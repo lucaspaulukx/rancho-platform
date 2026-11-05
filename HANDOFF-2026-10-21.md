@@ -1,3 +1,7 @@
+## Checkpoint80 — inventário offline de artefatos (05/11/2026)
+
+CLI plan/scan implementada com Syft1.56.0 por digest, archive pelo ID local, sem rede/socket/restart de apps e com cleanup verificado. Dez contratos e scan real repetido passaram;486 pacotes backend/73 console/209 lockfile+dev, com145/1/0 licenças não identificadas. Projeção CycloneDX exclui arquivos/env/config/metadados desconhecidos e liga hashes dos manifests congelados. Console declara Apache-2.0 nos manifests, coerente com LICENSE. Raw/temp removidos e IDs preservados. REL04 segue parcial: falta revisão de licenças, detecção completa de binários, CVEs/procedência/schema independente e demais gates48. Não converter inventário em aprovação legal/segurança. Matriz79 de seis identidades local/OIDC passou; renovação longa está em execução, ainda sem aceite.
+
 ## Checkpoint79 — primeiros controles físicos (05/11/2026)
 
 Baseline off repetido com3 transportes saudáveis confirmou entrega indevida após logout (novosWS101, logs17/exec1/métricas23), fixture/sessões limpas e sem churn nessa repetição. Nova imagem com guarda on passou admin:9 tentativas de assinatura/prova compacta/caminho401, HTTP401 após revogação, novosWS401,3 sockets1008 e zero dados posteriores com3 controles válidos. Remoção de grant de usuário local via grupo member também passou com HTTP404 e os mesmos controles, conta/grupo próprios removidos. OIDC, desativação, expiração e renovação longa continuam em execução/pendentes; não é fechamento de OBS02 nem do roadmap.

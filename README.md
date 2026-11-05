@@ -44,7 +44,7 @@ Tests involving hosts use isolated legacy guests. A successful frontend build do
 
 ## License and attribution
 
-Apache-2.0; preserve [LICENSE](LICENSE), [NOTICE](NOTICE) and dependency notices. Project distribution and third-party license inventory are still part of the release gates. Never commit credentials, dumps, private keys or captured sessions.
+Apache-2.0; preserve [LICENSE](LICENSE), [NOTICE](NOTICE) and dependency notices. Project distribution and third-party license inventory are still part of the release gates. Never commit credentials, dumps, private keys or captured sessions. The [offline artifact inventory](docs/80-artifact-dependency-inventory.md) produces projected CycloneDX reports; unknown licenses and incomplete binary detection remain release-review items.
 
 ## Migration rehearsal
 
