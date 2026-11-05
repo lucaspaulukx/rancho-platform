@@ -1,3 +1,7 @@
+# Checkpoint — recuperação de arquivos (05/11/2026)
+
+Backup frio76 passou nos5 volumes Rancher/MySQL/logs/Keycloak/cache e configuração criptografada. Restauração em volumes próprios comparou conteúdo, UID/GID e modos, cleanup e IDs de origem preservados.29 testes Python. Engines não iniciados nas cópias, senha do ensaio descartada; não é backup operacional nem aceite de migração. Próximo: engines/login isolados, imagens e demais gates48. Frontend605/71 não mudou.
+
 # Checkpoint — logout federado e pacote comunitário
 
 Frontend605 testes/71 arquivos + TypeScript/Vite em Docker. Logout62 aceito15 checks/4 fluxos reais/8 axe-layout: confirmação Keycloak, replay401, conta local conserva SSO, tela sem acesso e IdP parado em exclusivo/autologin. Política/cliente/provedor e fixtures restaurados; flag de logout defaultfalse. Contratos Java134 configuração +31 regras de logout +10 writer. Troca de tema atômica corrigiu baixo contraste transitório. Git contém commits incrementais, incluindo pacote limpo4c9e645 com595/70 no checkpoint anterior; schemas de teste sanitizados em src/test/fixtures. Ainda não é100%: roadmap48 aberto. Próximo: recuperação completa Rancher/IdP e migração72, além de streams logs/exec/métricas e demais gates.
