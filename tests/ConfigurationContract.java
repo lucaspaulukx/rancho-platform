@@ -70,6 +70,14 @@ public class ConfigurationContract {
         check(new CustomizationConfig(schema).enabled("SCHEMA_MIGRATIONS_ENABLED"));
         schema.put("RANCHER_CUSTOMIZATION_ENABLED","false");check(!new CustomizationConfig(schema).enabled("SCHEMA_MIGRATIONS_ENABLED"));
         schema=base();schema.put("RANCHER_SCHEMA_MIGRATIONS_ENABLED","yes");rejects(schema);
+        check(!new CustomizationConfig(base()).enabled("HOST_STREAM_SESSION_GUARD_ENABLED"));
+        Map<String,String> hostStreams=base();hostStreams.put("RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED","true");
+        rejects(hostStreams);
+        hostStreams.put("RANCHER_HOST_STREAM_PROXY_PROTOCOL","1");
+        check(new CustomizationConfig(hostStreams).enabled("HOST_STREAM_SESSION_GUARD_ENABLED"));
+        hostStreams.put("RANCHER_CUSTOMIZATION_ENABLED","false");
+        check(!new CustomizationConfig(hostStreams).enabled("HOST_STREAM_SESSION_GUARD_ENABLED"));
+        hostStreams.put("RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED","yes");rejects(hostStreams);
         Map<String,String> secret=base();secret.put("RANCHER_OIDC_CLIENT_SECRET","sentinel-secret-never-public");
         check(!new CustomizationConfig(secret).publicConfig().toString().contains("sentinel-secret"));
         System.out.println(checks+" configuration assertions passed across 64 combinations");

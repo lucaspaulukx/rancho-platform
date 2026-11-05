@@ -36,7 +36,7 @@ class Socket {
   static OPEN = 1;
   readyState = 1;
   onopen: (() => void) | null = null;
-  onclose: (() => void) | null = null;
+  onclose: ((event?: { code: number }) => void) | null = null;
   onmessage: ((event: { data: string }) => void) | null = null;
   onerror: (() => void) | null = null;
   send = vi.fn();
@@ -199,6 +199,35 @@ describe('Revogação de conexões já abertas', () => {
       expect(vi.getTimerCount()).toBe(1);
       act(() => Socket.instances[0].onclose?.());
       expect(vi.getTimerCount()).toBe(0);
+      view.unmount();
+    },
+  );
+  it.each(['logs', 'execute', 'metrics'] as const)(
+    'explica a revogação de %s sem reconectar automaticamente',
+    async (mode) => {
+      setup();
+      const view = render(
+        mode === 'metrics' ? (
+          <ResourceMetrics resource={resource} onClose={vi.fn()} />
+        ) : (
+          <ResourceStream resource={resource} mode={mode} onClose={vi.fn()} />
+        ),
+      );
+      if (mode === 'execute')
+        fireEvent.click(screen.getByRole('button', { name: 'Conectar ao container' }));
+      await act(async () => {
+        await Promise.resolve();
+      });
+      await waitFor(() => expect(Socket.instances).toHaveLength(1));
+      act(() => Socket.instances[0].onclose?.({ code: 1008 }));
+      expect(
+        screen.getByText(/sua sessão ou permissão não está mais disponível/),
+      ).toBeInTheDocument();
+      expect(vi.getTimerCount()).toBe(0);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(Socket.instances).toHaveLength(1);
       view.unmount();
     },
   );

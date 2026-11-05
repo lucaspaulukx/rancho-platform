@@ -137,13 +137,17 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
         socket.onerror = () => {
           if (!disposed) setError('A conexão falhou. Feche este painel e tente novamente.');
         };
-        socket.onclose = () => {
+        socket.onclose = (event) => {
           if (heartbeat) clearInterval(heartbeat);
           observer?.disconnect();
           socketRef.current = null;
           if (!disposed) {
             setConnected(false);
             setClosed(true);
+            if (event?.code === 1008)
+              setError(
+                'A conexão foi encerrada porque sua sessão ou permissão não está mais disponível.',
+              );
           }
         };
         heartbeat = setInterval(() => {

@@ -4,7 +4,7 @@ An independent React/TypeScript console and local-groups/OIDC backend extension 
 
 ## Status
 
-The latest frontend validation passed595 tests in70 files plus TypeScript/Vite. Contextual stack/service/container operations, local groups, OIDC and shared responsive components are implemented in tested slices. Complete parity, long-running security checks, migration/restore and release acceptance remain open. See [master roadmap](docs/48-master-roadmap.md) and [community release plan](docs/71-community-release-plan.md).
+The latest frontend validation passed608 tests in71 files plus TypeScript/Vite. Contextual stack/service/container operations, local groups, OIDC and shared responsive components are implemented in tested slices. Complete parity, long-running security checks, migration/restore and release acceptance remain open. See [master roadmap](docs/48-master-roadmap.md) and [community release plan](docs/71-community-release-plan.md).
 
 ## Get the sources
 
@@ -18,7 +18,7 @@ npm test
 npm run build
 ```
 
-Backend sources are pinned by commit in `upstream.json`; project changes are stored in `patches/cattle.patch`. Consultation-only clones are not dependencies. The original UI checkout is not required for builds; the isolated legacy extension is in `legacy-ui/`.
+Backend sources are pinned by commit in `upstream.json`; project changes are stored in `patches/cattle.patch` and `patches/websocket-proxy.patch`. Consultation-only clones are not dependencies. The original UI checkout is not required for builds; the isolated legacy extension is in `legacy-ui/`.
 
 ## Local laboratory
 
@@ -48,4 +48,4 @@ Apache-2.0; preserve [LICENSE](LICENSE), [NOTICE](NOTICE) and dependency notices
 
 ## Migration rehearsal
 
-Read the [migration guide](docs/72-migration-guide.md) before using the diagnostic/backup tool. It has passed database-only rehearsals with20 synthetic environments and [encrypted state/image recovery](docs/76-complete-recovery-plan.md) of the current lab artifact, including restored local/Keycloak/OIDC login. Original-to-custom engine upgrade, full rollback and production cutover remain unaccepted gates.
+Read the [migration guide](docs/72-migration-guide.md) before using the diagnostic/backup tool. It has passed database-only rehearsals with20 synthetic environments and [encrypted state/image recovery](docs/76-complete-recovery-plan.md) of the current lab artifact, including restored local/Keycloak/OIDC login. The [original-to-custom20-environment engine rehearsal and snapshot rollback](docs/77-runtime-schema-migration.md) also passed in isolated copies. Production cutover and the full recovery/release gates remain open.

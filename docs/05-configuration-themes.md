@@ -1,3 +1,7 @@
+# Configuração79 — sessões dos streams de host
+
+`RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED=false` no backend/base. Exige customização efetiva, imagem com protocolo1 e proxy real compatível. Recriação do backend é necessária para mudar a flag. Off mantém protocolo legado; on exige prova vinculada à sessão e revalida logs/terminal/métricas continuamente. Não revoga API keys nem altera grants. Ainda em validação física e não habilitada por padrão. Ver[79](79-host-stream-session-guard.md). A página Sobre mostra solicitado/efetivo/disponível;1008 informa perda de acesso sem reconexão automática.
+
 # 05 — Configuração, flags e temas
 
 ## Flags de bindings e API keys

@@ -6,6 +6,7 @@ Disposable build directories/logs remain ignored for investigation.
 """
 import argparse
 import os
+import json
 from pathlib import Path
 import secrets
 import subprocess
@@ -25,11 +26,12 @@ def main():
     assert not (destination / '.env').exists() and not (destination / 'keycloak/realm.json').exists()
     environment = dict(os.environ)
     if args.reuse_local_upstream:
-        assert (ROOT / 'cattle/.git').exists()
-        # Git config environment applies only to these children, including clone.
-        environment.update(GIT_CONFIG_COUNT='1',
-                           GIT_CONFIG_KEY_0='url.' + (ROOT / 'cattle').as_uri() + '.insteadOf',
-                           GIT_CONFIG_VALUE_0='https://github.com/rancher/cattle.git')
+        upstream = json.loads((ROOT / 'upstream.json').read_text(encoding='utf-8'))
+        environment['GIT_CONFIG_COUNT'] = str(len(upstream))
+        for index, (name, spec) in enumerate(upstream.items()):
+            assert (ROOT / name / '.git').exists()
+            environment['GIT_CONFIG_KEY_' + str(index)] = 'url.' + (ROOT / name).as_uri() + '.insteadOf'
+            environment['GIT_CONFIG_VALUE_' + str(index)] = spec['url']
     for action in ('apply', 'check'):
         subprocess.run(['python', 'scripts/upstream.py', action], cwd=destination,
                        env=environment, check=True, timeout=300)

@@ -3,6 +3,7 @@
 !.env.example
 keycloak/realm.json
 cattle/
+websocket-proxy/
 ui/
 rancher/
 references/
