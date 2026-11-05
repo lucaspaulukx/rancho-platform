@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "source": "CONTRIBUTING.md",
+      "sourceLanguage": "en",
+      "paths": {
+        "en": "CONTRIBUTING.md",
+        "pt-BR": "docs/pt-BR/contributing.md"
+      },
+      "reviewedSourceSha256": "568a57da8d267dbaa8d513365f9757d2b9559dcd3f98ad34bafb34a86274b2d6",
+      "reviewedTranslationSha256": "89bbd462f2a1431e9def47373cfb2f5e634b23344a4e34bc0079316f48b5b9c1"
+    },
+    {
+      "source": "README.md",
+      "sourceLanguage": "en",
+      "paths": {
+        "en": "README.md",
+        "pt-BR": "docs/pt-BR/overview.md"
+      },
+      "reviewedSourceSha256": "2ac968d187a8f5375f0b06c535655c48734e41bb6cd98196279e31a9df850248",
+      "reviewedTranslationSha256": "ff1c85f7754eb8846438fd407d1a217ad5b9456f1d0d70ff519bcb1fe899e72e"
+    },
+    {
+      "source": "SECURITY.md",
+      "sourceLanguage": "en",
+      "paths": {
+        "en": "SECURITY.md",
+        "pt-BR": "docs/pt-BR/security.md"
+      },
+      "reviewedSourceSha256": "2cbf9fcaa3b26d8765766b2a9dc8d935237a7283b618bda28a4ec74b6006e1d7",
+      "reviewedTranslationSha256": "0530faaad534a9eea59adbbb7469160186f3abe8251f75876cf07f551dc0fcaa"
+    },
+    {
+      "source": "console/README.md",
+      "sourceLanguage": "en",
+      "paths": {
+        "en": "console/README.md",
+        "pt-BR": "docs/pt-BR/console.md"
+      },
+      "reviewedSourceSha256": "750dd8ce21d4c3d3b939632d40fe1e68c448b5a2e1cf38dd587deb8a976bdcf8",
+      "reviewedTranslationSha256": "8abc037f86ae11c2fb36a3d134173a3274e8d07a33a3be6060800f05057b3486"
+    },
+    {
+      "source": "docs/pt-BR/access-migration.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/access-migration.md",
+        "en": "docs/en/access-migration.md"
+      },
+      "reviewedSourceSha256": "08ad172b6daf8ce2fcb88de6dc0d0d53e5c16a5e17123e455e02d7bfac99cdb0",
+      "reviewedTranslationSha256": "8e9f1ddc018605a6200ae00613c73b7df7136318c5dca9d4ec9f54a17b2503ab"
+    },
+    {
+      "source": "docs/pt-BR/architecture.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/architecture.md",
+        "en": "docs/en/architecture.md"
+      },
+      "reviewedSourceSha256": "ce1bd4fd3c388b46b5101ff77f0d1a55c6589d27c1376b930536c3274d21677d",
+      "reviewedTranslationSha256": "0ee2c4b1a322c8e673808ff3cf535a19582731061c190abe8840576fc22a9835"
+    },
+    {
+      "source": "docs/pt-BR/configuration.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/configuration.md",
+        "en": "docs/en/configuration.md"
+      },
+      "reviewedSourceSha256": "9fb217cfb72035507515e9a5922883576d588db77a6ade143733351c0e688a9e",
+      "reviewedTranslationSha256": "859de808735cc74bbd4e6cfa1f5aa7cce2c5b9df7695cd82860179c49fae78d8"
+    },
+    {
+      "source": "docs/pt-BR/documentation.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/documentation.md",
+        "en": "docs/en/documentation.md"
+      },
+      "reviewedSourceSha256": "6c07211e2db87951b09dbfe4360b8deccf789769cb7710369aa72424ef372baf",
+      "reviewedTranslationSha256": "61d73c268c02f540d047a18941a0eb0814be2eb7264f23635869f19859ae9957"
+    },
+    {
+      "source": "docs/pt-BR/migration.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/migration.md",
+        "en": "docs/en/migration.md"
+      },
+      "reviewedSourceSha256": "28672e4f5ff72a8d2d5c242d53232516ae807699e17cc0305e06192126cf1e9c",
+      "reviewedTranslationSha256": "56d82dd905e037e3328f427d56db04dd7d9c788fd6f7fd6ada161bf5fd56ca23"
+    },
+    {
+      "source": "docs/pt-BR/recovery.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/recovery.md",
+        "en": "docs/en/recovery.md"
+      },
+      "reviewedSourceSha256": "fa43ae5a80578b1720dfd7261e128a30396c7a9d7abec87e14856dfd46e06540",
+      "reviewedTranslationSha256": "7bb4d60dd7009031237544bbfec19fef395c19ebf4d947cbf5c3bd7391b70229"
+    },
+    {
+      "source": "docs/pt-BR/release.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/release.md",
+        "en": "docs/en/release.md"
+      },
+      "reviewedSourceSha256": "59fa09474cec8dfaeacf73fe059ccb9cb42436d49b2d1c5a2644f88cb6db89ee",
+      "reviewedTranslationSha256": "d82f50293496adb2ff3e6374d58f7bdee423a0615f363d2898c722fba358eaab"
+    },
+    {
+      "source": "docs/pt-BR/roadmap.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/roadmap.md",
+        "en": "docs/en/roadmap.md"
+      },
+      "reviewedSourceSha256": "d42dcbeb2762376fc6539081e04b064b3c9878cf569c0fcc5c895d9451b41295",
+      "reviewedTranslationSha256": "800e8e188349aa5505cc3bafc6e3565fcad48990855b44f9998f3c022e0a3f3d"
+    },
+    {
+      "source": "docs/pt-BR/security-model.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/security-model.md",
+        "en": "docs/en/security-model.md"
+      },
+      "reviewedSourceSha256": "d3a338804bef34de8015d28d1c674b4f1a54e99f0c96483a45a01fc060fdbcdf",
+      "reviewedTranslationSha256": "536637cd338f972992df3347c709783f3a277a801ade738555e8f21ba11af620"
+    },
+    {
+      "source": "docs/pt-BR/testing.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/testing.md",
+        "en": "docs/en/testing.md"
+      },
+      "reviewedSourceSha256": "a37daa8dc2c94ccc47fb35fe7a0699726a4056d162c7cad527071c5b5dbce5ee",
+      "reviewedTranslationSha256": "2ad7f1a43884fdc36ba714042791177e1875f94b0783e907924d1eb5877e1b0e"
+    },
+    {
+      "source": "docs/pt-BR/ui-guidelines.md",
+      "sourceLanguage": "pt-BR",
+      "paths": {
+        "pt-BR": "docs/pt-BR/ui-guidelines.md",
+        "en": "docs/en/ui-guidelines.md"
+      },
+      "reviewedSourceSha256": "161fff079485b161a3c11a99d60998964d79804a516ff7ce59acbc41866ac591",
+      "reviewedTranslationSha256": "929a276192ba4d1fe8b41a22ccd0091b13ecc37352d10e937d2718204c4b57f7"
+    }
+  ],
+  "shared": {
+    "AGENTS.md": "Bilingual canonical contributor instructions in one file.",
+    "CLAUDE.md": "Bilingual adapter to the canonical instructions.",
+    "GEMINI.md": "Bilingual adapter to the canonical instructions.",
+    ".github/copilot-instructions.md": "Bilingual adapter to the canonical instructions.",
+    ".github/PULL_REQUEST_TEMPLATE.md": "Bilingual PR template in one file.",
+    ".agents/skills/rancho-contribute/SKILL.md": "Bilingual repository skill in one file.",
+    ".cursor/rules/rancho.mdc": "Bilingual Cursor adapter to the canonical instructions.",
+    "docs/README.md": "Bilingual documentation language selector."
+  }
+}
