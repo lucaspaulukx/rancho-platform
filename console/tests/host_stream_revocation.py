@@ -85,7 +85,7 @@ class Probe:
             except Exception: self.process.kill(); self.process.wait()
 
 
-def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, console_proxy=False, service_scale=1, payload_transport=False, frontend_probe=False):
+def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, console_proxy=False, service_scale=1, payload_transport=False, frontend_probe=False, audit_probe=False):
     assert isinstance(hold_seconds, int) and 0 <= hold_seconds <= 600
     assert not STATE.exists(), 'Recover previous owned host stream fixture before repeating.'
     assert isinstance(service_scale, int) and 1 <= service_scale <= 5 and (service_scale == 1 or service_metrics)
@@ -96,6 +96,8 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
     identity = None
     stack = service = None
     probes = {}
+    audit_records = []
+    audit_enabled = bool(control.request('/oidc/config')[1]['effective'].get('AUDIT_CREDENTIAL_REDACTION_ENABLED')) if audit_probe else False
     controls = []
     result = {'status': 'failed', 'stage': 'preflight', 'cleanupComplete': False, 'scope': 'own local admin session; raw logs/exec/container metrics; one host', 'serviceMetricsIncluded': service_metrics, 'serviceScale': service_scale, 'proxyPort': proxy_port, 'payloadTransportRequested': payload_transport}
     def stage(value):
@@ -119,6 +121,9 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
               'baselineContainers': sorted(containers_before), 'baselineUserContainers': sorted(user_containers_before), 'baselineVolumes': sorted(volumes_before), 'baselineUserVolumes': sorted(user_volumes_before)}
     def save(): STATE.write_text(json.dumps(record, indent=2), encoding='utf-8')
     def access(session, instance, mode):
+        if audit_probe and mode in ('logs','exec') and not result.get('auditCredentials'):
+            import audit_credentials
+            audit_before = {r['id'] for r in audit_credentials.recent(session,mode)}
         resource = session.api(BASE + ('services/' + service['id'] if mode == 'service-metrics' else 'containers/' + instance['id']))
         if mode in ('metrics', 'service-metrics'):
             link = resource['links'].get('containerStats') if mode == 'service-metrics' else (resource['links'].get('stats') or resource['links'].get('containerStats'))
@@ -135,6 +140,8 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
                 'command': ['/bin/sh', '-c', 'while IFS= read -r value; do printf "%s\\n" "$value"; done']}
             code, value, _ = session.request(action, payload, 'POST')
         assert code in (200, 201, 202) and isinstance(value, dict) and value.get('url') and value.get('token')
+        if audit_probe and mode in ('logs','exec') and not result.get('auditCredentials'):
+            audit_records.append(audit_credentials.capture(session,mode,audit_before,value,audit_enabled))
         result.setdefault('accessTokenChars', {})[mode] = len(value['token'])
         negotiated = value.get('payload') is not None
         if negotiated:
@@ -216,6 +223,10 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
                     code = probe.wait('negative-' + variant)['status']
                     assert code in (401, 403, 404)
                     result.setdefault('negativeHandshakes', {}).setdefault(mode, {})[variant] = code
+        if audit_probe:
+            import audit_credentials
+            stage('audit-credentials')
+            result['auditCredentials'] = audit_credentials.verify(control,audit_records,instance,audit_enabled,marker)
         if frontend_probe:
             assert payload_transport and service_metrics and console_proxy and service_scale >= 3
             stage('browser-transport')

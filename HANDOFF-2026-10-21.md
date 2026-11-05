@@ -1,3 +1,9 @@
+## Checkpoint82 — proteção de credenciais na auditoria (05/11/2026)
+
+Baseline própria confirmou que readonly conseguia ler e reutilizar token admin de terminal pela auditoria do environment. Corrigidas gravação recursiva e projeção de registros novos/antigos, sob flag independente. Mesmo artefato on preservou capacidades legítimas e ator/ação/status, retirou tokens de novos registros no banco e protegeu2 antigos sem reescrevê-los; readonly sem acesso ao token, global404 e execute ausente. Revogação dos3 streams1008/novos401/zero dados, controles e cleanup aprovados.
+
+Java155/129 (off/on/customização off), Linux628/72+TypeScript/Vite e build backend limpo aprovados. Compose moderno habilita redação por default substituível false; base continua false. Histórico/backups continuam sensíveis e rollback/off reexpõe valores anteriores; não houve saneamento destrutivo. Ver82 para limites e tentativas falhas preservadas. Próximo: contas técnicas/API keys em streams e demais gates48.
+
 ## Checkpoint81 — transporte de métricas e lease pelo proxy (05/11/2026)
 
 Métricas grandes negociadas por primeiro frame, sem ampliar limite de URI; serviço próprio3 réplicas passou por18090 em4 transportes. Admin+seis casos locais/OIDC passaram revogação/controles; ensaio final320s e navegador8 checks confirmaram renovação, dados reais, envio único e fechamento1008/zero dados após revogação. Mesmo artefato off reproduziu falha legada, com relatório bruto failed preservado. Cleanup final completo, sem manifesto próprio pendente.

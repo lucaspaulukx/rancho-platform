@@ -1,3 +1,115 @@
+diff --git a/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditLogOutPutFilter.java b/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditLogOutPutFilter.java
+index f09070c..8ecabc6 100644
+--- a/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditLogOutPutFilter.java
++++ b/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditLogOutPutFilter.java
+@@ -33,9 +33,24 @@ public class AuditLogOutPutFilter implements ResourceOutputFilter {
+                                 Identity.class, String.valueOf(auditLogRecord.getAuthenticatedAsIdentityId())));
+             }
+         }
++        if (credentialRedactionEnabled()) {
++            if (request != null && request.getServletContext() != null) {
++                request.getServletContext().getResponse().setHeader("Cache-Control", "no-store");
++                request.getServletContext().getResponse().setHeader("Referrer-Policy", "no-referrer");
++            }
++            for (String field : new String[]{"requestObject", "responseObject"}) {
++                Object body = converted.getFields().get(field);
++                if (body instanceof String) converted.getFields().put(field, AuditCredentialRedactor.redactJson((String)body,jsonMapper));
++                else if (body != null) converted.getFields().put(field, AuditCredentialRedactor.redact(body));
++            }
++            // The generic data field may contain the unprojected persisted fields on other API schemas.
++            if (converted.getFields().containsKey("data")) converted.getFields().put("data", AuditCredentialRedactor.REDACTED);
++        }
+         return converted;
+     }
+ 
++    protected boolean credentialRedactionEnabled() { return AuditCredentialRedactor.enabled(); }
++
+     @Override
+     public String[] getTypes() {
+         return new String[0];
+diff --git a/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditServiceImpl.java b/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditServiceImpl.java
+index 4bf09a1..b7ea0c2 100644
+--- a/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditServiceImpl.java
++++ b/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditServiceImpl.java
+@@ -17,6 +17,7 @@ import io.github.ibuildthecloud.gdapi.request.ApiRequest;
+ 
+ import java.io.ByteArrayOutputStream;
+ import java.io.IOException;
++import java.nio.charset.StandardCharsets;
+ import java.util.Arrays;
+ import java.util.Collections;
+ import java.util.HashMap;
+@@ -148,37 +149,49 @@ public class AuditServiceImpl implements AuditService{
+         }
+     }
+ 
++    protected boolean credentialRedactionEnabled() {
++        // Startup CustomizationConfig validates both booleans. No high-level auth dependency in this framework.
++        return AuditCredentialRedactor.enabled();
++    }
++
+     private void putInAsString(Map<String, Object> data, String type, String fieldForObject, String errMsg, Object objectToPlace) {
+         if (objectToPlace == null) {
+             return;
+         }
+ 
+-        @SuppressWarnings("unchecked")
+-        Map<String, Object> obj = jsonMapper.convertValue(objectToPlace, Map.class);
++        try {
++            @SuppressWarnings("unchecked")
++            Map<String, Object> obj = jsonMapper.convertValue(objectToPlace, Map.class);
+ 
+-        if ("secret".equals(type)) {
+-            obj.remove("value");
+-        }
++            if ("secret".equals(type)) {
++                obj.remove("value");
++            }
+ 
+-        obj.remove("secretValue");
+-        obj.remove("password");
+-        obj.remove("newSecret");
+-        obj.remove("oldSecret");
+-        obj.remove("adminAccountPassword");
+-        obj.remove("serviceAccountPassword");
+-        Iterator<Map.Entry<String, Object>> iter = obj.entrySet().iterator();
+-        while (iter.hasNext()) {
+-            if (iter.next().getKey().endsWith("Config")) {
+-                iter.remove();
++            obj.remove("secretValue");
++            obj.remove("password");
++            obj.remove("newSecret");
++            obj.remove("oldSecret");
++            obj.remove("adminAccountPassword");
++            obj.remove("serviceAccountPassword");
++            Iterator<Map.Entry<String, Object>> iter = obj.entrySet().iterator();
++            while (iter.hasNext()) {
++                if (iter.next().getKey().endsWith("Config")) {
++                    iter.remove();
++                }
+             }
+-        }
+ 
+-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+-        try {
++            if (credentialRedactionEnabled()) {
++                @SuppressWarnings("unchecked")
++                Map<String,Object> sanitized = (Map<String,Object>) AuditCredentialRedactor.redact(obj);
++                obj = sanitized;
++            }
++            ByteArrayOutputStream os = new ByteArrayOutputStream();
+             jsonMapper.writeValue(os, obj);
+-            data.put(fieldForObject, os.toString());
+-        } catch (IOException e) {
+-            log.error("Failed to log [{}]", errMsg, e);
++            data.put(fieldForObject, new String(os.toByteArray(), StandardCharsets.UTF_8));
++        } catch (IOException | IllegalArgumentException e) {
++            // Mapper exception messages may quote secrets from the input. Never attach the exception.
++            data.put(fieldForObject, "{\"_auditUnavailable\":true}");
++            log.warn("Failed to serialize audit body; content omitted.");
+         }
+     }
+ }
 diff --git a/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java b/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java
 index 42b2a92..219b649 100644
 --- a/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java
@@ -533,6 +645,100 @@ index 209a46f..6618014 100644
          "statsAccess.url" : "r",
  
          "storagePool": "r",
+diff --git a/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditCredentialRedactor.java b/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditCredentialRedactor.java
+new file mode 100644
+--- /dev/null
++++ b/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditCredentialRedactor.java
+@@ -0,0 +1,89 @@
++package io.cattle.platform.iaas.api.auditing;
++
++import java.net.URI;
++import java.util.*;
++import java.util.regex.Pattern;
++
++/** Copies JSON-shaped audit data. Response objects and live capabilities are never mutated. */
++public final class AuditCredentialRedactor {
++    public static final String REDACTED = "[REDACTED]";
++    private static final int MAX_DEPTH = 32, MAX_NODES = 20000, MAX_TEXT = 65536;
++    private static final Set<String> PRIVATE_FIELDS = new HashSet<>(Arrays.asList(
++        "authorization", "proxyauthorization", "cookie", "setcookie", "headers", "payload",
++        "secretvalue", "publicvalue", "newsecret", "oldsecret", "privatekey", "clientsecret",
++        "credential", "credentials", "environment", "environmentvariables", "env",
++        "dockercompose", "ranchercompose", "userdata", "cloudconfig", "command", "entrypoint",
++        "certificate", "cert", "key", "value", "stringdata"));
++    private static final Pattern JWT = Pattern.compile("(?:^|[^A-Za-z0-9_-])[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}(?:$|[^A-Za-z0-9_-])");
++    private AuditCredentialRedactor() { }
++    public static boolean enabled() {
++        return "true".equals(System.getenv("RANCHER_AUDIT_CREDENTIAL_REDACTION_ENABLED")) &&
++            !"false".equals(System.getenv("RANCHER_CUSTOMIZATION_ENABLED"));
++    }
++    public static String redactJson(String text, io.cattle.platform.json.JsonMapper mapper) {
++        try {
++            if (text.length() > 1048576 || !boundedJson(text)) return "{\"_auditUnavailable\":true}";
++            Object parsed = mapper.readValue(text, Object.class);
++            if (!(parsed instanceof Map) && !(parsed instanceof List)) return "{\"_auditUnavailable\":true}";
++            return mapper.writeValueAsString(redact(parsed));
++        } catch (java.io.IOException | IllegalArgumentException invalid) {
++            return "{\"_auditUnavailable\":true}";
++        }
++    }
++    private static boolean boundedJson(String text) {
++        int depth = 0; boolean quoted = false, escaped = false;
++        for (int i=0;i<text.length();i++) {
++            char c=text.charAt(i);
++            if (quoted) {
++                if (escaped) escaped=false;
++                else if (c=='\\') escaped=true;
++                else if (c=='"') quoted=false;
++            } else if (c=='"') quoted=true;
++            else if (c=='{' || c=='[') { if (++depth > MAX_DEPTH) return false; }
++            else if (c=='}' || c==']') { if (--depth < 0) return false; }
++        }
++        return depth==0 && !quoted;
++    }
++    public static Object redact(Object value) { return copy(value, 0, new int[]{0}); }
++    private static boolean sensitive(String key) {
++        String name = key.replaceAll("[^A-Za-z0-9]", "").toLowerCase(Locale.ROOT);
++        return PRIVATE_FIELDS.contains(name) || name.endsWith("config") || name.endsWith("token") ||
++            name.endsWith("password") || name.endsWith("secret") || name.endsWith("apikey") || name.endsWith("accesskey") || name.endsWith("privatekey") || name.endsWith("secretvalue") ||
++            name.endsWith("credential") || name.endsWith("credentials") || name.endsWith("passwordhash");
++    }
++    private static Object copy(Object value, int depth, int[] nodes) {
++        if (++nodes[0] > MAX_NODES || depth > MAX_DEPTH) return REDACTED;
++        if (value == null || value instanceof Boolean || value instanceof Number) return value;
++        if (value instanceof Map) {
++            Map<String,Object> result = new LinkedHashMap<>();
++            for (Map.Entry<?,?> entry : ((Map<?,?>)value).entrySet()) {
++                if (nodes[0] >= MAX_NODES) { result.put("_auditTruncated", true); break; }
++                ++nodes[0];
++                String key = String.valueOf(entry.getKey());
++                if (key.length() > 256) { result.put("_auditTruncated", true); continue; }
++                result.put(key, sensitive(key) ? REDACTED : copy(entry.getValue(), depth + 1, nodes));
++            }
++            return result;
++        }
++        if (value instanceof List) {
++            List<Object> result = new ArrayList<>();
++            for (Object item : (List<?>)value) {
++                if (nodes[0] >= MAX_NODES) { result.add(REDACTED); break; }
++                result.add(copy(item, depth + 1, nodes));
++            }
++            return result;
++        }
++        if (!(value instanceof String)) return REDACTED;
++        String text = (String)value;
++        if (text.length() > MAX_TEXT || JWT.matcher(text).find() || text.contains("-----BEGIN ")) return REDACTED;
++        // URLs in free text cannot be parsed safely as one URI; omit the text if it contains a query/fragment.
++        String lower = text.toLowerCase(Locale.ROOT);
++        if (lower.contains("://")) {
++            try {
++                URI uri = new URI(text);
++                if (uri.getUserInfo() != null || uri.getQuery() != null || uri.getFragment() != null || uri.getHost() == null) return REDACTED;
++            } catch (Exception invalid) { return REDACTED; }
++        }
++        return text;
++    }
++}
 diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CommunitySchemaMigrations.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CommunitySchemaMigrations.java
 new file mode 100644
 --- /dev/null
@@ -692,10 +898,10 @@ new file mode 100644
 +    private final boolean metricsProxyConfigured;
 +
 +    public CustomizationConfig(Map<String,String> env) {
-+        String[] names={"CUSTOMIZATION_ENABLED","SCHEMA_MIGRATIONS_ENABLED","METRICS_PAYLOAD_TRANSPORT_ENABLED","HOST_STREAM_SESSION_GUARD_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
++        String[] names={"CUSTOMIZATION_ENABLED","SCHEMA_MIGRATIONS_ENABLED","AUDIT_CREDENTIAL_REDACTION_ENABLED","METRICS_PAYLOAD_TRANSPORT_ENABLED","HOST_STREAM_SESSION_GUARD_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
 +            "ENV_CREATION_ADMIN_ONLY","DISABLE_AUTO_ENVIRONMENT","CATALOG_WRITE_GUARD_ENABLED","SESSION_ACCOUNT_GUARD_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED","OIDC_LOGIN_PREFLIGHT_ENABLED","OIDC_FEDERATED_LOGOUT_ENABLED","OIDC_ONLY","OIDC_AUTO_LOGIN","MODERN_UI_ENABLED"};
 +        for (String name:names) {
-+            boolean fallback=!(name.equals("METRICS_PAYLOAD_TRANSPORT_ENABLED") || name.equals("HOST_STREAM_SESSION_GUARD_ENABLED") || name.equals("SCHEMA_MIGRATIONS_ENABLED") || name.equals("OIDC_FEDERATED_LOGOUT_ENABLED") || name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
++            boolean fallback=!(name.equals("AUDIT_CREDENTIAL_REDACTION_ENABLED") || name.equals("METRICS_PAYLOAD_TRANSPORT_ENABLED") || name.equals("HOST_STREAM_SESSION_GUARD_ENABLED") || name.equals("SCHEMA_MIGRATIONS_ENABLED") || name.equals("OIDC_FEDERATED_LOGOUT_ENABLED") || name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
 +            String value=env.get("RANCHER_"+name);
 +            if(value!=null && !value.equals("true") && !value.equals("false")) { throw new IllegalArgumentException("Invalid boolean: RANCHER_"+name); }
 +            requested.put(name,value==null?fallback:Boolean.valueOf(value));
@@ -728,7 +934,7 @@ new file mode 100644
 +        metricsProxyConfigured="1".equals(env.get("RANCHER_METRICS_PAYLOAD_PROXY_PROTOCOL"));
 +        if(custom && requested.get("METRICS_PAYLOAD_TRANSPORT_ENABLED") && !metricsProxyConfigured) { throw new IllegalArgumentException("Metrics payload transport requires a compatible proxy build"); }
 +        if(custom && requested.get("HOST_STREAM_SESSION_GUARD_ENABLED") && !streamProxyConfigured) { throw new IllegalArgumentException("Host stream guard requires a compatible proxy build"); }
-+        for(String name:new String[]{"SCHEMA_MIGRATIONS_ENABLED","METRICS_PAYLOAD_TRANSPORT_ENABLED","HOST_STREAM_SESSION_GUARD_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED"}) {
++        for(String name:new String[]{"SCHEMA_MIGRATIONS_ENABLED","AUDIT_CREDENTIAL_REDACTION_ENABLED","METRICS_PAYLOAD_TRANSPORT_ENABLED","HOST_STREAM_SESSION_GUARD_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED"}) {
 +            effective.put(name,custom && requested.get(name));
 +        }
 +        effective.put("OIDC_ENABLED",effective.get("OIDC_ENABLED") && oidcConfigured);
