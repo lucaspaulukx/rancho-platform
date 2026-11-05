@@ -15,6 +15,7 @@ evidence/
 **/*.log
 **/*-results.json
 **/*-fixture.json
+**/*-fixture.yaml
 **/*-interruption.json
 test-results.json
 *.jpg

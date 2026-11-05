@@ -6,7 +6,7 @@ APP=$ROOT/code/packaging/app-config
 WAR=/usr/share/cattle/war
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
-printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java" "$AUTH/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java" "$AUTH/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java" "$APP/src/main/java/io/cattle/platform/app/IaasApiConfig.java" >> /lab/sources
+printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java" "$AUTH/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java" "$AUTH/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java" "$APP/src/main/java/io/cattle/platform/app/IaasApiConfig.java" "$APP/src/main/java/io/cattle/platform/app/ApiServerConfig.java" >> /lab/sources
 printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java" "$AUTH/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenUtils.java" >> /lab/sources
 printf '%s\n' "$ROOT/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java" >> /lab/sources
 /usr/lib/jvm/zulu-8-amd64/bin/javac -encoding UTF-8 -source 8 -target 8 -cp "$WAR/WEB-INF/lib/*:$WAR/WEB-INF/jetty/*" -d /lab/classes @/lab/sources

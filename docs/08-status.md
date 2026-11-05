@@ -382,3 +382,5 @@ Desenvolver somente `console/` e componentes de laboratório necessários. `ui/`
 ## Histórico
 
 O [status anterior completo](history/status-before-documentation-consolidation-2026-10-21.md) foi preservado para rastreabilidade. Contagens menores e descrições antigas de laboratório parado pertencem àquelas execuções e não prevalecem sobre este checkpoint.
+
+Atualização73: corrigida revogação de token no subscribe UI sob flag independente. Matriz real on/off aprovada no mesmo backend, com HTTP/nova conexão401 e fechamento1000/zero eventos posteriores quando on; contratos Java128+10 e frontend595/70. Compose moderno habilita; default backend/basefalse. Remoção de grant, desativação, expiração, credenciais técnicas e logs/exec ainda não aceitos.
