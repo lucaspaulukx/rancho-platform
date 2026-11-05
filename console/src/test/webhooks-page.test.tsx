@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import contract from '../../webhook-schema-contract.json';
+import contract from './fixtures/webhook-schema.json';
 import { Webhooks } from '../pages/Webhooks';
 import { api, type Resource } from '../api';
 const backend = vi.hoisted(() => ({

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Resource, Schema } from '../api';
-import contract from '../../webhook-schema-contract.json';
+import contract from './fixtures/webhook-schema.json';
 import {
   newWebhookDraft,
   receiverMetadata,

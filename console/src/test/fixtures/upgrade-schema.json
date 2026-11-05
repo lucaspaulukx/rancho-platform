@@ -1,0 +1,1479 @@
+{
+  "schemas": {
+    "inServiceUpgradeStrategy": {
+      "resourceFields": {
+        "batchSize": {
+          "type": "int",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "min": 1,
+          "default": 1
+        },
+        "intervalMillis": {
+          "type": "int",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "min": 100,
+          "default": 2000
+        },
+        "launchConfig": {
+          "type": "launchConfig",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "previousLaunchConfig": {
+          "type": "launchConfig",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "previousSecondaryLaunchConfigs": {
+          "type": "array[secondaryLaunchConfig]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "secondaryLaunchConfigs": {
+          "type": "array[secondaryLaunchConfig]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "startFirst": {
+          "type": "boolean",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false,
+          "default": false
+        }
+      },
+      "resourceActions": {},
+      "resourceMethods": ["GET"],
+      "collectionMethods": ["POST"]
+    },
+    "kubernetesStackUpgrade": {
+      "resourceFields": {
+        "templates": {
+          "type": "map[string]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "externalId": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "environment": {
+          "type": "map[string]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "answers": {
+          "type": "map[json]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        }
+      },
+      "resourceActions": {},
+      "resourceMethods": ["GET"],
+      "collectionMethods": ["POST"]
+    },
+    "loadBalancerService": {
+      "resourceFields": {
+        "accountId": {
+          "type": "reference[account]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "assignServiceIpAddress": {
+          "type": "boolean",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false,
+          "default": false
+        },
+        "created": {
+          "type": "date",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "currentScale": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "description": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 1024
+        },
+        "externalId": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "fqdn": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "healthState": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 128
+        },
+        "id": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "instanceIds": {
+          "type": "array[reference[instance]]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "kind": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "launchConfig": {
+          "type": "launchConfig",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "required": true,
+          "readOnCreateOnly": false
+        },
+        "lbConfig": {
+          "type": "lbConfig",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "required": true,
+          "readOnCreateOnly": false
+        },
+        "linkedServices": {
+          "type": "map[reference[service]]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "metadata": {
+          "type": "map[json]",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "name": {
+          "type": "string",
+          "validChars": "a-zA-Z0-9-",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "required": true,
+          "readOnCreateOnly": false,
+          "minLength": 1,
+          "maxLength": 63
+        },
+        "publicEndpoints": {
+          "type": "array[publicEndpoint]",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "removed": {
+          "type": "date",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "retainIp": {
+          "type": "boolean",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "scale": {
+          "type": "int",
+          "description": null,
+          "create": true,
+          "update": true,
+          "readOnCreateOnly": false,
+          "min": 0,
+          "default": 1
+        },
+        "scalePolicy": {
+          "type": "scalePolicy",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "selectorLink": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 4096
+        },
+        "stackId": {
+          "type": "reference[stack]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "startOnCreate": {
+          "type": "boolean",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "default": false
+        },
+        "state": {
+          "type": "enum",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false,
+          "maxLength": 128,
+          "options": [
+            "activating",
+            "active",
+            "canceled-upgrade",
+            "canceling-upgrade",
+            "deactivating",
+            "finishing-upgrade",
+            "inactive",
+            "registering",
+            "removed",
+            "removing",
+            "requested",
+            "restarting",
+            "rolling-back",
+            "updating-active",
+            "updating-inactive",
+            "upgraded",
+            "upgrading"
+          ]
+        },
+        "system": {
+          "type": "boolean",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false,
+          "maxLength": 255,
+          "default": false
+        },
+        "transitioning": {
+          "type": "enum",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false,
+          "options": ["yes", "no", "error"]
+        },
+        "transitioningMessage": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "transitioningProgress": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "upgrade": {
+          "type": "serviceUpgrade",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "uuid": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 128
+        },
+        "vip": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        }
+      },
+      "resourceActions": {
+        "rollback": {
+          "input": null,
+          "output": "service"
+        },
+        "upgrade": {
+          "input": "serviceUpgrade",
+          "output": "service"
+        },
+        "restart": {
+          "input": "serviceRestart",
+          "output": "service"
+        },
+        "update": {
+          "input": null,
+          "output": "service"
+        },
+        "remove": {
+          "input": null,
+          "output": "service"
+        },
+        "deactivate": {
+          "input": null,
+          "output": "service"
+        },
+        "finishupgrade": {
+          "input": null,
+          "output": "service"
+        },
+        "removeservicelink": {
+          "input": "addRemoveServiceLinkInput",
+          "output": "service"
+        },
+        "continueupgrade": {
+          "input": null,
+          "output": "service"
+        },
+        "activate": {
+          "input": null,
+          "output": "service"
+        },
+        "addservicelink": {
+          "input": "addRemoveServiceLinkInput",
+          "output": "service"
+        },
+        "create": {
+          "input": null,
+          "output": "service"
+        },
+        "cancelupgrade": {
+          "input": null,
+          "output": "service"
+        },
+        "setservicelinks": {
+          "input": "setServiceLinksInput",
+          "output": "service"
+        }
+      },
+      "resourceMethods": ["GET", "PUT", "DELETE"],
+      "collectionMethods": ["GET", "POST"]
+    },
+    "rollingRestartStrategy": {
+      "resourceFields": {
+        "batchSize": {
+          "type": "int",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "min": 1,
+          "default": 1
+        },
+        "intervalMillis": {
+          "type": "int",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "min": 100,
+          "default": 2000
+        }
+      },
+      "resourceActions": {},
+      "resourceMethods": ["GET"],
+      "collectionMethods": ["POST"]
+    },
+    "scheduledUpgrade": {
+      "resourceFields": {
+        "accountId": {
+          "type": "reference[account]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "created": {
+          "type": "date",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "id": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "kind": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "removed": {
+          "type": "date",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "stackId": {
+          "type": "reference[stack]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "started": {
+          "type": "date",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "state": {
+          "type": "enum",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false,
+          "maxLength": 128,
+          "options": [
+            "done",
+            "removed",
+            "removing",
+            "requested",
+            "running",
+            "scheduled",
+            "scheduling"
+          ]
+        },
+        "uuid": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 128
+        },
+        "transitioning": {
+          "type": "enum",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false,
+          "options": ["yes", "no", "error"]
+        },
+        "transitioningMessage": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "transitioningProgress": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        }
+      },
+      "resourceActions": {
+        "start": {
+          "input": null,
+          "output": "scheduledUpgrade"
+        },
+        "create": {
+          "input": null,
+          "output": "scheduledUpgrade"
+        },
+        "remove": {
+          "input": null,
+          "output": "scheduledUpgrade"
+        }
+      },
+      "resourceMethods": ["GET"],
+      "collectionMethods": ["GET"]
+    },
+    "service": {
+      "resourceFields": {
+        "accountId": {
+          "type": "reference[account]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "createIndex": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "created": {
+          "type": "date",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "description": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 1024
+        },
+        "externalId": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "healthState": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 128
+        },
+        "id": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "kind": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "name": {
+          "type": "string",
+          "validChars": "a-zA-Z0-9-",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "required": true,
+          "readOnCreateOnly": false,
+          "minLength": 1,
+          "maxLength": 63
+        },
+        "removed": {
+          "type": "date",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "selectorContainer": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 4096
+        },
+        "selectorLink": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 4096
+        },
+        "stackId": {
+          "type": "reference[stack]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "state": {
+          "type": "enum",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false,
+          "maxLength": 128,
+          "options": [
+            "activating",
+            "active",
+            "canceled-upgrade",
+            "canceling-upgrade",
+            "deactivating",
+            "finishing-upgrade",
+            "inactive",
+            "registering",
+            "removed",
+            "removing",
+            "requested",
+            "restarting",
+            "rolling-back",
+            "updating-active",
+            "updating-inactive",
+            "upgraded",
+            "upgrading"
+          ]
+        },
+        "system": {
+          "type": "boolean",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false,
+          "maxLength": 255,
+          "default": false
+        },
+        "uuid": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 128
+        },
+        "vip": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "transitioning": {
+          "type": "enum",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false,
+          "options": ["yes", "no", "error"]
+        },
+        "transitioningMessage": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "transitioningProgress": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "scale": {
+          "type": "int",
+          "description": null,
+          "create": true,
+          "update": true,
+          "readOnCreateOnly": false,
+          "min": 0,
+          "default": 1
+        },
+        "currentScale": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "scalePolicy": {
+          "type": "scalePolicy",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "launchConfig": {
+          "type": "launchConfig",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "upgrade": {
+          "type": "serviceUpgrade",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "secondaryLaunchConfigs": {
+          "type": "array[secondaryLaunchConfig]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "metadata": {
+          "type": "map[json]",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "fqdn": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "publicEndpoints": {
+          "type": "array[publicEndpoint]",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "retainIp": {
+          "type": "boolean",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "assignServiceIpAddress": {
+          "type": "boolean",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false,
+          "default": false
+        },
+        "startOnCreate": {
+          "type": "boolean",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "default": false
+        },
+        "linkedServices": {
+          "type": "map[reference[service]]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "instanceIds": {
+          "type": "array[reference[instance]]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "lbConfig": {
+          "type": "lbTargetConfig",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        }
+      },
+      "resourceActions": {
+        "rollback": {
+          "input": null,
+          "output": "service"
+        },
+        "upgrade": {
+          "input": "serviceUpgrade",
+          "output": "service"
+        },
+        "restart": {
+          "input": "serviceRestart",
+          "output": "service"
+        },
+        "update": {
+          "input": null,
+          "output": "service"
+        },
+        "remove": {
+          "input": null,
+          "output": "service"
+        },
+        "deactivate": {
+          "input": null,
+          "output": "service"
+        },
+        "finishupgrade": {
+          "input": null,
+          "output": "service"
+        },
+        "removeservicelink": {
+          "input": "addRemoveServiceLinkInput",
+          "output": "service"
+        },
+        "continueupgrade": {
+          "input": null,
+          "output": "service"
+        },
+        "activate": {
+          "input": null,
+          "output": "service"
+        },
+        "addservicelink": {
+          "input": "addRemoveServiceLinkInput",
+          "output": "service"
+        },
+        "create": {
+          "input": null,
+          "output": "service"
+        },
+        "cancelupgrade": {
+          "input": null,
+          "output": "service"
+        },
+        "setservicelinks": {
+          "input": "setServiceLinksInput",
+          "output": "service"
+        }
+      },
+      "resourceMethods": ["GET", "PUT", "DELETE"],
+      "collectionMethods": ["GET", "POST"]
+    },
+    "serviceRestart": {
+      "resourceFields": {
+        "rollingRestartStrategy": {
+          "type": "rollingRestartStrategy",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "required": true,
+          "readOnCreateOnly": false
+        }
+      },
+      "resourceActions": {},
+      "resourceMethods": ["GET"],
+      "collectionMethods": ["POST"]
+    },
+    "serviceUpgrade": {
+      "resourceFields": {
+        "inServiceStrategy": {
+          "type": "inServiceUpgradeStrategy",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "toServiceStrategy": {
+          "type": "toServiceUpgradeStrategy",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        }
+      },
+      "resourceActions": {},
+      "resourceMethods": ["GET"],
+      "collectionMethods": ["POST"]
+    },
+    "serviceUpgradeStrategy": {
+      "resourceFields": {
+        "batchSize": {
+          "type": "int",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "min": 1,
+          "default": 1
+        },
+        "intervalMillis": {
+          "type": "int",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "min": 100,
+          "default": 2000
+        }
+      },
+      "resourceActions": {},
+      "resourceMethods": ["GET"],
+      "collectionMethods": []
+    },
+    "stack": {
+      "resourceFields": {
+        "accountId": {
+          "type": "reference[account]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "created": {
+          "type": "date",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "description": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 1024
+        },
+        "externalId": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 128
+        },
+        "group": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "healthState": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 128
+        },
+        "id": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "kind": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "name": {
+          "type": "string",
+          "validChars": "a-zA-Z0-9-",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "required": true,
+          "readOnCreateOnly": false,
+          "minLength": 1,
+          "maxLength": 63
+        },
+        "removed": {
+          "type": "date",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255
+        },
+        "state": {
+          "type": "enum",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false,
+          "maxLength": 128,
+          "options": [
+            "activating",
+            "active",
+            "canceled-upgrade",
+            "canceling-upgrade",
+            "error",
+            "erroring",
+            "finishing-upgrade",
+            "removed",
+            "removing",
+            "requested",
+            "rolling-back",
+            "updating-active",
+            "upgraded",
+            "upgrading"
+          ]
+        },
+        "system": {
+          "type": "boolean",
+          "description": null,
+          "create": true,
+          "update": true,
+          "readOnCreateOnly": false,
+          "maxLength": 255,
+          "default": false
+        },
+        "uuid": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "maxLength": 128
+        },
+        "transitioning": {
+          "type": "enum",
+          "description": null,
+          "create": false,
+          "update": false,
+          "readOnCreateOnly": false,
+          "options": ["yes", "no", "error"]
+        },
+        "transitioningMessage": {
+          "type": "string",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "transitioningProgress": {
+          "type": "int",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "dockerCompose": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "rancherCompose": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "environment": {
+          "type": "map[string]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "answers": {
+          "type": "map[json]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "templates": {
+          "type": "map[string]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "previousExternalId": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "previousEnvironment": {
+          "type": "map[string]",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "startOnCreate": {
+          "type": "boolean",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "outputs": {
+          "type": "map[string]",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "binding": {
+          "type": "binding",
+          "description": null,
+          "create": true,
+          "update": true,
+          "nullable": true,
+          "readOnCreateOnly": false
+        },
+        "serviceIds": {
+          "type": "array[reference[service]]",
+          "description": null,
+          "create": false,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false
+        }
+      },
+      "resourceActions": {
+        "rollback": {
+          "input": null,
+          "output": "stack"
+        },
+        "deactivateservices": {
+          "input": null,
+          "output": "stack"
+        },
+        "activateservices": {
+          "input": null,
+          "output": "stack"
+        },
+        "upgrade": {
+          "input": "stackUpgrade",
+          "output": "stack"
+        },
+        "addoutputs": {
+          "input": "addOutputsInput",
+          "output": "stack"
+        },
+        "create": {
+          "input": null,
+          "output": "stack"
+        },
+        "update": {
+          "input": null,
+          "output": "stack"
+        },
+        "exportconfig": {
+          "input": "composeConfigInput",
+          "output": "composeConfig"
+        },
+        "error": {
+          "input": null,
+          "output": "stack"
+        },
+        "cancelupgrade": {
+          "input": null,
+          "output": "stack"
+        },
+        "remove": {
+          "input": null,
+          "output": "stack"
+        },
+        "finishupgrade": {
+          "input": null,
+          "output": "stack"
+        }
+      },
+      "resourceMethods": ["GET", "PUT", "DELETE"],
+      "collectionMethods": ["GET", "POST"]
+    },
+    "stackUpgrade": {
+      "resourceFields": {
+        "dockerCompose": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "rancherCompose": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "externalId": {
+          "type": "string",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "environment": {
+          "type": "map[string]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "answers": {
+          "type": "map[json]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "templates": {
+          "type": "map[string]",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        }
+      },
+      "resourceActions": {},
+      "resourceMethods": ["GET"],
+      "collectionMethods": ["POST"]
+    },
+    "toServiceUpgradeStrategy": {
+      "resourceFields": {
+        "batchSize": {
+          "type": "int",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "min": 1,
+          "default": 1
+        },
+        "finalScale": {
+          "type": "int",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "min": 1,
+          "default": 1
+        },
+        "intervalMillis": {
+          "type": "int",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "nullable": true,
+          "readOnCreateOnly": false,
+          "min": 100,
+          "default": 2000
+        },
+        "toServiceId": {
+          "type": "reference[service]",
+          "transform": "",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        },
+        "updateLinks": {
+          "type": "boolean",
+          "description": null,
+          "create": true,
+          "update": false,
+          "readOnCreateOnly": false
+        }
+      },
+      "resourceActions": {},
+      "resourceMethods": ["GET"],
+      "collectionMethods": ["POST"]
+    }
+  }
+}
