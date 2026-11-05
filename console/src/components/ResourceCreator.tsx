@@ -48,6 +48,8 @@ export function ResourceCreator({
     ['service', 'container'].includes(selection.kind);
   const healthChecks =
     app.config.modules.workloadHealthChecks && ['service', 'container'].includes(selection.kind);
+  const ulimits =
+    app.config.modules.workloadUlimitEditors && ['service', 'container'].includes(selection.kind);
   const security =
     app.config.modules.workloadSecurityEditors && ['service', 'container'].includes(selection.kind);
   const resources =
@@ -74,7 +76,15 @@ export function ResourceCreator({
       }
       scope.assertCurrent();
       if (composeEditor) payload = validateStackCreation(current, payload);
-      if (workloadLayout || healthChecks || sidecars || scheduling || resources || security) {
+      if (
+        workloadLayout ||
+        healthChecks ||
+        sidecars ||
+        scheduling ||
+        resources ||
+        security ||
+        ulimits
+      ) {
         const refreshed = Object.fromEntries(
           (await allPages<Schema>(`projects/${scope.environment}/schemas`, signal)).map((value) => [
             value.id,
@@ -93,6 +103,7 @@ export function ResourceCreator({
           scheduling,
           resources,
           security,
+          ulimits,
         );
       }
       return api<Resource>(
@@ -213,6 +224,7 @@ export function ResourceCreator({
             schedulingEditors={scheduling}
             resourceEditors={resources}
             securityEditors={security}
+            ulimitEditors={ulimits}
             id="workspace-create-form"
             schema={formSchema}
             schemas={formSchemas}

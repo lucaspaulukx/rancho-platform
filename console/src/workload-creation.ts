@@ -1,3 +1,4 @@
+import { validateWorkloadUlimits } from './workload-ulimits';
 import { validateWorkloadSecurity } from './workload-security';
 import { validateWorkloadResources } from './workload-resources';
 import type { Schema, SchemaField } from './api';
@@ -59,6 +60,7 @@ const sections: { title: string; description: string; fields: string[] }[] = [
       'cpuPeriod',
       'cpuQuota',
       'blkioWeight',
+      'ulimits',
     ],
   },
   {
@@ -129,6 +131,7 @@ export function validateWorkloadCreation(
   scheduling = false,
   resources = false,
   security = false,
+  ulimits = false,
 ) {
   if (!['service', 'container'].includes(schema.id) || !schema.collectionMethods?.includes('POST'))
     throw new Error('A criação deste workload não está mais disponível.');
@@ -160,6 +163,7 @@ export function validateWorkloadCreation(
   }
   validate(schema, values);
   if (security) validateWorkloadSecurity(schema, values, schemas);
+  if (ulimits) validateWorkloadUlimits(schema, values, schemas);
   if (resources) validateWorkloadResources(schema, values, schemas);
   if (scheduling) validateWorkloadScheduling(schema, values, schemas);
   if (healthChecks) validateWorkloadHealthChecks(schema, values, schemas);
