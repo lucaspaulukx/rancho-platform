@@ -1,0 +1,19 @@
+# 39 — Upgrade contextual de verificações de saúde
+
+## Plano antes do código
+
+Estender o drawer Atualizar serviço, sem página adicional ou PUT em launchConfig. Flag workloadHealthCheckUpgrades independente da criação e do editor de portas/volumes, dependente de workloadUpgrades e contrato completo. Check opt-in Editar verificação de saúde nesta atualização; preservar imagem/portas/volumes/variáveis/sidecars e demais campos ao alterar só saúde.
+
+Fresh resource + schemas completos, snapshot de launchConfig/sidecars para não sobrescrever mudança concorrente, revisão explícita explicando recriação/risco de indisponibilidade. Configuração de origem usa shape nativo; remover apenas metadados readonly de saúde para o editor. requestLine legado não compreendido permanece preservado e não é convertido silenciosamente: editor estruturado indisponível nesse caso. Remover saúde envia null; payload passa pelo contrato nativo serviceUpgrade/inServiceStrategy. Rollback/finish são ações já existentes.
+
+Testes de payload para healthcheck-only/remover/preservação/conflito/schema revogado, formulário opt-in/revisão/flag. Fixture isolada escala0 ativa, alterar TCP→HTTP, rollback exato, repetir→finish, retirar saúde se contrato permite. Zero instâncias e configurações/volumes anteriores preservados no cleanup. Matriz real de readonly/sem acesso e temas; saúde física não declarada por esse gate.
+
+## Resultado
+
+Implementado: flag workloadHealthCheckUpgrades=true, opt-in no mesmo upgrade, editor comum TCP/HTTP/desativado e revisão de impacto. Funciona com imagem mantida e sem editar portas/volumes. Fonte healthcheck existente é convertida só pelo schema criável, incluindo leitura exata de requestLine suportado. Formato legado desconhecido bloqueia este opt-in e segue preservado por outros upgrades. Metadata readonly não vai para payload. Snapshot completo launchConfig/sidecars antes de sobrescrever saúde; flag/backend contrato revalidados no envio.
+
+Build517 testes/59 arquivos + TypeScript/Vite aprovado, cinco testes novos cobrem health-only, remover null, no-op/undefined, snapshot concorrente/contrato revogado, legado desconhecido e revisão/flag. Primeira falha de teste esperava ausência de estratégia, mas default nativo é recreate; expectativa corrigida. Anotação de Resource no teste corrigiu erro TypeScript, build repetido integralmente.
+
+Browser confirmou quatro cenários claro/escuro ×1440/390 com data-theme aplicado, axe/overflow zero. Native HTTP configurado sem trocar imagem/portas/volumes/variáveis/comando/rede/sidecars/escala, rollback exato, repetir/finish e remover por null/finish. Fonte HTTP existente conserva path/Host ao reabrir. Negação fora do environment com CSRF válido. Readonly confirmado com grant temporário: schema/recurso não expõem upgrade, POST com payload nativo e CSRF válido recebe422 InvalidAction, configuração permanece idêntica. Grupo removido e identidade volta a zero environments. Não tratar422 genérico de validação como negação: este aceite exige código InvalidAction e ausência da ação. Primeiras expectativas só aceitavam403/405; não houve escrita, grants foram removidos no finally. Repetição final14 checks E2E aprovada, incluindo asserção sobre configuração após remoção; quatro cenários axe/tema corretos. Fixture final1st108/1s140 removida, configurações e volumes anteriores preservados e zero instâncias. Manifest config-upgrade-fixture.json ausente. Relatório config-upgrade-cleanup-results.json registra o cleanup compartilhado; healthcheck-upgrade-authorization-results.json registra readonly.
+
+Helpers config_upgrade_fixture.py (escala0 ativa sem instâncias), e2e/run.py healthcheck-upgrade, healthcheck_upgrade_authorization.py, cleanup. Não usar ao mesmo tempo que config-upgrade. Nenhuma prova de saúde física/recriação/quórum multihost.

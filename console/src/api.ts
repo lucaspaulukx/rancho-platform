@@ -1,0 +1,241 @@
+export interface Policy {
+  enabled: boolean;
+  only: boolean;
+  autoLogin: boolean;
+  preflight?: boolean;
+}
+export interface Account {
+  id: string;
+  name: string;
+  kind: string;
+  state: string;
+  removed?: string;
+}
+export interface Project {
+  id: string;
+  name: string;
+  state: string;
+  orchestration?: string;
+  removed?: string;
+}
+export interface Identity {
+  externalIdType?: string;
+  name?: string;
+  login?: string;
+  externalId: string;
+}
+export interface Token {
+  userIdentity?: Identity;
+  userType?: string;
+  accountId?: string;
+  user?: string;
+  jwt?: string;
+  security?: boolean;
+}
+export type Role = 'owner' | 'member' | 'readonly' | 'restricted';
+export interface Group {
+  id: string;
+  name: string;
+  revision: number;
+  members: string[];
+  grants: Record<string, Role>;
+}
+export interface GroupInput {
+  id?: string;
+  name: string;
+  revision?: number;
+  members?: string[];
+  grants?: Record<string, Role>;
+  delete?: boolean;
+}
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+export const sessionUnauthorizedEvent = 'rancher.console.unauthorized';
+function csrf() {
+  return decodeURIComponent(
+    document.cookie
+      .split('; ')
+      .find((c) => c.startsWith('CSRF='))
+      ?.slice(5) || '',
+  );
+}
+export function safeApiUrl(path: string): string {
+  const url = new URL(
+    path.startsWith('/') || /^https?:/.test(path) ? path : `/v2-beta/${path}`,
+    location.origin,
+  );
+  if (
+    url.origin !== location.origin ||
+    !/^\/(v2-beta|v1-catalog|v1-webhooks|v1-auth)(\/|$)/.test(url.pathname)
+  ) {
+    throw new Error('O servidor retornou um endereço de API não permitido.');
+  }
+  return url.pathname + url.search;
+}
+export async function api<T>(
+  path: string,
+  body?: unknown,
+  method?: string,
+  signal?: AbortSignal,
+  headers?: Record<string, string>,
+): Promise<T> {
+  const url = safeApiUrl(path);
+  const sessionCookie = document.cookie.split('; ').find((cookie) => cookie.startsWith('token='));
+  const response = await fetch(url, {
+    credentials: 'same-origin',
+    method: method || (body !== undefined ? 'POST' : 'GET'),
+    signal,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'X-Api-Csrf': csrf(),
+      ...headers,
+    },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    if (
+      response.status === 401 &&
+      !/^\/v2-beta\/token(?:\/|\?|$)/.test(url) &&
+      sessionCookie === document.cookie.split('; ').find((cookie) => cookie.startsWith('token='))
+    )
+      window.dispatchEvent(new Event(sessionUnauthorizedEvent));
+    throw new ApiError(
+      response.status,
+      data.message || data.code || 'Não foi possível concluir a solicitação.',
+    );
+  }
+  return data;
+}
+export async function policy(): Promise<Policy> {
+  const r = await fetch('/oidc/status', { cache: 'no-store' });
+  if (!r.ok) throw new Error('Não foi possível carregar a configuração de login.');
+  return r.json();
+}
+const legacyKeys = ['user', 'userType', 'accountId', 'userIdentity', 'backTo'];
+export function acceptToken(token: Token) {
+  if (!token.jwt) throw new Error('O servidor não retornou uma sessão válida.');
+  document.cookie = `token=${encodeURIComponent(token.jwt)}; Path=/; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
+  legacyKeys.forEach((key) => localStorage.removeItem(key));
+  Object.entries({
+    user: token.user || token.userIdentity?.login || token.userIdentity?.name,
+    userType: token.userType,
+    accountId: token.accountId,
+    userIdentity: token.userIdentity,
+  }).forEach(([key, value]) => {
+    if (value !== undefined) localStorage.setItem(key, JSON.stringify(value));
+  });
+  sessionStorage.removeItem('projectId');
+  sessionStorage.removeItem('rancher.oidc.signedOut');
+  sessionStorage.removeItem('rancher.oidc.autoAttempt');
+}
+export async function logout() {
+  try {
+    await api('token/current', undefined, 'DELETE');
+  } finally {
+    document.cookie = 'token=; Path=/; Max-Age=0';
+    legacyKeys.forEach((key) => localStorage.removeItem(key));
+    sessionStorage.removeItem('projectId');
+    sessionStorage.setItem('rancher.oidc.signedOut', '1');
+    location.assign('/console/login');
+  }
+}
+export async function checkOidcProvider(signal?: AbortSignal) {
+  const response = await fetch('/oidc/readiness', { cache: 'no-store', signal });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || result.ready !== true)
+    throw new Error('Não foi possível acessar o provedor de login. Tente novamente.');
+}
+export async function oidcLogin(preflight = false, signal?: AbortSignal) {
+  const currentSession = () =>
+    document.cookie.split('; ').find((cookie) => cookie.startsWith('token='));
+  const originalSession = currentSession();
+  sessionStorage.setItem('rancher.oidc.autoAttempt', '1');
+  if (preflight) await checkOidcProvider(signal);
+  if (signal?.aborted || currentSession() !== originalSession)
+    throw new DOMException('Tentativa de login cancelada.', 'AbortError');
+  sessionStorage.removeItem('rancher.oidc.signedOut');
+  location.assign('/oidc/login');
+}
+export interface Collection<T> {
+  data: T[];
+  links?: Record<string, string>;
+  pagination?: { next?: string; partial?: boolean };
+  createTypes?: Record<string, string>;
+}
+export interface Resource {
+  id: string;
+  type: string;
+  name?: string;
+  state?: string;
+  description?: string;
+  links: Record<string, string>;
+  actions?: Record<string, string>;
+  [key: string]: unknown;
+}
+export interface SchemaField {
+  label?: string;
+  type: string;
+  create?: boolean;
+  update?: boolean;
+  required?: boolean;
+  nullable?: boolean;
+  default?: unknown;
+  options?: string[];
+  min?: number;
+  max?: number;
+  minLength?: number;
+  maxLength?: number;
+  validChars?: string;
+  description?: string;
+  unique?: boolean;
+  readOnCreateOnly?: boolean;
+}
+export interface Schema {
+  id: string;
+  pluralName: string;
+  resourceFields: Record<string, SchemaField>;
+  collectionMethods?: string[];
+  resourceMethods?: string[];
+  collectionActions?: Record<string, { input?: string }>;
+  resourceActions?: Record<string, { input?: string }>;
+  links: Record<string, string>;
+}
+export async function allPages<T>(
+  path: string,
+  signal?: AbortSignal,
+  headers?: Record<string, string>,
+): Promise<T[]> {
+  const items: T[] = [];
+  const seen = new Set<string>();
+  let next: string | undefined = path;
+  while (next) {
+    const safe = safeApiUrl(next);
+    if (seen.has(safe)) throw new Error('A paginação retornou um ciclo.');
+    seen.add(safe);
+    if (seen.size > 100) throw new Error('A coleção é muito grande. Refine os filtros.');
+    const page = await api<Collection<T>>(safe, undefined, undefined, signal, headers);
+    if (!Array.isArray(page.data)) throw new Error('Resposta de coleção inválida.');
+    items.push(...page.data);
+    next = page.pagination?.next;
+  }
+  return items;
+}
+export const rawId = (id: string) => id.replace(/^1a/, '');
+export const roles: { value: Role; label: string; description: string }[] = [
+  { value: 'readonly', label: 'Read Only', description: 'Consulta os recursos do environment.' },
+  {
+    value: 'restricted',
+    label: 'Restricted',
+    description: 'Usa as permissões restritas do Rancher.',
+  },
+  { value: 'member', label: 'Member', description: 'Gerencia serviços e recursos do environment.' },
+  { value: 'owner', label: 'Owner', description: 'Administra o environment e seus membros.' },
+];

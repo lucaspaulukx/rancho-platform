@@ -1,0 +1,7 @@
+{
+  "cattle": {
+    "url": "https://github.com/rancher/cattle.git",
+    "commit": "82d154a53f4089fecfb9f320caad826bb4f6055f",
+    "patch": "patches/cattle.patch"
+  }
+}

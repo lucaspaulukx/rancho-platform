@@ -1,0 +1,42 @@
+{{page-header currentPath="local-groups"}}
+<main class="clearfix">
+  <section class="header clearfix"><h1>Grupos e permissões</h1></section>
+  <section>
+    {{#if message}}<div class="banner {{if error 'bg-danger' 'bg-info'}}"><div class="banner-icon"><i class="icon icon-info"></i></div><div class="banner-message"><p role="status">{{message}}</p></div></div>{{/if}}
+    <div class="row">
+      <div class="col span-3">
+        <button type="button" class="btn btn-primary r-mb20" {{action "newGroup"}}>Adicionar grupo</button>
+        <ul class="list-unstyled">
+          {{#each model.groups as |group|}}<li class="r-mb10"><a class="hand" {{action "editGroup" group}}><i class="icon icon-users"></i> {{group.name}}</a></li>{{else}}<li class="text-muted">Nenhum grupo cadastrado.</li>{{/each}}
+        </ul>
+      </div>
+      <div class="col span-9">
+        <h2>{{if current "Editar grupo" "Adicionar grupo"}}</h2>
+        <div class="row"><div class="col span-12"><label for="group-name">Nome do grupo*</label>{{input id="group-name" class="form-control" value=draftName placeholder="Ex.: Suporte" maxlength="128"}}</div></div>
+        <h3 class="r-mt30">Usuários</h3>
+        <p class="text-muted">Os usuários do Keycloak aparecem após o primeiro login. Os grupos são gerenciados aqui no Rancher.</p>
+        <div class="row"><div class="col span-12">
+          {{#each members as |member|}}<label class="r-mr20 inline-block">{{input type="checkbox" checked=member.selected}} {{member.name}} <span class="text-muted">({{member.displayId}})</span></label>{{else}}<p class="text-muted">Nenhum usuário disponível.</p>{{/each}}
+        </div></div>
+        <h3 class="r-mt30">Permissões por environment</h3>
+        <table class="grid fixed"><thead><tr><th>Environment</th><th>Papel</th></tr></thead><tbody>
+          {{#each environments as |environment|}}<tr><td>{{environment.name}}</td><td>
+            <select class="form-control" aria-label="Permissão em {{environment.name}}" onchange={{action "setRole" environment value="target.value"}}>
+              <option value="" selected={{eq environment.role ""}}>Sem acesso</option>
+              <option value="readonly" selected={{eq environment.role "readonly"}}>Read Only</option>
+              <option value="restricted" selected={{eq environment.role "restricted"}}>Restricted</option>
+              <option value="member" selected={{eq environment.role "member"}}>Member</option>
+              <option value="owner" selected={{eq environment.role "owner"}}>Owner</option>
+            </select>
+          </td></tr>{{/each}}
+        </tbody></table>
+        <div class="footer-actions r-mt30">
+          <button type="button" class="btn btn-primary" disabled={{saving}} {{action "saveGroup"}}>{{if saving "Salvando..." "Salvar"}}</button>
+          <button type="button" class="btn btn-link" {{action "newGroup"}}>Cancelar</button>
+          {{#if current}}<button type="button" class="btn btn-danger pull-right" disabled={{saving}} {{action "deleteGroup"}}>Excluir grupo</button>{{/if}}
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{{page-footer}}

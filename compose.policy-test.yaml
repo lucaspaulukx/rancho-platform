@@ -1,0 +1,14 @@
+services:
+  policy-test-host:
+    build: ./console/tests/legacy-host
+    image: rancher16-policy-test-host:dev
+    container_name: rancher16-policy-test-host
+    volumes:
+      - policy-test-state:/lab-data
+    tmpfs:
+      - /run:size=64m,mode=0700
+    mem_limit: 2300m
+    cpus: 2
+    # Own guest/disk/agent identity; no host privileges, devices or Docker socket.
+volumes:
+  policy-test-state:
