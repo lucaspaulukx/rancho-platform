@@ -176,3 +176,7 @@ Contrato vigente schemaVersion1: [migração, dry-run, checksums e rollback](53-
 ## Logout federado opcional
 
 `RANCHER_OIDC_FEDERATED_LOGOUT_ENABLED` defaultfalse, efetivo somente com OIDC/customização ativos. True habilita preparo seguro de saída para sessões OIDC; local conserva saída local e não encerra SSO. Registrar no IdP o retorno exato `{origem pública do callback}/console/login?oidc_logout=returned`. Origin/CSRF/sessão são obrigatórios. Falha do IdP não impede limpar/revogar Rancher; exclusivo não oferece login local. Recorte62 aceito com15 checks,4 fluxos reais e8 cenários axe/layout.
+
+## Schema runtime opcional
+
+`RANCHER_SCHEMA_MIGRATIONS_ENABLED` defaultfalse, dependente da customização. On serializa migração001, verifica checksum/estrutura e recusa inconsistência; off mantém bootstrap anterior, não desfaz DDL nem libera downgrade de dados. Upgrade/rollback original20 e contratos reais em [77](77-runtime-schema-migration.md). Não habilitado automaticamente no compose moderno.

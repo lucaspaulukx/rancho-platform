@@ -78,3 +78,7 @@ Testar versão exata de agentes/Docker, stacks/Compose, rede/LB/TLS/volumes, log
 ## Evidência e limites atuais
 
 O laboratório comprova recuperação offline e esquema aditivo; o ensaio sintético original com20 environments não substitui dump real. Dados reais permanecem fora deste desenvolvimento até autorização própria. O histórico de alterações fica em commits locais; publicação e canal privado de segurança serão configurados antes de abrir o repositório.
+
+## Atualização de engine em cópia original20
+
+O [recorte77](77-runtime-schema-migration.md) agora comprova imagem oficial1.6.30→custom usando os mesmos volumes da cópia, migração runtime sob flag, restart, checksum divergente recusado e rollback por restauração correspondente com20 environments sintéticos. É evidência adicional ao banco72 e recuperação76, com isolamento de rede e cleanup. Não substitui ensaio do ambiente real, agentes/workloads/HA ou liberação do cutover. A origem do laboratório não teve a nova flag ativada por este teste.

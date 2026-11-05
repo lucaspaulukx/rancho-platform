@@ -368,6 +368,146 @@ index 209a46f..1bf6cf8 100644
          "portRange": "cru",
  
          "apiKey" : "crud",
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CommunitySchemaMigrations.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CommunitySchemaMigrations.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CommunitySchemaMigrations.java
+@@ -0,0 +1,135 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import java.io.ByteArrayOutputStream;
++import java.io.InputStream;
++import java.nio.charset.StandardCharsets;
++import java.security.MessageDigest;
++import java.sql.*;
++import java.util.*;
++
++/** Additive, serialized schema bootstrap. Never performs destructive downgrade. */
++public final class CommunitySchemaMigrations {
++    private CommunitySchemaMigrations() { }
++    private static final String RESOURCE = "/io/cattle/platform/iaas/api/auth/localrbac/migrations/001-local-groups.sql";
++
++    public static String sql() {
++        try (InputStream input = CommunitySchemaMigrations.class.getResourceAsStream(RESOURCE)) {
++            if (input == null) { throw new IllegalStateException("Packaged community schema missing"); }
++            ByteArrayOutputStream output = new ByteArrayOutputStream();
++            byte[] block = new byte[4096];
++            int count;
++            while ((count = input.read(block)) != -1) {
++                if (output.size() + count > 65536) { throw new IllegalStateException("Packaged community schema oversized"); }
++                output.write(block, 0, count);
++            }
++            return new String(output.toByteArray(), StandardCharsets.UTF_8).replace("\r\n", "\n");
++        } catch (java.io.IOException error) { throw new IllegalStateException("Cannot read packaged community schema", error); }
++    }
++
++    public static String checksum(String sql) {
++        try {
++            byte[] digest = MessageDigest.getInstance("SHA-256").digest(sql.getBytes(StandardCharsets.UTF_8));
++            StringBuilder result = new StringBuilder();
++            for (byte value : digest) { result.append(String.format(Locale.ROOT, "%02x", value & 255)); }
++            return result.toString();
++        } catch (java.security.NoSuchAlgorithmException error) { throw new IllegalStateException(error); }
++    }
++
++    private static boolean namedLock(Connection connection, String function) throws SQLException {
++        String sql = "SELECT " + function + "(CONCAT(DATABASE(), ':community-schema-v1')" +
++            ("GET_LOCK".equals(function) ? ",30)" : ")");
++        try (Statement statement = connection.createStatement(); ResultSet row = statement.executeQuery(sql)) {
++            return row.next() && row.getInt(1) == 1 && !row.wasNull();
++        }
++    }
++
++    public static void apply(Connection connection) throws SQLException {
++        if (!connection.getAutoCommit()) { throw new SQLException("Schema bootstrap requires a fresh autocommit connection"); }
++        String sql = sql();
++        String checksum = checksum(sql);
++        if (!namedLock(connection, "GET_LOCK")) { throw new SQLException("Community schema lock unavailable"); }
++        try {
++            try (Statement statement = connection.createStatement()) {
++                statement.execute("CREATE TABLE IF NOT EXISTS community_schema_migration (version INT PRIMARY KEY, checksum VARCHAR(64) NOT NULL, applied TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB");
++            }
++            boolean installed = false;
++            try (Statement statement = connection.createStatement();
++                 ResultSet rows = statement.executeQuery("SELECT version,checksum FROM community_schema_migration ORDER BY version")) {
++                while (rows.next()) {
++                    if (rows.getInt(1) != 1 || !checksum.equals(rows.getString(2))) {
++                        throw new SQLException("Community schema version/checksum mismatch; restore compatible data and image");
++                    }
++                    installed = true;
++                }
++            }
++            if (!installed) {
++                // Only the packaged versioned DDL, never user supplied SQL.
++                for (String command : sql.split(";")) {
++                    if (!command.trim().isEmpty()) {
++                        try (Statement statement = connection.createStatement()) { statement.execute(command.trim()); }
++                    }
++                }
++            }
++            validate(connection);
++            if (!installed) {
++                try (PreparedStatement statement = connection.prepareStatement("INSERT INTO community_schema_migration(version,checksum) VALUES(1,?)")) {
++                    statement.setString(1, checksum);
++                    statement.executeUpdate();
++                }
++            }
++        } finally {
++            if (!namedLock(connection, "RELEASE_LOCK")) { throw new SQLException("Community schema lock release failed"); }
++        }
++    }
++
++    private static void validate(Connection connection) throws SQLException {
++        String[][] definitions = {
++            {"community_schema_migration", "version:int:0:NO", "checksum:varchar:64:NO", "applied:timestamp:0:NO"},
++            {"local_rbac_group", "id:varchar:36:NO", "name:varchar:128:NO", "revision:bigint:0:NO"},
++            {"local_rbac_member", "group_id:varchar:36:NO", "account_id:bigint:0:NO"},
++            {"local_rbac_grant", "group_id:varchar:36:NO", "project_id:bigint:0:NO", "role:varchar:16:NO"},
++            {"local_rbac_audit", "id:bigint:0:NO", "actor:bigint:0:NO", "group_id:varchar:36:NO", "operation:varchar:16:NO", "created:timestamp:0:NO"},
++            {"local_rbac_audit_detail", "id:bigint:0:NO", "actor:bigint:0:NO", "group_id:varchar:36:NO", "operation:varchar:16:NO", "before_snapshot:mediumtext:16777215:YES", "after_snapshot:mediumtext:16777215:YES", "created:timestamp:0:NO"},
++            {"local_rbac_oidc_user", "identity_hash:varchar:64:NO", "account_id:bigint:0:NO"}
++        };
++        for (String[] definition : definitions) {
++            List<String> actual = new ArrayList<>();
++            try (PreparedStatement statement = connection.prepareStatement("SELECT COLUMN_NAME,DATA_TYPE,COALESCE(CHARACTER_MAXIMUM_LENGTH,0),IS_NULLABLE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? ORDER BY ORDINAL_POSITION")) {
++                statement.setString(1, definition[0]);
++                try (ResultSet rows = statement.executeQuery()) {
++                    while (rows.next()) { actual.add(rows.getString(1) + ":" + rows.getString(2) + ":" + rows.getLong(3) + ":" + rows.getString(4)); }
++                }
++            }
++            if (!actual.equals(Arrays.asList(definition).subList(1, definition.length))) {
++                throw new SQLException("Community schema columns differ from packaged migration");
++            }
++            try (PreparedStatement statement = connection.prepareStatement("SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=?")) {
++                statement.setString(1, definition[0]);
++                try (ResultSet row = statement.executeQuery()) {
++                    if (!row.next() || !"InnoDB".equals(row.getString(1))) { throw new SQLException("Community schema requires InnoDB"); }
++                }
++            }
++        }
++        String[][] indexes = {
++            {"community_schema_migration", "PRIMARY:0:version"},
++            {"local_rbac_group", "PRIMARY:0:id", "name:0:name"},
++            {"local_rbac_member", "PRIMARY:0:group_id,account_id", "account_id:1:account_id"},
++            {"local_rbac_grant", "PRIMARY:0:group_id,project_id"},
++            {"local_rbac_audit", "PRIMARY:0:id"},
++            {"local_rbac_audit_detail", "PRIMARY:0:id", "group_id:1:group_id,id"},
++            {"local_rbac_oidc_user", "PRIMARY:0:identity_hash", "account_id:0:account_id"}
++        };
++        for (String[] definition : indexes) {
++            Set<String> actual = new TreeSet<>();
++            try (PreparedStatement statement = connection.prepareStatement("SELECT INDEX_NAME,NON_UNIQUE,GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? GROUP BY INDEX_NAME,NON_UNIQUE")) {
++                statement.setString(1, definition[0]);
++                try (ResultSet rows = statement.executeQuery()) {
++                    while (rows.next()) { actual.add(rows.getString(1) + ":" + rows.getInt(2) + ":" + rows.getString(3)); }
++                }
++            }
++            if (!actual.equals(new TreeSet<String>(Arrays.asList(definition).subList(1, definition.length)))) {
++                throw new SQLException("Community schema keys differ from packaged migration");
++            }
++        }
++    }
++}
 diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CustomizationConfig.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CustomizationConfig.java
 new file mode 100644
 --- /dev/null
@@ -385,10 +525,10 @@ new file mode 100644
 +    private final boolean oidcConfigured;
 +
 +    public CustomizationConfig(Map<String,String> env) {
-+        String[] names={"CUSTOMIZATION_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
++        String[] names={"CUSTOMIZATION_ENABLED","SCHEMA_MIGRATIONS_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
 +            "ENV_CREATION_ADMIN_ONLY","DISABLE_AUTO_ENVIRONMENT","CATALOG_WRITE_GUARD_ENABLED","SESSION_ACCOUNT_GUARD_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED","OIDC_LOGIN_PREFLIGHT_ENABLED","OIDC_FEDERATED_LOGOUT_ENABLED","OIDC_ONLY","OIDC_AUTO_LOGIN","MODERN_UI_ENABLED"};
 +        for (String name:names) {
-+            boolean fallback=!(name.equals("OIDC_FEDERATED_LOGOUT_ENABLED") || name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
++            boolean fallback=!(name.equals("SCHEMA_MIGRATIONS_ENABLED") || name.equals("OIDC_FEDERATED_LOGOUT_ENABLED") || name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
 +            String value=env.get("RANCHER_"+name);
 +            if(value!=null && !value.equals("true") && !value.equals("false")) { throw new IllegalArgumentException("Invalid boolean: RANCHER_"+name); }
 +            requested.put(name,value==null?fallback:Boolean.valueOf(value));
@@ -417,7 +557,7 @@ new file mode 100644
 +        }
 +        effective.putAll(requested);
 +        boolean custom=requested.get("CUSTOMIZATION_ENABLED");
-+        for(String name:new String[]{"LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED"}) {
++        for(String name:new String[]{"SCHEMA_MIGRATIONS_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED"}) {
 +            effective.put(name,custom && requested.get(name));
 +        }
 +        effective.put("OIDC_ENABLED",effective.get("OIDC_ENABLED") && oidcConfigured);
@@ -772,7 +912,7 @@ diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth
 new file mode 100644
 --- /dev/null
 +++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroupStore.java
-@@ -0,0 +1,180 @@
+@@ -0,0 +1,187 @@
 +package io.cattle.platform.iaas.api.auth.localrbac;
 +
 +import io.cattle.platform.api.auth.Identity;
@@ -789,6 +929,13 @@ new file mode 100644
 +public class LocalGroupStore extends AbstractJooqDao {
 +    @PostConstruct
 +    public void init() {
++        if (CustomizationConfig.CURRENT.enabled("SCHEMA_MIGRATIONS_ENABLED")) {
++            Connection connection = getConfiguration().connectionProvider().acquire();
++            try { CommunitySchemaMigrations.apply(connection); }
++            catch (SQLException error) { throw new IllegalStateException("Community schema migration refused", error); }
++            finally { getConfiguration().connectionProvider().release(connection); }
++            return;
++        }
 +        create().execute("CREATE TABLE IF NOT EXISTS local_rbac_group (id VARCHAR(36) PRIMARY KEY, name VARCHAR(128) NOT NULL UNIQUE, revision BIGINT NOT NULL DEFAULT 1) ENGINE=InnoDB");
 +        create().execute("CREATE TABLE IF NOT EXISTS local_rbac_member (group_id VARCHAR(36) NOT NULL, account_id BIGINT NOT NULL, PRIMARY KEY(group_id,account_id), KEY(account_id)) ENGINE=InnoDB");
 +        create().execute("CREATE TABLE IF NOT EXISTS local_rbac_grant (group_id VARCHAR(36) NOT NULL, project_id BIGINT NOT NULL, role VARCHAR(16) NOT NULL, PRIMARY KEY(group_id,project_id)) ENGINE=InnoDB");

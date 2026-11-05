@@ -65,6 +65,11 @@ public class ConfigurationContract {
             check(new CustomizationConfig(logout).enabled("OIDC_FEDERATED_LOGOUT_ENABLED")==((bits&3)==3));
         }
         invalid=base();invalid.put("RANCHER_OIDC_FEDERATED_LOGOUT_ENABLED","yes");rejects(invalid);
+        check(!new CustomizationConfig(base()).enabled("SCHEMA_MIGRATIONS_ENABLED"));
+        Map<String,String> schema=base();schema.put("RANCHER_SCHEMA_MIGRATIONS_ENABLED","true");
+        check(new CustomizationConfig(schema).enabled("SCHEMA_MIGRATIONS_ENABLED"));
+        schema.put("RANCHER_CUSTOMIZATION_ENABLED","false");check(!new CustomizationConfig(schema).enabled("SCHEMA_MIGRATIONS_ENABLED"));
+        schema=base();schema.put("RANCHER_SCHEMA_MIGRATIONS_ENABLED","yes");rejects(schema);
         Map<String,String> secret=base();secret.put("RANCHER_OIDC_CLIENT_SECRET","sentinel-secret-never-public");
         check(!new CustomizationConfig(secret).publicConfig().toString().contains("sentinel-secret"));
         System.out.println(checks+" configuration assertions passed across 64 combinations");

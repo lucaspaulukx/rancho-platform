@@ -9,7 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def git(folder, *args, check=True):
-    result = subprocess.run(['git', '-C', str(folder), *args], capture_output=True, check=False)
+    # Cattle includes deep Java packages; default Git-for-Windows limits can
+    # silently leave a nested checkout incomplete. Apply consistently per call.
+    result = subprocess.run(['git', '-c', 'core.longpaths=true', '-C', str(folder), *args], capture_output=True, check=False)
     if check and result.returncode:
         raise RuntimeError('Git operation failed; inspect the checkout locally.')
     return result

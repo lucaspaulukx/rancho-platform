@@ -7,9 +7,24 @@ from pathlib import Path
 import re
 import secrets
 import subprocess
+import time
 
 from migration.recovery import NODE, OWNER, ROOT, inspect, journal, restored_volumes
 from migration.tool import Database, MigrationError, run
+
+ORIGINAL = 'sha256:95b55603122c28baea4e8d94663aa34ad770bbc624a9ed6ef986fb3ea5224d91'
+
+
+def authentication_probe(anchor, credentials, expected_environments, *, local_only=False):
+    private = {**credentials, 'expectedEnvironments': expected_environments, 'localOnly': local_only}
+    program = (ROOT / 'engine-probe.cjs').read_text(encoding='utf-8')
+    probe = subprocess.run(['docker', 'exec', '-i', anchor, 'node', '-e', program],
+                           input=json.dumps(private).encode(), capture_output=True, timeout=480)
+    try:
+        outcome = json.loads(probe.stdout)
+    except ValueError:
+        raise MigrationError('Recovered authentication probe failed without a valid safe report.') from None
+    return probe.returncode, outcome
 
 
 def isolated_shape(container, anchor_id, allowed_volumes):
@@ -22,14 +37,15 @@ def isolated_shape(container, anchor_id, allowed_volumes):
         raise MigrationError('Recovered engine references unowned storage.')
 
 
-def rehearse_engines(directory, password, credentials):
+def rehearse_engines(directory, password, credentials, *, target_image=None, original_twenty=False,
+                     schema_migrations=None, _after_probe=None, probe_oidc=True):
     directory = Path(directory)
     label = secrets.token_hex(16)
     containers = []
     outcome = None
 
-    def create(args, environment=None):
-        name = 'rancher-recovery-engine-' + secrets.token_hex(8)
+    def create(args, environment=None, prefix='rancher-recovery-engine-'):
+        name = prefix + secrets.token_hex(8)
         command = ['docker', 'create', '--name', name, '--label', OWNER + '=' + label,
                    '--log-driver', 'none', '--memory', '2g', *args]
         result = subprocess.run(command, capture_output=True, env=environment, timeout=120)
@@ -52,6 +68,36 @@ def rehearse_engines(directory, password, credentials):
             if anchor_state['HostConfig']['NetworkMode'] != 'none' or anchor_state['HostConfig'].get('PortBindings') or anchor_state['Mounts']:
                 raise MigrationError('Unexpected anchor networking/storage.')
             copies = {}
+            if original_twenty:
+                # Test-only transformation on authenticated, newly restored owned volumes.
+                # Never accepts a source database/container connection.
+                args = ['--network', 'container:' + anchor]
+                for original, name in zip(metadata['volumes'], volumes):
+                    if original['role'] == 'rancher':
+                        args += ['--mount', 'type=volume,src=' + name + ',dst=' + original['destination']]
+                script = 'mkdir -p /var/run/mysqld; chown mysql:mysql /var/run/mysqld; exec mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=127.0.0.1 --skip-slave-start --event-scheduler=OFF --innodb-buffer-pool-size=64M --log-error=/tmp/mysql.log'
+                prepared = create([*args, '--entrypoint', '/bin/sh', metadata['sources']['rancher']['Image'], '-c', script], prefix='rancher-rehearsal-prepare-')
+                isolated_shape(inspect(prepared), anchor, set(volumes))
+                run(['start', prepared])
+                db_name = inspect(prepared)['Name'].lstrip('/')
+                for attempt in range(60):
+                    try:
+                        run(['exec', prepared, 'mysqladmin', '--user=root', 'ping'], timeout=5)
+                        break
+                    except MigrationError:
+                        if attempt == 59: raise
+                        time.sleep(1)
+                from migration.test_original_rehearsal import original_twenty_environments
+                from migration.tool import preflight
+                original_twenty_environments(Database(db_name))
+                metadata['databasePreflight'] = preflight(Database(db_name), check_tables=True)
+                run(['stop', '--time', '120', prepared], timeout=150)
+                from migration.recovery import require_stopped_cleanly
+                require_stopped_cleanly(inspect(prepared)['State'])
+                assert inspect(prepared)['Config']['Labels'].get(OWNER) == label
+                run(['rm', '-v', prepared])
+                containers.remove(prepared)
+                journal(directory, 'original20-copy-prepared', environments=20)
             for role in ('keycloak', 'rancher'):
                 source = metadata['sources'][role]
                 environment = dict(item.split('=', 1) for item in source['Config']['Env'] if '=' in item)
@@ -64,6 +110,8 @@ def rehearse_engines(directory, password, credentials):
                                        RANCHER_OIDC_CALLBACK='http://localhost:18090/oidc/callback',
                                        RANCHER_OIDC_ONLY='false', RANCHER_OIDC_AUTO_LOGIN='false',
                                        CATTLE_SERVER_IP='127.0.0.1')
+                    if schema_migrations is not None:
+                        environment['RANCHER_SCHEMA_MIGRATIONS_ENABLED'] = str(schema_migrations).lower()
                     command = source['Config'].get('Cmd') or []
                 args = ['--network', 'container:' + anchor]
                 for key in environment:
@@ -85,22 +133,35 @@ def rehearse_engines(directory, password, credentials):
                     command = ['-c', 'printf "127.0.0.1 %s\\n" "$(hostname)" >> /etc/hosts; exec /usr/bin/entry "$@"',
                                'recovered-engine', *command]
                 # Explicitly mount all declared volumes, preventing anonymous unintended state.
-                image = source['Image']
+                image = target_image if role == 'rancher' and target_image else source['Image']
+                if not re.fullmatch(r'sha256:[a-f0-9]{64}', image):
+                    raise MigrationError('Recovered image must be selected by immutable ID.')
                 run(['image', 'inspect', image])
+                if role == 'rancher' and original_twenty and image != ORIGINAL:
+                    run(['image', 'inspect', ORIGINAL])
+                    previous = create([*args, ORIGINAL, *command], environment={**os.environ, **environment})
+                    isolated_shape(inspect(previous), anchor, set(volumes))
+                    run(['start', previous])
+                    code, baseline = authentication_probe(anchor, credentials, 20, local_only=True)
+                    if code or baseline.get('status') != 'passed':
+                        journal(directory, 'original-engine-login-failed', probe=baseline)
+                        raise MigrationError('Original engine baseline failed; upgrade prohibited.')
+                    if Database(previous).query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='cattle' AND table_name LIKE 'local_rbac_%';") != '0':
+                        raise MigrationError('Original fixture unexpectedly contains custom schema.')
+                    journal(directory, 'original-engine-baseline-passed', probe=baseline)
+                    run(['stop', '--time', '120', previous], timeout=150)
+                    from migration.recovery import require_stopped_cleanly
+                    require_stopped_cleanly(inspect(previous)['State'])
+                    assert inspect(previous)['Config']['Labels'].get(OWNER) == label
+                    run(['rm', '-v', previous])
+                    containers.remove(previous)
                 container_id = create([*args, image, *command], environment={**os.environ, **environment})
                 isolated_shape(inspect(container_id), anchor, set(volumes))
                 copies[role] = container_id
                 run(['start', container_id])
             journal(directory, 'isolated-engines-started', sourceStorageMounted=False, publishedPorts=0)
-            private = {**credentials, 'expectedEnvironments': metadata['databasePreflight']['inventoryCounts']['environments']}
-            program = (ROOT / 'engine-probe.cjs').read_text(encoding='utf-8')
-            probe = subprocess.run(['docker', 'exec', '-i', anchor, 'node', '-e', program],
-                                   input=json.dumps(private).encode(), capture_output=True, timeout=480)
-            try:
-                outcome = json.loads(probe.stdout)
-            except ValueError:
-                raise MigrationError('Recovered authentication probe failed without a valid safe report.') from None
-            if probe.returncode or outcome.get('status') != 'passed':
+            code, outcome = authentication_probe(anchor, credentials, metadata['databasePreflight']['inventoryCounts']['environments'], local_only=not probe_oidc)
+            if code or outcome.get('status') != 'passed':
                 # Probe stage/check labels come only from the packaged public probe.
                 journal(directory, 'isolated-login-failed', probe=outcome)
                 raise MigrationError('Recovered authentication failed; see safe journal stage. No cutover.')
@@ -114,6 +175,8 @@ def rehearse_engines(directory, password, credentials):
                 if expected is not None and db.query('CHECKSUM TABLE cattle.`' + table + '` EXTENDED;').split('\t')[-1] != expected:
                     raise MigrationError('Recovered direct/group grants changed; no migration acceptance.')
             journal(directory, 'isolated-login-passed', probe=outcome, inventoryAndGrantCountsPreserved=True)
+            if _after_probe:
+                _after_probe(copies, anchor, metadata, label)
         finally:
             failures = 0
             for container_id in reversed(containers):
