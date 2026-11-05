@@ -15,6 +15,8 @@ def main():
                                       'deactivate-local', 'deactivate-oidc', 'expire-local', 'expire-oidc'))
     parser.add_argument('--expect-legacy', action='store_true')
     parser.add_argument('--frontend-probe', action='store_true')
+    parser.add_argument('--service-browser', action='store_true')
+    parser.add_argument('--scheduler-relay', action='store_true')
     parser.add_argument('--payload-transport', action='store_true')
     parser.add_argument('--console-proxy', action='store_true')
     parser.add_argument('--service-scale', type=int, default=1)
@@ -42,8 +44,8 @@ def main():
             factory = lambda admin: expiry_factory(admin, oidc=kind == 'oidc', role='member')
         else:
             factory = identity_factory(mode, oidc=kind == 'oidc', role='member')
-    probe.REPORT = probe.ROOT / ('console/host-stream-' + args.mode + ('-lease' if args.hold_seconds else '') + ('-service' if args.service_metrics else '') + ('-proxy' if args.console_proxy else '') + ('-payload' if args.payload_transport else '') + ('-browser' if args.frontend_probe else '') + ('-scale' + str(args.service_scale) if args.service_scale != 1 else '') + ('-off' if args.expect_legacy else '-on') + '-results.json')
-    status = probe.main(identity_factory=factory, hold_seconds=args.hold_seconds, service_metrics=args.service_metrics, console_proxy=args.console_proxy, service_scale=args.service_scale, payload_transport=args.payload_transport, frontend_probe=args.frontend_probe)
+    probe.REPORT = probe.ROOT / ('console/host-stream-' + args.mode + ('-lease' if args.hold_seconds else '') + ('-service' if args.service_metrics else '') + ('-proxy' if args.console_proxy else '') + ('-payload' if args.payload_transport else '') + ('-browser' if args.frontend_probe else '') + ('-real-service-browser' if args.service_browser else '') + ('-relay-setup' if args.scheduler_relay else '') + ('-scale' + str(args.service_scale) if args.service_scale != 1 else '') + ('-off' if args.expect_legacy else '-on') + '-results.json')
+    status = probe.main(identity_factory=factory, hold_seconds=args.hold_seconds, service_metrics=args.service_metrics, console_proxy=args.console_proxy, service_scale=args.service_scale, payload_transport=args.payload_transport, frontend_probe=args.frontend_probe, service_browser=args.service_browser, scheduler_relay=args.scheduler_relay)
     report = json.loads(probe.REPORT.read_text(encoding='utf-8'))
     if args.expect_legacy:
         reproduced = report.get('cleanupComplete') and report.get('watchedSessionRevoked') and report.get('controlSessionRevoked') and report.get('allOwnStreamsReceivedBeforeRevocation') and report.get('protectedHttpAfterRevocation') == 401 and all(

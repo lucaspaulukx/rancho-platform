@@ -5,19 +5,20 @@ import ws_revocation as lab
 from legacy_guest import run_guest
 ROOT=lab.ROOT
 STATE=ROOT/'console/scheduler-heartbeat-fixture.json'
-assert all(arg in ('--global','--legacy-go','--empty-ping','--scheduler-network','--guest-bridge','--guest-only','--preflight-only','--mss-1000','--relay-control') for arg in sys.argv[1:])
-GLOBAL='--global' in sys.argv[1:]
-LEGACY='--legacy-go' in sys.argv[1:]
-EMPTY='--empty-ping' in sys.argv[1:]
-SCHEDULER_NET='--scheduler-network' in sys.argv[1:]
-GUEST_BRIDGE='--guest-bridge' in sys.argv[1:]
+ARGS=sys.argv[1:] if __name__=='__main__' else []
+assert all(arg in ('--global','--legacy-go','--empty-ping','--scheduler-network','--guest-bridge','--guest-only','--preflight-only','--mss-1000','--relay-control') for arg in ARGS)
+GLOBAL='--global' in ARGS
+LEGACY='--legacy-go' in ARGS
+EMPTY='--empty-ping' in ARGS
+SCHEDULER_NET='--scheduler-network' in ARGS
+GUEST_BRIDGE='--guest-bridge' in ARGS
 CONTAINER_NET=SCHEDULER_NET or GUEST_BRIDGE
 assert not (SCHEDULER_NET and GUEST_BRIDGE)
-GUEST_ONLY='--guest-only' in sys.argv[1:]
-PREFLIGHT='--preflight-only' in sys.argv[1:]
-RELAY='--relay-control' in sys.argv[1:]
+GUEST_ONLY='--guest-only' in ARGS
+PREFLIGHT='--preflight-only' in ARGS
+RELAY='--relay-control' in ARGS
 assert not RELAY or (SCHEDULER_NET and GUEST_ONLY and GLOBAL and not PREFLIGHT)
-MSS=1000 if '--mss-1000' in sys.argv[1:] else 0
+MSS=1000 if '--mss-1000' in ARGS else 0
 assert MSS==0 or (not LEGACY and SCHEDULER_NET and not PREFLIGHT)
 assert not GUEST_ONLY or CONTAINER_NET
 assert not PREFLIGHT or (CONTAINER_NET and GUEST_ONLY)
