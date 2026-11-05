@@ -181,3 +181,10 @@ Baseline própria confirmou que readonly conseguia ler e reutilizar token admin 
 
 Java155/129 (off/on/customização off), Linux628/72+TypeScript/Vite e build backend limpo aprovados. Compose moderno habilita redação por default substituível false; base continua false. Histórico/backups continuam sensíveis e rollback/off reexpõe valores anteriores; não houve saneamento destrutivo. Ver82 para limites e tentativas falhas preservadas. Próximo: contas técnicas/API keys em streams e demais gates48.
 
+
+## Checkpoint83 — guarda de API keys em validação (05/11/2026)
+
+Baseline pessoal/compartilhada confirmou streams válidos após desativação da chave. Implementação opcional false liga prova à credencial nativa realmente comparada, owner/scope/host/rota/role e teto configurável de socket30–86400s; marca agente separadamente, impede downgrade legado quando on e protege lotes/negociação. Java173 configuração/46 envelope/19 callback, Go upstream/novos/race, Linux628/72+TypeScript/Vite e build limpo aprovados.
+
+Novo artefato passou desativação pessoal+compartilhada em3 transportes pelo18090 com HTTP401, novosWS401,1008/zero dados e controles/cleanup. Grupo OIDC está em execução; conta/cookie/lease/lote e off do mesmo artefato ainda pendentes. Flag moderna não ativada por default; runtime local on somente para ensaios. Ver83; não encerrar OBS02/RBAC05/48 por esse recorte parcial.
+

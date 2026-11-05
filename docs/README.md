@@ -147,3 +147,5 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 - [Negociação de métricas grandes e conexões ociosas](81-metrics-payload-transport.md).
 
 - [Proteção de credenciais na auditoria](82-audit-credential-redaction.md).
+
+- [Revogação de streams de chaves de API](83-api-key-stream-guard.md).

@@ -5,6 +5,7 @@ import { Modal, Tabs, Alert } from './ui';
 import { useState } from 'react';
 import { version } from '../../package.json';
 const labels: Record<string, string> = {
+  API_KEY_STREAM_GUARD_ENABLED: 'Revalidação de chaves de API em streams',
   AUDIT_CREDENTIAL_REDACTION_ENABLED: 'Proteção de credenciais na auditoria',
   CUSTOMIZATION_ENABLED: 'Customização da instância',
   SCHEMA_MIGRATIONS_ENABLED: 'Versionamento das tabelas da comunidade',

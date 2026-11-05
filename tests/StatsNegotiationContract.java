@@ -23,13 +23,13 @@ public class StatsNegotiationContract {
     }
     static void reset(String mode) {
         child = new HashMap<>(); child.put("rancherStream",Collections.singletonMap("mode",mode));
-        if ("ui".equals(mode)) child.put("rancherStreamProof","public-compact-proof");
+        if ("ui".equals(mode) || "apikey".equals(mode)) child.put("rancherStreamProof","public-compact-proof");
         root = child; envelope = null;
     }
     public static void main(String[] args) {
         check(CustomizationConfig.CURRENT.enabled("HOST_STREAM_SESSION_GUARD_ENABLED"));
-        for (String variant : new String[]{"direct","service","project","technical"}) {
-            reset("technical".equals(variant) ? "technical" : "ui");
+        for (String variant : new String[]{"direct","service","project","technical","apikey"}) {
+            reset("technical".equals(variant) ? "technical" : "apikey".equals(variant) ? "apikey" : "ui");
             if ("service".equals(variant) || "project".equals(variant)) {
                 root = Collections.<String,Object>singletonMap(variant,Collections.singletonList(Collections.singletonMap("token","child")));
             }
@@ -38,7 +38,7 @@ public class StatsNegotiationContract {
             check(Boolean.TRUE.equals(envelope.get("payload")) && envelope.size()==2);
             Map<?,?> negotiation = (Map<?,?>)envelope.get("rancherNegotiation");
             check("/v1/containerstats/service/".equals(negotiation.get("path")));
-            check(("technical".equals(variant) ? "technical" : "ui").equals(negotiation.get("mode")));
+            check(("technical".equals(variant) ? "technical" : "apikey".equals(variant) ? "apikey" : "ui").equals(negotiation.get("mode")));
             check("technical".equals(variant) ? !negotiation.containsKey("proof") : "public-compact-proof".equals(negotiation.get("proof")));
             check(!envelope.toString().contains(original));
             check(original.equals(access.getPayload()));

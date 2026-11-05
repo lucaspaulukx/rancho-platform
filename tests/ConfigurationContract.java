@@ -77,6 +77,21 @@ public class ConfigurationContract {
             check(new CustomizationConfig(audit).enabled("AUDIT_CREDENTIAL_REDACTION_ENABLED")==((bits&3)==3));
         }
         invalid=base();invalid.put("RANCHER_AUDIT_CREDENTIAL_REDACTION_ENABLED","yes");rejects(invalid);
+        check(!new CustomizationConfig(base()).enabled("API_KEY_STREAM_GUARD_ENABLED"));
+        check(new CustomizationConfig(base()).apiKeyStreamMaxSeconds()==86400);
+        for(int bits=0;bits<8;bits++) {
+            Map<String,String> api=base();api.put("RANCHER_API_KEY_STREAM_GUARD_ENABLED","true");
+            api.put("RANCHER_CUSTOMIZATION_ENABLED",String.valueOf((bits&1)!=0));
+            api.put("RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED",String.valueOf((bits&2)!=0));
+            api.put("RANCHER_HOST_STREAM_PROXY_PROTOCOL","1");
+            if((bits&4)!=0) api.put("RANCHER_API_KEY_STREAM_PROXY_PROTOCOL","1");
+            if((bits&1)!=0 && (bits&6)!=6) rejects(api);
+            else check(new CustomizationConfig(api).enabled("API_KEY_STREAM_GUARD_ENABLED")==((bits&1)!=0));
+        }
+        for(String bad:new String[]{"0","29","86401","01"," 30","no","99999999999"}) {
+            invalid=base();invalid.put("RANCHER_API_KEY_STREAM_MAX_SECONDS",bad);rejects(invalid);
+        }
+        invalid=base();invalid.put("RANCHER_API_KEY_STREAM_GUARD_ENABLED","yes");rejects(invalid);
         check(!new CustomizationConfig(base()).enabled("HOST_STREAM_SESSION_GUARD_ENABLED"));
         Map<String,String> hostStreams=base();hostStreams.put("RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED","true");
         rejects(hostStreams);

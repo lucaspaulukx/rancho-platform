@@ -45,7 +45,7 @@ class Probe:
                 try: self.events.put(json.loads(line))
                 except ValueError: self.events.put({'type': 'probe-error'})
         threading.Thread(target=reader, daemon=True).start()
-        self.send({'url': url, 'session': next(c.value for c in session.cookies if c.name == 'token'), 'payload': access.get('payload'),
+        self.send({'url': url, 'session': next((c.value for c in session.cookies if c.name == 'token'), ''), 'payload': access.get('payload'),
                    'mode': mode, 'marker': marker, 'dockerId': instance['externalId'], 'instanceId': instance['id'],
                    'instanceUuid': instance['uuid'],
                    'runtimeModules': str(runtime / 'node_modules'), 'maxDurationMs': max_duration_ms, 'expectedPort': proxy_port})
@@ -149,7 +149,22 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
             result.setdefault('metadataResponses', {})[mode] = session.response_metadata
             assert 'no-store' in {v.strip().lower() for v in session.response_metadata['cacheControl'].split(',')}
             result.setdefault('negotiatedPayloadChars', {})[mode] = len(value['payload'])
-        if runtime_guard:
+        if runtime_guard and getattr(session,'technical_stream',False):
+            def technical_decode(raw): return json.loads(base64.urlsafe_b64decode(raw.split('.')[1]+'==='))
+            outer = technical_decode(value.get('payload') or value['token'])
+            sources = [technical_decode(item['token']) for item in outer['service']] if mode == 'service-metrics' else [outer]
+            assert len(sources) == (service_scale if mode=='service-metrics' else 1)
+            for source in sources:
+                binding = source['rancherStream']
+                assert binding['mode'] == ('apikey' if result.get('apiKeyGuardEnabled') else 'technical')
+                if result.get('apiKeyGuardEnabled'):
+                    assert source.get('rancherStreamProof') and re.fullmatch('[a-f0-9]{64}',binding['sessionHash'])
+                    assert binding['tokenId'] == session.credential_id and binding['userId'] == session.credential_owner
+                    assert binding['projectId']=='12' and binding['hostId']=='1'
+                    result['apiKeyBindingChecked'] = True
+                    compact = technical_decode(source['rancherStreamProof'])
+                    result.setdefault('originalLeaseSeconds',[]).append(int(compact['exp'])-int(compact['iat']))
+        if runtime_guard and not getattr(session,'technical_stream',False):
             def decode(raw): return json.loads(base64.urlsafe_b64decode(raw.split('.')[1] + '==='))
             outer = decode(value['payload'] if negotiated else value['token'])
             if negotiated:
@@ -177,7 +192,9 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
     try:
         import urllib.request
         opener = shared.lab.loopback_opener()
-        runtime_guard = json.load(opener.open('http://localhost:18080/community/host-stream-guard', timeout=5))['enabled']
+        capability = json.load(opener.open('http://localhost:18080/community/host-stream-guard', timeout=5))
+        runtime_guard = capability['enabled']
+        result['apiKeyGuardEnabled'] = capability.get('apiKeyGuardEnabled',False)
         image = subprocess.check_output(['docker', 'inspect', '--format', '{{.Image}}', 'rancher16-rbac-lab'], text=True).strip()
         assert re.fullmatch(r'sha256:[a-f0-9]{64}', image)
         result['runtimeImage'] = image
@@ -216,7 +233,7 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
             stage(mode + '-before-frame')
             probe.wait('before')
         result['allOwnStreamsReceivedBeforeRevocation'] = True
-        if runtime_guard:
+        if runtime_guard and (not getattr(watched,'technical_stream',False) or result.get('apiKeyGuardEnabled')):
             for mode, probe in probes.items():
                 for variant in ('signature', 'proof-only', 'scope'):
                     probe.send({'command': 'negative-handshake', 'variant': variant})
@@ -256,6 +273,14 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
                 assert event['open'] is True
             result['allThreeStreamsLivePastOriginalProofExpiry'] = True
             result['heldSeconds'] = hold_seconds
+        if identity and identity.get('before_invalidate'):
+            stage('shared-key-group-control')
+            identity['before_invalidate']()
+            for mode, active_probe in probes.items():
+                active_probe.send({'command':'watch-lease'})
+                active_probe.wait('watching-lease')
+                assert active_probe.wait('after-lease')['open']
+            result['sharedKeyIndependentOfHumanGroupWithLiveStreams'] = True
         stage('invalidate')
         if identity: identity['invalidate']()
         else: assert watched.request('/v2-beta/token/current', None, 'DELETE')[0] in (200, 204)
@@ -335,10 +360,13 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
             for name, session in [('watched', watched)]:
                 if session:
                     try:
-                        if session.request('/v2-beta/projects')[0] != 401:
-                            session.request('/v2-beta/token/current', None, 'DELETE')
-                        result[name + 'SessionRevoked'] = session.request('/v2-beta/projects')[0] == 401
-                        if not result[name + 'SessionRevoked']: result['status'] = 'failed'
+                        if getattr(session,'technical_stream',False):
+                            result['watchedUsedApiKeyNotUiSession'] = True
+                        else:
+                            if session.request('/v2-beta/projects')[0] != 401:
+                                session.request('/v2-beta/token/current', None, 'DELETE')
+                            result[name + 'SessionRevoked'] = session.request('/v2-beta/projects')[0] == 401
+                            if not result[name + 'SessionRevoked']: result['status'] = 'failed'
                     except Exception: result[name + 'SessionRevoked'] = False; result['status'] = 'failed'
             if identity:
                 try:

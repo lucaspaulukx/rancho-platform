@@ -1,0 +1,23 @@
+# 83 — Revogação de streams de chaves de API
+
+Plano antes da implementação. Guarda79/81 protege sessão UI; modo technical ainda conserva vida útil legada do JWT do host e dispensa callback contínuo. HTTP nativo já confere revogação da chave. Não assumir que isso fecha socket existente nem impede novo handshake com capacidade emitida antes.
+
+## Tasks e gates
+
+1. Baseline local com chave própria de conta e chave própria de environment, conta/grupo/container próprios. Abrir logs/exec/métricas pelo proxy18090; desativar somente a chave, comparar HTTP, novos sockets e dados posteriores. Controles admin independentes e cleanup exato; credenciais somente em memória, IDs/nomes de recursos no manifesto.
+2. Definir separação entre chave pessoal (permissões atuais da conta) e chave compartilhada do environment (independente de associação de quem criou). Capturar credencial que realmente autenticou no lookup nativo bem-sucedido; header presente, cookie antigo ou OAuth-Basic não podem classificar/autorizá-la incorretamente. Não impor conta humana ao agente técnico interno sem contrato.
+3. Flag independente e compatibilidade explícita do proxy. Prova compacta assinada liga id/versão ou hash da credencial, conta/scope, host/environment/rota, papel e validade; não incluir publicValue/secretValue/Basic no JWT/callback/log. Callback confere credencial ativa/não removida/expiração, conta e target ativos e papel atual. Renovação privada limitada, modos desconhecidos negados.
+4. Contratos Java/Go/race, lotes/payload e flags cruzadas; testes reais off/on no mesmo artefato: chave pessoal+compartilhada, revogação/remoção de grant/desativação da conta/expiração conforme contrato, cookie antigo e credenciais selecionadas. Lease longa/idle, novosWS negados,1008/zero dados posteriores e controles positivos. Não aumentar timeouts nem marcar falha do host como revogação correta.
+5. Regressão UI e logs/exec/métricas, build limpo de patches, cleanup, documentação e commit local. Ativar moderno somente depois do aceite; rollback false documentado. Carga/HA e política final de expiração pertencem aos demais gates48.
+
+## Implementação em validação
+
+Baselines próprias nas chaves pessoal e compartilhada confirmaram HTTP negado após desativação, mas novosWS101 e dados posteriores nos3 streams, com controles saudáveis e cleanup completo. Primeira tentativa do probe recusou sessão vazia pelo seu contrato UI; passou a omitir Cookie quando usa somente capacidade de host, sem afrouxar validações de rota/assinatura.
+
+Nova flag RANCHER_API_KEY_STREAM_GUARD_ENABLED=false exige guarda79 ligada e marcador/capacidade dedicados1. AuthDao marca no ApiRequest apenas a credencial de autenticação efetivamente comparada com sucesso e conta ativa. Apenas lookup selecionado BasicAuth com credential.kind=apiKey gera modo apikey; agente interno conserva modo técnico explicitamente marcado agentApiKey. Quando on, tokens técnicos anteriores sem esse vínculo são recusados, evitando downgrade de chaves emitidas antes da ativação. Header sozinho não autentica.
+
+Prova compacta liga ID de credencial/owner, fingerprint SHA256 de ID+owner+UUID+publicValue+hash armazenado, kind da conta, host/environment/path/role e validade máxima do socket. Valores originais não saem em claims/callbacks. Chave pessoal acompanha role atual; compartilhada exige owner project igual ao target e não depende de grupo humano. RANCHER_API_KEY_STREAM_MAX_SECONDS aceita30–86400, default86400; limita socket/prova renovável, não inventa expiração nativa da chave (schema credential não tem coluna de expiração). Renovação privada continua dentro desse teto. Callback confere estado/remoção/fingerprint/conta/host/project/role. Negociação de métricas carrega modo/prova correspondentes.
+
+Contratos intermediários:173 configuração,46 envelope,19 validações do callback API key; Go upstream e race passaram incluindo closure de input/output/idle/metrics no novo modo e limites de agente/downgrade. Artefato e matriz final on/off ainda em validação. Não ativar default moderno nem declarar RBAC05/OBS02 completo neste checkpoint.
+
+Checkpoint físico inicial: artefato novo passou desativação de chave pessoal e compartilhada nos3 transportes pelo proxy18090: HTTP401, novosWS401, fechamento1008/zero dados posteriores e controles positivos; cleanup completo. Casos de grupo/OIDC/conta/cookie/lease/lote e comparação off no mesmo artefato continuam pendentes. Frontend628/72+TypeScript/Vite e build limpo do índice+patches aprovados; flag moderna permanece sem default on. Runtime local recebeu on apenas para ensaios. Não confundir baseline antiga com comparação off do novo artefato.
