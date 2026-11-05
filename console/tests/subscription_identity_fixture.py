@@ -17,7 +17,8 @@ ACCOUNT_STATE = ROOT / 'console/local-account-contract-fixture.json'
 OWN_STATE = ROOT / 'console/subscription-identity-fixture.json'
 
 
-def identity_factory(mode, *, oidc=False):
+def identity_factory(mode, *, oidc=False, role="readonly"):
+    assert role in ("readonly", "member")
     assert mode in ('grant', 'deactivate')
 
     def create(admin):
@@ -123,7 +124,7 @@ def identity_factory(mode, *, oidc=False):
                 ordinary.login(name, password)
             assert ordinary.api('projects')['data'] == []
             numeric = account['id'].removeprefix('1a'); assert numeric.isdigit()
-            group = admin.api('localGroups', {'name': name + '-stream-group', 'members': [numeric], 'grants': {'12': 'readonly'}})
+            group = admin.api('localGroups', {'name': name + '-stream-group', 'members': [numeric], 'grants': {'12': role}})
             state['streamGroup'] = group['id']; save()
             assert [v['id'] for v in ordinary.api('projects')['data']] == ['1a12']
             def renew_session(): return login_session()
@@ -137,7 +138,7 @@ def identity_factory(mode, *, oidc=False):
                 if current['state'] == 'inactive': account_action('activate')
             return {'session': ordinary, 'browser_credentials': {'username': name, 'password': password}, 'renew_session': renew_session, 'invalidate': invalidate, 'cleanup': cleanup,
                     'prepare_cleanup': prepare_cleanup, 'protected': '/v2-beta/projects/1a12',
-                    'scope': ('own ordinary OIDC identity: ' if oidc else 'own ordinary local identity: ') + mode + '; readonly group only in UI-OPS-LAB; subscribe only'}
+                    'scope': ('own ordinary OIDC identity: ' if oidc else 'own ordinary local identity: ') + mode + '; ' + role + ' group only in UI-OPS-LAB'}
         except Exception:
             cleanup()
             raise

@@ -27,6 +27,6 @@ cp /lab/web/* "$WAR/"
 for xml in "$WAR/WEB-INF/web.xml" "$WAR/WEB-INF/content/WEB-INF/web.xml"; do
     [ ! -f "$xml" ] || sed -i 's@</web-app>@<servlet><servlet-name>LocalOidc</servlet-name><servlet-class>io.cattle.platform.iaas.api.auth.localrbac.OidcServlet</servlet-class></servlet><servlet-mapping><servlet-name>LocalOidc</servlet-name><url-pattern>/oidc/*</url-pattern></servlet-mapping></web-app>@' "$xml"
     [ ! -f "$xml" ] || sed -i 's@</web-app>@<servlet><servlet-name>HostStreamGuard</servlet-name><servlet-class>io.cattle.platform.iaas.api.auth.localrbac.HostStreamGuardServlet</servlet-class></servlet><servlet-mapping><servlet-name>HostStreamGuard</servlet-name><url-pattern>/host-stream-session/*</url-pattern></servlet-mapping></web-app>@' "$xml"
-    [ ! -f "$xml" ] || sed -i 's@/static,/ping,/healthcheck@/static,/ping,/healthcheck,/oidc/,/host-stream-session/,/local-,/no-access.@' "$xml"
+    [ ! -f "$xml" ] || sed -i 's@/static,/ping,/healthcheck@/static,/ping,/healthcheck,/oidc,/host-stream-session,/local-,/no-access.@' "$xml"
 done
 sed -i 's@<script src="/assets/ui-@<script src="/local-rbac-templates.js"></script><script src="/native-routes.js"></script><script src="/local-rbac-extension.js"></script><script src="/assets/ui-@' "$WAR/index.html"

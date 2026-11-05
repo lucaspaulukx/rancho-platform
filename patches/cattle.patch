@@ -374,7 +374,7 @@ index e017f43..78462b3 100644
      BasicAuthImpl BasicAuthImpl() {
          return new BasicAuthImpl();
 diff --git a/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties b/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties
-index 05685f7..0933524 100644
+index 05685f7..36a8c16 100644
 --- a/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties
 +++ b/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties
 @@ -48,7 +48,7 @@ default.services.domain=rancher.io
@@ -382,7 +382,7 @@ index 05685f7..0933524 100644
  api.security.enabled=false
  
 -api.ignore.paths=/static,/ping,/healthcheck
-+api.ignore.paths=/static,/ping,/healthcheck,/oidc
++api.ignore.paths=/static,/ping,/healthcheck,/oidc,/host-stream-session
  
  # 5 Minutes
  api.show.removed.for.seconds=-300

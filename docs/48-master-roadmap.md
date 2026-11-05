@@ -1,6 +1,6 @@
 # Roadmap mestre — Rancher Community Console
 
-Referência:05/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build605 testes/71 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
+Referência:05/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build608 testes/71 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
 
 ## Resultado esperado
 
@@ -145,4 +145,11 @@ Atualização79 baseline: host1h1 retomado sem novo registro; falha real em logs
 ## Checkpoint79 — implementação em validação (05/11/2026)
 
 Guarda opcional de logs/exec/métricas implementada em patches Cattle+proxy Go pinados; defaultfalse, prova compacta RS256, revalidação de sessão/conta/role/escopo, renovação privada e encerramento1008. Java143 configuração+26 regras+12 readiness+31 logout+10 writer; testes Go upstream/novos e race, frontend608/71+TypeScript e build Linux aprovados. Pacote limpo do índice clona/aplica/checka os dois upstreams e compila sem artefatos privados; testes Go não usam egress. Console nova publicada somente no laboratório. Backend de laboratório recebeu artefato novo com proteção off, sem alteração de schema. Matriz física on/off e identidades ainda em validação: primeiro off sofreu churn autônomo do scheduler1i956; guardar evidência e não afirmar aceite. OBS02, carga e demais gates48 permanecem abertos. Ver79 para detalhes/limites.
+
+
+## Checkpoint79 — primeiros controles físicos (05/11/2026)
+
+Baseline off repetido com3 transportes saudáveis confirmou entrega indevida após logout (novosWS101, logs17/exec1/métricas23), fixture/sessões limpas e sem churn nessa repetição. Nova imagem com guarda on passou admin:9 tentativas de assinatura/prova compacta/caminho401, HTTP401 após revogação, novosWS401,3 sockets1008 e zero dados posteriores com3 controles válidos. Remoção de grant de usuário local via grupo member também passou com HTTP404 e os mesmos controles, conta/grupo próprios removidos. OIDC, desativação, expiração e renovação longa continuam em execução/pendentes; não é fechamento de OBS02 nem do roadmap.
+
+A primeira tentativa on falhou fechada porque ApiRequestFilter usa a propriedade Archaius api.ignore.paths, não o parâmetro XML; servia indexHTML200 no callback. Corrigido o defaults.properties e prefixo sem slash final; matrix agora exige403JSON/no-store sem chave interna antes de criar fixtures. Remoções autônomas de scheduler e volumes-root associados são relatadas separadamente; preservação de serviços e containers/volumes de aplicação continua obrigatória. Baseline estrito anterior permanece falho, sem reescrever a evidência. Código/template de migração/DB não alterados por esta correção.
 

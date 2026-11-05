@@ -17,12 +17,29 @@ function decoded(buffer) {
   // Native exec uses base64; logs have a channel prefix followed by plain text.
   try { return Buffer.from(raw, 'base64').toString('utf8'); } catch { return raw; }
 }
-function openProbe() {
-  const next = new WebSocket(input.url, { headers: { Cookie: 'token=' + input.session },
+function openProbe(variant) {
+  const target = new URL(input.url);
+  let event = 'new-handshake';
+  if (variant) {
+    event = 'negative-' + variant;
+    const raw = target.searchParams.get('token');
+    const parts = raw.split('.');
+    if (variant === 'signature') {
+      parts[2] = (parts[2][0] === 'a' ? 'b' : 'a') + parts[2].slice(1);
+      target.searchParams.set('token', parts.join('.'));
+    } else if (variant === 'proof-only') {
+      const claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+      assert.equal(typeof claims.rancherStreamProof, 'string');
+      target.searchParams.set('token', claims.rancherStreamProof);
+    } else if (variant === 'scope') {
+      target.pathname = input.mode === 'logs' ? '/v1/exec' : '/v1/logs';
+    } else throw new Error('Invalid negative variant');
+  }
+  const next = new WebSocket(target.href, { headers: { Cookie: 'token=' + input.session },
     origin: 'http://localhost:18080', followRedirects: false, handshakeTimeout: 8000,
     perMessageDeflate: false, maxPayload: 1048576 });
-  next.on('unexpected-response', (_, response) => { emit({ type: 'new-handshake', status: response.statusCode }); response.destroy(); next.terminate(); });
-  next.on('open', () => { emit({ type: 'new-handshake', status: 101 }); next.terminate(); });
+  next.on('unexpected-response', (_, response) => { emit({ type: event, status: response.statusCode }); response.destroy(); next.terminate(); });
+  next.on('open', () => { emit({ type: event, status: 101 }); next.terminate(); });
   next.on('error', () => {});
 }
 inputLines.on('line', line => {
@@ -31,6 +48,7 @@ inputLines.on('line', line => {
     if (input) {
       if (message.command === 'finish') stop();
       else if (message.command === 'new-handshake') openProbe();
+      else if (message.command === 'negative-handshake') openProbe(message.variant);
       else if (message.command === 'send-after') {
         if (input.mode !== 'exec') throw new Error('Unexpected input mode');
         if (socket.readyState === WebSocket.OPEN) socket.send(Buffer.from(input.marker + '-after\n').toString('base64'));
