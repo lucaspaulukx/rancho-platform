@@ -1,3 +1,7 @@
+# Checkpoint — plano de acessos diretos (05/11/2026)
+
+Planner78 somente leitura/transaction consistente e plano AES-GCM:13 testes (grafo50×20), CLI real sem alteração da origem e fixture original20/3users/5grants→2grupos repetida3 restores aprovada. Fonte real tem só7 diretos adminglobais,0 propostas corretas. Nenhum apply/cutover disponível; Native setmembers exige owner direto, não remover o último no futuro. Próximo: grupos/API, matriz60 efetiva, cutover nativo/negação/revogação/rollback em cópia. Total53 testes Python no conjunto incluindo bootstrap; frontend605/71 e recorte77 permanecem. Roadmap48 ainda aberto.
+
 # Checkpoint — schema runtime e upgrade original20 (05/11/2026)
 
 Recorte77:9 JDBC reais e138 configuração/64 combinações;001 embarcada/versionada, flagfalse e checksum/lock/estrutura validados. Engine oficial original20→custom sobre mesmos volumes copiados passou login/OIDC/PKCE/zero acesso, restart idempotente, recusa de checksum inválido e rollback por snapshot original. Cleanup e origem IDs/HTTP preservados. SQL estava indevidamente ignorado: corrigido; helper Git trata caminhos longos e build limpo do índice+patch funciona sem artefatos privados. Frontend605/71 + TypeScript/Vite,40 testes Python e contratos Java12 readiness/31 logout/10 writer. Nova imagem validada em cópias; não habilitada na origem. Roadmap48 segue aberto; próximo RBAC03/grants e demais gates.

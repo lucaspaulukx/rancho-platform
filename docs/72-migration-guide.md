@@ -82,3 +82,5 @@ O laboratório comprova recuperação offline e esquema aditivo; o ensaio sinté
 ## Atualização de engine em cópia original20
 
 O [recorte77](77-runtime-schema-migration.md) agora comprova imagem oficial1.6.30→custom usando os mesmos volumes da cópia, migração runtime sob flag, restart, checksum divergente recusado e rollback por restauração correspondente com20 environments sintéticos. É evidência adicional ao banco72 e recuperação76, com isolamento de rede e cleanup. Não substitui ensaio do ambiente real, agentes/workloads/HA ou liberação do cutover. A origem do laboratório não teve a nova flag ativada por este teste.
+
+O [planejador78](78-direct-grants-to-groups.md) gera diff privado criptografado dos acessos diretos, sem alterar a origem nem inferir identidades por email. Coexistência/cutover por API ainda não estão aceitos. Preservar ao menos um owner direto de recuperação: a ação setmembers nativa exige owner na própria lista direta.
