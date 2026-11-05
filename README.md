@@ -1,16 +1,18 @@
-# Rancher Community Console
+# Rancho Platform
 
-An independent React/TypeScript console and local-groups/OIDC backend extension for Rancher1.6.30 Docker/Cattle. Rancher identity is preserved; the optional signature identifies the community console. This is an unfinished community project, not an official Rancher release.
+Rancho is an independent React/TypeScript console and local-groups/OIDC backend extension for Rancher1.6.30 Docker/Cattle. Rancher identity is preserved; the optional signature identifies the community console. This is an unfinished community project, not an official Rancher release.
 
 ## Status
 
-The latest frontend validation passed628 tests in72 files plus TypeScript/Vite. Contextual stack/service/container operations, local groups, OIDC and shared responsive components are implemented in tested slices. Complete parity, long-running security checks, migration/restore and release acceptance remain open. See [master roadmap](docs/48-master-roadmap.md) and [community release plan](docs/71-community-release-plan.md).
+The latest frontend validation passed639 tests in73 files plus TypeScript/Vite. Contextual stack/service/container operations, local groups, OIDC and shared responsive components are implemented in tested slices. Complete parity, long-running security checks, migration/restore and release acceptance remain open. See [master roadmap](docs/48-master-roadmap.md) and [community release plan](docs/71-community-release-plan.md).
 
 ## Get the sources
 
 Requirements: Git, Python3, Node24 and Docker with Linux containers. PowerShell7 is used by the laboratory bootstrap.
 
 ```sh
+git clone https://github.com/lucaspaulukx/rancho-platform.git
+cd rancho-platform
 python scripts/upstream.py apply
 cd console
 npm ci
@@ -37,6 +39,9 @@ python tests/integration.py
 Credentials are generated into ignored `.env`; no passwords are published. `Start-Lab.ps1` is a laboratory bootstrap, not a production migration tool. To preserve an existing lab, follow [console operations](console/README.md); do not regenerate its realm or credentials.
 
 ## Development and compatibility
+
+Canonical repository: [lucaspaulukx/rancho-platform](https://github.com/lucaspaulukx/rancho-platform). Development follows focused commits and branches; see the [Git workflow](docs/86-repository-workflow.md). Repository availability does not mark the unfinished roadmap as a production release.
+
 
 [Contributing](CONTRIBUTING.md), [security](SECURITY.md), [configuration/themes](docs/05-configuration-themes.md), [documentation](docs/README.md). Features remain individually gated; menu visibility is not authorization. The backend enforces account/environment access. Existing direct grants remain until explicitly migrated.
 

@@ -192,3 +192,11 @@ Novo artefato passou desativação pessoal+compartilhada em3 transportes pelo180
 Compatibilidade81: clássico não negocia payload; métricas agregadas grandes pelo proxy18090 com guarda on ainda têm gate414 aberto. Native direto18080 não prova topologia pública. REL03/06 devem incluir esse cliente sem editar Ember nem confundir aceite do novo frontend com paridade de transporte legado.
 
 Checkpoint85: controle com mesmo cliente/ping/rota isolou falha no caminho CNI gerenciado do scheduler; bridge padrão/guest host saudáveis, MSS1000 não resolveu. Desvio temporário por IP/MAC/destino permitiu3 réplicas em3.15s no Docker,59 conexões e zero timeout nos75s finais, cleanup completo. Gate de estabilidade sem desvio/soak permanece aberto. Próximo: usar preparação temporária só para alocação nos testes83 e seguir métricas contextuais84.
+
+## Checkpoint86 — Rancho Platform e aceite83/84 (05/11/2026)
+
+Destino Git autorizado: https://github.com/lucaspaulukx/rancho-platform, inicialmente vazio e privado. Preservar histórico comunitário; fluxo86 descreve commits por mudança e branches/PRs após importação. Conferência de21 commits/777 objetos não encontrou credenciais locais conhecidas, padrões configurados ou identidades aposentadas. Scanner não substitui auditoria completa.
+
+83: lease320s/quatro transportes/três réplicas e teto30s aprovados com controles/cleanup; HTTP continuou200 no prazo do socket, distinguindo prazo da conexão de expiração da chave. Comparações off pessoal/compartilhada no mesmo artefato reproduziram falha legada, com limpeza completa. Runtime local API-key on/teto86400s; default distribuído false. Alocação usou relay temporário85, removido antes dos streams; estabilidade CNI nativa continua aberta.
+
+84 implementou métricas contextuais por réplica, sem agregação inventada; Linux639 testes/73 arquivos + TypeScript/Vite passaram. Flag pública ausente/off e teste físico do menu real ainda em execução. Não declarar OPS13 concluído. Checkpoints seguintes são históricos; seus pendentes já resolvidos não prevalecem sobre este resumo.

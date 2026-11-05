@@ -1,3 +1,11 @@
+## Checkpoint86 — Rancho Platform e aceite83/84 (05/11/2026)
+
+Destino Git autorizado: https://github.com/lucaspaulukx/rancho-platform, inicialmente vazio e privado. Preservar histórico comunitário; fluxo86 descreve commits por mudança e branches/PRs após importação. Conferência de21 commits/777 objetos não encontrou credenciais locais conhecidas, padrões configurados ou identidades aposentadas. Scanner não substitui auditoria completa.
+
+83: lease320s/quatro transportes/três réplicas e teto30s aprovados com controles/cleanup; HTTP continuou200 no prazo do socket, distinguindo prazo da conexão de expiração da chave. Comparações off pessoal/compartilhada no mesmo artefato reproduziram falha legada, com limpeza completa. Runtime local API-key on/teto86400s; default distribuído false. Alocação usou relay temporário85, removido antes dos streams; estabilidade CNI nativa continua aberta.
+
+84 implementou métricas contextuais por réplica, sem agregação inventada; Linux639 testes/73 arquivos + TypeScript/Vite passaram. Flag pública ausente/off e teste físico do menu real ainda em execução. Não declarar OPS13 concluído. Checkpoints seguintes são históricos; seus pendentes já resolvidos não prevalecem sobre este resumo.
+
 ## Checkpoint85 — diagnóstico de scheduler e estado83 (05/11/2026)
 
 83 ampliou aceite para retirada de grant OIDC e conta local desativada com cookie antigo, nos3 transportes, com controles/cleanup. Longa4 transportes/3 réplicas falhou na alocação240s; não mede segurança. Harness passou a rastrear instâncias durante criação e preserva falhas. Runtime local está com API-key guard on para ensaios; default moderno dessa flag ainda false. Comparação off do mesmo artefato, prazo físico do socket, lote e lease longa seguem pendentes.
