@@ -1,0 +1,44 @@
+# Preparação de release
+
+<!-- rancho-language-navigation:start -->
+[Português (Brasil)](release.md) | [English](../en/release.md)
+<!-- rancho-language-navigation:end -->
+
+
+## Fronteira atual
+
+O repositório permanece privado durante a preparação. Fonte disponível, CI verde ou recorte aceito não autorizam mudar visibilidade, publicar pacote, fazer merge ou cutover produtivo. O aceite é controlado por capacidade/risco no [roadmap](roadmap.md), não por contagem acumulada de testes.
+
+O pacote contém fontes de aplicação/extensões, patches pinados, testes, templates, licenças e documentação mantida. Clones de consulta, dependências instaladas, credenciais/realms locais, dumps, evidências de sessão, estado de fixtures, backups e notas de máquina ficam fora do versionamento. Git preserva versões anteriores; elas não são instruções de onboarding.
+
+## Fontes reproduzíveis e validação
+
+```sh
+python scripts/upstream.py apply
+python scripts/upstream.py check
+python scripts/check_repository.py
+python scripts/check_public_history.py
+python scripts/docs_languages.py --require-complete
+```
+
+O lock upstream fixa commits oficiais. Faça build desses fontes e patches exportados, não de checkout modificado fora do índice. Preserve licenças/NOTICE, lockfiles revisados, imagens imutáveis e artefato anterior recuperável. Confira estado privado em imagens/configuração antes de distribuir.
+
+CI de fontes/console usa permissão readonly, actions pinadas e nenhum secret de laboratório. Confere fonte/histórico, contratos dos scanners, instalação por lock, formatação, testes frontend e TypeScript/Vite. Não valida sozinho backend físico, HA ou migração. A documentação de release exige todos os pares ativos pt-BR/inglês revisados, atuais e ligados.
+
+## Inventário de artefatos
+
+A ferramenta offline usa Syft pinado e IDs locais das imagens. `plan` lê identidades/tamanhos escalares e hashes de manifests, sem exportar imagens ou reiniciar serviços. Scan é explícito e exige saída nova.
+
+```sh
+docker pull anchore/syft:v1.56.0@sha256:697ae864af1299cfa43c54b161cea3dd65c6d54de82e3dba66ea3dccb3acc313
+python scripts/artifact_inventory.py plan
+python scripts/artifact_inventory.py scan --output migration-runs/artifact-inventory
+```
+
+`--backend-image` e `--console-image` selecionam imagens locais; export usa IDs imutáveis resolvidos. Scanner não tem rede, socket Docker, workspace ou capabilities. Lê só archives/manifests próprios e scratch, com limites de recursos. Ownership/caminhos protegem cleanup.
+
+Projeções CycloneDX públicas permitem identidades/versões/hashes/licenças e relações, excluindo configuração de imagem, environment, caminhos privados e metadados desconhecidos. Nomes de pacotes ainda podem ser privados e exigem revisão. Runtime e lockfile de desenvolvimento são evidências distintas; JS incorporado e Go antigo podem ter detecção incompleta. Licenças desconhecidas são pendências, não aprovação. Não é scanner CVE nem certificação jurídica e não publica automaticamente.
+
+## Aceite final
+
+Use um candidato identificado para autenticação/RBAC/streams, operação contextual, acessibilidade/performance, compatibilidade clássica, instalação nova, upgrade e recuperação/rollback completos. Registre limites/topologias. Configure canal privado de segurança antes de abrir o projeto. Mantenha [migração](migration.md) e [recuperação](recovery.md) vinculadas ao artefato; testes sintéticos não garantem migração universal.

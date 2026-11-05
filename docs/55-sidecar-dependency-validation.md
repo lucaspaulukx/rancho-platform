@@ -1,7 +1,0 @@
-# 55 — Dependências de sidecars coerentes com Cattle
-
-Confronto do contrato nativo ServiceValidationFilter.populateLaunchConfigRefs confirmou que vínculos de rede e volumes compõem um mesmo grafo. O frontend verificava cada grafo separadamente, permitindo ciclo misto até a rejeição da API. Também comparava nomes com caixa distinta, embora o backend recuse colisões sem diferenciar maiúsculas/minúsculas.
-
-Plano: unir arestas na validação compartilhada de criação/upgrade, detectar ciclos mistos entre primário/sidecars e colisões de nomes antes de enviar. Preservar grafia e conteúdo dos vínculos válidos, não transformar payload nem afrouxar backend. Aplicar sob os flags existentes de sidecars; nenhum novo módulo ou alteração Ember. Acrescentar testes com ciclos mistos, nomes e referência compartilhada acíclica. Aceite de validação: build576 testes/66 arquivos + TypeScript/Vite e formatação passaram. Novo teste de domínio cobre ciclos mistos incluindo primário, colisões de caixa e compartilhamento acíclico sem alterar payload. Função é usada pelos fluxos já protegidos de criação/upgrade. Execução física/upgrade/rollback dos sidecars continua gate próprio OPS07.
-
-Complemento26/10: validação agora exige networkMode=container junto de networkLaunchConfig, conforme setupNetworking do rancher-compose-executor nativo. Evita criar referência persistida sem namespace compartilhado. Build577/66 passou com novo teste para modos ausente/managed/none; payload completo e execução física serão verificados na doc56.

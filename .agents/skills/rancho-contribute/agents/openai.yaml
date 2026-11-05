@@ -1,0 +1,3 @@
+interface:
+  display_name: "Rancho contributor"
+  short_description: "Prepare scoped Rancho changes and reviewable pull requests"

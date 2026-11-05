@@ -1,0 +1,23 @@
+# Rancho contributor instructions
+
+English | [Português](#português)
+
+- Read the relevant task in `docs/en/roadmap.md` and its architecture/testing guides. Follow the user's current scope and continuing authorization; project guidance does not revoke granted sandbox permission.
+- Develop the new frontend in `console/`. Keep classic Ember unchanged. Reuse the shared shell, theme tokens, fields, tables, menus and drawers; preserve environment → stack → service → container context and Rancher attribution.
+- Treat current native schemas, resource actions and backend authorization as authoritative. Revalidate scope/contracts before mutation. Feature flags do not grant permission. New behavior needs an off/default/compatibility path; preserve unknown data and drafts, and do not claim client snapshots are atomic server CAS.
+- Use only owned sandbox fixtures for physical tests, with explicit markers and exact cleanup. Preserve existing configuration/data. Never commit credentials, dumps, realm files, fixture state, sessions or raw private responses. Do not print tokens or exception messages that may contain them.
+- Work on focused branches and stage explicit paths. Preserve history and existing user edits. Run relevant checks: console tests/build/format for frontend; native contracts and patch export/check for backend; physical integration for claimed runtime effects. Record failures and limitations; do not equate mocks or test counts with complete parity.
+- Update both language versions of affected documentation when available; record untranslated baseline documents honestly. Read the contribution guide in `CONTRIBUTING.md` or `docs/pt-BR/contributing.md`. Do not declare bilingual completion while translation coverage is incomplete.
+- Before commit run `python scripts/check_repository.py`; before push run `python scripts/check_public_history.py`. Repository hooks help but are not a full secret/license audit. Backend changes also require `python scripts/upstream.py export` and `check`.
+- Push branches/open PRs within current authorization. Use a body file for multiline PR text; explain behavior, tests, limits and rollback, linking stacked dependencies. Do not infer merge, force-push, visibility change, production access or release authorization. The repository is currently private; public release is deferred.
+
+## Português
+
+- Leia a task relevante em `docs/pt-BR/roadmap.md` e os guias de arquitetura/testes pertinentes. Respeite o escopo e a autorização contínua do usuário; estas regras não revogam permissões sandbox já concedidas.
+- Desenvolva o novo frontend em `console/`, preservando o Ember clássico. Reuse shell, tokens de tema, campos, tabelas, menus e drawers; mantenha o contexto environment → stack → serviço → container e a atribuição ao Rancher.
+- Schemas atuais, ações nativas e autorização do backend são a fonte de verdade. Revalide escopo/contrato antes de mutações. Flags não concedem permissão. Comportamento novo precisa de caminho off/default/compatibilidade; preserve dados desconhecidos e rascunhos, sem chamar snapshot cliente de CAS atômico no servidor.
+- Use somente fixtures próprias no sandbox, com marcadores e limpeza exatos. Preserve configurações/dados anteriores. Não versione credenciais, dumps, realms, estado de fixtures, sessões ou respostas privadas brutas. Não imprima tokens nem mensagens de exceção que possam contê-los.
+- Use branches focadas e caminhos explícitos no staging. Preserve histórico e alterações do usuário. Execute checks relevantes: testes/build/formatação para frontend; contratos nativos e export/check de patches para backend; integração física para efeitos reais alegados. Registre falhas/limites; mocks ou contagem de testes não provam paridade completa.
+- Atualize os dois idiomas dos documentos afetados quando disponíveis; registre honestamente a linha de base ainda não traduzida. Leia `CONTRIBUTING.md` ou `docs/pt-BR/contributing.md`. Não declare documentação bilingue completa com cobertura pendente.
+- Antes do commit, execute `python scripts/check_repository.py`; antes do push, `python scripts/check_public_history.py`. Hooks não substituem auditoria de secrets/licenças. Mudanças backend também exigem `python scripts/upstream.py export` e `check`.
+- Envie branches/abra PRs dentro da autorização vigente. Use arquivo de body para texto multilinha; descreva comportamento, testes, limites e rollback, indicando dependências entre PRs. Não presuma autorização de merge, force-push, mudança de visibilidade, produção ou release. O repositório permanece privado; publicação pública foi adiada.
