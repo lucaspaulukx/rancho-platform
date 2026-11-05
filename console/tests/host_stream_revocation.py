@@ -202,6 +202,7 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
         host = control.api(BASE + 'hosts/1h1')
         assert host['state'] == 'active' and host['agentState'] == 'active'
         save()
+        stage('own-workload-allocation')
         stack = control.api(BASE + 'stacks', {'name': marker, 'description': marker})
         record['stack'] = stack['id']; save()
         command = 'printf "%s\\n" ' + shlex.quote(marker + '-before') + ' > /tmp/stream-guard-marker; while true; do cat /tmp/stream-guard-marker; sleep 1; done'
@@ -212,12 +213,16 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
         record['service'] = service['id']; save()
         instance = None
         for attempt in range(240):
-            running = [v for v in rows('services/' + service['id'] + '/instances') if v['state'] == 'running' and v.get('externalId')]
+            discovered = rows('services/' + service['id'] + '/instances')
+            discovered_ids = sorted({*record.get('instances',[]),*(v['id'] for v in discovered)})
+            if discovered_ids != record.get('instances',[]):
+                record['instances'] = discovered_ids; save()
+            running = [v for v in discovered if v['state'] == 'running' and v.get('externalId')]
             if len(running) == service_scale:
                 instance = running[0]; break
             time.sleep(1)
         assert instance and instance['hostId'] == '1h1' and re.fullmatch(r'[a-f0-9]{64}', instance['externalId'])
-        record['instance'] = instance['id']; record['instances'] = sorted(v['id'] for v in running); save()
+        record['instance'] = instance['id']; record['instances'] = sorted({*record.get('instances',[]),*(v['id'] for v in running)}); save()
         print('PASS: own physical stream-emitter running on existing host1h1.', flush=True)
         stage('identity-setup')
         identity = identity_factory(control) if identity_factory else None
@@ -310,7 +315,7 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
         stage('measure-existing-streams')
         for mode, probe in probes.items():
             result['streams'][mode].update(probe.finish())
-        result['revocationEnforced'] = result['protectedHttpAfterRevocation'] in (401, 403, 404) and all(
+        result['revocationEnforced'] = result['protectedHttpAfterRevocation'] in (identity.get('protectedExpectedStatus',(401,403,404)) if identity else (401,403,404)) and all(
             value['freshControlHealthy'] and value['newHandshake'] in (401, 403, 404) and value['closed'] and value['closeCode'] == 1008 and value['after'] == 0
             for value in result['streams'].values())
         result['status'] = 'passed' if result['revocationEnforced'] else 'failed'

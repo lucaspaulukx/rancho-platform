@@ -1,6 +1,6 @@
 # Roadmap mestre — Rancher Community Console
 
-Referência:05/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build608 testes/71 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
+Referência:05/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build628 testes/72 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
 
 ## Resultado esperado
 
@@ -188,3 +188,7 @@ Baseline pessoal/compartilhada confirmou streams válidos após desativação da
 
 Novo artefato passou desativação pessoal+compartilhada em3 transportes pelo18090 com HTTP401, novosWS401,1008/zero dados e controles/cleanup. Grupo OIDC está em execução; conta/cookie/lease/lote e off do mesmo artefato ainda pendentes. Flag moderna não ativada por default; runtime local on somente para ensaios. Ver83; não encerrar OBS02/RBAC05/48 por esse recorte parcial.
 
+
+Compatibilidade81: clássico não negocia payload; métricas agregadas grandes pelo proxy18090 com guarda on ainda têm gate414 aberto. Native direto18080 não prova topologia pública. REL03/06 devem incluir esse cliente sem editar Ember nem confundir aceite do novo frontend com paridade de transporte legado.
+
+Checkpoint85: controle com mesmo cliente/ping/rota isolou falha no caminho CNI gerenciado do scheduler; bridge padrão/guest host saudáveis, MSS1000 não resolveu. Desvio temporário por IP/MAC/destino permitiu3 réplicas em3.15s no Docker,59 conexões e zero timeout nos75s finais, cleanup completo. Gate de estabilidade sem desvio/soak permanece aberto. Próximo: usar preparação temporária só para alocação nos testes83 e seguir métricas contextuais84.

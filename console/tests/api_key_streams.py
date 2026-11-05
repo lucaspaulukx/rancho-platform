@@ -63,9 +63,13 @@ def factory(shared, event="key", *, oidc=False, stale_cookie=False):
                 assert watched.api('projects/1a12')['id'] == '1a12'
             def invalidate():
                 if event in ('grant','account'): identity['invalidate']()
+                elif event=='deadline':
+                    limit=admin.request('/oidc/config')[1]['apiKeyStreamMaxSeconds']
+                    assert 30<=limit<=60
+                    time.sleep(limit+2)
                 else: deactivate()
             return {'session':watched,'before_invalidate':before_invalidate if shared else None,'invalidate':invalidate,'cleanup':cleanup,'prepare_cleanup':identity['prepare_cleanup'],
-                    'protected':'/v2-beta/projects/1a12','scope':'own '+('shared project' if shared else 'personal user')+' API key; '+event+(' with stale cookie' if stale_cookie else '')+(' OIDC identity' if oidc else '')}
+                    'protected':'/v2-beta/projects/1a12','protectedExpectedStatus':(200,) if event=='deadline' else (401,403,404),'scope':'own '+('shared project' if shared else 'personal user')+' API key; '+event+(' with stale cookie' if stale_cookie else '')+(' OIDC identity' if oidc else '')}
         except Exception:
             cleanup();raise
     return create
@@ -75,7 +79,7 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('scope',choices=('personal','shared'))
     parser.add_argument('mode',choices=('on','off'),nargs='?',default='off')
-    parser.add_argument('--event',choices=('key','grant','account'),default='key')
+    parser.add_argument('--event',choices=('key','grant','account','deadline'),default='key')
     parser.add_argument('--oidc',action='store_true')
     parser.add_argument('--stale-cookie',action='store_true')
     parser.add_argument('--hold-seconds',type=int,default=0)

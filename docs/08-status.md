@@ -1,3 +1,9 @@
+## Checkpoint85 — diagnóstico de scheduler e estado83 (05/11/2026)
+
+83 ampliou aceite para retirada de grant OIDC e conta local desativada com cookie antigo, nos3 transportes, com controles/cleanup. Longa4 transportes/3 réplicas falhou na alocação240s; não mede segurança. Harness passou a rastrear instâncias durante criação e preserva falhas. Runtime local está com API-key guard on para ensaios; default moderno dessa flag ainda false. Comparação off do mesmo artefato, prazo físico do socket, lote e lease longa seguem pendentes.
+
+85 investiga o bloqueio: scheduler1037 running/healthy registrou11 pong timeouts/15min. Controle próprio com biblioteca pinada, Go1.27.3/1.9.7, rota global e ping vazio mediu6/6 sem timeout tanto host quanto guest em35s. Isso não reproduz o processo real nem prova correção/causa. Controle no namespace reproduziu falha; bridge padrão saudável, MSS1000 falhou. Relay temporário pelo gateway passou6/6 e ensaio de 3 réplicas em3.15s/zero timeout nos75s finais, com remoção exata da regra e cleanup. Próximo: reaproveitar só a preparação de alocação para teste longo83. Gate CNI nativo continua aberto. Helpers scripts/build_scheduler_probe.py e console/tests/scheduler_heartbeat.py, relatórios ignorados. Conferir manifesto scheduler-heartbeat antes de outros testes. Ver85; plano84 de métricas de serviço foi escrito, ainda sem implementação.
+
 ## Checkpoint83 — guarda de API keys em validação (05/11/2026)
 
 Baseline pessoal/compartilhada confirmou streams válidos após desativação da chave. Implementação opcional false liga prova à credencial nativa realmente comparada, owner/scope/host/rota/role e teto configurável de socket30–86400s; marca agente separadamente, impede downgrade legado quando on e protege lotes/negociação. Java173 configuração/46 envelope/19 callback, Go upstream/novos/race, Linux628/72+TypeScript/Vite e build limpo aprovados.

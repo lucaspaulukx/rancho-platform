@@ -149,3 +149,6 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 - [Proteção de credenciais na auditoria](82-audit-credential-redaction.md).
 
 - [Revogação de streams de chaves de API](83-api-key-stream-guard.md).
+
+- [Plano de métricas contextuais de serviços](84-contextual-service-metrics.md).
+- [Diagnóstico do heartbeat do scheduler](85-scheduler-heartbeat-diagnosis.md).
