@@ -39,6 +39,7 @@
     "catalog": true,
     "observability": true,
     "metrics": true,
+    "metricsPayloadTransport": true,
     "admin": false,
     "api": false,
     "apiKeys": true,

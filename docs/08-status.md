@@ -1,3 +1,9 @@
+## Checkpoint81 — transporte de métricas e lease pelo proxy (05/11/2026)
+
+Métricas grandes negociadas por primeiro frame, sem ampliar limite de URI; serviço próprio3 réplicas passou por18090 em4 transportes. Admin+seis casos locais/OIDC passaram revogação/controles; ensaio final320s e navegador8 checks confirmaram renovação, dados reais, envio único e fechamento1008/zero dados após revogação. Mesmo artefato off reproduziu falha legada, com relatório bruto failed preservado. Cleanup final completo, sem manifesto próprio pendente.
+
+Linux628/72 + TypeScript/Vite, Java149/58/39, Go upstream/race e build limpo aprovados. Compose moderno e config pública habilitam transporte/guarda com override false; base Java/compose mantém false. Runtime efetivo conferido. Ver81 para hashes, evidências e limites. Interface agregada de serviço OPS13 não entregue pelo teste de transporte. Próximo: revisão de credenciais na auditoria, guarda de contas técnicas/API keys e demais gates48; estabilidade51/69, carga/HA/licenças/release continuam abertos. Checkpoints seguintes são históricos e suas contagens/flags anteriores não descrevem o estado atual.
+
 ## Checkpoint79 — matriz/lease e métricas de serviço (05/11/2026)
 
 Admin+seis casos locais/OIDC (grant, desativação, expiração real45s) passaram em3 transportes: HTTP401/404, novosWS401,1008/zero dados após revogação e controles válidos; contas/grupos/sessões/settings limpos. Lease admin320s confirmou novos dados em logs/exec/métricas após prova300s e posterior revogação correta, sem alterar expiração global. Getter de métricas de serviço foi corrigido para assinar path completo; proxy valida lotes sem payload antes do upgrade. Build/testes Go/race passaram;4 transportes e serviço3 réplicas passaram direto no backend.

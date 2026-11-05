@@ -143,3 +143,5 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 - [Guarda de sessões dos streams de host](79-host-stream-session-guard.md).
 
 - [Inventário de dependências e licenças por artefato](80-artifact-dependency-inventory.md).
+
+- [Negociação de métricas grandes e conexões ociosas](81-metrics-payload-transport.md).

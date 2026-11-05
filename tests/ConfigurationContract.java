@@ -78,6 +78,12 @@ public class ConfigurationContract {
         hostStreams.put("RANCHER_CUSTOMIZATION_ENABLED","false");
         check(!new CustomizationConfig(hostStreams).enabled("HOST_STREAM_SESSION_GUARD_ENABLED"));
         hostStreams.put("RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED","yes");rejects(hostStreams);
+        check(!new CustomizationConfig(base()).enabled("METRICS_PAYLOAD_TRANSPORT_ENABLED"));
+        Map<String,String> payloads=base();payloads.put("RANCHER_METRICS_PAYLOAD_TRANSPORT_ENABLED","true");rejects(payloads);
+        payloads.put("RANCHER_HOST_STREAM_PROXY_PROTOCOL","1");rejects(payloads);
+        payloads.put("RANCHER_METRICS_PAYLOAD_PROXY_PROTOCOL","1");check(new CustomizationConfig(payloads).enabled("METRICS_PAYLOAD_TRANSPORT_ENABLED"));
+        payloads.put("RANCHER_CUSTOMIZATION_ENABLED","false");check(!new CustomizationConfig(payloads).enabled("METRICS_PAYLOAD_TRANSPORT_ENABLED"));
+        payloads.put("RANCHER_METRICS_PAYLOAD_TRANSPORT_ENABLED","yes");rejects(payloads);
         Map<String,String> secret=base();secret.put("RANCHER_OIDC_CLIENT_SECRET","sentinel-secret-never-public");
         check(!new CustomizationConfig(secret).publicConfig().toString().contains("sentinel-secret"));
         System.out.println(checks+" configuration assertions passed across 64 combinations");

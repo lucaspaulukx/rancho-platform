@@ -4,11 +4,12 @@ import { ResourceMetrics } from '../components/ResourceMetrics';
 import { ResourceStream } from '../components/ResourceStream';
 import type { Resource } from '../api';
 const context = vi.hoisted(() => ({
+  server: { effective: { METRICS_PAYLOAD_TRANSPORT_ENABLED: false } },
   identity: 'fixture',
   project: { id: '1a12', name: 'Fixture' },
   config: {
     classicUrl: 'http://localhost:18080',
-    modules: { observability: true, metrics: true },
+    modules: { observability: true, metrics: true, metricsPayloadTransport: false },
   },
 }));
 vi.mock('../state', () => ({
@@ -68,7 +69,7 @@ function setup() {
   Socket.instances = [];
   vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
   vi.stubGlobal('WebSocket', Socket);
-  const fetcher = vi.fn(async (input: string) =>
+  const fetcher = vi.fn(async (input: string, _options?: RequestInit) =>
     input === resource.links.self
       ? response(resource)
       : response({ url: `${window.location.origin}/v1/connect`, token: 'synthetic-fixture' }),
@@ -86,6 +87,8 @@ afterEach(() => {
   context.project = { id: '1a12', name: 'Fixture' };
   context.config.modules.observability = true;
   context.config.modules.metrics = true;
+  context.config.modules.metricsPayloadTransport = false;
+  context.server.effective.METRICS_PAYLOAD_TRANSPORT_ENABLED = false;
 });
 describe('Revogação de conexões já abertas', () => {
   it.each(['logs', 'execute', 'metrics'] as const)(
@@ -229,6 +232,68 @@ describe('Revogação de conexões já abertas', () => {
       });
       expect(Socket.instances).toHaveLength(1);
       view.unmount();
+    },
+  );
+  it.each([
+    [false, false],
+    [true, false],
+    [false, true],
+  ])(
+    'mantém transporte legado sem opt-in quando frontend=%s e backend=%s',
+    async (frontend, backend) => {
+      const fetcher = setup();
+      context.config.modules.metricsPayloadTransport = frontend;
+      context.server.effective.METRICS_PAYLOAD_TRANSPORT_ENABLED = backend;
+      const view = render(<ResourceMetrics resource={resource} onClose={vi.fn()} />);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      await waitFor(() => expect(Socket.instances).toHaveLength(1));
+      const request = fetcher.mock.calls.find(([input]) => input === resource.links.stats);
+      expect((request?.[1] as RequestInit).headers).not.toHaveProperty('X-Rancher-Stats-Payload');
+      act(() => Socket.instances[0].onopen?.());
+      expect(Socket.instances[0].send).not.toHaveBeenCalled();
+      view.unmount();
+      expect(vi.getTimerCount()).toBe(0);
+    },
+  );
+  it.each(['open', 'closed-before-open', 'unmounted-before-open'] as const)(
+    'envia o payload de métricas uma vez e o descarta: %s',
+    async (caseName) => {
+      const fetcher = setup();
+      context.config.modules.metricsPayloadTransport = true;
+      context.server.effective.METRICS_PAYLOAD_TRANSPORT_ENABLED = true;
+      const part = (value: unknown) =>
+        btoa(JSON.stringify(value)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+      const envelope = `${part({ alg: 'RS256' })}.${part({ payload: true })}.publicFixtureSignature`;
+      const payload = `${part({ alg: 'RS256' })}.${part({ service: [], fixture: 'x'.repeat(10000) })}.publicFixtureSignature`;
+      fetcher.mockImplementation(async (input: string) =>
+        response(
+          input === resource.links.self
+            ? resource
+            : { url: `${location.origin}/v1/containerstats/service/`, token: envelope, payload },
+        ),
+      );
+      const view = render(<ResourceMetrics resource={resource} onClose={vi.fn()} />);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      await waitFor(() => expect(Socket.instances).toHaveLength(1));
+      const request = fetcher.mock.calls.find(([input]) => input === resource.links.stats);
+      expect((request?.[1] as RequestInit).headers).toMatchObject({
+        'X-Rancher-Stats-Payload': '1',
+      });
+      const socket = Socket.instances[0];
+      if (caseName === 'closed-before-open') act(() => socket.onclose?.());
+      if (caseName === 'unmounted-before-open') view.unmount();
+      act(() => {
+        socket.onopen?.();
+        socket.onopen?.();
+      });
+      expect(socket.send).toHaveBeenCalledTimes(caseName === 'open' ? 1 : 0);
+      if (caseName === 'open') expect(socket.send).toHaveBeenCalledWith(payload);
+      view.unmount();
+      expect(vi.getTimerCount()).toBe(0);
     },
   );
   it('distingue limite de memória zero de limite ausente no painel', async () => {

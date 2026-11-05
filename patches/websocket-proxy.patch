@@ -209,7 +209,7 @@ index 86cba1f..2bfc69a 100644
  	flag.StringVar(&keyFile, "jwt-public-key-file", "", "Location of the public-key used to validate JWTs.")
  	flag.StringVar(&keyContents, "jwt-public-key-contents", "", "An alternative to jwt-public-key-file. The contents of the key.")
 diff --git a/proxy/frontend_handler.go b/proxy/frontend_handler.go
-index 8355aec..ab2a0e5 100644
+index 8355aec..3678dbe 100644
 --- a/proxy/frontend_handler.go
 +++ b/proxy/frontend_handler.go
 @@ -18,18 +18,24 @@ const wsProto string = "Sec-Websocket-Protocol"
@@ -231,7 +231,7 @@ index 8355aec..ab2a0e5 100644
  	}
  
 +	proof, guardErr := h.guard.proof(token, req.URL.Path)
-+	if guardErr != nil || !h.guard.allowed(proof) {
++	if guardErr != nil || !h.guard.allowed(proof, true) {
 +		http.Error(rw, "Failed authentication", 401)
 +		return
 +	}
@@ -242,7 +242,7 @@ index 8355aec..ab2a0e5 100644
  		return
  	}
  	defer closeConnection(ws)
-+	stopWatch := h.guard.watch([]*hostStreamProof{proof}, func() { closeHostStream(ws) })
++	stopWatch := h.guard.watch([]*hostStreamProof{proof}, func() { closeHostStream(ws) }, func() bool { return ws.WriteControl(websocket.PingMessage, nil, time.Now().Add(time.Second)) == nil })
 +	defer stopWatch()
  
  	msgKey, respChannel, err := h.backend.initializeClient(hostKey)
@@ -346,7 +346,7 @@ index 089658e..8a2b736 100644
  	os.Exit(m.Run())
  }
 diff --git a/proxy/proxy.go b/proxy/proxy.go
-index 2bb6d93..4d52f2c 100644
+index 2bb6d93..09d3e91 100644
 --- a/proxy/proxy.go
 +++ b/proxy/proxy.go
 @@ -37,6 +37,10 @@ type Starter struct {
@@ -381,13 +381,13 @@ index 2bb6d93..4d52f2c 100644
 +	router.HandleFunc("/community/host-stream-guard", func(w http.ResponseWriter, r *http.Request) {
 +		w.Header().Set("Cache-Control", "no-store")
 +		w.Header().Set("Content-Type", "application/json")
-+		fmt.Fprintf(w, `{"protocol":1,"enabled":%t}`, s.Config.HostStreamSessionGuardEnabled)
++		fmt.Fprintf(w, `{"protocol":1,"enabled":%t,"metricsPayloadProtocol":1}`, s.Config.HostStreamSessionGuardEnabled)
 +	}).Methods("GET")
  	router.HandleFunc("/version", k8s.Version)
  	router.HandleFunc("/swaggerapi/api/v1", k8s.Swagger)
  
 diff --git a/proxy/stats_handler.go b/proxy/stats_handler.go
-index c86b697..b6a104a 100644
+index c86b697..4494ba7 100644
 --- a/proxy/stats_handler.go
 +++ b/proxy/stats_handler.go
 @@ -3,6 +3,7 @@ package proxy
@@ -412,7 +412,7 @@ index c86b697..b6a104a 100644
  	hostKey     string
  	url         string
  	msgKey      string
-@@ -60,31 +63,62 @@ func (h *StatsHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+@@ -60,31 +63,63 @@ func (h *StatsHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
  		return
  	}
  
@@ -421,16 +421,21 @@ index c86b697..b6a104a 100644
 +	payload, _ := authToken.Claims["payload"].(bool)
 +	var negotiation *hostStreamProof
 +	var statsInfoStructs []*statsInfo
-+	if multiHost || payload {
++	if payload {
++		negotiation, err = h.guard.negotiationProof(authToken, req.URL.Path)
++		if err == nil && !h.guard.allowed(negotiation, true) {
++			err = fmt.Errorf("Negotiation session invalid")
++		}
++	} else if multiHost {
 +		negotiation, err = h.guard.expiryProof(authToken)
 +	}
 +	if err == nil && !payload {
 +		statsInfoStructs, err = h.parseStatsInfo(req, tokenString, multiHost)
- 	}
++	}
 +	if err != nil {
 +		http.Error(rw, "Failed authentication", 401)
 +		return
-+	}
+ 	}
 +	upgrader := websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
  	ws, err := upgrader.Upgrade(rw, req, nil)
  	if err != nil {
@@ -440,9 +445,9 @@ index c86b697..b6a104a 100644
 -
 -	if ok, _ := authToken.Claims["payload"].(bool); ok {
 +	defer closeConnection(ws)
-+	stopNegotiation := h.guard.watch([]*hostStreamProof{negotiation}, func() { closeHostStream(ws) })
-+	if !payload {
-+		stopNegotiation()
++	stopNegotiation := func() {}
++	if payload {
++		stopNegotiation = h.guard.watch([]*hostStreamProof{negotiation}, func() { closeHostStream(ws) })
 +	}
 +	defer stopNegotiation()
 +	if payload {
@@ -450,9 +455,7 @@ index c86b697..b6a104a 100644
 -		_, content, err := ws.ReadMessage()
 -		if err != nil {
 -			http.Error(rw, "Failed to read payload", 500)
-+		if h.guard != nil {
-+			ws.SetReadLimit(16 * 1024 * 1024)
-+		}
++		ws.SetReadLimit(16 * 1024 * 1024)
 +		_, content, readErr := ws.ReadMessage()
 +		if readErr != nil {
  			return
@@ -466,7 +469,7 @@ index c86b697..b6a104a 100644
 -		http.Error(rw, "Failed to read payload targets", 500)
 -		return
 +	if payload {
-+		if !h.guard.allowed(negotiation) {
++		if !h.guard.allowed(negotiation, true) {
 +			closeHostStream(ws)
 +			return
 +		}
@@ -476,20 +479,35 @@ index c86b697..b6a104a 100644
 +			return
 +		}
 +		stopNegotiation()
-+		if h.guard != nil {
-+			ws.SetReadDeadline(time.Time{})
-+		}
-+	}
++		ws.SetReadDeadline(time.Time{})
+ 	}
 +	proofs := make([]*hostStreamProof, 0, len(statsInfoStructs))
 +	for _, target := range statsInfoStructs {
 +		proofs = append(proofs, target.proof)
- 	}
-+	stopWatch := h.guard.watch(proofs, func() { closeHostStream(ws) })
++	}
++	stopWatch := h.guard.watch(proofs, func() { closeHostStream(ws) }, func() bool { return ws.WriteControl(websocket.PingMessage, nil, time.Now().Add(time.Second)) == nil })
 +	defer stopWatch()
  
  	var mutex sync.Mutex
  	var countMutex sync.Mutex
-@@ -114,6 +148,10 @@ func (h *StatsHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+@@ -106,7 +141,15 @@ func (h *StatsHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+ 
+ 		// Send response messages to client
+ 		go func(s *statsInfo) {
+-			errStatus := false
++			defer func() {
++				countMutex.Lock()
++				doneCounter--
++				finished := doneCounter == 0
++				countMutex.Unlock()
++				if finished {
++					closeConnection(ws)
++				}
++			}()
+ 			for {
+ 				message, ok := <-s.respChannel
+ 				if !ok {
+@@ -114,20 +157,19 @@ func (h *StatsHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
  				}
  				switch message.Type {
  				case common.Body:
@@ -499,17 +517,22 @@ index c86b697..b6a104a 100644
 +					}
  					mutex.Lock()
  					ws.SetWriteDeadline(time.Now().Add(10 * time.Second))
- 					if err := ws.WriteMessage(1, []byte(message.Body)); err != nil {
-@@ -126,8 +164,12 @@ func (h *StatsHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
- 					doneCounter--
- 					countMutex.Unlock()
- 				}
+-					if err := ws.WriteMessage(1, []byte(message.Body)); err != nil {
+-						errStatus = true
+-					}
++					err := ws.WriteMessage(1, []byte(message.Body))
+ 					mutex.Unlock()
++					if err != nil {
++						return
++					}
+ 				case common.Close:
+-					countMutex.Lock()
+-					errStatus = true
+-					doneCounter--
+-					countMutex.Unlock()
+-				}
 -				if errStatus && doneCounter == 0 {
-+				countMutex.Lock()
-+				finished := doneCounter == 0
-+				countMutex.Unlock()
-+				if errStatus && finished {
- 					closeConnection(ws)
+-					closeConnection(ws)
 +					return
  				}
  			}
@@ -547,7 +570,7 @@ index c86b697..b6a104a 100644
 +				return nil, fmt.Errorf("Invalid target URL")
 +			}
 +			proof, proofErr := h.guard.proof(innerJwtToken, target.Path)
-+			if proofErr != nil || !h.guard.allowed(proof) {
++			if proofErr != nil || !h.guard.allowed(proof, true) {
 +				return nil, fmt.Errorf("Invalid target session")
  			}
  			urlString = urlString + "?token=" + innerTokenString
@@ -561,7 +584,7 @@ index c86b697..b6a104a 100644
  		}
 -		statsInfoStructs = append(statsInfoStructs, &statsInfo{hostKey: hostUUID, url: req.URL.String()})
 +		proof, proofErr := h.guard.proof(token, req.URL.Path)
-+		if proofErr != nil || !h.guard.allowed(proof) {
++		if proofErr != nil || !h.guard.allowed(proof, true) {
 +			return nil, fmt.Errorf("Invalid target session")
 +		}
 +		statsInfoStructs = append(statsInfoStructs, &statsInfo{hostKey: hostUUID, url: req.URL.String(), proof: proof})
@@ -575,7 +598,7 @@ diff --git a/proxy/host_stream_guard.go b/proxy/host_stream_guard.go
 new file mode 100644
 --- /dev/null
 +++ b/proxy/host_stream_guard.go
-@@ -0,0 +1,353 @@
+@@ -0,0 +1,410 @@
 +package proxy
 +
 +import (
@@ -615,6 +638,7 @@ new file mode 100644
 +
 +// One shared, bounded cache for a proxy process. Keys never contain credentials.
 +type hostStreamGuard struct {
++	heartbeat time.Duration
 +	endpoint  string
 +	client    *http.Client
 +	mu        sync.Mutex
@@ -641,7 +665,7 @@ new file mode 100644
 +	if host != "localhost" && (ip == nil || !ip.IsLoopback()) {
 +		return nil, errors.New("Host stream verification requires a loopback Cattle address")
 +	}
-+	return &hostStreamGuard{endpoint: endpoint.String(), secret: secret, publicKey: publicKey,
++	return &hostStreamGuard{heartbeat: 30 * time.Second, endpoint: endpoint.String(), secret: secret, publicKey: publicKey,
 +		client: &http.Client{Timeout: streamCheckBudget,
 +			CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse },
 +			Transport: &http.Transport{Proxy: nil, MaxIdleConns: 8, MaxIdleConnsPerHost: 8,
@@ -775,7 +799,45 @@ new file mode 100644
 +	return &hostStreamProof{mode: "envelope", expires: expires}, nil
 +}
 +
-+func (g *hostStreamGuard) allowed(proof *hostStreamProof) bool {
++func (g *hostStreamGuard) negotiationProof(token *jwt.Token, path string) (*hostStreamProof, error) {
++	if g == nil {
++		return nil, nil
++	}
++	expires, valid := streamEnvelope(token)
++	if !valid {
++		return nil, errors.New("Invalid negotiation envelope")
++	}
++	reference, ok := token.Claims["rancherNegotiation"].(map[string]interface{})
++	if !ok || reference["path"] != path {
++		return nil, errors.New("Negotiation scope required")
++	}
++	if reference["mode"] == "technical" {
++		return &hostStreamProof{mode: "technical", expires: expires}, nil
++	}
++	raw, ok := reference["proof"].(string)
++	if reference["mode"] != "ui" || !ok || len(raw) > 65536 {
++		return nil, errors.New("Invalid negotiation reference")
++	}
++	inner, err := jwt.Parse(raw, func(_ *jwt.Token) (interface{}, error) { return g.publicKey, nil })
++	if err != nil || inner == nil {
++		return nil, errors.New("Invalid negotiation signature")
++	}
++	binding, ok := inner.Claims["rancherStream"].(map[string]interface{})
++	if !ok {
++		return nil, errors.New("Negotiation session reference missing")
++	}
++	signedPath, ok := binding["path"].(string)
++	if !ok {
++		return nil, errors.New("Negotiation target missing")
++	}
++	proof, err := g.proof(inner, signedPath)
++	if err != nil || proof.mode != "ui" {
++		return nil, errors.New("Invalid negotiation session")
++	}
++	return proof, nil
++}
++
++func (g *hostStreamGuard) allowed(proof *hostStreamProof, fresh ...bool) bool {
 +	if g == nil {
 +		return true
 +	}
@@ -813,6 +875,10 @@ new file mode 100644
 +		}
 +		proof.raw, proof.expires, proof.renewAt = next.raw, next.expires, next.renewAt
 +		return true
++	}
++	if len(fresh) > 0 && fresh[0] {
++		valid, _ := g.verify(proof, false)
++		return valid
 +	}
 +	now := time.Now()
 +	g.mu.Lock()
@@ -904,13 +970,18 @@ new file mode 100644
 +}
 +
 +// Idle sockets must close too; stopping the watcher is idempotent and never blocks cleanup.
-+func (g *hostStreamGuard) watch(proofs []*hostStreamProof, denied func()) func() {
++func (g *hostStreamGuard) watch(proofs []*hostStreamProof, denied func(), keepalive ...func() bool) func() {
 +	if g == nil {
 +		return func() {}
 +	}
 +	done := make(chan struct{})
 +	var once sync.Once
 +	go func() {
++		lastPing := time.Now()
++		interval := g.heartbeat
++		if interval <= 0 {
++			interval = 30 * time.Second
++		}
 +		ticker := time.NewTicker(time.Second)
 +		defer ticker.Stop()
 +		for {
@@ -924,6 +995,15 @@ new file mode 100644
 +						return
 +					}
 +				}
++				if time.Since(lastPing) >= interval {
++					for _, ping := range keepalive {
++						if !ping() {
++							denied()
++							return
++						}
++					}
++					lastPing = time.Now()
++				}
 +			}
 +		}
 +	}()
@@ -933,7 +1013,7 @@ diff --git a/proxy/host_stream_guard_test.go b/proxy/host_stream_guard_test.go
 new file mode 100644
 --- /dev/null
 +++ b/proxy/host_stream_guard_test.go
-@@ -0,0 +1,378 @@
+@@ -0,0 +1,463 @@
 +package proxy
 +
 +import (
@@ -1075,7 +1155,8 @@ new file mode 100644
 +	b := &streamTestBackend{data: make(chan common.Message)}
 +	server := httptest.NewServer(&StatsHandler{guard: g, backend: b, parsedPublicKey: testutils.ParseTestPublicKey()})
 +	defer server.Close()
-+	envelope := streamTestToken(t, map[string]interface{}{"exp": time.Now().Unix() + 60, "payload": true})
++	reference := streamTestToken(t, streamTestClaims()).Raw
++	envelope := streamTestToken(t, map[string]interface{}{"exp": time.Now().Unix() + 60, "payload": true, "rancherNegotiation": map[string]interface{}{"path": "/v1/containerstats/service", "mode": "ui", "proof": reference}})
 +	ws, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http")+"/v1/containerstats/service?token="+envelope.Raw, nil)
 +	if err != nil {
 +		t.Fatal("negotiation failed")
@@ -1091,6 +1172,57 @@ new file mode 100644
 +	_, _, err = ws.ReadMessage()
 +	if err == nil || !strings.Contains(err.Error(), "1008") || atomic.LoadInt32(&b.initialized) != 0 {
 +		t.Fatal("invalid payload batch reached a backend")
++	}
++}
++
++func TestHostStreamKeepaliveFollowsAuthorization(t *testing.T) {
++	var denied int32
++	g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) {
++		json.NewEncoder(w).Encode(map[string]bool{"allowed": atomic.LoadInt32(&denied) == 0})
++	})
++	g.heartbeat = time.Millisecond
++	p, _ := g.proof(streamTestToken(t, streamTestClaims()), "/v1/echo")
++	ping := make(chan struct{}, 2)
++	closed := make(chan struct{})
++	stop := g.watch([]*hostStreamProof{p}, func() { close(closed) }, func() bool { ping <- struct{}{}; return true })
++	defer stop()
++	select {
++	case <-ping:
++	case <-time.After(2 * time.Second):
++		t.Fatal("authorized idle keepalive missing")
++	}
++	atomic.StoreInt32(&denied, 1)
++	select {
++	case <-closed:
++	case <-time.After(2 * time.Second):
++		t.Fatal("keepalive masked authorization revocation")
++	}
++	select {
++	case <-ping:
++		t.Fatal("keepalive sent after authorization denial")
++	default:
++	}
++}
++
++func TestHostStreamMetricsClosesWhenBackendEnds(t *testing.T) {
++	g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(`{"allowed":true}`)) })
++	b := &streamTestBackend{data: make(chan common.Message, 1)}
++	server := httptest.NewServer(&StatsHandler{guard: g, backend: b, parsedPublicKey: testutils.ParseTestPublicKey()})
++	defer server.Close()
++	token := streamTestToken(t, streamTestClaims())
++	ws, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http")+"/v1/echo?token="+token.Raw, nil)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer ws.Close()
++	b.data <- common.Message{Type: common.Body, Body: "before"}
++	ws.SetReadDeadline(time.Now().Add(3 * time.Second))
++	if _, _, err := ws.ReadMessage(); err != nil {
++		t.Fatal(err)
++	}
++	close(b.data)
++	if _, _, err := ws.ReadMessage(); err == nil || strings.Contains(err.Error(), "timeout") {
++		t.Fatal("ended backend left a frontend socket alive")
 +	}
 +}
 +
@@ -1214,6 +1346,10 @@ new file mode 100644
 +		t.Fatal("parallel requests not coalesced")
 +	}
 +	atomic.StoreInt32(&denied, 1)
++	fresh, _ := g.proof(token, "/v1/echo")
++	if g.allowed(fresh, true) {
++		t.Fatal("fresh handshake reused a positive forwarding decision")
++	}
 +	time.Sleep(300 * time.Millisecond)
 +	p, _ := g.proof(streamTestToken(t, streamTestClaims()), "/v1/echo")
 +	if g.allowed(p) {
@@ -1299,6 +1435,35 @@ new file mode 100644
 +		t.Fatal("nil reference allowed")
 +	}
 +}
++func TestHostStreamNegotiationScope(t *testing.T) {
++	g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(`{"allowed":true}`)) })
++	proof := streamTestToken(t, streamTestClaims()).Raw
++	for _, mode := range []string{"valid", "missing", "path", "mode", "bad-proof"} {
++		t.Run(mode, func(t *testing.T) {
++			reference := map[string]interface{}{"path": "/v1/containerstats/service", "mode": "ui", "proof": proof}
++			claims := map[string]interface{}{"exp": time.Now().Unix() + 60, "payload": true, "rancherNegotiation": reference}
++			switch mode {
++			case "missing":
++				delete(claims, "rancherNegotiation")
++			case "path":
++				reference["path"] = "/v1/wrong"
++			case "mode":
++				reference["mode"] = "other"
++			case "bad-proof":
++				reference["proof"] = "malformed"
++			}
++			p, err := g.negotiationProof(streamTestToken(t, claims), "/v1/containerstats/service")
++			if mode == "valid" {
++				if err != nil || p.mode != "ui" || !g.allowed(p, true) {
++					t.Fatal("valid negotiation refused")
++				}
++			} else if err == nil {
++				t.Fatal("invalid negotiation accepted")
++			}
++		})
++	}
++}
++
 +func TestHostStreamConfiguration(t *testing.T) {
 +	for _, address := range []string{"example.com:8081", "127.0.0.1", "127.0.0.1:8081?x=1", "user@127.0.0.1:8081", "172.21.0.4:8081"} {
 +		if _, err := newHostStreamGuard(true, address, strings.Repeat("s", 43), nil); err == nil {

@@ -3,7 +3,7 @@ import hashlib, importlib.util, json, re, subprocess, time, urllib.request, urll
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2];MANIFEST=ROOT/'console/local-account-contract-fixture.json'
 sp=importlib.util.spec_from_file_location('lab',ROOT/'tests/integration.py');lab=importlib.util.module_from_spec(sp);sp.loader.exec_module(lab);lab.BASE='http://localhost:18090'
-u=lab.Session();u.opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),urllib.request.HTTPCookieProcessor(u.cookies));u.login('labadmin',lab.CONFIG['RANCHER_ADMIN_PASSWORD'])
+u=lab.Session();u.opener=lab.loopback_opener(u.cookies);u.login('labadmin',lab.CONFIG['RANCHER_ADMIN_PASSWORD'])
 try:
     s=json.loads(MANIFEST.read_text(encoding='utf-8'))
     assert re.fullmatch(r'console-account-[0-9a-f]{12}',s['name']) and s['marker']=='Disposable account contract '+s['name']

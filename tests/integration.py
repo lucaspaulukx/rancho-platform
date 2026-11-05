@@ -33,10 +33,11 @@ class Session:
         self.cookies = http.cookiejar.CookieJar(policy=LoopbackBrowserPolicy())
         self.opener = loopback_opener(self.cookies)
 
-    def request(self, path, body=None, method=None, form=False):
+    def request(self, path, body=None, method=None, form=False, extra_headers=None):
         url = path if path.startswith('http') else BASE + path
         data = None if body is None else (urllib.parse.urlencode(body).encode() if form else json.dumps(body).encode())
         headers = {'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' if form else 'application/json'}
+        headers.update(extra_headers or {})
         for c in self.cookies:
             if c.name == 'CSRF': headers['X-Api-Csrf'] = c.value
         req = urllib.request.Request(url, data=data, headers=headers, method=method)
@@ -44,6 +45,7 @@ class Session:
             response = self.opener.open(req, timeout=20)
         except urllib.error.HTTPError as e:
             response = e
+        self.response_metadata = {'cacheControl': ','.join(response.headers.get_all('Cache-Control', [])), 'contentType': response.headers.get('Content-Type')}
         raw = response.read().decode('utf-8')
         try: content = json.loads(raw)
         except ValueError: content = raw

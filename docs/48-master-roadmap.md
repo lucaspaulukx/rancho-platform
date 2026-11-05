@@ -167,3 +167,10 @@ Proxy moderno real18090 com3 réplicas reproduziu414 no token agregado10524 char
 
 Helper HTTP de testes conecta localhost por127.0.0.1 preservando URL/Host/cookies/redirect/timeouts;2 contratos e login real passaram. Medido ping Python2039ms→2ms, eliminando fallback IPv6 do Windows, sem mudar DNS/hosts/timeout do servidor nem o gate de instabilidade do scheduler. Keycloak helper aceita opener opcional; padrão de outros usuários não alterado. Próximo81: payload assinado no primeiro frame opt-in e teste de terminal ocioso pelo proxy; API keys/HA/carga seguem gates distintos.
 
+
+## Checkpoint81 — transporte de métricas e lease pelo proxy (05/11/2026)
+
+Métricas grandes negociadas por primeiro frame, sem ampliar limite de URI; serviço próprio3 réplicas passou por18090 em4 transportes. Admin+seis casos locais/OIDC passaram revogação/controles; ensaio final320s e navegador8 checks confirmaram renovação, dados reais, envio único e fechamento1008/zero dados após revogação. Mesmo artefato off reproduziu falha legada, com relatório bruto failed preservado. Cleanup final completo, sem manifesto próprio pendente.
+
+Linux628/72 + TypeScript/Vite, Java149/58/39, Go upstream/race e build limpo aprovados. Compose moderno e config pública habilitam transporte/guarda com override false; base Java/compose mantém false. Runtime efetivo conferido. Ver81 para hashes, evidências e limites. Interface agregada de serviço OPS13 não entregue pelo teste de transporte. Próximo: revisão de credenciais na auditoria, guarda de contas técnicas/API keys e demais gates48; estabilidade51/69, carga/HA/licenças/release continuam abertos. Checkpoints seguintes são históricos e suas contagens/flags anteriores não descrevem o estado atual.
+
