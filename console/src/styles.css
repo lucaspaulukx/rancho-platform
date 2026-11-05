@@ -2961,3 +2961,10 @@ input[type='checkbox']:focus-visible {
     display: inline;
   }
 }
+
+/* Theme tokens change atomically; hover transitions resume after the new palette is painted. */
+:root[data-theme-switching='true'] *,
+:root[data-theme-switching='true'] *::before,
+:root[data-theme-switching='true'] *::after {
+  transition: none !important;
+}

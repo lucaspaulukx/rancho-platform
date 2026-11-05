@@ -9,3 +9,5 @@ Fonte de verdade: `console/src/themes/presets.json`. Gerar CSS com `node scripts
 Shell compartilhado: sidebar224px, recolhida80px, móvel260px, breakpoint767px; navbar68px no desktop e72px no móvel. Só a navegação rola; ícones19px, itens13px e padding9px13px. A área de marca tem104px, sem uma segunda logo.
 
 `branding=false` remove a assinatura comunitária e conserva Rancher. Preferências locais usam namespace `rancher.console`; preferências de instalações experimentais anteriores são redefinidas sem alterar contas, permissões ou workloads.
+
+Troca de tema: tokens são aplicados antes da pintura, com transições de cor suspensas por duas frames. Isso evita texto escuro sobre o fundo ainda escuro durante a interpolação para o claro; hover volta a transicionar após a paleta assentar. O gate real de logout62 passou8 cenários de axe/layout em claro/escuro e1440/390, sem espera artificial para esconder a transição.
