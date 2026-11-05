@@ -51,7 +51,7 @@ Enquanto uma tela continuar no Ember, uma navegação explícita abre sua URL cl
 
 | Componente | Responsabilidade / regra |
 |---|---|
-| Brand / ProductSignature | Logos positivos/negativos existentes; texto “Rancher · customizado pela comunidade”. |
+| Brand / ProductSignature | Marca Rancher e assinatura comunitária opcional sob branding. |
 | Sidebar / Navbar | Um único mapa de navegação, filtrado por capacidade e permissão; foco e estado ativo consistentes. |
 | EnvironmentSwitcher | Lista somente environments autorizados; troca limpa cache e subscriptions do escopo anterior. |
 | PageHeader | Título, descrição, breadcrumbs e ação principal em posições uniformes. |

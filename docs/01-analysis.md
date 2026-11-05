@@ -19,7 +19,7 @@ Estado global e limites: [status atual](08-status.md). Instruções de retomada:
 | Tempo real | Assinaturas WebSocket, console, logs e estatísticas | Não são substituídos por uma tabela REST. Exigem testes de conexão, escopo e revogação. |
 | Outros componentes | Catálogo, machine service, auth service e proxies | Fluxos precisam ser testados através da mesma origem, não apenas por chamada direta ao Cattle. |
 | Rancher Console | React, TypeScript, componentes acessíveis e tokens de tema | Aproveitar identidade e padrões; não copiar as regras de negócio do Rancher Console. |
-| Marca | Logos comunidade positivos/negativos disponíveis no Rancher Console | Reutilizar os arquivos existentes, sem redesenhar a marca. |
+| Marca | Símbolo, wordmark e favicon originais do Rancher | Reutilizar os arquivos existentes, sem redesenhar a marca. |
 
 Referências locais principais: `ui/app/router.js`, `ui/app/utils/navigation-tree.js`, `ui/app/services/access.js`, `ui/app/utils/browser-storage.js`, `ui/app/mixins/subscribe.js`; no Rancher Console, `tailwind.config.js`, `app/globals.css`, `styles/brand.css`, `components/layout/` e `public/imgs/`.
 

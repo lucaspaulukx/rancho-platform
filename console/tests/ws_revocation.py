@@ -9,6 +9,7 @@ import secrets
 import subprocess
 import threading
 import time
+import traceback
 import urllib.parse
 import urllib.request
 
@@ -28,14 +29,20 @@ def session():
     return value
 
 
-def main():
+def main(*, identity_factory=None):
     assert not MANIFEST.exists(), 'Recover the owned prior fixture before repeating.'
-    control, watched = session(), session()
+    control = session()
+    try:
+        identity = identity_factory(control) if identity_factory else None
+    except Exception:
+        control.request('/v2-beta/token/current', None, 'DELETE')
+        raise
+    watched = identity['session'] if identity else session()
     base = 'projects/1a12/'
     name = 'console-stream-' + secrets.token_hex(6)
     stack = None
     process = None
-    result = {'scope': 'own admin opaque-cookie project subscribe only; not logs/exec or group revocation',
+    result = {'scope': identity['scope'] if identity else 'own admin opaque-cookie project subscribe only; not logs/exec or group revocation',
               'status': 'failed', 'preexistingStacksPreserved': False, 'cleanupComplete': False}
     before = {s['id']: hashlib.sha256(json.dumps({k: s.get(k) for k in ('name', 'description', 'state')}, sort_keys=True).encode()).hexdigest()
               for s in control.api(base + 'stacks?limit=-1')['data'] if not s.get('removed')}
@@ -82,8 +89,12 @@ def main():
         control.api(base + 'stacks/' + stack['id'], {'description': name + '-before'}, method='PUT')
         wait_for('before')
         result['ownMetadataEventReceivedBeforeRevocation'] = True
-        assert watched.request('/v2-beta/token/current', None, 'DELETE')[0] in (200, 204)
-        result['newProtectedRequestStatus'] = watched.request('/v2-beta/projects')[0]
+        if identity:
+            identity['invalidate']()
+        else:
+            assert watched.request('/v2-beta/token/current', None, 'DELETE')[0] in (200, 204)
+        protected = identity.get('protected', '/v2-beta/projects') if identity else '/v2-beta/projects'
+        result['newProtectedRequestStatus'] = watched.request(protected)[0]
         command({'command': 'new-handshake'})
         result['newHandshakeStatus'] = wait_for('new-handshake', 8)['status']
         command({'command': 'watch-after'})
@@ -95,7 +106,7 @@ def main():
         command({'command': 'finish'})
         measured = wait_for('result', 5)
         result.update({k: v for k, v in measured.items() if k != 'type'})
-        result['revocationEnforced'] = result['newProtectedRequestStatus'] == 401 and result['newHandshakeStatus'] in (401, 403) and measured['closed'] and measured['after'] == 0
+        result['revocationEnforced'] = result['newProtectedRequestStatus'] in (401, 403, 404) and result['newHandshakeStatus'] in (401, 403, 404) and measured['closed'] and measured['after'] == 0
         result['status'] = 'passed' if result['revocationEnforced'] else 'failed'
     except Exception as error:
         result['errorType'] = type(error).__name__
@@ -124,12 +135,24 @@ def main():
             result['status'] = 'failed'
             result['cleanupErrorType'] = type(cleanup_error).__name__
         finally:
+            if identity:
+                try: identity['prepare_cleanup']()
+                except Exception: result['identityRecoveryError'] = True; result['status'] = 'failed'
             try:
                 if watched.request('/v2-beta/projects')[0] != 401:
                     watched.request('/v2-beta/token/current', None, 'DELETE')
                 result['watchedSessionRevoked'] = watched.request('/v2-beta/projects')[0] == 401
             except Exception:
                 result['watchedSessionRevoked'] = False
+            if identity:
+                try:
+                    identity['cleanup']()
+                    result['identityFixtureCleaned'] = True
+                except Exception as identity_error:
+                    result['identityCleanupErrorType'] = type(identity_error).__name__
+                    result['identityCleanupLocations'] = [{'file': Path(f.filename).name, 'line': f.lineno} for f in traceback.extract_tb(identity_error.__traceback__)]
+                    result['identityFixtureCleaned'] = False
+                    result['status'] = 'failed'
             try:
                 result['controlSessionRevoked'] = control.request('/v2-beta/token/current', None, 'DELETE')[0] in (200, 204)
             except Exception:

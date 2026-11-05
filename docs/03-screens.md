@@ -19,7 +19,7 @@ Todas as telas autenticadas usam AppShell. Login e retorno de autenticação usa
 
 | ID / tela | Conteúdo e funções | Interações e estados | Controle |
 |---|---|---|---|
-| AUTH-01 — Login | Logo comunidade, referência Rancher, botão corporativo, ajuda curta; formulário local somente no modo híbrido | Login, senha oculta, erro acionável, envio em andamento; nenhum link de recuperação inexistente | OIDC enabled / only / auto; módulo de login moderno |
+| AUTH-01 — Login | Marca Rancher, assinatura comunitária opcional, botão OIDC, ajuda curta; formulário local somente no modo híbrido | Login, senha oculta, erro acionável, envio em andamento; nenhum link de recuperação inexistente | OIDC enabled / only / auto; módulo de login moderno |
 | AUTH-02 — Retorno OIDC | Estado “Concluindo login”; troca única do ticket pela sessão Rancher | Ticket inválido/expirado permite reiniciar; não precisa de F5; não expõe código/token na UI | OIDC e login moderno |
 | AUTH-03 — Sessão expirada / logout | Mensagem e retorno ao login; preservação apenas de destino interno permitido | Logout explícito não inicia ciclo infinito de autologin; callback de erro não se repete automaticamente | Política de sessão |
 | ACCESS-01 — Sem acesso | Usuário autenticado, estado pendente e orientação para inclusão em grupo | Verificar novamente; sair/trocar conta; sem criação de environment, sem menus operacionais acessíveis | Tela de acesso pendente; regra de autorização independente |

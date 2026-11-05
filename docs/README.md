@@ -1,4 +1,4 @@
-# Rancher · customização comunidade
+# Rancher Community Console
 
 Roadmap completo e ordem de execução vigente: [Roadmap mestre](48-master-roadmap.md). Estado por entrega, gates restantes e critérios para100%; checkpoints abaixo preservam o histórico.
 
@@ -8,7 +8,7 @@ Planejamento iniciado em 20/10/2026; documentação consolidada para handoff em 
 
 ## Objetivo
 
-Modernizar o Rancher Docker 1.6.30 com identidade visual baseada no Rancher Console, preservando a referência ao Rancher, as regras de autorização do backend e a continuidade operacional. Acrescentar grupos locais, acesso centralizado aos environments e autenticação Keycloak/OIDC. Entregar por fases, com ativação e desativação explícitas, temas configuráveis e componentes compartilhados.
+Modernizar o Rancher Docker 1.6.30 com identidade Rancher modernizada, preservando sua marca, as regras de autorização do backend e a continuidade operacional. Acrescentar grupos locais, acesso centralizado aos environments e autenticação Keycloak/OIDC. Entregar por fases, com ativação e desativação explícitas, temas configuráveis e componentes compartilhados.
 
 **Regra de execução:** documentar antes de migrar. Cada fase passa por seus critérios de aceite e rollback antes da seguinte. Uma tela desenhada ou compilada não é uma funcionalidade validada.
 
@@ -23,7 +23,7 @@ Modernizar o Rancher Docker 1.6.30 com identidade visual baseada no Rancher Cons
 7. [Testes, aceite e rollback](07-validation-rollout.md)
 8. [Situação real do trabalho](08-status.md)
 9. [Inventário extraído dos fontes legados](09-source-inventory.md)
-10. [Referência visual conferida no Rancher Console](10-visual-identity.md)
+10. [Identidade visual e dimensões](10-visual-identity.md)
 11. [Aceite isolado das políticas de rede](11-network-policy-acceptance.md)
 12. [Operação unificada, menus contextuais e upgrade](12-unified-operation-ux.md)
 13. [Upgrade contextual de catálogo](13-catalog-stack-upgrade.md)
@@ -74,7 +74,7 @@ Checkpoints anteriores estão em `history/` e não prevalecem sobre o status atu
 - Grupos e seus membros são administrados no Rancher; o Keycloak autentica.
 - Usuário novo não recebe acesso nem environment automaticamente. Recebe uma tela explicativa.
 - OIDC pode ser exclusivo; login automático pode ser ligado separadamente.
-- Visual utiliza a base de cores do Rancher Console e a logo comunidade, mantendo referência ao Rancher.
+- Visual usa marca Rancher, azul e tons neutros em tokens compartilhados.
 - Telas modernas precisam ser amigáveis; reproduzir os formulários antigos com outra cor não basta.
 - Tudo novo precisa ter controle de ativação/desativação e comportamento de reversão definido.
 - Temas devem ser configuráveis.
@@ -131,3 +131,5 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 - [Guia e ferramenta de migração](72-migration-guide.md).
 - [Revogação de streams](73-open-stream-revocation.md).
 - [Histórico Git e base comunitária](74-git-and-community-validation.md).
+
+- [Bootstrap seguro e limites de validação](75-bootstrap-safety.md).
