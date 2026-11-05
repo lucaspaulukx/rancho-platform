@@ -1,3 +1,7 @@
+# Checkpoint — baseline de streams de host (05/11/2026)
+
+Host legado1h1/UI-OPS-LAB ativo, Docker19.03.15/cgroupfs. Helpers repõem token existente em arquivo privado e revogam sessão própria. Baseline79 confirmou falha: HTTP401 após logout, novosWS101 e sockets abertos com logs17/exec1/métricas23 posteriores;3 controles saudáveis. Uma fixture própria removida, config/volumes preservados e manifesto ausente. Não é aceite OBS02: guarda Go/Java ainda não implementada. Oficial websocket-proxyv0.23.12/5b4d22 em migration-runs; compila e upstream tests passam com Go1.27.3-alpine@sha256:d200d2dd76b03a99b52651fd1325aff7dcd35422c35c01bac56571b0507f3deb, sem rede. Próximo: binding UI assinado + revalidação contínua/idle no proxy, defaultfalse e on/off real. SourceRancher ainda imagem antiga; demais VMs paradas, baseline parado, projeto alheio intocado.
+
 # Checkpoint — grupos/cutover API original20 (05/11/2026)
 
 Recorte78 API passou35 checks em cópia original20:3 users/5 bindings→2 grupos, matrix60 preservada em coexistência/cutover nativo/rollback, owner direto conservado, readonly405 e admin404 com controle positivo e zero criação proibida, revogação na sessão e revisão antiga409. Sessões/cópias limpas, origem IDs/HTTP preservados. Planner público segue readonly; harness não é apply de produção, precheck nativo não é CAS. Próximo: OBS02 logs/exec/métricas e demais gates48. Pesquisa preliminar fonte oficial websocket-proxy v0.23.12/5b4d22 no diretório ignorado migration-runs; nenhuma mudança nesse componente ainda.
