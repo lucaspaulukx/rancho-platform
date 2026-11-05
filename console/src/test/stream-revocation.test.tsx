@@ -9,7 +9,14 @@ const context = vi.hoisted(() => ({
   project: { id: '1a12', name: 'Fixture' },
   config: {
     classicUrl: 'http://localhost:18080',
-    modules: { observability: true, metrics: true, metricsPayloadTransport: false },
+    modules: {
+      observability: true,
+      metrics: true,
+      metricsPayloadTransport: false,
+      serviceMetrics: false,
+      workloads: true,
+      contextActions: true,
+    },
   },
 }));
 vi.mock('../state', () => ({
@@ -88,6 +95,7 @@ afterEach(() => {
   context.config.modules.observability = true;
   context.config.modules.metrics = true;
   context.config.modules.metricsPayloadTransport = false;
+  context.config.modules.serviceMetrics = false;
   context.server.effective.METRICS_PAYLOAD_TRANSPORT_ENABLED = false;
 });
 describe('Revogação de conexões já abertas', () => {
@@ -356,5 +364,106 @@ describe('Revogação de conexões já abertas', () => {
     expect(Socket.instances[0].close).toHaveBeenCalled();
     view.unmount();
     expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe('Drawer de métricas de serviço', () => {
+  const base = '/v2-beta/projects/1a12/services/1s1';
+  const service: Resource = {
+    id: '1s1',
+    type: 'service',
+    name: 'web',
+    accountId: '1a12',
+    state: 'active',
+    links: { self: base, instances: base + '/instances', containerStats: base + '/containerstats' },
+  };
+  const a: Resource = { ...resource, name: 'web-1', serviceIds: ['1s1'] };
+  const b: Resource = { ...a, id: '1i2', name: 'web-2', externalId: 'docker-fixture-two' };
+  const install = (rows: () => Resource[]) => {
+    setup();
+    const fetcher = vi.fn(async (input: string) => {
+      if (input === base) return response(service);
+      if (input === base + '/instances?limit=65') return response({ data: rows() });
+      if (input === base + '/containerstats')
+        return response({
+          url: location.origin + '/v1/containerstats/service',
+          token: 'synthetic-service',
+        });
+      throw new Error('Unexpected fixture endpoint');
+    });
+    vi.stubGlobal('fetch', fetcher);
+    return fetcher;
+  };
+  it('não busca descritores nem conecta quando a flag está desligada', () => {
+    const fetcher = install(() => [a]);
+    render(<ResourceMetrics resource={service} onClose={vi.fn()} />);
+    expect(screen.getByText('Métricas desativadas')).toBeInTheDocument();
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(Socket.instances).toHaveLength(0);
+  });
+  it('seleciona séries do mesmo socket sem misturar réplicas nem sair do drawer', async () => {
+    context.config.modules.serviceMetrics = true;
+    install(() => [a, b]);
+    const view = render(<ResourceMetrics resource={service} onClose={vi.fn()} />);
+    await waitFor(() => expect(Socket.instances).toHaveLength(1));
+    const socket = Socket.instances[0];
+    act(() =>
+      socket.onmessage?.({
+        data: JSON.stringify([
+          {
+            resourceType: 'container',
+            id: a.externalId,
+            timestamp: '2026-11-05T12:00:01Z',
+            memory: { usage: 4 * 1048576 },
+          },
+          {
+            resourceType: 'container',
+            id: b.externalId,
+            timestamp: '2026-11-05T12:00:01Z',
+            memory: { usage: 9 * 1048576 },
+          },
+          {
+            resourceType: 'container',
+            id: 'foreign',
+            timestamp: '2026-11-05T12:00:01Z',
+            memory: { usage: 99 * 1048576 },
+          },
+        ]),
+      }),
+    );
+    const select = screen.getByLabelText('Container do serviço');
+    const memory = screen.getByRole('heading', { name: 'Memória' }).closest('section');
+    expect(memory).toHaveTextContent('4MiB');
+    expect(screen.getByText(/2 de 2 com amostras/)).toBeInTheDocument();
+    fireEvent.change(select, { target: { value: '1i2' } });
+    expect(memory).toHaveTextContent('9MiB');
+    expect(Socket.instances).toHaveLength(1);
+    view.unmount();
+    expect(socket.close).toHaveBeenCalled();
+  });
+  it('encerra o lote se uma réplica é substituída, sem reconectar sozinha', async () => {
+    context.config.modules.serviceMetrics = true;
+    let rows = [a, b];
+    install(() => rows);
+    render(<ResourceMetrics resource={service} onClose={vi.fn()} />);
+    await waitFor(() => expect(Socket.instances).toHaveLength(1));
+    rows = [a, { ...b, externalId: 'replacement-docker' }];
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+    expect(screen.getByText(/Os containers do serviço mudaram/)).toBeInTheDocument();
+    expect(Socket.instances[0].close).toHaveBeenCalled();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30_000);
+    });
+    expect(Socket.instances).toHaveLength(1);
+  });
+  it('não emite acesso para uma lista que contém container de outro escopo', async () => {
+    context.config.modules.serviceMetrics = true;
+    const fetcher = install(() => [{ ...a, accountId: '1a99' }]);
+    render(<ResourceMetrics resource={service} onClose={vi.fn()} />);
+    expect(await screen.findByText(/lista de containers não corresponde/)).toBeInTheDocument();
+    expect(fetcher.mock.calls.map(([path]) => path)).not.toContain(base + '/containerstats');
+    expect(Socket.instances).toHaveLength(0);
   });
 });

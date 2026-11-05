@@ -22,3 +22,11 @@ Definir antes do código orçamento explícito de réplicas/buffers e estratégi
 4. Testes de componente: flag off/ausente, serviço sem link, erro parcial, pausa/reconexão, fechamento e troca de ambiente/identidade, cleanup e CSV. Linux unitários+TypeScript/Vite.
 5. Teste físico de serviço próprio3 réplicas pelo proxy18090 sem substituir descriptors/rotas no navegador: menu real abre painel, identifica cada réplica com amostras ao vivo, troca seleção, logs/terminal continuam contextuais, temas/layout/teclado, retirada de grant fecha conexões e cleanup completo. Teste de fonte estrangeira no parser não substitui RBAC real.
 6. Registrar resultado e limites; habilitar moderno somente após gates. OPS13 também exige demais tipos/gráficos do inventário03/09 e não se encerra pelo recorte inicial.
+
+## Implementação e gate local — 05/11/2026
+
+Implementado o recorte de serviços Docker nativos: ação contextual nas stacks e nos detalhes abre o drawer comum; uma conexão de serviço alimenta séries independentes por réplica. Associação exige environment e serviço atuais, links de mesma origem e instâncias autorizadas. Snapshot limitado a64 targets; frames limitados a1MiB/32 linhas e cada série a300 amostras/5min. Não há soma de réplicas apresentada como taxa agregada. Mudança de associação detectada na revalidação de15s encerra a conexão e pede reconexão explícita.
+
+Seletor usa Field e tokens compartilhados; troca de réplica preserva o socket. CSV inclui somente a réplica selecionada com containerId e unidades. Fechamento/contexto/revogação abortam requisições e conexão;1008 não reconecta automaticamente. Flag aditiva continua off quando ausente e depende dos módulos previstos. Não alterado frontend original.
+
+Build Linux passou639 testes/73 arquivos, TypeScript e Vite. Inclui testes de mistura/escopo/limites de séries, dependências de configuração, menu contextual e lifecycle do painel. Teste físico do menu com três réplicas, CSV, temas, mobile e retirada real de grant ainda pendente. Flag pública permanece ausente/off até esse gate; teste pode ativá-la somente no próprio contexto do navegador, sem substituir descriptors, dados ou endpoints. OPS13 permanece aberto.

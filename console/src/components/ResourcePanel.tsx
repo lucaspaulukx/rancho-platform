@@ -12,7 +12,7 @@ import { fieldLabel, SchemaForm } from './SchemaForm';
 import { ResourceDetails } from './ResourceDetails';
 import { ResourceStream } from './ResourceStream';
 import { isUserAction } from '../resource-actions';
-import { metricsLink } from '../metrics';
+import { metricsLink, serviceMetricsEnabled } from '../metrics';
 import {
   imageUpgradePayload,
   supportsImageUpgrade,
@@ -446,7 +446,7 @@ function ResourcePanelContext({
                   )}
                   {app.config.modules.observability &&
                     app.config.modules.metrics &&
-                    metricsLink(resource) && (
+                    metricsLink(resource, serviceMetricsEnabled(app.config.modules)) && (
                       <Button onClick={() => setMode('metrics')}>Métricas</Button>
                     )}
                   {writable && schema?.resourceMethods?.includes('PUT') && (
