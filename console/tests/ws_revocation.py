@@ -24,7 +24,7 @@ REPORT = ROOT / 'console/ws-revocation-results.json'
 
 def session():
     value = lab.Session()
-    value.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPCookieProcessor(value.cookies))
+    value.opener = lab.loopback_opener(value.cookies)
     value.login('labadmin', lab.CONFIG['RANCHER_ADMIN_PASSWORD'])
     return value
 

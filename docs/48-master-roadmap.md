@@ -158,3 +158,12 @@ A primeira tentativa on falhou fechada porque ApiRequestFilter usa a propriedade
 
 CLI plan/scan implementada com Syft1.56.0 por digest, archive pelo ID local, sem rede/socket/restart de apps e com cleanup verificado. Dez contratos e scan real repetido passaram;486 pacotes backend/73 console/209 lockfile+dev, com145/1/0 licenças não identificadas. Projeção CycloneDX exclui arquivos/env/config/metadados desconhecidos e liga hashes dos manifests congelados. Console declara Apache-2.0 nos manifests, coerente com LICENSE. Raw/temp removidos e IDs preservados. REL04 segue parcial: falta revisão de licenças, detecção completa de binários, CVEs/procedência/schema independente e demais gates48. Não converter inventário em aprovação legal/segurança. Matriz79 de seis identidades local/OIDC passou; renovação longa está em execução, ainda sem aceite.
 
+
+## Checkpoint79 — matriz/lease e métricas de serviço (05/11/2026)
+
+Admin+seis casos locais/OIDC (grant, desativação, expiração real45s) passaram em3 transportes: HTTP401/404, novosWS401,1008/zero dados após revogação e controles válidos; contas/grupos/sessões/settings limpos. Lease admin320s confirmou novos dados em logs/exec/métricas após prova300s e posterior revogação correta, sem alterar expiração global. Getter de métricas de serviço foi corrigido para assinar path completo; proxy valida lotes sem payload antes do upgrade. Build/testes Go/race passaram;4 transportes e serviço3 réplicas passaram direto no backend.
+
+Proxy moderno real18090 com3 réplicas reproduziu414 no token agregado10524 chars; não marcar esse caso aceito. Primeira tentativa dizia proxy mas ainda usava18080: evidência inválida para proxy, preservada; harness agora confirma porta no evento ready. Comparação off no mesmo artefato256a2a53, através de18090, passou como baseline legado inseguro nos4 transportes, com cleanup/controles. Guarda de host deixada **off** no runtime e nos defaults até corrigir negociação de payload81; UI608/71 permanece servida.
+
+Helper HTTP de testes conecta localhost por127.0.0.1 preservando URL/Host/cookies/redirect/timeouts;2 contratos e login real passaram. Medido ping Python2039ms→2ms, eliminando fallback IPv6 do Windows, sem mudar DNS/hosts/timeout do servidor nem o gate de instabilidade do scheduler. Keycloak helper aceita opener opcional; padrão de outros usuários não alterado. Próximo81: payload assinado no primeiro frame opt-in e teste de terminal ocioso pelo proxy; API keys/HA/carga seguem gates distintos.
+

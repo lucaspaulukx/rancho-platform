@@ -52,3 +52,18 @@ Baseline off repetido com3 transportes saudáveis confirmou entrega indevida ap�
 
 A primeira tentativa on falhou fechada porque ApiRequestFilter usa a propriedade Archaius api.ignore.paths, não o parâmetro XML; servia indexHTML200 no callback. Corrigido o defaults.properties e prefixo sem slash final; matrix agora exige403JSON/no-store sem chave interna antes de criar fixtures. Remoções autônomas de scheduler e volumes-root associados são relatadas separadamente; preservação de serviços e containers/volumes de aplicação continua obrigatória. Baseline estrito anterior permanece falho, sem reescrever a evidência. Código/template de migração/DB não alterados por esta correção.
 
+
+## Próximo subteste — métricas agregadas de serviço
+
+Matriz dos seis usuários local/OIDC passou e o teste admin de320s confirmou logs/exec/métricas vivos depois da prova original300s, seguidos de revogação1008/zero dados e controles saudáveis. Nenhuma alteração de relógio/expiração global foi usada no ensaio de lease.
+
+Leitura adicional do getter nativo ServiceContainerStatsLinkHandler mostrou que ele emite token para o caminho base e só depois acrescenta dockerId ao URL interno. Binding estrito atual não pode aceitar essa diferença; afrouxar path no proxy ampliaria o escopo. Corrigir o getter para emitir acesso com o caminho completo e preservar URL/meta externa, compilar o JAR host-stats no overlay e testar métrica de serviço real. Proxy deve validar todas as provas de um lote sem payload antes do upgrade; negociação payload=true continua limitada e validada depois do primeiro frame. Acrescentar regressão Go de lote parcialmente revogado antes de qualquer backend e controle físico no mesmo container próprio. UI guard continua sem default no compose moderno até concluir esse subteste e baseline off no artefato correspondente.
+
+## Checkpoint79 — matriz/lease e métricas de serviço (05/11/2026)
+
+Admin+seis casos locais/OIDC (grant, desativação, expiração real45s) passaram em3 transportes: HTTP401/404, novosWS401,1008/zero dados após revogação e controles válidos; contas/grupos/sessões/settings limpos. Lease admin320s confirmou novos dados em logs/exec/métricas após prova300s e posterior revogação correta, sem alterar expiração global. Getter de métricas de serviço foi corrigido para assinar path completo; proxy valida lotes sem payload antes do upgrade. Build/testes Go/race passaram;4 transportes e serviço3 réplicas passaram direto no backend.
+
+Proxy moderno real18090 com3 réplicas reproduziu414 no token agregado10524 chars; não marcar esse caso aceito. Primeira tentativa dizia proxy mas ainda usava18080: evidência inválida para proxy, preservada; harness agora confirma porta no evento ready. Comparação off no mesmo artefato256a2a53, através de18090, passou como baseline legado inseguro nos4 transportes, com cleanup/controles. Guarda de host deixada **off** no runtime e nos defaults até corrigir negociação de payload81; UI608/71 permanece servida.
+
+Helper HTTP de testes conecta localhost por127.0.0.1 preservando URL/Host/cookies/redirect/timeouts;2 contratos e login real passaram. Medido ping Python2039ms→2ms, eliminando fallback IPv6 do Windows, sem mudar DNS/hosts/timeout do servidor nem o gate de instabilidade do scheduler. Keycloak helper aceita opener opcional; padrão de outros usuários não alterado. Próximo81: payload assinado no primeiro frame opt-in e teste de terminal ocioso pelo proxy; API keys/HA/carga seguem gates distintos.
+
