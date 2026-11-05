@@ -48,4 +48,4 @@ Apache-2.0; preserve [LICENSE](LICENSE), [NOTICE](NOTICE) and dependency notices
 
 ## Migration rehearsal
 
-Read the [migration guide](docs/72-migration-guide.md) before using the diagnostic/backup tool. It has passed database-only offline recovery rehearsals, including20 synthetic environments; complete state/IdP migration and production cutover are not yet accepted.
+Read the [migration guide](docs/72-migration-guide.md) before using the diagnostic/backup tool. It has passed database-only rehearsals with20 synthetic environments and [encrypted state/image recovery](docs/76-complete-recovery-plan.md) of the current lab artifact, including restored local/Keycloak/OIDC login. Original-to-custom engine upgrade, full rollback and production cutover remain unaccepted gates.

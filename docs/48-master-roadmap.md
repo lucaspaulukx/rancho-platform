@@ -95,7 +95,7 @@ Desenvolvimento não altera Ember. Toda função nova tem flag e comportamento o
 | ID | Entrega | Estado | Critério final |
 |---|---|---|---|
 | REL01 | Migrations banco/config versionadas | Parcial: ensaio offline72 aceito | Instalação limpa + atualização de base sintética + idempotência/checksums/rollback |
-| REL02 | Backup Rancher DB/estado e Keycloak | DB72 e backup frio/restore de arquivos76 aceitos; engines/login pendentes | Backup consistente completo e protegido; restaurar em volumes/containers próprios, login/grupos/workloads conferidos |
+| REL02 | Backup Rancher DB/estado e Keycloak | DB72, arquivos e engines/login isolados76 aceitos; upgrade original/rollback completo pendentes | Backup consistente completo e protegido; restaurar em volumes/containers próprios, login/grupos/workloads conferidos |
 | REL03 | Rollback de frontend/backend | Parcial | Imagem anterior e configuração/dados compatíveis; aba aberta continua ou recupera com clareza |
 | REL04 | Pacote reproduzível | Parcial | Bootstrap/restart de rede57 aceito; lockfiles/imagens/digests/licenças, instalação/upgrade/restore completos e matriz de compatibilidade restantes |
 | REL05 | Segurança final | A executar | Rotas/ações/scopes, CSRF/secret/cache/sessão/dependências/exposição revisados, riscos legados explícitos |
@@ -131,3 +131,5 @@ Matriz73 ampliada: retirada de grant próprio, desativação e expiração real 
 Atualização62: logout federado opcional passou15 checks,4 cenários reais e8 axe/layout; nenhuma confirmação humana pendente. Retorno/Origin/CSRF/SSO local/IdP indisponível/exclusivo/autologin e replay validados. Flag defaultfalse, configuração restaurada. Cinco contratos de UI passaram a usar2 fixtures de schema sanitizadas versionadas: build do pacote limpo do Git aprovado595/70 no checkpoint4c9e645, sem capturas locais. Build funcional atual605/71 com TypeScript/Vite. Próxima prioridade: backup/restore completo de estado Rancher/Keycloak e limites do preflight72, mantendo OBS02 de logs/exec/métricas e todos os demais gates abertos.
 
 Atualização76 (05/11): backup frio criptografado dos5 volumes/configuração e restauração de arquivos, ownership e modos em volumes novos aprovados;29 testes Python. Fonte retomada com IDs preservados, helpers sem logs/rede e cópias limpas. REL02 permanece parcial até engines/login/grants recuperados, imagens e capacidade/ACL completos.
+
+Atualização76 ampliada:36 testes,4 imagens criptografadas,15 checks de engines recuperados/login local/Keycloak/OIDC-PKCE/zero acesso e checksums de grants passaram. Cópias sem egress/portas/volumes de origem, cleanup e HTTP original aprovados. Não confundir recuperação do mesmo artefato com migração original20envs + rollback de engine, ainda aberta.

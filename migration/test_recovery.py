@@ -13,6 +13,14 @@ from migration.tool import MigrationError
 class RecoveryTests(unittest.TestCase):
     password = 'synthetic-recovery-test-passphrase-0123456789'
 
+    def test_reject_capture_after_kill_oom_or_unexpected_exit(self):
+        for state in [{'Running': True, 'ExitCode': 0}, {'Running': False, 'ExitCode': 137},
+                      {'Running': False, 'ExitCode': 1}, {'Running': False, 'ExitCode': 0, 'OOMKilled': True}]:
+            with self.assertRaises(MigrationError):
+                recovery.require_stopped_cleanly(state)
+        recovery.require_stopped_cleanly({'Running': False, 'ExitCode': 0})
+        recovery.require_stopped_cleanly({'Running': False, 'ExitCode': 143})
+
     def test_backup_requires_explicit_maintenance_before_any_docker_action(self):
         with patch.object(recovery, 'run') as docker:
             with self.assertRaises(MigrationError):
