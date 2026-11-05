@@ -1,3 +1,9 @@
+## Checkpoint87 — limites de processo na criação (05/11/2026)
+
+Nova flag opcional workloadUlimitEditors, ausente=false. Editor compartilhado de ulimits em container/launchConfig/sidecar, validação32bits/duplicatas/soft-hard e revalidação de schema antes do POST. Linux647 testes/74 arquivos + TypeScript/Vite passaram. Fixture real criou container pelo drawer: nofile1024/2048 confirmado na API, Docker e processo; identidade sem grant recebeu negação. Cleanup de recursos/identidade/sessão e desvio temporário completos, configurações/volumes anteriores preservados.
+
+Aceite físico restrito a container avulso Linux/nofile/um host. Serviços/sidecars têm testes de contrato/componente, sem aceite físico equivalente ainda. Upgrade/reset/rollback são recorte88; OPS11, CNI nativo, multi-host e release continuam abertos. Ver87 para falhas preservadas e limites. Código sob flag off no pacote; não houve mudança no Ember/backend.
+
 ## Checkpoint86 — Rancho Platform e aceite83/84 (05/11/2026)
 
 Destino Git autorizado: https://github.com/lucaspaulukx/rancho-platform, inicialmente vazio e privado. Preservar histórico comunitário; fluxo86 descreve commits por mudança e branches/PRs após importação. Conferência de21 commits/777 objetos não encontrou credenciais locais conhecidas, padrões configurados ou identidades aposentadas. Scanner não substitui auditoria completa.
