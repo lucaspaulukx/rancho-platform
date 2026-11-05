@@ -172,3 +172,7 @@ Contrato vigente schemaVersion1: [migração, dry-run, checksums e rollback](53-
 ## Revalidação de subscribe — 04/11/2026
 
 `RANCHER_SUBSCRIPTION_SESSION_GUARD_ENABLED` defaultfalse no backend, efetiva somente com customização. Compose moderno assume true (overridefalse). Revalida token opaco/JWE, conta/perfil e papel por mensagem/ping do WebSocket subscribe; falha fecha a conexão. On/off e revogação de sessão própria aceitos73. Não representa aceite de API keys, logs, exec ou carga.
+
+## Logout federado opcional
+
+`RANCHER_OIDC_FEDERATED_LOGOUT_ENABLED` defaultfalse, efetivo somente com OIDC/customização ativos. True habilita preparo seguro de saída para sessões OIDC; local conserva saída local e não encerra SSO. Registrar no IdP o retorno exato `{origem pública do callback}/console/login?oidc_logout=returned`. Origin/CSRF/sessão são obrigatórios. Falha do IdP não impede limpar/revogar Rancher; exclusivo não oferece login local. Recorte62 aceito com15 checks,4 fluxos reais e8 cenários axe/layout.

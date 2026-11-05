@@ -57,6 +57,14 @@ public class ConfigurationContract {
         check(new CustomizationConfig(streams).enabled("SUBSCRIPTION_SESSION_GUARD_ENABLED"));
         streams.put("RANCHER_CUSTOMIZATION_ENABLED","false");check(!new CustomizationConfig(streams).enabled("SUBSCRIPTION_SESSION_GUARD_ENABLED"));
         streams=base();streams.put("RANCHER_SUBSCRIPTION_SESSION_GUARD_ENABLED","yes");rejects(streams);
+        check(!new CustomizationConfig(base()).enabled("OIDC_FEDERATED_LOGOUT_ENABLED"));
+        for(int bits=0;bits<4;bits++) {
+            Map<String,String> logout=base();logout.put("RANCHER_OIDC_FEDERATED_LOGOUT_ENABLED","true");
+            logout.put("RANCHER_CUSTOMIZATION_ENABLED",String.valueOf((bits&1)!=0));
+            logout.put("RANCHER_OIDC_ENABLED",String.valueOf((bits&2)!=0));
+            check(new CustomizationConfig(logout).enabled("OIDC_FEDERATED_LOGOUT_ENABLED")==((bits&3)==3));
+        }
+        invalid=base();invalid.put("RANCHER_OIDC_FEDERATED_LOGOUT_ENABLED","yes");rejects(invalid);
         Map<String,String> secret=base();secret.put("RANCHER_OIDC_CLIENT_SECRET","sentinel-secret-never-public");
         check(!new CustomizationConfig(secret).publicConfig().toString().contains("sentinel-secret"));
         System.out.println(checks+" configuration assertions passed across 64 combinations");

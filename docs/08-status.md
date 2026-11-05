@@ -1,3 +1,7 @@
+# Checkpoint — logout federado e pacote comunitário
+
+Frontend605 testes/71 arquivos + TypeScript/Vite em Docker. Logout62 aceito15 checks/4 fluxos reais/8 axe-layout: confirmação Keycloak, replay401, conta local conserva SSO, tela sem acesso e IdP parado em exclusivo/autologin. Política/cliente/provedor e fixtures restaurados; flag de logout defaultfalse. Contratos Java134 configuração +31 regras de logout +10 writer. Troca de tema atômica corrigiu baixo contraste transitório. Git contém commits incrementais, incluindo pacote limpo4c9e645 com595/70 no checkpoint anterior; schemas de teste sanitizados em src/test/fixtures. Ainda não é100%: roadmap48 aberto. Próximo: recuperação completa Rancher/IdP e migração72, além de streams logs/exec/métricas e demais gates.
+
 # Checkpoint — 04/11/2026
 
 Base comunitária74 e guia/ferramenta de migração72 entregues em recortes testados. Frontend595/70, TypeScript/Vite; Sobre8 + formulários4 axe/layout, rotas42. Migração17 testes +110 tabelas reais e fixture original20 environments offline: backup criptografado, integridade, restore, esquema aditivo/idempotência, rollback e cleanup aprovados. Nenhuma escrita na origem. OBS02/73 falhou nativamente: após revogar sessão, HTTP401 mas socket anterior entregou novo evento. Corrigir antes de considerar segurança de streams aceita. Roadmap48 permanece aberto; nenhuma liberação de produção.

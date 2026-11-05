@@ -135,7 +135,7 @@ def identity_factory(mode, *, oidc=False):
             def prepare_cleanup():
                 current = admin.api('accounts/' + account['id'])
                 if current['state'] == 'inactive': account_action('activate')
-            return {'session': ordinary, 'renew_session': renew_session, 'invalidate': invalidate, 'cleanup': cleanup,
+            return {'session': ordinary, 'browser_credentials': {'username': name, 'password': password}, 'renew_session': renew_session, 'invalidate': invalidate, 'cleanup': cleanup,
                     'prepare_cleanup': prepare_cleanup, 'protected': '/v2-beta/projects/1a12',
                     'scope': ('own ordinary OIDC identity: ' if oidc else 'own ordinary local identity: ') + mode + '; readonly group only in UI-OPS-LAB; subscribe only'}
         except Exception:

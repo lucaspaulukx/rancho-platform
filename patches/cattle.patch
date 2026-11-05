@@ -372,7 +372,7 @@ diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth
 new file mode 100644
 --- /dev/null
 +++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CustomizationConfig.java
-@@ -0,0 +1,68 @@
+@@ -0,0 +1,70 @@
 +package io.cattle.platform.iaas.api.auth.localrbac;
 +
 +import java.util.*;
@@ -386,9 +386,9 @@ new file mode 100644
 +
 +    public CustomizationConfig(Map<String,String> env) {
 +        String[] names={"CUSTOMIZATION_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
-+            "ENV_CREATION_ADMIN_ONLY","DISABLE_AUTO_ENVIRONMENT","CATALOG_WRITE_GUARD_ENABLED","SESSION_ACCOUNT_GUARD_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED","OIDC_LOGIN_PREFLIGHT_ENABLED","OIDC_ONLY","OIDC_AUTO_LOGIN","MODERN_UI_ENABLED"};
++            "ENV_CREATION_ADMIN_ONLY","DISABLE_AUTO_ENVIRONMENT","CATALOG_WRITE_GUARD_ENABLED","SESSION_ACCOUNT_GUARD_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED","OIDC_LOGIN_PREFLIGHT_ENABLED","OIDC_FEDERATED_LOGOUT_ENABLED","OIDC_ONLY","OIDC_AUTO_LOGIN","MODERN_UI_ENABLED"};
 +        for (String name:names) {
-+            boolean fallback=!(name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
++            boolean fallback=!(name.equals("OIDC_FEDERATED_LOGOUT_ENABLED") || name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
 +            String value=env.get("RANCHER_"+name);
 +            if(value!=null && !value.equals("true") && !value.equals("false")) { throw new IllegalArgumentException("Invalid boolean: RANCHER_"+name); }
 +            requested.put(name,value==null?fallback:Boolean.valueOf(value));
@@ -421,6 +421,7 @@ new file mode 100644
 +            effective.put(name,custom && requested.get(name));
 +        }
 +        effective.put("OIDC_ENABLED",effective.get("OIDC_ENABLED") && oidcConfigured);
++        effective.put("OIDC_FEDERATED_LOGOUT_ENABLED",requested.get("OIDC_FEDERATED_LOGOUT_ENABLED") && effective.get("OIDC_ENABLED"));
 +        effective.put("OIDC_LOGIN_PREFLIGHT_ENABLED",requested.get("OIDC_LOGIN_PREFLIGHT_ENABLED") && effective.get("OIDC_ENABLED"));
 +        if((requested.get("OIDC_ONLY") || requested.get("OIDC_AUTO_LOGIN")) && !effective.get("OIDC_ENABLED")) {
 +            throw new IllegalArgumentException("OIDC_ONLY/AUTO_LOGIN require effective OIDC");
@@ -436,6 +437,7 @@ new file mode 100644
 +        Map<String,Boolean> available=new LinkedHashMap<>();
 +        for(String key:requested.keySet()) { available.put(key,!key.equals("MODERN_UI_ENABLED")); }
 +        available.put("OIDC_ENABLED",oidcConfigured);
++        available.put("OIDC_FEDERATED_LOGOUT_ENABLED",oidcConfigured);
 +        available.put("OIDC_LOGIN_PREFLIGHT_ENABLED",oidcConfigured);
 +        result.put("available",available);
 +        return result;
@@ -951,6 +953,60 @@ new file mode 100644
 +        create().execute("INSERT INTO local_rbac_oidc_user(identity_hash,account_id) VALUES(?,?)",hash,account);
 +    }
 +}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcLogoutRules.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcLogoutRules.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcLogoutRules.java
+@@ -0,0 +1,49 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import java.net.URI;
++import java.net.URLEncoder;
++import java.net.URLDecoder;
++import java.nio.charset.StandardCharsets;
++import java.security.MessageDigest;
++
++/** Fixed return and issuer-bound destination; no browser-supplied redirect or ID token. */
++public final class OidcLogoutRules {
++    private OidcLogoutRules() { }
++    private static URI web(String value, boolean allowHttp) throws Exception {
++        URI uri = new URI(value);
++        if (uri.getHost() == null || uri.getRawUserInfo() != null || uri.getRawFragment() != null ||
++            !("https".equalsIgnoreCase(uri.getScheme()) || (allowHttp && "http".equalsIgnoreCase(uri.getScheme())))) {
++            throw new IllegalArgumentException("Invalid logout URL");
++        }
++        return uri;
++    }
++    private static int port(URI uri) { return uri.getPort() >= 0 ? uri.getPort() : "https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80; }
++    private static boolean sameOrigin(URI a, URI b) {
++        return a.getScheme().equalsIgnoreCase(b.getScheme()) && a.getHost().equalsIgnoreCase(b.getHost()) && port(a) == port(b);
++    }
++    public static boolean requestAllowed(String origin, String callback, String cookie, String header, boolean allowHttp) {
++        try {
++            URI source = web(origin, allowHttp), target = web(callback, allowHttp);
++            if (!sameOrigin(source, target) || source.getRawQuery() != null || !source.getRawPath().isEmpty()) { return false; }
++            return cookie != null && header != null && !cookie.isEmpty() && cookie.length() <= 4096 &&
++                MessageDigest.isEqual(cookie.getBytes(StandardCharsets.UTF_8), header.getBytes(StandardCharsets.UTF_8));
++        } catch (Exception invalid) { return false; }
++    }
++    public static String destination(String endpoint, String issuer, String callback, String client, boolean allowHttp) throws Exception {
++        URI logout = web(endpoint, allowHttp), provider = web(issuer, allowHttp), app = web(callback, allowHttp);
++        if (!sameOrigin(logout, provider) || client == null || client.trim().isEmpty() || client.length() > 1024) {
++            throw new IllegalArgumentException("Invalid logout destination");
++        }
++        if (logout.getRawQuery() != null) {
++            for (String pair : logout.getRawQuery().split("&")) {
++                String key = URLDecoder.decode(pair.split("=", 2)[0], "UTF-8");
++                if ("client_id".equals(key) || "post_logout_redirect_uri".equals(key) || "id_token_hint".equals(key) || "logout_hint".equals(key)) {
++                    throw new IllegalArgumentException("Conflicting logout parameters");
++                }
++            }
++        }
++        String returned = new URI(app.getScheme(), null, app.getHost(), app.getPort(), "/console/login", "oidc_logout=returned", null).toASCIIString();
++        return logout.toASCIIString() + (logout.getRawQuery() == null ? "?" : "&") +
++            "client_id=" + URLEncoder.encode(client, "UTF-8") + "&post_logout_redirect_uri=" + URLEncoder.encode(returned, "UTF-8");
++    }
++}
 diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcReadiness.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcReadiness.java
 new file mode 100644
 --- /dev/null
@@ -989,7 +1045,7 @@ diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth
 new file mode 100644
 --- /dev/null
 +++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcServlet.java
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,58 @@
 +package io.cattle.platform.iaas.api.auth.localrbac;
 +
 +import java.io.IOException;
@@ -1030,12 +1086,29 @@ new file mode 100644
 +            response.sendError(401,"Falha na autenticacao OIDC. Inicie o login novamente.");
 +        }
 +    }
++    @Override
++    protected void doPost(HttpServletRequest request,HttpServletResponse response) throws IOException {
++        response.setHeader("Cache-Control","no-store");
++        response.setHeader("Referrer-Policy","no-referrer");
++        response.setHeader("X-Content-Type-Options","nosniff");
++        response.setContentType("application/json");
++        if (!"/logout".equals(request.getPathInfo())) { response.setStatus(404); response.getWriter().write("{}"); return; }
++        OidcSupport oidc=WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext()).getBean(OidcSupport.class);
++        try {
++            new com.fasterxml.jackson.databind.ObjectMapper().writeValue(response.getWriter(),oidc.prepareLogout(request));
++        } catch (io.github.ibuildthecloud.gdapi.exception.ClientVisibleException rejected) {
++            response.setStatus(rejected.getStatus()); response.getWriter().write("{\"error\":\"LogoutUnavailable\"}");
++        } catch (Exception unavailable) {
++            response.setStatus(503); response.getWriter().write("{\"error\":\"LogoutUnavailable\"}");
++        }
++    }
++
 +}
 diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcSupport.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcSupport.java
 new file mode 100644
 --- /dev/null
 +++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcSupport.java
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,192 @@
 +package io.cattle.platform.iaas.api.auth.localrbac;
 +
 +import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1062,6 +1135,9 @@ new file mode 100644
 +public class OidcSupport {
 +    @Inject LocalGroupStore localGroupStore;
 +    @Inject AuthDao authDao;
++    @Inject io.cattle.platform.iaas.api.auth.dao.AuthTokenDao authTokenDao;
++    @Inject io.cattle.platform.core.dao.AccountDao accountDao;
++    @Inject io.cattle.platform.token.TokenService tokenService;
 +    @Inject ObjectManager objectManager;
 +    @Inject ObjectProcessManager objectProcessManager;
 +    private final ObjectMapper mapper=new ObjectMapper();
@@ -1094,6 +1170,38 @@ new file mode 100644
 +            metadata=fresh;
 +            return true;
 +        });
++    }
++    public boolean federatedLogoutEnabled() { return CustomizationConfig.CURRENT.enabled("OIDC_FEDERATED_LOGOUT_ENABLED"); }
++    private String cookie(HttpServletRequest request, String name) {
++        if (request.getCookies() != null) {
++            for (Cookie cookie : request.getCookies()) { if (name.equals(cookie.getName())) { return cookie.getValue(); } }
++        }
++        return null;
++    }
++    public Map<String,Object> prepareLogout(HttpServletRequest request) throws Exception {
++        if (!federatedLogoutEnabled()) { throw new ClientVisibleException(404,"FeatureDisabled"); }
++        boolean allowHttp = "true".equals(System.getenv("RANCHER_LAB_ALLOW_HTTP"));
++        if (!OidcLogoutRules.requestAllowed(request.getHeader("Origin"), callback, cookie(request,"CSRF"), request.getHeader("X-Api-Csrf"), allowHttp)) {
++            throw new ClientVisibleException(403,"LogoutRequestRejected");
++        }
++        String key = cookie(request,"token");
++        io.cattle.platform.core.model.AuthToken stored = key == null ? null : authTokenDao.getTokenByKey(key);
++        if (stored == null || !io.cattle.platform.iaas.api.auth.SecurityConstants.AUTH_PROVIDER.get().equals(stored.getProvider())) {
++            throw new ClientVisibleException(401,"SessionUnavailable");
++        }
++        Map<String,Object> payload;
++        try { payload = tokenService.getJsonPayload(stored.getValue(),true); }
++        catch (io.cattle.platform.token.TokenException invalid) { throw new ClientVisibleException(401,"SessionUnavailable"); }
++        Account account = stored.getAuthenticatedAsAccountId() == null ? null : authDao.getAccountById(stored.getAuthenticatedAsAccountId());
++        if (payload == null || account == null || !accountDao.isActiveAccount(account)) { throw new ClientVisibleException(401,"SessionUnavailable"); }
++        Map<String,Object> result = new LinkedHashMap<>();
++        if (!"oidc".equals(payload.get("loginMethod"))) { result.put("federated",false); return result; }
++        // Fresh discovery, with bounded connect/read deadlines; never return cached success for an unavailable IdP.
++        Map<String,Object> fresh = json(issuer+"/.well-known/openid-configuration",null);
++        if (!issuer.equals(fresh.get("issuer")) || !(fresh.get("end_session_endpoint") instanceof String)) { throw new IOException("Logout discovery unavailable"); }
++        String url = OidcLogoutRules.destination((String)fresh.get("end_session_endpoint"),issuer,callback,client,allowHttp);
++        result.put("federated",true); result.put("url",url);
++        return result;
 +    }
 +    private String randomString() { byte[] b=new byte[32]; random.nextBytes(b); return Base64.getUrlEncoder().withoutPadding().encodeToString(b); }
 +    private String enc(String s) throws Exception { return URLEncoder.encode(s,"UTF-8"); }

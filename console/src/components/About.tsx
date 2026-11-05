@@ -15,6 +15,7 @@ const labels: Record<string, string> = {
   CATALOG_WRITE_GUARD_ENABLED: 'Proteção de escrita nos catálogos por perfil',
   OIDC_ENABLED: 'Autenticação OIDC',
   OIDC_LOGIN_PREFLIGHT_ENABLED: 'Verificação prévia do provedor de login',
+  OIDC_FEDERATED_LOGOUT_ENABLED: 'Saída federada opcional do provedor OIDC',
   OIDC_ONLY: 'Login exclusivo por OIDC',
   OIDC_AUTO_LOGIN: 'Entrada automática por OIDC',
 };
