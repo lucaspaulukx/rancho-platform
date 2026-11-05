@@ -15,6 +15,23 @@ def git(folder, *args, check=True):
     return result
 
 
+def export_patch(folder):
+    content = git(folder, 'diff', '--binary', '--no-ext-diff', 'HEAD').stdout
+    for item in git(folder, 'ls-files', '--others', '--exclude-standard', '-z').stdout.decode().split('\0'):
+        if not item:
+            continue
+        source = folder / item
+        if source.suffix not in {'.java', '.json', '.properties', '.xml'}:
+            raise RuntimeError('Unexpected untracked file; review upstream checkout before export.')
+        lines = source.read_text(encoding='utf-8').splitlines(keepends=True)
+        content += f'diff --git a/{item} b/{item}\nnew file mode 100644\n'.encode()
+        diff = ''.join(difflib.unified_diff([], lines, fromfile='/dev/null', tofile='b/' + item))
+        if diff and not diff.endswith('\n'):
+            diff += '\n\\ No newline at end of file\n'
+        content += diff.encode()
+    return content
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=['apply', 'export', 'check'])
@@ -33,23 +50,12 @@ def main():
         if git(folder, 'rev-parse', 'HEAD').stdout.decode().strip() != spec['commit']:
             raise RuntimeError('Upstream HEAD differs from the pinned commit; refusing to continue.')
         if args.action == 'export':
-            content = git(folder, 'diff', '--binary', '--no-ext-diff', 'HEAD').stdout
-            for item in git(folder, 'ls-files', '--others', '--exclude-standard', '-z').stdout.decode().split('\0'):
-                if not item:
-                    continue
-                source = folder / item
-                if source.suffix not in {'.java', '.json', '.properties', '.xml'}:
-                    raise RuntimeError('Unexpected untracked file; review upstream checkout before export.')
-                lines = source.read_text(encoding='utf-8').splitlines(keepends=True)
-                content += f'diff --git a/{item} b/{item}\nnew file mode 100644\n'.encode()
-                diff = ''.join(difflib.unified_diff([], lines, fromfile='/dev/null', tofile='b/' + item))
-                if diff and not diff.endswith('\n'):
-                    diff += '\n\\ No newline at end of file\n'
-                content += diff.encode()
             patch.parent.mkdir(exist_ok=True)
-            patch.write_bytes(content)
+            patch.write_bytes(export_patch(folder))
         elif args.action == 'check':
             git(folder, 'apply', '--reverse', '--check', str(patch))
+            if export_patch(folder) != patch.read_bytes():
+                raise RuntimeError('Backend checkout contains changes missing from the patch; run export before committing.')
         elif git(folder, 'apply', '--reverse', '--check', str(patch), check=False).returncode == 0:
             pass  # Already applied; do not reset or discard the checkout.
         else:

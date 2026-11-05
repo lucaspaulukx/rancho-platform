@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+python scripts/check_repository.py
+if [ -d cattle/.git ]; then
+  python scripts/upstream.py check
+fi

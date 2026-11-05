@@ -1,6 +1,6 @@
 # Roadmap mestre — Rancher Community Console
 
-Referência:26/10/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build595 testes/70 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
+Referência:04/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build595 testes/70 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
 
 ## Resultado esperado
 
@@ -94,12 +94,16 @@ Desenvolvimento não altera Ember. Toda função nova tem flag e comportamento o
 
 | ID | Entrega | Estado | Critério final |
 |---|---|---|---|
-| REL01 | Migrations banco/config versionadas | A executar | Instalação limpa + atualização de base sintética + idempotência/checksums/rollback |
-| REL02 | Backup Rancher DB/estado e Keycloak | Parcial DB | Backup consistente completo e protegido; restaurar em volumes/containers próprios, login/grupos/workloads conferidos |
+| REL01 | Migrations banco/config versionadas | Parcial: ensaio offline72 aceito | Instalação limpa + atualização de base sintética + idempotência/checksums/rollback |
+| REL02 | Backup Rancher DB/estado e Keycloak | DB criptografado/restore/rollback72 aceitos; estado/IdP pendentes | Backup consistente completo e protegido; restaurar em volumes/containers próprios, login/grupos/workloads conferidos |
 | REL03 | Rollback de frontend/backend | Parcial | Imagem anterior e configuração/dados compatíveis; aba aberta continua ou recupera com clareza |
 | REL04 | Pacote reproduzível | Parcial | Bootstrap/restart de rede57 aceito; lockfiles/imagens/digests/licenças, instalação/upgrade/restore completos e matriz de compatibilidade restantes |
 | REL05 | Segurança final | A executar | Rotas/ações/scopes, CSRF/secret/cache/sessão/dependências/exposição revisados, riscos legados explícitos |
 | REL06 | Regressão/aceite de release local | A executar | Todos os gates obrigatórios aprovados no mesmo artefato, fixtures limpas e evidência rastreável |
+
+## Atualização comunitária — 04/11/2026
+
+Identidade e distribuição71/74: base Git sanitizada, assinatura comunitária opcional, marca/paleta Rancher e patches reproduzíveis. Migração72: diagnóstico, backup criptografado do banco, ensaio offline com integridade/checksums, migração aditiva/idempotência e rollback aceitos também com20 environments sintéticos. Isso não fecha REL01/02/06: estado Rancher/IdP, integração da migração ao startup/upgrade, login/grants/workloads e aceite unificado continuam pendentes. OBS02: teste73 confirmou entrega em socket aberto após revogação; correção de servidor é prioridade imediata.
 
 ## Ordem de execução restante
 
