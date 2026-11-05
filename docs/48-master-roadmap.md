@@ -214,3 +214,9 @@ Upgrade contextual de ulimits entregue sob flag independente workloadUlimitUpgra
 CI independente no PR3 usa checkout limpo, actions pinadas, token readonly, scanners, formatação, testes e build, sem credenciais/laboratório/deploy. Branch ci/console-validation emffc273902dd9c1aeae876cd9135f9ba160835b20 passou push42085317252 e PR42085365316. Isso valida a base main96f1fc5 e o workflow; não é CI remoto da branch de ulimits nem aceite físico. Repositório continua privado, sem release/publicação pública.
 
 Próximos: fechar criação física de ulimits em serviço/sidecar90; documentação bilingue e guias de contribuição/IA solicitados pelo mantenedor; seguir demais gates48.
+
+## Checkpoint90 — criação primária/sidecar e documentação comunitária (05/11/2026)
+
+Formulário real criou serviço/sidecar com nofile1024/2048 e128/256. Dois containers no host1h1; payload/API/Docker/processo confirmados, zero JS, relay removido antes do inspect e cleanup completo com recursos anteriores preservados. Fecha a lacuna de criação física de87 nesse recorte; não amplia para outros rlimits/CNI/multi-host. Sem mudança de frontend: último gate Linux654/75+TypeScript/Vite continua a referência.
+
+Mantenedor solicitou documentação integral em pt-BR/inglês, seleção por idioma no README e por documento, guia de boas práticas/PR e orientações/skills para assistentes de IA. Acrescentar gate de cobertura/links e revisão das traduções ao roadmap; preservar histórico/comandos/evidências e não tratar resumo como tradução completa. Repositório continua privado; nenhuma mudança de visibilidade ou release está autorizada nesta etapa.
