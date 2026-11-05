@@ -1,6 +1,6 @@
 # Roadmap mestre — Rancher Community Console
 
-Referência:05/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build647 testes/74 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
+Referência:05/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build654 testes/75 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
 
 ## Resultado esperado
 
@@ -206,3 +206,11 @@ Destino Git autorizado: https://github.com/lucaspaulukx/rancho-platform, inicial
 Nova flag opcional workloadUlimitEditors, ausente=false. Editor compartilhado de ulimits em container/launchConfig/sidecar, validação32bits/duplicatas/soft-hard e revalidação de schema antes do POST. Linux647 testes/74 arquivos + TypeScript/Vite passaram. Fixture real criou container pelo drawer: nofile1024/2048 confirmado na API, Docker e processo; identidade sem grant recebeu negação. Cleanup de recursos/identidade/sessão e desvio temporário completos, configurações/volumes anteriores preservados.
 
 Aceite físico restrito a container avulso Linux/nofile/um host. Serviços/sidecars têm testes de contrato/componente, sem aceite físico equivalente ainda. Upgrade/reset/rollback são recorte88; OPS11, CNI nativo, multi-host e release continuam abertos. Ver87 para falhas preservadas e limites. Código sob flag off no pacote; não houve mudança no Ember/backend.
+
+## Checkpoint88/89 — upgrade de limites e CI (05/11/2026)
+
+Upgrade contextual de ulimits entregue sob flag independente workloadUlimitUpgrades, ausente=false. Gate Linux654 testes/75 arquivos + TypeScript/Vite. Browser10 checks: revisão, upgrade/rollback/finish/reset, sem navegação/JS; negação após retirada de grant e cleanup aprovados. Prova física separada em serviço próprio confirmou1024/2048 e restauração da herança no rollback/reset, com cinco janelas diagnósticas120s removidas antes dos inspects. Configurações/containers/volumes anteriores e sessão própria preservados/limpos conforme escopo. Ver88; OPS11/CNI/multi-host/rlimits restantes continuam abertos.
+
+CI independente no PR3 usa checkout limpo, actions pinadas, token readonly, scanners, formatação, testes e build, sem credenciais/laboratório/deploy. Branch ci/console-validation emffc273902dd9c1aeae876cd9135f9ba160835b20 passou push42085317252 e PR42085365316. Isso valida a base main96f1fc5 e o workflow; não é CI remoto da branch de ulimits nem aceite físico. Repositório continua privado, sem release/publicação pública.
+
+Próximos: fechar criação física de ulimits em serviço/sidecar90; documentação bilingue e guias de contribuição/IA solicitados pelo mantenedor; seguir demais gates48.

@@ -7,9 +7,7 @@ STATE=ROOT/'console/scheduler-relay-window-fixture.json'
 BASE='projects/1a12/'
 
 class RelayAllocationWindow:
- def __init__(self, admin, label_key, label_value, *, window_seconds=120):
-  assert type(window_seconds) is int and 30<=window_seconds<=120
-  self.window_seconds=window_seconds
+ def __init__(self, admin, label_key, label_value):
   assert label_key in ('rancher.console.scheduler-relay','rancher.console.stream-fixture','rancher.console.ulimits-fixture')
   assert re.fullmatch(r'(?:community-scheduler-relay-|console-host-stream-|console-ulimits-)[a-f0-9]{12}',label_value)
   self.admin=admin
@@ -57,13 +55,13 @@ class RelayAllocationWindow:
   remove=rule_cmd+'-D PREROUTING '+rule
   checked=rule_cmd+'-C PREROUTING '+rule
   self.checked,self.remove=checked,remove
-  listener=shlex.quote(guest)+' relay-window '+str(source)+' '+str(self.window_seconds)
+  listener=shlex.quote(guest)+' relay-window '+str(source)+' 120'
   nested=('set -e; applied=0; relay_pid=0; cleanup() { if [ "$applied" = 1 ]; then '+remove+' && echo FIXTURE_STATUS:own-relay-rule-removed; fi; '
    +'if [ '+shlex.quote(guest)+' -ef "/proc/$relay_pid/exe" ]; then kill "$relay_pid"; fi; }; trap cleanup EXIT; '
    +'if '+checked+' 2>/dev/null; then exit 9; fi; '+listener+' & relay_pid=$!; sleep 1; kill -0 "$relay_pid"; '
    +rule_cmd+'-I PREROUTING 1 '+rule+'; applied=1; echo FIXTURE_STATUS:own-relay-rule-installed; wait "$relay_pid"; '
    +"docker ps --filter label="+self.label_key+"="+self.label_value+" --format 'FIXTURE_STATUS:ownDocker={{.ID}}'; "
-   +"docker logs --since "+str(min(75,self.window_seconds-5))+"s "+cid+" 2>&1 | awk '/pong timeout/{count++} END{print \"FIXTURE_STATUS:schedulerPongTimeouts=\" (count+0)}'")
+   +"docker logs --since 75s "+cid+" 2>&1 | awk '/pong timeout/{count++} END{print \"FIXTURE_STATUS:schedulerPongTimeouts=\" (count+0)}'")
   def drive():
    try:self.output.put(run_guest('sudo bash -c '+shlex.quote(nested),timeout=160))
    except Exception as error:self.output.put({'errorType':type(error).__name__})
@@ -73,7 +71,7 @@ class RelayAllocationWindow:
 
  def finish(self):
   if self.result is not None:return self.result
-  self.result={'windowSeconds':self.window_seconds,'ruleRemoved':False,'filesCleaned':False,'allocationRelayAccepted':False}
+  self.result={'ruleRemoved':False,'filesCleaned':False,'allocationRelayAccepted':False}
   result=self.result
   if self.thread:
    while self.thread.is_alive():self.thread.join(timeout=15)

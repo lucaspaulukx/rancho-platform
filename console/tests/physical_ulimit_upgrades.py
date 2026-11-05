@@ -35,7 +35,7 @@ def main():
   return value
  def start_relay():
   nonlocal relay
-  relay=RelayAllocationWindow(admin,'rancher.console.ulimits-fixture',marker,window_seconds=45);relay.start()
+  relay=RelayAllocationWindow(admin,'rancher.console.ulimits-fixture',marker);relay.start()
  def measure(phase,previous=None,expected=None):
   until=time.monotonic()+90
   while time.monotonic()<until:
