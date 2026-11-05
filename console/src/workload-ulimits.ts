@@ -89,3 +89,16 @@ export function validateWorkloadUlimits(
           validateWorkloadUlimits(schemas[child], row, schemas, depth + 1);
   }
 }
+
+/** Strip only the native add-on discriminator; preserve every unknown property. */
+export function editableUlimits(value: unknown): unknown {
+  if (value == null) return [];
+  if (!Array.isArray(value)) return value;
+  return value.map((row) => {
+    if (row && typeof row === 'object' && !Array.isArray(row) && row.type === 'ulimit') {
+      const { type: _type, ...fields } = row;
+      return fields;
+    }
+    return row;
+  });
+}

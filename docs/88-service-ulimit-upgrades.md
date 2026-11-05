@@ -17,3 +17,13 @@ Metadado nativo type=ulimit pode ser removido explicitamente da projeção edit�
 3. Linux unitários/TypeScript/Vite; serviço próprio escala0 para upgrade, rollback, finish e reset persistidos, sem instâncias inesperadas.
 4. Fixture física própria confirma novos limites em Docker/processo; rollback/finish/reset e preservação de dados, controle de acesso e cleanup. Alocação90s com desvio temporário85 é evidência separada de estabilidade CNI nativa. Não ampliar timeouts nem tocar workloads anteriores.
 5. Documentar limites, atualizar roadmap e PR da entrega. Manter flag pública off até os gates respectivos; demais opções de recursos/dispositivos e multi-host continuam separados.
+
+## Implementação e gates intermediários
+
+Flag workloadUlimitUpgrades, ausente=false, independente da criação87. Drawer usa checkbox explícito/editor/revisão; o submit e ResourcePanel validam flag e contratos atuais, incluindo schema ulimit. Payload troca somente os limites primários selecionados e preserva demais campos/sidecars; snapshot completo e no-op são verificados. Projeção editável remove apenas o discriminator nativo type=ulimit; outras propriedades incompatíveis permanecem visíveis e bloqueiam envio.
+
+Sete testes novos de domínio/componente e regressões passaram; gate Linux654 testes/75 arquivos + TypeScript/Vite aprovado. Browser real em serviço próprio escala0 passou10 checks: flag off, revisão antes do POST, upgrade, rollback, finish, reset vazio persistido, contexto/zero JS e apenas três upgrades. Cleanup e sessão de controle removidos, sem instâncias físicas. Relatório local ignorado: console/ulimit-upgrade-results.json. Negação de upgrade após retirada de grant está sendo acrescentada a esse harness e requer repetição; não está incluída nesse primeiro aceite.
+
+Tentativas intermediárias do harness corrigiram Accept application/json e slash final das actions nativas. Espera de menu passa a20s para cobrir o polling15s do inventário; prazo de transição nativa45s não foi ampliado. Falhas ficaram arquivadas e suas fixtures foram limpas.
+
+Prova física nativa é separada do teste de UI: cria serviço próprio com uma réplica, mede herança, upgrade, rollback, finish e reset no Docker/processo. Relay diagnóstico admite janela menor de30–120s (default120 preservado; ensaio88 usa45s), com remoção antes de cada inspect. Contador de pongs cobre min(75, janela-5)s, não alegar75s em janela45s. Primeira tentativa detectou binário diagnóstico ainda fixo em120s; falhou antes de criar workload e limpou a fixture. Rebuild do helper com intervalo restrito está em ensaio; isso não altera scheduler/CNI do produto.
