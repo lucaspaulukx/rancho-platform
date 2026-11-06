@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/provider';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Button, Field } from './ui';
@@ -13,6 +14,7 @@ export function ComposeEditor({
   onChange: (value: string) => void;
   required?: boolean;
 }) {
+  const { t } = useI18n();
   const [visible, setVisible] = useState(!value);
   return (
     <section className="compose-editor">
@@ -21,14 +23,14 @@ export function ComposeEditor({
         <Button
           type="button"
           onClick={() => setVisible(!visible)}
-          aria-label={`${visible ? 'Ocultar' : 'Mostrar'} ${label}`}
+          aria-label={t(visible ? 'composeEditor.hideLabel' : 'composeEditor.showLabel', { label })}
         >
           {visible ? <EyeOff size={16} /> : <Eye size={16} />}
-          {visible ? 'Ocultar' : 'Mostrar'}
+          {visible ? t('composeEditor.hide') : t('composeEditor.show')}
         </Button>
       </div>
       {visible ? (
-        <Field label={label} hint="Conteúdo enviado ao Rancher sem conversão. Até 512 KiB UTF-8.">
+        <Field label={label} hint={t('composeEditor.hint')}>
           {(id, descriptionId) => (
             <textarea
               id={id}
@@ -44,11 +46,13 @@ export function ComposeEditor({
           )}
         </Field>
       ) : (
-        <p className="muted">Conteúdo oculto. Use Mostrar para editar.</p>
+        <p className="muted">{t('composeEditor.hidden')}</p>
       )}
       <small className="muted">
-        {value ? value.split('\n').length : 0} linhas ·{' '}
-        {new TextEncoder().encode(value).byteLength.toLocaleString('pt-BR')} bytes
+        {t('composeEditor.size', {
+          lines: String(value ? value.split('\n').length : 0),
+          bytes: new TextEncoder().encode(value).byteLength,
+        })}
       </small>
     </section>
   );

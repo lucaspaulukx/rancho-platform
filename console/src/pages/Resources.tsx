@@ -641,7 +641,7 @@ function ResourceContext({ item }: { item: NavItem }) {
         onOpenChange={(open) => {
           if (!open && !run.isPending) closeForm();
         }}
-        title={`${label(action || 'Operação')}: ${resource?.name || resource?.id}`}
+        title={`${action ? label(action) : t('resourcesPage.operation')}: ${resource?.name || resource?.id}`}
         description={t('resourcesPage.operationContext', {
           name: app.project?.name || t('resourcesPage.instanceLower'),
         })}

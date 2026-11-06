@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/provider';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
 import { useRef, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
@@ -27,6 +28,19 @@ import {
   useToast,
 } from './ui';
 
+class ServiceEditorError extends Error {
+  constructor(
+    readonly key:
+      | 'serviceEditors.reopen'
+      | 'serviceEditors.contract'
+      | 'serviceEditors.changed'
+      | 'serviceEditors.confirmRemove'
+      | 'serviceEditors.reviewLinks',
+  ) {
+    super(key);
+  }
+}
+
 const metadata = (v: Resource): Resource =>
   Object.fromEntries(
     [
@@ -51,6 +65,9 @@ export default function ServiceLinksPanel({
   onClose: () => void;
   onSaved: (value: Resource) => void;
 }) {
+  const { t } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof ServiceEditorError ? t(error.key) : error.message;
   const app = useApp();
   const scope = useActionScope();
   const schemas = useSchemas(true);
@@ -60,7 +77,7 @@ export default function ServiceLinksPanel({
   const [review, setReview] = useState(false);
   const [discard, setDiscard] = useState(false);
   const [removeAll, setRemoveAll] = useState(false);
-  const [validation, setValidation] = useState('');
+  const [validation, setValidation] = useState<Error | null>(null);
   const [nextId, setNextId] = useState(1000);
   async function load(signal: AbortSignal) {
     const base = `projects/${scope.environment}/`;
@@ -116,8 +133,7 @@ export default function ServiceLinksPanel({
   try {
     if (data) original = editableServiceLinks(data.mappings, data.services, scope.environment!);
   } catch (caught) {
-    unsupported =
-      caught instanceof Error ? caught.message : 'Não é possível editar estes vínculos.';
+    unsupported = caught instanceof Error ? caught.message : t('serviceEditors.unsupported');
   }
   const rows = draft || original;
   const allowed =
@@ -132,13 +148,13 @@ export default function ServiceLinksPanel({
     setDraft(value);
     setRemoveAll(false);
     setReview(false);
-    setValidation('');
+    setValidation(null);
   }
   const mutation = useMutation({
     gcTime: 0,
     mutationFn: async () => {
       if (!data || !draft || !app.config.modules.serviceLinksEditor)
-        throw new Error('Reabra o editor de vínculos.');
+        throw new ServiceEditorError('serviceEditors.reopen');
       const signal = scope.signal();
       const contracts = schemas.data;
       if (
@@ -146,7 +162,7 @@ export default function ServiceLinksPanel({
         !contracts.serviceLink?.links.self ||
         !contracts.setServiceLinksInput?.links.self
       )
-        throw new Error('Contrato de vínculos indisponível.');
+        throw new ServiceEditorError('serviceEditors.contract');
       const [fresh, permission, linkSchema, inputSchema] = await Promise.all([
         load(signal),
         api<Schema>(contracts.service.links.self, undefined, undefined, signal),
@@ -163,7 +179,7 @@ export default function ServiceLinksPanel({
         linkSchema.id !== 'serviceLink' ||
         permission.id !== 'service'
       )
-        throw new Error('O contrato de vínculos mudou. Reabra o painel.');
+        throw new ServiceEditorError('serviceEditors.changed');
       const payload = prepareServiceLinks(
         fresh.source,
         permission,
@@ -174,7 +190,7 @@ export default function ServiceLinksPanel({
         scope.environment!,
       );
       if (!payload.serviceLinks.length && data.mappings.length && !removeAll)
-        throw new Error('Confirme a remoção de todos os vínculos.');
+        throw new ServiceEditorError('serviceEditors.confirmRemove');
       return api<Resource>(fresh.source.actions!.setservicelinks, payload, 'POST', signal);
     },
     onError: () => setReview(false),
@@ -184,7 +200,7 @@ export default function ServiceLinksPanel({
       await client.invalidateQueries({
         queryKey: ['data', app.identity, 'project', app.project?.id],
       });
-      toast('Vínculos enviados ao Rancher. Acompanhe a configuração e a topologia.');
+      toast(t('serviceEditors.sent'));
       onSaved(metadata(value));
     },
   });
@@ -209,11 +225,13 @@ export default function ServiceLinksPanel({
         scope.environment!,
       );
       if (!draft.length && data.mappings.length && !removeAll)
-        throw new Error('Confirme a remoção de todos os vínculos.');
-      setValidation('');
+        throw new ServiceEditorError('serviceEditors.confirmRemove');
+      setValidation(null);
       setReview(true);
     } catch (caught) {
-      setValidation(caught instanceof Error ? caught.message : 'Revise os vínculos.');
+      setValidation(
+        caught instanceof Error ? caught : new ServiceEditorError('serviceEditors.reviewLinks'),
+      );
     }
   }
   const targets =
@@ -233,29 +251,29 @@ export default function ServiceLinksPanel({
     const stack = data?.stacks.find((v) => v.id === target?.stackId);
     return target
       ? `${stack?.name || target.stackId} / ${target.name || target.id}`
-      : `Destino indisponível (${id})`;
+      : t('serviceEditors.targetMissing', { id });
   };
   return (
     <>
       <Modal
         open
         drawer
-        title={`Vínculos · ${resource.name || resource.id}`}
-        description={`Environment: ${app.project?.name}`}
+        title={t('serviceEditors.title', { name: resource.name || resource.id })}
+        description={t('serviceEditors.environment', { name: app.project?.name || '' })}
         onOpenChange={(open) => {
           if (!open) close();
         }}
         footer={
           <>
             <Button onClick={close} disabled={mutation.isPending}>
-              Fechar
+              {t('serviceEditors.close')}
             </Button>
             <Button
               variant="primary"
               disabled={!allowed || !dirty || mutation.isPending}
               onClick={requestReview}
             >
-              Revisar alterações
+              {t('serviceEditors.review')}
             </Button>
           </>
         }
@@ -272,31 +290,23 @@ export default function ServiceLinksPanel({
           />
         ) : (
           <>
-            <Alert tone="info">
-              Defina quais serviços esta aplicação consome. O alias é opcional e identifica o
-              destino na configuração nativa. Alterar a lista pode afetar resolução de nomes e
-              conectividade.
-            </Alert>
+            <Alert tone="info">{t('serviceEditors.linkInfo')}</Alert>
             {unsupported && <Alert tone="warning">{unsupported}</Alert>}
-            {!allowed && !unsupported && (
-              <Alert tone="warning">
-                Sua conta ou o estado atual não permite alterar vínculos.
-              </Alert>
-            )}
+            {!allowed && !unsupported && <Alert tone="warning">{t('serviceEditors.denied')}</Alert>}
             <fieldset className="form-fieldset" disabled={!allowed || mutation.isPending}>
-              {!rows.length && <p className="muted">Este serviço não possui vínculos de saída.</p>}
+              {!rows.length && <p className="muted">{t('serviceEditors.empty')}</p>}
               {rows.map((row, index) => (
                 <section className="compose-editor" key={row.key}>
                   <div className="compose-editor-heading">
-                    <strong>Vínculo {index + 1}</strong>
+                    <strong>{t('serviceEditors.link', { index: index + 1 })}</strong>
                     <Button
-                      aria-label={`Remover vínculo ${index + 1}`}
+                      aria-label={t('serviceEditors.remove', { index: index + 1 })}
                       onClick={() => change(rows.filter((v) => v.key !== row.key))}
                     >
                       <Trash2 size={16} />
                     </Button>
                   </div>
-                  <Field label={`Serviço de destino ${index + 1}`}>
+                  <Field label={t('serviceEditors.target', { index: index + 1 })}>
                     {(id) => (
                       <select
                         id={id}
@@ -309,7 +319,7 @@ export default function ServiceLinksPanel({
                           )
                         }
                       >
-                        <option value="">Selecionar serviço…</option>
+                        <option value="">{t('serviceEditors.select')}</option>
                         {targets.map((target) => (
                           <option value={target.id} key={target.id}>
                             {display(target.id)}
@@ -322,8 +332,8 @@ export default function ServiceLinksPanel({
                     )}
                   </Field>
                   <Field
-                    label={`Alias do vínculo ${index + 1}`}
-                    hint="Opcional. Sem alias, o Rancher usa o nome do serviço."
+                    label={t('serviceEditors.alias', { index: index + 1 })}
+                    hint={t('serviceEditors.aliasHint')}
                   >
                     {(id) => (
                       <input
@@ -351,18 +361,24 @@ export default function ServiceLinksPanel({
                 }}
               >
                 <Plus size={16} />
-                Adicionar vínculo
+                {t('serviceEditors.add')}
               </Button>
               {!rows.length && !!original.length && (
                 <CheckboxField
-                  label="Confirmo remover todos os vínculos deste serviço"
+                  label={t('serviceEditors.acknowledge')}
                   checked={removeAll}
                   onChange={(event) => setRemoveAll(event.target.checked)}
                 />
               )}
             </fieldset>
             {(validation || mutation.error) && (
-              <Alert>{validation || mutation.error?.message}</Alert>
+              <Alert>
+                {validation
+                  ? errorText(validation)
+                  : mutation.error
+                    ? errorText(mutation.error)
+                    : ''}
+              </Alert>
             )}
           </>
         )}
@@ -370,24 +386,34 @@ export default function ServiceLinksPanel({
       <Confirm
         open={review}
         onOpenChange={setReview}
-        title="Aplicar vínculos de serviço?"
-        description={`A lista de ${resource.name || resource.id} será substituída por ${rows.length} vínculo(s), somente em ${app.project?.name}.`}
+        title={t('serviceEditors.apply')}
+        description={t('serviceEditors.applyDescription', {
+          name: resource.name || resource.id,
+          count: rows.length,
+          environment: app.project?.name || '',
+        })}
         busy={mutation.isPending}
         onConfirm={() => mutation.mutate()}
       >
-        <h3>Antes · {original.length} vínculo(s)</h3>
+        <h3>{t('serviceEditors.before', { count: original.length })}</h3>
         <ul>
           {original.map((row) => (
             <li key={row.key}>
-              {display(row.serviceId)} · alias: {row.name || 'nome do serviço'}
+              {t('serviceEditors.summary', {
+                target: display(row.serviceId),
+                alias: row.name || t('serviceEditors.serviceName'),
+              })}
             </li>
           ))}
         </ul>
-        <h3>Depois · {rows.length} vínculo(s)</h3>
+        <h3>{t('serviceEditors.after', { count: rows.length })}</h3>
         <ul>
           {rows.map((row) => (
             <li key={row.key}>
-              {display(row.serviceId)} · alias: {row.name || 'nome do serviço'}
+              {t('serviceEditors.summary', {
+                target: display(row.serviceId),
+                alias: row.name || t('serviceEditors.serviceName'),
+              })}
             </li>
           ))}
         </ul>
@@ -395,8 +421,8 @@ export default function ServiceLinksPanel({
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar vínculos não salvos?"
-        description="A configuração do Rancher não será alterada."
+        title={t('serviceEditors.discard')}
+        description={t('serviceEditors.discardDescription')}
         onConfirm={onClose}
       />
       <Confirm
@@ -404,8 +430,8 @@ export default function ServiceLinksPanel({
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Mudar de contexto?"
-        description="Há vínculos não salvos. Aguarde qualquer envio pendente."
+        title={t('serviceEditors.context')}
+        description={t('serviceEditors.contextDescription')}
         busy={mutation.isPending}
         onConfirm={() => {
           if (!mutation.isPending && blocker.state === 'blocked') blocker.proceed();

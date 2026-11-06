@@ -45,6 +45,9 @@ import { enSelectorRows, ptSelectorRows } from './domains/selector-rows';
 import { enRegistryCredentials, ptRegistryCredentials } from './domains/registry-credentials';
 import { enBalancerRulesPanel, ptBalancerRulesPanel } from './domains/balancer-rules-panel';
 import { enEnvironmentTemplates, ptEnvironmentTemplates } from './domains/environment-templates';
+import { enAboutPage, ptAboutPage } from './domains/about-page';
+import { enComposeEditor, ptComposeEditor } from './domains/compose-editor';
+import { enServiceEditors, ptServiceEditors } from './domains/service-editors';
 import {
   enStackComposeUpgradePanel,
   ptStackComposeUpgradePanel,
@@ -100,6 +103,9 @@ export const englishMessages = {
   ...enRegistryCredentials,
   ...enBalancerRulesPanel,
   ...enEnvironmentTemplates,
+  ...enAboutPage,
+  ...enComposeEditor,
+  ...enServiceEditors,
   ...enStackComposeUpgradePanel,
   ...enResourcePanel,
   ...enResourceStream,
@@ -183,6 +189,9 @@ export const portugueseMessages = {
   ...ptRegistryCredentials,
   ...ptBalancerRulesPanel,
   ...ptEnvironmentTemplates,
+  ...ptAboutPage,
+  ...ptComposeEditor,
+  ...ptServiceEditors,
   ...ptStackComposeUpgradePanel,
   ...ptResourcePanel,
   ...ptResourceStream,
