@@ -42,6 +42,8 @@ The operations workspace and shared stream selector use the active locale for na
 
 The workload creation drawer and bulk confirmation use the shared locale for their dialog labels and guidance. The native schema form and the specialized editors each own their own field labels.
 
+The specialized CPU, memory, capability, process-limit and health-check controls use registered pt-BR/en-US messages. CPU parser errors expose stable codes for translation. Some validation messages from the other native workload helpers still use their original Portuguese text.
+
 ## Data and mutations
 
 Use current resource schemas/action links instead of inventing routes or assuming global schemas equal environment-scoped schemas. Re-read the resource, scope and relevant contract before mutation. Preserve unknown configuration and unselected fields; do not silently replace unsupported values with empty defaults.
