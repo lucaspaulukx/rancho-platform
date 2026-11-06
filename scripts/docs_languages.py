@@ -180,7 +180,7 @@ def pair_structure(entry):
         raise ValueError('Translated code blocks differ from the canonical commands/evidence.')
     if source_headings != target_headings:
         raise ValueError('Translated heading hierarchy differs from the source.')
-    if re.findall(r'^\|\s*([A-Z]+[0-9]{2})\s*\|', a, re.M) != re.findall(r'^\|\s*([A-Z]+[0-9]{2})\s*\|', b, re.M):
+    if re.findall(r'^\|\s*([A-Z][A-Z0-9]*[0-9]{2})\s*\|', a, re.M) != re.findall(r'^\|\s*([A-Z][A-Z0-9]*[0-9]{2})\s*\|', b, re.M):
         raise ValueError('Translated roadmap task IDs differ from the source.')
     if not links_to(source, target, a) or not links_to(target, source, b):
         raise ValueError('Language navigation is not reciprocal.')
