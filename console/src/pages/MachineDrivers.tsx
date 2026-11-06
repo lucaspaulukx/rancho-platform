@@ -4,6 +4,7 @@ import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, allPages, ApiError, type Resource, type Schema } from '../api';
 import { useApp } from '../state';
+import { useI18n } from '../i18n/provider';
 import { useSchemas } from '../hooks/useSchemas';
 import { useRequestScope } from '../hooks/useRequestScope';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
@@ -34,15 +35,21 @@ import {
   PageHeader,
   useToast,
 } from '../components/ui';
-async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
-  try {
-    return await api<T>(path, body, method, signal);
-  } catch (e) {
-    throw new Error(
-      e instanceof ApiError
-        ? `Operação de driver não concluída (HTTP ${e.status}).`
-        : 'Não foi possível concluir a operação de driver.',
-    );
+type PageErrorKey =
+  | 'machineDrivers.loadFailed'
+  | 'machineDrivers.changed'
+  | 'machineDrivers.editUnavailable'
+  | 'machineDrivers.accessUnavailable'
+  | 'machineDrivers.activationDisabled'
+  | 'machineDrivers.reopen'
+  | 'machineDrivers.operationFailed'
+  | 'machineDrivers.unavailable';
+class DriverPageError extends Error {
+  constructor(
+    readonly key: PageErrorKey,
+    readonly status?: number,
+  ) {
+    super(key);
   }
 }
 export function MachineDrivers() {
@@ -50,6 +57,24 @@ export function MachineDrivers() {
   return <DriverScope key={app.identity} />;
 }
 function DriverScope() {
+  const { t } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof DriverPageError
+      ? error.status !== undefined
+        ? t('machineDrivers.httpFailed', { status: error.status })
+        : t(error.key)
+      : error.message;
+  async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
+    try {
+      return await api<T>(path, body, method, signal);
+    } catch (e) {
+      throw new DriverPageError(
+        'machineDrivers.operationFailed',
+        e instanceof ApiError ? e.status : undefined,
+      );
+    }
+  }
+
   const app = useApp(),
     scope = useRequestScope(app.identity + ':drivers'),
     schemas = useSchemas(false),
@@ -63,7 +88,7 @@ function DriverScope() {
     [discard, setDiscard] = useState(false),
     [action, setAction] = useState<{ row: DriverSnapshot; kind: DriverAction } | null>(null),
     [opening, setOpening] = useState(false),
-    [error, setError] = useState('');
+    [error, setError] = useState<Error | null>(null);
   const enabled = app.admin && app.config.modules.machineDrivers;
   const query = useQuery({
     queryKey: ['data', app.identity, 'machine-drivers'],
@@ -74,7 +99,7 @@ function DriverScope() {
       try {
         return (await allPages<Resource>('machinedrivers?limit=100', signal)).map(driverMetadata);
       } catch {
-        throw new Error('Não foi possível carregar os drivers.');
+        throw new DriverPageError('machineDrivers.loadFailed');
       }
     },
   });
@@ -95,16 +120,16 @@ function DriverScope() {
   async function open(row: DriverMetadata, kind?: DriverAction) {
     if (opening) return;
     setOpening(true);
-    setError('');
+    setError(null);
     try {
       const snapshot = driverSnapshot(
         await request<Resource>(row.self, undefined, undefined, scope.signal()),
       );
       scope.assertCurrent();
-      if (snapshot.id !== row.id) throw new Error('O driver mudou. Atualize a lista.');
+      if (snapshot.id !== row.id) throw new DriverPageError('machineDrivers.changed');
       if (kind) setAction({ row: snapshot, kind });
       else {
-        if (!customDriver(snapshot)) throw new Error('Edição manual indisponível.');
+        if (!customDriver(snapshot)) throw new DriverPageError('machineDrivers.editUnavailable');
         setEditor(snapshot);
         setFields({
           url: snapshot.url,
@@ -115,7 +140,7 @@ function DriverScope() {
         setRevealed(false);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Driver indisponível.');
+      setError(e instanceof Error ? e : new DriverPageError('machineDrivers.unavailable'));
     } finally {
       setOpening(false);
     }
@@ -124,13 +149,13 @@ function DriverScope() {
     retry: false,
     gcTime: 0,
     mutationFn: async () => {
-      if (!enabled) throw new Error('Acesso indisponível.');
+      if (!enabled) throw new DriverPageError('machineDrivers.accessUnavailable');
       const signal = scope.signal(),
         schema = await request<Schema>('schemas/machineDriver', undefined, undefined, signal);
       scope.assertCurrent();
       if (action) {
         if (action.kind !== 'remove' && !app.config.modules.driverActivation)
-          throw new Error('Ativação de drivers desabilitada.');
+          throw new DriverPageError('machineDrivers.activationDisabled');
         const fresh = driverSnapshot(
           await request<Resource>(action.row.self, undefined, undefined, signal),
         );
@@ -138,7 +163,7 @@ function DriverScope() {
         const target = driverAction(schema, action.row, fresh, action.kind);
         await request<unknown>(target, {}, 'POST', signal);
       } else {
-        if (!editor) throw new Error('Reabra o editor.');
+        if (!editor) throw new DriverPageError('machineDrivers.reopen');
         const fresh = before
           ? driverSnapshot(await request<Resource>(before.self, undefined, undefined, signal))
           : undefined;
@@ -157,7 +182,7 @@ function DriverScope() {
     onSuccess: () => {
       clear();
       void client.invalidateQueries({ queryKey: ['data', app.identity, 'machine-drivers'] });
-      toast('Operação enviada. Acompanhe o estado do driver na lista.');
+      toast(t('machineDrivers.sent'));
     },
   });
   const blocker = useBlocker(dirty || write.isPending);
@@ -167,80 +192,81 @@ function DriverScope() {
     if (dirty) setDiscard(true);
     else clear();
   }
-  if (!enabled) return <Alert>Drivers indisponíveis neste acesso.</Alert>;
+  if (!enabled) return <Alert>{t('machineDrivers.driversUnavailable')}</Alert>;
   const actionLabels: Record<DriverAction, string> = {
-    activate: 'Ativar',
-    reactivate: 'Reativar',
-    deactivate: 'Desativar',
-    remove: 'Remover',
+    activate: t('machineDrivers.activate'),
+    reactivate: t('machineDrivers.reactivate'),
+    deactivate: t('machineDrivers.deactivate'),
+    remove: t('machineDrivers.remove'),
   };
   return (
     <>
       <PageHeader
-        title="Drivers de máquinas"
-        description="Provedores de máquinas disponíveis no Rancher. As operações afetam toda a instância."
+        title={t('machineDrivers.title')}
+        description={t('machineDrivers.description')}
         action={
           <>
             <Button onClick={() => void query.refetch()} disabled={query.isFetching}>
-              Atualizar
+              {t('machineDrivers.refresh')}
             </Button>
             <Button
               disabled={!schemas.data?.machineDriver?.collectionMethods?.includes('POST')}
               onClick={() => {
                 setEditor('new');
                 setFields({ ...emptyDriver });
-                setError('');
+                setError(null);
               }}
             >
-              Adicionar driver
+              {t('machineDrivers.add')}
             </Button>
           </>
         }
       />
       <CheckboxField
-        label="Atualizar drivers automaticamente (5 s)"
+        label={t('machineDrivers.auto')}
         checked={auto}
         onChange={(e) => setAuto(e.target.checked)}
       />
-      <Alert tone="info">
-        O cadastro solicita um driver inativo. O registro e a edição podem baixar e executar o
-        binário no servidor. A URL de interface é armazenada, mas seu código não é carregado nesta
-        console.
-      </Alert>
-      {error && <Alert>{error}</Alert>}
+      <Alert tone="info">{t('machineDrivers.info')}</Alert>
+      {error && <Alert>{errorText(error)}</Alert>}
       {query.isPending ? (
         <Loading />
       ) : query.error ? (
-        <ErrorState error={query.error} retry={() => void query.refetch()} />
+        <ErrorState error={new Error(errorText(query.error))} retry={() => void query.refetch()} />
       ) : (
         <DataTable
-          label="Drivers de máquinas"
+          label={t('machineDrivers.title')}
           rows={query.data || []}
           rowKey={(v) => v.id}
           searchText={(v) =>
-            `${v.name} ${v.state} ${v.builtin ? 'Embutido' : v.catalog ? 'Catálogo' : 'Personalizado'}`
+            `${v.name} ${v.state} ${v.builtin ? t('machineDrivers.builtin') : v.catalog ? t('machineDrivers.catalog') : t('machineDrivers.custom')}`
           }
           columns={[
-            { key: 'name', label: 'Driver', render: (v) => v.name },
+            { key: 'name', label: t('machineDrivers.driver'), render: (v) => v.name },
             {
               key: 'state',
-              label: 'Estado',
+              label: t('machineDrivers.state'),
               render: (v) => <Badge state={v.state}>{v.state || '—'}</Badge>,
             },
             {
               key: 'origin',
-              label: 'Origem',
-              render: (v) => (v.builtin ? 'Embutido' : v.catalog ? 'Catálogo' : 'Personalizado'),
+              label: t('machineDrivers.origin'),
+              render: (v) =>
+                v.builtin
+                  ? t('machineDrivers.builtin')
+                  : v.catalog
+                    ? t('machineDrivers.catalog')
+                    : t('machineDrivers.custom'),
             },
             {
               key: 'actions',
-              label: 'Ações',
+              label: t('machineDrivers.actions'),
               render: (v) => {
                 const actions: MenuAction[] = [];
                 if (customDriver(v) && ['active', 'inactive', 'error'].includes(v.state))
                   actions.push({
                     id: 'edit',
-                    label: 'Editar driver',
+                    label: t('machineDrivers.edit'),
                     disabled: opening,
                     onSelect: () => void open(v),
                   });
@@ -249,19 +275,24 @@ function DriverScope() {
                     if (v.actions[k])
                       actions.push({
                         id: k,
-                        label: actionLabels[k] + ' driver',
+                        label: t('machineDrivers.actionLabel', { action: actionLabels[k] }),
                         disabled: opening,
                         onSelect: () => void open(v, k),
                       });
                 if (customDriver(v) && v.actions.remove)
                   actions.push({
                     id: 'remove',
-                    label: 'Remover driver',
+                    label: t('machineDrivers.removeDriver'),
                     danger: true,
                     disabled: opening,
                     onSelect: () => void open(v, 'remove'),
                   });
-                return <ActionMenu label={`Ações do driver ${v.name}`} actions={actions} />;
+                return (
+                  <ActionMenu
+                    label={t('machineDrivers.rowActions', { name: v.name })}
+                    actions={actions}
+                  />
+                );
               },
             },
           ]}
@@ -272,14 +303,12 @@ function DriverScope() {
         onOpenChange={(o) => {
           if (!o) close();
         }}
-        title={before ? 'Editar driver' : 'Adicionar driver'}
-        description={
-          before?.name || 'O nome será definido pelo Rancher a partir da URL do binário.'
-        }
+        title={before ? t('machineDrivers.edit') : t('machineDrivers.add')}
+        description={before?.name || t('machineDrivers.nameHint')}
         footer={
           <>
             <Button onClick={close} disabled={write.isPending}>
-              Cancelar
+              {t('machineDrivers.cancel')}
             </Button>
             <Button
               onClick={() => {
@@ -288,13 +317,13 @@ function DriverScope() {
               }}
               disabled={!fields.url || !dirty}
             >
-              Revisar driver
+              {t('machineDrivers.review')}
             </Button>
           </>
         }
       >
         <CheckboxField
-          label="Mostrar URLs e checksum"
+          label={t('machineDrivers.show')}
           checked={revealed}
           onChange={(e) => setRevealed(e.target.checked)}
         />
@@ -303,17 +332,13 @@ function DriverScope() {
             key={key}
             label={
               {
-                url: 'URL do binário',
-                uiUrl: 'URL da interface (opcional)',
-                checksum: 'Checksum (opcional)',
-                description: 'Descrição (opcional)',
+                url: t('machineDrivers.binaryUrl'),
+                uiUrl: t('machineDrivers.uiUrl'),
+                checksum: t('machineDrivers.checksum'),
+                description: t('machineDrivers.fieldDescription'),
               }[key]
             }
-            hint={
-              key === 'url'
-                ? 'Use um binário de origem confiável. Cadastrar pode executar código no servidor.'
-                : undefined
-            }
+            hint={key === 'url' ? t('machineDrivers.binaryHint') : undefined}
           >
             {(id, descriptionId) => (
               <input
@@ -338,22 +363,34 @@ function DriverScope() {
             write.reset();
           }
         }}
-        title={action ? `${actionLabels[action.kind]} driver?` : 'Salvar driver?'}
+        title={
+          action
+            ? t('machineDrivers.actionTitle', { action: actionLabels[action.kind] })
+            : t('machineDrivers.saveTitle')
+        }
         description={
           action
-            ? `${action.row.name}. ${action.kind === 'remove' ? 'O registro será removido. Máquinas já provisionadas não são removidas por esta tela.' : action.kind === 'deactivate' ? 'O provedor deixará de estar disponível para novos provisionamentos.' : 'O servidor pode baixar e executar o binário configurado. Confirme a origem antes de continuar.'}`
-            : 'O Rancher pode baixar e executar o binário durante o registro ou a edição. As URLs e o checksum estão protegidos nesta revisão.'
+            ? t('machineDrivers.actionDescription', {
+                name: action.row.name,
+                effect:
+                  action.kind === 'remove'
+                    ? t('machineDrivers.removeDescription')
+                    : action.kind === 'deactivate'
+                      ? t('machineDrivers.deactivateDescription')
+                      : t('machineDrivers.activateDescription'),
+              })
+            : t('machineDrivers.saveDescription')
         }
         busy={write.isPending}
         onConfirm={() => write.mutate()}
       >
-        {write.error && <Alert>{write.error.message}</Alert>}
+        {write.error && <Alert>{errorText(write.error)}</Alert>}
       </Confirm>
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar alterações do driver?"
-        description="Os campos ainda não foram enviados ao servidor."
+        title={t('machineDrivers.discardTitle')}
+        description={t('machineDrivers.discardDescription')}
         onConfirm={() => {
           setDiscard(false);
           clear();
@@ -364,8 +401,8 @@ function DriverScope() {
         onOpenChange={(o) => {
           if (!o && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Sair com alteração pendente?"
-        description="O driver ainda não foi salvo. Aguarde qualquer envio em andamento."
+        title={t('machineDrivers.leaveTitle')}
+        description={t('machineDrivers.leaveDescription')}
         busy={write.isPending}
         onConfirm={() => {
           if (!write.isPending && blocker.state === 'blocked') {

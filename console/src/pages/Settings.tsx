@@ -3,6 +3,7 @@ import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, allPages, ApiError, type Resource, type Schema } from '../api';
 import { useApp } from '../state';
+import { useI18n } from '../i18n/provider';
 import { useSchemas } from '../hooks/useSchemas';
 import { useRequestScope } from '../hooks/useRequestScope';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
@@ -27,15 +28,18 @@ import {
   PageHeader,
   useToast,
 } from '../components/ui';
-async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
-  try {
-    return await api<T>(path, body, method, signal);
-  } catch (e) {
-    throw new Error(
-      e instanceof ApiError
-        ? `Não foi possível consultar ou alterar a configuração (HTTP ${e.status}).`
-        : 'Não foi possível concluir a operação de configuração.',
-    );
+type PageErrorKey =
+  | 'settings.loadFailed'
+  | 'settings.changed'
+  | 'settings.reopen'
+  | 'settings.operationFailed'
+  | 'settings.unavailable';
+class SettingsPageError extends Error {
+  constructor(
+    readonly key: PageErrorKey,
+    readonly status?: number,
+  ) {
+    super(key);
   }
 }
 export function Settings() {
@@ -43,6 +47,24 @@ export function Settings() {
   return <SettingsScope key={app.identity} />;
 }
 function SettingsScope() {
+  const { t } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof SettingsPageError
+      ? error.status !== undefined
+        ? t('settings.httpFailed', { status: error.status })
+        : t(error.key)
+      : error.message;
+  async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
+    try {
+      return await api<T>(path, body, method, signal);
+    } catch (e) {
+      throw new SettingsPageError(
+        'settings.operationFailed',
+        e instanceof ApiError ? e.status : undefined,
+      );
+    }
+  }
+
   const app = useApp(),
     scope = useRequestScope(app.identity + ':settings'),
     schemas = useSchemas(false),
@@ -56,7 +78,7 @@ function SettingsScope() {
     [reset, setReset] = useState(false),
     [discard, setDiscard] = useState(false),
     [opening, setOpening] = useState<string | null>(null),
-    [error, setError] = useState('');
+    [error, setError] = useState<Error | null>(null);
   const query = useQuery({
     queryKey: ['data', app.identity, 'server-settings'],
     enabled: app.admin && app.config.modules.settings,
@@ -65,19 +87,19 @@ function SettingsScope() {
       try {
         return (await allPages<Resource>('settings?limit=100', signal)).map(settingMetadata);
       } catch {
-        throw new Error('Não foi possível carregar os nomes das configurações.');
+        throw new SettingsPageError('settings.loadFailed');
       }
     },
   });
   async function open(row: SettingMetadata) {
     if (opening) return;
     setOpening(row.name);
-    setError('');
+    setError(null);
     try {
       const signal = scope.signal(),
         snapshot = settingSnapshot(await request<Resource>(row.self, undefined, undefined, signal));
       scope.assertCurrent();
-      if (snapshot.name !== row.name) throw new Error('A configuração mudou. Atualize a lista.');
+      if (snapshot.name !== row.name) throw new SettingsPageError('settings.changed');
       setEditor(snapshot);
       setValue(snapshot.value ?? '');
       setEmpty(false);
@@ -85,7 +107,7 @@ function SettingsScope() {
       setReview(false);
       setReset(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Configuração indisponível.');
+      setError(e instanceof Error ? e : new SettingsPageError('settings.unavailable'));
     } finally {
       setOpening(null);
     }
@@ -96,7 +118,7 @@ function SettingsScope() {
     gcTime: 0,
     mutationFn: async () => {
       if (!app.admin || !app.config.modules.settings || !editor)
-        throw new Error('Reabra o editor.');
+        throw new SettingsPageError('settings.reopen');
       const signal = scope.signal(),
         contract = await request<Schema>('schemas/setting', undefined, undefined, signal);
       scope.assertCurrent();
@@ -111,7 +133,7 @@ function SettingsScope() {
     onSuccess: () => {
       clear();
       void client.invalidateQueries({ queryKey: ['data', app.identity, 'server-settings'] });
-      toast('Configuração enviada ao Rancher. Consulte o valor efetivo novamente.');
+      toast(t('settings.sent'));
     },
   });
   const blocker = useBlocker(dirty || write.isPending);
@@ -131,51 +153,51 @@ function SettingsScope() {
     else clear();
   }
   if (!app.admin || !app.config.modules.settings)
-    return <Alert>Configurações indisponíveis neste acesso.</Alert>;
+    return <Alert>{t('settings.accessUnavailable')}</Alert>;
   return (
     <>
       <PageHeader
-        title="Configuração do servidor"
-        description="Configurações nativas e origem do valor efetivo. Mudanças podem afetar toda a instância."
+        title={t('settings.title')}
+        description={t('settings.description')}
         action={
           <Button onClick={() => void query.refetch()} disabled={query.isFetching}>
-            Atualizar
+            {t('settings.refresh')}
           </Button>
         }
       />
-      <Alert tone="info">
-        A busca consulta os nomes carregados. Valores ficam protegidos e são consultados
-        individualmente ao abrir. Configuração por arquivo ou variável pode prevalecer sobre um
-        override no banco; esta tela não reinicia serviços.
-      </Alert>
-      {error && <Alert>{error}</Alert>}
+      <Alert tone="info">{t('settings.listInfo')}</Alert>
+      {error && <Alert>{errorText(error)}</Alert>}
       {query.isPending ? (
         <Loading />
       ) : query.error ? (
-        <ErrorState error={query.error} retry={() => void query.refetch()} />
+        <ErrorState error={new Error(errorText(query.error))} retry={() => void query.refetch()} />
       ) : (
         <DataTable
           rows={query.data || []}
           rowKey={(v) => v.name}
           searchText={(v) => `${v.name} ${v.source}`}
           columns={[
-            { key: 'name', label: 'Configuração', render: (v) => v.name },
-            { key: 'source', label: 'Origem', render: (v) => v.source || 'Não informada' },
+            { key: 'name', label: t('settings.setting'), render: (v) => v.name },
+            {
+              key: 'source',
+              label: t('settings.source'),
+              render: (v) => v.source || t('settings.unknown'),
+            },
             {
               key: 'database',
-              label: 'Override no banco',
-              render: (v) => (v.inDb ? 'Sim' : 'Não'),
+              label: t('settings.database'),
+              render: (v) => (v.inDb ? t('settings.yes') : t('settings.no')),
             },
             {
               key: 'open',
-              label: 'Detalhes',
+              label: t('settings.details'),
               render: (v) => (
                 <Button
-                  aria-label={`Abrir configuração ${v.name}`}
+                  aria-label={t('settings.open', { name: v.name })}
                   onClick={() => void open(v)}
                   disabled={!!opening}
                 >
-                  {opening === v.name ? 'Abrindo…' : 'Consultar / editar'}
+                  {opening === v.name ? t('settings.opening') : t('settings.edit')}
                 </Button>
               ),
             },
@@ -187,12 +209,12 @@ function SettingsScope() {
         onOpenChange={(open) => {
           if (!open) close();
         }}
-        title="Configuração do servidor"
-        description={editor?.name || 'Configuração individual'}
+        title={t('settings.title')}
+        description={editor?.name || t('settings.individual')}
         footer={
           <>
             <Button onClick={close} disabled={write.isPending}>
-              Cancelar
+              {t('settings.cancel')}
             </Button>
             {settingWritable(schemas.data?.setting, 'reset', editor ?? undefined) && (
               <Button
@@ -204,7 +226,7 @@ function SettingsScope() {
                 }}
                 disabled={write.isPending || dirty}
               >
-                Restaurar padrão
+                {t('settings.restore')}
               </Button>
             )}
             {settingWritable(schemas.data?.setting, 'update') && (
@@ -218,17 +240,16 @@ function SettingsScope() {
                 }}
                 disabled={write.isPending || !dirty}
               >
-                Revisar alteração
+                {t('settings.review')}
               </Button>
             )}
           </>
         }
       >
         <Alert tone="info">
-          Origem: {editor?.source || 'Não informada'}. Alterar o valor cria ou atualiza o override
-          no banco. O valor efetivo pode vir de outra fonte.
+          {t('settings.sourceInfo', { source: editor?.source || t('settings.unknown') })}
         </Alert>
-        <Field label="Valor configurado">
+        <Field label={t('settings.configured')}>
           {(id) =>
             revealed ? (
               <textarea
@@ -247,7 +268,7 @@ function SettingsScope() {
             )
           }
         </Field>
-        <Field label="Valor efetivo atual">
+        <Field label={t('settings.effective')}>
           {(id) =>
             revealed ? (
               <textarea
@@ -269,11 +290,11 @@ function SettingsScope() {
           }
         </Field>
         <Button onClick={() => setRevealed((v) => !v)}>
-          {revealed ? 'Ocultar valores' : 'Mostrar valores'}
+          {revealed ? t('settings.hide') : t('settings.show')}
         </Button>
         {!value && (
           <CheckboxField
-            label="Confirmo salvar um valor vazio"
+            label={t('settings.empty')}
             checked={empty}
             onChange={(e) => setEmpty(e.target.checked)}
           />
@@ -284,18 +305,21 @@ function SettingsScope() {
         onOpenChange={(open) => {
           if (!write.isPending) setReview(open);
         }}
-        title={reset ? 'Restaurar padrão da configuração?' : 'Alterar configuração do servidor?'}
-        description={`${editor?.name || ''}. ${reset ? 'Somente o override no banco será removido; outra fonte poderá fornecer o valor efetivo.' : 'O novo valor está protegido na revisão e pode afetar toda a instância.'}`}
+        title={reset ? t('settings.restoreTitle') : t('settings.changeTitle')}
+        description={t('settings.reviewDescription', {
+          name: editor?.name || '',
+          effect: reset ? t('settings.restoreDescription') : t('settings.changeDescription'),
+        })}
         busy={write.isPending}
         onConfirm={() => write.mutate()}
       >
-        {write.error && <Alert>{write.error.message}</Alert>}
+        {write.error && <Alert>{errorText(write.error)}</Alert>}
       </Confirm>
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar alteração de configuração?"
-        description="O valor digitado será descartado sem envio ao servidor."
+        title={t('settings.discardTitle')}
+        description={t('settings.discardDescription')}
         onConfirm={() => {
           setDiscard(false);
           clear();
@@ -306,8 +330,8 @@ function SettingsScope() {
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Sair com alteração pendente?"
-        description="A configuração ainda não foi salva. Aguarde qualquer envio em andamento."
+        title={t('settings.leaveTitle')}
+        description={t('settings.leaveDescription')}
         busy={write.isPending}
         onConfirm={() => {
           if (!write.isPending && blocker.state === 'blocked') {

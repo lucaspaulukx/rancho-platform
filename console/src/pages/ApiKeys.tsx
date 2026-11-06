@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, Eye, EyeOff, Plus, RefreshCw } from 'lucide-react';
 import { allPages, api, type Resource, type Schema } from '../api';
 import { useApp } from '../state';
+import { useI18n } from '../i18n/provider';
+import type { MessageKey } from '../i18n/messages';
 import { useSchemas } from '../hooks/useSchemas';
 import { useRequestScope } from '../hooks/useRequestScope';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
@@ -34,13 +36,29 @@ import {
   useToast,
 } from '../components/ui';
 import { ActionMenu } from '../components/ActionMenu';
-const labels: Record<KeyAction, string> = {
-  activate: 'Ativar',
-  deactivate: 'Desativar',
-  remove: 'Revogar',
-  purge: 'Excluir definitivamente',
-};
+type KeyPageErrorKey = Extract<
+  MessageKey,
+  | 'apiKeys.reopenEditor'
+  | 'apiKeys.reopenOperation'
+  | 'apiKeys.actionUnavailable'
+  | 'apiKeys.reviewFields'
+>;
+class KeyPageError extends Error {
+  constructor(readonly key: KeyPageErrorKey) {
+    super(key);
+  }
+}
 export function ApiKeys() {
+  const { t } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof KeyPageError ? t(error.key) : error.message;
+  const labels: Record<KeyAction, string> = {
+    activate: t('apiKeys.activate'),
+    deactivate: t('apiKeys.deactivate'),
+    remove: t('apiKeys.remove'),
+    purge: t('apiKeys.purge'),
+  };
+
   const app = useApp(),
     client = useQueryClient(),
     toast = useToast();
@@ -67,7 +85,7 @@ export function ApiKeys() {
   const [revealed, setRevealed] = useState(false),
     [saved, setSaved] = useState(false),
     [loseSecret, setLoseSecret] = useState(false);
-  const [validation, setValidation] = useState('');
+  const [validation, setValidation] = useState<Error | null>(null);
   const base = environment ? `projects/${project}/` : '';
   const listKey = ['data', app.identity, 'api-keys', environment ? project : 'accounts', removed];
   const query = useQuery({
@@ -99,7 +117,7 @@ export function ApiKeys() {
     setEditor(value);
     setName(value === 'new' ? '' : String(value.name || ''));
     setDescription(value === 'new' ? '' : String(value.description || ''));
-    setValidation('');
+    setValidation(null);
   }
   async function freshSchema(signal: AbortSignal) {
     const contract = await api<Schema>(base + 'schemas/apiKey', undefined, undefined, signal);
@@ -111,7 +129,7 @@ export function ApiKeys() {
     retry: false,
     mutationFn: async () => {
       if (!app.config.modules.apiKeys || !editor || (environment && !project))
-        throw new Error('Reabra o editor no escopo desejado.');
+        throw new KeyPageError('apiKeys.reopenEditor');
       const signal = scope.signal(),
         contract = await freshSchema(signal);
       if (editor === 'new') {
@@ -137,14 +155,14 @@ export function ApiKeys() {
       setEditor(null);
       setReview(false);
       void client.invalidateQueries({ queryKey: ['data', app.identity, 'api-keys'] });
-      toast('Chave atualizada no Rancher.');
+      toast(t('apiKeys.updated'));
     },
   });
   const run = useMutation({
     gcTime: 0,
     retry: false,
     mutationFn: async () => {
-      if (!action || !app.config.modules.apiKeys) throw new Error('Reabra a operação.');
+      if (!action || !app.config.modules.apiKeys) throw new KeyPageError('apiKeys.reopenOperation');
       const signal = scope.signal(),
         contract = await freshSchema(signal),
         fresh = await api<Resource>(action.row.links.self, undefined, undefined, signal);
@@ -156,7 +174,7 @@ export function ApiKeys() {
         (project && fresh.accountId !== project) ||
         !keyActionAllowed(contract, fresh, action.kind)
       )
-        throw new Error('A ação não está mais disponível neste escopo.');
+        throw new KeyPageError('apiKeys.actionUnavailable');
       const target = keyActionTarget(contract, fresh, action.kind)!;
       await api<unknown>(
         target.url,
@@ -169,7 +187,7 @@ export function ApiKeys() {
     onSuccess: () => {
       setAction(null);
       void client.invalidateQueries({ queryKey: ['data', app.identity, 'api-keys'] });
-      toast('Operação enviada ao Rancher. Acompanhe o estado da chave.');
+      toast(t('apiKeys.operationSent'));
     },
   });
   const pending = write.isPending || run.isPending,
@@ -191,27 +209,27 @@ export function ApiKeys() {
       if (!schema || !editor) return;
       if (editor === 'new') prepareKeyCreate(schema, name, description, project);
       else prepareKeyEdit(schema, editor, editor, name, description, project);
-      setValidation('');
+      setValidation(null);
       setReview(true);
     } catch (e) {
-      setValidation(e instanceof Error ? e.message : 'Revise os campos.');
+      setValidation(e instanceof Error ? e : new KeyPageError('apiKeys.reviewFields'));
     }
   }
   return (
     <>
       <PageHeader
-        title="Chaves de API"
-        description="Credenciais persistentes e seus titulares. Desative uma chave para interromper o acesso; depois, revogue-a se não for mais utilizada."
+        title={t('apiKeys.title')}
+        description={t('apiKeys.description')}
         action={
           <>
             <Button onClick={() => void query.refetch()} disabled={query.isFetching}>
               <RefreshCw size={16} />
-              Atualizar
+              {t('apiKeys.refresh')}
             </Button>
             {canCreateKey(schema, project) && (!environment || project) && (
               <Button variant="primary" onClick={() => open('new')}>
                 <Plus size={16} />
-                Criar chave
+                {t('apiKeys.create')}
               </Button>
             )}
           </>
@@ -219,7 +237,7 @@ export function ApiKeys() {
       />
       <section className="panel">
         <div className="form-grid">
-          <Field label="Escopo das chaves">
+          <Field label={t('apiKeys.scope')}>
             {(id) => (
               <select
                 id={id}
@@ -229,30 +247,30 @@ export function ApiKeys() {
                   setRemoved(false);
                 }}
               >
-                <option value="accounts">Contas autorizadas</option>
+                <option value="accounts">{t('apiKeys.accounts')}</option>
                 <option value="environment" disabled={!app.project}>
-                  Environment: {app.project?.name || 'nenhum selecionado'}
+                  {t('apiKeys.environment', { name: app.project?.name || t('apiKeys.none') })}
                 </option>
               </select>
             )}
           </Field>
-          <Field label="Situação das chaves">
+          <Field label={t('apiKeys.status')}>
             {(id) => (
               <select
                 id={id}
                 value={removed ? 'removed' : 'current'}
                 onChange={(e) => setRemoved(e.target.value === 'removed')}
               >
-                <option value="current">Ativas e inativas</option>
-                <option value="removed">Removidas</option>
+                <option value="current">{t('apiKeys.current')}</option>
+                <option value="removed">{t('apiKeys.removed')}</option>
               </select>
             )}
           </Field>
         </div>
         <Alert tone="info">
           {environment
-            ? `Chaves deste environment autenticam como ${app.project?.name}. Elas são compartilhadas e independem da sessão pessoal; remover um usuário não revoga automaticamente estas credenciais.`
-            : 'A lista segue as contas que o Rancher permite consultar. Novas chaves deste escopo pertencem à conta autenticada e herdam seus acessos.'}
+            ? t('apiKeys.environmentInfo', { name: app.project?.name || '' })
+            : t('apiKeys.accountInfo')}
         </Alert>
       </section>
       {query.isPending || schemas.isPending ? (
@@ -273,7 +291,7 @@ export function ApiKeys() {
           columns={[
             {
               key: 'name',
-              label: 'Chave',
+              label: t('apiKeys.key'),
               sortValue: (v) => String(v.name || v.id),
               render: (v) => (
                 <>
@@ -282,10 +300,10 @@ export function ApiKeys() {
                 </>
               ),
             },
-            { key: 'owner', label: 'Titular', render: (v) => String(v.accountId || '—') },
+            { key: 'owner', label: t('apiKeys.owner'), render: (v) => String(v.accountId || '—') },
             {
               key: 'public',
-              label: 'Identificador',
+              label: t('apiKeys.identifier'),
               render: (v) => (
                 <code>
                   {typeof v.publicValue === 'string' ? v.publicValue.slice(0, 8) + '…' : v.id}
@@ -294,18 +312,18 @@ export function ApiKeys() {
             },
             {
               key: 'state',
-              label: 'Estado',
+              label: t('apiKeys.state'),
               render: (v) => <Badge state={v.state}>{v.state || '—'}</Badge>,
             },
             {
               key: 'actions',
-              label: 'Ações',
+              label: t('apiKeys.actions'),
               render: (v) => (
                 <ActionMenu
-                  label={`Ações da chave ${v.name || v.id}`}
+                  label={t('apiKeys.rowActions', { name: String(v.name || v.id) })}
                   actions={[
                     ...(schema?.resourceMethods?.includes('PUT') && !v.removed
-                      ? [{ id: 'edit', label: 'Editar nome e descrição', onSelect: () => open(v) }]
+                      ? [{ id: 'edit', label: t('apiKeys.editMetadata'), onSelect: () => open(v) }]
                       : []),
                     ...keyActions
                       .filter((kind) => keyActionAllowed(schema, v, kind))
@@ -328,11 +346,11 @@ export function ApiKeys() {
       <Modal
         open={!!editor}
         drawer
-        title={editor === 'new' ? 'Criar chave de API' : 'Editar chave de API'}
+        title={editor === 'new' ? t('apiKeys.createTitle') : t('apiKeys.editTitle')}
         description={
           environment
-            ? `Environment: ${app.project?.name}`
-            : 'Nova credencial para a conta autenticada'
+            ? t('apiKeys.environment', { name: app.project?.name || '' })
+            : t('apiKeys.newCredential')
         }
         onOpenChange={(open) => {
           if (!open) close();
@@ -340,16 +358,16 @@ export function ApiKeys() {
         footer={
           <>
             <Button onClick={close} disabled={pending}>
-              Cancelar
+              {t('apiKeys.cancel')}
             </Button>
             <Button variant="primary" disabled={pending} onClick={requestReview}>
-              Revisar
+              {t('apiKeys.review')}
             </Button>
           </>
         }
       >
         <fieldset disabled={pending} className="form-fieldset">
-          <Field label="Nome da chave">
+          <Field label={t('apiKeys.name')}>
             {(id) => (
               <input
                 id={id}
@@ -360,7 +378,7 @@ export function ApiKeys() {
               />
             )}
           </Field>
-          <Field label="Descrição da chave">
+          <Field label={t('apiKeys.keyDescription')}>
             {(id) => (
               <textarea
                 id={id}
@@ -372,30 +390,32 @@ export function ApiKeys() {
             )}
           </Field>
         </fieldset>
-        {(validation || write.error) && <Alert>{validation || write.error?.message}</Alert>}
+        {(validation || write.error) && <Alert>{errorText((validation || write.error)!)}</Alert>}
       </Modal>
       <Confirm
         open={review}
         onOpenChange={setReview}
-        title={editor === 'new' ? 'Criar credencial persistente?' : 'Aplicar alteração da chave?'}
+        title={editor === 'new' ? t('apiKeys.createConfirm') : t('apiKeys.editConfirm')}
         description={
           environment
-            ? `Escopo: ${app.project?.name}. A credencial funciona independentemente da sessão pessoal e precisa ser revogada separadamente.`
-            : 'Escopo: conta autenticada. A chave terá os acessos desta conta enquanto estiver ativa.'
+            ? t('apiKeys.environmentReview', { name: app.project?.name || '' })
+            : t('apiKeys.accountReview')
         }
         busy={pending}
         onConfirm={() => write.mutate()}
       >
         <p>
-          Nome: <strong>{name}</strong>
+          {t('apiKeys.namePrefix')} <strong>{name}</strong>
         </p>
-        {editor !== 'new' && editor && <p>Nome anterior: {String(editor.name || editor.id)}</p>}
+        {editor !== 'new' && editor && (
+          <p>{t('apiKeys.previousName', { name: String(editor.name || editor.id) })}</p>
+        )}
       </Confirm>
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar alteração da chave?"
-        description="As informações não salvas serão descartadas."
+        title={t('apiKeys.discardTitle')}
+        description={t('apiKeys.discardDescription')}
         onConfirm={() => {
           setDiscard(false);
           setEditor(null);
@@ -403,8 +423,8 @@ export function ApiKeys() {
       />
       <Modal
         open={!!secret}
-        title="Guarde sua chave de API"
-        description="O segredo é exibido somente agora. Depois de fechar, este frontend não o recupera."
+        title={t('apiKeys.saveTitle')}
+        description={t('apiKeys.saveDescription')}
         onOpenChange={(open) => {
           if (!open) {
             if (saved) clearSecret();
@@ -413,17 +433,15 @@ export function ApiKeys() {
         }}
         footer={
           <Button variant="primary" disabled={!saved} onClick={clearSecret}>
-            Concluir
+            {t('apiKeys.done')}
           </Button>
         }
       >
-        <Alert tone="warning">
-          Guarde esta credencial em local seguro. Você pode revogá-la na lista de chaves.
-        </Alert>
-        <Field label="Chave de acesso">
+        <Alert tone="warning">{t('apiKeys.saveWarning')}</Alert>
+        <Field label={t('apiKeys.accessKey')}>
           {(id) => <input id={id} readOnly value={secret?.publicValue || ''} autoComplete="off" />}
         </Field>
-        <Field label="Segredo da chave">
+        <Field label={t('apiKeys.secret')}>
           {(id) => (
             <input
               id={id}
@@ -437,26 +455,26 @@ export function ApiKeys() {
         <div className="workspace-panel-actions">
           <Button aria-pressed={revealed} onClick={() => setRevealed(!revealed)}>
             {revealed ? <EyeOff size={16} /> : <Eye size={16} />}{' '}
-            {revealed ? 'Ocultar segredo' : 'Mostrar segredo'}
+            {revealed ? t('apiKeys.hideSecret') : t('apiKeys.showSecret')}
           </Button>
           <Button
             onClick={async () => {
               try {
                 if (secret) {
                   await navigator.clipboard.writeText(secret.secretValue);
-                  toast('Segredo copiado.');
+                  toast(t('apiKeys.copied'));
                 }
               } catch {
-                toast('Não foi possível copiar. Revele e selecione o segredo manualmente.');
+                toast(t('apiKeys.copyFailed'));
               }
             }}
           >
             <Copy size={16} />
-            Copiar segredo
+            {t('apiKeys.copy')}
           </Button>
         </div>
         <CheckboxField
-          label="Guardei a credencial ou aceito perder a visualização do segredo"
+          label={t('apiKeys.saved')}
           checked={saved}
           onChange={(e) => setSaved(e.target.checked)}
         />
@@ -464,8 +482,8 @@ export function ApiKeys() {
       <Confirm
         open={loseSecret}
         onOpenChange={setLoseSecret}
-        title="Fechar sem guardar o segredo?"
-        description="O frontend não recuperará o segredo após fechar. Você precisará revogar e criar outra chave."
+        title={t('apiKeys.loseTitle')}
+        description={t('apiKeys.loseDescription')}
         onConfirm={clearSecret}
       />
       <Confirm
@@ -473,20 +491,26 @@ export function ApiKeys() {
         onOpenChange={(open) => {
           if (!open && !pending) setAction(null);
         }}
-        title={`${action ? labels[action.kind] : 'Alterar'} chave?`}
-        description={`Chave: ${action?.row.name || action?.row.id || ''}. Titular: ${action?.row.accountId || ''}. ${action?.kind === 'activate' ? 'O acesso pela credencial será reativado.' : 'Requisições usando esta credencial poderão ser interrompidas.'}`}
+        title={t('apiKeys.actionTitle', {
+          action: action ? labels[action.kind] : t('apiKeys.change'),
+        })}
+        description={t('apiKeys.actionDescription', {
+          name: String(action?.row.name || action?.row.id || ''),
+          owner: String(action?.row.accountId || ''),
+          effect: action?.kind === 'activate' ? t('apiKeys.reactivate') : t('apiKeys.interrupt'),
+        })}
         busy={pending}
         onConfirm={() => run.mutate()}
       >
-        {run.error && <Alert>{run.error.message}</Alert>}
+        {run.error && <Alert>{errorText(run.error)}</Alert>}
       </Confirm>
       <Confirm
         open={blocker.state === 'blocked'}
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Mudar de contexto?"
-        description="Há alterações pendentes ou um segredo que não será recuperado. Aguarde qualquer envio em andamento."
+        title={t('apiKeys.contextTitle')}
+        description={t('apiKeys.contextDescription')}
         busy={pending}
         onConfirm={() => {
           if (!pending && blocker.state === 'blocked') {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useI18n } from '../i18n/provider';
 import { Link, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight, ShieldCheck, UsersRound } from 'lucide-react';
@@ -22,6 +23,7 @@ import { LocalAccountPanel, type AccountSelection } from '../components/LocalAcc
 import { sessionAccountId } from '../local-accounts';
 
 export function Users() {
+  const { t } = useI18n();
   const app = useApp();
   const client = useQueryClient();
   const { id } = useParams();
@@ -34,23 +36,23 @@ export function Users() {
   function actions(account: Account) {
     return (
       <ActionMenu
-        label={`Ações da conta ${account.name || account.id}`}
+        label={t('users.accountActions', { account: account.name || account.id })}
         actions={[
           {
             id: 'profile',
-            label: 'Editar perfil da conta',
+            label: t('users.profile'),
             onSelect: () => setManagement({ mode: 'profile', account }),
           },
           {
             id: 'password',
-            label: 'Redefinir senha local',
+            label: t('users.password'),
             onSelect: () => setManagement({ mode: 'password', account }),
           },
           ...(account.state === 'inactive'
             ? [
                 {
                   id: 'activate',
-                  label: 'Ativar conta',
+                  label: t('users.activate'),
                   onSelect: () => setManagement({ mode: 'activate', account }),
                 },
               ]
@@ -59,21 +61,20 @@ export function Users() {
             ? [
                 {
                   id: 'deactivate',
-                  label: 'Desativar conta',
+                  label: t('users.deactivate'),
                   danger: true,
                   disabled: !ownAccount || account.id === ownAccount,
-                  reason: 'Use outro administrador para desativar sua conta.',
+                  reason: t('users.deactivateReason'),
                   onSelect: () => setManagement({ mode: 'deactivate', account }),
                 },
               ]
             : []),
           {
             id: 'remove',
-            label: 'Excluir conta',
+            label: t('users.remove'),
             danger: true,
             disabled: account.state !== 'inactive' || !ownAccount || account.id === ownAccount,
-            reason:
-              'Desative a conta antes de excluí-la; use outro administrador para sua própria conta.',
+            reason: t('users.removeReason'),
             onSelect: () => setManagement({ mode: 'remove', account }),
           },
         ]}
@@ -85,31 +86,22 @@ export function Users() {
   const { users, groups, projects, groupsEnabled } = query.data;
   const user = id ? users.find((user) => user.id === id) : undefined;
   if (id && !user)
-    return (
-      <Empty
-        title="Usuário não encontrado"
-        description="Esta conta não está disponível na instância."
-      />
-    );
+    return <Empty title={t('users.notFound')} description={t('users.notFoundDescription')} />;
   const memberships = user ? groups.filter((group) => group.members.includes(rawId(user.id))) : [];
   return (
     <>
       <PageHeader
-        title={user?.name || (user ? user.id : 'Usuários')}
-        description={
-          user
-            ? 'Conta Rancher e participação em grupos locais.'
-            : 'Visualize suas contas e gerencie o acesso das equipes pelos grupos.'
-        }
-        eyebrow="CONTROLE DE ACESSO"
+        title={user?.name || (user ? user.id : t('users.title'))}
+        description={user ? t('users.detailDescription') : t('users.description')}
+        eyebrow={t('users.eyebrow')}
         action={
           user ? (
             <Link className="button secondary" to="/users">
               <ArrowLeft size={16} />
-              Voltar
+              {t('users.back')}
             </Link>
           ) : accountAdministration ? (
-            <Button onClick={() => setManagement({ mode: 'create' })}>Criar conta local</Button>
+            <Button onClick={() => setManagement({ mode: 'create' })}>{t('users.create')}</Button>
           ) : undefined
         }
       />
@@ -117,11 +109,11 @@ export function Users() {
         <>
           <section className="panel">
             <div className="panel-heading">
-              <h2>Dados da conta</h2>
+              <h2>{t('users.accountData')}</h2>
               {groupsEnabled && (
                 <Button onClick={() => setDiagnosing(true)}>
                   <ShieldCheck size={15} />
-                  Acesso efetivo
+                  {t('users.effectiveAccess')}
                 </Button>
               )}
               <Badge state={user.state}>{user.state}</Badge>
@@ -129,48 +121,41 @@ export function Users() {
             </div>
             <dl className="details-grid">
               <div>
-                <dt>Identificação</dt>
+                <dt>{t('users.identification')}</dt>
                 <dd>{user.id}</dd>
               </div>
               <div>
-                <dt>Perfil global</dt>
-                <dd>{user.kind === 'admin' ? 'Administrador' : 'Usuário'}</dd>
+                <dt>{t('users.globalRole')}</dt>
+                <dd>{user.kind === 'admin' ? t('users.administrator') : t('users.user')}</dd>
               </div>
               <div>
-                <dt>Nome</dt>
-                <dd>{user.name || 'Não informado'}</dd>
+                <dt>{t('users.name')}</dt>
+                <dd>{user.name || t('users.notProvided')}</dd>
               </div>
               <div>
-                <dt>Grupos locais</dt>
-                <dd>{groupsEnabled ? memberships.length : 'Gerenciamento desativado'}</dd>
+                <dt>{t('users.localGroups')}</dt>
+                <dd>{groupsEnabled ? memberships.length : t('users.managementDisabled')}</dd>
               </div>
             </dl>
-            {user.kind === 'admin' && (
-              <Alert tone="info">
-                Esta conta tem privilégios administrativos globais. Participação em grupos não reduz
-                esses privilégios.
-              </Alert>
-            )}
+            {user.kind === 'admin' && <Alert tone="info">{t('users.adminNotice')}</Alert>}
           </section>
           <section className="panel" style={{ marginTop: 20 }}>
             <div className="panel-heading">
-              <h2>Participação em grupos</h2>
+              <h2>{t('users.membership')}</h2>
             </div>
             {!groupsEnabled ? (
-              <Alert tone="info">
-                O gerenciamento de grupos está desativado nesta console ou no servidor.
-              </Alert>
+              <Alert tone="info">{t('users.groupsDisabled')}</Alert>
             ) : (
               <DataTable
                 rows={groups}
                 rowKey={(group) => group.id}
                 searchText={(group) => group.name}
-                emptyTitle="Nenhum grupo local"
-                emptyDescription="Crie um grupo para organizar os acessos da equipe."
+                emptyTitle={t('users.emptyGroups')}
+                emptyDescription={t('users.emptyGroupsDescription')}
                 columns={[
                   {
                     key: 'name',
-                    label: 'Grupo',
+                    label: t('users.group'),
                     sortValue: (group) => group.name,
                     render: (group) => (
                       <div className="row-title">
@@ -183,24 +168,26 @@ export function Users() {
                   },
                   {
                     key: 'member',
-                    label: 'Participação',
+                    label: t('users.participation'),
                     render: (group) => (
                       <Badge state={group.members.includes(rawId(user.id)) ? 'active' : undefined}>
-                        {group.members.includes(rawId(user.id)) ? 'Membro' : 'Não participa'}
+                        {group.members.includes(rawId(user.id))
+                          ? t('users.member')
+                          : t('users.notMember')}
                       </Badge>
                     ),
                   },
                   {
                     key: 'grants',
-                    label: 'Environments',
+                    label: t('users.environments'),
                     render: (group) => Object.keys(group.grants).length,
                   },
                   {
                     key: 'edit',
-                    label: 'Gerenciamento',
+                    label: t('users.management'),
                     render: (group) => (
                       <Button variant="ghost" onClick={() => setEditing(group)}>
-                        Editar grupo
+                        {t('users.editGroup')}
                         <ArrowRight size={15} />
                       </Button>
                     ),
@@ -211,10 +198,9 @@ export function Users() {
           </section>
           {groupsEnabled && memberships.length > 0 && (
             <section className="panel" style={{ marginTop: 20 }}>
-              <h2>Grants dos grupos</h2>
+              <h2>{t('users.grants')}</h2>
               <p className="muted" style={{ fontSize: 12 }}>
-                Os vínculos abaixo mostram o que cada grupo concede. Permissões diretas e
-                privilégios globais também são considerados pelo Rancher.
+                {t('users.grantsDescription')}
               </p>
               <div className="selection-list">
                 {memberships.flatMap((group) =>
@@ -243,7 +229,7 @@ export function Users() {
           columns={[
             {
               key: 'name',
-              label: 'Usuário',
+              label: t('users.user'),
               sortValue: (user) => user.name || user.id,
               render: (user) => (
                 <Link className="row-title" to={`/users/${user.id}`}>
@@ -259,40 +245,46 @@ export function Users() {
             },
             {
               key: 'kind',
-              label: 'Perfil global',
+              label: t('users.globalRole'),
               render: (user) => (
-                <Badge>{user.kind === 'admin' ? 'Administrador' : 'Usuário'}</Badge>
+                <Badge>{user.kind === 'admin' ? t('users.administrator') : t('users.user')}</Badge>
               ),
             },
             {
               key: 'state',
-              label: 'Estado',
+              label: t('users.state'),
               sortValue: (user) => user.state,
               render: (user) => <Badge state={user.state}>{user.state}</Badge>,
             },
             {
               key: 'groups',
-              label: 'Grupos locais',
+              label: t('users.localGroups'),
               render: (user) =>
                 groupsEnabled
                   ? groups.filter((group) => group.members.includes(rawId(user.id))).length
-                  : 'Desativados',
+                  : t('users.disabled'),
             },
             {
               key: 'open',
-              label: 'Detalhes',
+              label: t('users.details'),
               render: (user) => (
                 <Link
                   className="button ghost"
                   to={`/users/${user.id}`}
-                  aria-label={`Abrir ${user.name || user.id}`}
+                  aria-label={t('users.open', { account: user.name || user.id })}
                 >
                   <ArrowRight size={16} />
                 </Link>
               ),
             },
             ...(accountAdministration
-              ? [{ key: 'actions', label: 'Ações', render: (account: Account) => actions(account) }]
+              ? [
+                  {
+                    key: 'actions',
+                    label: t('users.actions'),
+                    render: (account: Account) => actions(account),
+                  },
+                ]
               : []),
           ]}
         />

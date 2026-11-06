@@ -46,6 +46,8 @@ The specialized CPU, memory, capability, process-limit and health-check controls
 
 Scheduling and port/mount editors use the shared message catalogs. Memory and process-limit validators expose typed message keys, and their inline errors follow a language switch while retaining the draft. Native scheduling values, port protocols and mount modes retain their API representation.
 
+Groups, accounts, local account dialogs, effective access diagnostics, API keys, audit, server settings, processes, engine monitoring, machine drivers and catalog repositories use registered pt-BR/en-US labels. Locally generated errors keep typed keys and are translated when rendered, including errors already visible during a language switch. Native/helper errors retain their existing representation where extraction is pending. Changing language preserves open group drafts and does not change query scope, privileges or native action identifiers.
+
 ## Data and mutations
 
 Use current resource schemas/action links instead of inventing routes or assuming global schemas equal environment-scoped schemas. Re-read the resource, scope and relevant contract before mutation. Preserve unknown configuration and unselected fields; do not silently replace unsupported values with empty defaults.

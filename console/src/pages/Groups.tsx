@@ -18,6 +18,8 @@ import {
   type Role,
 } from '../api';
 
+import { useI18n } from '../i18n/provider';
+
 import { useApp } from '../state';
 import { useLocalAccessData } from '../hooks/useLocalAccessData';
 import { GroupAudit } from '../components/AccessDiagnostics';
@@ -66,6 +68,7 @@ export function GroupEditor({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { t } = useI18n();
   const [name, setName] = useState(group?.name || '');
   const [nameError, setNameError] = useState('');
   const [members, setMembers] = useState(new Set(group?.members || []));
@@ -110,7 +113,7 @@ export function GroupEditor({
   const save = useMutation({
     mutationFn: () => api<Group>('localGroups', body),
     onSuccess: () => {
-      toast(group ? 'Grupo atualizado. Os grants já estão em vigor.' : 'Grupo criado.');
+      toast(group ? t('groups.updated') : t('groups.created'));
       onSaved();
     },
   });
@@ -140,23 +143,26 @@ export function GroupEditor({
         onOpenChange={(open) => {
           if (!open) close();
         }}
-        title={group ? 'Editar grupo' : 'Criar grupo'}
-        description="Defina membros e acesso aos environments em um único lugar."
+        title={group ? t('groups.editGroup') : t('groups.createGroup')}
+        description={t('groups.editorDescription')}
         drawer
         footer={
           <>
             <span className="muted" style={{ marginRight: 'auto', fontSize: 11 }}>
-              {members.size} membros · {Object.keys(grants).length} environments
+              {t('groups.selectionSummary', {
+                members: members.size,
+                environments: Object.keys(grants).length,
+              })}
             </span>
             <Button onClick={close} disabled={save.isPending}>
-              Cancelar
+              {t('groups.cancel')}
             </Button>
             <Button
               variant="primary"
               busy={save.isPending}
               onClick={() => {
                 if (!name.trim()) {
-                  setNameError('Informe um nome para o grupo.');
+                  setNameError('required');
                   nameRef.current?.focus();
                   return;
                 }
@@ -166,15 +172,15 @@ export function GroupEditor({
                 } else save.mutate();
               }}
             >
-              {tab < 2 ? 'Revisar alterações' : 'Salvar grupo'}
+              {tab < 2 ? t('groups.reviewChanges') : t('groups.saveGroup')}
             </Button>
           </>
         }
       >
         <Field
-          label="Nome do grupo"
-          error={nameError}
-          hint="Um nome que represente a equipe ou sua função."
+          label={t('groups.groupName')}
+          error={nameError ? t('groups.nameRequired') : ''}
+          hint={t('groups.nameHint')}
         >
           {(id, desc) => (
             <input
@@ -187,7 +193,7 @@ export function GroupEditor({
                 setName(e.target.value);
                 setNameError('');
               }}
-              placeholder="Ex.: Operações de infraestrutura"
+              placeholder={t('groups.namePlaceholder')}
               required
             />
           )}
@@ -195,9 +201,9 @@ export function GroupEditor({
 
         <Tabs
           labels={[
-            `Membros (${members.size})`,
-            `Environments (${Object.keys(grants).length})`,
-            'Revisão',
+            t('groups.membersTab', { count: members.size }),
+            t('groups.environmentsTab', { count: Object.keys(grants).length }),
+            t('groups.review'),
           ]}
           selected={tab}
           onChange={(index) => {
@@ -206,15 +212,15 @@ export function GroupEditor({
           }}
           panelId="group-tabpanel"
           idPrefix="group-tab"
-          label="Configuração do grupo"
+          label={t('groups.configuration')}
         />
         <div role="tabpanel" id="group-tabpanel" aria-labelledby={`group-tab-${tab}`}>
           {tab < 2 && (
             <label className="search-input" style={{ width: '100%' }}>
               <Search size={17} />
               <input
-                aria-label={tab === 0 ? 'Buscar membros' : 'Buscar environments'}
-                placeholder={tab === 0 ? 'Buscar por nome ou ID…' : 'Buscar environment…'}
+                aria-label={tab === 0 ? t('groups.searchMembers') : t('groups.searchEnvironments')}
+                placeholder={tab === 0 ? t('groups.searchNameId') : t('groups.searchEnvironment')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -224,8 +230,7 @@ export function GroupEditor({
           {tab === 0 && (
             <>
               <p className="muted" style={{ fontSize: 11, margin: '15px 0' }}>
-                Selecione as contas que fazem parte deste grupo. Usuários novos precisam entrar ao
-                menos uma vez para aparecer aqui.
+                {t('groups.membersHelp')}
               </p>
               <div className="selection-list">
                 {matchingUsers.map((user) => (
@@ -250,21 +255,22 @@ export function GroupEditor({
                     <div>
                       <strong>{user.name || user.id}</strong>
                       <small>
-                        {user.id} · {user.kind === 'admin' ? 'Administrador' : 'Usuário'}
-                        {user.state !== 'active' ? ' · Conta inativa' : ''}
+                        {user.id} ·{' '}
+                        {user.kind === 'admin' ? t('groups.administrator') : t('groups.user')}
+                        {user.state !== 'active' ? t('groups.inactive') : ''}
                       </small>
                     </div>
                   </label>
                 ))}
-                {!matchingUsers.length && <p className="muted">Nenhum usuário encontrado.</p>}
+                {!matchingUsers.length && <p className="muted">{t('groups.noUsers')}</p>}
                 {missingMembers
                   .filter((id) => id.includes(search.trim()))
                   .map((id) => (
                     <div className="selection-item selected" key={`missing-${id}`}>
                       <UsersRound size={19} />
                       <div>
-                        <strong>Conta indisponível ({id})</strong>
-                        <small>O vínculo foi preservado. Você pode removê-lo deste grupo.</small>
+                        <strong>{t('groups.missingAccount', { id })}</strong>
+                        <small>{t('groups.preservedMember')}</small>
                       </div>
                       <Button
                         onClick={() =>
@@ -273,7 +279,7 @@ export function GroupEditor({
                           )
                         }
                       >
-                        Remover vínculo da conta {id}
+                        {t('groups.removeAccount', { id })}
                       </Button>
                     </div>
                   ))}
@@ -284,8 +290,7 @@ export function GroupEditor({
           {tab === 1 && (
             <>
               <p className="muted" style={{ fontSize: 11, margin: '15px 0' }}>
-                Nenhum environment é concedido por padrão. Escolha o papel apenas nos ambientes
-                necessários.
+                {t('groups.environmentHelp')}
               </p>
               <div className="selection-list">
                 {matchingProjects.map((project) => (
@@ -299,7 +304,7 @@ export function GroupEditor({
                       <small>{project.id}</small>
                     </div>
                     <select
-                      aria-label={`Permissão em ${project.name}`}
+                      aria-label={t('groups.permissionLabel', { name: project.name })}
                       value={grants[rawId(project.id)] || ''}
                       disabled={project.state !== 'active' && !grants[rawId(project.id)]}
                       onChange={(e) => {
@@ -309,7 +314,7 @@ export function GroupEditor({
                         setGrants(next);
                       }}
                     >
-                      <option value="">Sem acesso</option>
+                      <option value="">{t('groups.noAccess')}</option>
                       {roles
                         .filter(
                           (role) =>
@@ -329,11 +334,8 @@ export function GroupEditor({
                     <div className="selection-item selected" key={`missing-${id}`}>
                       <ShieldCheck size={19} />
                       <div>
-                        <strong>Environment indisponível ({id})</strong>
-                        <small>
-                          Permissão preservada: {grants[id]}. Remova o vínculo se ele não deve
-                          permanecer.
-                        </small>
+                        <strong>{t('groups.missingEnvironment', { id })}</strong>
+                        <small>{t('groups.preservedPermission', { role: grants[id] })}</small>
                       </div>
                       <Button
                         onClick={() =>
@@ -344,34 +346,34 @@ export function GroupEditor({
                           })
                         }
                       >
-                        Remover permissão do environment {id}
+                        {t('groups.removeEnvironment', { id })}
                       </Button>
                     </div>
                   ))}
               </div>
-              <Alert tone="info">
-                Os papéis seguem as regras do Rancher. Acesso direto ao environment continua sendo
-                considerado pelo backend.
-              </Alert>
+              <Alert tone="info">{t('groups.rancherRules')}</Alert>
             </>
           )}
 
           {tab === 2 && (
             <>
-              <h3>{name.trim() || 'Informe um nome para continuar'}</h3>
+              <h3>{name.trim() || t('groups.nameToContinue')}</h3>
               <div className="review-list">
                 <div>
-                  <span>Membros selecionados</span>
+                  <span>{t('groups.selectedMembers')}</span>
                   <strong>{members.size}</strong>
                 </div>
                 <div>
-                  <span>Environments com acesso</span>
+                  <span>{t('groups.accessEnvironments')}</span>
                   <strong>{Object.keys(grants).length}</strong>
                 </div>
               </div>
               <p className="muted" style={{ fontSize: 12 }}>
-                {changes.added.length} membros adicionados · {changes.removed.length} removidos ·{' '}
-                {changes.changed.length} permissões alteradas
+                {t('groups.changes', {
+                  added: changes.added.length,
+                  removed: changes.removed.length,
+                  changed: changes.changed.length,
+                })}
               </p>
               <div className="selection-list">
                 {Object.entries(grants).map(([id, role]) => (
@@ -385,14 +387,11 @@ export function GroupEditor({
                 ))}
               </div>
               {!Object.keys(grants).length && (
-                <Alert tone="info">Este grupo não concederá acesso a nenhum environment.</Alert>
+                <Alert tone="info">{t('groups.noEnvironmentAccess')}</Alert>
               )}
               {group && changes.removed.length > 0 && (
                 <div style={{ marginTop: 15 }}>
-                  <Alert tone="warning">
-                    A remoção de membros retira os acessos concedidos por este grupo nas próximas
-                    requisições, inclusive em sessões existentes.
-                  </Alert>
+                  <Alert tone="warning">{t('groups.removalWarning')}</Alert>
                 </div>
               )}
             </>
@@ -402,12 +401,7 @@ export function GroupEditor({
           <div style={{ marginTop: 20 }}>
             <Alert>
               {save.error.message}
-              {'status' in save.error && save.error.status === 409 && (
-                <p>
-                  Seus dados foram preservados. Feche o editor e recarregue o grupo para revisar a
-                  versão atual antes de tentar novamente.
-                </p>
-              )}
+              {'status' in save.error && save.error.status === 409 && <p>{t('groups.conflict')}</p>}
             </Alert>
           </div>
         )}
@@ -415,8 +409,8 @@ export function GroupEditor({
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar alterações?"
-        description="As alterações ainda não foram salvas neste grupo."
+        title={t('groups.discardTitle')}
+        description={t('groups.discardDescription')}
         onConfirm={onClose}
       />
       <Confirm
@@ -424,8 +418,8 @@ export function GroupEditor({
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Sair sem salvar?"
-        description="Seu rascunho de grupo ainda não foi salvo."
+        title={t('groups.leaveTitle')}
+        description={t('groups.leaveDescription')}
         onConfirm={() => {
           if (blocker.state === 'blocked') blocker.proceed();
         }}
@@ -435,6 +429,7 @@ export function GroupEditor({
 }
 
 export function Groups() {
+  const { t } = useI18n();
   const app = useApp();
   const client = useQueryClient();
   const toast = useToast();
@@ -459,7 +454,7 @@ export function Groups() {
       setDeleting(null);
       await client.invalidateQueries({ queryKey: key });
       await app.refresh();
-      toast('Grupo excluído. Os usuários foram preservados.');
+      toast(t('groups.deleted'));
     },
   });
 
@@ -474,18 +469,18 @@ export function Groups() {
   return (
     <>
       <PageHeader
-        title="Grupos e permissões"
-        description="Organize suas equipes e conceda acesso aos environments, sem gerenciar usuário por usuário em cada ambiente."
-        eyebrow="CONTROLE DE ACESSO"
+        title={t('groups.title')}
+        description={t('groups.description')}
+        eyebrow={t('groups.eyebrow')}
         action={
           <>
             <Button onClick={() => setHistory(null)}>
               <History size={17} />
-              Auditoria de grupos
+              {t('groups.audit')}
             </Button>
             <Button variant="primary" onClick={() => setEditing(null)}>
               <Plus size={17} />
-              Criar grupo
+              {t('groups.createAction')}
             </Button>
           </>
         }
@@ -493,9 +488,9 @@ export function Groups() {
       <div className="metric-grid groups-metrics">
         <div className="metric">
           <div>
-            <p>Grupos locais</p>
+            <p>{t('groups.localGroups')}</p>
             <strong>{groups.length}</strong>
-            <small>Gerenciados nesta instância</small>
+            <small>{t('groups.managedHere')}</small>
           </div>
           <div className="metric-icon">
             <ShieldCheck size={21} />
@@ -503,9 +498,9 @@ export function Groups() {
         </div>
         <div className="metric">
           <div>
-            <p>Membros vinculados</p>
+            <p>{t('groups.linkedMembers')}</p>
             <strong>{memberCount}</strong>
-            <small>Usuários distintos nos grupos</small>
+            <small>{t('groups.distinctUsers')}</small>
           </div>
           <div className="metric-icon">
             <UsersRound size={21} />
@@ -513,9 +508,9 @@ export function Groups() {
         </div>
         <div className="metric">
           <div>
-            <p>Environments com grants</p>
+            <p>{t('groups.grantedEnvironments')}</p>
             <strong>{environmentCount}</strong>
-            <small>Vínculos definidos pelos grupos</small>
+            <small>{t('groups.groupLinks')}</small>
           </div>
           <div className="metric-icon">
             <ShieldCheck size={21} />
@@ -526,12 +521,12 @@ export function Groups() {
         rows={groups}
         rowKey={(g) => g.id}
         searchText={(g) => g.name}
-        emptyTitle="Comece organizando sua equipe"
-        emptyDescription="Crie um grupo, adicione membros e escolha em quais environments eles poderão trabalhar."
+        emptyTitle={t('groups.emptyTitle')}
+        emptyDescription={t('groups.emptyDescription')}
         columns={[
           {
             key: 'name',
-            label: 'Grupo',
+            label: t('groups.group'),
             sortValue: (g) => g.name,
             render: (g) => (
               <div className="row-title">
@@ -540,7 +535,7 @@ export function Groups() {
                 </span>
                 <div>
                   <button onClick={() => setEditing(g)}>{g.name}</button>
-                  <small>Grupo local · revisão {g.revision}</small>
+                  <small>{t('groups.revision', { revision: g.revision })}</small>
                 </div>
               </div>
             ),
@@ -548,18 +543,20 @@ export function Groups() {
 
           {
             key: 'members',
-            label: 'Membros',
+            label: t('groups.members'),
             sortValue: (g) => g.members.length,
             render: (g) => (
               <span>
-                {g.members.length} usuário{g.members.length === 1 ? '' : 's'}
+                {t(g.members.length === 1 ? 'groups.oneUser' : 'groups.manyUsers', {
+                  count: g.members.length,
+                })}
               </span>
             ),
           },
 
           {
             key: 'environments',
-            label: 'Environments',
+            label: t('groups.environments'),
             render: (g) => (
               <div className="badge-row">
                 {Object.keys(g.grants)
@@ -570,14 +567,16 @@ export function Groups() {
                 {Object.keys(g.grants).length > 2 && (
                   <Badge>+{Object.keys(g.grants).length - 2}</Badge>
                 )}
-                {!Object.keys(g.grants).length && <span className="muted">Sem grants</span>}
+                {!Object.keys(g.grants).length && (
+                  <span className="muted">{t('groups.noGrants')}</span>
+                )}
               </div>
             ),
           },
 
           {
             key: 'roles',
-            label: 'Papéis',
+            label: t('groups.roles'),
             render: (g) => (
               <span className="muted">
                 {[...new Set(Object.values(g.grants))]
@@ -589,28 +588,28 @@ export function Groups() {
 
           {
             key: 'actions',
-            label: 'Ações',
+            label: t('groups.actions'),
             render: (g) => (
               <div className="row-actions">
                 <Button
                   variant="ghost"
                   onClick={() => setHistory(g)}
-                  aria-label={`Histórico de ${g.name}`}
+                  aria-label={t('groups.historyLabel', { name: g.name })}
                 >
                   <History size={15} />
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={() => setEditing(g)}
-                  aria-label={`Editar ${g.name}`}
+                  aria-label={t('groups.editLabel', { name: g.name })}
                 >
                   <Pencil size={15} />
-                  Editar
+                  {t('groups.edit')}
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={() => setDeleting(g)}
-                  aria-label={`Excluir ${g.name}`}
+                  aria-label={t('groups.deleteLabel', { name: g.name })}
                 >
                   <Trash2 size={15} />
                 </Button>
@@ -646,8 +645,8 @@ export function Groups() {
         onOpenChange={(open) => {
           if (!open) setDeleting(null);
         }}
-        title={`Excluir ${deleting?.name || 'grupo'}?`}
-        description="Os grants deste grupo serão retirados. Usuários e vínculos diretos aos environments serão preservados."
+        title={t('groups.deleteTitle', { name: deleting?.name || t('groups.groupFallback') })}
+        description={t('groups.deleteDescription')}
         onConfirm={() => {
           if (deleting) remove.mutate(deleting);
         }}

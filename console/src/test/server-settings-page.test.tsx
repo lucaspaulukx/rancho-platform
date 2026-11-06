@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { Settings } from '../pages/Settings';
+import { I18nProvider } from '../i18n/provider';
 import type { Resource, Schema } from '../api';
 const state = vi.hoisted(() => ({
   changed: false,
@@ -57,12 +58,27 @@ vi.mock('../api', async () => ({
     };
   }),
 }));
-function mount() {
+function mount(localized = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = createMemoryRouter([{ path: '/', element: <Settings /> }]);
   render(
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
+      <I18nProvider
+        policy={
+          localized
+            ? {
+                enabled: true,
+                defaultLocale: 'pt-BR',
+                availableLocales: ['pt-BR', 'en-US'],
+                selectable: true,
+                detectBrowser: false,
+                preview: true,
+              }
+            : undefined
+        }
+      >
+        <RouterProvider router={router} />
+      </I18nProvider>
     </QueryClientProvider>,
   );
   return client;
@@ -152,5 +168,29 @@ describe('Página de configurações', () => {
     expect(JSON.stringify({ ...localStorage, ...sessionStorage })).not.toContain(
       'synthetic-private',
     );
+  });
+  it('traduz erro já aberto sem perder o rascunho nem repetir a mutação', async () => {
+    localStorage.removeItem('rancho.console.locale.anonymous');
+    mount(true);
+    const user = await edit();
+    state.fail = true;
+    await user.click(screen.getByRole('button', { name: 'Confirmar' }));
+    await screen.findByText('Não foi possível concluir a operação de configuração.');
+    const draft = screen.getByLabelText('Valor configurado');
+    const displayedValue = (draft as HTMLInputElement).value;
+    act(() => {
+      localStorage.setItem(
+        'rancho.console.locale.anonymous',
+        JSON.stringify({ version: 1, locale: 'en-US' }),
+      );
+      window.dispatchEvent(new StorageEvent('storage', { key: 'rancho.console.locale.anonymous' }));
+    });
+    expect(screen.getByText('Unable to complete the settings operation.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Configured value')).toBe(draft);
+    expect(draft).toHaveValue(displayedValue);
+    expect(state.posts).toEqual([{ value: 'new\nmultiline' }]);
+    expect(state.posts).toHaveLength(1);
+    expect(screen.queryByText('synthetic-private failure')).not.toBeInTheDocument();
+    localStorage.removeItem('rancho.console.locale.anonymous');
   });
 });

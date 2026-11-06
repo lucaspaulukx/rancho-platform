@@ -139,14 +139,18 @@ async function main() {
   await language().waitFor();
   const search = workspace.getByLabel('Buscar na operação', { exact: true });
   await search.waitFor();
+  const searchControl = await search.elementHandle();
   const create = workspace.locator('details.creation-menu > summary').filter({ hasText: /^Criar$/ });
   await create.waitFor();
+  const createControl = await create.elementHandle();
   await workspace.getByRole('button', { name: 'Recolher menu', exact: true }).click();
   await language().selectOption('en-US');
   await workspace.getByRole('button', { name: 'Expand menu', exact: true }).waitFor();
   check('authenticated switch preserves environment/path/filter and operation controls',
-    workspace.url() === workspaceUrl && await search.inputValue() === 'localization-acceptance' &&
-    await create.isVisible() &&
+    workspace.url() === workspaceUrl &&
+    await workspace.getByLabel('Search operations', { exact: true }).inputValue() === 'localization-acceptance' &&
+    await workspace.getByLabel('Search operations', { exact: true }).evaluate((node, previous) => node === previous, searchControl) &&
+    await workspace.locator('details.creation-menu > summary').filter({ hasText: /^Create$/ }).evaluate((node, previous) => node === previous, createControl) &&
     await workspace.getByRole('button', { name: /^Environment: / }).isVisible());
   check('collapsed sidebar and selected locale survive shell translation',
     (await workspace.getByTestId('app-shell').getAttribute('class')).includes('sidebar-collapsed') &&
@@ -185,6 +189,19 @@ async function main() {
     check('mobile ' + theme + ' selector remains labelled, selected and inside viewport',
       await selector.inputValue() === 'en-US' && await insideViewport(selector) && fits);
     check('mobile ' + theme + ' selector text contrast', await contrast(selector) >= 4.5);
+  }
+  result.stage = 'administration-routes';
+  await workspace.setViewportSize({ width: 1440, height: 1000 });
+  for (const [route, title] of [
+    ['groups', 'Groups and permissions'],
+    ['users', 'Users'],
+    ['api-keys', 'API keys'],
+    ['settings', 'Server settings'],
+  ]) {
+    await workspace.goto(origin + '/console/' + route + '?env=1a12');
+    await workspace.getByRole('heading', { name: title, exact: true }).waitFor();
+    check('translated administrative route ' + route + ' keeps scope',
+      new URL(workspace.url()).searchParams.get('env') === '1a12');
   }
   check('no browser HTTP mutations or external navigation', result.blockedRequests === 0);
   check('no JavaScript errors', result.pageErrors === 0);

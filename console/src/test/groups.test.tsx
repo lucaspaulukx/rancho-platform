@@ -1,11 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GroupEditor } from '../pages/Groups';
 import { ToastProvider } from '../components/ui';
 import { AccessDiagnostics, GroupAudit } from '../components/AccessDiagnostics';
+import { I18nProvider } from '../i18n/provider';
 
 vi.mock('../state', () => ({
   useApp: () => ({ identity: 'fixture', project: { id: '1a12' } }),
@@ -155,6 +156,52 @@ describe('Diagnóstico backend e snapshots de grupos', () => {
 });
 
 describe('Manutenção de vínculos de grupos', () => {
+  it('retains a group draft when the language changes', async () => {
+    const router = createMemoryRouter([
+      {
+        path: '/',
+        element: (
+          <ToastProvider>
+            <GroupEditor
+              group={null}
+              users={[]}
+              projects={[]}
+              onClose={vi.fn()}
+              onSaved={vi.fn()}
+            />
+          </ToastProvider>
+        ),
+      },
+    ]);
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <I18nProvider
+          policy={{
+            enabled: true,
+            defaultLocale: 'pt-BR',
+            availableLocales: ['pt-BR', 'en-US'],
+            selectable: true,
+            detectBrowser: false,
+            preview: true,
+          }}
+        >
+          <RouterProvider router={router} />
+        </I18nProvider>
+      </QueryClientProvider>,
+    );
+    const name = screen.getByRole('textbox', { name: 'Nome do grupo' });
+    await userEvent.type(name, 'Equipe local');
+    act(() => {
+      localStorage.setItem(
+        'rancho.console.locale.anonymous',
+        JSON.stringify({ version: 1, locale: 'en-US' }),
+      );
+      window.dispatchEvent(new StorageEvent('storage', { key: 'rancho.console.locale.anonymous' }));
+    });
+    expect(screen.getByRole('textbox', { name: 'Group name' })).toBe(name);
+    expect(name).toHaveValue('Equipe local');
+    router.dispose();
+  });
   it('permite remover vínculos indisponíveis sem permitir novas contas inativas', async () => {
     const router = createMemoryRouter([
       {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { History, RefreshCw } from 'lucide-react';
 import { api, rawId, roles, type Account, type Collection, type Group, type Project } from '../api';
+import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import { Alert, Badge, Button, DataTable, Empty, ErrorState, Field, Loading, Modal } from './ui';
 
@@ -30,6 +31,7 @@ interface AuditEvent {
   after?: Snapshot | null;
 }
 const roleName = (role: string) => roles.find((value) => value.value === role)?.label || role;
+class AccessScopeMismatchError extends Error {}
 
 export function AccessDiagnostics({
   account,
@@ -40,6 +42,7 @@ export function AccessDiagnostics({
   projects: Project[];
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const app = useApp();
   const [environment, setEnvironment] = useState(app.project?.id || projects[0]?.id || '');
   const query = useQuery({
@@ -64,9 +67,7 @@ export function AccessDiagnostics({
           : report.accountId !== rawId(account.id)) ||
         report.projectId !== rawId(environment)
       )
-        throw new Error(
-          'O diagnóstico retornado não corresponde à conta e ao environment selecionados.',
-        );
+        throw new AccessScopeMismatchError();
       return report;
     },
     retry: false,
@@ -75,21 +76,21 @@ export function AccessDiagnostics({
     <Modal
       open
       drawer
-      title={`Acesso efetivo · ${account.name || account.id}`}
-      description="Grants e papel calculados pelo backend Rancher."
+      title={t('accessDiagnostics.title', { name: account.name || account.id })}
+      description={t('accessDiagnostics.description')}
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      footer={<Button onClick={onClose}>Fechar</Button>}
+      footer={<Button onClick={onClose}>{t('accessDiagnostics.close')}</Button>}
     >
-      <Field label="Environment">
+      <Field label={t('accessDiagnostics.environment')}>
         {(id) => (
           <select
             id={id}
             value={environment}
             onChange={(event) => setEnvironment(event.target.value)}
           >
-            {!projects.length && <option value="">Nenhum environment</option>}
+            {!projects.length && <option value="">{t('accessDiagnostics.noEnvironment')}</option>}
             {projects.map((project) => (
               <option key={project.id} value={project.id}>
                 {project.name}
@@ -99,42 +100,46 @@ export function AccessDiagnostics({
         )}
       </Field>
       {!!environment && (
-        <Button aria-label="Atualizar acesso efetivo" onClick={() => void query.refetch()}>
+        <Button aria-label={t('accessDiagnostics.refresh')} onClick={() => void query.refetch()}>
           <RefreshCw size={15} />
         </Button>
       )}
       {!environment ? (
         <Empty
-          title="Nenhum environment"
-          description="Não há environment disponível para consultar."
+          title={t('accessDiagnostics.noEnvironment')}
+          description={t('accessDiagnostics.noEnvironmentDescription')}
         />
       ) : query.isPending ? (
         <Loading />
       ) : query.error ? (
-        <ErrorState error={query.error} retry={() => void query.refetch()} />
+        <ErrorState
+          error={
+            query.error instanceof AccessScopeMismatchError
+              ? new Error(t('accessDiagnostics.scopeMismatch'))
+              : query.error
+          }
+          retry={() => void query.refetch()}
+        />
       ) : (
         <>
           {!query.data.complete && (
-            <Alert tone="warning">
-              Diagnóstico parcial: identidades de provedores externos podem conceder acesso
-              adicional. O papel efetivo não foi determinado.
-            </Alert>
+            <Alert tone="warning">{t('accessDiagnostics.partialWarning')}</Alert>
           )}
           <dl className="details-grid">
             <div>
-              <dt>Papel efetivo</dt>
+              <dt>{t('accessDiagnostics.effectiveRole')}</dt>
               <dd>
                 <Badge>
                   {!query.data.complete
-                    ? 'Não determinado'
+                    ? t('accessDiagnostics.undetermined')
                     : query.data.effectiveRole
                       ? roleName(query.data.effectiveRole)
-                      : 'Sem acesso'}
+                      : t('accessDiagnostics.noAccess')}
                 </Badge>
               </dd>
             </div>
             <div>
-              <dt>Escopo de identidade</dt>
+              <dt>{t('accessDiagnostics.identityScope')}</dt>
               <dd>{query.data.identityScope}</dd>
             </div>
           </dl>
@@ -142,25 +147,29 @@ export function AccessDiagnostics({
             rows={query.data.sources}
             rowKey={(source) => `${source.kind}:${source.groupId || source.memberId || 'global'}`}
             searchText={(source) => `${source.name || ''} ${source.kind} ${source.role}`}
-            emptyTitle="Nenhum grant local"
-            emptyDescription="Não há fonte de acesso local para esta conta neste environment."
+            emptyTitle={t('accessDiagnostics.noLocalGrant')}
+            emptyDescription={t('accessDiagnostics.noLocalGrantDescription')}
             columns={[
               {
                 key: 'kind',
-                label: 'Origem',
+                label: t('accessDiagnostics.origin'),
                 render: (source) =>
                   source.kind === 'group'
-                    ? 'Grupo local'
+                    ? t('accessDiagnostics.localGroup')
                     : source.kind === 'direct'
-                      ? 'Vínculo direto'
-                      : 'Administrador global',
+                      ? t('accessDiagnostics.directLink')
+                      : t('accessDiagnostics.globalAdministrator'),
               },
               {
                 key: 'source',
-                label: 'Fonte',
+                label: t('accessDiagnostics.source'),
                 render: (source) => source.name || source.memberId || account.name || account.id,
               },
-              { key: 'role', label: 'Papel concedido', render: (source) => roleName(source.role) },
+              {
+                key: 'role',
+                label: t('accessDiagnostics.grantedRole'),
+                render: (source) => roleName(source.role),
+              },
             ]}
           />
         </>
@@ -180,6 +189,7 @@ export function GroupAudit({
   projects: Project[];
   onClose: () => void;
 }) {
+  const { t, formats } = useI18n();
   const app = useApp();
   const [selected, setSelected] = useState<AuditEvent | null>(null);
   const query = useInfiniteQuery({
@@ -210,17 +220,16 @@ export function GroupAudit({
     <Modal
       open
       drawer
-      title={`Histórico · ${group?.name || 'Grupos locais'}`}
-      description="Auditoria de grupos locais registrada pelo servidor."
+      title={t('accessDiagnostics.auditTitle', {
+        name: group?.name || t('accessDiagnostics.localGroups'),
+      })}
+      description={t('accessDiagnostics.auditDescription')}
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      footer={<Button onClick={onClose}>Fechar</Button>}
+      footer={<Button onClick={onClose}>{t('accessDiagnostics.close')}</Button>}
     >
-      <Alert tone="info">
-        Snapshots detalhados estão disponíveis somente para alterações posteriores à ativação desta
-        auditoria. Registros legados foram preservados.
-      </Alert>
+      <Alert tone="info">{t('accessDiagnostics.snapshotsNotice')}</Alert>
       {query.isPending ? (
         <Loading />
       ) : query.error ? (
@@ -231,43 +240,53 @@ export function GroupAudit({
             rows={query.data.pages.flatMap((page) => page.data)}
             rowKey={(event) => event.id}
             searchText={(event) => `${event.operation} ${event.actorId} ${event.created}`}
-            emptyTitle="Nenhuma alteração registrada"
-            emptyDescription="Este grupo ainda não tem snapshots detalhados."
+            emptyTitle={t('accessDiagnostics.noChanges')}
+            emptyDescription={t('accessDiagnostics.noSnapshots')}
             columns={[
               {
                 key: 'group',
-                label: 'Grupo',
+                label: t('accessDiagnostics.group'),
                 render: (event) => event.after?.name || event.before?.name || event.groupId,
               },
               {
                 key: 'created',
-                label: 'Data',
-                render: (event) => new Date(event.created).toLocaleString('pt-BR'),
+                label: t('accessDiagnostics.date'),
+                render: (event) =>
+                  formats.date(new Date(event.created), {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    second: 'numeric',
+                  }),
               },
               {
                 key: 'actor',
-                label: 'Ator',
+                label: t('accessDiagnostics.actor'),
                 render: (event) =>
                   users.find((user) => rawId(user.id) === event.actorId)?.name || event.actorId,
               },
               {
                 key: 'operation',
-                label: 'Operação',
+                label: t('accessDiagnostics.operation'),
                 render: (event) =>
-                  ({ create: 'Criação', update: 'Atualização', delete: 'Exclusão' })[
-                    event.operation
-                  ] || event.operation,
+                  ({
+                    create: t('accessDiagnostics.create'),
+                    update: t('accessDiagnostics.update'),
+                    delete: t('accessDiagnostics.delete'),
+                  })[event.operation] || event.operation,
               },
               {
                 key: 'details',
-                label: 'Detalhes',
+                label: t('accessDiagnostics.details'),
                 render: (event) => (
                   <Button
                     onClick={() => setSelected(event)}
-                    aria-label={`Revisar evento ${event.id}`}
+                    aria-label={t('accessDiagnostics.reviewEvent', { id: event.id })}
                   >
                     <History size={15} />
-                    Antes e depois
+                    {t('accessDiagnostics.beforeAfter')}
                   </Button>
                 ),
               },
@@ -275,54 +294,56 @@ export function GroupAudit({
           />
           {query.hasNextPage && (
             <Button busy={query.isFetchingNextPage} onClick={() => void query.fetchNextPage()}>
-              Carregar anteriores
+              {t('accessDiagnostics.loadEarlier')}
             </Button>
           )}
           {query.data.pages.length === 10 && query.data.pages.at(-1)?.data.length === 100 && (
-            <Alert tone="warning">
-              Limite de 1.000 eventos nesta consulta. O servidor pode ter registros anteriores.
-            </Alert>
+            <Alert tone="warning">{t('accessDiagnostics.limitWarning')}</Alert>
           )}
           {selected && (
-            <section aria-label="Alteração auditada">
-              <h2>Evento {selected.id}</h2>
+            <section aria-label={t('accessDiagnostics.auditedChange')}>
+              <h2>{t('accessDiagnostics.event', { id: selected.id })}</h2>
               {(['before', 'after'] as const).map((side) => {
                 const value = selected[side];
                 return (
                   <section key={side}>
-                    <h3>{side === 'before' ? 'Antes' : 'Depois'}</h3>
+                    <h3>
+                      {side === 'before'
+                        ? t('accessDiagnostics.before')
+                        : t('accessDiagnostics.after')}
+                    </h3>
                     {!value ? (
-                      <p className="muted">Grupo inexistente</p>
+                      <p className="muted">{t('accessDiagnostics.nonexistentGroup')}</p>
                     ) : (
                       <dl className="details-grid">
                         <div>
-                          <dt>Nome</dt>
+                          <dt>{t('accessDiagnostics.name')}</dt>
                           <dd>{value.name}</dd>
                         </div>
                         <div>
-                          <dt>Revisão</dt>
+                          <dt>{t('accessDiagnostics.revision')}</dt>
                           <dd>{value.revision}</dd>
                         </div>
                         <div>
-                          <dt>Membros</dt>
+                          <dt>{t('accessDiagnostics.members')}</dt>
                           <dd>
                             {value.members
                               .map(
                                 (member) =>
                                   users.find((user) => rawId(user.id) === member)?.name || member,
                               )
-                              .join(', ') || 'Nenhum'}
+                              .join(', ') || t('accessDiagnostics.none')}
                           </dd>
                         </div>
                         <div>
-                          <dt>Grants</dt>
+                          <dt>{t('accessDiagnostics.grants')}</dt>
                           <dd>
                             {Object.entries(value.grants)
                               .map(
                                 ([project, role]) =>
                                   `${projects.find((item) => rawId(item.id) === project)?.name || project}: ${roleName(role)}`,
                               )
-                              .join('; ') || 'Nenhum'}
+                              .join('; ') || t('accessDiagnostics.none')}
                           </dd>
                         </div>
                       </dl>

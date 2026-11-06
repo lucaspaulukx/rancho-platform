@@ -1,3 +1,5 @@
+import type { enLocalAccountPanel } from '../i18n/domains/local-account-panel';
+import { useI18n } from '../i18n/provider';
 import { useEffect, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -26,18 +28,22 @@ import {
 } from '../local-accounts';
 import { Alert, Button, CheckboxField, Confirm, Field, Loading, Modal, useToast } from './ui';
 
+type PanelErrorKey = Exclude<
+  Extract<keyof typeof enLocalAccountPanel, `localAccountPanel.error.${string}`>,
+  'localAccountPanel.error.http'
+>;
+class AccountPanelError extends Error {
+  constructor(
+    readonly key: PanelErrorKey,
+    readonly status?: number,
+  ) {
+    super(key);
+  }
+}
 export interface AccountSelection {
   mode: AccountOperation;
   account?: { id: string };
 }
-const titles: Record<AccountOperation, string> = {
-  create: 'Criar conta local',
-  profile: 'Editar perfil da conta',
-  password: 'Redefinir senha local',
-  activate: 'Ativar conta',
-  deactivate: 'Desativar conta',
-  remove: 'Excluir conta',
-};
 export function LocalAccountPanel({
   selection,
   onClose,
@@ -45,18 +51,33 @@ export function LocalAccountPanel({
   selection: AccountSelection;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
+  const titles: Record<AccountOperation, string> = {
+    create: t('localAccountPanel.create'),
+    profile: t('localAccountPanel.profile'),
+    password: t('localAccountPanel.password'),
+    activate: t('localAccountPanel.activate'),
+    deactivate: t('localAccountPanel.deactivate'),
+    remove: t('localAccountPanel.remove'),
+  };
   const app = useApp(),
     scope = useRequestScope(
       app.identity + ':account:' + selection.account?.id + ':' + selection.mode,
     ),
     client = useQueryClient(),
     toast = useToast();
+  const errorText = (error: Error) =>
+    error instanceof AccountPanelError
+      ? error.status !== undefined
+        ? t('localAccountPanel.error.http', { status: error.status })
+        : t(error.key)
+      : error.message;
   const enabled = app.admin && app.config.modules.localAccountAdministration;
   const ownAccount = sessionAccountId(app.token);
   const [current, setCurrent] = useState<Resource | null>(null),
     [pending, setPending] = useState<Resource | null>(null),
     [loading, setLoading] = useState(true),
-    [error, setError] = useState('');
+    [error, setError] = useState<Error | null>(null);
   const [name, setName] = useState(''),
     [description, setDescription] = useState(''),
     [kind, setKind] = useState('user'),
@@ -76,18 +97,16 @@ export function LocalAccountPanel({
     try {
       return await api<T>(path, body, method, signal);
     } catch (e) {
-      throw new Error(
-        e instanceof ApiError
-          ? `Operação de conta não concluída (HTTP ${e.status}).`
-          : 'Não foi possível concluir a operação de conta.',
-      );
+      throw e instanceof ApiError
+        ? new AccountPanelError('localAccountPanel.error.operation', e.status)
+        : new AccountPanelError('localAccountPanel.error.operation');
     }
   }
   async function list<T>(path: string, signal: AbortSignal) {
     try {
       return await allPages<T>(path, signal);
     } catch {
-      throw new Error('Não foi possível consultar a administração de contas.');
+      throw new AccountPanelError('localAccountPanel.error.list');
     }
   }
   useEffect(() => {
@@ -107,7 +126,7 @@ export function LocalAccountPanel({
           }
         }
       } catch (e) {
-        if (alive) setError((e as Error).message);
+        if (alive) setError(e as Error);
       } finally {
         if (alive) setLoading(false);
       }
@@ -120,7 +139,7 @@ export function LocalAccountPanel({
     retry: false,
     gcTime: 0,
     mutationFn: async () => {
-      if (!enabled) throw new Error('Administração de contas indisponível.');
+      if (!enabled) throw new AccountPanelError('localAccountPanel.error.unavailable');
       const signal = scope.signal();
       const token = (await request<Collection<Token>>('token', undefined, undefined, signal))
         .data?.[0];
@@ -130,17 +149,18 @@ export function LocalAccountPanel({
         !ownAccount ||
         sessionAccountId(token) !== ownAccount
       )
-        throw new Error('Sua permissão de administrador mudou.');
+        throw new AccountPanelError('localAccountPanel.error.permission');
       const schemas = Object.fromEntries(
         (await list<Schema>('schemas', signal)).map((v) => [v.id, v]),
       );
       scope.assertCurrent();
       let target = current;
       if (selection.mode === 'create') {
-        if (password !== confirmation) throw new Error('As senhas não coincidem.');
+        if (password !== confirmation)
+          throw new AccountPanelError('localAccountPanel.error.passwordMismatch');
         passwordCreate(schemas.password, pending?.id || ownAccount, login, password);
         if (kind === 'admin' && !privileged)
-          throw new Error('Confirme o acesso administrativo global.');
+          throw new AccountPanelError('localAccountPanel.error.confirmPrivilege');
         const credentials = (await list<Resource>('passwords?limit=100', signal)).map(
           credentialMetadata,
         );
@@ -153,7 +173,7 @@ export function LocalAccountPanel({
               v.accountId !== pending?.id,
           )
         )
-          throw new Error('Já existe uma credencial com este login.');
+          throw new AccountPanelError('localAccountPanel.error.duplicateLogin');
         if (!pending) {
           target = localAccountMetadata(
             await request<Resource>(
@@ -167,7 +187,7 @@ export function LocalAccountPanel({
           setPending(target);
           void client.invalidateQueries({ queryKey: ['data', app.identity, 'access'] });
         } else target = pending;
-        if (!target) throw new Error('A conta não foi criada.');
+        if (!target) throw new AccountPanelError('localAccountPanel.error.notCreated');
         if (
           !credentials.some(
             (v) => !v.removed && v.accountId === target!.id && v.login === login.trim(),
@@ -180,7 +200,7 @@ export function LocalAccountPanel({
             signal,
           );
       } else {
-        if (!current) throw new Error('Reabra o painel da conta.');
+        if (!current) throw new AccountPanelError('localAccountPanel.error.reopen');
         target = localAccountMetadata(
           await request<Resource>(accountPath(current.id), undefined, undefined, signal),
         );
@@ -190,7 +210,7 @@ export function LocalAccountPanel({
         validateAccountChange(current, target, ownAccount, selection.mode, kind, rows);
         if (selection.mode === 'profile') {
           if (kind === 'admin' && current.kind !== 'admin' && !privileged)
-            throw new Error('Confirme o acesso administrativo global.');
+            throw new AccountPanelError('localAccountPanel.error.confirmPrivilege');
           await request<unknown>(
             accountPath(target.id),
             accountProfile(schemas.account, name, description, kind),
@@ -198,17 +218,17 @@ export function LocalAccountPanel({
             signal,
           );
         } else if (selection.mode === 'password') {
-          if (password !== confirmation) throw new Error('As senhas não coincidem.');
+          if (password !== confirmation)
+            throw new AccountPanelError('localAccountPanel.error.passwordMismatch');
           const credentials = (await list<Resource>('passwords?limit=100', signal))
             .map(credentialMetadata)
             .filter((v) => !v.removed && v.accountId === target!.id && v.state === 'active');
           scope.assertCurrent();
           if (credentials.length !== 1)
-            throw new Error(
-              'Esta conta não possui uma única credencial local ativa. Credenciais OIDC são gerenciadas no provedor.',
-            );
+            throw new AccountPanelError('localAccountPanel.error.credentialCount');
           const id = credentials[0].id;
-          if (!/^1c[1-9]\d*$/.test(id)) throw new Error('Credencial inválida.');
+          if (!/^1c[1-9]\d*$/.test(id))
+            throw new AccountPanelError('localAccountPanel.error.credential');
           await request<unknown>(
             'passwords/' + id + '?action=changesecret',
             passwordReset(schemas.changeSecretInput, password),
@@ -222,7 +242,7 @@ export function LocalAccountPanel({
             url.pathname.replace(/\/$/, '') !== '/v2-beta/accounts/' + target.id ||
             url.search !== '?action=' + selection.mode
           )
-            throw new Error('A operação mudou. Reabra o painel.');
+            throw new AccountPanelError('localAccountPanel.error.changedOperation');
           await request<unknown>(url.pathname + url.search, {}, 'POST', signal);
         }
       }
@@ -236,7 +256,7 @@ export function LocalAccountPanel({
       setReview(false);
       void client.invalidateQueries({ queryKey: ['data', app.identity] });
       void app.refresh();
-      toast('Operação recebida pelo Rancher. Acompanhe o estado da conta.');
+      toast(t('localAccountPanel.success'));
       onClose();
     },
   });
@@ -259,8 +279,10 @@ export function LocalAccountPanel({
         title={titles[selection.mode]}
         description={
           selection.mode === 'create'
-            ? 'A conta nasce sem acesso a environments. Conceda acesso pelos grupos após criar.'
-            : `Conta ${current?.name || selection.account?.id || ''}. Privilégio global é independente dos grupos.`
+            ? t('localAccountPanel.createDescription')
+            : t('localAccountPanel.accountDescription', {
+                account: current?.name || selection.account?.id || '',
+              })
         }
         onOpenChange={(o) => {
           if (!o) close();
@@ -268,15 +290,15 @@ export function LocalAccountPanel({
         footer={
           <>
             <Button disabled={write.isPending} onClick={close}>
-              Cancelar
+              {t('localAccountPanel.cancel')}
             </Button>
             <Button
               disabled={loading || !!error || (!current && selection.mode !== 'create')}
               onClick={() => setReview(true)}
             >
               {['activate', 'deactivate', 'remove'].includes(selection.mode)
-                ? 'Revisar operação'
-                : 'Revisar alterações'}
+                ? t('localAccountPanel.reviewOperation')
+                : t('localAccountPanel.reviewChanges')}
             </Button>
           </>
         }
@@ -284,7 +306,7 @@ export function LocalAccountPanel({
         {loading ? (
           <Loading />
         ) : error ? (
-          <Alert>{error}</Alert>
+          <Alert>{errorText(error)}</Alert>
         ) : (
           <fieldset
             className="form-fieldset"
@@ -294,15 +316,10 @@ export function LocalAccountPanel({
               write.reset();
             }}
           >
-            {pending && (
-              <Alert>
-                A conta {pending.id} já foi criada. Conclua a credencial neste formulário; repetir o
-                envio reaproveita esta conta.
-              </Alert>
-            )}
+            {pending && <Alert>{t('localAccountPanel.pending', { account: pending.id })}</Alert>}
             {profile && (
               <>
-                <Field label="Nome da conta">
+                <Field label={t('localAccountPanel.name')}>
                   {(id) => (
                     <input
                       id={id}
@@ -313,7 +330,7 @@ export function LocalAccountPanel({
                     />
                   )}
                 </Field>
-                <Field label="Descrição da conta">
+                <Field label={t('localAccountPanel.description')}>
                   {(id) => (
                     <textarea
                       id={id}
@@ -323,7 +340,7 @@ export function LocalAccountPanel({
                     />
                   )}
                 </Field>
-                <Field label="Perfil global da conta">
+                <Field label={t('localAccountPanel.kind')}>
                   {(id) => (
                     <select
                       id={id}
@@ -331,15 +348,15 @@ export function LocalAccountPanel({
                       disabled={!!pending || current?.id === ownAccount}
                       onChange={(e) => setKind(e.target.value)}
                     >
-                      <option value="user">Usuário</option>
-                      <option value="admin">Administrador</option>
+                      <option value="user">{t('localAccountPanel.user')}</option>
+                      <option value="admin">{t('localAccountPanel.admin')}</option>
                     </select>
                   )}
                 </Field>
                 {kind === 'admin' && current?.kind !== 'admin' && (
                   <CheckboxField
-                    label="Confirmo conceder administração global do Rancher"
-                    description="Administradores acessam todos os environments e configurações, independentemente dos grupos."
+                    label={t('localAccountPanel.confirmAdmin')}
+                    description={t('localAccountPanel.adminDescription')}
                     checked={privileged}
                     onChange={(e) => setPrivileged(e.target.checked)}
                   />
@@ -347,7 +364,7 @@ export function LocalAccountPanel({
               </>
             )}
             {selection.mode === 'create' && (
-              <Field label="Login local">
+              <Field label={t('localAccountPanel.login')}>
                 {(id) => (
                   <input
                     id={id}
@@ -360,7 +377,7 @@ export function LocalAccountPanel({
             )}
             {secret && (
               <>
-                <Field label="Nova senha local">
+                <Field label={t('localAccountPanel.newPassword')}>
                   {(id) => (
                     <input
                       id={id}
@@ -371,7 +388,7 @@ export function LocalAccountPanel({
                     />
                   )}
                 </Field>
-                <Field label="Confirmar senha local">
+                <Field label={t('localAccountPanel.confirmPassword')}>
                   {(id) => (
                     <input
                       id={id}
@@ -383,31 +400,16 @@ export function LocalAccountPanel({
                   )}
                 </Field>
                 {selection.mode === 'password' && (
-                  <Alert tone="info">
-                    A troca altera apenas a credencial local. Sessões JWT já emitidas não são
-                    revogadas pela troca de senha. Para bloquear o uso da conta, desative-a. Senhas
-                    do Keycloak são gerenciadas no provedor.
-                  </Alert>
+                  <Alert tone="info">{t('localAccountPanel.passwordNotice')}</Alert>
                 )}
               </>
             )}
             {selection.mode === 'deactivate' && (
-              <Alert>
-                A conta deixará de autenticar e a próxima consulta de sessão será recusada. Grupos e
-                acessos cadastrados serão preservados.
-              </Alert>
+              <Alert>{t('localAccountPanel.deactivateNotice')}</Alert>
             )}
-            {selection.mode === 'remove' && (
-              <Alert>
-                A conta deve estar inativa. A exclusão lógica é aplicada pelo Rancher; esta tela não
-                executa purge nem apaga dados dos environments.
-              </Alert>
-            )}
+            {selection.mode === 'remove' && <Alert>{t('localAccountPanel.removeNotice')}</Alert>}
             {selection.mode === 'activate' && (
-              <Alert tone="info">
-                A conta volta a autenticar e poderá recuperar os acessos diretos e de grupos ainda
-                cadastrados.
-              </Alert>
+              <Alert tone="info">{t('localAccountPanel.activateNotice')}</Alert>
             )}
           </fieldset>
         )}
@@ -417,21 +419,29 @@ export function LocalAccountPanel({
         onOpenChange={(o) => {
           if (!write.isPending) setReview(o);
         }}
-        title="Aplicar alteração da conta?"
-        description={`${titles[selection.mode]}: ${name || current?.name || 'nova conta'}. ${kind === 'admin' ? 'O perfil administrativo tem acesso global. ' : ''}Credenciais ficam protegidas nesta revisão.`}
+        title={t('localAccountPanel.reviewTitle')}
+        description={t(
+          kind === 'admin'
+            ? 'localAccountPanel.reviewAdmin'
+            : 'localAccountPanel.reviewDescription',
+          {
+            operation: titles[selection.mode],
+            account: name || current?.name || t('localAccountPanel.newAccount'),
+          },
+        )}
         busy={write.isPending}
         onConfirm={() => write.mutate()}
       >
-        {write.error && <Alert>{write.error.message}</Alert>}
+        {write.error && <Alert>{errorText(write.error)}</Alert>}
       </Confirm>
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title={pending ? 'Abandonar cadastro incompleto?' : 'Descartar alterações da conta?'}
+        title={pending ? t('localAccountPanel.abandon') : t('localAccountPanel.discard')}
         description={
           pending
-            ? `A conta ${pending.id} já existe. Fechar não a exclui e a credencial pode estar incompleta; verifique a conta antes de criar outro cadastro.`
-            : 'As alterações ainda não foram enviadas.'
+            ? t('localAccountPanel.pendingDiscard', { account: pending.id })
+            : t('localAccountPanel.unsent')
         }
         onConfirm={() => {
           setPassword('');
@@ -444,12 +454,8 @@ export function LocalAccountPanel({
         onOpenChange={(o) => {
           if (!o && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Sair com alteração pendente?"
-        description={
-          pending
-            ? 'A conta já foi criada e a credencial pode estar incompleta.'
-            : 'As alterações ainda não foram enviadas.'
-        }
+        title={t('localAccountPanel.leave')}
+        description={pending ? t('localAccountPanel.incomplete') : t('localAccountPanel.unsent')}
         busy={write.isPending}
         onConfirm={() => {
           if (!write.isPending && blocker.state === 'blocked') {
