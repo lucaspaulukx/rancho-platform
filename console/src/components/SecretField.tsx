@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, Copy, Eye, EyeOff } from 'lucide-react';
 import { Alert, Button, Field } from './ui';
+import { useI18n } from '../i18n/provider';
 
 export function SecretField({
   label,
@@ -11,15 +12,16 @@ export function SecretField({
   value: string;
   multiline?: boolean;
 }) {
+  const { t } = useI18n();
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(false);
   async function copy() {
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
     } catch {
-      setError('Não foi possível copiar. Revele o valor e copie manualmente.');
+      setError(true);
     }
   }
   return (
@@ -49,14 +51,14 @@ export function SecretField({
       <div className="row-actions">
         <Button type="button" variant="ghost" onClick={() => setVisible(!visible)}>
           {visible ? <EyeOff size={16} /> : <Eye size={16} />}
-          {visible ? 'Ocultar' : 'Revelar'}
+          {visible ? t('secretField.hide') : t('secretField.reveal')}
         </Button>
         <Button type="button" onClick={() => void copy()}>
           {copied ? <Check size={16} /> : <Copy size={16} />}
-          {copied ? 'Copiado' : 'Copiar'}
+          {copied ? t('secretField.copied') : t('secretField.copy')}
         </Button>
       </div>
-      {error && <Alert>{error}</Alert>}
+      {error && <Alert>{t('secretField.copyFailed')}</Alert>}
     </div>
   );
 }

@@ -50,6 +50,8 @@ Groups, accounts, local account dialogs, effective access diagnostics, API keys,
 
 ## Data and mutations
 
+Hosts, catalog templates and webhooks also use the shared locale. Host registration commands and secret values remain native and masked until explicitly revealed; switching language changes labels without requesting registration or copying a secret. Template names, parameter content and webhook driver identifiers retain their native values. Helper errors that have not been extracted remain unchanged.
+
 Use current resource schemas/action links instead of inventing routes or assuming global schemas equal environment-scoped schemas. Re-read the resource, scope and relevant contract before mutation. Preserve unknown configuration and unselected fields; do not silently replace unsupported values with empty defaults.
 
 Resource IDs, identity and environment must agree throughout an operation. Scope changes abort pending requests and close streams. Query data and React drafts have different lifetimes: private configuration, generated credentials and stream capabilities must not become persistent browser state. Preserve the draft when a mutation fails.

@@ -4,8 +4,18 @@ import { useApp } from '../state';
 import { useSchemas } from '../hooks/useSchemas';
 import { Alert, Button, ErrorState, Loading, Modal } from './ui';
 import { SecretField } from './SecretField';
+import { useI18n } from '../i18n/provider';
+class RegistrationError extends Error {
+  constructor(
+    readonly key:
+      'hostRegistration.unavailable' | 'hostRegistration.pending' | 'hostRegistration.failed',
+  ) {
+    super(key);
+  }
+}
 
 export function HostRegistration({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
   const app = useApp();
   const schemas = useSchemas(true);
   const [command, setCommand] = useState('');
@@ -34,7 +44,7 @@ export function HostRegistration({ onClose }: { onClose: () => void }) {
           return;
         }
         if (['inactive', 'removed', 'error'].includes(token.state || ''))
-          throw new Error('O registro não ficou disponível. Tente novamente.');
+          throw new RegistrationError('hostRegistration.unavailable');
         await new Promise<void>((resolve, reject) => {
           const abort = () => {
             clearTimeout(timer);
@@ -49,11 +59,11 @@ export function HostRegistration({ onClose }: { onClose: () => void }) {
         });
         token = await api<Resource>(token.links.self, undefined, undefined, controller.signal);
       }
-      throw new Error('O registro ainda está sendo preparado. Aguarde e tente novamente.');
+      throw new RegistrationError('hostRegistration.pending');
     } catch (failure) {
       if (!controller.signal.aborted)
         setError(
-          failure instanceof Error ? failure : new Error('Não foi possível preparar o registro.'),
+          failure instanceof Error ? failure : new RegistrationError('hostRegistration.failed'),
         );
     } finally {
       if (!controller.signal.aborted) setBusy(false);
@@ -63,28 +73,22 @@ export function HostRegistration({ onClose }: { onClose: () => void }) {
     <Modal
       open
       drawer
-      title="Adicionar host"
-      description={`Environment: ${app.project?.name || '—'}`}
+      title={t('hostRegistration.title')}
+      description={t('hostRegistration.environment', { name: app.project?.name || '—' })}
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      footer={<Button onClick={onClose}>Fechar</Button>}
+      footer={<Button onClick={onClose}>{t('hostRegistration.close')}</Button>}
     >
-      <h2>Registrar um host Docker</h2>
-      <p>
-        Execute o comando no host que deseja adicionar. Ele deve conseguir acessar o endereço do
-        servidor Rancher e usar uma versão de Docker compatível com o Rancher 1.6.
-      </p>
-      <Alert tone="warning">
-        O comando autoriza um agente neste environment e executa um container privilegiado no host
-        escolhido. Compartilhe-o somente com quem administra esse host.
-      </Alert>
+      <h2>{t('hostRegistration.register')}</h2>
+      <p>{t('hostRegistration.instructions')}</p>
+      <Alert tone="warning">{t('hostRegistration.warning')}</Alert>
       {schemas.isPending ? (
         <Loading />
       ) : schemas.error ? (
         <ErrorState error={schemas.error} />
       ) : !allowed ? (
-        <Alert>Seu perfil não permite registrar hosts neste environment.</Alert>
+        <Alert>{t('hostRegistration.denied')}</Alert>
       ) : (
         <Button
           variant="primary"
@@ -92,17 +96,16 @@ export function HostRegistration({ onClose }: { onClose: () => void }) {
           onClick={() => void prepare()}
           style={{ marginTop: 20 }}
         >
-          {command ? 'Atualizar comando' : 'Preparar comando de registro'}
+          {command ? t('hostRegistration.refresh') : t('hostRegistration.prepare')}
         </Button>
       )}
-      {error && <ErrorState error={error} />}
+      {error && (
+        <ErrorState error={error instanceof RegistrationError ? new Error(t(error.key)) : error} />
+      )}
       {command && (
         <div style={{ marginTop: 20 }}>
-          <SecretField label="Comando de registro" value={command} multiline />
-          <p className="muted">
-            O comando é exibido apenas neste painel. O novo host aparecerá na listagem após o agente
-            conectar.
-          </p>
+          <SecretField label={t('hostRegistration.command')} value={command} multiline />
+          <p className="muted">{t('hostRegistration.notice')}</p>
         </div>
       )}
     </Modal>

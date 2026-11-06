@@ -30,6 +30,10 @@ import { enProcesses, ptProcesses } from './domains/processes';
 import { enEngineMonitoring, ptEngineMonitoring } from './domains/engine-monitoring';
 import { enMachineDrivers, ptMachineDrivers } from './domains/machine-drivers';
 import { enCatalogRepositories, ptCatalogRepositories } from './domains/catalog-repositories';
+import { enHostRegistration, ptHostRegistration } from './domains/host-registration';
+import { enHostsPage, ptHostsPage } from './domains/hosts-page';
+import { enCatalogPage, ptCatalogPage } from './domains/catalog-page';
+import { enWebhooksPage, ptWebhooksPage } from './domains/webhooks-page';
 
 // Initial shared domain only. These catalogs do not represent full interface coverage.
 export const englishMessages = {
@@ -64,6 +68,10 @@ export const englishMessages = {
   ...enEngineMonitoring,
   ...enMachineDrivers,
   ...enCatalogRepositories,
+  ...enHostRegistration,
+  ...enHostsPage,
+  ...enCatalogPage,
+  ...enWebhooksPage,
   'common.cancel': 'Cancel',
   'common.close': 'Close',
   'common.save': 'Save',
@@ -129,6 +137,10 @@ export const portugueseMessages = {
   ...ptEngineMonitoring,
   ...ptMachineDrivers,
   ...ptCatalogRepositories,
+  ...ptHostRegistration,
+  ...ptHostsPage,
+  ...ptCatalogPage,
+  ...ptWebhooksPage,
   'common.cancel': 'Cancelar',
   'common.close': 'Fechar',
   'common.save': 'Salvar',

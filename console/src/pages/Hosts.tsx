@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/provider';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -27,6 +28,7 @@ export function HostsPage() {
   return <HostsContext key={`${app.identity}-${app.project?.id}`} />;
 }
 function HostsContext() {
+  const { t, locale, formats } = useI18n();
   const app = useApp();
   const { id } = useParams();
   const schemas = useSchemas(true);
@@ -51,8 +53,8 @@ function HostsContext() {
   if (!app.project)
     return (
       <Empty
-        title="Selecione um environment"
-        description="Os hosts pertencem ao environment selecionado."
+        title={t('hostsPage.selectEnvironment')}
+        description={t('hostsPage.environmentDescription')}
       />
     );
   if (query.isPending || schemas.isPending) return <Loading />;
@@ -69,33 +71,33 @@ function HostsContext() {
   const host = id ? query.data.hosts.find((value) => value.id === id) : undefined;
   const filtered = query.data.hosts.filter((value) =>
     `${value.name || ''} ${value.hostname || ''} ${value.agentIpAddress || ''} ${value.state || ''}`
-      .toLocaleLowerCase()
-      .includes(search.toLocaleLowerCase()),
+      .toLocaleLowerCase(locale)
+      .includes(search.toLocaleLowerCase(locale)),
   );
   const writable = canManageResource(schemas.data?.host);
   const suffix = `?env=${encodeURIComponent(app.project.id)}`;
   return (
     <>
       <PageHeader
-        title={id ? String(host?.name || host?.hostname || id) : 'Hosts'}
+        title={id ? String(host?.name || host?.hostname || id) : t('hostsPage.title')}
         eyebrow={app.project.name}
-        description="Infraestrutura, capacidade e containers por host."
+        description={t('hostsPage.description')}
         action={
           <>
             {id && (
               <Link className="button" to={`/hosts${suffix}`}>
-                Voltar aos hosts
+                {t('hostsPage.back')}
               </Link>
             )}
             {!id && schemas.data?.registrationToken?.collectionMethods?.includes('POST') && (
               <Button variant="primary" onClick={() => setRegistration(true)}>
                 <Plus size={16} />
-                Adicionar host
+                {t('hostsPage.add')}
               </Button>
             )}
             {host && writable && (
               <Button onClick={() => setSelection({ resource: host, mode: 'detail' })}>
-                Gerenciar host
+                {t('hostsPage.manage')}
               </Button>
             )}
             {host &&
@@ -103,10 +105,10 @@ function HostsContext() {
               app.config.modules.metrics &&
               metricsLink(host) && (
                 <Button onClick={() => setSelection({ resource: host, mode: 'metrics' })}>
-                  Métricas do host
+                  {t('hostsPage.metrics')}
                 </Button>
               )}
-            <Button aria-label="Atualizar hosts" onClick={() => void query.refetch()}>
+            <Button aria-label={t('hostsPage.refresh')} onClick={() => void query.refetch()}>
               <RefreshCw size={16} />
             </Button>
           </>
@@ -114,29 +116,26 @@ function HostsContext() {
       />
       {id && !host ? (
         <Empty
-          title="Host indisponível"
-          description="O host não existe neste environment ou foi removido."
+          title={t('hostsPage.unavailable')}
+          description={t('hostsPage.unavailableDescription')}
         />
       ) : (
         <>
           {!id && (
-            <Field label="Buscar hosts">
+            <Field label={t('hostsPage.search')}>
               {(field) => (
                 <input
                   id={field}
                   type="search"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Nome, endereço ou estado…"
+                  placeholder={t('hostsPage.searchPlaceholder')}
                 />
               )}
             </Field>
           )}
           {!id && !filtered.length && (
-            <Empty
-              title="Nenhum host encontrado"
-              description="Registre um host ou ajuste sua busca."
-            />
+            <Empty title={t('hostsPage.empty')} description={t('hostsPage.emptyDescription')} />
           )}
           <div className="host-grid">
             {(host ? [host] : filtered).map((value) => {
@@ -152,49 +151,48 @@ function HostsContext() {
                   </div>
                   <dl className="details-grid">
                     <div>
-                      <dt>Endereço do agente</dt>
+                      <dt>{t('hostsPage.agentAddress')}</dt>
                       <dd>{summary.address || '—'}</dd>
                     </div>
                     <div>
-                      <dt>Agente</dt>
+                      <dt>{t('hostsPage.agent')}</dt>
                       <dd>{String(value.agentState || '—')}</dd>
                     </div>
                     <div>
-                      <dt>CPUs</dt>
-                      <dd>{summary.cpu ?? '—'}</dd>
+                      <dt>{t('hostsPage.cpus')}</dt>
+                      <dd>{summary.cpu === undefined ? '—' : formats.number(summary.cpu)}</dd>
                     </div>
                     <div>
-                      <dt>Memória total</dt>
+                      <dt>{t('hostsPage.memory')}</dt>
                       <dd>
                         {summary.memoryGiB === undefined
                           ? '—'
-                          : `${summary.memoryGiB.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} GiB`}
+                          : `${formats.number(summary.memoryGiB, { maximumFractionDigits: 1 })} GiB`}
                       </dd>
                     </div>
                     <div>
-                      <dt>Sistema</dt>
+                      <dt>{t('hostsPage.system')}</dt>
                       <dd>{summary.os || '—'}</dd>
                     </div>
                     <div>
-                      <dt>Docker</dt>
+                      <dt>{t('hostsPage.docker')}</dt>
                       <dd>{summary.docker || '—'}</dd>
                     </div>
                   </dl>
                   {value.transitioning === 'error' && (
                     <Alert>
-                      {String(
-                        value.transitioningMessage || 'O Rancher informou uma falha neste host.',
-                      )}
+                      {String(value.transitioningMessage || t('hostsPage.hostFailure'))}
                     </Alert>
                   )}
                   <div className="row-actions">
                     {!id && (
                       <Link className="button primary" to={`/hosts/${value.id}${suffix}`}>
-                        Ver containers {app.config.modules.workloads && `(${containers.length})`}
+                        {t('hostsPage.viewContainers')}{' '}
+                        {app.config.modules.workloads && `(${formats.number(containers.length)})`}
                       </Link>
                     )}
                     <Button onClick={() => setSelection({ resource: value, mode: 'detail' })}>
-                      Detalhes e ações
+                      {t('hostsPage.detailsActions')}
                     </Button>
                   </div>
                 </section>
@@ -204,7 +202,7 @@ function HostsContext() {
           {host &&
             (app.config.modules.workloads ? (
               <section style={{ marginTop: 24 }}>
-                <h2>Containers neste host</h2>
+                <h2>{t('hostsPage.containersTitle')}</h2>
                 <DataTable
                   rows={containersOnHost(host, query.data.containers)}
                   rowKey={(value) => value.id}
@@ -214,7 +212,7 @@ function HostsContext() {
                   columns={[
                     {
                       key: 'name',
-                      label: 'Container',
+                      label: t('hostsPage.container'),
                       render: (value) => (
                         <Button
                           variant="ghost"
@@ -226,18 +224,22 @@ function HostsContext() {
                     },
                     {
                       key: 'state',
-                      label: 'Estado',
+                      label: t('hostsPage.state'),
                       render: (value) => <Badge state={value.state}>{value.state}</Badge>,
                     },
-                    { key: 'image', label: 'Imagem', render: (value) => imageName(value) },
+                    {
+                      key: 'image',
+                      label: t('hostsPage.image'),
+                      render: (value) => imageName(value),
+                    },
                     {
                       key: 'actions',
-                      label: 'Ações',
+                      label: t('hostsPage.actions'),
                       render: (value) => (
                         <div className="row-actions">
                           {app.config.modules.observability && value.actions?.logs && (
                             <Button onClick={() => setSelection({ resource: value, mode: 'logs' })}>
-                              Logs
+                              {t('hostsPage.logs')}
                             </Button>
                           )}
                           {app.config.modules.observability &&
@@ -246,7 +248,7 @@ function HostsContext() {
                               <Button
                                 onClick={() => setSelection({ resource: value, mode: 'execute' })}
                               >
-                                Terminal
+                                {t('hostsPage.terminal')}
                               </Button>
                             )}
                         </div>
@@ -256,9 +258,7 @@ function HostsContext() {
                 />
               </section>
             ) : (
-              <Alert tone="info">
-                Ative o módulo de workloads para consultar os containers deste host.
-              </Alert>
+              <Alert tone="info">{t('hostsPage.enableWorkloads')}</Alert>
             ))}
         </>
       )}
