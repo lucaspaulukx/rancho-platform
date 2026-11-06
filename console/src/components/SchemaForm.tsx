@@ -6,6 +6,7 @@ import {
   validateWorkloadDevices,
 } from '../workload-devices';
 import { useI18n } from '../i18n/provider';
+import { ptSchemaForm } from '../i18n/domains/schema-form';
 import { supportsUlimits, validateWorkloadUlimits } from '../workload-ulimits';
 import { CapabilityEditor } from './CapabilityEditor';
 import { validateWorkloadSecurity } from '../workload-security';
@@ -26,130 +27,6 @@ import type { Resource, Schema, SchemaField } from '../api';
 import { Alert, Button, CheckboxField, Field } from './ui';
 import { workloadSections } from '../workload-creation';
 
-const labels: Record<string, string> = {
-  start: 'Iniciar',
-  id: 'ID',
-  type: 'Tipo de recurso',
-  project: 'Environment',
-  projectTemplate: 'Template do environment',
-  orchestration: 'Orquestrador',
-  setmembers: 'Gerenciar acessos diretos',
-  service: 'Serviço',
-  container: 'Container',
-  certificate: 'Certificado',
-  secret: 'Secret',
-  registry: 'Registry',
-  volume: 'Volume',
-  snapshot: 'Criar snapshot',
-  restore: 'Restaurar',
-  restorefrombackup: 'Restaurar de backup',
-  reverttosnapshot: 'Reverter para snapshot',
-  mounts: 'Montagens',
-  snapshots: 'Snapshots',
-  storagePools: 'Pools de armazenamento',
-  images: 'Imagens',
-  account: 'Conta',
-  host: 'Host',
-  state: 'Estado',
-  healthState: 'Saúde',
-  healthCheck: 'Verificação de saúde',
-  secondaryLaunchConfigs: 'Sidecars',
-  dataVolumesFromLaunchConfigs: 'Volumes de outros containers deste serviço',
-  networkLaunchConfig: 'Rede de outro container deste serviço',
-  hostId: 'Host',
-  primaryIpAddress: 'Endereço IP',
-  created: 'Criado em',
-  transitioningMessage: 'Mensagem da operação',
-  deactivateservices: 'Parar serviços',
-  activateservices: 'Iniciar serviços',
-  exportconfig: 'Exportar Compose',
-  addoutputs: 'Adicionar saídas',
-  addservicelink: 'Adicionar vínculo de serviço',
-  removeservicelink: 'Remover vínculo de serviço',
-  setservicelinks: 'Gerenciar vínculos de serviços',
-  update: 'Atualizar configuração',
-  stop: 'Parar',
-  restart: 'Reiniciar',
-  remove: 'Remover',
-  purge: 'Excluir definitivamente',
-  logs: 'Ver logs',
-  execute: 'Abrir terminal',
-  activate: 'Ativar',
-  deactivate: 'Desativar',
-  upgrade: 'Atualizar serviço',
-  rollback: 'Reverter atualização',
-  finishupgrade: 'Concluir atualização',
-  cancelupgrade: 'Cancelar atualização',
-  cancelrollback: 'Cancelar reversão',
-  name: 'Nome',
-  description: 'Descrição',
-  imageUuid: 'Imagem',
-  scale: 'Escala',
-  hostname: 'Hostname',
-  serverAddress: 'Endereço do registry',
-  username: 'Usuário',
-  password: 'Senha',
-  value: 'Valor',
-  cert: 'Certificado PEM',
-  key: 'Chave privada PEM',
-  certChain: 'Cadeia intermediária PEM',
-  expiresAt: 'Validade',
-  issuedAt: 'Emitido em',
-  issuer: 'Emissor',
-  certFingerprint: 'Impressão digital',
-  CN: 'Nome comum',
-  sizeMb: 'Capacidade solicitada (MiB)',
-  driverOpts: 'Opções do driver',
-  storageDriverId: 'Driver de armazenamento',
-  projectTemplateId: 'Template do environment',
-  environment: 'Variáveis de ambiente',
-  ports: 'Portas publicadas',
-  command: 'Comando',
-  entryPoint: 'Entrypoint',
-  dataVolumes: 'Volumes',
-  dataVolumesFrom: 'Volumes de containers',
-  requestedHostId: 'Host solicitado',
-  stackId: 'Stack',
-  memory: 'Memória (bytes)',
-  milliCpuReservation: 'Reserva de CPU (millicores)',
-  memoryReservation: 'Reserva de memória (bytes)',
-  privileged: 'Modo privilegiado',
-  startOnCreate: 'Iniciar após criação',
-  networkMode: 'Modo de rede',
-  labels: 'Labels',
-  launchConfig: 'Configuração do container',
-  externalIpAddresses: 'Endereços externos',
-  lbConfig: 'Configuração do balanceador',
-  members: 'Membros diretos',
-  kind: 'Tipo',
-  publicValue: 'Chave pública',
-  secretValue: 'Chave secreta',
-  accountId: 'Conta',
-  driver: 'Driver',
-  size: 'Tamanho',
-  accessMode: 'Modo de acesso',
-  user: 'Usuário do processo',
-  workingDir: 'Diretório de trabalho',
-  stdinOpen: 'Manter entrada padrão aberta',
-  tty: 'Alocar terminal (TTY)',
-  domainName: 'Domínio',
-  expose: 'Portas expostas',
-  dns: 'Servidores DNS',
-  dnsSearch: 'Domínios de busca DNS',
-  networkIds: 'Redes',
-  cpuShares: 'Peso de CPU',
-  cpuSet: 'CPUs permitidas',
-  cpuPeriod: 'Período de CPU (µs)',
-  cpuQuota: 'Quota de CPU (µs)',
-  blkioWeight: 'Peso de I/O',
-  volumeDriver: 'Driver de volumes',
-  storageOpt: 'Opções de armazenamento',
-  readOnly: 'Sistema de arquivos somente leitura',
-  capAdd: 'Capabilities adicionais',
-  capDrop: 'Capabilities removidas',
-  securityOpt: 'Opções de segurança',
-  devices: 'Dispositivos',
-};
 const basics = new Set([
   'name',
   'description',
@@ -176,12 +53,19 @@ export const sensitiveField = (name: string, field?: SchemaField) =>
   /password|passwd|secret|private.?key|token|credential|auth.?key|host.?key|access.?key|api.?key|(^|_)pass($|_)|^key$|^value$/i.test(
     name,
   );
+type FieldLabelKey = Extract<keyof typeof ptSchemaForm, `schemaForm.label.${string}`>;
+function fieldLabelKey(name: string) {
+  const exact = `schemaForm.label.${name}`;
+  const lower = `schemaForm.label.${name.toLowerCase()}`;
+  if (Object.hasOwn(ptSchemaForm, exact)) return exact as FieldLabelKey;
+  if (Object.hasOwn(ptSchemaForm, lower)) return lower as FieldLabelKey;
+}
 export function fieldLabel(name: string) {
-  return (
-    labels[name] ||
-    labels[name.toLowerCase()] ||
-    name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase())
-  );
+  const key = fieldLabelKey(name);
+  return key ? ptSchemaForm[key] : humanizeFieldName(name);
+}
+function humanizeFieldName(name: string) {
+  return name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
 }
 function objectSchema(type: string, schemas: Record<string, Schema>) {
   if (
@@ -326,6 +210,7 @@ export function MapField({
   onChange: (value: Record<string, string>) => void;
   privateValues?: boolean;
 }) {
+  const { t } = useI18n();
   const [rows, setRows] = useState(() =>
     Object.entries(value).map(([key, value]) => ({ key, value })),
   );
@@ -338,16 +223,16 @@ export function MapField({
       {rows.map((row, index) => (
         <div className="map-row" key={index}>
           <input
-            aria-label={`${name}: chave ${index + 1}`}
-            placeholder="Chave"
+            aria-label={t('schemaForm.mapKey', { name, index: index + 1 })}
+            placeholder={t('schemaForm.key')}
             value={row.key}
             onChange={(e) =>
               update(rows.map((r, i) => (i === index ? { ...r, key: e.target.value } : r)))
             }
           />
           <input
-            aria-label={`${name}: valor ${index + 1}`}
-            placeholder="Valor"
+            aria-label={t('schemaForm.mapValue', { name, index: index + 1 })}
+            placeholder={t('schemaForm.value')}
             type={privateValues ? 'password' : 'text'}
             autoComplete={privateValues ? 'new-password' : 'off'}
             value={row.value}
@@ -358,7 +243,7 @@ export function MapField({
           <Button
             variant="ghost"
             type="button"
-            aria-label={`Remover linha ${index + 1}`}
+            aria-label={t('schemaForm.removeRow', { index: index + 1 })}
             onClick={() => update(rows.filter((_, i) => i !== index))}
           >
             <Trash2 size={15} />
@@ -367,7 +252,7 @@ export function MapField({
       ))}
       <Button type="button" onClick={() => update([...rows, { key: '', value: '' }])}>
         <Plus size={15} />
-        Adicionar
+        {t('schemaForm.add')}
       </Button>
     </div>
   );
@@ -383,6 +268,7 @@ function JsonField({
   onChange: (value: unknown) => void;
   required?: boolean;
 }) {
+  const { t } = useI18n();
   const [text, setText] = useState(value === undefined ? '' : JSON.stringify(value, null, 2));
   return (
     <textarea
@@ -399,12 +285,17 @@ function JsonField({
           e.target.setCustomValidity('');
           onChange(parsed);
         } catch {
-          e.target.setCustomValidity('Informe JSON válido.');
+          e.target.setCustomValidity(t('schemaForm.invalidJson'));
         }
       }}
     />
   );
 }
+type SectionTitleKey = Extract<keyof typeof ptSchemaForm, `schemaForm.section.${string}.title`>;
+type SectionDescriptionKey = Extract<
+  keyof typeof ptSchemaForm,
+  `schemaForm.section.${string}.description`
+>;
 function WorkloadSections({
   fields,
   render,
@@ -412,31 +303,42 @@ function WorkloadSections({
   fields: [string, SchemaField][];
   render: (entry: [string, SchemaField]) => ReactNode;
 }) {
+  const { t } = useI18n();
   const { groups, advanced } = workloadSections(fields);
   return (
     <>
-      {groups.map((group) =>
-        ['Identificação', 'Container', 'Campos obrigatórios adicionais'].includes(group.title) ||
-        group.entries.some(([, field]) => field.required) ? (
-          <section className="form-section" key={group.title} aria-label={group.title}>
-            <h3>{group.title}</h3>
-            <p className="muted">{group.description}</p>
+      {groups.map((group) => {
+        const section = group.fields[0] || 'required';
+        const titleKey = `schemaForm.section.${section}.title`;
+        const descriptionKey = `schemaForm.section.${section}.description`;
+        const title = Object.hasOwn(ptSchemaForm, titleKey)
+          ? t(titleKey as SectionTitleKey)
+          : group.title;
+        const description = Object.hasOwn(ptSchemaForm, descriptionKey)
+          ? t(descriptionKey as SectionDescriptionKey)
+          : group.description;
+        return ['name', 'imageUuid', 'required'].includes(section) ||
+          group.entries.some(([, field]) => field.required) ? (
+          <section className="form-section" key={section} aria-label={title}>
+            <h3>{title}</h3>
+            <p className="muted">{description}</p>
             {group.entries.map(render)}
           </section>
         ) : (
-          <details className="workload-form-section" key={group.title}>
+          <details className="workload-form-section" key={section}>
             <summary>
-              <strong>{group.title}</strong>
-              <span>{group.description}</span>
+              <strong>{title}</strong>
+              <span>{description}</span>
             </summary>
             <div>{group.entries.map(render)}</div>
           </details>
-        ),
-      )}
+        );
+      })}
       {!!advanced.length && (
         <details className="advanced-fields">
           <summary>
-            Outras opções nativas <span>{advanced.length} opções</span>
+            {t('schemaForm.nativeOptions')}{' '}
+            <span>{t('schemaForm.optionCount', { count: advanced.length })}</span>
           </summary>
           <div>{advanced.map(render)}</div>
         </details>
@@ -479,6 +381,10 @@ function EditorField({
   ulimitEditors?: boolean;
   deviceEditors?: boolean;
 }) {
+  const { locale, t } = useI18n();
+  const key = fieldLabelKey(name);
+  const defaultLabel = key ? t(key) : humanizeFieldName(name);
+  const label = field.label || defaultLabel;
   const nested = objectSchema(field.type, schemas);
   const [revealed, setRevealed] = useState(false);
   if (deviceEditors && name === 'devices' && supportsDevices(field))
@@ -593,7 +499,7 @@ function EditorField({
     return (
       <fieldset className="nested-fields">
         <legend>
-          {fieldLabel(name)}
+          {defaultLabel}
           {field.required ? ' *' : ''}
         </legend>
         {!field.required && (
@@ -613,7 +519,11 @@ function EditorField({
                 )
               }
             />
-            <span>Configurar {(field.label || fieldLabel(name)).toLocaleLowerCase()}</span>
+            <span>
+              {t('schemaForm.configure', {
+                label: field.label || defaultLabel.toLocaleLowerCase(locale),
+              })}
+            </span>
           </label>
         )}
         {enabled && (
@@ -626,7 +536,9 @@ function EditorField({
                 {!!advanced.length && (
                   <details className="advanced-fields">
                     <summary>
-                      Outras opções de {fieldLabel(name).toLocaleLowerCase()}{' '}
+                      {t('schemaForm.otherOptions', {
+                        label: defaultLabel.toLocaleLowerCase(locale),
+                      })}{' '}
                       <span>{advanced.length}</span>
                     </summary>
                     <div>{advanced.map(renderNested)}</div>
@@ -651,7 +563,7 @@ function EditorField({
   if (field.type === 'boolean' || field.type === 'bool')
     return (
       <CheckboxField
-        label={field.label || fieldLabel(name)}
+        label={label}
         description={field.description}
         checked={value === true}
         onChange={(event) => onChange(event.target.checked)}
@@ -659,16 +571,16 @@ function EditorField({
     );
   return (
     <Field
-      label={`${field.label || fieldLabel(name)}${field.required ? ' *' : ''}`}
+      label={`${label}${field.required ? ' *' : ''}`}
       hint={
         field.description ||
-        (field.validChars ? `Caracteres permitidos: ${field.validChars}.` : undefined) ||
+        (field.validChars ? t('schemaForm.validChars', { chars: field.validChars }) : undefined) ||
         (/^reference\[/.test(field.type)
           ? choices
-            ? 'Escolha um recurso deste environment.'
-            : 'Informe o ID do recurso autorizado.'
+            ? t('schemaForm.chooseResource')
+            : t('schemaForm.enterResource')
           : field.type.startsWith('array[')
-            ? 'Um valor por linha.'
+            ? t('schemaForm.arrayHint')
             : undefined)
       }
     >
@@ -681,9 +593,11 @@ function EditorField({
               value={String(value ?? '')}
               onChange={(event) => onChange(event.target.value)}
             >
-              <option value="">Selecionar…</option>
+              <option value="">{t('schemaForm.select')}</option>
               {!!value && !choices.some((choice) => choice.id === value) && (
-                <option value={String(value)}>Recurso indisponível ({String(value)})</option>
+                <option value={String(value)}>
+                  {t('schemaForm.unavailableResource', { id: String(value) })}
+                </option>
               )}
               {choices.map((choice) => (
                 <option key={choice.id} value={choice.id}>
@@ -699,7 +613,7 @@ function EditorField({
               value={String(value ?? '')}
               onChange={(e) => onChange(e.target.value)}
             >
-              <option value="">Selecionar…</option>
+              <option value="">{t('schemaForm.select')}</option>
               {field.options?.map((option) => (
                 <option value={option} key={option}>
                   {option}
@@ -710,7 +624,7 @@ function EditorField({
         if (field.type === 'map[string]')
           return (
             <MapField
-              name={fieldLabel(name)}
+              name={defaultLabel}
               privateValues={name === 'environment'}
               value={(value || {}) as Record<string, string>}
               onChange={onChange}
@@ -764,7 +678,7 @@ function EditorField({
                   onClick={() => setRevealed(!revealed)}
                 >
                   {revealed ? <EyeOff size={16} /> : <Eye size={16} />}{' '}
-                  {revealed ? 'Ocultar' : 'Mostrar'} conteúdo
+                  {t(revealed ? 'schemaForm.hide' : 'schemaForm.show')}
                 </Button>
               )}
             </>
@@ -817,6 +731,7 @@ export function SidecarsEditor({
   deviceEditors?: boolean;
   onChange: (value: unknown) => void;
 }) {
+  const { t } = useI18n();
   const [rows, setRows] = useState(() =>
     Array.isArray(value)
       ? value.map((value) => ({
@@ -846,20 +761,16 @@ export function SidecarsEditor({
     onChange(next.map((v) => v.value));
   }
   return (
-    <section aria-label="Containers auxiliares do serviço">
-      <p className="muted">
-        Cada sidecar acompanha as instâncias deste serviço. Referências de rede/volumes usam o nome
-        do serviço ou do sidecar. Para compartilhar a rede, defina o modo container na seção Rede e
-        informe o nome do container. Revise os vínculos ao renomear ou remover um container.
-      </p>
+    <section aria-label={t('schemaForm.sidecars')}>
+      <p className="muted">{t('schemaForm.sidecarsHelp')}</p>
       {!valid ? (
-        <Alert>Configuração de sidecars inválida. Reabra o formulário.</Alert>
+        <Alert>{t('schemaForm.sidecarsInvalid')}</Alert>
       ) : (
         <>
           {rows.map((row, index) => (
             <fieldset className="nested-fields" key={row.key}>
               <legend>
-                Sidecar {index + 1}
+                {t('schemaForm.sidecar', { index: index + 1 })}
                 {row.value.name ? ' · ' + row.value.name : ''}
               </legend>
               <WorkloadSections
@@ -894,7 +805,7 @@ export function SidecarsEditor({
                 variant="ghost"
                 onClick={() => update(rows.filter((v) => v.key !== row.key))}
               >
-                Remover sidecar {index + 1}
+                {t('schemaForm.removeSidecar', { index: index + 1 })}
               </Button>
             </fieldset>
           ))}
@@ -916,7 +827,7 @@ export function SidecarsEditor({
             }
           >
             <Plus size={15} />
-            Adicionar sidecar
+            {t('schemaForm.addSidecar')}
           </Button>
         </>
       )}
@@ -1029,7 +940,7 @@ export function SchemaForm({
           ? error
           : error instanceof Error
             ? error.message
-            : 'Revise os campos.',
+            : t('schemaForm.review'),
       );
     }
   }
@@ -1072,7 +983,8 @@ export function SchemaForm({
             {!!advanced.length && (
               <details className="advanced-fields">
                 <summary>
-                  Configuração avançada <span>{advanced.length} opções</span>
+                  {t('schemaForm.advanced')}{' '}
+                  <span>{t('schemaForm.optionCount', { count: advanced.length })}</span>
                 </summary>
                 <div>{advanced.map(render)}</div>
               </details>
