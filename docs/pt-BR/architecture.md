@@ -44,6 +44,8 @@ O painel de criação de workloads e a confirmação de operações em lote usam
 
 Os controles especializados de CPU, memória, capabilities, limites de processo e saúde usam mensagens registradas em pt-BR/en-US. Erros do parser de CPU expõem códigos estáveis para tradução. Algumas mensagens de validação dos outros helpers de workloads ainda usam o texto original em português.
 
+Os editores de agendamento, portas e montagens usam os catálogos compartilhados. Validadores de memória e limites de processo expõem chaves tipadas, e os erros exibidos nos editores acompanham a troca de idioma preservando o rascunho. Valores nativos de agendamento, protocolos de portas e modos de montagem mantêm a representação da API.
+
 ## Dados e mutações
 
 Use schemas/action links atuais, sem inventar rotas ou supor igualdade entre schemas globais e do environment. Releia recurso, escopo e contrato relevante antes da mutação. Preserve configuração desconhecida e campos não selecionados; não transforme valores incompatíveis em defaults vazios silenciosamente.

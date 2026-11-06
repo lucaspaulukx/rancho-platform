@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import { useI18n } from '../i18n/provider';
 import {
   decodeScheduling,
   encodeScheduling,
@@ -9,6 +10,18 @@ import {
   type SchedulingRule,
 } from '../workload-scheduling';
 import { Alert, Button, Field } from './ui';
+
+const kindLabels = {
+  host_label: 'schedulingEditor.kind.host_label',
+  container_label: 'schedulingEditor.kind.container_label',
+  container: 'schedulingEditor.kind.container',
+} as const;
+const modeLabels = {
+  '': 'schedulingEditor.mode.required',
+  _ne: 'schedulingEditor.mode.exclude',
+  _soft: 'schedulingEditor.mode.prefer',
+  _soft_ne: 'schedulingEditor.mode.avoid',
+} as const;
 
 export function SchedulingEditor({
   value,
@@ -22,15 +35,15 @@ export function SchedulingEditor({
     onChange: (value: Record<string, string>) => void,
   ) => ReactNode;
 }) {
+  const { t } = useI18n();
   const [initial] = useState(() => {
     try {
-      return { ...decodeScheduling(value), error: '' };
+      return { ...decodeScheduling(value), error: false };
     } catch {
       return {
         rules: [] as SchedulingRule[],
         other: value,
-        error:
-          'Há regras legadas que este editor não consegue interpretar. Edite as labels nativas ou desative o editor estruturado; nada foi convertido.',
+        error: true,
       };
     }
   });
@@ -43,20 +56,12 @@ export function SchedulingEditor({
   }
   const global = other[globalLabel] === 'true';
   return (
-    <section aria-label="Afinidades de agendamento">
-      <p className="muted">
-        Combine regras para posicionar o workload. Preferências podem não ser atendidas; regras
-        obrigatórias podem impedir o agendamento.
-      </p>
-      {global && (
-        <Alert tone="info">
-          Serviço global: use somente labels de host com regras obrigatórias ou de negação. A escala
-          global é preservada.
-        </Alert>
-      )}
+    <section aria-label={t('schedulingEditor.title')}>
+      <p className="muted">{t('schedulingEditor.description')}</p>
+      {global && <Alert tone="info">{t('schedulingEditor.global')}</Alert>}
       {initial.error ? (
         <>
-          <Alert>{initial.error}</Alert>
+          <Alert>{t('schedulingEditor.legacy')}</Alert>
           {renderLabels(other, (labels) => update([], labels))}
         </>
       ) : (
@@ -67,32 +72,32 @@ export function SchedulingEditor({
             }
             return (
               <fieldset className="nested-fields" key={rule.id}>
-                <legend>Afinidade {index + 1}</legend>
-                <Field label="Alvo da afinidade">
+                <legend>{t('schedulingEditor.rule', { index: index + 1 })}</legend>
+                <Field label={t('schedulingEditor.target')}>
                   {(id) => (
                     <select
                       id={id}
                       value={rule.kind}
                       onChange={(e) => patch({ kind: e.target.value as SchedulingRule['kind'] })}
                     >
-                      {Object.entries(schedulingKinds).map(([key, label]) => (
+                      {Object.keys(schedulingKinds).map((key) => (
                         <option key={key} value={key} disabled={global && key !== 'host_label'}>
-                          {label}
+                          {t(kindLabels[key as SchedulingRule['kind']])}
                         </option>
                       ))}
                     </select>
                   )}
                 </Field>
-                <Field label="Condição da afinidade">
+                <Field label={t('schedulingEditor.condition')}>
                   {(id) => (
                     <select
                       id={id}
                       value={rule.mode}
                       onChange={(e) => patch({ mode: e.target.value as SchedulingRule['mode'] })}
                     >
-                      {Object.entries(schedulingModes).map(([key, label]) => (
+                      {Object.keys(schedulingModes).map((key) => (
                         <option key={key} value={key} disabled={global && key.includes('_soft')}>
-                          {label}
+                          {t(modeLabels[key as SchedulingRule['mode']])}
                         </option>
                       ))}
                     </select>
@@ -100,10 +105,10 @@ export function SchedulingEditor({
                 </Field>
                 {rule.kind !== 'container' && (
                   <Field
-                    label="Chave da label"
+                    label={t('schedulingEditor.key')}
                     hint={
                       rule.kind === 'container_label'
-                        ? 'Para um serviço: io.rancher.stack_service.name; valor: stack/serviço.'
+                        ? t('schedulingEditor.serviceHint')
                         : undefined
                     }
                   >
@@ -119,7 +124,9 @@ export function SchedulingEditor({
                 )}
                 <Field
                   label={
-                    rule.kind === 'container' ? 'Nome do container de referência' : 'Valor da label'
+                    rule.kind === 'container'
+                      ? t('schedulingEditor.container')
+                      : t('schedulingEditor.value')
                   }
                 >
                   {(id) => (
@@ -134,10 +141,10 @@ export function SchedulingEditor({
                 <Button
                   type="button"
                   variant="ghost"
-                  aria-label={`Remover afinidade ${index + 1}`}
+                  aria-label={t('schedulingEditor.remove', { index: index + 1 })}
                   onClick={() => update(rules.filter((v) => v.id !== rule.id))}
                 >
-                  <Trash2 size={15} /> Remover regra
+                  <Trash2 size={15} /> {t('schedulingEditor.removeRule')}
                 </Button>
               </fieldset>
             );
@@ -152,10 +159,10 @@ export function SchedulingEditor({
               ])
             }
           >
-            <Plus size={15} /> Adicionar afinidade
+            <Plus size={15} /> {t('schedulingEditor.add')}
           </Button>
           <details className="advanced-fields">
-            <summary>Outras labels e regras nativas</summary>
+            <summary>{t('schedulingEditor.native')}</summary>
             <div>{renderLabels(other, (labels) => update(rules, labels))}</div>
           </details>
         </>

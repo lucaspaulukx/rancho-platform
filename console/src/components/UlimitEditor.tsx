@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { useI18n } from '../i18n/provider';
+import { ResourceValidationError } from '../resource-validation';
 import { normalizeUlimits, ulimitNames } from '../workload-ulimits';
 import { Alert, Button, Field } from './ui';
 
@@ -30,7 +31,7 @@ export function UlimitEditor({
     try {
       normalizeUlimits(value);
     } catch (caught) {
-      error = (caught as Error).message;
+      error = caught instanceof ResourceValidationError ? t(caught.key) : (caught as Error).message;
     }
   }
   return (
