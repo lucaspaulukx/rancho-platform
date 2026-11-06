@@ -36,6 +36,8 @@ Os domínios registrados cobrem autenticação/sem-acesso, shell/navegação/sel
 
 `npm run check:locales` valida conjuntos exatos de chaves registradas pt-BR/en-US e estrutura de parâmetros/plurais no CI de fontes e build da imagem. Seu relatório sanitizado informa explicitamente que a cobertura da interface não foi medida e os outros oito catálogos seguem pendentes. Extração completa e revisão linguística continuam no roadmap. Metadados de direção e layout do seletor não implementam RTL completo. Erros contextuais mantêm o locale; erro catastrófico na rota raiz substitui o provider e retorna com segurança ao pt-BR. Testes dos domínios registrados não comprovam paridade de idiomas em todas as rotas.
 
+O painel compartilhado de detalhes segue o idioma ativo nas abas, nos rótulos, nos números, nas datas e na validade de certificados. A troca de idioma preserva a aba selecionada e mantém o JSON sanitizado idêntico, incluindo chaves, valores nativos e marcadores de ocultação.
+
 ## Dados e mutações
 
 Use schemas/action links atuais, sem inventar rotas ou supor igualdade entre schemas globais e do environment. Releia recurso, escopo e contrato relevante antes da mutação. Preserve configuração desconhecida e campos não selecionados; não transforme valores incompatíveis em defaults vazios silenciosamente.
