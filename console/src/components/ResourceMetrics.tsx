@@ -19,13 +19,27 @@ import {
   type ServiceMetricTarget,
 } from '../metrics';
 import { metricsConnection, type MetricsAccess } from '../streams';
+import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import { Alert, Badge, Button, Empty, Field, Modal } from './ui';
 
-const display = (value?: number) =>
-  value === undefined
-    ? '—'
-    : new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format(value);
+type MetricsErrorKey =
+  | 'resourceMetrics.wrongEnvironment'
+  | 'resourceMetrics.resourceDenied'
+  | 'resourceMetrics.incomplete'
+  | 'resourceMetrics.targetLimit'
+  | 'resourceMetrics.noTargets'
+  | 'resourceMetrics.negotiation'
+  | 'resourceMetrics.invalidSample'
+  | 'resourceMetrics.connectionFailed'
+  | 'resourceMetrics.sessionDenied'
+  | 'resourceMetrics.membershipChanged'
+  | 'resourceMetrics.failed';
+class MetricsPanelError extends Error {
+  constructor(readonly key: MetricsErrorKey) {
+    super(key);
+  }
+}
 interface MetricsProps {
   resource: Resource;
   onClose: () => void;
@@ -40,6 +54,7 @@ export function ResourceMetrics(props: MetricsProps) {
   );
 }
 function MetricsSession({ resource, onClose }: MetricsProps) {
+  const { t, formats } = useI18n();
   const app = useApp();
   const [individualPoints, setPoints] = useState<MetricPoint[]>([]);
   const [targets, setTargets] = useState<ServiceMetricTarget[]>([]);
@@ -48,7 +63,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
   const [paused, setPaused] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<'connecting' | 'live' | 'closed' | 'stale'>('connecting');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<MetricsErrorKey | ServiceMetricsError | null>(null);
   const received = useRef(0);
   const service = resource.type === 'service';
   const enabled =
@@ -61,7 +76,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
   useEffect(() => {
     if (paused || !enabled) return;
     if (!app.project?.id || resource.accountId !== app.project.id) {
-      setError('O recurso não pertence ao environment selecionado.');
+      setError('resourceMetrics.wrongEnvironment');
       setStatus('closed');
       return;
     }
@@ -76,15 +91,13 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
     let pendingPayload: string | undefined;
     let history: ServiceMetricHistory | undefined;
     setStatus('connecting');
-    setError('');
+    setError(null);
     received.current = 0;
     if (service) {
       setTargets([]);
       setSeries(new Map());
     }
-    const denied = (
-      message = 'As métricas foram encerradas porque o recurso ou a permissão não está mais disponível.',
-    ) => {
+    const denied = (message: MetricsErrorKey = 'resourceMetrics.resourceDenied') => {
       if (!disposed && !ended) {
         setError(message);
         setStatus('closed');
@@ -99,9 +112,8 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
         AbortSignal.any([controller.signal, AbortSignal.timeout(10_000)]),
       );
       if (!Array.isArray(page.data) || page.pagination?.partial)
-        throw new ServiceMetricsError('A lista de containers do serviço está incompleta.');
-      if (page.pagination?.next)
-        throw new ServiceMetricsError('O painel suporta até 64 containers por serviço.');
+        throw new MetricsPanelError('resourceMetrics.incomplete');
+      if (page.pagination?.next) throw new MetricsPanelError('resourceMetrics.targetLimit');
       return serviceMetricTargets(current, page.data, environment);
     };
     async function connect() {
@@ -124,10 +136,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
         if (service) {
           const currentTargets = await readTargets(current);
           if (disposed) return;
-          if (!currentTargets.length)
-            throw new ServiceMetricsError(
-              'Não há containers em execução para medir neste serviço.',
-            );
+          if (!currentTargets.length) throw new MetricsPanelError('resourceMetrics.noTargets');
           membership = serviceMetricMembership(currentTargets);
           history = new ServiceMetricHistory(currentTargets);
           setTargets(currentTargets);
@@ -156,7 +165,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
             try {
               socket?.send(payload);
             } catch {
-              setError('Não foi possível negociar a conexão de métricas.');
+              setError('resourceMetrics.negotiation');
               socket?.close();
             }
           }
@@ -183,13 +192,13 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
               setPoints((values) => appendMetricPoint(values, point));
             }
           } catch {
-            setError('O servidor enviou uma amostra de métricas inválida.');
+            setError('resourceMetrics.invalidSample');
             socket?.close();
           }
         };
         socket.onerror = () => {
           pendingPayload = undefined;
-          if (!disposed) setError('A conexão de métricas falhou. Tente conectar novamente.');
+          if (!disposed) setError('resourceMetrics.connectionFailed');
         };
         socket.onclose = (event) => {
           ended = true;
@@ -198,10 +207,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
           if (heartbeat) clearInterval(heartbeat);
           if (!disposed) {
             setStatus('closed');
-            if (event?.code === 1008)
-              setError(
-                'As métricas foram encerradas porque sua sessão ou permissão não está mais disponível.',
-              );
+            if (event?.code === 1008) setError('resourceMetrics.sessionDenied');
           }
         };
         heartbeat = setInterval(() => {
@@ -229,7 +235,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
                 const updated = await readTargets(value);
                 if (disposed || ended) return;
                 if (serviceMetricMembership(updated) !== membership) {
-                  denied('Os containers do serviço mudaram. Reconecte para atualizar as métricas.');
+                  denied('resourceMetrics.membershipChanged');
                   return;
                 }
                 setTargets(updated);
@@ -244,9 +250,11 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
         pendingPayload = undefined;
         if (!disposed) {
           setError(
-            error instanceof ServiceMetricsError
-              ? error.message
-              : 'Não foi possível obter métricas deste recurso. Confira seu estado, a conectividade do agente e suas permissões.',
+            error instanceof MetricsPanelError
+              ? error.key
+              : error instanceof ServiceMetricsError
+                ? error
+                : 'resourceMetrics.failed',
           );
           setStatus('closed');
         }
@@ -299,18 +307,17 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
     <Modal
       open
       drawer
-      title={`Métricas · ${resource.name || resource.hostname || resource.id}`}
-      description={`Environment: ${app.project?.name || '—'} · amostras em tempo real do Rancher`}
+      title={t('resourceMetrics.title', {
+        name: String(resource.name || resource.hostname || resource.id),
+      })}
+      description={t('resourceMetrics.description', { name: app.project?.name || '—' })}
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      footer={<Button onClick={onClose}>Fechar</Button>}
+      footer={<Button onClick={onClose}>{t('resourceMetrics.close')}</Button>}
     >
       {!enabled ? (
-        <Empty
-          title="Métricas desativadas"
-          description="Ative o módulo de métricas na configuração da console."
-        />
+        <Empty title={t('resourceMetrics.disabled')} description={t('resourceMetrics.enable')} />
       ) : (
         <>
           <div className="metrics-toolbar">
@@ -328,25 +335,26 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
               }
             >
               {paused
-                ? 'Pausado'
+                ? t('resourceMetrics.paused')
                 : status === 'live'
-                  ? 'Ao vivo'
+                  ? t('resourceMetrics.live')
                   : status === 'stale'
-                    ? 'Sem novas amostras'
+                    ? t('resourceMetrics.stale')
                     : status === 'closed'
-                      ? 'Conexão encerrada'
-                      : 'Conectando…'}
+                      ? t('resourceMetrics.closed')
+                      : t('resourceMetrics.connecting')}
             </Badge>
             <div className="row-actions">
               <Button onClick={() => setPaused((value) => !value)}>
-                {paused ? <Play size={15} /> : <Pause size={15} />} {paused ? 'Retomar' : 'Pausar'}
+                {paused ? <Play size={15} /> : <Pause size={15} />}{' '}
+                {paused ? t('resourceMetrics.resume') : t('resourceMetrics.pause')}
               </Button>
               <Button disabled={!points.length} onClick={download}>
                 <Download size={15} />
-                CSV
+                {t('resourceMetrics.csv')}
               </Button>
               <Button
-                aria-label="Reconectar métricas"
+                aria-label={t('resourceMetrics.reconnect')}
                 onClick={() => {
                   setPaused(false);
                   setAttempt((value) => value + 1);
@@ -356,11 +364,14 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
               </Button>
             </div>
           </div>
-          {error && <Alert>{error}</Alert>}
+          {error && <Alert>{typeof error === 'string' ? t(error) : error.message}</Alert>}
           {service && !!targets.length && (
             <Field
-              label="Container do serviço"
-              hint={`${series.size} de ${targets.length} com amostras nesta conexão. O CSV exporta o container selecionado.`}
+              label={t('resourceMetrics.container')}
+              hint={t('resourceMetrics.containerHint', {
+                sampled: series.size,
+                total: targets.length,
+              })}
             >
               {(id, descriptionId) => (
                 <select
@@ -379,66 +390,77 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
             </Field>
           )}
           {status === 'stale' && !paused && (
-            <Alert tone="warning">
-              O agente não enviou novas amostras recentemente. Os últimos valores continuam visíveis
-              com seus horários.
-            </Alert>
+            <Alert tone="warning">{t('resourceMetrics.staleWarning')}</Alert>
           )}
           <p className="muted metrics-caption">
-            Últimos 5 minutos desta conexão · até 300 amostras ·{' '}
-            {latest
-              ? `última amostra às ${new Date(latest.ts).toLocaleTimeString('pt-BR')}`
-              : 'aguardando amostras'}
+            {t('resourceMetrics.caption', {
+              status: latest
+                ? t('resourceMetrics.lastSample', {
+                    time: formats.date(latest.ts, { timeStyle: 'medium' }),
+                  })
+                : t('resourceMetrics.awaiting'),
+            })}
           </p>
           <div className="resource-metrics-grid">
             <MetricChart
-              title="CPU"
+              title={t('resourceMetrics.cpu')}
               unit="%"
               points={points}
-              fields={[{ key: 'cpuPercent', label: 'Uso de CPU', color: 'var(--primary)' }]}
+              fields={[
+                {
+                  key: 'cpuPercent',
+                  label: t('resourceMetrics.cpuUsage'),
+                  color: 'var(--primary)',
+                },
+              ]}
               max={Math.max(
                 (latest?.cpus || 1) * 100,
                 ...points.map((point) => point.cpuPercent || 0),
               )}
-              note={`100% equivale a um núcleo${latest?.cpus ? ` · ${latest.cpus} núcleos reportados` : ''}.`}
-            />
-            <MetricChart
-              title="Memória"
-              unit="MiB"
-              points={points}
-              fields={[{ key: 'memoryMiB', label: 'Memória usada', color: 'var(--info)' }]}
-              max={latest?.memoryLimitMiB}
               note={
-                latest?.memoryLimitMiB !== undefined
-                  ? `Limite reportado: ${display(latest.memoryLimitMiB)} MiB.`
-                  : 'O agente não reportou limite de memória.'
+                latest?.cpus
+                  ? t('resourceMetrics.cpuNoteReported', { cores: latest.cpus })
+                  : t('resourceMetrics.cpuNote')
               }
             />
             <MetricChart
-              title="Rede"
-              unit="KiB/s"
+              title={t('resourceMetrics.memory')}
+              unit="MiB"
               points={points}
               fields={[
-                { key: 'rxKiBs', label: 'Recebidos', color: 'var(--success)' },
-                { key: 'txKiBs', label: 'Enviados', color: 'var(--primary)' },
+                { key: 'memoryMiB', label: t('resourceMetrics.memoryUsed'), color: 'var(--info)' },
               ]}
-              note="Taxas calculadas entre amostras das mesmas interfaces."
+              max={latest?.memoryLimitMiB}
+              note={
+                latest?.memoryLimitMiB !== undefined
+                  ? t('resourceMetrics.memoryLimit', {
+                      limit: formats.number(latest.memoryLimitMiB, { maximumFractionDigits: 1 }),
+                    })
+                  : t('resourceMetrics.noMemoryLimit')
+              }
             />
             <MetricChart
-              title="Disco"
+              title={t('resourceMetrics.network')}
               unit="KiB/s"
               points={points}
               fields={[
-                { key: 'readKiBs', label: 'Leitura', color: 'var(--info)' },
-                { key: 'writeKiBs', label: 'Escrita', color: 'var(--warning)' },
+                { key: 'rxKiBs', label: t('resourceMetrics.received'), color: 'var(--success)' },
+                { key: 'txKiBs', label: t('resourceMetrics.sent'), color: 'var(--primary)' },
               ]}
-              note="Ausência de contadores aparece como indisponível."
+              note={t('resourceMetrics.networkNote')}
+            />
+            <MetricChart
+              title={t('resourceMetrics.disk')}
+              unit="KiB/s"
+              points={points}
+              fields={[
+                { key: 'readKiBs', label: t('resourceMetrics.read'), color: 'var(--info)' },
+                { key: 'writeKiBs', label: t('resourceMetrics.write'), color: 'var(--warning)' },
+              ]}
+              note={t('resourceMetrics.diskNote')}
             />
           </div>
-          <p className="muted metrics-caption">
-            Histórico mantido somente enquanto este painel estiver aberto. Permissões revalidadas a
-            cada 15 segundos.
-          </p>
+          <p className="muted metrics-caption">{t('resourceMetrics.history')}</p>
         </>
       )}
     </Modal>
@@ -459,6 +481,9 @@ function MetricChart({
   max?: number;
   note: string;
 }) {
+  const { t, formats } = useI18n();
+  const display = (value?: number) =>
+    value === undefined ? '—' : formats.number(value, { maximumFractionDigits: 1 });
   const ceiling =
     max && max > 0
       ? max
@@ -489,7 +514,7 @@ function MetricChart({
         <svg
           viewBox="0 0 320 100"
           role="img"
-          aria-label={`${title}: evolução das amostras recebidas`}
+          aria-label={t('resourceMetrics.chartLabel', { title })}
           className="metric-chart-svg"
         >
           <path d="M0 8H320 M0 48H320 M0 88H320" stroke="var(--border)" fill="none" />
@@ -509,15 +534,19 @@ function MetricChart({
         </svg>
       ) : (
         <div className="metric-chart-unavailable">
-          {points.length ? 'Contador indisponível' : 'Aguardando dados do agente…'}
+          {points.length
+            ? t('resourceMetrics.unavailableCounter')
+            : t('resourceMetrics.waitingAgent')}
         </div>
       )}
       <div className="metric-chart-axis">
-        <span>{points.length ? new Date(points[0].ts).toLocaleTimeString('pt-BR') : '—'}</span>
+        <span>{points.length ? formats.date(points[0].ts, { timeStyle: 'medium' }) : '—'}</span>
         <span>
           {display(ceiling)} {unit}
         </span>
-        <span>{points.length ? new Date(points.at(-1)!.ts).toLocaleTimeString('pt-BR') : '—'}</span>
+        <span>
+          {points.length ? formats.date(points.at(-1)!.ts, { timeStyle: 'medium' }) : '—'}
+        </span>
       </div>
       <p className="muted">{note}</p>
     </section>

@@ -39,6 +39,8 @@ import { enWorkloadsPage, ptWorkloadsPage } from './domains/workloads-page';
 import { enEnvironmentCatalogs, ptEnvironmentCatalogs } from './domains/environment-catalogs';
 import { enNetworkPoliciesPage, ptNetworkPoliciesPage } from './domains/network-policies-page';
 import { enResourcesPage, ptResourcesPage } from './domains/resources-page';
+import { enServiceUpgradeForm, ptServiceUpgradeForm } from './domains/service-upgrade-form';
+import { enResourceMetrics, ptResourceMetrics } from './domains/resource-metrics';
 import { enResourcePanel, ptResourcePanel } from './domains/resource-panel';
 import { enResourceStream, ptResourceStream } from './domains/resource-stream';
 
@@ -84,6 +86,8 @@ export const englishMessages = {
   ...enEnvironmentCatalogs,
   ...enNetworkPoliciesPage,
   ...enResourcesPage,
+  ...enServiceUpgradeForm,
+  ...enResourceMetrics,
   ...enResourcePanel,
   ...enResourceStream,
   'common.cancel': 'Cancel',
@@ -160,6 +164,8 @@ export const portugueseMessages = {
   ...ptEnvironmentCatalogs,
   ...ptNetworkPoliciesPage,
   ...ptResourcesPage,
+  ...ptServiceUpgradeForm,
+  ...ptResourceMetrics,
   ...ptResourcePanel,
   ...ptResourceStream,
   'common.cancel': 'Cancelar',
