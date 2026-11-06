@@ -38,6 +38,8 @@ Os domínios registrados cobrem autenticação/sem-acesso, shell/navegação/sel
 
 O painel compartilhado de detalhes segue o idioma ativo nas abas, nos rótulos, nos números, nas datas e na validade de certificados. A troca de idioma preserva a aba selecionada e mantém o JSON sanitizado idêntico, incluindo chaves, valores nativos e marcadores de ocultação.
 
+A tela de operações e o seletor compartilhado de streams usam o idioma ativo na navegação, nos filtros e nos rótulos de ações. A troca de idioma preserva a visão atual dos workloads e os identificadores das ações nativas.
+
 ## Dados e mutações
 
 Use schemas/action links atuais, sem inventar rotas ou supor igualdade entre schemas globais e do environment. Releia recurso, escopo e contrato relevante antes da mutação. Preserve configuração desconhecida e campos não selecionados; não transforme valores incompatíveis em defaults vazios silenciosamente.

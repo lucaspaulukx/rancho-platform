@@ -38,6 +38,8 @@ The registered message domains cover authentication/no-access, shared shell/navi
 
 The shared resource details panel follows the active locale for tabs, field labels, numbers, dates and certificate validity. Switching language preserves the selected tab and keeps sanitized configuration JSON identical, including native keys, values and redaction markers.
 
+The operations workspace and shared stream selector use the active locale for navigation, filters and action captions. Switching language preserves the current workload view and native action identifiers.
+
 ## Data and mutations
 
 Use current resource schemas/action links instead of inventing routes or assuming global schemas equal environment-scoped schemas. Re-read the resource, scope and relevant contract before mutation. Preserve unknown configuration and unselected fields; do not silently replace unsupported values with empty defaults.
