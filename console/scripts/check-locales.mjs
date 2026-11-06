@@ -21,6 +21,7 @@ const checkedLocales = ['en-US', 'pt-BR'];
 export function checkRegisteredCatalogs({
   englishMessages,
   portugueseMessages,
+  previewCatalogs = {},
   validateCatalog,
   localeInventory,
 }) {
@@ -42,6 +43,22 @@ export function checkRegisteredCatalogs({
     failures.add('invalid-message-structure');
   }
   const locales = Array.isArray(localeInventory) ? localeInventory.map((entry) => entry?.code) : [];
+  const previewCatalogKeyCounts = {};
+  const previews = isRecord(previewCatalogs) ? Object.entries(previewCatalogs) : [];
+  if (!isRecord(previewCatalogs)) failures.add('invalid-preview-registry');
+  for (const [locale, catalog] of previews) {
+    if (!inventoryCodes.includes(locale) || checkedLocales.includes(locale)) {
+      failures.add('invalid-preview-locale');
+      continue;
+    }
+    try {
+      const keys = Object.keys(validateCatalog(catalog));
+      if (!keys.length) failures.add('empty-preview-catalog');
+      previewCatalogKeyCounts[locale] = keys.length;
+    } catch {
+      failures.add('invalid-preview-message-structure');
+    }
+  }
   if (
     locales.length !== inventoryCodes.length ||
     new Set(locales).size !== inventoryCodes.length ||
@@ -54,6 +71,7 @@ export function checkRegisteredCatalogs({
     registeredEnglishKeys: englishKeys.length,
     registeredPortugueseKeys: portugueseKeys.length,
     checkedCatalogLocales: checkedLocales,
+    previewCatalogKeyCounts,
     pendingCatalogLocales: inventoryCodes.filter((code) => !checkedLocales.includes(code)),
     interfaceCoverage: 'not-measured',
     allRoutesTranslated: false,
@@ -73,12 +91,13 @@ async function main() {
       appType: 'custom',
       logLevel: 'silent',
     });
-    const { englishMessages, portugueseMessages, validateCatalog } =
+    const { englishMessages, portugueseMessages, previewCatalogs, validateCatalog } =
       await server.ssrLoadModule('/src/i18n/messages.ts');
     const { localeInventory } = await server.ssrLoadModule('/src/i18n/locales.ts');
     report = checkRegisteredCatalogs({
       englishMessages,
       portugueseMessages,
+      previewCatalogs,
       validateCatalog,
       localeInventory,
     });

@@ -20,7 +20,7 @@ async function closeContext(value) {
   result.contextsClosed++;
 }
 
-async function context({ authenticated = false, enabled = true } = {}) {
+async function context({ authenticated = false, enabled = true, frenchPreview = false } = {}) {
   const value = await browser.newContext({
     viewport: { width: 1440, height: 1000 }, locale: 'pt-BR', colorScheme: 'dark',
   });
@@ -43,7 +43,7 @@ async function context({ authenticated = false, enabled = true } = {}) {
     assert.equal(response.status(), 200);
     const config = await response.json();
     config.localization = {
-      enabled, defaultLocale: 'pt-BR', availableLocales: ['pt-BR', 'en-US'],
+      enabled, defaultLocale: 'pt-BR', availableLocales: frenchPreview ? ['pt-BR', 'en-US', 'fr-FR'] : ['pt-BR', 'en-US'],
       selectable: true, detectBrowser: false, preview: true,
     };
     // Theme variation is local to this browser context, never the deployed JSON.
@@ -100,7 +100,7 @@ async function main() {
   await closeContext(disabled);
 
   result.stage = 'public-login-drafts';
-  const publicContext = await context();
+  const publicContext = await context({ frenchPreview: true });
   const publicPage = await page(publicContext);
   await publicPage.goto(loginUrl, { waitUntil: 'domcontentloaded' });
   const publicSelector = publicPage.getByRole('combobox', { name: 'Idioma', exact: true });
@@ -128,6 +128,13 @@ async function main() {
   check('public document language updates', await publicPage.locator('html').getAttribute('lang') === 'en-US');
   await publicPage.setViewportSize({ width: 390, height: 844 });
   check('public mobile selector stays in viewport', await insideViewport(publicPage.getByRole('combobox', { name: 'Language', exact: true })));
+  await publicPage.getByRole('combobox', { name: 'Language', exact: true }).selectOption('fr-FR');
+  await publicPage.getByRole('heading', { name: 'Accédez à votre environnement', exact: true }).waitFor();
+  check('French preview translates sign-in while preserving both drafts and the URL',
+    await publicPage.locator('html').getAttribute('lang') === 'fr-FR' &&
+    await publicPage.getByText('Aperçu · traductions incomplètes', { exact: true }).isVisible() &&
+    await username.inputValue() === 'localization-draft-only' &&
+    await password.inputValue() === 'not-a-real-password' && publicPage.url() === loginUrl);
   await closeContext(publicContext);
 
   result.stage = 'authenticated-shell';
