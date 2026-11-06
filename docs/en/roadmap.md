@@ -43,7 +43,7 @@ The new console currently has fixed pt-BR interface text, including validation a
 
 | ID | Capability | State and remaining gate |
 |---|---|---|
-| I18N01 | Shared locale, message and formatting infrastructure | Pending; typed message keys/parameters, locale normalization, explicit fallback, pluralization and locale-aware numbers/dates/relative time/sorting; no DOM text replacement or translated API identifiers |
+| I18N01 | Shared locale, message and formatting infrastructure | Partial; ten-locale inventory, typed initial shared domain/parameters, explicit fallback, pluralization and native Intl formatting/sorting implemented with unit/type checks; provider and adoption by the complete interface remain; no DOM text replacement or translated API identifiers |
 | I18N02 | Configuration and shared language selector | Pending; opt-in/default/off contract, administrator language/default/selection policy, choice on public and authenticated layouts, safe preference persistence and browser-language negotiation; switching preserves environment, route, drafts and stream ownership |
 | I18N03 | Complete pt-BR/en-US extraction | Pending; shared shell, login/no-access/recovery, all pages, menus, tables, drawers, dialogs, confirmations, toasts, validators and accessible labels; preserve technical commands and native resource/user content |
 | I18N04 | Remaining eight production languages | Pending; complete de-DE/fr-FR/hu-HU/ja-JP/fa-IR/ru-RU/uk-UA/zh-Hans catalogs, placeholder/plural consistency and language review; never advertise an English fallback catalog as a completed translation |

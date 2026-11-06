@@ -26,6 +26,14 @@ The root [upstream.json](../../upstream.json) pins official sources and [patches
 
 Pages render inside the shared shell. Contextual actions open shared drawers instead of moving users between separate pages for the same stack. URL parameters retain environment, view and filters. A UI flag controls presentation, never backend access.
 
+## Localization boundary
+
+The shared foundation in `console/src/i18n/` inventories the ten original production locales and Persian RTL metadata, normalizes legacy/browser locale identifiers and negotiates only an explicitly available language list. It does not read browser preferences or enable a selector on its own. Traditional Chinese and incompatible script variants do not silently map to Simplified Chinese. Native `Intl` helpers provide locale-specific numbers, dates, relative time, plural categories and numeric sorting. `formatResourceDate` accepts an optional locale; existing callers retain pt-BR.
+
+The initial message domain has seven shared keys with pt-BR/en-US catalogs, typed parameters and structural runtime validation. Unknown keys, malformed plurals and changed placeholders fail without echoing submitted data. Missing messages explicitly resolve to en-US and use English grammar/formatting; `resolvedLocale` exposes that fallback. `translatedKeys` counts only this small domain, never application coverage. Messages are plain strings for React text/attributes: do not pass them to `dangerouslySetInnerHTML` or evaluate them. Native errors, resource names, commands and log content are not translation keys.
+
+The locale provider, administrator policy/flags, preference persistence, selector, complete string extraction and reviewed language catalogs remain roadmap work. No production locale is enabled by importing this foundation; the current interface remains fixed pt-BR. The inventory is not a list of completed translations, and direction metadata does not implement RTL styling. Domain tests validate the foundation; they do not establish all-route translation or browser switching acceptance.
+
 ## Data and mutations
 
 Use current resource schemas/action links instead of inventing routes or assuming global schemas equal environment-scoped schemas. Re-read the resource, scope and relevant contract before mutation. Preserve unknown configuration and unselected fields; do not silently replace unsupported values with empty defaults.
