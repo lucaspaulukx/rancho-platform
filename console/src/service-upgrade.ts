@@ -1,6 +1,7 @@
 import { supportsUlimits, normalizeUlimits, editableUlimits } from './workload-ulimits';
 import { normalizeDevices, supportsDevices } from './workload-devices';
 import { ptDeviceUpgrade } from './i18n/domains/device-upgrade';
+import { ptServiceUpgradeForm } from './i18n/domains/service-upgrade-form';
 import { validateWorkloadSecurity } from './workload-security';
 import { validateWorkloadResources } from './workload-resources';
 import { cpuFields, cpuResourceDefaults, validatedCpuResources } from './cpu-resources';
@@ -13,6 +14,15 @@ import { validateSidecars } from './workload-sidecars';
 import { validateSchedulingLabels } from './workload-scheduling';
 
 type DeviceUpgradeErrorKey = Extract<keyof typeof ptDeviceUpgrade, `deviceUpgrade.error.${string}`>;
+type ServiceUpgradeErrorKey = Extract<
+  keyof typeof ptServiceUpgradeForm,
+  `serviceUpgradeForm.validation.${string}`
+>;
+export class ServiceUpgradeValidationError extends Error {
+  constructor(readonly key: ServiceUpgradeErrorKey) {
+    super(ptServiceUpgradeForm[key]);
+  }
+}
 export class DeviceUpgradeValidationError extends Error {
   constructor(public readonly key: DeviceUpgradeErrorKey) {
     super(ptDeviceUpgrade[key]);
@@ -40,29 +50,31 @@ function upgradePayload(
   allowSameImage = false,
 ) {
   if (!supportsImageUpgrade(resource, schemas))
-    throw new Error('O contrato de atualização não está disponível.');
+    throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.contract');
   if (
     Array.isArray(resource.secondaryLaunchConfigs) &&
     resource.secondaryLaunchConfigs.length &&
     !schemas.secondaryLaunchConfig
   )
-    throw new Error('O contrato dos sidecars não está disponível.');
+    throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.sidecarContract');
   const image = imageName(values.image).trim();
-  if (!image || /\s/.test(image)) throw new Error('Informe uma imagem válida, sem espaços.');
+  if (!image || /\s/.test(image))
+    throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.image');
   const batch = Number(values.batchSize),
     interval = Number(values.intervalMillis);
   if (String(values.batchSize ?? '').trim() === '' || !Number.isSafeInteger(batch) || batch < 1)
-    throw new Error('O lote deve ser um inteiro de pelo menos 1.');
+    throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.batch');
   if (
     String(values.intervalMillis ?? '').trim() === '' ||
     !Number.isSafeInteger(interval) ||
     interval < 100
   )
-    throw new Error('O intervalo deve ser um inteiro de pelo menos 100 ms.');
-  if (typeof values.startFirst !== 'boolean') throw new Error('Revise a ordem de atualização.');
+    throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.interval');
+  if (typeof values.startFirst !== 'boolean')
+    throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.order');
   const launch = resource.launchConfig as Record<string, unknown>;
   if (!allowSameImage && image === imageName(launch.imageUuid))
-    throw new Error('Escolha uma imagem diferente da atual.');
+    throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.differentImage');
   return preparePayload(
     schemas.serviceUpgrade,
     {
@@ -306,9 +318,10 @@ export function configurationUpgradePayload(
     validateBindings('dataVolumes', values.dataVolumes, launch.dataVolumes ?? []);
   }
   if (values.editHealthCheck === true) {
-    if (values.healthCheck === undefined) throw new Error('Revise a verificação de saúde.');
+    if (values.healthCheck === undefined)
+      throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.health');
     if (!supportsHealthCheckUpgrade(fresh, schemas))
-      throw new Error('Contrato da verificação de saúde indisponível.');
+      throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.healthContract');
     validateHealthCheck(
       values.healthCheck,
       schemas.instanceHealthCheck,
@@ -317,7 +330,7 @@ export function configurationUpgradePayload(
   }
   if (values.editUlimits === true) {
     if (!supportsUlimitUpgrade(fresh, schemas))
-      throw new Error('Contrato de limites de processo indisponível.');
+      throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.ulimitContract');
     normalizeUlimits(values.ulimits);
   }
   if (values.editDevices === true) {
@@ -333,7 +346,7 @@ export function configurationUpgradePayload(
       !Array.isArray(values.capAdd) ||
       !Array.isArray(values.capDrop)
     )
-      throw new Error('Revise o contrato de segurança.');
+      throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.securityContract');
     validateWorkloadSecurity(schemas.launchConfig, securityValues(values), schemas);
   }
   if (values.editResources === true) {
@@ -342,7 +355,7 @@ export function configurationUpgradePayload(
       values.memory === undefined ||
       values.memoryReservation === undefined
     )
-      throw new Error('Informe limite e reserva; use zero para retirar o valor explícito.');
+      throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.memory');
     validateWorkloadResources(
       schemas.launchConfig,
       { memory: values.memory, memoryReservation: values.memoryReservation },
@@ -351,17 +364,19 @@ export function configurationUpgradePayload(
   }
   if (values.editCpuResources === true) {
     if (!supportsCpuResourceUpgrade(fresh, schemas))
-      throw new Error('Contrato de CPU e I/O indisponível.');
+      throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.cpuContract');
     validatedCpuResources(values.cpuResources);
   }
   if (values.editScheduling === true) {
     if (!supportsSchedulingUpgrade(fresh, schemas))
-      throw new Error('Contrato de agendamento indisponível.');
+      throw new ServiceUpgradeValidationError('serviceUpgradeForm.validation.schedulingContract');
     validateSchedulingLabels(values.labels);
   }
   if (values.editSidecars === true) {
     if (!supportsSidecarUpgrade(fresh, schemas) || !Array.isArray(values.secondaryLaunchConfigs))
-      throw new Error('Contrato de atualização dos sidecars indisponível.');
+      throw new ServiceUpgradeValidationError(
+        'serviceUpgradeForm.validation.sidecarUpgradeContract',
+      );
     const next = {
       name: fresh.name,
       launchConfig: {

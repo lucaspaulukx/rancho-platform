@@ -70,6 +70,16 @@ export const enEnvironmentTemplates = {
   'environmentTemplates.error.remove': 'The native remove action is no longer available.',
   'environmentTemplates.error.version': 'The version belongs to another template.',
   'environmentTemplates.error.review': 'Review the stack configuration.',
+  'environmentTemplates.validation.name': 'Enter a template name with up to 255 characters.',
+  'environmentTemplates.validation.description':
+    'The template description must be at most 1024 characters.',
+  'environmentTemplates.validation.stackCount': 'The template can contain up to 100 stacks.',
+  'environmentTemplates.validation.invalidStack': 'A stack in the template is invalid.',
+  'environmentTemplates.validation.duplicateStack':
+    'Stack names must be unique within the template.',
+  'environmentTemplates.validation.stackSource':
+    'Each stack needs a catalog template or Docker Compose.',
+  'environmentTemplates.validation.answers': 'A stack contains invalid answers.',
 } as const;
 export const ptEnvironmentTemplates = {
   'environmentTemplates.title': 'Templates de environment',
@@ -145,4 +155,14 @@ export const ptEnvironmentTemplates = {
   'environmentTemplates.error.remove': 'A acao nativa de remover nao esta mais disponivel.',
   'environmentTemplates.error.version': 'A versao pertence a outro template.',
   'environmentTemplates.error.review': 'Revise a configuracao da stack.',
+  'environmentTemplates.validation.name': 'Informe um nome de template com ate 255 caracteres.',
+  'environmentTemplates.validation.description':
+    'A descricao do template deve ter ate 1024 caracteres.',
+  'environmentTemplates.validation.stackCount': 'O template deve conter no maximo 100 stacks.',
+  'environmentTemplates.validation.invalidStack': 'Uma stack do template e invalida.',
+  'environmentTemplates.validation.duplicateStack':
+    'Os nomes das stacks devem ser unicos no template.',
+  'environmentTemplates.validation.stackSource':
+    'Cada stack precisa de um template do catalogo ou Docker Compose.',
+  'environmentTemplates.validation.answers': 'As respostas de uma stack sao invalidas.',
 } as const satisfies Record<keyof typeof enEnvironmentTemplates, string>;

@@ -2,7 +2,11 @@ import { useI18n } from '../i18n/provider';
 import { useState, type FormEvent } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import type { Schema } from '../api';
-import { prepareStackCompose, type StackComposeDraft } from '../stack-compose';
+import {
+  prepareStackCompose,
+  StackComposeValidationError,
+  type StackComposeDraft,
+} from '../stack-compose';
 import { Alert, Button, CheckboxField, Field } from './ui';
 import { ComposeEditor } from './ComposeEditor';
 
@@ -45,6 +49,15 @@ export function StackComposeForm({
     } catch (caught) {
       setValidation(caught instanceof Error ? caught : 'review');
     }
+  }
+  function describeError(value: Error | null) {
+    if (!(value instanceof StackComposeValidationError)) return value?.message;
+    const [key, parameter] = value.detail;
+    if (key === 'composeValidation.fileTooLarge' || key === 'composeValidation.nullCharacter')
+      return t(key, { label: parameter });
+    if (key === 'composeValidation.duplicateVariable' || key === 'composeValidation.fieldChanged')
+      return t(key, { name: parameter });
+    return t(key);
   }
   return (
     <form id="workspace-create-form" onSubmit={submit}>
@@ -193,7 +206,7 @@ export function StackComposeForm({
           <Alert tone="danger">
             {validation === 'review'
               ? t('composeEditor.review')
-              : validation?.message || error?.message}
+              : describeError(validation) || describeError(error)}
           </Alert>
         )}
       </fieldset>

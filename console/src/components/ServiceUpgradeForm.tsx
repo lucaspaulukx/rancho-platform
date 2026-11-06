@@ -1,6 +1,7 @@
 import { UlimitEditor } from './UlimitEditor';
 import { DeviceEditor } from './DeviceEditor';
 import { DeviceValidationError } from '../workload-devices';
+import { ResourceValidationError } from '../resource-validation';
 import { useI18n } from '../i18n/provider';
 import { editableUlimits } from '../workload-ulimits';
 import { CapabilityEditor } from './CapabilityEditor';
@@ -25,6 +26,7 @@ import {
   supportsUlimitUpgrade,
   supportsDeviceUpgrade,
   DeviceUpgradeValidationError,
+  ServiceUpgradeValidationError,
   securityValues,
 } from '../service-upgrade';
 import { WorkloadBindingsEditor } from './WorkloadBindingsEditor';
@@ -70,9 +72,17 @@ export function ServiceUpgradeForm({
   const [batchSize, setBatch] = useState('1');
   const [intervalMillis, setInterval] = useState('2000');
   const [startFirst, setFirst] = useState(false);
-  const [validation, setValidation] = useState<
-    string | DeviceValidationError | DeviceUpgradeValidationError | null
-  >('');
+  const [validation, setValidation] = useState<Error | 'review' | null>(null);
+  function describeError(value: Error | null) {
+    if (
+      value instanceof DeviceValidationError ||
+      value instanceof DeviceUpgradeValidationError ||
+      value instanceof ServiceUpgradeValidationError ||
+      value instanceof ResourceValidationError
+    )
+      return t(value.key);
+    return value?.message;
+  }
   const launch = resource.launchConfig as Record<string, unknown>;
   const available = bindingsEnabled && supportsConfigurationUpgrade(resource, schemas);
   const [editBindings, setEditBindings] = useState(false);
@@ -143,17 +153,11 @@ export function ServiceUpgradeForm({
     try {
       if (editingConfiguration) configurationUpgradePayload(resource, resource, values, schemas);
       else imageUpgradePayload(resource, values, schemas);
-      setValidation('');
+      setValidation(null);
       if (editingConfiguration) setReview(values);
       else onSubmit(values);
     } catch (caught) {
-      setValidation(
-        caught instanceof DeviceValidationError || caught instanceof DeviceUpgradeValidationError
-          ? caught
-          : caught instanceof Error
-            ? caught.message
-            : null,
-      );
+      setValidation(caught instanceof Error ? caught : 'review');
     }
   }
   return (
@@ -478,18 +482,11 @@ export function ServiceUpgradeForm({
             })}
           </Alert>
           <p className="muted">{t('serviceUpgradeForm.follow')}</p>
-          {(validation !== '' || error) && (
+          {(validation || error) && (
             <Alert tone="danger">
-              {validation instanceof DeviceValidationError ||
-              validation instanceof DeviceUpgradeValidationError
-                ? t(validation.key)
-                : validation === null
-                  ? t('serviceUpgradeForm.review')
-                  : validation ||
-                    (error instanceof DeviceValidationError ||
-                    error instanceof DeviceUpgradeValidationError
-                      ? t(error.key)
-                      : error?.message)}
+              {validation === 'review'
+                ? t('serviceUpgradeForm.review')
+                : describeError(validation || error)}
             </Alert>
           )}
         </fieldset>
