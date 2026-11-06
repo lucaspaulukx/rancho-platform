@@ -5,11 +5,13 @@ import { useApp } from '../state';
 import { Alert, ErrorState, Loading } from './ui';
 import { SchemaForm } from './SchemaForm';
 import { Link } from 'react-router-dom';
-import { navigation } from '../navigation';
+import { localizedNavigation } from '../navigation';
+import { useI18n } from '../i18n/provider';
 
 export function EnvironmentResources({ project }: { project: Resource }) {
+  const { t } = useI18n();
   const app = useApp();
-  const items = navigation.filter(
+  const items = localizedNavigation(t).filter(
     (item) =>
       [
         '/stacks',
@@ -26,9 +28,9 @@ export function EnvironmentResources({ project }: { project: Resource }) {
   );
   return (
     <section className="panel" style={{ marginTop: 24 }}>
-      <h2>Recursos deste environment</h2>
+      <h2>{t('environmentEditor.resources')}</h2>
       <p className="muted">
-        Abra uma área de operação no contexto de {project.name || project.id}.
+        {t('environmentEditor.openContext', { name: project.name || project.id })}
       </p>
       <div className="related-links">
         {items.map((item) => (
@@ -44,7 +46,7 @@ export function EnvironmentResources({ project }: { project: Resource }) {
       </div>
       {app.admin && app.config.modules.groups && (
         <p style={{ marginTop: 20, marginBottom: 0 }}>
-          <Link to="/groups">Gerenciar acesso por grupos</Link>
+          <Link to="/groups">{t('environmentEditor.groups')}</Link>
         </p>
       )}
     </section>
@@ -123,6 +125,7 @@ export function EnvironmentEditor({
   error?: Error | null;
   onDirtyChange: (dirty: boolean) => void;
 }) {
+  const { t } = useI18n();
   const app = useApp();
   const [templateId, setTemplateId] = useState('');
   const templates = useQuery({
@@ -136,7 +139,7 @@ export function EnvironmentEditor({
   });
   const template = templates.data?.find((value) => value.id === templateId);
   if (!original && templates.isPending && templates.fetchStatus !== 'idle')
-    return <Loading label="Carregando templates do Rancher…" />;
+    return <Loading label={t('environmentEditor.loading')} />;
   if (!original && templates.error)
     return <ErrorState error={templates.error} retry={() => void templates.refetch()} />;
   const editorSchema = {
@@ -146,8 +149,7 @@ export function EnvironmentEditor({
       name: { ...schema.resourceFields.name, required: true },
       projectTemplateId: {
         ...schema.resourceFields.projectTemplateId,
-        description:
-          'Selecione um template para provisionar a infraestrutura nativa, ou deixe vazio para não aplicar um template.',
+        description: t('environmentEditor.selectTemplate'),
       },
     },
   };
@@ -173,11 +175,11 @@ export function EnvironmentEditor({
         <section
           className="panel"
           style={{ marginTop: 20 }}
-          aria-label="Infraestrutura do template"
+          aria-label={t('environmentEditor.infrastructure')}
         >
           <h3>{template.name}</h3>
           <p className="muted">
-            {template.description || 'Infraestrutura definida pelo template do Rancher.'}
+            {template.description || t('environmentEditor.defaultDescription')}
           </p>
           <ul>
             {(
@@ -189,17 +191,10 @@ export function EnvironmentEditor({
               </li>
             ))}
           </ul>
-          <Alert tone="info">
-            O Rancher provisionará estas stacks no novo environment. A execução depende dos hosts e
-            dos serviços de infraestrutura disponíveis.
-          </Alert>
+          <Alert tone="info">{t('environmentEditor.provisionNotice')}</Alert>
         </section>
       )}
-      {!original && (
-        <p className="muted">
-          O acesso por grupos pode ser configurado na tela Grupos após a criação.
-        </p>
-      )}
+      {!original && <p className="muted">{t('environmentEditor.accessNotice')}</p>}
     </>
   );
 }

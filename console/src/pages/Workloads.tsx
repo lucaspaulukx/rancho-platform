@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/provider';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -55,6 +56,7 @@ function WorkloadTable({
   rows: Resource[];
   inventory: WorkloadInventory;
 }) {
+  const { t, formats } = useI18n();
   const app = useApp();
   const suffix = `?env=${encodeURIComponent(app.project!.id)}`;
   return (
@@ -63,13 +65,13 @@ function WorkloadTable({
       rowKey={(row) => row.id}
       searchText={(row) => `${row.name || ''} ${row.id} ${imageName(row)} ${row.state || ''}`}
       emptyTitle={
-        kind === 'services' ? 'Nenhum serviço neste contexto' : 'Nenhum container neste contexto'
+        kind === 'services' ? t('workloadsPage.noServices') : t('workloadsPage.noContainers')
       }
-      emptyDescription="Confira o environment e os filtros selecionados."
+      emptyDescription={t('workloadsPage.emptyDescription')}
       columns={[
         {
           key: 'name',
-          label: kind === 'services' ? 'Serviço' : 'Container',
+          label: kind === 'services' ? t('workloadsPage.service') : t('workloadsPage.container'),
           sortValue: (row) => row.name || row.id,
           render: (row) => (
             <Link className="row-title" to={`/${kind}/${row.id}${suffix}`}>
@@ -85,20 +87,22 @@ function WorkloadTable({
         },
         {
           key: 'state',
-          label: 'Estado',
+          label: t('workloadsPage.state'),
           sortValue: (row) => row.state || '',
           render: (row) => (
             <div>
               <Badge state={row.state}>{row.state || '—'}</Badge>
               {typeof row.healthState === 'string' && (
-                <small className="health-label">Saúde: {row.healthState}</small>
+                <small className="health-label">
+                  {t('workloadsPage.health', { state: row.healthState })}
+                </small>
               )}
             </div>
           ),
         },
         {
           key: 'stack',
-          label: 'Stack',
+          label: t('workloadsPage.stack'),
           render: (row) => {
             const stack =
               kind === 'services'
@@ -107,13 +111,13 @@ function WorkloadTable({
             return stack ? (
               <Link to={`/stacks/${stack.id}${suffix}`}>{stack.name || stack.id}</Link>
             ) : (
-              <span className="muted">Sem stack</span>
+              <span className="muted">{t('workloadsPage.noStack')}</span>
             );
           },
         },
         {
           key: 'image',
-          label: 'Imagem',
+          label: t('workloadsPage.image'),
           render: (row) => (
             <span className="resource-image" title={imageName(row)}>
               {imageName(row)}
@@ -124,15 +128,15 @@ function WorkloadTable({
           ? [
               {
                 key: 'scale',
-                label: 'Containers / escala',
+                label: t('workloadsPage.scale'),
                 render: (row: Resource) =>
-                  `${containersForService(row, inventory.containers).length} / ${row.scale ?? '—'}`,
+                  `${formats.number(containersForService(row, inventory.containers).length)} / ${typeof row.scale === 'number' ? formats.number(row.scale) : (row.scale ?? '—')}`,
               },
             ]
           : [
               {
                 key: 'host',
-                label: 'Host',
+                label: t('workloadsPage.host'),
                 render: (row: Resource) =>
                   typeof row.hostId === 'string' && app.config.modules.hosts ? (
                     <Link to={`/hosts/${row.hostId}${suffix}`}>{row.hostId}</Link>
@@ -143,11 +147,11 @@ function WorkloadTable({
             ]),
         {
           key: 'open',
-          label: 'Detalhes',
+          label: t('workloadsPage.details'),
           render: (row) => (
             <Link
               className="button ghost"
-              aria-label={`Abrir ${row.name || row.id}`}
+              aria-label={t('workloadsPage.open', { name: row.name || row.id })}
               to={`/${kind}/${row.id}${suffix}`}
             >
               <ArrowRight size={16} />
@@ -159,6 +163,7 @@ function WorkloadTable({
   );
 }
 export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containers' }) {
+  const { t, locale, formats } = useI18n();
   const app = useApp();
   const query = useWorkloadInventory();
   const [params, setParams] = useSearchParams();
@@ -193,8 +198,8 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
   if (search)
     rows = rows.filter((row) =>
       `${row.name || ''} ${row.description || ''} ${row.id}`
-        .toLocaleLowerCase()
-        .includes(search.toLocaleLowerCase()),
+        .toLocaleLowerCase(locale)
+        .includes(search.toLocaleLowerCase(locale)),
     );
   const states = [...new Set(inventory[kind].map((row) => row.state).filter(Boolean))].sort();
   return (
@@ -203,34 +208,37 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
         <Layers3 size={18} />
         <strong>{app.project!.name}</strong>
         <span className="muted">
-          {inventory.stacks.length} stacks · {inventory.services.length} serviços ·{' '}
-          {inventory.containers.length} containers
+          {t('workloadsPage.inventorySummary', {
+            stacks: inventory.stacks.length,
+            services: inventory.services.length,
+            containers: inventory.containers.length,
+          })}
         </span>
         <Button variant="ghost" onClick={() => void query.refetch()} disabled={query.isFetching}>
-          Atualizar inventário
+          {t('workloadsPage.refresh')}
         </Button>
       </div>
       <div className="workload-filters">
         {kind === 'stacks' ? (
-          <Field label="Buscar stack">
+          <Field label={t('workloadsPage.searchStack')}>
             {(id) => (
               <input
                 id={id}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Nome, descrição ou ID…"
+                placeholder={t('workloadsPage.searchPlaceholder')}
               />
             )}
           </Field>
         ) : (
-          <Field label="Stack">
+          <Field label={t('workloadsPage.stack')}>
             {(id) => (
               <select
                 id={id}
                 value={stackId}
                 onChange={(event) => filter('stack', event.target.value)}
               >
-                <option value="">Todas as stacks</option>
+                <option value="">{t('workloadsPage.allStacks')}</option>
                 {stacks.map((stack) => (
                   <option key={stack.id} value={stack.id}>
                     {stack.name || stack.id}
@@ -240,10 +248,10 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
             )}
           </Field>
         )}
-        <Field label="Estado">
+        <Field label={t('workloadsPage.state')}>
           {(id) => (
             <select id={id} value={state} onChange={(event) => filter('state', event.target.value)}>
-              <option value="">Todos os estados</option>
+              <option value="">{t('workloadsPage.allStates')}</option>
               {states.map((value) => (
                 <option key={value} value={value}>
                   {value}
@@ -258,13 +266,11 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
             checked={includeSystem}
             onChange={(event) => filter('system', event.target.checked ? 'true' : '')}
           />
-          Incluir infraestrutura
+          {t('workloadsPage.includeInfra')}
         </label>
       </div>
       {stackId && !selectedStack ? (
-        <Alert>
-          A stack selecionada não existe neste environment ou não está disponível para sua conta.
-        </Alert>
+        <Alert>{t('workloadsPage.unavailableStack')}</Alert>
       ) : kind === 'stacks' ? (
         <div className="stack-grid">
           {rows.map((stack) => {
@@ -284,28 +290,32 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
                 </h2>
                 <p className="muted">
                   {stack.description ||
-                    (stack.system ? 'Stack de infraestrutura' : 'Stack de aplicação')}
+                    (stack.system ? t('workloadsPage.infraStack') : t('workloadsPage.appStack'))}
                 </p>
                 <div className="stack-metrics">
                   <Link
                     to={`/services?env=${app.project!.id}&stack=${stack.id}${includeSystem ? '&system=true' : ''}`}
                   >
-                    <strong>{children.services.length}</strong> serviços
+                    <strong>{formats.number(children.services.length)}</strong>{' '}
+                    {t('workloadsPage.services')}
                   </Link>
                   <Link
                     to={`/containers?env=${app.project!.id}&stack=${stack.id}${includeSystem ? '&system=true' : ''}`}
                   >
-                    <strong>{children.containers.length}</strong> containers
+                    <strong>{formats.number(children.containers.length)}</strong>{' '}
+                    {t('workloadsPage.containers')}
                   </Link>
                 </div>
                 <div className="stack-card-footer">
                   <span className="muted">
-                    Saúde: {String(stack.healthState || 'não informada')}
+                    {t('workloadsPage.health', {
+                      state: String(stack.healthState || t('workloadsPage.unknownHealth')),
+                    })}
                   </span>
                   <Link
                     className="button ghost"
                     to={`/stacks/${stack.id}?env=${app.project!.id}`}
-                    aria-label={`Abrir stack ${stack.name || stack.id}`}
+                    aria-label={t('workloadsPage.openStack', { name: stack.name || stack.id })}
                   >
                     <ArrowRight size={17} />
                   </Link>
@@ -315,8 +325,8 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
           })}
           {!rows.length && (
             <Empty
-              title="Nenhuma stack neste filtro"
-              description="Confira os filtros ou crie uma stack neste environment."
+              title={t('workloadsPage.noStacks')}
+              description={t('workloadsPage.noStacksDescription')}
             />
           )}
         </div>
@@ -327,6 +337,7 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
   );
 }
 export function WorkloadChildren({ resource }: { resource: Resource }) {
+  const { t } = useI18n();
   const query = useWorkloadInventory();
   const [tab, setTab] = useState(0);
   if (query.isPending) return <Loading />;
@@ -339,18 +350,18 @@ export function WorkloadChildren({ resource }: { resource: Resource }) {
   const kind = isStack && tab === 0 ? 'services' : 'containers';
   return (
     <section className="workload-children">
-      <h2>{isStack ? 'Recursos da stack' : 'Containers do serviço'}</h2>
+      <h2>{isStack ? t('workloadsPage.stackResources') : t('workloadsPage.serviceContainers')}</h2>
       {isStack && (
         <Tabs
           selected={tab}
           onChange={setTab}
           labels={[
-            `Serviços (${contents.services.length})`,
-            `Containers (${contents.containers.length})`,
+            t('workloadsPage.servicesTab', { count: contents.services.length }),
+            t('workloadsPage.containersTab', { count: contents.containers.length }),
           ]}
           idPrefix={`stack-${resource.id}`}
           panelId={`stack-panel-${resource.id}`}
-          label="Recursos da stack"
+          label={t('workloadsPage.stackResources')}
         />
       )}
       <div

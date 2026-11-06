@@ -12,6 +12,14 @@ import {
   type LogLine,
 } from '../streams';
 import { Alert, Button, Modal } from './ui';
+import { useI18n } from '../i18n/provider';
+type StreamErrorKey =
+  | 'resourceStream.scope'
+  | 'resourceStream.invalidFrame'
+  | 'resourceStream.failed'
+  | 'resourceStream.revoked'
+  | 'resourceStream.unavailable'
+  | 'resourceStream.startFailed';
 
 interface Connection {
   url: string;
@@ -34,10 +42,11 @@ export function ResourceStream(props: StreamProps) {
   );
 }
 function StreamSession({ resource, mode, onClose, context }: StreamProps) {
+  const { t, locale } = useI18n();
   const app = useApp();
   const [connected, setConnected] = useState(false);
   const [started, setStarted] = useState(mode === 'logs');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<StreamErrorKey | null>(null);
   const [closed, setClosed] = useState(false);
   const [paused, setPaused] = useState(false);
   const [search, setSearch] = useState('');
@@ -50,7 +59,7 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
   useEffect(() => {
     if (!started || !app.config.modules.observability) return;
     if (!environment || resource.accountId !== environment) {
-      setError('O recurso não pertence ao environment selecionado.');
+      setError('resourceStream.scope');
       setClosed(true);
       return;
     }
@@ -130,12 +139,12 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
               setLines((current) => boundedLogs(current, decodeLogFrame(event.data)));
             else terminal?.write(decodeTerminal(event.data, decoder));
           } catch {
-            setError('Foi recebida uma mensagem de conexão inválida.');
+            setError('resourceStream.invalidFrame');
             socket?.close();
           }
         };
         socket.onerror = () => {
-          if (!disposed) setError('A conexão falhou. Feche este painel e tente novamente.');
+          if (!disposed) setError('resourceStream.failed');
         };
         socket.onclose = (event) => {
           if (heartbeat) clearInterval(heartbeat);
@@ -144,10 +153,7 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
           if (!disposed) {
             setConnected(false);
             setClosed(true);
-            if (event?.code === 1008)
-              setError(
-                'A conexão foi encerrada porque sua sessão ou permissão não está mais disponível.',
-              );
+            if (event?.code === 1008) setError('resourceStream.revoked');
           }
         };
         heartbeat = setInterval(() => {
@@ -163,16 +169,13 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
             })
             .catch(() => {
               if (!disposed) {
-                setError('O recurso não está mais disponível ou seu acesso expirou.');
+                setError('resourceStream.unavailable');
                 socket?.close();
               }
             });
         }, 15_000);
       } catch {
-        if (!disposed)
-          setError(
-            'Não foi possível iniciar a conexão. Verifique o estado do recurso e suas permissões.',
-          );
+        if (!disposed) setError('resourceStream.startFailed');
       }
     }
     void connect();
@@ -207,66 +210,78 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
         if (!open) onClose();
       }}
       drawer
-      title={`${mode === 'logs' ? 'Logs' : 'Console'} · ${resource.name || resource.id}`}
-      description={`Environment: ${app.project?.name || '—'} · ${connected ? 'Conectado' : closed ? 'Conexão encerrada' : started ? 'Conectando…' : 'Aguardando conexão'}`}
+      title={`${t(mode === 'logs' ? 'resourceStream.logs' : 'resourceStream.console')} · ${resource.name || resource.id}`}
+      description={t('resourceStream.description', {
+        name: app.project?.name || '—',
+        status: t(
+          connected
+            ? 'resourceStream.connected'
+            : closed
+              ? 'resourceStream.closed'
+              : started
+                ? 'resourceStream.connecting'
+                : 'resourceStream.waiting',
+        ),
+      })}
       footer={
         <Button onClick={onClose}>
           <X size={16} />
-          Fechar conexão
+          {t('resourceStream.close')}
         </Button>
       }
     >
       {context}
-      {error && <Alert>{error}</Alert>}
+      {error && <Alert>{t(error)}</Alert>}
       {mode === 'execute' ? (
         <>
           {!started && (
             <div style={{ marginBottom: 20 }}>
-              <Alert tone="warning">
-                A console executa comandos dentro do container selecionado com as permissões
-                concedidas pelo Rancher.
-              </Alert>
+              <Alert tone="warning">{t('resourceStream.warning')}</Alert>
               <Button variant="primary" onClick={() => setStarted(true)} style={{ marginTop: 15 }}>
                 <Play size={16} />
-                Conectar ao container
+                {t('resourceStream.connect')}
               </Button>
             </div>
           )}
-          <div ref={terminalHost} className="terminal-host" aria-label="Terminal do container" />
+          <div
+            ref={terminalHost}
+            className="terminal-host"
+            aria-label={t('resourceStream.terminal')}
+          />
         </>
       ) : (
         <>
           <div className="stream-toolbar">
             <input
-              aria-label="Filtrar logs"
-              placeholder="Filtrar linhas recebidas…"
+              aria-label={t('resourceStream.filter')}
+              placeholder={t('resourceStream.filterPlaceholder')}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
             <Button onClick={() => setPaused(!paused)}>
               {paused ? <Play size={16} /> : <Pause size={16} />}
-              {paused ? 'Retomar rolagem' : 'Pausar rolagem'}
+              {t(paused ? 'resourceStream.resume' : 'resourceStream.pause')}
             </Button>
             <Button onClick={download} disabled={!lines.length}>
               <Download size={16} />
-              Baixar
+              {t('resourceStream.download')}
             </Button>
           </div>
           <p className="muted" style={{ fontSize: 11 }}>
-            Buffer limitado às últimas 2.000 linhas e 512 KB. A busca e o download usam somente o
-            conteúdo recebido neste painel.
+            {t('resourceStream.buffer')}
           </p>
           <div
             ref={body}
             className="log-viewer"
             role="log"
             aria-live={paused ? 'off' : 'polite'}
-            aria-label="Logs do container"
+            aria-label={t('resourceStream.logLabel')}
           >
             {lines
               .filter(
                 (line) =>
-                  !search || line.text.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
+                  !search ||
+                  line.text.toLocaleLowerCase(locale).includes(search.toLocaleLowerCase(locale)),
               )
               .map((line, index) => (
                 <div className={line.channel === 'stderr' ? 'stderr' : ''} key={index}>

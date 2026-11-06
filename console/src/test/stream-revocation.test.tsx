@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { ResourceMetrics } from '../components/ResourceMetrics';
 import { ResourceStream } from '../components/ResourceStream';
 import type { Resource } from '../api';
+import { I18nProvider, useI18n } from '../i18n/provider';
 const context = vi.hoisted(() => ({
   server: { effective: { METRICS_PAYLOAD_TRANSPORT_ENABLED: false } },
   identity: 'fixture',
@@ -99,6 +100,49 @@ afterEach(() => {
   context.server.effective.METRICS_PAYLOAD_TRANSPORT_ENABLED = false;
 });
 describe('Revogação de conexões já abertas', () => {
+  it('preserva a conexão de logs e o filtro ao trocar de idioma', async () => {
+    const fetcher = setup();
+    function Viewer() {
+      const { setLocale } = useI18n();
+      return (
+        <ResourceStream
+          resource={resource}
+          mode="logs"
+          onClose={vi.fn()}
+          context={<button onClick={() => setLocale('en-US')}>English</button>}
+        />
+      );
+    }
+    const view = render(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: true,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <Viewer />
+      </I18nProvider>,
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(Socket.instances).toHaveLength(1));
+    const socket = Socket.instances[0];
+    const filter = screen.getByRole('textbox', { name: 'Filtrar logs' });
+    fireEvent.change(filter, { target: { value: 'fixture' } });
+    fetcher.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'English' }));
+    expect(screen.getByRole('textbox', { name: 'Filter logs' })).toBe(filter);
+    expect(filter).toHaveValue('fixture');
+    expect(Socket.instances).toEqual([socket]);
+    expect(socket.close).not.toHaveBeenCalled();
+    expect(fetcher).not.toHaveBeenCalled();
+    view.unmount();
+  });
   it.each(['logs', 'execute', 'metrics'] as const)(
     'encerra %s ao desativar observabilidade sem novas requisições',
     async (mode) => {
