@@ -41,6 +41,13 @@ import { enNetworkPoliciesPage, ptNetworkPoliciesPage } from './domains/network-
 import { enResourcesPage, ptResourcesPage } from './domains/resources-page';
 import { enServiceUpgradeForm, ptServiceUpgradeForm } from './domains/service-upgrade-form';
 import { enResourceMetrics, ptResourceMetrics } from './domains/resource-metrics';
+import { enSelectorRows, ptSelectorRows } from './domains/selector-rows';
+import { enRegistryCredentials, ptRegistryCredentials } from './domains/registry-credentials';
+import { enBalancerRulesPanel, ptBalancerRulesPanel } from './domains/balancer-rules-panel';
+import {
+  enStackComposeUpgradePanel,
+  ptStackComposeUpgradePanel,
+} from './domains/stack-compose-upgrade-panel';
 import { enResourcePanel, ptResourcePanel } from './domains/resource-panel';
 import { enResourceStream, ptResourceStream } from './domains/resource-stream';
 
@@ -88,6 +95,10 @@ export const englishMessages = {
   ...enResourcesPage,
   ...enServiceUpgradeForm,
   ...enResourceMetrics,
+  ...enSelectorRows,
+  ...enRegistryCredentials,
+  ...enBalancerRulesPanel,
+  ...enStackComposeUpgradePanel,
   ...enResourcePanel,
   ...enResourceStream,
   'common.cancel': 'Cancel',
@@ -166,6 +177,10 @@ export const portugueseMessages = {
   ...ptResourcesPage,
   ...ptServiceUpgradeForm,
   ...ptResourceMetrics,
+  ...ptSelectorRows,
+  ...ptRegistryCredentials,
+  ...ptBalancerRulesPanel,
+  ...ptStackComposeUpgradePanel,
   ...ptResourcePanel,
   ...ptResourceStream,
   'common.cancel': 'Cancelar',

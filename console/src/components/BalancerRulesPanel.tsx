@@ -4,6 +4,7 @@ import { useBlocker } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react';
 import { allPages, api, type Resource, type Schema } from '../api';
+import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import { useActionScope } from '../hooks/useActionScope';
 import {
@@ -24,6 +25,17 @@ import {
   Modal,
   useToast,
 } from './ui';
+
+type BalancerErrorKey =
+  | 'balancerRulesPanel.reopen'
+  | 'balancerRulesPanel.confirmPorts'
+  | 'balancerRulesPanel.disabled'
+  | 'balancerRulesPanel.reviewRules';
+class BalancerPanelError extends Error {
+  constructor(readonly key: BalancerErrorKey) {
+    super(key);
+  }
+}
 
 const metadata = (v: Resource): Resource =>
   Object.fromEntries(
@@ -49,6 +61,9 @@ export default function BalancerRulesPanel({
   onClose: () => void;
   onSaved: (value: Resource) => void;
 }) {
+  const { t } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof BalancerPanelError ? t(error.key) : error.message;
   const app = useApp(),
     scope = useActionScope(),
     client = useQueryClient(),
@@ -65,7 +80,7 @@ export default function BalancerRulesPanel({
   const [review, setReview] = useState(false),
     [discard, setDiscard] = useState(false),
     [published, setPublished] = useState(false);
-  const [validation, setValidation] = useState(''),
+  const [validation, setValidation] = useState<Error | null>(null),
     [nextId, setNextId] = useState(1000);
   async function load(signal: AbortSignal) {
     const base = `projects/${scope.environment}/`;
@@ -108,7 +123,7 @@ export default function BalancerRulesPanel({
   try {
     if (data) original = editableBalancerRules(data.source);
   } catch (e) {
-    unsupported = e instanceof Error ? e.message : 'Configuração não suportada.';
+    unsupported = e instanceof Error ? e.message : t('balancerRulesPanel.unsupported');
   }
   const rows = draft || original;
   const allowed =
@@ -138,19 +153,21 @@ export default function BalancerRulesPanel({
   function display(id: string) {
     const s = data?.services.find((v) => v.id === id),
       stack = data?.stacks.find((v) => v.id === s?.stackId);
-    return s ? `${stack?.name || s.stackId} / ${s.name || s.id}` : `Destino indisponível (${id})`;
+    return s
+      ? `${stack?.name || s.stackId} / ${s.name || s.id}`
+      : t('balancerRulesPanel.unavailableTarget', { id });
   }
   function change(value: BalancerRuleDraft[]) {
     setDraft(value);
     setPublished(false);
     setReview(false);
-    setValidation('');
+    setValidation(null);
   }
   function update(key: number, patch: Partial<BalancerRuleDraft>) {
     change(rows.map((v) => (v.key === key ? { ...v, ...patch } : v)));
   }
   function validate() {
-    if (!data || !draft || !allowed) throw new Error('Reabra o editor do balanceador.');
+    if (!data || !draft || !allowed) throw new BalancerPanelError('balancerRulesPanel.reopen');
     const payload = prepareBalancerRules(
       data.source,
       draft,
@@ -160,7 +177,7 @@ export default function BalancerRulesPanel({
       scope.environment!,
     );
     if (draft.some((v) => v.access === 'public') && !published)
-      throw new Error('Confirme o impacto das portas publicadas.');
+      throw new BalancerPanelError('balancerRulesPanel.confirmPorts');
     return payload;
   }
   const mutation = useMutation({
@@ -168,7 +185,7 @@ export default function BalancerRulesPanel({
     mutationFn: async () => {
       validate();
       if (!data || !draft || !app.config.modules.balancerRulesEditor)
-        throw new Error('Editor desativado.');
+        throw new BalancerPanelError('balancerRulesPanel.disabled');
       const signal = scope.signal(),
         fresh = await load(signal);
       scope.assertCurrent();
@@ -192,7 +209,7 @@ export default function BalancerRulesPanel({
       await client.invalidateQueries({
         queryKey: ['data', app.identity, 'project', app.project?.id],
       });
-      toast('Regras enviadas ao Rancher. Acompanhe o estado do balanceador.');
+      toast(t('balancerRulesPanel.sent'));
       onSaved(value);
     },
   });
@@ -207,10 +224,12 @@ export default function BalancerRulesPanel({
   function requestReview() {
     try {
       validate();
-      setValidation('');
+      setValidation(null);
       setReview(true);
     } catch (e) {
-      setValidation(e instanceof Error ? e.message : 'Revise as regras.');
+      setValidation(
+        e instanceof Error ? e : new BalancerPanelError('balancerRulesPanel.reviewRules'),
+      );
     }
   }
   const summary = (entries: BalancerRuleDraft[]) => (
@@ -218,7 +237,9 @@ export default function BalancerRulesPanel({
       {entries.map((v) => (
         <li key={v.key}>
           {v.protocol.toUpperCase()} :{v.sourcePort} → {display(v.serviceId)} :{v.targetPort} ·{' '}
-          {v.access === 'public' ? 'Publicado' : 'Interno'}
+          {v.access === 'public'
+            ? t('balancerRulesPanel.published')
+            : t('balancerRulesPanel.internal')}
           {v.hostname ? ` · ${v.hostname}` : ''}
           {v.path ? ` · ${v.path}` : ''}
         </li>
@@ -230,22 +251,22 @@ export default function BalancerRulesPanel({
       <Modal
         open
         drawer
-        title={`Balanceador · ${resource.name || resource.id}`}
-        description={`Environment: ${app.project?.name}`}
+        title={t('balancerRulesPanel.title', { name: resource.name || resource.id })}
+        description={t('balancerRulesPanel.environment', { name: app.project?.name || '' })}
         onOpenChange={(open) => {
           if (!open) close();
         }}
         footer={
           <>
             <Button onClick={close} disabled={mutation.isPending}>
-              Fechar
+              {t('balancerRulesPanel.close')}
             </Button>
             <Button
               variant="primary"
               disabled={!allowed || !dirty || mutation.isPending}
               onClick={requestReview}
             >
-              Revisar alterações
+              {t('balancerRulesPanel.review')}
             </Button>
           </>
         }
@@ -256,25 +277,18 @@ export default function BalancerRulesPanel({
           <Loading />
         ) : (
           <>
-            <Alert tone="info">
-              Organize as rotas e os destinos deste balanceador. Portas publicadas ficam acessíveis
-              pela rede dos hosts. A alteração pode interromper conexões; o serviço não será
-              iniciado automaticamente.
-            </Alert>
+            <Alert tone="info">{t('balancerRulesPanel.info')}</Alert>
             {unsupported ? (
               <Alert tone="warning">
-                {unsupported} A configuração existente foi mantida. Feche este painel e escolha
-                Editar configuração para usar o formulário nativo.
+                {t('balancerRulesPanel.preservation', { reason: unsupported })}
               </Alert>
             ) : !allowed ? (
-              <Alert tone="warning">
-                Sua conta ou o estado atual não permite alterar estas regras.
-              </Alert>
+              <Alert tone="warning">{t('balancerRulesPanel.denied')}</Alert>
             ) : null}
             {unsupported && (
-              <section className="compose-editor" aria-label="Regras preservadas">
-                <h3>Regras preservadas</h3>
-                <p className="muted">Nenhuma regra ou porta será convertida por este editor.</p>
+              <section className="compose-editor" aria-label={t('balancerRulesPanel.preserved')}>
+                <h3>{t('balancerRulesPanel.preserved')}</h3>
+                <p className="muted">{t('balancerRulesPanel.noConversion')}</p>
                 <ul>
                   {Array.isArray((data.source.lbConfig as Record<string, unknown>)?.portRules) &&
                     (
@@ -284,11 +298,11 @@ export default function BalancerRulesPanel({
                       >[]
                     ).map((rule, index) => (
                       <li key={index}>
-                        {String(rule.protocol || 'Nativo').toUpperCase()} :
+                        {String(rule.protocol || t('balancerRulesPanel.native')).toUpperCase()} :
                         {String(rule.sourcePort || '—')} →{' '}
                         {rule.serviceId
                           ? display(String(rule.serviceId))
-                          : 'Destino por configuração avançada'}
+                          : t('balancerRulesPanel.advanced')}
                         {rule.targetPort ? ` :${String(rule.targetPort)}` : ''}
                       </li>
                     ))}
@@ -299,16 +313,16 @@ export default function BalancerRulesPanel({
               {rows.map((row, index) => (
                 <section className="compose-editor" key={row.key}>
                   <div className="compose-editor-heading">
-                    <strong>Regra {index + 1}</strong>
+                    <strong>{t('balancerRulesPanel.rule', { index: index + 1 })}</strong>
                     <Button
-                      aria-label={`Remover regra ${index + 1}`}
+                      aria-label={t('balancerRulesPanel.remove', { index: index + 1 })}
                       onClick={() => change(rows.filter((v) => v.key !== row.key))}
                     >
                       <Trash2 size={16} />
                     </Button>
                   </div>
                   <div className="form-grid">
-                    <Field label={`Protocolo ${index + 1}`}>
+                    <Field label={t('balancerRulesPanel.protocol', { index: index + 1 })}>
                       {(id) => (
                         <select
                           id={id}
@@ -326,7 +340,7 @@ export default function BalancerRulesPanel({
                         </select>
                       )}
                     </Field>
-                    <Field label={`Acesso ${index + 1}`}>
+                    <Field label={t('balancerRulesPanel.access', { index: index + 1 })}>
                       {(id) => (
                         <select
                           id={id}
@@ -335,12 +349,12 @@ export default function BalancerRulesPanel({
                             update(row.key, { access: e.target.value as 'internal' | 'public' })
                           }
                         >
-                          <option value="internal">Interno</option>
-                          <option value="public">Publicado nos hosts</option>
+                          <option value="internal">{t('balancerRulesPanel.internal')}</option>
+                          <option value="public">{t('balancerRulesPanel.hostPublished')}</option>
                         </select>
                       )}
                     </Field>
-                    <Field label={`Porta de entrada ${index + 1}`}>
+                    <Field label={t('balancerRulesPanel.sourcePort', { index: index + 1 })}>
                       {(id) => (
                         <input
                           id={id}
@@ -350,7 +364,7 @@ export default function BalancerRulesPanel({
                         />
                       )}
                     </Field>
-                    <Field label={`Porta de destino ${index + 1}`}>
+                    <Field label={t('balancerRulesPanel.targetPort', { index: index + 1 })}>
                       {(id) => (
                         <input
                           id={id}
@@ -362,16 +376,18 @@ export default function BalancerRulesPanel({
                     </Field>
                   </div>
                   {row.sourceIp && (
-                    <p className="muted">IP de publicação preservado: {row.sourceIp}</p>
+                    <p className="muted">
+                      {t('balancerRulesPanel.sourceIp', { ip: row.sourceIp })}
+                    </p>
                   )}
-                  <Field label={`Serviço de destino ${index + 1}`}>
+                  <Field label={t('balancerRulesPanel.target', { index: index + 1 })}>
                     {(id) => (
                       <select
                         id={id}
                         value={row.serviceId}
                         onChange={(e) => update(row.key, { serviceId: e.target.value })}
                       >
-                        <option value="">Selecionar serviço…</option>
+                        <option value="">{t('balancerRulesPanel.select')}</option>
                         {targets.map((v) => (
                           <option key={v.id} value={v.id}>
                             {display(v.id)}
@@ -386,8 +402,8 @@ export default function BalancerRulesPanel({
                   {row.protocol === 'http' && (
                     <div className="form-grid">
                       <Field
-                        label={`Hostname ${index + 1}`}
-                        hint="Opcional. Vazio aceita qualquer hostname."
+                        label={t('balancerRulesPanel.hostname', { index: index + 1 })}
+                        hint={t('balancerRulesPanel.hostnameHint')}
                       >
                         {(id) => (
                           <input
@@ -399,7 +415,10 @@ export default function BalancerRulesPanel({
                           />
                         )}
                       </Field>
-                      <Field label={`Caminho ${index + 1}`} hint="Opcional. Exemplo: /api">
+                      <Field
+                        label={t('balancerRulesPanel.path', { index: index + 1 })}
+                        hint={t('balancerRulesPanel.pathHint')}
+                      >
                         {(id) => (
                           <input
                             id={id}
@@ -435,18 +454,24 @@ export default function BalancerRulesPanel({
                 }}
               >
                 <Plus size={16} />
-                Adicionar regra
+                {t('balancerRulesPanel.add')}
               </Button>
               {!!draft?.some((v) => v.access === 'public') && (
                 <CheckboxField
-                  label="Revisei as portas publicadas e o impacto na conectividade"
+                  label={t('balancerRulesPanel.acknowledge')}
                   checked={published}
                   onChange={(e) => setPublished(e.target.checked)}
                 />
               )}
             </fieldset>
             {(validation || mutation.error) && (
-              <Alert>{validation || mutation.error?.message}</Alert>
+              <Alert>
+                {validation
+                  ? errorText(validation)
+                  : mutation.error
+                    ? errorText(mutation.error)
+                    : ''}
+              </Alert>
             )}
           </>
         )}
@@ -454,21 +479,24 @@ export default function BalancerRulesPanel({
       <Confirm
         open={review}
         onOpenChange={setReview}
-        title="Aplicar regras do balanceador?"
-        description={`As regras de ${resource.name || resource.id} serão atualizadas somente em ${app.project?.name}. Conexões podem ser afetadas.`}
+        title={t('balancerRulesPanel.apply')}
+        description={t('balancerRulesPanel.applyDescription', {
+          name: resource.name || resource.id,
+          environment: app.project?.name || '',
+        })}
         busy={mutation.isPending}
         onConfirm={() => mutation.mutate()}
       >
-        <h3>Antes · {original.length} regra(s)</h3>
+        <h3>{t('balancerRulesPanel.before', { count: original.length })}</h3>
         {summary(original)}
-        <h3>Depois · {rows.length} regra(s)</h3>
+        <h3>{t('balancerRulesPanel.after', { count: rows.length })}</h3>
         {summary(rows)}
       </Confirm>
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar regras não salvas?"
-        description="A configuração do Rancher não será alterada."
+        title={t('balancerRulesPanel.discard')}
+        description={t('balancerRulesPanel.discardDescription')}
         onConfirm={onClose}
       />
       <Confirm
@@ -476,8 +504,8 @@ export default function BalancerRulesPanel({
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Mudar de contexto?"
-        description="Há regras não salvas. Aguarde qualquer envio pendente."
+        title={t('balancerRulesPanel.context')}
+        description={t('balancerRulesPanel.contextDescription')}
         busy={mutation.isPending}
         onConfirm={() => {
           if (!mutation.isPending && blocker.state === 'blocked') blocker.proceed();
