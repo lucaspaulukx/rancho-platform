@@ -33,9 +33,11 @@ O destino precisa ser novo. Revise o diff antes de selecioná-lo para deploy. A 
 
 Use `moduleNames` e os rótulos de Sobre como inventário exato. Cada função verifica dependências e entradas de rota/ação. Alterar módulo visual não muda permissões nativas, grants existentes ou workloads armazenados.
 
-## Editor de dispositivos na criação
+## Dispositivos na criação e no upgrade de serviços
 
-`modules.workloadDeviceEditors` habilita de forma independente um editor comum de dispositivos na criação de container avulso, launch config principal do serviço e sidecars. O default off mantém o formulário nativo genérico de lista de strings. Não habilita edição por PUT de container avulso ou upgrade de serviço nem altera workloads existentes. O schema atual do escopo ainda precisa oferecer `devices: array[string]` com create habilitado; o contrato é relido antes do POST.
+`modules.workloadDeviceEditors` habilita um editor comum de dispositivos na criação de container avulso, launch config principal do serviço e sidecars. O default off mantém o formulário nativo genérico de lista de strings. O schema atual do escopo ainda precisa oferecer `devices: array[string]` com create habilitado. O contrato é relido antes do POST.
+
+`modules.workloadDeviceUpgrades` é uma flag independente e fica desligada quando ausente. Com `modules.workloadUpgrades` habilitada, ela oferece seleção explícita e confirmação para dispositivos na configuração principal de um serviço nativo. Uma lista vazia remove os mapeamentos explícitos. O console relê o serviço e os schemas de upgrade e verifica alterações na configuração principal e nos sidecars antes do envio. O Rancher aplica as mudanças recriando containers, com as ações nativas de reversão e conclusão. PUT de container avulso e edição estruturada de dispositivos de sidecars durante upgrade ficam fora do escopo deste editor.
 
 Cada novo mapeamento informa caminho absoluto no host, caminho absoluto no container e permissões r/w/m distintas. O editor local permite até32 mapeamentos, recusa linhas incompletas/caracteres de controle/destinos duplicados e preserva strings aceitas exatamente até edição explícita. Strings legadas opacas continuam visíveis no rascunho e não são reescritas silenciosamente; enviar formatos incompatíveis exige retornar ao formulário nativo com o editor desligado. O frontend não comprova que um caminho existe ou é dispositivo permitido no host; autorização nativa e Docker continuam decidindo.
 
