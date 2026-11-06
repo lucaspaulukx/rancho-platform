@@ -82,7 +82,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 | OPS07 | Sidecar create/upgrade/removal | Shared network/volume and one-host upgrade slices validated; data migration, variants and native stability remain |
 | OPS08 | Creation/upgrade affinities | Host-label slice validated; container/global/multi-host and remaining physical upgrades remain |
 | OPS09 | Memory/reservation | Creation/upgrade/rollback slices validated; remaining resource/OOM matrix remains |
-| OPS10 | Capabilities/readOnly/privileged/security options | Capability/readOnly reset/finish slices validated; devices/securityOpt/ulimits boundaries and privilege variants remain |
+| OPS10 | Capabilities/readOnly/privileged/security options | Capability/readOnly reset/finish and optional shared device-creation editor validated; one-host standalone device mapping/read/native-default write behavior accepted; device upgrades, physical sidecars/multi-host, securityOpt and privilege variants remain |
 | OPS11 | CPU/IO/process limits | One-host CPU/IO and nofile create/upgrade/rollback/reset validated, including independent sidecar creation; other limits/load/compatibility remain |
 | OPS12 | Standalone container editing/recreation | Partial; mutable/immutable fields and native recreation contract remain |
 | OPS13 | Details/graph/code/statistics by type | Partial; per-replica service metrics implemented, complete type/field/action inventory remains |

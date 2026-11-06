@@ -63,6 +63,7 @@ const moduleLabels: Record<ModuleName, string> = {
   serviceMetrics: 'Métricas de containers no contexto do serviço',
   workloadUlimitEditors: 'Editor de limites de processo na criação',
   workloadUlimitUpgrades: 'Limites de processo no upgrade de serviço',
+  workloadDeviceEditors: 'Editor de dispositivos na criação',
   admin: 'Administração geral',
   api: 'Integrações adicionais',
   apiKeys: 'Chaves de API',

@@ -56,4 +56,6 @@ O helper de transporte do scheduler é diagnóstico limitado para a rede gerenci
 
 ## Evidências e escopo
 
+`physical_devices.py` exercita separadamente o editor default off pela criação real de container avulso, verificando mapeamento nativo/Docker exato, modo não privilegiado, leitura de dispositivo char e resultado real de abertura para escrita. Confere negação ao membro revogado e limpeza exata. A fixture /dev/null não certifica isolamento de escrita pelas permissões padrão nativas; upgrades de serviços, sidecars físicos e outros dispositivos/runtimes exigem aceites separados.
+
 Separe unitário/componente, build limpo, renderização browser, comportamento nativo real e CI remoto. Registre identidade do artefato, flags, escopo, controles, resultados medidos e cleanup; publique somente resumos sanitizados. Teste `nofile` em um host não valida todos os limites ou multi-host. Probe curto de WebSocket não prova estabilidade do scheduler/soak. Restore offline de DB não prova recuperação de engine/IdP/workloads. Aceites restantes ficam no [roadmap](roadmap.md).

@@ -9,7 +9,7 @@
 
 The distribution reads `console/public/console-config.json`; `console/src/config.ts` defines its validated contract. Keep an existing complete configuration as the starting point, not a partial example pasted over it. Unknown keys, invalid booleans and invalid theme overrides are rejected.
 
-`schemaVersion: 1` versions the configuration. Legacy input is converted in memory without rewriting its source. Existing version1 modules are explicit; the additive `metricsPayloadTransport`, `serviceMetrics`, `workloadUlimitEditors` and `workloadUlimitUpgrades` flags default to false when absent. New flags must preserve that compatibility behavior.
+`schemaVersion: 1` versions the configuration. Legacy input is converted in memory without rewriting its source. Existing version1 modules are explicit; the additive `metricsPayloadTransport`, `serviceMetrics`, `workloadUlimitEditors`, `workloadUlimitUpgrades` and `workloadDeviceEditors` flags default to false when absent. New flags must preserve that compatibility behavior.
 
 From `console/`, validate or create a separate migrated file:
 
@@ -32,6 +32,14 @@ The destination must be new. Review the diff before selecting it for deployment.
 | Other `modules` entries | Environment, catalog, storage, network, administration and integration surfaces |
 
 Use `moduleNames` and the shared About labels as the exact inventory. Every feature checks its own dependencies and route/action entrypoints. Changing a UI module never changes native permissions, existing grants or stored workloads.
+
+## Device creation editor
+
+`modules.workloadDeviceEditors` independently enables a shared device-mapping editor in standalone container, primary service launch config and sidecar creation. It defaults off, retaining the generic native string-array form. It does not enable device editing through standalone PUT or service upgrades, and does not change existing workloads. The current scoped schema must still offer create-enabled `devices: array[string]`; the contract is reread before POST.
+
+Each new mapping explicitly supplies an absolute host path, absolute container path and distinct r/w/m permissions. The local editor allows at most32 mappings, rejects incomplete rows/control characters/duplicate target paths, and preserves accepted mapping strings exactly until an explicit edit. Opaque legacy strings remain visible in the draft and are not silently rewritten; submitting unsupported formats requires returning to the native form with this editor off. The frontend does not prove a path exists or is an allowed device on a host; native authorization and Docker still decide.
+
+Requested mapping permissions do not replace the runtime's default device allowlist. In Docker19.03.15, [Moby's defaults](https://github.com/moby/moby/blob/v19.03.15/oci/defaults.go) include /dev/null rwm, and the [device setup](https://github.com/moby/moby/blob/v19.03.15/daemon/oci_linux.go) adds requested rules. A /dev/null mapping with r can persist correctly while write-open remains allowed. Do not claim effective write denial from HostConfig or the UI alone. Test the actual process behavior on the intended runtime before relying on a restriction.
 
 ## Interface language policy
 

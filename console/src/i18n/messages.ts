@@ -3,6 +3,7 @@ import { enAuth, ptAuth } from './domains/auth';
 import { enUi, ptUi } from './domains/ui';
 import { enShell, ptShell } from './domains/shell';
 import { enRecovery, ptRecovery } from './domains/recovery';
+import { enDevices, ptDevices } from './domains/devices';
 
 // Initial shared domain only. These catalogs do not represent full interface coverage.
 export const englishMessages = {
@@ -10,6 +11,7 @@ export const englishMessages = {
   ...enUi,
   ...enShell,
   ...enRecovery,
+  ...enDevices,
   'common.cancel': 'Cancel',
   'common.close': 'Close',
   'common.save': 'Save',
@@ -48,6 +50,7 @@ export const portugueseMessages = {
   ...ptUi,
   ...ptShell,
   ...ptRecovery,
+  ...ptDevices,
   'common.cancel': 'Cancelar',
   'common.close': 'Fechar',
   'common.save': 'Salvar',

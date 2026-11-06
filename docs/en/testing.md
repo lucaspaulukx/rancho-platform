@@ -56,4 +56,6 @@ The scheduler transport helper is a bounded diagnostic for the legacy managed-ne
 
 ## Evidence and scope
 
+`physical_devices.py` separately exercises the default-off editor through real standalone creation, then verifies exact native/Docker mapping, nonprivileged mode, character-device read and the actual write-open outcome. It verifies revoked-member denial and exact cleanup. The /dev/null fixture does not certify write isolation because of native default allowlists; service upgrades, physical sidecars and other devices/runtimes need separate acceptance.
+
 Distinguish unit/component, clean build, browser rendering, real native behavior and remote CI. Record artifact identity, flags, scope, controls, measured results and cleanup; publish only sanitized summaries. A one-host `nofile` test does not validate all limits or multi-host operation. A short WebSocket probe does not prove scheduler stability or soak. An offline DB restore does not prove engine/IdP/workload recovery. Remaining acceptance belongs in the [roadmap](roadmap.md).
