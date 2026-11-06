@@ -10,10 +10,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "config:migrate": "node scripts/migrate-config.mjs",
+    "check:locales": "node scripts/check-locales.mjs",
     "prebuild": "node scripts/themes.mjs",
     "predev": "node scripts/themes.mjs",
-    "format": "prettier --write src public/console-config.json *.ts *.json index.html scripts",
-    "format:check": "prettier --check src public/console-config.json *.ts *.json index.html scripts"
+    "format": "prettier --write src public/console-config.json *.ts package*.json tsconfig.json index.html scripts",
+    "format:check": "prettier --check src public/console-config.json *.ts package*.json tsconfig.json index.html scripts"
   },
   "dependencies": {
     "@dagrejs/dagre": "3.1.1",

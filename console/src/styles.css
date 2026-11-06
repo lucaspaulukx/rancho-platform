@@ -2963,6 +2963,67 @@ input[type='checkbox']:focus-visible {
 }
 
 /* Theme tokens change atomically; hover transitions resume after the new palette is painted. */
+.language-selector {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+.language-selector label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.language-selector select {
+  inline-size: auto;
+  max-inline-size: 180px;
+  min-block-size: 34px;
+}
+.language-selector > .muted {
+  flex-basis: 100%;
+  font-size: 11px;
+}
+.auth-panel-top:has(.language-selector) {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.auth-panel-top .language-selector {
+  flex-basis: 100%;
+  order: 3;
+}
+.navbar:has(.language-selector) {
+  block-size: auto;
+  min-block-size: 68px;
+  padding-block: 8px;
+}
+.navbar:has(.language-selector) .navbar-actions {
+  min-inline-size: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+@media (max-width: 767px) {
+  .navbar:has(.language-selector) {
+    align-items: flex-start;
+  }
+  .navbar:has(.language-selector) .navbar-actions {
+    flex: 1;
+  }
+  .navbar .language-selector {
+    flex-basis: 100%;
+    order: 5;
+    justify-content: flex-end;
+  }
+  .navbar .language-selector select {
+    max-inline-size: 160px;
+  }
+  .navbar .language-selector > .muted {
+    text-align: end;
+  }
+}
+
 :root[data-theme-switching='true'] *,
 :root[data-theme-switching='true'] *::before,
 :root[data-theme-switching='true'] *::after {

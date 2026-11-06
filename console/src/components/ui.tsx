@@ -1,4 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog';
+import { useI18n } from '../i18n/provider';
 import {
   AlertCircle,
   CheckCircle2,
@@ -110,11 +111,12 @@ export function Alert({
     </div>
   );
 }
-export function Loading({ label = 'Carregando dados…' }: { label?: string }) {
+export function Loading({ label }: { label?: string }) {
+  const { t } = useI18n();
   return (
     <div className="loading" role="status">
       <LoaderCircle className="spin" size={24} />
-      <span>{label}</span>
+      <span>{label ?? t('ui.loading')}</span>
     </div>
   );
 }
@@ -139,12 +141,11 @@ export function Empty({
   );
 }
 export function ErrorState({ error, retry }: { error: unknown; retry?: () => void }) {
+  const { t } = useI18n();
   return (
     <div className="error-state">
-      <Alert>
-        {error instanceof Error ? error.message : 'Não foi possível carregar os dados.'}
-      </Alert>
-      {retry && <Button onClick={retry}>Tentar novamente</Button>}
+      <Alert>{error instanceof Error ? error.message : t('ui.loadFailed')}</Alert>
+      {retry && <Button onClick={retry}>{t('ui.retry')}</Button>}
     </div>
   );
 }
@@ -202,6 +203,7 @@ export function Modal({
   footer?: ReactNode;
   drawer?: boolean;
 }) {
+  const { t } = useI18n();
   const content = useRef<HTMLDivElement>(null);
   const restoreFocus = useRef<HTMLElement | null>(null);
   return (
@@ -239,7 +241,7 @@ export function Modal({
               {description && <Dialog.Description>{description}</Dialog.Description>}
             </div>
             <Dialog.Close asChild>
-              <Button variant="ghost" aria-label="Fechar diálogo">
+              <Button variant="ghost" aria-label={t('ui.closeDialog')}>
                 <X size={20} />
               </Button>
             </Dialog.Close>
@@ -338,6 +340,7 @@ export function Confirm({
   busy?: boolean;
   children?: ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <Modal
       open={open}
@@ -347,10 +350,10 @@ export function Confirm({
       footer={
         <>
           <Button onClick={() => onOpenChange(false)} disabled={busy}>
-            Cancelar
+            {t('ui.cancel')}
           </Button>
           <Button variant="danger" onClick={onConfirm} busy={busy}>
-            Confirmar
+            {t('ui.confirm')}
           </Button>
         </>
       }
@@ -370,10 +373,10 @@ export function DataTable<T>({
   columns,
   rowKey,
   searchText,
-  label = 'Tabela de dados',
+  label,
   paginate = true,
-  emptyTitle = 'Nenhum resultado',
-  emptyDescription = 'Não há registros para os filtros selecionados.',
+  emptyTitle,
+  emptyDescription,
   selection,
   onSelection,
 }: {
@@ -388,6 +391,7 @@ export function DataTable<T>({
   selection?: Set<string>;
   onSelection?: (ids: Set<string>) => void;
 }) {
+  const { t, locale, formats } = useI18n();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [sort, setSort] = useState('');
@@ -397,14 +401,13 @@ export function DataTable<T>({
     (row) =>
       !search ||
       !searchText ||
-      searchText(row).toLocaleLowerCase().includes(search.toLocaleLowerCase()),
+      searchText(row).toLocaleLowerCase(locale).includes(search.toLocaleLowerCase(locale)),
   );
   if (column?.sortValue)
     filtered.sort(
       (a, b) =>
-        String(column.sortValue!(a)).localeCompare(String(column.sortValue!(b)), undefined, {
-          numeric: true,
-        }) * (descending ? -1 : 1),
+        formats.compare(String(column.sortValue!(a)), String(column.sortValue!(b))) *
+        (descending ? -1 : 1),
     );
   const pageCount = Math.max(1, Math.ceil(filtered.length / 20));
   const current = Math.min(page, pageCount - 1);
@@ -418,31 +421,41 @@ export function DataTable<T>({
             <Search size={17} />
             <input
               id={searchId}
-              placeholder="Buscar nesta lista…"
+              placeholder={t('ui.table.searchPlaceholder')}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(0);
               }}
             />
-            <span className="sr-only">Buscar registros</span>
+            <span className="sr-only">{t('ui.table.searchLabel')}</span>
           </label>
           <span className="muted">
-            {filtered.length} registro{filtered.length === 1 ? '' : 's'}
+            {t(filtered.length === 0 ? 'ui.table.zeroRecords' : 'ui.table.records', {
+              count: filtered.length,
+            })}
           </span>
         </div>
       )}
       {!filtered.length ? (
-        <Empty title={emptyTitle} description={emptyDescription} />
+        <Empty
+          title={emptyTitle ?? t('ui.table.emptyTitle')}
+          description={emptyDescription ?? t('ui.table.emptyDescription')}
+        />
       ) : (
         <>
-          <div className="table-scroll" tabIndex={0} role="region" aria-label={label}>
+          <div
+            className="table-scroll"
+            tabIndex={0}
+            role="region"
+            aria-label={label ?? t('ui.table.label')}
+          >
             <table>
               <thead>
                 <tr>
                   {selection && (
                     <th>
-                      <span className="sr-only">Selecionar</span>
+                      <span className="sr-only">{t('ui.table.select')}</span>
                     </th>
                   )}
                   {columns.map((c) => (
@@ -478,7 +491,9 @@ export function DataTable<T>({
                       <td>
                         <input
                           type="checkbox"
-                          aria-label={`Selecionar ${searchText?.(row) || rowKey(row)}`}
+                          aria-label={t('ui.table.selectRow', {
+                            name: searchText?.(row) || rowKey(row),
+                          })}
                           checked={selection.has(rowKey(row))}
                           onChange={(e) => {
                             const ids = new Set(selection);
@@ -500,22 +515,23 @@ export function DataTable<T>({
           {paginate && (
             <footer className="table-footer">
               <span>
-                {current * 20 + 1}–{Math.min((current + 1) * 20, filtered.length)} de{' '}
-                {filtered.length}
+                {t('ui.table.range', {
+                  start: current * 20 + 1,
+                  end: Math.min((current + 1) * 20, filtered.length),
+                  total: filtered.length,
+                })}
               </span>
               <div>
                 <Button
-                  aria-label="Página anterior"
+                  aria-label={t('ui.table.previous')}
                   disabled={current === 0}
                   onClick={() => setPage(current - 1)}
                 >
                   <ChevronLeft size={16} />
                 </Button>
-                <span>
-                  Página {current + 1} de {pageCount}
-                </span>
+                <span>{t('ui.table.page', { page: current + 1, total: pageCount })}</span>
                 <Button
-                  aria-label="Próxima página"
+                  aria-label={t('ui.table.next')}
                   disabled={current + 1 >= pageCount}
                   onClick={() => setPage(current + 1)}
                 >
@@ -531,6 +547,7 @@ export function DataTable<T>({
 }
 const ToastContext = createContext<(message: string) => void>(() => {});
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
   const [message, setMessage] = useState('');
   useEffect(() => {
     if (message) {
@@ -548,7 +565,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             {message}
             <Button
               variant="ghost"
-              aria-label="Dispensar notificação"
+              aria-label={t('ui.dismissNotification')}
               onClick={() => setMessage('')}
             >
               <X size={16} />

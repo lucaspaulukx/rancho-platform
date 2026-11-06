@@ -33,6 +33,23 @@ The destination must be new. Review the diff before selecting it for deployment.
 
 Use `moduleNames` and the shared About labels as the exact inventory. Every feature checks its own dependencies and route/action entrypoints. Changing a UI module never changes native permissions, existing grants or stored workloads.
 
+## Interface language policy
+
+The optional root `localization` object is additive in schemaVersion1. An absent object preserves pt-BR and hides the language selector; normalization never rewrites the source. Disabling it restores pt-BR without deleting stored language choices. This is presentation policy, not an environment grant or OIDC setting, and it does not change the external IdP language.
+
+| Field | Default and behavior |
+|---|---|
+| `localization.enabled` | `false`; off fixes the interface to pt-BR |
+| `localization.defaultLocale` | `pt-BR`; canonical locale from the roadmap inventory, required in the available list |
+| `localization.availableLocales` | `["pt-BR"]`; nonempty, unique, at most the ten known locales |
+| `localization.selectable` | `false`; locked policy enforces the administrator's default and ignores stored/browser choices |
+| `localization.detectBrowser` | `false`; when selectable, negotiates permitted browser languages after stored choices |
+| `localization.preview` | `false`; currently required to configure any non-pt-BR locale because full extraction/review remains unfinished |
+
+For an isolated English preview, merge a `localization` object into an existing complete configuration with `enabled`, `selectable` and `preview` true, `defaultLocale` pt-BR and `availableLocales` containing pt-BR/en-US. Validate it before deploying. Unknown fields, nonboolean switches, noncanonical locales, duplicates and a default outside the list are rejected. A preview notice remains visible even for a locked language; the selector itself requires at least two selectable locales. Preview is not a completed translation or release acceptance. Other catalog languages currently fall back to English for registered keys, and unextracted pages keep their original text.
+
+Preferences contain only version and locale, under the account-scoped `rancho.console.locale.*` browser key. A stored account choice takes precedence over the anonymous login choice, then permitted browser languages, then the configured default. Choosing before login can supply the initial language of an account without its own saved choice. Storage failure leaves the choice usable in memory; unrelated reconfiguration preserves an explicit allowed choice. Identity changes, policy locks/removals/off and cross-tab preference changes reapply the policy. No credentials, workload drafts or API data enter this preference. Switching locale updates context and document lang/direction without remounting the shell or changing environment/route.
+
 ## Backend policy
 
 Compose variables configure the backend; `/oidc/config` exposes requested/effective/available capabilities. Inspect effective capability, not only an environment-variable value. The master customization switch and artifact/proxy compatibility can make a requested feature ineffective.

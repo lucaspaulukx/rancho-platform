@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { ModuleName } from './config';
+import type { ShellNavigationMessageKey } from './i18n/domains/shell';
 
 export function environmentSearch(search: string) {
   const environment = new URLSearchParams(search).get('env');
@@ -252,3 +253,40 @@ export const navigation: NavItem[] = [
     scoped: true,
   },
 ];
+
+const navigationDomains: Record<string, string> = {
+  '/': 'overview',
+  '/environments': 'environments',
+  '/stacks': 'stacks',
+  '/services': 'services',
+  '/containers': 'containers',
+  '/hosts': 'hosts',
+  '/volumes': 'volumes',
+  '/registries': 'registries',
+  '/secrets': 'secrets',
+  '/certificates': 'certificates',
+  '/catalog': 'catalog',
+  '/groups': 'groups',
+  '/users': 'users',
+  '/audit': 'audit',
+  '/processes': 'processes',
+  '/catalog-repositories': 'catalogRepositories',
+  '/drivers': 'drivers',
+  '/ha': 'ha',
+  '/settings': 'settings',
+  '/api-keys': 'apiKeys',
+  '/webhooks': 'webhooks',
+};
+
+/** Labels are copied; paths, stable grouping and native contracts remain unchanged. */
+export function localizedNavigation(t: (key: ShellNavigationMessageKey) => string): NavItem[] {
+  return navigation.map((item) => {
+    const domain = navigationDomains[item.path];
+    if (!domain) return { ...item };
+    return {
+      ...item,
+      title: t(`shell.nav.${domain}.title` as ShellNavigationMessageKey),
+      description: t(`shell.nav.${domain}.description` as ShellNavigationMessageKey),
+    };
+  });
+}

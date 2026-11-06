@@ -1,12 +1,25 @@
 import { localeDirection, localeFormats, type Locale } from './locales';
+import { enAuth, ptAuth } from './domains/auth';
+import { enUi, ptUi } from './domains/ui';
+import { enShell, ptShell } from './domains/shell';
+import { enRecovery, ptRecovery } from './domains/recovery';
 
 // Initial shared domain only. These catalogs do not represent full interface coverage.
 export const englishMessages = {
+  ...enAuth,
+  ...enUi,
+  ...enShell,
+  ...enRecovery,
   'common.cancel': 'Cancel',
   'common.close': 'Close',
   'common.save': 'Save',
   'common.retry': 'Try again',
   'common.loading': 'Loading…',
+  'language.label': 'Language',
+  'language.preview': 'Preview · translations incomplete',
+  'runtime.disabledTitle': 'Console disabled',
+  'runtime.disabledDescription': 'This console is disabled in the instance configuration.',
+  'runtime.classic': 'Open classic Rancher',
   'environment.selected': 'Environment: {name}',
   'selection.count': { one: '{count} selected item', other: '{count} selected items' },
 } as const;
@@ -14,11 +27,12 @@ export type MessageKey = keyof typeof englishMessages;
 type Placeholders<S extends string> = S extends `${string}{${infer P}}${infer Rest}`
   ? P | Placeholders<Rest>
   : never;
-type Template<K extends MessageKey> = (typeof englishMessages)[K] extends string
-  ? (typeof englishMessages)[K]
-  : (typeof englishMessages)[K] extends { other: infer S extends string }
+type MessageTemplate<M> = M extends string
+  ? M
+  : M extends { other: infer S extends string }
     ? S
     : never;
+type Template<K extends MessageKey> = MessageTemplate<(typeof englishMessages)[K]>;
 type ParametersFor<K extends MessageKey> = {
   [P in Placeholders<Template<K>>]: P extends 'count' ? number : string | number;
 };
@@ -30,11 +44,20 @@ export type MessageCatalog = Partial<{
   [K in MessageKey]: (typeof englishMessages)[K] extends string ? string : PluralMessage;
 }>;
 export const portugueseMessages = {
+  ...ptAuth,
+  ...ptUi,
+  ...ptShell,
+  ...ptRecovery,
   'common.cancel': 'Cancelar',
   'common.close': 'Fechar',
   'common.save': 'Salvar',
   'common.retry': 'Tentar novamente',
   'common.loading': 'Carregando…',
+  'language.label': 'Idioma',
+  'language.preview': 'Prévia · traduções incompletas',
+  'runtime.disabledTitle': 'Console desativada',
+  'runtime.disabledDescription': 'Esta console está desativada na configuração da instância.',
+  'runtime.classic': 'Abrir Rancher clássico',
   'environment.selected': 'Environment: {name}',
   'selection.count': { one: '{count} item selecionado', other: '{count} itens selecionados' },
 } satisfies MessageCatalog;

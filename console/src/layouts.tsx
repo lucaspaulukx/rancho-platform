@@ -15,7 +15,9 @@ import {
   Sun,
   X,
 } from 'lucide-react';
-import { environmentSearch, navigation } from './navigation';
+import { environmentSearch, localizedNavigation } from './navigation';
+import { useI18n } from './i18n/provider';
+import { LanguageSelector } from './components/LanguageSelector';
 import { useApp } from './state';
 import { useTheme } from './theme';
 import { useSidebarPreference } from './hooks/useSidebarPreference';
@@ -34,6 +36,7 @@ const AccessDiagnostics = lazy(() =>
 );
 
 export function Appearance({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useI18n();
   const theme = useTheme();
   const { config } = useApp();
   return (
@@ -42,11 +45,11 @@ export function Appearance({ open, onClose }: { open: boolean; onClose: () => vo
       onOpenChange={(v) => {
         if (!v) onClose();
       }}
-      title="Sua aparência"
-      description="Preferências aplicadas a todas as telas desta console."
+      title={t('shell.appearance.title')}
+      description={t('shell.appearance.description')}
       footer={
         <Button variant="primary" onClick={onClose}>
-          Concluir
+          {t('shell.appearance.done')}
         </Button>
       }
     >
@@ -64,22 +67,28 @@ export function Appearance({ open, onClose }: { open: boolean; onClose: () => vo
               <span />
             </div>
             <span>
-              {['Claro', 'Escuro', 'Sistema'][index]}
+              {
+                [
+                  t('shell.appearance.light'),
+                  t('shell.appearance.dark'),
+                  t('shell.appearance.system'),
+                ][index]
+              }
               {theme.mode === mode && <Check size={16} />}
             </span>
           </button>
         ))}
       </div>
-      {!config.themeSelectable && <p className="muted">O tema é definido pelo administrador.</p>}
-      <Field label="Densidade">
+      {!config.themeSelectable && <p className="muted">{t('shell.appearance.managed')}</p>}
+      <Field label={t('shell.appearance.density')}>
         {(id) => (
           <select
             id={id}
             value={theme.dense ? 'compact' : 'comfortable'}
             onChange={(e) => theme.setDense(e.target.value === 'compact')}
           >
-            <option value="comfortable">Confortável</option>
-            <option value="compact">Compacta</option>
+            <option value="comfortable">{t('shell.appearance.comfortable')}</option>
+            <option value="compact">{t('shell.appearance.compact')}</option>
           </select>
         )}
       </Field>
@@ -87,6 +96,8 @@ export function Appearance({ open, onClose }: { open: boolean; onClose: () => vo
   );
 }
 export function AppShell() {
+  const { t } = useI18n();
+  const navigation = localizedNavigation(t);
   const { pending: loggingOut, signOut } = useLogout();
   const app = useApp();
   const { pathname, search } = useLocation();
@@ -147,8 +158,8 @@ export function AppShell() {
     ? [
         {
           path: '/no-access',
-          title: 'Seu acesso',
-          description: 'Aguardando liberação de acesso.',
+          title: t('shell.access.title'),
+          description: t('shell.access.waiting'),
           icon: ShieldCheck,
           section: 'SUA CONTA',
           scoped: false,
@@ -168,11 +179,11 @@ export function AppShell() {
   if (!app.config.enabled)
     return (
       <Empty
-        title="Console desativada"
-        description="A console moderna está desativada na configuração desta instância."
+        title={t('shell.disabled.title')}
+        description={t('shell.disabled.description')}
         action={
           <a className="button secondary" href={app.config.classicUrl}>
-            Abrir Rancher clássico <ArrowUpRight size={16} />
+            {t('shell.classic.open')} <ArrowUpRight size={16} />
           </a>
         }
       />
@@ -180,31 +191,31 @@ export function AppShell() {
   return (
     <div className={`app-shell ${collapsed ? 'sidebar-collapsed' : ''}`} data-testid="app-shell">
       <a className="skip-link" href="#main-content">
-        Pular para o conteúdo
+        {t('shell.skipContent')}
       </a>
       {mobile && (
         <button
           className="sidebar-backdrop"
           aria-hidden="true"
           tabIndex={-1}
-          aria-label="Fechar navegação"
+          aria-label={t('shell.navigation.close')}
           onClick={() => setMobile(false)}
         />
       )}
       <aside
         className={`sidebar ${mobile ? 'mobile-open' : ''}`}
-        aria-label="Navegação principal"
+        aria-label={t('shell.navigation.main')}
         role={mobile ? 'dialog' : undefined}
         aria-modal={mobile || undefined}
       >
         <div className="sidebar-brand">
-          <Link to="/" aria-label="Página inicial">
+          <Link to="/" aria-label={t('shell.navigation.home')}>
             <Brand compact={collapsed} />
           </Link>
           <Button
             variant="ghost"
             className="mobile-only"
-            aria-label="Fechar navegação"
+            aria-label={t('shell.navigation.close')}
             onClick={() => setMobile(false)}
           >
             <X size={19} />
@@ -213,7 +224,19 @@ export function AppShell() {
         <nav>
           {groups.map((section) => (
             <div className="nav-section" key={section}>
-              <p>{section}</p>
+              <p>
+                {section === 'OPERAÇÃO'
+                  ? t('shell.section.operations')
+                  : section === 'INFRAESTRUTURA'
+                    ? t('shell.section.infrastructure')
+                    : section === 'ADMINISTRAÇÃO'
+                      ? t('shell.section.administration')
+                      : section === 'INTEGRAÇÕES'
+                        ? t('shell.section.integrations')
+                        : section === 'SUA CONTA'
+                          ? t('shell.section.account')
+                          : section}
+              </p>
               {items
                 .filter((item) => item.section === section)
                 .map((item) => (
@@ -246,10 +269,10 @@ export function AppShell() {
           <button
             className="collapse-button"
             onClick={toggleSidebar}
-            aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+            aria-label={collapsed ? t('shell.navigation.expand') : t('shell.navigation.collapse')}
           >
             <PanelLeftClose size={17} />
-            <span>Recolher menu</span>
+            <span>{t('shell.navigation.collapse')}</span>
           </button>
         </div>
       </aside>
@@ -259,7 +282,7 @@ export function AppShell() {
             <Button
               variant="ghost"
               className="mobile-only"
-              aria-label="Abrir navegação"
+              aria-label={t('shell.navigation.open')}
               onClick={() => setMobile(true)}
             >
               <Menu size={22} />
@@ -268,7 +291,9 @@ export function AppShell() {
               <span>Console</span>
               <span>/</span>
               <strong>
-                {pathname === '/no-access' ? 'Acesso pendente' : current?.title || 'Visão geral'}
+                {pathname === '/no-access'
+                  ? t('shell.access.pending')
+                  : current?.title || t('shell.nav.overview.title')}
               </strong>
             </div>
           </div>
@@ -279,17 +304,18 @@ export function AppShell() {
               onSelect={app.setProject}
               manageEnabled={app.config.modules.environments}
             />
+            <LanguageSelector />
             <span className="navbar-divider" />
             <Button
               variant="ghost"
-              aria-label={dark ? 'Usar tema claro' : 'Usar tema escuro'}
+              aria-label={dark ? t('shell.theme.light') : t('shell.theme.dark')}
               onClick={() => setMode(dark ? 'light' : 'dark')}
               disabled={!app.config.themeSelectable}
             >
               {dark ? <Sun size={19} /> : <Moon size={19} />}
             </Button>
             <details className="profile-menu">
-              <summary aria-label="Menu do usuário">
+              <summary aria-label={t('shell.user.menu')}>
                 <span className="avatar">
                   {(app.token.userIdentity?.name || app.token.userIdentity?.login || 'U')
                     .slice(0, 2)
@@ -297,9 +323,11 @@ export function AppShell() {
                 </span>
                 <div>
                   <strong>
-                    {app.token.userIdentity?.name || app.token.userIdentity?.login || 'Usuário'}
+                    {app.token.userIdentity?.name ||
+                      app.token.userIdentity?.login ||
+                      t('shell.user.name')}
                   </strong>
-                  <span>{app.admin ? 'Administrador' : 'Usuário'}</span>
+                  <span>{app.admin ? t('shell.user.admin') : t('shell.user.name')}</span>
                 </div>
                 <ChevronDown size={14} />
               </summary>
@@ -307,22 +335,23 @@ export function AppShell() {
                 {accessAccount && (
                   <button onClick={() => setSelfAccess(true)}>
                     <ShieldCheck size={17} />
-                    Meu acesso
+                    {t('shell.user.access')}
                   </button>
                 )}
                 <button onClick={() => setAppearance(true)}>
-                  <Palette size={17} /> Aparência
+                  <Palette size={17} /> {t('shell.user.appearance')}
                 </button>
                 <a href={app.config.classicUrl} target="_blank" rel="noreferrer">
-                  <ArrowUpRight size={17} /> Rancher clássico
+                  <ArrowUpRight size={17} /> {t('shell.classic.title')}
                 </a>
                 {app.config.modules.about && (
                   <button onClick={() => setAbout(true)}>
-                    <Info size={17} /> Sobre esta console
+                    <Info size={17} /> {t('shell.user.about')}
                   </button>
                 )}
                 <button onClick={() => void signOut()} disabled={loggingOut} aria-busy={loggingOut}>
-                  <LogOut size={17} /> {loggingOut ? 'Saindo…' : 'Sair'}
+                  <LogOut size={17} />{' '}
+                  {loggingOut ? t('shell.user.signingOut') : t('shell.user.signOut')}
                 </button>
               </div>
             </details>
@@ -336,7 +365,7 @@ export function AppShell() {
         <footer className="workspace-footer">
           <span>{app.config.branding ? 'Rancher Community Console' : 'Rancher'}</span>
           <span>
-            Console moderna <span className="version-pill">v0.1.0</span>
+            {t('shell.footer.modern')} <span className="version-pill">v0.1.0</span>
           </span>
         </footer>
       </div>
@@ -352,7 +381,10 @@ export function AppShell() {
             key={`${app.identity}:${app.project?.id}`}
             account={{
               id: accessAccount,
-              name: app.token.userIdentity?.name || app.token.userIdentity?.login || 'Minha conta',
+              name:
+                app.token.userIdentity?.name ||
+                app.token.userIdentity?.login ||
+                t('shell.user.account'),
               kind: app.admin ? 'admin' : 'user',
               state: 'active',
             }}
@@ -365,6 +397,7 @@ export function AppShell() {
   );
 }
 export function AuthLayout({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
   const { dark, setMode } = useTheme();
   const { config } = useApp();
   return (
@@ -372,13 +405,13 @@ export function AuthLayout({ children }: { children: ReactNode }) {
       <section className="auth-story">
         <Brand />
         <div className="auth-story-content">
-          <p className="eyebrow">INFRAESTRUTURA, COM CONTEXTO</p>
+          <p className="eyebrow">{t('shell.story.eyebrow')}</p>
           <h2>
-            Seu ambiente.
+            {t('shell.story.environment')}
             <br />
-            Uma visão clara.
+            {t('shell.story.view')}
           </h2>
-          <p>Recursos, aplicações e acesso em uma experiência conectada.</p>
+          <p>{t('shell.story.description')}</p>
           <div className="auth-diagram" aria-hidden="true">
             <div className="diagram-core">
               <img src="/console/brand/rancher-symbol.svg" alt="" />
@@ -397,10 +430,11 @@ export function AuthLayout({ children }: { children: ReactNode }) {
       <section className="auth-panel">
         <div className="auth-panel-top">
           <span>Rancher Console</span>
+          <LanguageSelector />
           {config.themeSelectable && (
             <Button
               variant="ghost"
-              aria-label={dark ? 'Usar tema claro' : 'Usar tema escuro'}
+              aria-label={dark ? t('shell.theme.light') : t('shell.theme.dark')}
               onClick={() => setMode(dark ? 'light' : 'dark')}
             >
               {dark ? <Sun size={19} /> : <Moon size={19} />}
@@ -408,7 +442,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
           )}
         </div>
         <div className="auth-form-container">{children}</div>
-        <p className="auth-footer">Acesso seguro à sua infraestrutura.</p>
+        <p className="auth-footer">{t('shell.story.secure')}</p>
       </section>
     </div>
   );

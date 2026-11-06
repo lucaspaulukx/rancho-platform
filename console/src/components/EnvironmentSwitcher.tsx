@@ -2,12 +2,13 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, ChevronDown, Layers3, Search } from 'lucide-react';
 import type { Project } from '../api';
+import { useI18n } from '../i18n/provider';
 
-const searchable = (value: string) =>
+const searchable = (value: string, locale: string) =>
   value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .toLocaleLowerCase();
+    .toLocaleLowerCase(locale);
 export function EnvironmentSwitcher({
   projects,
   currentId,
@@ -19,6 +20,7 @@ export function EnvironmentSwitcher({
   onSelect: (id: string) => void;
   manageEnabled?: boolean;
 }) {
+  const { t, locale } = useI18n();
   const id = useId();
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -32,12 +34,16 @@ export function EnvironmentSwitcher({
       projects
         .filter((project) => !project.removed)
         .sort((a, b) =>
-          a.id === currentId ? -1 : b.id === currentId ? 1 : a.name.localeCompare(b.name, 'pt-BR'),
+          a.id === currentId
+            ? -1
+            : b.id === currentId
+              ? 1
+              : a.name.localeCompare(b.name, locale, { numeric: true }),
         )
         .filter((project) =>
-          searchable(`${project.name} ${project.id}`).includes(searchable(query)),
+          searchable(`${project.name} ${project.id}`, locale).includes(searchable(query, locale)),
         ),
-    [projects, query, currentId],
+    [projects, query, currentId, locale],
   );
   function close(restoreFocus = false) {
     setOpen(false);
@@ -84,11 +90,13 @@ export function EnvironmentSwitcher({
         type="button"
         className="environment-trigger"
         disabled={!projects.length}
-        aria-label={`Environment: ${current?.name || 'Sem acesso'}`}
+        aria-label={t('shell.environment.label', {
+          name: current?.name || t('shell.environment.none'),
+        })}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? `${id}-panel` : undefined}
-        title={current?.name || 'Sem acesso'}
+        title={current?.name || t('shell.environment.none')}
         onClick={() => (open ? close() : show())}
         onKeyDown={(event) => {
           if (['ArrowDown', 'ArrowUp'].includes(event.key)) {
@@ -101,8 +109,8 @@ export function EnvironmentSwitcher({
           <Layers3 size={18} />
         </span>
         <span className="environment-trigger-copy">
-          <span className="environment-caption">ENVIRONMENT</span>
-          <strong>{current?.name || 'Sem acesso'}</strong>
+          <span className="environment-caption">{t('shell.environment.caption')}</span>
+          <strong>{current?.name || t('shell.environment.none')}</strong>
         </span>
         <ChevronDown
           size={14}
@@ -113,7 +121,7 @@ export function EnvironmentSwitcher({
         <section
           id={`${id}-panel`}
           role="dialog"
-          aria-label="Selecionar environment"
+          aria-label={t('shell.environment.select')}
           className="environment-popover"
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
@@ -124,22 +132,22 @@ export function EnvironmentSwitcher({
           }}
         >
           <div className="environment-popover-heading">
-            <strong>Trocar environment</strong>
-            <span>{projects.length} disponíveis</span>
+            <strong>{t('shell.environment.switch')}</strong>
+            <span>{t('shell.environment.availableCount', { count: projects.length })}</span>
           </div>
           <div className="environment-search">
             <Search size={16} />
             <input
               ref={search}
               role="combobox"
-              aria-label="Buscar environment"
+              aria-label={t('shell.environment.search')}
               aria-expanded="true"
               aria-autocomplete="list"
               aria-controls={`${id}-list`}
               aria-activedescendant={
                 choices.length ? `${id}-option-${Math.min(active, choices.length - 1)}` : undefined
               }
-              placeholder="Buscar por nome…"
+              placeholder={t('shell.environment.placeholder')}
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);
@@ -167,7 +175,7 @@ export function EnvironmentSwitcher({
             className="environment-options"
             id={`${id}-list`}
             role="listbox"
-            aria-label="Environments disponíveis"
+            aria-label={t('shell.environment.available')}
           >
             {choices.map((project, index) => (
               <button
@@ -191,28 +199,30 @@ export function EnvironmentSwitcher({
                   <small>
                     {project.orchestration || 'Cattle'} ·{' '}
                     {project.state === 'active'
-                      ? 'Ativo'
+                      ? t('shell.environment.active')
                       : project.state === 'inactive'
-                        ? 'Inativo'
+                        ? t('shell.environment.inactive')
                         : project.state}
                   </small>
                 </span>
-                {project.id === currentId && <Check size={17} aria-label="Environment atual" />}
+                {project.id === currentId && (
+                  <Check size={17} aria-label={t('shell.environment.current')} />
+                )}
               </button>
             ))}
           </div>
           {!choices.length && (
             <p className="environment-search-empty" role="status">
-              Nenhum environment encontrado.
+              {t('shell.environment.empty')}
             </p>
           )}
           <div className="environment-popover-footer">
             {manageEnabled ? (
               <Link to="/environments" onClick={() => close()}>
-                Gerenciar environments <ArrowRight size={13} />
+                {t('shell.environment.manage')} <ArrowRight size={13} />
               </Link>
             ) : (
-              <span>Selecione um ambiente autorizado.</span>
+              <span>{t('shell.environment.authorized')}</span>
             )}
             <kbd>Esc</kbd>
           </div>
