@@ -1,3 +1,4 @@
+import { ResourceValidationError } from '../resource-validation';
 import { UlimitEditor } from './UlimitEditor';
 import { DeviceEditor } from './DeviceEditor';
 import {
@@ -109,6 +110,41 @@ export function editableFields(schema: Schema, updating: boolean) {
         (priority.includes(right) ? priority.indexOf(right) : 100),
     );
 }
+type PayloadErrorDetail =
+  | [key: 'schemaForm.validation.depth']
+  | [
+      key:
+        | 'schemaForm.validation.required'
+        | 'schemaForm.validation.notNullable'
+        | 'schemaForm.validation.integer'
+        | 'schemaForm.validation.enum'
+        | 'schemaForm.validation.invalidCharacters'
+        | 'schemaForm.validation.range'
+        | 'schemaForm.validation.boolean'
+        | 'schemaForm.validation.integerArray'
+        | 'schemaForm.validation.object'
+        | 'schemaForm.validation.items',
+      field: string,
+    ]
+  | [
+      key: 'schemaForm.validation.minLength' | 'schemaForm.validation.maxLength',
+      field: string,
+      limit: number,
+    ];
+
+class SchemaPayloadError extends Error {
+  readonly detail: PayloadErrorDetail;
+  constructor(...detail: PayloadErrorDetail) {
+    const [key, field, limit] = detail;
+    super(
+      ptSchemaForm[key].replace(/\{(field|limit)\}/g, (_, param: string) =>
+        param === 'field' ? fieldLabel(field!) : String(limit),
+      ),
+    );
+    this.detail = detail;
+  }
+}
+
 export function preparePayload(
   schema: Schema,
   values: Record<string, unknown>,
@@ -116,20 +152,21 @@ export function preparePayload(
   schemas: Record<string, Schema> = {},
   depth = 0,
 ) {
-  if (depth > 12) throw new Error('A configuração tem níveis demais. Revise os campos avançados.');
+  if (depth > 12) throw new SchemaPayloadError('schemaForm.validation.depth');
   const result: Record<string, unknown> = {};
   for (const [name, field] of editableFields(schema, !!original)) {
     const value = values[name];
     if (value === undefined || value === '') {
       if (field.required && (!original || original[name] !== value))
-        throw new Error(`Preencha ${fieldLabel(name)}.`);
+        throw new SchemaPayloadError('schemaForm.validation.required', name);
       if (original && value === '' && original[name] !== '' && original[name] !== undefined)
         result[name] = field.nullable ? null : '';
       continue;
     }
     if (value === null) {
-      if (field.required) throw new Error(`Preencha ${fieldLabel(name)}.`);
-      if (field.nullable === false) throw new Error(`${fieldLabel(name)} não pode ser removido.`);
+      if (field.required) throw new SchemaPayloadError('schemaForm.validation.required', name);
+      if (field.nullable === false)
+        throw new SchemaPayloadError('schemaForm.validation.notNullable', name);
       if (!original || original[name] !== null) result[name] = null;
       continue;
     }
@@ -137,38 +174,36 @@ export function preparePayload(
       (field.type === 'int' || field.type === 'long') &&
       (!Number.isSafeInteger(Number(value)) || String(value).trim() === '')
     )
-      throw new Error(`${fieldLabel(name)} precisa ser um número inteiro.`);
+      throw new SchemaPayloadError('schemaForm.validation.integer', name);
     if (field.options && field.type === 'enum' && !field.options.includes(String(value)))
-      throw new Error(`Escolha uma opção válida em ${fieldLabel(name)}.`);
+      throw new SchemaPayloadError('schemaForm.validation.enum', name);
     if (typeof value === 'string') {
       if (field.minLength !== undefined && value.length < field.minLength)
-        throw new Error(
-          `${fieldLabel(name)} precisa ter pelo menos ${field.minLength} caracteres.`,
-        );
+        throw new SchemaPayloadError('schemaForm.validation.minLength', name, field.minLength);
       if (field.maxLength !== undefined && value.length > field.maxLength)
-        throw new Error(`${fieldLabel(name)} aceita até ${field.maxLength} caracteres.`);
+        throw new SchemaPayloadError('schemaForm.validation.maxLength', name, field.maxLength);
       // The Cattle schema describes a character class, not a complete regular expression.
       if (field.validChars && !new RegExp(`^[${field.validChars}]*$`).test(value))
-        throw new Error(`${fieldLabel(name)} contém caracteres não permitidos pelo Rancher.`);
+        throw new SchemaPayloadError('schemaForm.validation.invalidCharacters', name);
     }
     if (
       ['int', 'long'].includes(field.type) &&
       ((field.min !== undefined && Number(value) < field.min) ||
         (field.max !== undefined && Number(value) > field.max))
     )
-      throw new Error(`${fieldLabel(name)} está fora dos limites permitidos.`);
+      throw new SchemaPayloadError('schemaForm.validation.range', name);
     if ((field.type === 'boolean' || field.type === 'bool') && typeof value !== 'boolean')
-      throw new Error(`${fieldLabel(name)} precisa ser verdadeiro ou falso.`);
+      throw new SchemaPayloadError('schemaForm.validation.boolean', name);
     if (
       field.type === 'array[int]' &&
       (!Array.isArray(value) || value.some((item) => !Number.isSafeInteger(item)))
     )
-      throw new Error(`${fieldLabel(name)} precisa conter apenas números inteiros.`);
+      throw new SchemaPayloadError('schemaForm.validation.integerArray', name);
     if (field.required && typeof value === 'object' && value !== null && !Object.keys(value).length)
-      throw new Error(`Preencha ${fieldLabel(name)}.`);
+      throw new SchemaPayloadError('schemaForm.validation.required', name);
     let normalized: unknown = field.type === 'int' || field.type === 'long' ? Number(value) : value;
     if (name === 'imageUuid' && typeof normalized === 'string') {
-      if (!normalized.trim()) throw new Error('Preencha Imagem.');
+      if (!normalized.trim()) throw new SchemaPayloadError('schemaForm.validation.required', name);
       normalized = normalized.trim();
       if (!(normalized as string).startsWith('docker:')) normalized = 'docker:' + normalized;
     }
@@ -176,7 +211,7 @@ export function preparePayload(
     const arrayType = /^array\[([^\]]+)\]$/.exec(field.type)?.[1];
     if (nested) {
       if (typeof value !== 'object' || Array.isArray(value))
-        throw new Error(`Revise ${fieldLabel(name)}.`);
+        throw new SchemaPayloadError('schemaForm.validation.object', name);
       normalized = preparePayload(
         nested,
         value as Record<string, unknown>,
@@ -189,7 +224,7 @@ export function preparePayload(
         !Array.isArray(value) ||
         value.some((item) => !item || typeof item !== 'object' || Array.isArray(item))
       )
-        throw new Error(`Revise os itens de ${fieldLabel(name)}.`);
+        throw new SchemaPayloadError('schemaForm.validation.items', name);
       normalized = value.map((item) =>
         preparePayload(schemas[arrayType], item, undefined, schemas, depth + 1),
       );
@@ -920,10 +955,10 @@ export function SchemaForm({
     return () => window.removeEventListener('beforeunload', unload);
   }, [dirty]);
   const { t } = useI18n();
-  const [validation, setValidation] = useState<string | DeviceValidationError>('');
+  const [validation, setValidation] = useState<Error | 'review' | null>(null);
   function submit(event: FormEvent) {
     event.preventDefault();
-    setValidation('');
+    setValidation(null);
     try {
       if (bindingEditors) validateBindingFields(schema, values, schemas, initialBindings.current);
       if (healthCheckEditors) validateWorkloadHealthChecks(schema, values, schemas);
@@ -935,13 +970,7 @@ export function SchemaForm({
       if (sidecarEditors && schema.id === 'service') validateSidecars(values, schemas);
       onSubmit(preparePayload(schema, values, original, schemas));
     } catch (error) {
-      setValidation(
-        error instanceof DeviceValidationError
-          ? error
-          : error instanceof Error
-            ? error.message
-            : t('schemaForm.review'),
-      );
+      setValidation(error instanceof Error ? error : 'review');
     }
   }
   const render = ([name, field]: [string, SchemaField]) => (
@@ -969,9 +998,21 @@ export function SchemaForm({
   );
   const main = fields.filter(([name, field]) => basics.has(name) || field.required);
   const advanced = fields.filter(([name, field]) => !basics.has(name) && !field.required);
+  function describeError(value?: Error | null) {
+    if (value instanceof DeviceValidationError || value instanceof ResourceValidationError)
+      return t(value.key);
+    if (!(value instanceof SchemaPayloadError)) return value?.message;
+    const [key, name, limit] = value.detail;
+    if (key === 'schemaForm.validation.depth') return t(key);
+    const labelKey = fieldLabelKey(name);
+    const field = labelKey ? t(labelKey) : humanizeFieldName(name);
+    if (key === 'schemaForm.validation.minLength' || key === 'schemaForm.validation.maxLength')
+      return t(key, { field, limit: String(limit) });
+    return t(key, { field });
+  }
   const validationText =
-    validation instanceof DeviceValidationError ? t(validation.key) : validation;
-  const errorText = error instanceof DeviceValidationError ? t(error.key) : error?.message;
+    validation === 'review' ? t('schemaForm.review') : describeError(validation);
+  const errorText = describeError(error);
   return (
     <form id={id} onSubmit={submit}>
       <fieldset disabled={busy} className="form-fieldset">

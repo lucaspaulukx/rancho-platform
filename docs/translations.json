@@ -58,8 +58,8 @@
         "pt-BR": "docs/pt-BR/architecture.md",
         "en": "docs/en/architecture.md"
       },
-      "reviewedSourceSha256": "0befc82a51d628113c606900174eae17eb88d9b597b80cef5bfe0af60701a68f",
-      "reviewedTranslationSha256": "13addc7d33e2eb792eb4d8afb21bb2ba938cd82f986f7dc9a9a88cc22a9fbf2a"
+      "reviewedSourceSha256": "610b8c2f371cff97111763598e95d2eb26e0803308c1dab2c4ad53f9a1f2626f",
+      "reviewedTranslationSha256": "062e4ead29e15be78415329056d24f951016d59f98311b45a651eb2c1aab378b"
     },
     {
       "source": "docs/pt-BR/configuration.md",
