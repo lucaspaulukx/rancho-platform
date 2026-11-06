@@ -1,3 +1,5 @@
+import { ptHealthCheckEditor } from './i18n/domains/health-check-editor';
+import { ptHealthCheckValidation } from './i18n/domains/health-check-validation';
 import type { Schema } from './api';
 export const healthNumbers = [
   ['interval', 'Intervalo das verificações (ms)', 1, 2000],
@@ -7,6 +9,40 @@ export const healthNumbers = [
   ['healthyThreshold', 'Sucessos para considerar saudável', 1, 2],
   ['unhealthyThreshold', 'Falhas para considerar indisponível', 1, 3],
 ] as const;
+type HealthCheckNumberLabel =
+  | 'healthCheckEditor.port'
+  | 'healthCheckEditor.quorum'
+  | `healthCheckEditor.number.${(typeof healthNumbers)[number][0]}`;
+type HealthCheckValidationDetail =
+  | { key: 'healthCheckValidation.field'; name: string }
+  | {
+      key: 'healthCheckValidation.integer';
+      labelKey: HealthCheckNumberLabel;
+      min: number;
+      max: number;
+    }
+  | {
+      key: Exclude<
+        keyof typeof ptHealthCheckValidation,
+        'healthCheckValidation.field' | 'healthCheckValidation.integer'
+      >;
+    };
+
+export class HealthCheckValidationError extends Error {
+  constructor(readonly detail: HealthCheckValidationDetail) {
+    const message = ptHealthCheckValidation[detail.key];
+    super(
+      detail.key === 'healthCheckValidation.field'
+        ? message.replace('{name}', () => detail.name)
+        : detail.key === 'healthCheckValidation.integer'
+          ? message
+              .replace('{label}', ptHealthCheckEditor[detail.labelKey])
+              .replace('{min}', String(detail.min))
+              .replace('{max}', String(detail.max))
+          : message,
+    );
+  }
+}
 export const healthMethods = [
   'OPTIONS',
   'GET',
@@ -29,11 +65,9 @@ export function healthRequestLine(v: HealthRequest) {
 export function validateHealthRequest(line: unknown) {
   if (line === '' || line === undefined || line === null) return;
   if (typeof line !== 'string' || line.length > 8192)
-    throw new Error('Revise a requisição HTTP da verificação de saúde.');
+    throw new HealthCheckValidationError({ key: 'healthCheckValidation.request' });
   if (!decodeHealthRequest(line))
-    throw new Error(
-      'Use um caminho HTTP iniciado por /, sem espaços, aspas ou quebras de linha, e um Host válido.',
-    );
+    throw new HealthCheckValidationError({ key: 'healthCheckValidation.requestFormat' });
 }
 export function decodeHealthRequest(line: string): HealthRequest | undefined {
   const parsed =
@@ -56,12 +90,17 @@ export function healthDefaults(schema: Schema) {
 export function validateHealthCheck(value: unknown, schema?: Schema, quorum?: Schema) {
   if (value == null) return;
   if (!schema || typeof value !== 'object' || Array.isArray(value))
-    throw new Error('Contrato da verificação de saúde indisponível.');
+    throw new HealthCheckValidationError({ key: 'healthCheckValidation.contract' });
   const v = value as Record<string, unknown>;
   for (const name of Object.keys(v))
     if (!schema.resourceFields[name]?.create)
-      throw new Error(`O campo de saúde ${name} não está disponível. Reabra o painel.`);
-  const integer = (value: unknown, label: string, min: number, max = Number.MAX_SAFE_INTEGER) => {
+      throw new HealthCheckValidationError({ key: 'healthCheckValidation.field', name });
+  const integer = (
+    value: unknown,
+    labelKey: HealthCheckNumberLabel,
+    min: number,
+    max = Number.MAX_SAFE_INTEGER,
+  ) => {
     if (
       !['string', 'number'].includes(typeof value) ||
       String(value).trim() === '' ||
@@ -69,26 +108,32 @@ export function validateHealthCheck(value: unknown, schema?: Schema, quorum?: Sc
       Number(value) < min ||
       Number(value) > max
     )
-      throw new Error(`${label} precisa ser um inteiro entre ${min} e ${max}.`);
+      throw new HealthCheckValidationError({
+        key: 'healthCheckValidation.integer',
+        labelKey,
+        min,
+        max,
+      });
   };
-  integer(v.port, 'Porta da verificação', 1, 65535);
-  for (const [name, label, min] of healthNumbers)
-    if (v[name] !== undefined && v[name] !== '') integer(v[name], label, min);
+  integer(v.port, 'healthCheckEditor.port', 1, 65535);
+  for (const [name, , min] of healthNumbers)
+    if (v[name] !== undefined && v[name] !== '')
+      integer(v[name], `healthCheckEditor.number.${name}`, min);
   validateHealthRequest(v.requestLine);
   if (
     v.strategy !== undefined &&
     !schema.resourceFields.strategy?.options?.includes(String(v.strategy))
   )
-    throw new Error('Estratégia de saúde indisponível.');
+    throw new HealthCheckValidationError({ key: 'healthCheckValidation.strategy' });
   if (v.strategy === 'recreateOnQuorum') {
     if (
       !schema.resourceFields.recreateOnQuorumStrategyConfig?.create ||
       !quorum?.resourceFields.quorum?.create
     )
-      throw new Error('Contrato de quórum indisponível.');
+      throw new HealthCheckValidationError({ key: 'healthCheckValidation.quorum' });
     integer(
       (v.recreateOnQuorumStrategyConfig as Record<string, unknown> | undefined)?.quorum,
-      'Quórum de saúde',
+      'healthCheckEditor.quorum',
       1,
     );
   }
@@ -99,7 +144,7 @@ export function validateWorkloadHealthChecks(
   schemas: Record<string, Schema>,
   depth = 0,
 ) {
-  if (depth > 12) throw new Error('A configuração de saúde tem níveis demais.');
+  if (depth > 12) throw new HealthCheckValidationError({ key: 'healthCheckValidation.depth' });
   for (const [name, value] of Object.entries(values)) {
     const type = schema.resourceFields[name]?.type;
     if (name === 'healthCheck' && type === 'instanceHealthCheck')
