@@ -24,6 +24,34 @@ Statuses below describe maintained capabilities and remaining acceptance, not an
 | CFG01 | Frontend/backend flags and classic fallback | Partial; final dependency/on/off/reversal matrix remains |
 | CFG02 | Versioned configuration | Implemented contract/CLI; artifact/data rollback belongs to release acceptance |
 
+## Interface languages and original Rancher parity
+
+The new console currently has fixed pt-BR interface text, including validation and accessibility labels. Bilingual project documentation does not provide interface localization. The reference is [Rancher server v1.6.30](https://github.com/rancher/rancher/blob/v1.6.30/server/Dockerfile), which selects UI1.6.52. Its [translation catalog](https://github.com/rancher/ui/tree/v1.6.52/translations) and [locale discovery](https://github.com/rancher/ui/blob/v1.6.52/config/environment.js) define the production language inventory below. The `none` diagnostic locale is excluded from production; existing translation files do not prove that every original message was translated.
+
+| Original locale | Console locale target | Language | Direction |
+|---|---|---|---|
+| en-us | en-US | English | LTR |
+| pt-br | pt-BR | Portuguese (Brazil) | LTR |
+| de-de | de-DE | German | LTR |
+| fr-fr | fr-FR | French | LTR |
+| hu-hu | hu-HU | Hungarian | LTR |
+| ja-jp | ja-JP | Japanese | LTR |
+| fa-ir | fa-IR | Persian | RTL |
+| ru-ru | ru-RU | Russian | LTR |
+| uk-ua | uk-UA | Ukrainian | LTR |
+| zh-hans | zh-Hans | Simplified Chinese | LTR |
+
+| ID | Capability | State and remaining gate |
+|---|---|---|
+| I18N01 | Shared locale, message and formatting infrastructure | Pending; typed message keys/parameters, locale normalization, explicit fallback, pluralization and locale-aware numbers/dates/relative time/sorting; no DOM text replacement or translated API identifiers |
+| I18N02 | Configuration and shared language selector | Pending; opt-in/default/off contract, administrator language/default/selection policy, choice on public and authenticated layouts, safe preference persistence and browser-language negotiation; switching preserves environment, route, drafts and stream ownership |
+| I18N03 | Complete pt-BR/en-US extraction | Pending; shared shell, login/no-access/recovery, all pages, menus, tables, drawers, dialogs, confirmations, toasts, validators and accessible labels; preserve technical commands and native resource/user content |
+| I18N04 | Remaining eight production languages | Pending; complete de-DE/fr-FR/hu-HU/ja-JP/fa-IR/ru-RU/uk-UA/zh-Hans catalogs, placeholder/plural consistency and language review; never advertise an English fallback catalog as a completed translation |
+| I18N05 | RTL and multilingual presentation | Pending; fa-IR direction, logical CSS spacing/alignment and directional icons, mixed LTR code/IDs/terminal content, long labels and CJK layout; keyboard/focus, mobile and theme regression |
+| I18N06 | Translation contribution and release gates | Pending; key/placeholder/coverage checks, stale translation detection, lazy-load/offline failure handling and bounded bundles; test all ten locales, fallback/invalid preferences, locale formats, switching with open dialogs/streams and unlocalized API errors without exposing private payloads |
+
+Implement the shared contract first, then configuration/selection and full pt-BR/en-US coverage, the other language catalogs, RTL and final regression. Keep partially translated languages out of the normal production selector until coverage and review are accepted. A locale inventory, selector or fallback alone does not complete multilingual support. These tasks are part of release acceptance, not an optional domain; they do not require changing classic Ember or translating workload names, logs, Compose/API field names or external IdP pages. Documentation remains maintained in pt-BR and English; interface parity does not promise ten documentation translations.
+
 ## Identity and authorization
 
 | ID | Capability | State and remaining gate |
