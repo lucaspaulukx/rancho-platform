@@ -9,6 +9,8 @@ import { enDeviceUpgradeForm, ptDeviceUpgradeForm } from './domains/device-upgra
 import { enResourceDetails, ptResourceDetails } from './domains/resource-details';
 import { enWorkloadStreams, ptWorkloadStreams } from './domains/workload-streams';
 import { enOperations, ptOperations } from './domains/operations';
+import { enResourceCreator, ptResourceCreator } from './domains/resource-creator';
+import { enBulkOperation, ptBulkOperation } from './domains/bulk-operation';
 
 // Initial shared domain only. These catalogs do not represent full interface coverage.
 export const englishMessages = {
@@ -22,6 +24,8 @@ export const englishMessages = {
   ...enResourceDetails,
   ...enWorkloadStreams,
   ...enOperations,
+  ...enResourceCreator,
+  ...enBulkOperation,
   'common.cancel': 'Cancel',
   'common.close': 'Close',
   'common.save': 'Save',
@@ -66,6 +70,8 @@ export const portugueseMessages = {
   ...ptResourceDetails,
   ...ptWorkloadStreams,
   ...ptOperations,
+  ...ptResourceCreator,
+  ...ptBulkOperation,
   'common.cancel': 'Cancelar',
   'common.close': 'Fechar',
   'common.save': 'Salvar',

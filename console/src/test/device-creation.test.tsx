@@ -224,7 +224,7 @@ describe('Structured device creation integration', () => {
         },
       },
     ];
-    await user.click(screen.getByRole('button', { name: 'Criar' }));
+    await user.click(screen.getByRole('button', { name: 'Create' }));
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     expect(screen.getByRole('alert')).toHaveTextContent(
       'The current contract does not allow device mappings during creation.',

@@ -40,6 +40,8 @@ The shared resource details panel follows the active locale for tabs, field labe
 
 The operations workspace and shared stream selector use the active locale for navigation, filters and action captions. Switching language preserves the current workload view and native action identifiers.
 
+The workload creation drawer and bulk confirmation use the shared locale for their dialog labels and guidance. The native schema form and the specialized editors each own their own field labels.
+
 ## Data and mutations
 
 Use current resource schemas/action links instead of inventing routes or assuming global schemas equal environment-scoped schemas. Re-read the resource, scope and relevant contract before mutation. Preserve unknown configuration and unselected fields; do not silently replace unsupported values with empty defaults.

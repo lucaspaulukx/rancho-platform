@@ -90,12 +90,6 @@ export const enOperations = {
   'operations.action.remove': 'Remove',
   'operations.action.purge': 'Permanently delete',
   'operations.action.setservicelinks': 'Manage service links',
-  'operations.creation.stack': 'Stack',
-  'operations.creation.service': 'Service',
-  'operations.creation.loadBalancerService': 'Load balancer',
-  'operations.creation.dnsService': 'Service alias',
-  'operations.creation.externalService': 'External service',
-  'operations.creation.container': 'Standalone container',
 } as const;
 
 export const ptOperations = {
@@ -189,10 +183,4 @@ export const ptOperations = {
   'operations.action.remove': 'Remover',
   'operations.action.purge': 'Excluir definitivamente',
   'operations.action.setservicelinks': 'Gerenciar vínculos de serviços',
-  'operations.creation.stack': 'Stack',
-  'operations.creation.service': 'Serviço',
-  'operations.creation.loadBalancerService': 'Balanceador',
-  'operations.creation.dnsService': 'Alias de serviço',
-  'operations.creation.externalService': 'Serviço externo',
-  'operations.creation.container': 'Container avulso',
 } satisfies Record<keyof typeof enOperations, string>;
