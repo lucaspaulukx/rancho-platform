@@ -1,0 +1,88 @@
+export const deDE = {
+  'ui.loading': 'Daten werden geladen…',
+  'ui.loadFailed': 'Die Daten konnten nicht geladen werden.',
+  'ui.retry': 'Erneut versuchen',
+  'ui.closeDialog': 'Dialog schließen',
+  'ui.cancel': 'Abbrechen',
+  'ui.confirm': 'Bestätigen',
+  'ui.table.label': 'Datentabelle',
+  'ui.table.emptyTitle': 'Keine Ergebnisse',
+  'ui.table.emptyDescription': 'Keine Einträge entsprechen den ausgewählten Filtern.',
+  'ui.table.searchPlaceholder': 'Diese Liste durchsuchen…',
+  'ui.table.searchLabel': 'Einträge suchen',
+  'ui.table.records': { one: '{count} Eintrag', other: '{count} Einträge' },
+  'ui.table.zeroRecords': '{count} Einträge',
+  'ui.table.select': 'Auswählen',
+  'ui.table.selectRow': '{name} auswählen',
+  'ui.table.range': '{start}–{end} von {total}',
+  'ui.table.previous': 'Vorherige Seite',
+  'ui.table.next': 'Nächste Seite',
+  'ui.table.page': 'Seite {page} von {total}',
+  'ui.dismissNotification': 'Benachrichtigung schließen',
+
+  'auth.entryFailed':
+    'Die Authentifizierung konnte nicht abgeschlossen werden. Melden Sie sich erneut an.',
+  'auth.providerUnavailable':
+    'Der Identitätsanbieter ist nicht erreichbar. Versuchen Sie es erneut.',
+  'auth.ticketRejected':
+    'Die Anmeldung ist abgelaufen oder wurde abgelehnt. Melden Sie sich erneut an.',
+  'auth.completingLogin': 'Anmeldung wird abgeschlossen…',
+  'auth.welcome': 'WILLKOMMEN IN DER KONSOLE',
+  'auth.loginTitle': 'Auf Ihre Umgebung zugreifen',
+  'auth.loginDescription':
+    'Melden Sie sich mit Ihrem Konto an, um die Ressourcen zu verwalten, auf die Sie Zugriff haben.',
+  'auth.providerLogoutWarning':
+    'Sie haben sich von dieser Konsole abgemeldet. Die Abmeldung beim Identitätsanbieter konnte nicht bestätigt werden.',
+  'auth.serverLogoutWarning':
+    'Die Sitzung wurde aus diesem Browser entfernt. Ob sie auf dem Server beendet wurde, konnte nicht bestätigt werden.',
+  'auth.methodsUnavailable': 'Die Anmeldemethoden konnten nicht überprüft werden.',
+  'auth.retry': 'Erneut versuchen',
+  'auth.checkingAccess': 'Zugriff wird geprüft…',
+  'auth.keycloakLogin': 'Mit Keycloak anmelden',
+  'auth.localAlternative': 'oder Ihr lokales Konto verwenden',
+  'auth.username': 'Benutzername',
+  'auth.password': 'Passwort',
+  'auth.localLogin': 'Mit einem lokalen Konto anmelden',
+  'auth.localRejected':
+    'Die Anmeldung konnte nicht abgeschlossen werden. Prüfen Sie Ihre Zugangsdaten und versuchen Sie es erneut.',
+  'auth.pendingStill': 'Ihre Zugriffsfreigabe steht noch aus.',
+  'auth.accessCheckFailed': 'Der Zugriff konnte nicht überprüft werden. Versuchen Sie es erneut.',
+  'auth.accessTitle': 'Ihr Zugriff',
+  'auth.accessDescription':
+    'Sie sind angemeldet. Es muss noch festgelegt werden, auf welche Umgebungen Sie zugreifen dürfen.',
+  'auth.pendingEyebrow': 'ZUGRIFF NOCH NICHT FREIGEGEBEN',
+  'auth.pendingTitle': 'Ihr Arbeitsbereich ist fast bereit',
+  'auth.pendingDescription':
+    'Eine Person mit Administratorrechten muss Ihr Konto einer Gruppe hinzufügen, die auf die Umgebungen zugreifen darf. Es wird keine Umgebung automatisch erstellt.',
+  'auth.contactAdmin': 'Wenden Sie sich an Ihre Administration',
+  'auth.accountHint': 'Geben Sie Ihr Konto an: {account}.',
+  'auth.groupAccess': 'Zugriff über Ihre Gruppe erhalten',
+  'auth.groupAccessDescription': 'Berechtigungen werden in Rancher festgelegt und verwaltet.',
+  'auth.returnConsole': 'Zurück zu Ihrer Konsole',
+  'auth.returnConsoleDescription':
+    'Prüfen Sie den Zugriff nach der Freigabe erneut, um Ihre Umgebungen zu laden.',
+  'auth.checkAccess': 'Zugriff prüfen',
+  'auth.signOut': 'Abmelden',
+  'auth.moduleDisabled': 'Modul deaktiviert',
+  'auth.accessRestricted': 'Zugriff eingeschränkt',
+  'auth.notFound': 'Seite nicht gefunden',
+  'auth.moduleDisabledDescription':
+    'Dieses Modul ist in der Konfiguration der Konsole deaktiviert.',
+  'auth.accessRestrictedDescription': 'Ihr Konto hat keine Berechtigung für diesen Bereich.',
+  'auth.notFoundDescription':
+    'Die Adresse hat sich möglicherweise geändert oder die Seite ist in dieser Konsole nicht verfügbar.',
+  'auth.backHome': 'Zurück zur Startseite',
+
+  'common.cancel': 'Abbrechen',
+  'common.close': 'Schließen',
+  'common.save': 'Speichern',
+  'common.retry': 'Erneut versuchen',
+  'common.loading': 'Wird geladen…',
+  'language.label': 'Sprache',
+  'language.preview': 'Vorschau · Übersetzungen unvollständig',
+  'runtime.disabledTitle': 'Konsole deaktiviert',
+  'runtime.disabledDescription': 'Diese Konsole ist in der Konfiguration der Instanz deaktiviert.',
+  'runtime.classic': 'Klassische Rancher-Oberfläche öffnen',
+  'environment.selected': 'Umgebung: {name}',
+  'selection.count': { one: '{count} ausgewählter Eintrag', other: '{count} ausgewählte Einträge' },
+} as const;

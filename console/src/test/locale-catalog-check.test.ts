@@ -31,14 +31,19 @@ describe('Registered locale catalog gate', () => {
     expect(report.registeredEnglishKeys).toBe(Object.keys(englishMessages).length);
     expect(report.registeredPortugueseKeys).toBe(report.registeredEnglishKeys);
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
-    const frenchScope = Object.keys(englishMessages).filter(
+    const previewScope = Object.keys(englishMessages).filter(
       (key) =>
         /^(auth|ui|common|language|runtime)\./.test(key) ||
         key === 'environment.selected' ||
         key === 'selection.count',
     );
-    expect(Object.keys(previewCatalogs['fr-FR']!).sort()).toEqual(frenchScope.sort());
-    expect(report.previewCatalogKeyCounts).toEqual({ 'fr-FR': frenchScope.length });
+    const previewLocales = ['de-DE', 'fr-FR', 'ja-JP', 'zh-Hans'] as const;
+    expect(Object.keys(previewCatalogs)).toEqual(previewLocales);
+    for (const locale of previewLocales)
+      expect(Object.keys(previewCatalogs[locale]!).sort()).toEqual(previewScope.sort());
+    expect(report.previewCatalogKeyCounts).toEqual(
+      Object.fromEntries(previewLocales.map((locale) => [locale, previewScope.length])),
+    );
     expect(report.pendingCatalogLocales).toEqual([
       'de-DE',
       'fr-FR',

@@ -1,5 +1,8 @@
 import { localeDirection, localeFormats, type Locale } from './locales';
 import { frFR } from './catalogs/fr-FR';
+import { deDE } from './catalogs/de-DE';
+import { jaJP } from './catalogs/ja-JP';
+import { zhHans } from './catalogs/zh-Hans';
 import { enAuth, ptAuth } from './domains/auth';
 import { enUi, ptUi } from './domains/ui';
 import { enShell, ptShell } from './domains/shell';
@@ -229,7 +232,10 @@ export const portugueseMessages = {
 } satisfies MessageCatalog;
 
 export const previewCatalogs: Readonly<Partial<Record<Locale, MessageCatalog>>> = {
+  'de-DE': deDE,
   'fr-FR': frFR,
+  'ja-JP': jaJP,
+  'zh-Hans': zhHans,
 };
 
 function record(value: unknown): value is Record<string, unknown> {
