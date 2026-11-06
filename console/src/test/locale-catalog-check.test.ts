@@ -37,7 +37,16 @@ describe('Registered locale catalog gate', () => {
         key === 'environment.selected' ||
         key === 'selection.count',
     );
-    const previewLocales = ['de-DE', 'fr-FR', 'ja-JP', 'zh-Hans'] as const;
+    const previewLocales = [
+      'de-DE',
+      'fr-FR',
+      'hu-HU',
+      'ja-JP',
+      'fa-IR',
+      'ru-RU',
+      'uk-UA',
+      'zh-Hans',
+    ] as const;
     expect(Object.keys(previewCatalogs)).toEqual(previewLocales);
     for (const locale of previewLocales)
       expect(Object.keys(previewCatalogs[locale]!).sort()).toEqual(previewScope.sort());

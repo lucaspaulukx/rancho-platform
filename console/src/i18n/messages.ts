@@ -3,6 +3,10 @@ import { frFR } from './catalogs/fr-FR';
 import { deDE } from './catalogs/de-DE';
 import { jaJP } from './catalogs/ja-JP';
 import { zhHans } from './catalogs/zh-Hans';
+import { huHU } from './catalogs/hu-HU';
+import { faIR } from './catalogs/fa-IR';
+import { ruRU } from './catalogs/ru-RU';
+import { ukUA } from './catalogs/uk-UA';
 import { enAuth, ptAuth } from './domains/auth';
 import { enUi, ptUi } from './domains/ui';
 import { enShell, ptShell } from './domains/shell';
@@ -234,7 +238,11 @@ export const portugueseMessages = {
 export const previewCatalogs: Readonly<Partial<Record<Locale, MessageCatalog>>> = {
   'de-DE': deDE,
   'fr-FR': frFR,
+  'hu-HU': huHU,
   'ja-JP': jaJP,
+  'fa-IR': faIR,
+  'ru-RU': ruRU,
+  'uk-UA': ukUA,
   'zh-Hans': zhHans,
 };
 
