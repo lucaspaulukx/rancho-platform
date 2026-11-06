@@ -287,15 +287,17 @@ function ResourcePanelContext({
                 ),
               );
         scope.assertCurrent();
+        const freshContracts = Object.fromEntries(
+          contracts.map((contract) => [contract.id, contract]),
+        );
         if (
           payload.editDevices === true &&
-          payload.editSidecars !== true &&
-          names.some((name, index) => contracts[index]?.id !== name)
+          names.some((name) => !Object.hasOwn(freshContracts, name))
         )
           throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
         const freshSchemas = {
-          ...schemas.data,
-          ...Object.fromEntries(contracts.map((v) => [v.id, v])),
+          ...(payload.editDevices === true && payload.editSidecars === true ? {} : schemas.data),
+          ...freshContracts,
         };
         return api<Resource>(
           url,
