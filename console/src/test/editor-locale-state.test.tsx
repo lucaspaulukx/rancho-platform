@@ -6,6 +6,7 @@ import { I18nProvider, useI18n } from '../i18n/provider';
 import { CapabilityEditor } from '../components/CapabilityEditor';
 import { MemoryEditor } from '../components/MemoryEditor';
 import { SchemaForm } from '../components/SchemaForm';
+import { ComposeEditor } from '../components/ComposeEditor';
 
 function Editor() {
   const { setLocale } = useI18n();
@@ -24,6 +25,43 @@ function Editor() {
     </>
   );
 }
+
+it('keeps Compose source left to right and preserves the draft when switching to Persian', () => {
+  const initial = 'services:\n  web:\n    image: alpine:3.20\n';
+  function Composer() {
+    const { setLocale } = useI18n();
+    const [source, setSource] = useState(initial);
+    return (
+      <>
+        <button onClick={() => setLocale('fa-IR')}>Persian</button>
+        <ComposeEditor label="Docker Compose" value={source} onChange={setSource} />
+      </>
+    );
+  }
+  render(
+    <I18nProvider
+      policy={{
+        enabled: true,
+        defaultLocale: 'pt-BR',
+        availableLocales: ['pt-BR', 'fa-IR'],
+        selectable: true,
+        detectBrowser: false,
+        preview: true,
+      }}
+    >
+      <Composer />
+    </I18nProvider>,
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Mostrar Docker Compose' }));
+  const source = screen.getByRole('textbox', { name: 'Docker Compose' });
+  const draft = initial + '# fixture\n';
+  fireEvent.change(source, { target: { value: draft } });
+  fireEvent.click(screen.getByRole('button', { name: 'Persian' }));
+  expect(document.documentElement.dir).toBe('rtl');
+  expect(screen.getByRole('textbox', { name: 'Docker Compose' })).toBe(source);
+  expect(source).toHaveAttribute('dir', 'ltr');
+  expect(source).toHaveValue(draft);
+});
 
 it('retranslates an existing schema validation error without sending the draft', () => {
   const submit = vi.fn();

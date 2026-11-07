@@ -960,6 +960,7 @@ function CatalogFiles({ files }: { files: Record<string, string> }) {
         />
       </div>
       <pre
+        dir="ltr"
         id="catalog-file-content"
         role="tabpanel"
         aria-labelledby={`catalog-file-${Math.min(tab, names.length - 1)}`}

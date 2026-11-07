@@ -312,6 +312,21 @@ async function main() {
   check('Persian mobile environment menu remains within the viewport',
     await insideViewport(rtlEnvironment) && new URL(workspace.url()).searchParams.get('env') === '1a12');
   await workspace.keyboard.press('Escape');
+  result.stage = 'rtl-compose-draft';
+  await workspace.setViewportSize({ width: 1440, height: 1000 });
+  await workspace.goto(origin + '/console/stacks?env=1a12');
+  await workspace.locator('details.creation-menu > summary').click();
+  await workspace.locator('.creation-options').getByRole('button', { name: 'Stack', exact: true }).click();
+  const creator = workspace.getByRole('dialog', { name: 'Create stack', exact: true });
+  await creator.waitFor();
+  await creator.getByLabel('How to create the stack', { exact: true }).selectOption('compose');
+  const composeSource = creator.getByRole('textbox', { name: 'Docker Compose', exact: true });
+  const yamlDraft = 'services:\n  web:\n    image: alpine:3.20\n';
+  await composeSource.fill(yamlDraft);
+  check('Persian Compose editor keeps source left-to-right without changing the draft',
+    await composeSource.evaluate((source) => getComputedStyle(source).direction === 'ltr') &&
+    await composeSource.inputValue() === yamlDraft &&
+    await workspace.locator('html').getAttribute('dir') === 'rtl');
   check('no browser HTTP mutations or external navigation', result.blockedRequests === 0);
   check('no JavaScript errors', result.pageErrors === 0);
   result.status = 'passed';

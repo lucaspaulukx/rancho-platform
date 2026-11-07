@@ -246,6 +246,7 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
           <div
             ref={terminalHost}
             className="terminal-host"
+            dir="ltr"
             aria-label={t('resourceStream.terminal')}
           />
         </>
@@ -273,6 +274,7 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
           <div
             ref={body}
             className="log-viewer"
+            dir="ltr"
             role="log"
             aria-live={paused ? 'off' : 'polite'}
             aria-label={t('resourceStream.logLabel')}

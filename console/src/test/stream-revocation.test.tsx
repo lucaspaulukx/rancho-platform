@@ -100,49 +100,54 @@ afterEach(() => {
   context.server.effective.METRICS_PAYLOAD_TRANSPORT_ENABLED = false;
 });
 describe('Revogação de conexões já abertas', () => {
-  it('preserva a conexão de logs e o filtro ao trocar de idioma', async () => {
-    const fetcher = setup();
-    function Viewer() {
-      const { setLocale } = useI18n();
-      return (
-        <ResourceStream
-          resource={resource}
-          mode="logs"
-          onClose={vi.fn()}
-          context={<button onClick={() => setLocale('en-US')}>English</button>}
-        />
+  it.each(['en-US', 'fa-IR'] as const)(
+    'preserva a conexão de logs e o filtro ao trocar para %s',
+    async (locale) => {
+      const fetcher = setup();
+      function Viewer() {
+        const { setLocale } = useI18n();
+        return (
+          <ResourceStream
+            resource={resource}
+            mode="logs"
+            onClose={vi.fn()}
+            context={<button onClick={() => setLocale(locale)}>Change language</button>}
+          />
+        );
+      }
+      const view = render(
+        <I18nProvider
+          policy={{
+            enabled: true,
+            defaultLocale: 'pt-BR',
+            availableLocales: ['pt-BR', locale],
+            selectable: true,
+            detectBrowser: false,
+            preview: true,
+          }}
+        >
+          <Viewer />
+        </I18nProvider>,
       );
-    }
-    const view = render(
-      <I18nProvider
-        policy={{
-          enabled: true,
-          defaultLocale: 'pt-BR',
-          availableLocales: ['pt-BR', 'en-US'],
-          selectable: true,
-          detectBrowser: false,
-          preview: true,
-        }}
-      >
-        <Viewer />
-      </I18nProvider>,
-    );
-    await act(async () => {
-      await Promise.resolve();
-    });
-    await waitFor(() => expect(Socket.instances).toHaveLength(1));
-    const socket = Socket.instances[0];
-    const filter = screen.getByRole('textbox', { name: 'Filtrar logs' });
-    fireEvent.change(filter, { target: { value: 'fixture' } });
-    fetcher.mockClear();
-    fireEvent.click(screen.getByRole('button', { name: 'English' }));
-    expect(screen.getByRole('textbox', { name: 'Filter logs' })).toBe(filter);
-    expect(filter).toHaveValue('fixture');
-    expect(Socket.instances).toEqual([socket]);
-    expect(socket.close).not.toHaveBeenCalled();
-    expect(fetcher).not.toHaveBeenCalled();
-    view.unmount();
-  });
+      await act(async () => {
+        await Promise.resolve();
+      });
+      await waitFor(() => expect(Socket.instances).toHaveLength(1));
+      const socket = Socket.instances[0];
+      const filter = screen.getByRole('textbox', { name: 'Filtrar logs' });
+      fireEvent.change(filter, { target: { value: 'fixture' } });
+      fetcher.mockClear();
+      fireEvent.click(screen.getByRole('button', { name: 'Change language' }));
+      expect(screen.getByRole('textbox', { name: 'Filter logs' })).toBe(filter);
+      expect(filter).toHaveValue('fixture');
+      expect(Socket.instances).toEqual([socket]);
+      expect(socket.close).not.toHaveBeenCalled();
+      expect(fetcher).not.toHaveBeenCalled();
+      expect(screen.getByRole('log')).toHaveAttribute('dir', 'ltr');
+      expect(document.documentElement.dir).toBe(locale === 'fa-IR' ? 'rtl' : 'ltr');
+      view.unmount();
+    },
+  );
   it.each(['logs', 'execute', 'metrics'] as const)(
     'encerra %s ao desativar observabilidade sem novas requisições',
     async (mode) => {
