@@ -1,5 +1,7 @@
 # Testing
 
+The production build runs `check:bundles` after Vite. It reads the generated manifest, follows static imports and checks gzip sizes against `console/scripts/bundle-budgets.json`. Limits cover initial JavaScript (256 KiB), initial CSS (20 KiB), the largest lazy JavaScript chunk (100 KiB) and total JavaScript (600 KiB). Shared imports and CSS are counted once. The initial baseline includes the current language previews. These artifact budgets complement runtime measurements of latency, memory and rendering. Review the change and its measured cost before adjusting a limit.
+
 <!-- rancho-language-navigation:start -->
 [Português (Brasil)](../pt-BR/testing.md) | [English](testing.md)
 <!-- rancho-language-navigation:end -->
