@@ -191,4 +191,12 @@ export const deDE = {
   'shell.environment.empty': 'Keine Umgebungen gefunden.',
   'shell.environment.manage': 'Umgebungen verwalten',
   'shell.environment.authorized': 'Wählen Sie eine autorisierte Umgebung aus.',
+
+  'recovery.moduleTitle': 'Diese Seite konnte nicht geladen werden',
+  'recovery.renderTitle': 'Diese Seite konnte nicht geöffnet werden',
+  'recovery.moduleDescription':
+    'Die Konsole wurde möglicherweise aktualisiert oder die Verbindung wurde unterbrochen. Laden Sie die Konsole neu, um die aktuelle Version abzurufen. Nicht gespeicherte Änderungen in diesem Tab können verloren gehen.',
+  'recovery.renderDescription':
+    'Ein Fehler in der Benutzeroberfläche ist aufgetreten. Sie können einen anderen Bereich öffnen oder diese Seite neu laden. Nicht gespeicherte Änderungen in diesem Tab können verloren gehen.',
+  'recovery.reload': 'Konsole neu laden',
 } as const;

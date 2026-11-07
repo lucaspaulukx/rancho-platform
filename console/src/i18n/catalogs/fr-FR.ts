@@ -187,4 +187,12 @@ export const frFR = {
   'shell.environment.empty': 'Aucun environnement trouvé.',
   'shell.environment.manage': 'Gérer les environnements',
   'shell.environment.authorized': 'Sélectionnez un environnement autorisé.',
+
+  'recovery.moduleTitle': 'Impossible de charger cette page',
+  'recovery.renderTitle': 'Impossible d’ouvrir cette page',
+  'recovery.moduleDescription':
+    'La console a peut-être été mise à jour ou la connexion a été interrompue. Rechargez la console pour obtenir la version actuelle. Les modifications non enregistrées dans cet onglet peuvent être perdues.',
+  'recovery.renderDescription':
+    'Une erreur d’interface s’est produite. Vous pouvez ouvrir une autre section ou recharger cette page. Les modifications non enregistrées dans cet onglet peuvent être perdues.',
+  'recovery.reload': 'Recharger la console',
 } as const;

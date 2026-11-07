@@ -176,4 +176,11 @@ export const zhHans = {
   'shell.environment.empty': '未找到环境。',
   'shell.environment.manage': '管理环境',
   'shell.environment.authorized': '请选择有访问权限的环境。',
+  'recovery.moduleTitle': '无法加载此页面',
+  'recovery.renderTitle': '无法打开此页面',
+  'recovery.moduleDescription':
+    '控制台可能已更新，或连接已中断。请重新加载以获取当前版本。此标签页中未保存的更改可能会丢失。',
+  'recovery.renderDescription':
+    '界面发生错误。您可以打开其他部分或重新加载此页面。此标签页中未保存的更改可能会丢失。',
+  'recovery.reload': '重新加载控制台',
 } as const;
