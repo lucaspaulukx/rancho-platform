@@ -1,8 +1,8 @@
 import type { Resource } from './api';
 import {
-  containersForService,
   imageName,
   isInfrastructure,
+  serviceIds,
   stackContents,
   type WorkloadInventory,
 } from './workloads';
@@ -40,16 +40,23 @@ export function workloadTree(inventory: WorkloadInventory, filter: WorkloadFilte
     (filter.includeSystem || !isInfrastructure(r)) &&
     (inherited || queryMatches(r)) &&
     (!filter.state || r.state === filter.state);
+  const containersByService = new Map<string, Resource[]>();
+  for (const container of inventory.containers) {
+    for (const id of new Set(serviceIds(container))) {
+      const containers = containersByService.get(id);
+      if (containers) containers.push(container);
+      else containersByService.set(id, [container]);
+    }
+  }
   const attachedServices = new Set<string>();
   const attachedContainers = new Set<string>();
   const projectService = (service: Resource, inherited = false): ServiceNode | undefined => {
-    const containers = containersForService(service, inventory.containers);
+    const containers = containersByService.get(service.id) ?? [];
     containers.forEach((container) => attachedContainers.add(container.id));
-    const filtered = containers.filter((container) =>
-      matches(container, inherited || queryMatches(service)),
-    );
+    const serviceMatchesQuery = inherited || queryMatches(service);
+    const filtered = containers.filter((container) => matches(container, serviceMatchesQuery));
     return (filter.includeSystem || !isInfrastructure(service)) &&
-      (matches(service, inherited) || filtered.length)
+      ((serviceMatchesQuery && matches(service, true)) || filtered.length)
       ? { resource: service, containers: filtered }
       : undefined;
   };
@@ -58,22 +65,25 @@ export function workloadTree(inventory: WorkloadInventory, filter: WorkloadFilte
     const contents = stackContents(stack, inventory);
     contents.services.forEach((service) => attachedServices.add(service.id));
     contents.containers.forEach((container) => attachedContainers.add(container.id));
+    const stackMatchesQuery = queryMatches(stack);
     // Traverse hidden stacks as well to preserve ownership of their children.
     const nodes = contents.services
-      .map((service) => projectService(service, queryMatches(stack)))
+      .map((service) => projectService(service, stackMatchesQuery))
       .filter((node): node is ServiceNode => !!node);
-    const serviceContainerIds = new Set(
-      contents.services.flatMap((service) =>
-        containersForService(service, contents.containers).map((container) => container.id),
-      ),
-    );
+    const serviceContainerIds = new Set<string>();
+    for (const service of contents.services) {
+      // Stack contents include every container linked to one of its services.
+      for (const container of containersByService.get(service.id) ?? []) {
+        serviceContainerIds.add(container.id);
+      }
+    }
     const containers = contents.containers.filter(
       (container) =>
-        !serviceContainerIds.has(container.id) && matches(container, queryMatches(stack)),
+        !serviceContainerIds.has(container.id) && matches(container, stackMatchesQuery),
     );
     if (
       (filter.includeSystem || !isInfrastructure(stack)) &&
-      (matches(stack) || nodes.length || containers.length)
+      ((stackMatchesQuery && matches(stack, true)) || nodes.length || containers.length)
     )
       stacks.push({ resource: stack, services: nodes, containers });
   }

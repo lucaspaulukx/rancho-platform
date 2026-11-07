@@ -20,7 +20,7 @@ Statuses below describe maintained capabilities and remaining acceptance, not an
 | UX03 | Theme tokens and overrides | Implemented; verify effective contrast across final routes |
 | UX04 | Old-tab/chunk recovery and retained assets | Implemented; final upgrade/rollback with an open old tab remains |
 | UX05 | Manual accessibility/screen reader | Pending critical-flow manual acceptance |
-| UX06 | High volume/performance | Build gzip budgets and a synthetic browser inventory benchmark are in place. Measured latency, heap and rendering across 20 environments with 2,000 containers each. Optional client pagination bounds the flat Containers view to 50 rendered rows while preserving full inventory search and selection. Real backend latency, longer sessions and final release thresholds remain |
+| UX06 | High volume/performance | Build gzip budgets and a synthetic browser inventory benchmark are in place. Measured latency, heap and rendering across 20 environments with 2,000 containers each. Optional client pagination bounds the flat Containers view to 50 rendered rows while preserving full inventory search and selection. The workload tree reuses an index of containers by service during projection. Rendering of large expanded trees, real backend latency, longer sessions and final release thresholds remain |
 | CFG01 | Frontend/backend flags and classic fallback | Partial; final dependency/on/off/reversal matrix remains |
 | CFG02 | Versioned configuration | Implemented contract/CLI; artifact/data rollback belongs to release acceptance |
 

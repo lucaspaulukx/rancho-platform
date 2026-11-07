@@ -128,6 +128,33 @@ describe('Operação em uma única tela', () => {
     expect(tree.containers.map((node) => node.id)).toEqual(['standalone']);
     expect(tree.services).toEqual([]);
   });
+  it('preserva ordem e vínculos compartilhados com serviços declarados pela stack', () => {
+    const tree = workloadTree(
+      {
+        stacks: [resource('store', { type: 'stack', serviceIds: ['legacy'] })],
+        services: [
+          resource('web', { type: 'service', stackId: 'store' }),
+          resource('legacy', { type: 'service' }),
+          resource('standalone-service', { type: 'service' }),
+        ],
+        containers: [
+          resource('shared', { serviceIds: ['legacy', 'web', 'legacy', 'standalone-service'] }),
+          resource('direct', { stackId: 'store' }),
+          resource('legacy-only', { serviceIds: ['legacy'] }),
+          resource('orphan', { serviceIds: ['missing'] }),
+        ],
+      },
+      { query: '', state: '', includeSystem: false },
+    );
+    expect(tree.stacks[0].services.map((node) => node.resource.id)).toEqual(['web', 'legacy']);
+    expect(
+      tree.stacks[0].services.map((node) => node.containers.map((container) => container.id)),
+    ).toEqual([['shared'], ['shared', 'legacy-only']]);
+    expect(tree.stacks[0].containers.map((container) => container.id)).toEqual(['direct']);
+    expect(tree.services.map((node) => node.resource.id)).toEqual(['standalone-service']);
+    expect(tree.services[0].containers.map((container) => container.id)).toEqual(['shared']);
+    expect(tree.containers.map((container) => container.id)).toEqual(['orphan']);
+  });
   it('mantém stack e serviço ao buscar um container', () => {
     const tree = workloadTree(inventory, { query: 'web-2', state: '', includeSystem: false });
     expect(tree.stacks[0].resource.id).toBe('store');
