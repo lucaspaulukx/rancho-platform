@@ -513,35 +513,57 @@ export function DataTable<T>({
             </table>
           </div>
           {paginate && (
-            <footer className="table-footer">
-              <span>
-                {t('ui.table.range', {
-                  start: current * 20 + 1,
-                  end: Math.min((current + 1) * 20, filtered.length),
-                  total: filtered.length,
-                })}
-              </span>
-              <div>
-                <Button
-                  aria-label={t('ui.table.previous')}
-                  disabled={current === 0}
-                  onClick={() => setPage(current - 1)}
-                >
-                  <ChevronLeft size={16} />
-                </Button>
-                <span>{t('ui.table.page', { page: current + 1, total: pageCount })}</span>
-                <Button
-                  aria-label={t('ui.table.next')}
-                  disabled={current + 1 >= pageCount}
-                  onClick={() => setPage(current + 1)}
-                >
-                  <ChevronRight size={16} />
-                </Button>
-              </div>
-            </footer>
+            <TablePagination
+              page={current}
+              pageSize={20}
+              total={filtered.length}
+              onPageChange={setPage}
+            />
           )}
         </>
       )}
+    </div>
+  );
+}
+export function TablePagination({
+  page,
+  pageSize,
+  total,
+  onPageChange,
+}: {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
+}) {
+  const { t } = useI18n();
+  const pageCount = Math.ceil(total / pageSize);
+  return (
+    <div className="table-footer">
+      <span role="status">
+        {t('ui.table.range', {
+          start: page * pageSize + 1,
+          end: Math.min((page + 1) * pageSize, total),
+          total,
+        })}
+      </span>
+      <div>
+        <Button
+          aria-label={t('ui.table.previous')}
+          disabled={page === 0}
+          onClick={() => onPageChange(page - 1)}
+        >
+          <ChevronLeft size={16} />
+        </Button>
+        <span>{t('ui.table.page', { page: page + 1, total: pageCount })}</span>
+        <Button
+          aria-label={t('ui.table.next')}
+          disabled={page + 1 >= pageCount}
+          onClick={() => onPageChange(page + 1)}
+        >
+          <ChevronRight size={16} />
+        </Button>
+      </div>
     </div>
   );
 }

@@ -69,6 +69,7 @@ export interface ConsoleConfig {
   classicUrl: string;
   themeDefault: ThemeMode;
   themeSelectable: boolean;
+  workloadInventoryPagination?: boolean;
   customTheme: ThemeOverrides;
   modules: Record<ModuleName, boolean>;
   localization?: LocalizationPolicy;
@@ -136,6 +137,11 @@ export function validateConfig(value: unknown): ConsoleConfig {
   for (const key of ['enabled', 'branding', 'themeSelectable'] as const) {
     if (typeof c[key] !== 'boolean') throw new Error(`Configuração inválida: ${key}.`);
   }
+  if (
+    Object.hasOwn(source, 'workloadInventoryPagination') &&
+    typeof c.workloadInventoryPagination !== 'boolean'
+  )
+    throw new Error('Configuração inválida: workloadInventoryPagination.');
   if (!['light', 'dark', 'system'].includes(c.themeDefault))
     throw new Error('Tema padrão inválido.');
   try {

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -32,6 +32,7 @@ import {
   Field,
   Loading,
   PageHeader,
+  TablePagination,
   Tabs,
 } from '../components/ui';
 import { ActionMenu } from '../components/ActionMenu';
@@ -86,6 +87,7 @@ export function OperationsPage({
   const text = params.get('q') || '';
   const state = params.get('state') || '';
   const includeSystem = params.get('system') === 'true';
+  const paginateContainers = app.config.workloadInventoryPagination === true;
   const requestedView = params.get('view') || initialView;
   const view =
     app.config.modules.contextActions &&
@@ -556,15 +558,21 @@ export function OperationsPage({
           )}
           {view === 'containers' && (
             <section className="operation-stack" aria-label={t('operations.environmentContainers')}>
-              {visibleContainers.map((container) =>
-                row(
-                  container,
-                  'container',
-                  <span className="operation-count">
-                    {containerStacks.get(container.id)?.name || t('operations.standaloneContainer')}
-                  </span>,
-                ),
-              )}
+              <ContainerInventory
+                key={paginateContainers ? JSON.stringify([text, state, includeSystem]) : undefined}
+                rows={visibleContainers}
+                paginate={paginateContainers}
+                renderRow={(container) =>
+                  row(
+                    container,
+                    'container',
+                    <span className="operation-count">
+                      {containerStacks.get(container.id)?.name ||
+                        t('operations.standaloneContainer')}
+                    </span>,
+                  )
+                }
+              />
             </section>
           )}
         </div>
@@ -620,6 +628,40 @@ export function OperationsPage({
     </>
   );
 }
+const CONTAINER_PAGE_SIZE = 50;
+
+function ContainerInventory({
+  rows,
+  paginate,
+  renderRow,
+}: {
+  rows: Resource[];
+  paginate: boolean;
+  renderRow: (row: Resource) => ReactNode;
+}) {
+  const [page, setPage] = useState(0);
+  const lastPage = Math.max(0, Math.ceil(rows.length / CONTAINER_PAGE_SIZE) - 1);
+  const current = Math.min(page, lastPage);
+  useEffect(() => {
+    setPage((previous) => Math.min(previous, lastPage));
+  }, [lastPage]);
+  const start = current * CONTAINER_PAGE_SIZE;
+  const visible = paginate ? rows.slice(start, start + CONTAINER_PAGE_SIZE) : rows;
+  return (
+    <>
+      {paginate && lastPage > 0 && (
+        <TablePagination
+          page={current}
+          pageSize={CONTAINER_PAGE_SIZE}
+          total={rows.length}
+          onPageChange={setPage}
+        />
+      )}
+      {visible.map(renderRow)}
+    </>
+  );
+}
+
 function OperationRow({
   resource,
   kind,
