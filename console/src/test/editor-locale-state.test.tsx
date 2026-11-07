@@ -109,6 +109,51 @@ it('retranslates an existing schema validation error without sending the draft',
   expect(submit).not.toHaveBeenCalled();
 });
 
+it('preserves invalid JSON and retranslates its browser validation in place', () => {
+  function JsonEditor() {
+    const { setLocale } = useI18n();
+    return (
+      <>
+        <button onClick={() => setLocale('en-US')}>English</button>
+        <SchemaForm
+          schemas={{}}
+          onSubmit={vi.fn()}
+          schema={{
+            id: 'fixture',
+            pluralName: 'fixtures',
+            links: {},
+            resourceFields: { payload: { type: 'map[int]', create: true, required: true } },
+          }}
+        />
+      </>
+    );
+  }
+  render(
+    <I18nProvider
+      policy={{
+        enabled: true,
+        defaultLocale: 'pt-BR',
+        availableLocales: ['pt-BR', 'en-US'],
+        selectable: true,
+        detectBrowser: false,
+        preview: true,
+      }}
+    >
+      <JsonEditor />
+    </I18nProvider>,
+  );
+  const json = screen.getByRole('textbox', { name: 'Payload *' }) as HTMLTextAreaElement;
+  fireEvent.change(json, { target: { value: '{ invalid' } });
+  expect(json.validationMessage).toBe('Informe JSON válido.');
+  fireEvent.click(screen.getByRole('button', { name: 'English' }));
+  expect(screen.getByRole('textbox', { name: 'Payload *' })).toBe(json);
+  expect(json).toHaveValue('{ invalid');
+  expect(json).toHaveAttribute('dir', 'ltr');
+  expect(json.validationMessage).toBe('Enter valid JSON.');
+  fireEvent.change(json, { target: { value: '{"count":1}' } });
+  expect(json.validationMessage).toBe('');
+});
+
 it('preserves a selected native capability and its control when switching locale', async () => {
   const user = userEvent.setup();
   render(
