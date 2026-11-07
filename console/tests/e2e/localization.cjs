@@ -173,7 +173,7 @@ async function main() {
   await closeContext(publicContext);
 
   result.stage = 'authenticated-shell';
-  const authenticated = await context({ authenticated: true, extraLocales: ['fa-IR'] });
+  const authenticated = await context({ authenticated: true, extraLocales: ['fr-FR', 'de-DE', 'ja-JP', 'zh-Hans', 'hu-HU', 'ru-RU', 'uk-UA', 'fa-IR'] });
   const workspace = await page(authenticated);
   const workspaceUrl = origin + '/console/stacks?env=1a12&q=localization-acceptance';
   await workspace.goto(workspaceUrl, { waitUntil: 'domcontentloaded' });
@@ -271,7 +271,19 @@ async function main() {
     await about.getByText('Rancher 1.6.30', { exact: true }).isVisible());
   await about.getByRole('button', { name: 'Close dialog', exact: true }).click();
   result.stage = 'authenticated-rtl';
-  await language().selectOption('fa-IR');
+  for (const [locale, stacks] of [
+    ['de-DE', 'Stacks'], ['fr-FR', 'Stacks'], ['ja-JP', 'スタック'],
+    ['zh-Hans', '堆栈'], ['ru-RU', 'Стеки'], ['uk-UA', 'Стеки'],
+    ['hu-HU', 'Stackek'], ['fa-IR', 'پشته‌ها'],
+  ]) {
+    await workspace.locator('.language-selector select').selectOption(locale);
+    const stacksLink = workspace.locator('.sidebar a[href="/console/stacks?env=1a12"]');
+    check(`${locale} navigation translates in place and keeps the environment route`,
+      await stacksLink.getAttribute('title') === stacks &&
+      new URL(workspace.url()).searchParams.get('env') === '1a12' &&
+      await workspace.getByTestId('app-shell').getAttribute('class').then((value) => value.includes('sidebar-collapsed')));
+  }
+  await workspace.locator('.language-selector select').selectOption('fa-IR');
   await workspace.getByRole('combobox', { name: 'زبان', exact: true }).waitFor();
   check('Persian desktop places the sidebar on the right with its divider facing the workspace',
     await workspace.locator('.sidebar').evaluate((sidebar) => {
@@ -289,7 +301,7 @@ async function main() {
   await workspace.keyboard.press('Escape');
   await rtlDrawer.waitFor({ state: 'hidden' });
   await workspace.setViewportSize({ width: 390, height: 844 });
-  const mobileMenu = workspace.getByRole('button', { name: 'Open navigation', exact: true });
+  const mobileMenu = workspace.getByRole('button', { name: 'باز کردن پیمایش', exact: true });
   await mobileMenu.focus();
   await workspace.keyboard.press('Enter');
   const mobileSidebar = workspace.locator('.sidebar.mobile-open');
@@ -304,7 +316,7 @@ async function main() {
     await mobileSidebar.evaluate((sidebar) => sidebar.contains(document.activeElement)));
   await workspace.keyboard.press('Escape');
   await mobileSidebar.waitFor({ state: 'hidden' });
-  await workspace.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Open navigation');
+  await workspace.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'باز کردن پیمایش');
   check('Escape closes the Persian mobile sidebar and returns focus to its trigger');
   await workspace.locator('.environment-trigger').click();
   const rtlEnvironment = workspace.locator('.environment-popover');
