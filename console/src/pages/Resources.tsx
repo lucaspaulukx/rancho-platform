@@ -615,7 +615,10 @@ function ResourceContext({ item }: { item: NavItem }) {
                 key={`${editor}-${resource?.id || 'new'}-${replaceCertificate}`}
                 schema={
                   dataKind
-                    ? dataEditorSchema(schema, editor === 'edit', replaceCertificate)
+                    ? dataEditorSchema(schema, editor === 'edit', replaceCertificate, {
+                        label: t('resourcesPage.secretContent'),
+                        description: t('resourcesPage.secretContentHint'),
+                      })
                     : schema
                 }
                 schemas={schemas.data || {}}

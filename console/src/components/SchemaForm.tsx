@@ -62,9 +62,9 @@ function fieldLabelKey(name: string) {
   if (Object.hasOwn(ptSchemaForm, exact)) return exact as FieldLabelKey;
   if (Object.hasOwn(ptSchemaForm, lower)) return lower as FieldLabelKey;
 }
-export function fieldLabel(name: string) {
+export function fieldLabel(name: string, translate?: (key: FieldLabelKey) => string) {
   const key = fieldLabelKey(name);
-  return key ? ptSchemaForm[key] : humanizeFieldName(name);
+  return key ? (translate?.(key) ?? ptSchemaForm[key]) : humanizeFieldName(name);
 }
 function humanizeFieldName(name: string) {
   return name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
@@ -435,7 +435,7 @@ function EditorField({
   )
     return (
       <CapabilityEditor
-        label={name === 'capAdd' ? 'Capabilities adicionais' : 'Capabilities removidas'}
+        label={t(name === 'capAdd' ? 'schemaForm.label.capAdd' : 'schemaForm.label.capDrop')}
         value={value}
         options={field.options}
         onChange={onChange}
@@ -448,7 +448,11 @@ function EditorField({
   )
     return (
       <MemoryEditor
-        label={name === 'memory' ? 'Limite de memória' : 'Reserva de memória'}
+        label={t(
+          name === 'memory'
+            ? 'serviceUpgradeForm.memoryLimit'
+            : 'serviceUpgradeForm.memoryReservation',
+        )}
         value={value}
         onChange={onChange}
       />

@@ -54,7 +54,11 @@ export function repositoryMetadata(doc: RepositoryDocument) {
   return {
     source: doc.setting.source,
     inDb: doc.setting.inDb,
-    entries: doc.entries.map((v) => ({ name: v.name, branch: v.branch || 'Padrão do servidor' })),
+    entries: doc.entries.map((v) => ({
+      name: v.name,
+      branch: v.branch || 'Padrão do servidor',
+      usesDefaultBranch: !v.branch,
+    })),
   };
 }
 export function repositoryValue(before: RepositoryDocument, entries: RepositoryDraft[]) {
