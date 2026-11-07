@@ -1,6 +1,8 @@
 import { createServer } from 'vite';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const inventoryCodes = [
@@ -16,12 +18,47 @@ const inventoryCodes = [
   'zh-Hans',
 ];
 const checkedLocales = ['en-US', 'pt-BR'];
+const sourceFile = resolve(root, 'src/i18n/preview-sources.json');
+
+function ordered(value) {
+  if (Array.isArray(value)) return value.map(ordered);
+  if (value && typeof value === 'object')
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, ordered(value[key])]),
+    );
+  return value;
+}
+
+/** Fingerprints original messages by translated domain, independent of key ordering. */
+export function previewSourceSnapshot(englishMessages, previewCatalogs) {
+  const catalogs = {};
+  for (const [locale, catalog] of Object.entries(previewCatalogs)) {
+    const groups = {};
+    for (const key of Object.keys(catalog).sort()) {
+      if (!Object.hasOwn(englishMessages, key)) throw new Error('Unknown preview source.');
+      const domain = key.split('.')[0];
+      (groups[domain] ??= []).push([key, englishMessages[key]]);
+    }
+    catalogs[locale] = Object.fromEntries(
+      Object.entries(groups).map(([domain, messages]) => [
+        domain,
+        createHash('sha256')
+          .update(JSON.stringify(ordered(messages)))
+          .digest('hex'),
+      ]),
+    );
+  }
+  return { version: 1, catalogs };
+}
 
 /** Reports only registered messages; it does not discover untranslated interface strings. */
 export function checkRegisteredCatalogs({
   englishMessages,
   portugueseMessages,
   previewCatalogs = {},
+  previewSources,
   validateCatalog,
   localeInventory,
 }) {
@@ -59,6 +96,13 @@ export function checkRegisteredCatalogs({
       failures.add('invalid-preview-message-structure');
     }
   }
+  try {
+    const expected = previewSourceSnapshot(englishMessages, previewCatalogs);
+    if (JSON.stringify(ordered(previewSources)) !== JSON.stringify(ordered(expected)))
+      failures.add('preview-source-review-required');
+  } catch {
+    failures.add('invalid-preview-source');
+  }
   if (
     locales.length !== inventoryCodes.length ||
     new Set(locales).size !== inventoryCodes.length ||
@@ -83,7 +127,8 @@ async function main() {
   let server;
   let report;
   try {
-    if (process.argv.length !== 2) throw new Error('Unsupported arguments.');
+    const recording = process.argv.length === 4 && process.argv[2] === '--record-preview-source';
+    if (process.argv.length !== 2 && !recording) throw new Error('Unsupported arguments.');
     server = await createServer({
       root,
       configFile: false,
@@ -94,13 +139,36 @@ async function main() {
     const { englishMessages, portugueseMessages, previewCatalogs, validateCatalog } =
       await server.ssrLoadModule('/src/i18n/messages.ts');
     const { localeInventory } = await server.ssrLoadModule('/src/i18n/locales.ts');
-    report = checkRegisteredCatalogs({
-      englishMessages,
-      portugueseMessages,
-      previewCatalogs,
-      validateCatalog,
-      localeInventory,
-    });
+    const previewSources = existsSync(sourceFile)
+      ? JSON.parse(readFileSync(sourceFile, 'utf8'))
+      : { version: 1, catalogs: {} };
+    if (recording) {
+      const locale = process.argv[3];
+      if (!Object.hasOwn(previewCatalogs, locale)) throw new Error('Unknown preview locale.');
+      validateCatalog(englishMessages);
+      validateCatalog(previewCatalogs[locale]);
+      if (
+        previewSources.version !== 1 ||
+        !previewSources.catalogs ||
+        typeof previewSources.catalogs !== 'object' ||
+        Array.isArray(previewSources.catalogs)
+      )
+        throw new Error('Invalid source manifest.');
+      const snapshot = previewSourceSnapshot(englishMessages, {
+        [locale]: previewCatalogs[locale],
+      });
+      previewSources.catalogs[locale] = snapshot.catalogs[locale];
+      writeFileSync(sourceFile, JSON.stringify(ordered(previewSources), null, 2) + '\n');
+      report = { status: 'passed', scope: 'preview-source-record', locale, failures: [] };
+    } else
+      report = checkRegisteredCatalogs({
+        englishMessages,
+        portugueseMessages,
+        previewCatalogs,
+        previewSources,
+        validateCatalog,
+        localeInventory,
+      });
   } catch {
     report = {
       status: 'failed',

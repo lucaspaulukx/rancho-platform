@@ -30,6 +30,12 @@ python -m unittest discover -s tests -p test_docs_languages.py
 
 Substitua a fonte pelos caminhos canônicos afetados; `--review` aceita vários documentos. Revise o texto antes dos hashes. Navegação altera só o bloco próprio e preserva bytes do corpo/código e seletores manuais válidos. Catálogos não oferecem links de tradução ausente. O gate estrito rejeita traduções ausentes/desatualizadas, comandos/cabeçalhos alterados, links locais quebrados, caminhos inválidos e Markdown não registrado.
 
+## Revisão das traduções da interface
+
+Os catálogos de prévia em `console/src/i18n/catalogs/` acompanham o texto original em inglês por domínio de mensagens em `console/src/i18n/preview-sources.json`. Execute `npm run check:locales` dentro de `console/`. Alterar o texto ou os parâmetros de um domínio traduzido exige revisar cada idioma afetado. O gate também roda no CI e no build da imagem.
+
+Após revisar e atualizar um idioma, registre a fonte atual com `node scripts/check-locales.mjs --record-preview-source fr-FR`, substituindo o locale conforme necessário. Versione o catálogo e o manifesto de fontes juntos. Esse registro reconhece a versão da fonte usada pelo catálogo. Revisão linguística e cobertura completa da interface continuam como requisitos de aceite separados. Registrar outro locale atualiza somente os hashes daquele idioma.
+
 ## Links e evidências
 
 Use links relativos válidos, nomes exatos de comandos/APIs e limites claros de evidência. Erros brutos, credenciais, dumps, relatórios locais e dados de clientes ficam fora do Git. Referencie entrypoints de teste mantidos, sem colar o log de execução de um operador. Leitor de tela manual, efeitos nativos e recuperação não são substituídos por verificador documental.

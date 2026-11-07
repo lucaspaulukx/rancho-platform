@@ -30,6 +30,12 @@ python -m unittest discover -s tests -p test_docs_languages.py
 
 Replace the example source with the affected canonical paths; `--review` accepts multiple documents. Review text before stamping hashes. Navigation updates only its owned block and preserves body/code bytes and manual valid selectors. Catalog generation never offers a missing translation link. The strict gate rejects missing or stale translations, changed code blocks/headings, broken local links, invalid paths and unregistered Markdown.
 
+## Reviewing interface translations
+
+The preview catalogs in `console/src/i18n/catalogs/` track their English source by message domain in `console/src/i18n/preview-sources.json`. Run `npm run check:locales` from `console/`. A wording or placeholder change in a translated domain requires reviewing every affected locale. The gate also runs in CI and the image build.
+
+After reviewing and updating one locale, record its current source with `node scripts/check-locales.mjs --record-preview-source fr-FR`, replacing the locale as needed. Commit the catalog and source manifest together. The record acknowledges the source version used by that catalog. Linguistic review and complete interface coverage remain separate acceptance requirements. Recording another locale updates only that locale's source hashes.
+
 ## Links and evidence
 
 Use relative links that work in the repository, exact command/API names and clear evidence boundaries. Keep raw errors, credentials, dumps, local reports and customer information outside Git. Reference maintained test entrypoints instead of embedding one operator's run log. Manual screen-reader review, native effects and recovery cannot be replaced by a documentation checker.

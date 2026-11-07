@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
 import {
   englishMessages,
   portugueseMessages,
@@ -12,7 +13,7 @@ import { localeInventory } from '../i18n/locales';
 
 // The CLI is an ES module; a computed URL avoids claiming a generated declaration exists.
 const root = process.cwd();
-const { checkRegisteredCatalogs } = await import(
+const { checkRegisteredCatalogs, previewSourceSnapshot } = await import(
   /* @vite-ignore */ pathToFileURL(resolve(root, 'scripts/check-locales.mjs')).href
 );
 const inputs = {
@@ -21,9 +22,37 @@ const inputs = {
   previewCatalogs,
   validateCatalog,
   localeInventory,
+  previewSources: JSON.parse(readFileSync(resolve(root, 'src/i18n/preview-sources.json'), 'utf8')),
 };
 
 describe('Registered locale catalog gate', () => {
+  it('requires preview review when source wording changes without changing placeholders', () => {
+    const changed = { ...englishMessages, 'auth.loginTitle': 'Open your environment' };
+    const report = checkRegisteredCatalogs({ ...inputs, englishMessages: changed });
+    expect(report.failures).toContain('preview-source-review-required');
+    expect(report.status).toBe('failed');
+    const refreshed = previewSourceSnapshot(changed, previewCatalogs);
+    expect(
+      checkRegisteredCatalogs({ ...inputs, englishMessages: changed, previewSources: refreshed })
+        .status,
+    ).toBe('passed');
+    expect(refreshed.catalogs['fr-FR'].shell).toBe(inputs.previewSources.catalogs['fr-FR'].shell);
+    expect(refreshed.catalogs['fr-FR'].auth).not.toBe(inputs.previewSources.catalogs['fr-FR'].auth);
+  });
+
+  it('ignores source order and untranslated domains but rejects a missing source manifest', () => {
+    const reordered = Object.fromEntries(Object.entries(englishMessages).reverse());
+    expect(checkRegisteredCatalogs({ ...inputs, englishMessages: reordered }).status).toBe(
+      'passed',
+    );
+    const unrelated = { ...englishMessages, 'resourceCreator.kind.service': 'Workload service' };
+    expect(checkRegisteredCatalogs({ ...inputs, englishMessages: unrelated }).status).toBe(
+      'passed',
+    );
+    expect(checkRegisteredCatalogs({ ...inputs, previewSources: undefined }).failures).toContain(
+      'preview-source-review-required',
+    );
+  });
   it('checks equal registered catalogs without claiming complete interface translation', () => {
     const report = checkRegisteredCatalogs(inputs);
     expect(report.status).toBe('passed');
