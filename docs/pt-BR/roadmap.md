@@ -20,7 +20,7 @@ Estados descrevem capacidades mantidas e aceites restantes, não diário de exec
 | UX03 | Tokens de tema e overrides | Implementado; conferir contraste efetivo nas rotas finais |
 | UX04 | Recuperação de chunks/abas antigas e retenção de assets | Implementado; falta upgrade/rollback final com aba antiga aberta |
 | UX05 | Acessibilidade manual/leitor de tela | Pendente aceite manual dos fluxos críticos |
-| UX06 | Alto volume/performance | Pendentes budgets e medição de latência, heap/render com20 environments/milhares de registros |
+| UX06 | Alto volume/performance | Limites gzip no build e benchmark sintético de inventário no navegador disponíveis. Latência, heap e renderização medidos em 20 ambientes com 2.000 containers cada. A lista plana ainda renderiza todas as linhas filtradas. Faltam latência real do backend, sessões longas e critérios finais de release |
 | CFG01 | Flags frontend/backend e fallback clássico | Parcial; falta matriz final de dependência/on/off/reversão |
 | CFG02 | Configuração versionada | Contrato/CLI implementados; rollback de artefato/dados pertence ao aceite de release |
 

@@ -97,6 +97,17 @@ export function OperationsPage({
       query.data ? workloadTree(query.data, { query: text, state, includeSystem }) : undefined,
     [query.data, text, state, includeSystem],
   );
+  const containerStacks = useMemo(() => {
+    const stacks = new Map<string, Resource>();
+    if (view === 'containers' && query.data) {
+      for (const stack of query.data.stacks) {
+        for (const container of stackContents(stack, query.data).containers) {
+          if (!stacks.has(container.id)) stacks.set(container.id, stack);
+        }
+      }
+    }
+    return stacks;
+  }, [query.data, view]);
   function filter(key: string, value: string) {
     const next = new URLSearchParams(params);
     if (value) next.set(key, value);
@@ -550,13 +561,7 @@ export function OperationsPage({
                   container,
                   'container',
                   <span className="operation-count">
-                    {inventory.stacks.find(
-                      (stack) =>
-                        stack.id === container.stackId ||
-                        stackContents(stack, inventory).containers.some(
-                          (value) => value.id === container.id,
-                        ),
-                    )?.name || t('operations.standaloneContainer')}
+                    {containerStacks.get(container.id)?.name || t('operations.standaloneContainer')}
                   </span>,
                 ),
               )}

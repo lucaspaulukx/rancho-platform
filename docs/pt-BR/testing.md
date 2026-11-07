@@ -72,4 +72,14 @@ O helper de transporte do scheduler é diagnóstico limitado para a rede gerenci
 
 `sidecar_device_upgrade_acceptance.py` verifica o editor estruturado em serviço próprio com escala zero, incluindo flag desligada, campo ausente no schema atualizado do ambiente, retenção do rascunho, upgrade, reversão, conclusão e remoção explícita. Confere a preservação do mapeamento principal, a limpeza e a revogação da sessão.
 
+### Inventário em alto volume
+
+Com o console compilado em localhost:18090 e o Chromium do Playwright disponível, rode este comando na raiz do repositório.
+
+```sh
+node console/tests/e2e/high-volume-inventory.cjs
+```
+
+Defina `PLAYWRIGHT_MODULES` e `CHROMIUM_EXECUTABLE` se o Playwright ou o Chromium estiverem instalados fora dos caminhos padrão. O benchmark usa três contextos novos de navegador e 20 ambientes sintéticos com 20 stacks, 200 serviços e 2.000 containers em cada um. Confere a paginação da API, busca o último container e percorre todos os ambientes em um contexto. Registra o asset inicial, o tempo de carregamento e troca de ambiente, o tamanho do DOM, tarefas longas e o heap após a coleta de lixo. O navegador fornece as respostas da API sem credenciais nem gravações no Rancher. Use o mesmo navegador, máquina e configuração de build para comparar resultados. A latência do backend e sessões longas exigem testes separados.
+
 Separe unitário/componente, build limpo, renderização browser, comportamento nativo real e CI remoto. Registre identidade do artefato, flags, escopo, controles, resultados medidos e cleanup; publique somente resumos sanitizados. Teste `nofile` em um host não valida todos os limites ou multi-host. Probe curto de WebSocket não prova estabilidade do scheduler/soak. Restore offline de DB não prova recuperação de engine/IdP/workloads. Aceites restantes ficam no [roadmap](roadmap.md).
