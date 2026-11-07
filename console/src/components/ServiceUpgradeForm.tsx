@@ -26,6 +26,7 @@ import {
   supportsSecurityUpgrade,
   supportsUlimitUpgrade,
   supportsDeviceUpgrade,
+  supportsSidecarDeviceUpgrade,
   DeviceUpgradeValidationError,
   ServiceUpgradeValidationError,
   securityValues,
@@ -93,6 +94,8 @@ export function ServiceUpgradeForm({
     healthAvailable ? editableHealthCheck(resource, schemas) : null,
   );
   const sidecarsAvailable = sidecarsEnabled && supportsSidecarUpgrade(resource, schemas);
+  const sidecarDevicesAvailable =
+    devicesEnabled && sidecarsAvailable && supportsSidecarDeviceUpgrade(resource, schemas);
   const [editSidecars, setEditSidecars] = useState(false);
   const schedulingAvailable = schedulingEnabled && supportsSchedulingUpgrade(resource, schemas);
   const [editScheduling, setEditScheduling] = useState(false);
@@ -100,6 +103,20 @@ export function ServiceUpgradeForm({
   const [sidecars, setSidecars] = useState<unknown>(() =>
     sidecarsAvailable ? editableSidecars(resource, schemas) : [],
   );
+  const originalSidecarDevices = new Map(
+    (Array.isArray(resource.secondaryLaunchConfigs) ? resource.secondaryLaunchConfigs : []).map(
+      (row) => [row.name, row.devices],
+    ),
+  );
+  const editSidecarDevices =
+    sidecarDevicesAvailable &&
+    Array.isArray(sidecars) &&
+    sidecars.some(
+      (row) =>
+        row &&
+        typeof row === 'object' &&
+        JSON.stringify(row.devices) !== JSON.stringify(originalSidecarDevices.get(row.name)),
+    );
   const resourceAvailable = resourcesEnabled && supportsResourceUpgrade(resource, schemas);
   const [editResources, setEditResources] = useState(false);
   const cpuAvailable = resourcesEnabled && supportsCpuResourceUpgrade(resource, schemas);
@@ -148,7 +165,11 @@ export function ServiceUpgradeForm({
       ...(healthAvailable && editHealthCheck ? { editHealthCheck: true, healthCheck } : {}),
       ...(schedulingAvailable && editScheduling ? { editScheduling: true, labels } : {}),
       ...(sidecarsAvailable && editSidecars
-        ? { editSidecars: true, secondaryLaunchConfigs: sidecars }
+        ? {
+            editSidecars: true,
+            ...(editSidecarDevices ? { editSidecarDevices: true } : {}),
+            secondaryLaunchConfigs: sidecars,
+          }
         : {}),
     };
     try {
@@ -434,6 +455,7 @@ export function ServiceUpgradeForm({
               references={{}}
               bindingEditors={bindingsEnabled}
               healthCheckEditors={healthChecksEnabled}
+              deviceEditors={sidecarDevicesAvailable}
               onChange={(value) => {
                 setSidecars(value);
                 onDirtyChange(true);
@@ -498,12 +520,12 @@ export function ServiceUpgradeForm({
           if (!open && !busy) setReview(null);
         }}
         title={
-          review?.editDevices === true
+          review?.editDevices === true || review?.editSidecarDevices === true
             ? t('deviceUpgradeForm.confirmTitle')
             : t('serviceUpgradeForm.confirm')
         }
         description={
-          review?.editDevices === true
+          review?.editDevices === true || review?.editSidecarDevices === true
             ? t('deviceUpgradeForm.confirmDescription', { service: resource.name || resource.id })
             : t('serviceUpgradeForm.impact', { service: resource.name || resource.id })
         }

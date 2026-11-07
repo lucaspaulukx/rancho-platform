@@ -120,6 +120,18 @@ export function supportsDeviceUpgrade(resource: Resource, schemas: Record<string
     supportsDevices(schemas.launchConfig?.resourceFields.devices)
   );
 }
+export function supportsSidecarDeviceUpgrade(resource: Resource, schemas: Record<string, Schema>) {
+  return (
+    supportsSidecarUpgrade(resource, schemas) &&
+    schemas.serviceUpgrade?.resourceFields.inServiceStrategy?.type === 'inServiceUpgradeStrategy' &&
+    schemas.inServiceUpgradeStrategy?.resourceFields.launchConfig?.type === 'launchConfig' &&
+    schemas.inServiceUpgradeStrategy?.resourceFields.secondaryLaunchConfigs?.type ===
+      'array[secondaryLaunchConfig]' &&
+    schemas.secondaryLaunchConfig?.resourceFields.name?.type === 'string' &&
+    schemas.secondaryLaunchConfig?.resourceFields.imageUuid?.type === 'string' &&
+    supportsDevices(schemas.secondaryLaunchConfig?.resourceFields.devices)
+  );
+}
 export function supportsSecurityUpgrade(resource: Resource, schemas: Record<string, Schema>) {
   return (
     supportsImageUpgrade(resource, schemas) &&
@@ -223,9 +235,21 @@ export function supportsSidecarUpgrade(resource: Resource, schemas: Record<strin
 }
 export function editableSidecars(resource: Resource, schemas: Record<string, Schema>) {
   return Array.isArray(resource.secondaryLaunchConfigs)
-    ? resource.secondaryLaunchConfigs.map((value) =>
-        preparePayload(schemas.secondaryLaunchConfig, value, undefined, schemas),
-      )
+    ? resource.secondaryLaunchConfigs.map((value): Record<string, unknown> => {
+        const schema = schemas.secondaryLaunchConfig;
+        const draftSchema = supportsDevices(schema.resourceFields.devices)
+          ? schema
+          : {
+              ...schema,
+              resourceFields: Object.fromEntries(
+                Object.entries(schema.resourceFields).filter(([name]) => name !== 'devices'),
+              ),
+            };
+        const prepared = preparePayload(draftSchema, value, undefined, schemas);
+        // Retain native device data in the draft even when the current create schema omits it.
+        // The fresh submission contract must reject loss rather than silently clearing mappings.
+        return Object.hasOwn(value, 'devices') ? { ...prepared, devices: value.devices } : prepared;
+      })
     : [];
 }
 function canonical(value: unknown): unknown {
@@ -255,6 +279,12 @@ export function configurationUpgradePayload(
   values: Record<string, unknown>,
   schemas: Record<string, Schema>,
 ) {
+  const deviceEditing = values.editDevices === true || values.editSidecarDevices === true;
+  if (
+    values.editSidecarDevices === true &&
+    (values.editSidecars !== true || !supportsSidecarDeviceUpgrade(fresh, schemas))
+  )
+    throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
   if (
     !(values.editDevices === true
       ? supportsDeviceUpgrade(fresh, schemas)
@@ -283,7 +313,7 @@ export function configurationUpgradePayload(
     !['active', 'inactive'].includes(fresh.state || '') ||
     !fresh.actions?.upgrade
   )
-    throw values.editDevices === true
+    throw deviceEditing
       ? new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable')
       : new Error('A atualização de configuração não está disponível neste serviço.');
   if (
@@ -299,7 +329,7 @@ export function configurationUpgradePayload(
       JSON.stringify(canonical([before.launchConfig, before.secondaryLaunchConfigs])) !==
         JSON.stringify(canonical([fresh.launchConfig, fresh.secondaryLaunchConfigs])))
   )
-    throw values.editDevices === true
+    throw deviceEditing
       ? new DeviceUpgradeValidationError('deviceUpgrade.error.conflict')
       : new Error('A configuração foi alterada por outro cliente. Reabra o upgrade.');
   const launch = fresh.launchConfig as Record<string, unknown>;
@@ -386,6 +416,23 @@ export function configurationUpgradePayload(
       secondaryLaunchConfigs: values.secondaryLaunchConfigs,
     };
     validateSidecars(next, schemas);
+    if (values.editSidecarDevices === true) {
+      const originals = new Map(
+        ((fresh.secondaryLaunchConfigs ?? []) as Record<string, unknown>[]).map((row) => [
+          row.name,
+          row,
+        ]),
+      );
+      for (const row of values.secondaryLaunchConfigs as Record<string, unknown>[]) {
+        const original = originals.get(row.name);
+        if (JSON.stringify(row.devices) !== JSON.stringify(original?.devices)) {
+          // Clearing a kept mapping is explicit ([]); omission must never imply a reset.
+          if (row.devices === undefined)
+            throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
+          normalizeDevices(row.devices);
+        }
+      }
+    }
     validateWorkloadHealthChecks(
       {
         ...schemas.service,
@@ -427,7 +474,7 @@ export function configurationUpgradePayload(
       JSON.stringify(canonical(securityValues(values))) ===
         JSON.stringify(canonical(securityValues(launch))))
   )
-    throw values.editDevices === true
+    throw deviceEditing
       ? new DeviceUpgradeValidationError('deviceUpgrade.error.noChange')
       : new Error('Altere a imagem ou a configuração antes de atualizar.');
   const result = upgradePayload(
@@ -466,6 +513,25 @@ export function configurationUpgradePayload(
           sidecar.devices.length > 0 &&
           JSON.stringify(sidecar.devices) !== JSON.stringify(prepared[index]?.devices),
       )
+    )
+      throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
+  }
+  if (values.editSidecarDevices === true) {
+    const strategy = result.inServiceStrategy as Record<string, unknown>;
+    const prepared = new Map(
+      ((strategy.secondaryLaunchConfigs ?? []) as Record<string, unknown>[]).map((row) => [
+        row.name,
+        row,
+      ]),
+    );
+    for (const row of values.secondaryLaunchConfigs as Record<string, unknown>[])
+      if (JSON.stringify(row.devices) !== JSON.stringify(prepared.get(row.name)?.devices))
+        throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
+    const intendedPrimary =
+      values.editDevices === true ? normalizeDevices(values.devices) : launch.devices;
+    if (
+      JSON.stringify(intendedPrimary) !==
+      JSON.stringify((strategy.launchConfig as Record<string, unknown>).devices)
     )
       throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
   }

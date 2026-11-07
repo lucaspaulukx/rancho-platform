@@ -233,7 +233,9 @@ function ResourcePanelContext({
       const signal = scope.signal();
       const current = await api<Resource>(resource.links.self, undefined, undefined, signal);
       scope.resource(current, resource);
-      if (payload.editDevices === true) {
+      const deviceUpgradeRequested =
+        payload.editDevices === true || payload.editSidecarDevices === true;
+      if (deviceUpgradeRequested) {
         if (!app.config.modules.workloadDeviceUpgrades)
           throw new DeviceUpgradeValidationError('deviceUpgrade.error.disabled');
         if (!imageUpgrade || !scope.environment)
@@ -275,7 +277,7 @@ function ResourcePanelContext({
           payload.editCpuResources === true ||
           payload.editSecurity === true ||
           payload.editUlimits === true ||
-          payload.editDevices === true)
+          deviceUpgradeRequested)
       ) {
         if (payload.editBindings === true && !app.config.modules.workloadConfigUpgrades)
           throw new ResourcePanelError('resourcePanel.bindingsDisabled');
@@ -302,7 +304,9 @@ function ResourcePanelContext({
           ...(payload.editHealthCheck === true
             ? ['instanceHealthCheck', 'recreateOnQuorumStrategyConfig']
             : []),
-          ...(Array.isArray(current.secondaryLaunchConfigs) && current.secondaryLaunchConfigs.length
+          ...((Array.isArray(current.secondaryLaunchConfigs) &&
+            current.secondaryLaunchConfigs.length) ||
+          payload.editSidecarDevices === true
             ? ['secondaryLaunchConfig']
             : []),
         ];
@@ -323,13 +327,10 @@ function ResourcePanelContext({
         const freshContracts = Object.fromEntries(
           contracts.map((contract) => [contract.id, contract]),
         );
-        if (
-          payload.editDevices === true &&
-          names.some((name) => !Object.hasOwn(freshContracts, name))
-        )
+        if (deviceUpgradeRequested && names.some((name) => !Object.hasOwn(freshContracts, name)))
           throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
         const freshSchemas = {
-          ...(payload.editDevices === true && payload.editSidecars === true ? {} : schemas.data),
+          ...(deviceUpgradeRequested && payload.editSidecars === true ? {} : schemas.data),
           ...freshContracts,
         };
         return api<Resource>(
