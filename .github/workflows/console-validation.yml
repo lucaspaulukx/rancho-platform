@@ -39,6 +39,11 @@ jobs:
           python3 scripts/docs_languages.py --require-complete
           python3 -m unittest discover -s tests -p test_docs_languages.py
           python3 -m unittest discover -s tests -p test_repository_layout.py
+      - name: Check offline migration contracts
+        run: |
+          python3 -m venv "$RUNNER_TEMP/rancho-migration"
+          "$RUNNER_TEMP/rancho-migration/bin/python" -m pip install --disable-pip-version-check --no-input -r migration/requirements.txt
+          "$RUNNER_TEMP/rancho-migration/bin/python" -B -m unittest discover -s migration
       - name: Install locked console dependencies
         working-directory: console
         run: npm ci
