@@ -966,7 +966,7 @@ select optgroup {
 table {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
+  text-align: start;
   font-size: 12px;
 }
 th {
@@ -1039,7 +1039,7 @@ tbody tr:hover {
   border: 0;
   padding: 0;
   color: var(--text);
-  text-align: left;
+  text-align: start;
 }
 .row-title button:hover {
   color: var(--primary);
@@ -1873,7 +1873,7 @@ input[type='checkbox']:focus-visible {
 }
 .creation-options {
   position: absolute;
-  right: 0;
+  inset-inline-end: 0;
   top: calc(100% + 8px);
   z-index: 20;
   width: 210px;
@@ -1889,7 +1889,7 @@ input[type='checkbox']:focus-visible {
   border: 0;
   border-radius: 6px;
   width: 100%;
-  text-align: left;
+  text-align: start;
   background: none;
   color: var(--text);
   font-size: 12px;
@@ -1944,7 +1944,7 @@ input[type='checkbox']:focus-visible {
   color: var(--text);
   font-size: 13px;
   font-weight: 600;
-  text-align: left;
+  text-align: start;
   width: fit-content;
   max-width: 100%;
   overflow-wrap: anywhere;
@@ -2004,7 +2004,7 @@ input[type='checkbox']:focus-visible {
   padding: 9px 12px;
   border: 0;
   border-radius: 6px;
-  text-align: left;
+  text-align: start;
   font: inherit;
   font-size: 12px;
   color: var(--text);
@@ -2489,7 +2489,7 @@ input[type='checkbox']:focus-visible {
 .pending-steps {
   display: flex;
   flex-direction: column;
-  text-align: left;
+  text-align: start;
   max-width: 440px;
   margin: 32px auto;
   padding-top: 24px;
@@ -2816,7 +2816,7 @@ input[type='checkbox']:focus-visible {
 .nav-section a.active:before {
   content: '';
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   top: 7px;
   bottom: 7px;
   width: 2px;
@@ -2839,7 +2839,7 @@ input[type='checkbox']:focus-visible {
   padding: 4px 0;
   border: 0;
   background: none;
-  text-align: left;
+  text-align: start;
   color: var(--text);
   cursor: pointer;
 }

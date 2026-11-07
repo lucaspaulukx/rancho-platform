@@ -1,9 +1,47 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ActionMenu } from '../components/ActionMenu';
+import { I18nProvider } from '../i18n/provider';
 
 describe('Menu de ações compartilhado', () => {
+  it('reposiciona um menu aberto em RTL preservando foco sem executar ações', async () => {
+    const choose = vi.fn();
+    render(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'fa-IR'],
+          selectable: true,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <ActionMenu label="Ações" actions={[{ id: 'logs', label: 'Logs', onSelect: choose }]} />
+      </I18nProvider>,
+    );
+    const trigger = screen.getByRole('button', { name: 'Ações' });
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(300, 100, 40, 30));
+    await userEvent.click(trigger);
+    const menu = screen.getByRole('menu');
+    expect(menu).toHaveStyle({ left: '76px' });
+    const item = screen.getByRole('menuitem', { name: 'Logs' });
+    expect(item).toHaveFocus();
+    act(() => {
+      localStorage.setItem(
+        'rancho.console.locale.anonymous',
+        JSON.stringify({ version: 1, locale: 'fa-IR' }),
+      );
+      window.dispatchEvent(new StorageEvent('storage', { key: 'rancho.console.locale.anonymous' }));
+    });
+    expect(screen.getByRole('menu')).toBe(menu);
+    expect(menu).toHaveStyle({ left: '300px' });
+    expect(item).toHaveFocus();
+    expect(choose).not.toHaveBeenCalled();
+    await userEvent.keyboard('{Escape}');
+    expect(trigger).toHaveFocus();
+  });
   it('abre por teclado, ignora itens desabilitados e devolve foco com Escape', async () => {
     render(
       <ActionMenu

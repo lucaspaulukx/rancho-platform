@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { MoreHorizontal } from 'lucide-react';
+import { useI18n } from '../i18n/provider';
 
 export interface MenuAction {
   id: string;
@@ -11,6 +12,7 @@ export interface MenuAction {
   onSelect: () => void;
 }
 export function ActionMenu({ label, actions }: { label: string; actions: MenuAction[] }) {
+  const { direction } = useI18n();
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
@@ -40,7 +42,13 @@ export function ActionMenu({ label, actions }: { label: string; actions: MenuAct
       const maxHeight = Math.max(80, Math.min(420, upwards ? above : below));
       const height = Math.min(menu.current.scrollHeight, maxHeight);
       setPosition({
-        left: Math.max(12, Math.min(box.right - width, window.innerWidth - width - 12)),
+        left: Math.max(
+          12,
+          Math.min(
+            direction === 'rtl' ? box.left : box.right - width,
+            window.innerWidth - width - 12,
+          ),
+        ),
         top: Math.max(
           12,
           Math.min(
@@ -58,7 +66,7 @@ export function ActionMenu({ label, actions }: { label: string; actions: MenuAct
       window.removeEventListener('resize', place);
       window.removeEventListener('scroll', place, true);
     };
-  }, [open, actions.length]);
+  }, [open, actions.length, direction]);
   useLayoutEffect(() => {
     if (!open) {
       focused.current = false;

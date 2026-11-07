@@ -50,6 +50,8 @@ Grupos, contas, diálogos de contas locais, diagnóstico de acesso efetivo, chav
 
 ## Dados e mutações
 
+Tabelas compartilhadas, títulos de recursos e controles de criação se alinham ao início da direção de texto ativa. O menu de ações se reposiciona quando a direção muda, preservando o foco do teclado e o estado aberto.
+
 Listas de recursos e workloads, ações de recursos, edição de environments, repositórios de catálogo por environment e políticas de rede usam mensagens compartilhadas. O painel de logs e terminal traduz controles e estados da conexão no lugar. A troca de idioma preserva a conexão ativa, o filtro, os comandos nativos e o conteúdo dos logs.
 
 Rótulos e mensagens de revisão da atualização de serviços seguem o idioma ativo. Rótulos, números exibidos e horários dos gráficos de métricas usam esse idioma, preservando a série selecionada e o formato do CSV.

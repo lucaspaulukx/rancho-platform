@@ -50,6 +50,8 @@ Groups, accounts, local account dialogs, effective access diagnostics, API keys,
 
 ## Data and mutations
 
+Shared tables, resource titles and creation controls align to the start of the active text direction. The action menu repositions when direction changes while preserving keyboard focus and its open state.
+
 Resource and workload lists, resource actions, environment editing, scoped catalog repositories and network policies use shared messages. The log and terminal panel translates controls and connection states in place. The active connection, filter, native commands and log content are preserved when switching language.
 
 Service upgrade labels and review messages follow the active locale. Metrics labels, displayed numbers and chart timestamps use that locale while the selected series and CSV format stay stable.
