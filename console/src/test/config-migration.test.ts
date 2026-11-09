@@ -33,21 +33,16 @@ describe('Migração da configuração pública', () => {
     expect(validateConfig(config)).toEqual(upgraded);
     expect(validateConfig(legacy)).toEqual(upgraded);
   });
-  it('preserves optional pagination and rejects invalid values', () => {
-    const { workloadInventoryPagination: _, ...existing } = config;
-    expect(validateConfig(existing).workloadInventoryPagination).toBeUndefined();
-    expect(
-      validateConfig({ ...existing, workloadInventoryPagination: true })
-        .workloadInventoryPagination,
-    ).toBe(true);
-    expect(
-      validateConfig({ ...existing, workloadInventoryPagination: false })
-        .workloadInventoryPagination,
-    ).toBe(false);
-    expect(() => validateConfig({ ...existing, workloadInventoryPagination: 'true' })).toThrow(
-      'workloadInventoryPagination',
-    );
-  });
+  it.each(['workloadInventoryPagination', 'workloadTreePagination'] as const)(
+    'preserves optional %s and rejects invalid values',
+    (key) => {
+      const { [key]: _, ...existing } = config;
+      expect(validateConfig(existing)[key]).toBeUndefined();
+      expect(validateConfig({ ...existing, [key]: true })[key]).toBe(true);
+      expect(validateConfig({ ...existing, [key]: false })[key]).toBe(false);
+      expect(() => validateConfig({ ...existing, [key]: 'true' })).toThrow(key);
+    },
+  );
   it.each([0, 2, '1', null, false])('recusa versão não suportada %s', (schemaVersion) => {
     expect(() => validateConfig({ ...config, schemaVersion })).toThrow('Versão');
   });

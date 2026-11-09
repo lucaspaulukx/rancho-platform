@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useEffect } from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { OperationsPage } from '../pages/Operations';
@@ -13,6 +13,7 @@ const fixture = vi.hoisted(() => ({
   readonly: false,
   config: {
     workloadInventoryPagination: false,
+    workloadTreePagination: false,
     modules: {
       workloads: true,
       contextActions: true,
@@ -140,11 +141,12 @@ function mount() {
 afterEach(() => {
   fixture.config.modules.serviceMetrics = false;
   fixture.config.workloadInventoryPagination = false;
+  fixture.config.workloadTreePagination = false;
   fixture.extraContainers = [];
   fixture.readonly = false;
 });
-function addContainers() {
-  fixture.extraContainers = Array.from({ length: 50 }, (_, index) => ({
+function addContainers(length = 50) {
+  fixture.extraContainers = Array.from({ length }, (_, index) => ({
     id: `extra-${index + 3}`,
     name: `web-${index + 3}`,
     type: 'container',
@@ -157,6 +159,32 @@ function addContainers() {
 }
 
 describe('Workspace unificado', () => {
+  it('bounds an expanded stack while keeping context and selection across pages', () => {
+    fixture.config.workloadTreePagination = true;
+    addContainers(105);
+    const router = mount();
+    fireEvent.click(screen.getByRole('button', { name: 'Expandir tudo' }));
+    const stack = screen.getByRole('region', { name: 'Stack Loja' });
+    const containers = stack.querySelectorAll('.operation-row.container');
+    expect(containers).toHaveLength(98);
+    fireEvent.click(
+      within(containers[0] as HTMLElement).getByRole('checkbox', { name: 'Selecionar web-1' }),
+    );
+    const pager = document.querySelector<HTMLElement>('.operation-tree > .table-footer')!;
+    fireEvent.click(within(pager).getByRole('button', { name: 'Próxima página' }));
+
+    const continuation = within(screen.getByRole('region', { name: 'Stack Loja' }));
+    expect(continuation.getByRole('button', { name: 'web' })).toBeInTheDocument();
+    expect(continuation.getAllByRole('button', { name: /^web-\d+$/ })).toHaveLength(9);
+    expect(continuation.queryByRole('button', { name: 'web-1' })).not.toBeInTheDocument();
+    expect(screen.getByText('1 recursos selecionados · limite 100')).toBeInTheDocument();
+    fireEvent.click(continuation.getByRole('button', { name: 'Ações de web-107' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Reiniciar' }));
+    const dialog = screen.getByRole('dialog', { name: 'Operação do recurso' });
+    expect(dialog).toHaveTextContent('restart');
+    router.dispose();
+  });
+
   it('paginates containers while preserving bulk selection and global search', async () => {
     fixture.config.workloadInventoryPagination = true;
     addContainers();

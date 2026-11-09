@@ -11,6 +11,7 @@ const mobileViewport = { width: 390, height: 844 };
 const projectCount = 20;
 const pageSize = 100;
 const renderedPageSize = 50;
+const groupedPageSize = 100;
 const counts = { stacks: 20, services: 200, containers: 2000 };
 const coldRuns = 3;
 const round = (number) => Math.round(number * 100) / 100;
@@ -134,7 +135,164 @@ async function heap(session) {
   return (await session.send('Runtime.getHeapUsage')).usedSize;
 }
 
-async function run(browser, { pagination, sweep = false, smoke = false, size = viewport }) {
+async function checkGrouped(page, first, pagination, apiRequests, requests) {
+  const expand = page.getByRole('button', { name: 'Expandir tudo', exact: true });
+  const collapse = page.getByRole('button', { name: 'Recolher tudo', exact: true });
+  const previous = page.getByRole('button', { name: 'Página anterior', exact: true });
+  const next = page.getByRole('button', { name: 'Próxima página', exact: true });
+  const search = page.getByRole('searchbox', { name: 'Buscar na operação' });
+  const pageStatus = (number, total) =>
+    page.getByText(`Página ${number} de ${total}`, { exact: true });
+  const resourceRows = page.locator('main .operation-row');
+  const last = rowName(first, counts.containers - 1);
+  const totalStackRows = counts.stacks + counts.services + counts.containers;
+  const totalStackPages = Math.ceil(totalStackRows / groupedPageSize);
+  const initialApiRequests = apiRequests.length;
+
+  async function snapshot() {
+    return page.evaluate((rowNames) => {
+      const name = '.resource-name-button bdi';
+      return {
+        rows: document.querySelectorAll('main .operation-row').length,
+        domElements: document.querySelectorAll('*').length,
+        children: [...document.querySelectorAll(rowNames)].map((container) => {
+          const service = container.closest('.operation-service');
+          const serviceRow = service?.querySelector(
+            ':scope > .operation-expand-row .operation-row',
+          );
+          const stack = service?.closest('.operation-stack');
+          const stackRow = stack?.querySelector(':scope > .stack-heading .operation-row');
+          return {
+            name: container.textContent,
+            service: serviceRow?.querySelector(name)?.textContent,
+            stack: stackRow?.querySelector(name)?.textContent,
+            stackContext: serviceRow?.querySelector('.operation-count')?.textContent,
+          };
+        }),
+      };
+    }, rowNames);
+  }
+
+  function checkParent(child, index, view) {
+    const service = index % counts.services;
+    const stack = rowId(first, 'stacks', service % counts.stacks);
+    assert.equal(child.service, rowId(first, 'services', service));
+    if (view === 'stacks') assert.equal(child.stack, stack);
+    else assert.ok(child.stackContext.startsWith(`${stack} · `));
+  }
+
+  async function sweepView(view, totalRows, ancestorLimit) {
+    const totalPages = Math.ceil(totalRows / groupedPageSize);
+    const expected = Array.from({ length: counts.containers }, (_, index) => rowName(first, index));
+    const indexes = new Map(expected.map((name, index) => [name, index]));
+    const seen = new Set();
+    let maxResourceRows = 0;
+    let maxDomElements = 0;
+    await pageStatus(1, totalPages).waitFor();
+    assert.equal(await previous.isDisabled(), true);
+    for (let number = 1; number <= totalPages; number += 1) {
+      await pageStatus(number, totalPages).waitFor();
+      const { rows, domElements, children } = await snapshot();
+      const logicalRows = Math.min(groupedPageSize, totalRows - (number - 1) * groupedPageSize);
+      assert.ok(rows >= logicalRows && rows <= logicalRows + ancestorLimit);
+      if (number === 1) {
+        assert.equal(rows, logicalRows);
+        assert.ok(children.every((child) => child.name !== last));
+      }
+      for (const child of children) {
+        assert.ok(indexes.has(child.name));
+        assert.ok(!seen.has(child.name));
+        checkParent(child, indexes.get(child.name), view);
+        seen.add(child.name);
+      }
+      maxResourceRows = Math.max(maxResourceRows, rows);
+      maxDomElements = Math.max(maxDomElements, domElements);
+      if (number < totalPages) {
+        await next.click();
+        assert.equal(apiRequests.length, initialApiRequests);
+      }
+    }
+    assert.equal(await next.isDisabled(), true);
+    assert.equal(seen.size, counts.containers);
+    assert.equal(apiRequests.length, initialApiRequests);
+    return { totalPages, maxResourceRows, maxDomElements, containerOccurrences: seen.size };
+  }
+
+  stage = pagination ? 'grouped stack pagination' : 'grouped pagination disabled smoke';
+  await expand.click();
+  if (!pagination) {
+    await waitForRows(page, last, counts.containers);
+    const rows = await resourceRows.count();
+    const domElements = await page.evaluate(() => document.querySelectorAll('*').length);
+    assert.equal(rows, totalStackRows);
+    assert.equal(await previous.count(), 0);
+    assert.equal(await next.count(), 0);
+    await collapse.click();
+    assert.equal(await page.locator(rowNames).count(), 0);
+    assert.equal(await resourceRows.count(), counts.stacks);
+    assert.equal(apiRequests.length, initialApiRequests);
+    return { pagination, expandedResourceRows: rows, expandedDomElements: domElements };
+  }
+  const stacks = await sweepView('stacks', totalStackRows, 2);
+
+  stage = 'grouped search and expansion resets';
+  await search.fill(last);
+  await waitForRows(page, last, 1);
+  const match = await snapshot();
+  assert.equal(match.rows, 3);
+  checkParent(match.children[0], counts.containers - 1, 'stacks');
+  await search.clear();
+  await pageStatus(1, totalStackPages).waitFor();
+  await next.click();
+  await pageStatus(2, totalStackPages).waitFor();
+  await collapse.click();
+  assert.equal(await page.locator(rowNames).count(), 0);
+  assert.equal(await resourceRows.count(), counts.stacks);
+  assert.equal(await next.count(), 0);
+  await expand.click();
+  await pageStatus(1, totalStackPages).waitFor();
+  await next.click();
+  await pageStatus(2, totalStackPages).waitFor();
+  await expand.click();
+  await pageStatus(1, totalStackPages).waitFor();
+
+  stage = 'grouped service pagination';
+  await next.click();
+  await pageStatus(2, totalStackPages).waitFor();
+  await page.getByRole('tab', { name: 'Serviços', exact: true }).click();
+  const services = await sweepView('services', counts.services + counts.containers, 1);
+
+  stage = 'grouped environment reset';
+  await page.locator('.environment-trigger').click();
+  await page
+    .locator('.environment-options')
+    .getByRole('option', { name: projectName(2) })
+    .click();
+  const second = projects[1].id;
+  await page
+    .locator('main .operation-row.service .resource-name-button bdi')
+    .filter({ hasText: new RegExp(`^${rowId(second, 'services', 0)}$`) })
+    .waitFor();
+  assert.equal(await previous.isDisabled(), true);
+  assert.equal(await page.locator(rowNames).count(), 0);
+  checkCursors(requests, second);
+  return {
+    pagination,
+    logicalPageSize: groupedPageSize,
+    stacks,
+    services,
+    globalSearch: true,
+    expansionResetsPage: true,
+    viewResetsPage: true,
+    environmentResetsPage: true,
+    noAdditionalApiRequestsForSearchOrPaging: true,
+  };
+}
+
+async function run(
+  browser,
+  { pagination, grouped, sweep = false, smoke = false, size = viewport },
+) {
   const context = await browser.newContext({
     viewport: size,
     locale: 'pt-BR',
@@ -170,6 +328,7 @@ async function run(browser, { pagination, sweep = false, smoke = false, size = v
           const response = await route.fetch({ maxRedirects: 0 });
           const config = await response.json();
           config.workloadInventoryPagination = pagination;
+          config.workloadTreePagination = grouped === true;
           return route.fulfill({ response, json: config });
         }
         if (
@@ -183,6 +342,12 @@ async function run(browser, { pagination, sweep = false, smoke = false, size = v
       blocked += 1;
       return route.abort();
     });
+    if (grouped !== undefined) {
+      // Exercise the background-tab polling policy while measuring local page changes.
+      await context.addInitScript(() => {
+        Object.defineProperty(document, 'visibilityState', { get: () => 'hidden' });
+      });
+    }
     await context.addInitScript((rowNames) => {
       window.ux06 = { longTasks: [], staleFrames: 0, transitionFrames: 0, checkScope: false };
       if (PerformanceObserver.supportedEntryTypes.includes('longtask'))
@@ -221,6 +386,22 @@ async function run(browser, { pagination, sweep = false, smoke = false, size = v
         assetFailures += 1;
     });
     const first = projects[0].id;
+    if (grouped !== undefined) {
+      stage = 'initial grouped inventory';
+      await page.goto(`${origin}/console/containers?env=${first}&view=stacks`, {
+        waitUntil: 'domcontentloaded',
+      });
+      await page
+        .locator('main .operation-row.stack .resource-name-button bdi')
+        .filter({ hasText: new RegExp(`^${rowId(first, 'stacks', 0)}$`) })
+        .waitFor();
+      checkCursors(requests, first);
+      assert.equal(requests.length, 23);
+      const assetEntry = await page.locator('script[type="module"][src]').getAttribute('src');
+      const result = await checkGrouped(page, first, grouped, apiRequests, requests);
+      checkNetwork();
+      return { assetEntry, ...result };
+    }
     const expectedRows = pagination ? renderedPageSize : counts.containers;
     stage = smoke ? 'pagination disabled smoke' : 'initial inventory';
     await page.goto(`${origin}/console/containers?env=${first}`, { waitUntil: 'domcontentloaded' });
@@ -417,6 +598,17 @@ async function run(browser, { pagination, sweep = false, smoke = false, size = v
       ? await run(browser, { pagination, smoke: true, size: mobileViewport })
       : null;
     if (mobileSmoke) assert.equal(mobileSmoke.assetEntry, samples[0].assetEntry);
+    const grouped = pagination
+      ? {
+          enabled: await run(browser, { pagination, grouped: true }),
+          disabled: await run(browser, { pagination, grouped: false }),
+        }
+      : null;
+    if (grouped) {
+      assert.equal(grouped.enabled.assetEntry, samples[0].assetEntry);
+      assert.equal(grouped.disabled.assetEntry, samples[0].assetEntry);
+      assert.ok(grouped.enabled.stacks.maxDomElements < grouped.disabled.expandedDomElements);
+    }
     const initialMs = samples.map(({ initialReadyMs }) => initialReadyMs).sort((a, b) => a - b);
     console.log(
       JSON.stringify(
@@ -449,6 +641,7 @@ async function run(browser, { pagination, sweep = false, smoke = false, size = v
           samples,
           ...(disabledSmoke && { disabledSmoke }),
           ...(mobileSmoke && { mobileSmoke }),
+          ...(grouped && { grouped }),
         },
         null,
         2,

@@ -21,7 +21,8 @@ import { useApp } from '../state';
 import { useI18n } from '../i18n/provider';
 import { useSchemas, canManageResource } from '../hooks/useSchemas';
 import { useWorkloadInventory } from './Workloads';
-import { workloadTree, type ServiceNode } from '../workload-tree';
+import { workloadTree, type ServiceNode, type StackNode } from '../workload-tree';
+import { workloadTreePage } from '../workload-tree-page';
 import { imageName, stackContents } from '../workloads';
 import { serviceMetricsEnabled } from '../metrics';
 import {
@@ -54,6 +55,7 @@ import { commonBulkActions, resourceKey } from '../bulk-actions';
 import { BulkOperation, type BulkPlan } from '../components/BulkOperation';
 
 const ServiceTopology = lazy(() => import('../components/ServiceTopology'));
+const GROUPED_PAGE_SIZE = 100;
 
 export function OperationsPage({
   initialView = 'stacks',
@@ -88,6 +90,7 @@ export function OperationsPage({
   const state = params.get('state') || '';
   const includeSystem = params.get('system') === 'true';
   const paginateContainers = app.config.workloadInventoryPagination === true;
+  const paginateTree = app.config.workloadTreePagination === true;
   const requestedView = params.get('view') || initialView;
   const view =
     app.config.modules.contextActions &&
@@ -99,6 +102,32 @@ export function OperationsPage({
       query.data ? workloadTree(query.data, { query: text, state, includeSystem }) : undefined,
     [query.data, text, state, includeSystem],
   );
+  const visibleServices = tree
+    ? [...tree.stacks.flatMap((node) => node.services), ...tree.services]
+    : [];
+  const pageScope = JSON.stringify([view, text, state, includeSystem]);
+  const [treePage, setTreePage] = useState({ scope: pageScope, index: 0 });
+  const requestedPage = treePage.scope === pageScope ? treePage.index : 0;
+  const stackExpanded = (node: StackNode) => !!text || !collapsed.has(node.resource.id);
+  const serviceExpanded = (node: ServiceNode) => !!text || expandedServices.has(node.resource.id);
+  const grouped =
+    tree && view !== 'containers'
+      ? workloadTreePage(
+          view === 'services' ? { stacks: [], services: visibleServices, containers: [] } : tree,
+          {
+            page: requestedPage,
+            pageSize: paginateTree ? GROUPED_PAGE_SIZE : undefined,
+            stackExpanded,
+            serviceExpanded,
+          },
+        )
+      : undefined;
+  const currentTreePage = grouped?.current ?? 0;
+  useEffect(() => {
+    if (treePage.scope !== pageScope || treePage.index !== currentTreePage)
+      setTreePage({ scope: pageScope, index: currentTreePage });
+  }, [currentTreePage, pageScope, treePage]);
+  const setGroupedPage = (index: number) => setTreePage({ scope: pageScope, index });
   const containerStacks = useMemo(() => {
     const stacks = new Map<string, Resource>();
     if (view === 'containers' && query.data) {
@@ -162,9 +191,6 @@ export function OperationsPage({
         .filter(Boolean),
     ),
   ].sort();
-  const visibleServices = tree
-    ? [...tree.stacks.flatMap((node) => node.services), ...tree.services]
-    : [];
   const visibleContainers = tree
     ? [
         ...new Map(
@@ -267,8 +293,10 @@ export function OperationsPage({
       }
     />
   );
-  const service = (node: ServiceNode, indent = true) => {
-    const expanded = !!text || expandedServices.has(node.resource.id);
+  const service = (node: ServiceNode, containers: Resource[], parentStack?: string) => {
+    const indent = parentStack !== undefined;
+    const expanded = serviceExpanded(node);
+    const childrenId = `service-children-${parentStack ?? 'root'}-${node.resource.id}`;
     return (
       <div
         className={indent ? 'operation-service nested' : 'operation-service'}
@@ -282,7 +310,7 @@ export function OperationsPage({
               { name: node.resource.name || node.resource.id },
             )}
             aria-expanded={expanded}
-            aria-controls={`service-children-${node.resource.id}`}
+            aria-controls={childrenId}
             onClick={() => toggleService(node.resource.id)}
           >
             {expanded ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
@@ -301,9 +329,9 @@ export function OperationsPage({
           )}
         </div>
         {expanded && (
-          <div id={`service-children-${node.resource.id}`} className="operation-containers">
+          <div id={childrenId} className="operation-containers">
             {node.containers.length ? (
-              node.containers.map((container) => row(container, 'container'))
+              containers.map((container) => row(container, 'container'))
             ) : (
               <p className="operation-empty">{t('operations.emptyService')}</p>
             )}
@@ -429,6 +457,7 @@ export function OperationsPage({
         <Button
           variant="ghost"
           onClick={() => {
+            setGroupedPage(0);
             setCollapsed(new Set());
             setExpandedServices(new Set(inventory.services.map((resource) => resource.id)));
           }}
@@ -438,6 +467,7 @@ export function OperationsPage({
         <Button
           variant="ghost"
           onClick={() => {
+            setGroupedPage(0);
             setCollapsed(new Set(inventory.stacks.map((resource) => resource.id)));
             setExpandedServices(new Set());
           }}
@@ -491,9 +521,17 @@ export function OperationsPage({
               </Button>
             </section>
           )}
+          {paginateTree && grouped && grouped.total > GROUPED_PAGE_SIZE && (
+            <TablePagination
+              page={currentTreePage}
+              pageSize={GROUPED_PAGE_SIZE}
+              total={grouped.total}
+              onPageChange={setGroupedPage}
+            />
+          )}
           {view === 'stacks' &&
-            tree!.stacks.map((node) => {
-              const expanded = !!text || !collapsed.has(node.resource.id);
+            grouped?.stacks.map(({ node, services, containers }) => {
+              const expanded = stackExpanded(node);
               return (
                 <section
                   className="operation-stack"
@@ -526,8 +564,10 @@ export function OperationsPage({
                   </div>
                   {expanded && (
                     <div id={`stack-children-${node.resource.id}`} className="operation-stack-body">
-                      {node.services.map((node) => service(node))}
-                      {node.containers.map((container) => row(container, 'container'))}
+                      {services.map(({ node: child, containers }) =>
+                        service(child, containers, node.resource.id),
+                      )}
+                      {containers.map((container) => row(container, 'container'))}
                       {!node.services.length && !node.containers.length && (
                         <p className="operation-empty">{t('operations.emptyStack')}</p>
                       )}
@@ -536,24 +576,24 @@ export function OperationsPage({
                 </section>
               );
             })}
-          {view === 'stacks' && !!tree!.services.length && (
+          {view === 'stacks' && !!grouped?.services.length && (
             <section className="operation-stack">
               <h2 className="operation-section-title">{t('operations.orphanServices')}</h2>
-              {tree!.services.map((node) => service(node, false))}
+              {grouped.services.map(({ node, containers }) => service(node, containers))}
             </section>
           )}
-          {view === 'stacks' && !!tree!.containers.length && (
+          {view === 'stacks' && !!grouped?.containers.length && (
             <section className="operation-stack">
               <h2 className="operation-section-title">
                 <Box size={19} />
                 {t('operations.orphanContainers')}
               </h2>
-              {tree!.containers.map((container) => row(container, 'container'))}
+              {grouped.containers.map((container) => row(container, 'container'))}
             </section>
           )}
           {view === 'services' && (
             <section className="operation-stack" aria-label={t('operations.environmentServices')}>
-              {visibleServices.map((node) => service(node, false))}
+              {grouped?.services.map(({ node, containers }) => service(node, containers))}
             </section>
           )}
           {view === 'containers' && (
