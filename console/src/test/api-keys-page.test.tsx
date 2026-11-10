@@ -4,11 +4,14 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { ApiKeys } from '../pages/ApiKeys';
-import { allPages, type Resource, type Schema } from '../api';
+import { allPages, ApiError, type Resource, type Schema } from '../api';
+import { I18nProvider } from '../i18n/provider';
+import type { Locale } from '../i18n/locales';
 const backend = vi.hoisted(() => ({
   records: [] as Resource[],
   contract: {} as Schema,
   revoked: false,
+  failCreate: false,
   posts: [] as unknown[],
   identity: 'admin',
 }));
@@ -36,6 +39,7 @@ vi.mock('../api', async () => ({
         ...(backend.revoked ? { collectionMethods: ['GET'], resourceMethods: ['GET'] } : {}),
       };
     if (method === 'POST' && path === '/keys') {
+      if (backend.failCreate) throw new ApiError(422, 'synthetic-sensitive-error');
       backend.posts.push(payload);
       const row = {
         id: 'k1',
@@ -75,12 +79,24 @@ function mount() {
     defaultOptions: { queries: { retry: false, staleTime: Infinity }, mutations: { retry: false } },
   });
   const router = createMemoryRouter([{ path: '/', element: <ApiKeys /> }]);
-  render(
+  const view = (defaultLocale: Locale) => (
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale,
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: false,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <RouterProvider router={router} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
-  return { client, router };
+  const { rerender } = render(view('pt-BR'));
+  return { client, router, changeLocale: (locale: Locale) => rerender(view(locale)) };
 }
 function cached(client: QueryClient) {
   return JSON.stringify([
@@ -108,6 +124,7 @@ beforeEach(() => {
   backend.records = [];
   backend.posts = [];
   backend.revoked = false;
+  backend.failCreate = false;
   backend.contract = {
     id: 'apiKey',
     pluralName: 'apiKeys',
@@ -175,16 +192,38 @@ describe('Tela de chaves de API', () => {
     );
   });
   it('recusa permissão de criação revogada depois da revisão', async () => {
-    mount();
+    const { changeLocale } = mount();
     const user = userEvent.setup();
     await user.click(await screen.findByRole('button', { name: 'Criar chave' }));
-    await user.type(screen.getByLabelText('Nome da chave'), 'automation');
+    const name = screen.getByLabelText('Nome da chave');
+    await user.type(name, 'automation');
     await user.click(screen.getByRole('button', { name: 'Revisar' }));
     backend.revoked = true;
     await user.click(screen.getByRole('button', { name: 'Confirmar' }));
     await screen.findByText('A criação de chaves não está disponível neste escopo.');
+    changeLocale('en-US');
+    expect(screen.getByText('Key creation is unavailable in this scope.')).toBeInTheDocument();
     expect(backend.posts).toHaveLength(0);
-    expect(screen.getByLabelText('Nome da chave')).toHaveValue('automation');
+    expect(screen.getByLabelText('Key name')).toBe(name);
+    expect(name).toHaveValue('automation');
+  });
+  it('shows a localized HTTP status and discards the raw create error', async () => {
+    const { client, changeLocale } = mount();
+    const user = userEvent.setup();
+    backend.failCreate = true;
+    await user.click(await screen.findByRole('button', { name: 'Criar chave' }));
+    await user.type(screen.getByLabelText('Nome da chave'), 'automation');
+    await user.click(screen.getByRole('button', { name: 'Revisar' }));
+    await user.click(screen.getByRole('button', { name: 'Confirmar' }));
+    await screen.findByText('Não foi possível concluir a solicitação de chave de API (HTTP 422).');
+    changeLocale('en-US');
+    expect(
+      screen.getByText('Unable to complete the API key request (HTTP 422).'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('synthetic-sensitive-error')).not.toBeInTheDocument();
+    const error = client.getMutationCache().getAll()[0].state.error;
+    expect(error).toMatchObject({ status: 422, message: 'apiKeys.requestFailed' });
+    expect(error?.cause).toBeUndefined();
   });
   it('dados secretos recebidos na listagem também não entram no cache', async () => {
     backend.records = [

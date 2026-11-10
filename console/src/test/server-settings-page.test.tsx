@@ -11,6 +11,7 @@ const state = vi.hoisted(() => ({
   denied: false,
   posts: [] as unknown[],
   fail: false,
+  missingSource: false,
 }));
 const raw = {
   id: 'console.lab.fixture.test',
@@ -43,7 +44,9 @@ vi.mock('../components/ui', async () => ({
 }));
 vi.mock('../api', async () => ({
   ...(await vi.importActual('../api')),
-  allPages: vi.fn(async () => [structuredClone(raw)]),
+  allPages: vi.fn(async () => [
+    { ...structuredClone(raw), ...(state.missingSource ? { source: undefined } : {}) },
+  ]),
   api: vi.fn(async (path: string, body?: unknown, method?: string) => {
     if (path === 'schemas/setting')
       return { ...schema, resourceMethods: state.denied ? ['GET'] : schema.resourceMethods };
@@ -55,6 +58,7 @@ vi.mock('../api', async () => ({
     return {
       ...structuredClone(raw),
       ...(state.changed ? { activeValue: 'external-private' } : {}),
+      ...(state.missingSource ? { source: undefined } : {}),
     };
   }),
 }));
@@ -103,6 +107,7 @@ beforeEach(() => {
   state.changed = false;
   state.denied = false;
   state.fail = false;
+  state.missingSource = false;
   state.posts = [];
 });
 describe('Página de configurações', () => {
@@ -168,6 +173,30 @@ describe('Página de configurações', () => {
     expect(JSON.stringify({ ...localStorage, ...sessionStorage })).not.toContain(
       'synthetic-private',
     );
+  });
+  it('traduz origem ausente e erro de revalidação sem enviar o valor', async () => {
+    localStorage.removeItem('rancho.console.locale.anonymous');
+    state.missingSource = true;
+    mount(true);
+    expect(await screen.findByText('Não informada')).toBeInTheDocument();
+    const user = await edit();
+    state.changed = true;
+    await user.click(screen.getByRole('button', { name: 'Confirmar' }));
+    await screen.findByText('A configuração mudou. Reabra o editor.');
+    const draft = screen.getByLabelText('Valor configurado');
+
+    act(() => {
+      localStorage.setItem(
+        'rancho.console.locale.anonymous',
+        JSON.stringify({ version: 1, locale: 'en-US' }),
+      );
+      window.dispatchEvent(new StorageEvent('storage', { key: 'rancho.console.locale.anonymous' }));
+    });
+    expect(screen.getByText('The setting changed. Reopen the editor.')).toBeInTheDocument();
+    expect(screen.getByText(/Source: Not provided\./)).toBeInTheDocument();
+    expect(screen.getByLabelText('Configured value')).toBe(draft);
+    expect(state.posts).toHaveLength(0);
+    localStorage.removeItem('rancho.console.locale.anonymous');
   });
   it('traduz erro já aberto sem perder o rascunho nem repetir a mutação', async () => {
     localStorage.removeItem('rancho.console.locale.anonymous');

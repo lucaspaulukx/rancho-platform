@@ -5,6 +5,7 @@ import {
   driverPayload,
   driverAction,
   customDriver,
+  DriverValidationError,
 } from '../machine-drivers';
 import type { Resource, Schema } from '../api';
 const raw: Resource = {
@@ -63,7 +64,7 @@ describe('Drivers de máquinas', () => {
           activate: 'https://external.invalid/v2-beta/machinedrivers/1md99?action=activate',
         },
       }),
-    ).toThrow();
+    ).toThrow(new DriverValidationError('machineDrivers.validation.actionLink'));
   });
   it('envia apenas campos suportados e solicita cadastro inativo', () => {
     const body = driverPayload(schema, fields);

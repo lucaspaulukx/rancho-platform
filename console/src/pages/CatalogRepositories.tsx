@@ -3,6 +3,7 @@ import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError, type Resource, type Schema } from '../api';
 import { useI18n } from '../i18n/provider';
+import { SettingValidationError } from '../server-settings';
 import { useApp } from '../state';
 import { useSchemas } from '../hooks/useSchemas';
 import { useRequestScope } from '../hooks/useRequestScope';
@@ -55,6 +56,7 @@ export function CatalogRepositories() {
 function RepositoryScope() {
   const { t } = useI18n();
   function errorText(error: Error) {
+    if (error instanceof SettingValidationError) return t(error.key);
     if (!(error instanceof CatalogRepositoryError)) return error.message;
     return error.key === 'catalogRepositories.httpError'
       ? t(error.key, { status: error.params!.status })
@@ -173,7 +175,8 @@ function RepositoryScope() {
       {query.isPending ? (
         <Loading />
       ) : query.error ? (
-        query.error instanceof CatalogRepositoryError ? (
+        query.error instanceof CatalogRepositoryError ||
+        query.error instanceof SettingValidationError ? (
           <div className="error-state">
             <Alert>{errorText(query.error)}</Alert>
             <Button onClick={() => void query.refetch()}>{t('catalogRepositories.retry')}</Button>
@@ -184,7 +187,9 @@ function RepositoryScope() {
       ) : (
         <>
           <p className="muted">
-            {t('catalogRepositories.source', { source: query.data.source })}{' '}
+            {t('catalogRepositories.source', {
+              source: query.data.source || t('settings.unknown'),
+            })}{' '}
             {query.data.inDb
               ? t('catalogRepositories.override')
               : t('catalogRepositories.noOverride')}

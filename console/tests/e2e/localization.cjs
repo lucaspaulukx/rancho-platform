@@ -244,6 +244,8 @@ async function main() {
     ['users', 'Users'],
     ['api-keys', 'API keys'],
     ['settings', 'Server settings'],
+    ['drivers', 'Machine drivers'],
+    ['catalog-repositories', 'Catalog repositories'],
     ['hosts', 'Hosts'],
     ['catalog', 'Catalog'],
     ['webhooks', 'Webhooks'],
