@@ -68,6 +68,12 @@ python -m migration.test_original_engine_lab --quiesce --backend-image my-backen
 
 ## Aceite nativo e de navegador
 
+Execute o teste do cliente clássico no laboratório local indicado com o Chromium do Playwright instalado. Use o mesmo ID de backend registrado no ensaio de release. O teste confere se o container esperado é dono da porta local, entra pelo Ember, abre a lista de ambientes sem erros não tratados no navegador e revoga a sessão de teste. As requisições do navegador se limitam a leituras locais e ao login. Esse teste cobre o backend candidato. O ensaio de rollback isolado cobre a entrega dos arquivos clássicos no backend original.
+
+```sh
+python -m migration.test_classic_browser_lab --backend-image rancho-backend:candidate
+```
+
 Use host/guest Docker dedicado e compatível com a geração legada. Harnesses físicos em `console/tests/` restringem-se intencionalmente a sandbox nomeado, environment/host esperados e ownership explícito. Não são diagnósticos genéricos de produção nem automaticamente portáveis para qualquer instalação nova. Leia o script e provisione a fixture exigida antes de executá-lo.
 
 Cada teste define alegação e budget, usa recursos próprios, exerce controles positivos/negativos, preserva dados/configuração anteriores e confere cleanup. Execute uma fixture com baseline global/canal serial do guest por vez. Cleanup incompleto é falha mesmo se a asserção principal passou. Preserve relatórios sanitizados de falhas; não edite relatório para obter sucesso.

@@ -68,6 +68,12 @@ python -m migration.test_original_engine_lab --quiesce --backend-image my-backen
 
 ## Native and browser acceptance
 
+Run the classic browser smoke against the named local lab with Playwright Chromium installed. Use the same backend ID recorded in the release rehearsal. It checks that the expected container owns the loopback port, signs in through Ember, opens the Environments list without uncaught browser errors and revokes the test session. Browser requests are limited to local reads and the login request. This exercise covers the candidate backend while the isolated rollback probe covers classic asset delivery on the original backend.
+
+```sh
+python -m migration.test_classic_browser_lab --backend-image rancho-backend:candidate
+```
+
 Use a dedicated legacy-compatible Docker host/guest. The physical harnesses in `console/tests/` are intentionally constrained to a named sandbox, expected environment/host and explicit ownership. They are not generic production diagnostics or automatically portable to an arbitrary fresh installation. Review the script and provision the required fixture before invoking it.
 
 Each test must define its claim and budget, use owned resources, exercise positive and negative controls, preserve prior configuration/data and verify cleanup. Run one global-baseline/guest-serial fixture at a time. Incomplete cleanup remains a failure even when the main assertion passed. Preserve sanitized failed reports; never edit a report into success.
