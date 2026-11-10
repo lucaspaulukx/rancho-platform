@@ -94,4 +94,12 @@ Defina `PLAYWRIGHT_MODULES` e `CHROMIUM_EXECUTABLE` se o Playwright ou o Chromiu
 
 Defina `UX06_SOAK_SECONDS` como um inteiro de 60 a 900 para executar somente o soak de inventário. Em uma aba visível do Chromium, o teste verifica atualizações periódicas e recuperação automática após duas falhas sintéticas de leitura. O relatório inclui heap após coleta de lixo, tempo de trabalho do renderer, escopo e contagem de linhas.
 
+### Soak de métricas nativas do host
+
+Execute no laboratório local UI-OPS-LAB com o host existente ativo. O teste abre o console real em um contexto isolado do Chromium, verifica a reconexão explícita e mede a continuidade dos frames, o tempo de trabalho do renderer e o heap após coleta de lixo. Confere o limite do histórico CSV, apaga o download, fecha o stream e revoga a própria sessão. Use 360 segundos para ultrapassar a janela de histórico de cinco minutos. O resultado cobre um stream de métricas de host.
+
+```sh
+python console/tests/host_metrics_soak.py --seconds 360
+```
+
 Separe unitário/componente, build limpo, renderização browser, comportamento nativo real e CI remoto. Registre identidade do artefato, flags, escopo, controles, resultados medidos e cleanup; publique somente resumos sanitizados. Teste `nofile` em um host não valida todos os limites ou multi-host. Probe curto de WebSocket não prova estabilidade do scheduler/soak. Restore offline de DB não prova recuperação de engine/IdP/workloads. Aceites restantes ficam no [roadmap](roadmap.md).

@@ -108,7 +108,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 |---|---|---|
 | OBS01 | Logs/terminal/métricas contextuais | Recortes reais implementados; falta regressão final foco/resize/buffer/environment |
 | OBS02 | Revogar streams abertos | UI/API keys pessoais e compartilhadas de host validadas em recortes; faltam caminhos técnicos e regressão final |
-| OBS03 | Soak do build final | Pendentes heap/buffers/CPU/reconnect medidos; soak antigo não prova build novo |
+| OBS03 | Soak do build final | Teste nativo de seis minutos no host verificou continuidade dos frames, reconexão explícita, limite do CSV, heap e tempo de trabalho do renderer. Falta o soak no artefato final com logs, terminal e métricas de containers e serviços simultâneos |
 | ADM01 | Contas locais/perfil/senha/lifecycle | Implementado; falta matriz final concorrência/admin OIDC/técnicos |
 | ADM02 | Auditoria/settings/processos/replay | Recortes implementados; falta regressão final permissão/privacidade/erro/efeito nativo |
 | ADM03 | HA/pools | Monitor implementado; falta configuração/failover físico |

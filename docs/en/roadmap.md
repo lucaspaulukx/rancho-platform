@@ -108,7 +108,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 |---|---|---|
 | OBS01 | Contextual logs/terminal/metrics | Implemented real-data slices; final focus/resize/buffer/environment regression remains |
 | OBS02 | Open-stream revocation | UI and personal/shared API-key host-stream slices validated; technical paths and final artifact regression remain |
-| OBS03 | Final-build soak | Pending measured heap/buffers/CPU/reconnect; old-build soak is not current evidence |
+| OBS03 | Final-build soak | Six-minute native host metrics slice verified continuous frames, explicit reconnect, bounded CSV history, heap and renderer task time. Final-artifact soak with concurrent logs, terminal and container/service metrics remains |
 | ADM01 | Local accounts/profile/password/lifecycle | Implemented; final concurrency/OIDC-admin/technical matrix remains |
 | ADM02 | Audit/settings/process/replay | Implemented slices; final permission/privacy/error/native-effect regression remains |
 | ADM03 | HA/pools | Monitoring implemented; physical configuration/failover remains |
