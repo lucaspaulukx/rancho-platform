@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { NetworkPolicies } from '../components/NetworkPolicies';
+import { I18nProvider } from '../i18n/provider';
+import type { Locale } from '../i18n/locales';
 
 const context = vi.hoisted(() => ({
   identity: 'admin',
@@ -68,12 +70,24 @@ function fixture(manager = false, revoked = false) {
       ),
     },
   ]);
-  render(
+  const view = (defaultLocale: Locale) => (
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale,
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: false,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <RouterProvider router={router} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
-  return writes;
+  const { rerender } = render(view('pt-BR'));
+  return { writes, changeLocale: (locale: Locale) => rerender(view(locale)) };
 }
 describe('Painel de políticas nativas', () => {
   it.each(['environments', 'networkPolicies'] as const)(
@@ -92,27 +106,37 @@ describe('Painel de políticas nativas', () => {
     },
   );
   it('não permite alterações sem gerenciador saudável e não envia POST ou PUT', async () => {
-    const writes = fixture();
+    const { writes } = fixture();
     await userEvent.click(screen.getByRole('button', { name: 'Consultar políticas de rede' }));
     expect(await screen.findByLabelText('Demais comunicações')).toBeDisabled();
     expect(screen.getByText(/network-policy-manager não está ativo/)).toBeInTheDocument();
     expect(writes).toEqual([]);
   });
   it('revalida a permissão depois da confirmação e bloqueia o envio revogado', async () => {
-    const writes = fixture(true, true);
+    const { writes, changeLocale } = fixture(true, true);
     await userEvent.click(screen.getByRole('button', { name: 'Consultar políticas de rede' }));
-    await userEvent.selectOptions(await screen.findByLabelText('Demais comunicações'), 'deny');
+    const field = await screen.findByLabelText('Demais comunicações');
+    await userEvent.selectOptions(field, 'deny');
     await userEvent.click(screen.getByRole('button', { name: 'Revisar alteração' }));
     expect(screen.getByRole('dialog', { name: 'Aplicar políticas de rede?' })).toHaveTextContent(
       'Permitir → Bloquear',
     );
     expect(writes).toEqual([]);
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('permissão');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Sua permissão de alterar políticas não está mais disponível.',
+    );
+    changeLocale('en-US');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'You no longer have permission to change network policies.',
+    );
+    expect(screen.getByLabelText('Other communication')).toBe(field);
+    expect(field).toHaveValue('deny');
+    expect(screen.getByRole('heading', { name: /ipsec/ })).toBeInTheDocument();
     expect(writes).toEqual([]);
   });
   it('impede confirmar quando o usuário retorna aos valores originais', async () => {
-    const writes = fixture(true);
+    const { writes } = fixture(true);
     await userEvent.click(screen.getByRole('button', { name: 'Consultar políticas de rede' }));
     const field = await screen.findByLabelText('Demais comunicações');
     await userEvent.selectOptions(field, 'deny');

@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import BalancerRulesPanel from '../components/BalancerRulesPanel';
 import type { Resource, Schema } from '../api';
+import type { Locale } from '../i18n/locales';
+import { I18nProvider } from '../i18n/provider';
 const state = vi.hoisted(() => ({
   source: {} as Resource,
   schemas: [] as Schema[],
@@ -75,12 +77,24 @@ function mount() {
       ),
     },
   ]);
-  render(
+  const page = (locale: Locale) => (
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: locale,
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: false,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <RouterProvider router={router} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
-  return { saved, close, client };
+  const { rerender } = render(page('pt-BR'));
+  return { saved, close, client, showLocale: (locale: Locale) => rerender(page(locale)) };
 }
 beforeEach(() => {
   state.enabled = true;
@@ -165,7 +179,7 @@ describe('Painel contextual do balanceador', () => {
     ).not.toContain('private-synthetic');
   });
   it('recusa snapshot concorrente e mantém o rascunho', async () => {
-    mount();
+    const { showLocale } = mount();
     const user = await edit();
     await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: 'Revisar alterações' }));
@@ -174,6 +188,11 @@ describe('Painel contextual do balanceador', () => {
     await screen.findByText(/alterado por outro cliente/);
     expect(state.puts).toHaveLength(0);
     expect(screen.getByLabelText('Porta de destino 1')).toHaveValue('8081');
+    showLocale('en-US');
+    expect(
+      screen.getByText('Another client changed the load balancer. Close and reopen the panel.'),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Target port 1')).toHaveValue('8081');
   });
   it('revalida o schema antes do PUT e bloqueia permissão revogada', async () => {
     mount();
@@ -205,7 +224,7 @@ describe('Painel contextual do balanceador', () => {
   it('protege protocolo avançado e não revela configuração privada', async () => {
     (state.source.lbConfig as { portRules: Record<string, unknown>[] }).portRules[0].protocol =
       'https';
-    mount();
+    const { showLocale } = mount();
     await screen.findByText(/Há regras avançadas/);
     expect(screen.getByRole('region', { name: 'Regras preservadas' })).toHaveTextContent(
       'HTTPS :8080',
@@ -213,6 +232,12 @@ describe('Painel contextual do balanceador', () => {
     expect(screen.getByRole('button', { name: 'Revisar alterações' })).toBeDisabled();
     expect(document.body.textContent).not.toContain('private-synthetic');
     expect(state.puts).toHaveLength(0);
+    showLocale('en-US');
+    expect(screen.getByText(/Use the native editor for these advanced rules/)).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Preserved rules' })).toHaveTextContent(
+      'HTTPS :8080',
+    );
+    expect(screen.getByRole('button', { name: 'Review changes' })).toBeDisabled();
   });
   it('recusa contrato aninhado revogado durante a revisão', async () => {
     mount();

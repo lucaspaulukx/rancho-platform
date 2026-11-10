@@ -1,6 +1,19 @@
 import type { Resource, Schema } from './api';
 import { encodeUtf8Base64 } from './encoding';
 import { sensitiveField } from './components/SchemaForm';
+import { ptResourcesPage } from './i18n/domains/resources-page';
+
+type DataValidationKey = Extract<
+  keyof typeof ptResourcesPage,
+  `resourcesPage.validation.${string}`
+>;
+
+export class DataValidationError extends Error {
+  constructor(readonly key: DataValidationKey) {
+    super(ptResourcesPage[key]);
+  }
+}
+
 export type DataKind = 'volume' | 'registry' | 'certificate' | 'secret';
 export const isDataKind = (kind?: string): kind is DataKind =>
   ['volume', 'registry', 'certificate', 'secret'].includes(kind || '');
@@ -72,17 +85,17 @@ export function dataEditorSchema(
 }
 export function normalizeRegistryAddress(value: string) {
   const address = value.trim();
-  if (!address) throw new Error('Informe o endereço do registry.');
+  if (!address) throw new DataValidationError('resourcesPage.validation.registryRequired');
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(address) && !/^https?:\/\//i.test(address))
-    throw new Error('Informe um endereço HTTP ou HTTPS para o registry.');
+    throw new DataValidationError('resourcesPage.validation.registryProtocol');
   let url: URL;
   try {
     url = new URL(/^https?:\/\//i.test(address) ? address : `https://${address}`);
   } catch {
-    throw new Error('Informe um endereço de registry válido.');
+    throw new DataValidationError('resourcesPage.validation.registryAddress');
   }
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || !url.hostname)
-    throw new Error('Informe somente o servidor e a porta, sem credenciais no endereço.');
+    throw new DataValidationError('resourcesPage.validation.registryCredentials');
   return url.host.toLowerCase();
 }
 export function prepareDataPayload(
@@ -99,7 +112,7 @@ export function prepareDataPayload(
       schema.resourceFields.value?.maxLength !== undefined &&
       encoded.length > schema.resourceFields.value.maxLength
     )
-      throw new Error('O conteúdo excede o tamanho permitido pelo servidor.');
+      throw new DataValidationError('resourcesPage.validation.secretSize');
     output.value = encoded;
   }
   if (kind === 'secret' && updating) {
@@ -115,12 +128,12 @@ export function prepareDataPayload(
       typeof payload.cert !== 'string' ||
       !/-----BEGIN CERTIFICATE-----[\s\S]+-----END CERTIFICATE-----/.test(payload.cert)
     )
-      throw new Error('Informe um certificado PEM válido.');
+      throw new DataValidationError('resourcesPage.validation.certificatePem');
     if (
       typeof payload.key !== 'string' ||
       !/-----BEGIN ((?:RSA |EC )?PRIVATE KEY)-----[\s\S]+-----END \1-----/.test(payload.key)
     )
-      throw new Error('Informe a chave privada PEM sem senha correspondente ao certificado.');
+      throw new DataValidationError('resourcesPage.validation.privateKeyPem');
     output.cert = payload.cert.trim();
     output.key = payload.key.trim();
     if (updating)

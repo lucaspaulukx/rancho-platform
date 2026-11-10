@@ -31,6 +31,17 @@ export const enNetworkPoliciesPage = {
   'networkPoliciesPage.stackScope': 'Services in the same stack',
   'networkPoliciesPage.reopen': 'Reopen the policy before saving.',
   'networkPoliciesPage.contextChanged': 'The context changed. Reopen the panel.',
+  'networkPoliciesPage.validation.networkUnavailable':
+    'The network is unavailable in this environment.',
+  'networkPoliciesPage.validation.permissionChanged':
+    'You no longer have permission to change network policies.',
+  'networkPoliciesPage.validation.managerUnavailable':
+    'The policy manager must be active and healthy.',
+  'networkPoliciesPage.validation.advancedRules':
+    'This network contains advanced rules that must be preserved.',
+  'networkPoliciesPage.validation.rulesChanged':
+    'The policies have changed. Reopen the panel before saving.',
+  'networkPoliciesPage.validation.action': 'Select Allow or Deny for each rule.',
 } as const;
 
 export const ptNetworkPoliciesPage = {
@@ -66,4 +77,15 @@ export const ptNetworkPoliciesPage = {
   'networkPoliciesPage.stackScope': 'Serviços da mesma stack',
   'networkPoliciesPage.reopen': 'Reabra a política antes de salvar.',
   'networkPoliciesPage.contextChanged': 'O contexto mudou. Reabra o painel.',
-} as const;
+  'networkPoliciesPage.validation.networkUnavailable':
+    'A rede não está disponível neste environment.',
+  'networkPoliciesPage.validation.permissionChanged':
+    'Sua permissão de alterar políticas não está mais disponível.',
+  'networkPoliciesPage.validation.managerUnavailable':
+    'O gerenciador de políticas precisa estar ativo e saudável.',
+  'networkPoliciesPage.validation.advancedRules':
+    'Esta rede contém regras avançadas que devem ser preservadas.',
+  'networkPoliciesPage.validation.rulesChanged':
+    'As políticas mudaram. Reabra o painel antes de salvar.',
+  'networkPoliciesPage.validation.action': 'Selecione permitir ou bloquear para cada regra.',
+} as const satisfies Record<keyof typeof enNetworkPoliciesPage, string>;

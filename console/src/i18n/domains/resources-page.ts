@@ -1,4 +1,13 @@
 export const enResourcesPage = {
+  'resourcesPage.validation.registryRequired': 'Enter the registry address.',
+  'resourcesPage.validation.registryProtocol': 'Enter an HTTP or HTTPS registry address.',
+  'resourcesPage.validation.registryAddress': 'Enter a valid registry address.',
+  'resourcesPage.validation.registryCredentials':
+    'Enter only the server and port. Leave credentials out of the address.',
+  'resourcesPage.validation.secretSize': 'The content exceeds the server size limit.',
+  'resourcesPage.validation.certificatePem': 'Enter a valid PEM certificate.',
+  'resourcesPage.validation.privateKeyPem':
+    'Enter the unencrypted PEM private key for this certificate.',
   'resourcesPage.secretContent': 'Secret content',
   'resourcesPage.secretContentHint':
     'Text is encoded as UTF-8 when submitted. The value cannot be retrieved after saving.',
@@ -100,6 +109,15 @@ export const enResourcesPage = {
 } as const;
 
 export const ptResourcesPage = {
+  'resourcesPage.validation.registryRequired': 'Informe o endereço do registry.',
+  'resourcesPage.validation.registryProtocol': 'Informe um endereço HTTP ou HTTPS para o registry.',
+  'resourcesPage.validation.registryAddress': 'Informe um endereço de registry válido.',
+  'resourcesPage.validation.registryCredentials':
+    'Informe somente o servidor e a porta, sem credenciais no endereço.',
+  'resourcesPage.validation.secretSize': 'O conteúdo excede o tamanho permitido pelo servidor.',
+  'resourcesPage.validation.certificatePem': 'Informe um certificado PEM válido.',
+  'resourcesPage.validation.privateKeyPem':
+    'Informe a chave privada PEM sem senha correspondente ao certificado.',
   'resourcesPage.secretContent': 'Conteúdo do secret',
   'resourcesPage.secretContentHint':
     'Texto codificado em UTF-8 no envio. O valor não será recuperado após salvar.',
