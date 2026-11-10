@@ -58,6 +58,14 @@ Run this on the named local Rancher lab with an owned synthetic database. The ha
 python -m migration.test_original_rehearsal
 ```
 
+### Original engine upgrade and rollback
+
+Run the following only on the named synthetic lab during a maintenance window. It briefly stops the local Rancher, Keycloak and console for a consistent cold capture and restarts them before testing the restored copy. The isolated copy starts Rancher 1.6.30 with 20 environments, upgrades to the locally built schema-validation image, checks the migration record after restart and verifies that a checksum mismatch blocks startup. The rollback starts the original image on a fresh copy of the corresponding original snapshot and verifies that the custom tables are absent. Check the source container IDs and HTTP readiness after the rehearsal. This covers the isolated engine and database path. Workload, external storage and final topology acceptance run separately.
+
+```sh
+python -m migration.test_original_engine_lab --quiesce
+```
+
 ## Native and browser acceptance
 
 Use a dedicated legacy-compatible Docker host/guest. The physical harnesses in `console/tests/` are intentionally constrained to a named sandbox, expected environment/host and explicit ownership. They are not generic production diagnostics or automatically portable to an arbitrary fresh installation. Review the script and provision the required fixture before invoking it.

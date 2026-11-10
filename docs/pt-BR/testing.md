@@ -58,6 +58,14 @@ Execute no laboratório local do Rancher com um banco sintético próprio. O tes
 python -m migration.test_original_rehearsal
 ```
 
+### Upgrade e rollback do engine original
+
+Execute apenas no laboratório sintético indicado, durante uma janela de manutenção. O teste interrompe brevemente o Rancher, o Keycloak e o console locais para uma captura a frio consistente e reinicia os três antes de testar a cópia restaurada. A cópia isolada inicia o Rancher 1.6.30 com 20 ambientes, migra para a imagem local de validação de schema, confere o registro da migração após reiniciar e verifica que uma divergência de checksum bloqueia o startup. No rollback, o teste inicia a imagem original sobre uma nova cópia do snapshot original correspondente e verifica a ausência das tabelas customizadas. Confira os IDs dos containers de origem e a disponibilidade HTTP após o ensaio. Este teste cobre o engine e o banco isolados. O aceite de workloads, armazenamento externo e topologia final é separado.
+
+```sh
+python -m migration.test_original_engine_lab --quiesce
+```
+
 ## Aceite nativo e de navegador
 
 Use host/guest Docker dedicado e compatível com a geração legada. Harnesses físicos em `console/tests/` restringem-se intencionalmente a sandbox nomeado, environment/host esperados e ownership explícito. Não são diagnósticos genéricos de produção nem automaticamente portáveis para qualquer instalação nova. Leia o script e provisione a fixture exigida antes de executá-lo.
