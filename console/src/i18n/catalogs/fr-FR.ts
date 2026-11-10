@@ -1,4 +1,11 @@
 export const frFR = {
+  'operations.stacks': 'Stacks',
+  'operations.services': 'Services',
+  'operations.containers': 'Conteneurs',
+  'operations.view': 'Vue des opérations',
+  'operations.expandAll': 'Tout développer',
+  'operations.collapseAll': 'Tout réduire',
+  'operations.topology': 'Topologie',
   'operations.search': 'Rechercher dans les opérations',
   'operations.searchPlaceholder': 'Stack, service, conteneur, image ou ID…',
   'operations.state': 'État',

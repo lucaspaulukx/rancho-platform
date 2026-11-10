@@ -1,4 +1,11 @@
 export const ukUA = {
+  'operations.stacks': 'Стеки',
+  'operations.services': 'Сервіси',
+  'operations.containers': 'Контейнери',
+  'operations.view': 'Подання операцій',
+  'operations.expandAll': 'Розгорнути все',
+  'operations.collapseAll': 'Згорнути все',
+  'operations.topology': 'Топологія',
   'operations.search': 'Пошук в операціях',
   'operations.searchPlaceholder': 'Стек, сервіс, контейнер, образ або ID…',
   'operations.state': 'Стан',

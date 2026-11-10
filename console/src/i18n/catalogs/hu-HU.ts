@@ -1,4 +1,11 @@
 export const huHU = {
+  'operations.stacks': 'Stackek',
+  'operations.services': 'Szolgáltatások',
+  'operations.containers': 'Konténerek',
+  'operations.view': 'Műveleti nézet',
+  'operations.expandAll': 'Összes kibontása',
+  'operations.collapseAll': 'Összes összecsukása',
+  'operations.topology': 'Topológia',
   'operations.search': 'Keresés a műveletekben',
   'operations.searchPlaceholder': 'Stack, szolgáltatás, konténer, lemezkép vagy azonosító…',
   'operations.state': 'Állapot',

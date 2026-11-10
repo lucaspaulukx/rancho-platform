@@ -1,4 +1,11 @@
 export const jaJP = {
+  'operations.stacks': 'スタック',
+  'operations.services': 'サービス',
+  'operations.containers': 'コンテナ',
+  'operations.view': '操作ビュー',
+  'operations.expandAll': 'すべて展開',
+  'operations.collapseAll': 'すべて折りたたむ',
+  'operations.topology': 'トポロジー',
   'operations.search': '操作対象を検索',
   'operations.searchPlaceholder': 'スタック、サービス、コンテナ、イメージ、ID…',
   'operations.state': '状態',
