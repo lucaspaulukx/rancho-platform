@@ -1,4 +1,8 @@
 export const enGroups = {
+  'groups.role.readonly': 'Read Only',
+  'groups.role.restricted': 'Restricted',
+  'groups.role.member': 'Member',
+  'groups.role.owner': 'Owner',
   'groups.updated': 'Group updated. The grants are already in effect.',
   'groups.created': 'Group created.',
   'groups.editGroup': 'Edit group',
@@ -88,6 +92,10 @@ export const enGroups = {
 } as const;
 
 export const ptGroups = {
+  'groups.role.readonly': 'Somente leitura',
+  'groups.role.restricted': 'Restrito',
+  'groups.role.member': 'Membro',
+  'groups.role.owner': 'Proprietário',
   'groups.updated': 'Grupo atualizado. Os grants já estão em vigor.',
   'groups.created': 'Grupo criado.',
   'groups.editGroup': 'Editar grupo',

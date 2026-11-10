@@ -46,7 +46,7 @@ describe('Diagnóstico backend e snapshots de grupos', () => {
     });
     mount(<AccessDiagnostics account={account} projects={projects} onClose={vi.fn()} />);
     expect(await screen.findByText('Equipe')).toBeInTheDocument();
-    expect(screen.getByText('Owner')).toBeInTheDocument();
+    expect(screen.getByText('Proprietário')).toBeInTheDocument();
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('targetAccount=1a10&targetEnvironment=1a12'),
       expect.anything(),
@@ -68,7 +68,7 @@ describe('Diagnóstico backend e snapshots de grupos', () => {
     mount(<AccessDiagnostics account={account} projects={projects} onClose={vi.fn()} />);
     expect(await screen.findByText('Não determinado')).toBeInTheDocument();
     expect(screen.getByText(/Diagnóstico parcial/)).toBeInTheDocument();
-    expect(screen.queryByText('Owner')).not.toBeInTheDocument();
+    expect(screen.queryByText('Proprietário')).not.toBeInTheDocument();
   });
   it('rejeita diagnóstico retornado para outra conta', async () => {
     respond({
@@ -85,7 +85,7 @@ describe('Diagnóstico backend e snapshots de grupos', () => {
     });
     mount(<AccessDiagnostics account={account} projects={projects} onClose={vi.fn()} />);
     expect(await screen.findByText(/não corresponde à conta/)).toBeInTheDocument();
-    expect(screen.queryByText('Owner')).not.toBeInTheDocument();
+    expect(screen.queryByText('Proprietário')).not.toBeInTheDocument();
   });
   it('exibe os snapshots antes e depois do evento persistido', async () => {
     const before = {
@@ -156,7 +156,7 @@ describe('Diagnóstico backend e snapshots de grupos', () => {
 });
 
 describe('Manutenção de vínculos de grupos', () => {
-  it('retains a group draft when the language changes', async () => {
+  it('translates role labels without changing the grant draft or its native value when the language changes', async () => {
     const router = createMemoryRouter([
       {
         path: '/',
@@ -165,7 +165,7 @@ describe('Manutenção de vínculos de grupos', () => {
             <GroupEditor
               group={null}
               users={[]}
-              projects={[]}
+              projects={projects}
               onClose={vi.fn()}
               onSaved={vi.fn()}
             />
@@ -191,6 +191,11 @@ describe('Manutenção de vínculos de grupos', () => {
     );
     const name = screen.getByRole('textbox', { name: 'Nome do grupo' });
     await userEvent.type(name, 'Equipe local');
+    await userEvent.click(screen.getByRole('tab', { name: 'Environments (0)' }));
+    const permission = screen.getByRole('combobox', { name: 'Permissão em Operações' });
+    const readOnly = within(permission).getByRole('option', { name: 'Somente leitura' });
+    expect(readOnly).toHaveValue('readonly');
+    await userEvent.selectOptions(permission, readOnly);
     act(() => {
       localStorage.setItem(
         'rancho.console.locale.anonymous',
@@ -198,6 +203,12 @@ describe('Manutenção de vínculos de grupos', () => {
       );
       window.dispatchEvent(new StorageEvent('storage', { key: 'rancho.console.locale.anonymous' }));
     });
+    expect(screen.getByRole('combobox', { name: 'Permission in Operações' })).toBe(permission);
+    expect(permission).toHaveValue('readonly');
+    expect(within(permission).getByRole('option', { name: 'Read Only' })).toHaveValue('readonly');
+    await userEvent.click(screen.getByRole('tab', { name: 'Review' }));
+    expect(screen.getByText('Read Only')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('tab', { name: 'Members (0)' }));
     expect(screen.getByRole('textbox', { name: 'Group name' })).toBe(name);
     expect(name).toHaveValue('Equipe local');
     router.dispose();

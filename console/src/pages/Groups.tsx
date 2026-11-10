@@ -20,6 +20,7 @@ import {
 } from '../api';
 
 import { useI18n } from '../i18n/provider';
+import { roleLabel } from '../i18n/role-label';
 
 import { useApp } from '../state';
 import { useLocalAccessData } from '../hooks/useLocalAccessData';
@@ -319,11 +320,11 @@ export function GroupEditor({
                       {roles
                         .filter(
                           (role) =>
-                            project.state === 'active' || grants[rawId(project.id)] === role.value,
+                            project.state === 'active' || grants[rawId(project.id)] === role,
                         )
                         .map((role) => (
-                          <option key={role.value} value={role.value}>
-                            {role.label}
+                          <option key={role} value={role}>
+                            {roleLabel(t, role)}
                           </option>
                         ))}
                     </select>
@@ -383,7 +384,7 @@ export function GroupEditor({
                     <div>
                       <strong>{projects.find((p) => rawId(p.id) === id)?.name || id}</strong>
                     </div>
-                    <Badge>{roles.find((r) => r.value === role)?.label || role}</Badge>
+                    <Badge>{roleLabel(t, role)}</Badge>
                   </div>
                 ))}
               </div>
@@ -581,7 +582,7 @@ export function Groups() {
             render: (g) => (
               <span className="muted">
                 {[...new Set(Object.values(g.grants))]
-                  .map((role) => roles.find((r) => r.value === role)?.label || role)
+                  .map((role) => roleLabel(t, role))
                   .join(', ') || '—'}
               </span>
             ),

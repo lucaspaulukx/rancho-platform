@@ -104,7 +104,7 @@ describe('Configuração e escopo da console', () => {
     await userEvent.click(screen.getByLabelText('Menu do usuário'));
     await userEvent.click(screen.getByRole('button', { name: 'Meu acesso' }));
     await screen.findByRole('heading', { name: 'Acesso efetivo · Minha conta' });
-    await screen.findByRole('cell', { name: 'Owner' });
+    await screen.findByRole('cell', { name: 'Proprietário' });
     expect(fetcher.mock.calls.map(([url]) => url)).toContain(
       '/v2-beta/localAccessReports?targetAccount=self&targetEnvironment=1a7',
     );

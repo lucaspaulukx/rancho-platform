@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { History, RefreshCw } from 'lucide-react';
-import { api, rawId, roles, type Account, type Collection, type Group, type Project } from '../api';
+import { api, rawId, type Account, type Collection, type Group, type Project } from '../api';
 import { useI18n } from '../i18n/provider';
+import { roleLabel } from '../i18n/role-label';
 import { useApp } from '../state';
 import { Alert, Badge, Button, DataTable, Empty, ErrorState, Field, Loading, Modal } from './ui';
 
@@ -30,7 +31,6 @@ interface AuditEvent {
   before?: Snapshot | null;
   after?: Snapshot | null;
 }
-const roleName = (role: string) => roles.find((value) => value.value === role)?.label || role;
 class AccessScopeMismatchError extends Error {}
 
 export function AccessDiagnostics({
@@ -133,7 +133,7 @@ export function AccessDiagnostics({
                   {!query.data.complete
                     ? t('accessDiagnostics.undetermined')
                     : query.data.effectiveRole
-                      ? roleName(query.data.effectiveRole)
+                      ? roleLabel(t, query.data.effectiveRole)
                       : t('accessDiagnostics.noAccess')}
                 </Badge>
               </dd>
@@ -168,7 +168,7 @@ export function AccessDiagnostics({
               {
                 key: 'role',
                 label: t('accessDiagnostics.grantedRole'),
-                render: (source) => roleName(source.role),
+                render: (source) => roleLabel(t, source.role),
               },
             ]}
           />
@@ -341,7 +341,7 @@ export function GroupAudit({
                             {Object.entries(value.grants)
                               .map(
                                 ([project, role]) =>
-                                  `${projects.find((item) => rawId(item.id) === project)?.name || project}: ${roleName(role)}`,
+                                  `${projects.find((item) => rawId(item.id) === project)?.name || project}: ${roleLabel(t, role)}`,
                               )
                               .join('; ') || t('accessDiagnostics.none')}
                           </dd>
