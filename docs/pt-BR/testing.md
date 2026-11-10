@@ -60,10 +60,10 @@ python -m migration.test_original_rehearsal
 
 ### Upgrade e rollback do engine original
 
-Execute apenas no laboratório sintético indicado, durante uma janela de manutenção. O teste interrompe brevemente o Rancher, o Keycloak e o console locais para uma captura a frio consistente e reinicia os três antes de testar a cópia restaurada. A cópia isolada inicia o Rancher 1.6.30 com 20 ambientes, migra para a imagem local de validação de schema, confere o registro da migração após reiniciar e verifica que uma divergência de checksum bloqueia o startup. No rollback, o teste inicia a imagem original sobre uma nova cópia do snapshot original correspondente e verifica a ausência das tabelas customizadas. Confira os IDs dos containers de origem e a disponibilidade HTTP após o ensaio. Este teste cobre o engine e o banco isolados. O aceite de workloads, armazenamento externo e topologia final é separado.
+Execute apenas no laboratório sintético indicado, durante uma janela de manutenção. O teste interrompe brevemente o Rancher, o Keycloak e o console locais para uma captura a frio consistente e reinicia os três antes de testar a cópia restaurada. A cópia isolada inicia o Rancher 1.6.30 com 20 ambientes, migra para a imagem local de backend selecionada, confere o registro da migração após reiniciar e verifica que uma divergência de checksum bloqueia a inicialização. No rollback, o teste inicia a imagem original sobre uma nova cópia do snapshot original correspondente e verifica a ausência das tabelas customizadas. O teste de recuperação confere o documento de entrada do cliente clássico e os dois bundles JavaScript, o login administrativo e o inventário de ambientes. Registre os IDs das duas imagens, a preservação dos containers de origem e a disponibilidade HTTP a partir do relatório. O ensaio cobre o engine, o banco isolado e a entrega dos arquivos do cliente clássico. A interação do cliente clássico no navegador e o aceite de workloads, armazenamento externo e topologia final são separados.
 
 ```sh
-python -m migration.test_original_engine_lab --quiesce
+python -m migration.test_original_engine_lab --quiesce --backend-image my-backend:candidate
 ```
 
 ## Aceite nativo e de navegador
