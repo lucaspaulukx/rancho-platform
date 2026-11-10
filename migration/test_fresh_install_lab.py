@@ -108,7 +108,23 @@ def console_ready(container):
     native_api(container, base + "/v2-beta", console=True)
 
 
-def rehearse(backend, console):
+def configuration(container, enabled):
+    try:
+        config = json.loads(http(container, "http://127.0.0.1:8080/oidc/config"))
+    except json.JSONDecodeError:
+        raise RehearsalError("Parse public configuration contract") from None
+    require(isinstance(config, dict) and config.get("version") == 1 and
+            all(isinstance(config.get(field), dict) for field in ("requested", "effective", "available")),
+            "Verify public configuration version and flag maps")
+    require(config["requested"].get("CUSTOMIZATION_ENABLED") is enabled, "Verify requested customization mode")
+    for flag in ("SCHEMA_MIGRATIONS_ENABLED", "LOCAL_RBAC_ENABLED"):
+        require(config["requested"].get(flag) is True and config["effective"].get(flag) is enabled,
+                f"Verify requested and effective {flag}")
+    require(config["effective"].get("OIDC_ENABLED") is False and
+            config["available"].get("MODERN_UI_ENABLED") is False, "Verify OIDC and embedded console remain off")
+
+
+def rehearse(backend, console, *, configuration_reversal=False):
     token = secrets.token_hex(12)
     prefix = f"rancho-fresh-{token}"
     label = f"{OWNER}={token}"
@@ -126,6 +142,12 @@ def rehearse(backend, console):
         require({item["NetworkID"] for item in info["NetworkSettings"]["Networks"].values()} == {network},
                 "Verify running container has only the private bridge")
 
+    def stop(container):
+        docker("Stop isolated backend cleanly", "stop", "--time", "120", container, timeout=135)
+        state = inspect("container", container)["State"]
+        require(not state["Running"] and not state["OOMKilled"] and state["ExitCode"] in (0, 143),
+                "Verify clean shutdown before reusing database volumes")
+
     try:
         network = create("network", prefix, "--internal", "--driver", "bridge", prefix)
         network_info = inspect("network", network)
@@ -140,18 +162,7 @@ def rehearse(backend, console):
             mounts += ["--mount", f"type=volume,src={volume},dst={target}"]
         common = ("--pull=never", "--log-driver=local", "--log-opt", "max-size=1m", "--log-opt", "max-file=2",
                   "--network", network)
-        rancher = create(
-            "container", prefix + "-backend", "--name", prefix + "-backend", *common, "--network-alias", "rancher",
-            "--memory", "2g", *mounts,
-            "--env", "DEFAULT_CATTLE_CATALOG_EXECUTE=false", "--env", "CATTLE_CATALOG_EXECUTE=false",
-            "--env", "RANCHER_CUSTOMIZATION_ENABLED=true", "--env", "RANCHER_SCHEMA_MIGRATIONS_ENABLED=true",
-            "--env", "RANCHER_LOCAL_RBAC_ENABLED=true", "--env", "RANCHER_DISABLE_AUTO_ENVIRONMENT=true",
-            "--env", "RANCHER_OIDC_ENABLED=false", "--env", "RANCHER_MODERN_UI_ENABLED=false", backend,
-        )
-        modern = create(
-            "container", prefix + "-console", "--name", prefix + "-console", *common, "--memory", "256m", console,
-        )
-        for identity, image, expected_volumes in ((rancher, backend, volume_names), (modern, console, set())):
+        def validate_container(identity, image, expected_volumes):
             info = inspect("container", identity)
             config = info["HostConfig"]
             require(info["Image"] == image and not config["Privileged"] and not config["PortBindings"],
@@ -161,6 +172,26 @@ def rehearse(backend, console):
                     "Verify private network attachment")
             require(all(mount["Type"] == "volume" for mount in info["Mounts"]) and
                     {mount["Name"] for mount in info["Mounts"]} == expected_volumes, "Verify exact owned mounts")
+
+        def create_backend(suffix, enabled):
+            name = prefix + suffix
+            identity = create(
+                "container", name, "--name", name, *common, "--network-alias", "rancher",
+                "--memory", "2g", *mounts,
+                "--env", "DEFAULT_CATTLE_CATALOG_EXECUTE=false", "--env", "CATTLE_CATALOG_EXECUTE=false",
+                "--env", f"RANCHER_CUSTOMIZATION_ENABLED={str(enabled).lower()}",
+                "--env", "RANCHER_SCHEMA_MIGRATIONS_ENABLED=true", "--env", "RANCHER_LOCAL_RBAC_ENABLED=true",
+                "--env", "RANCHER_DISABLE_AUTO_ENVIRONMENT=true",
+                "--env", "RANCHER_OIDC_ENABLED=false", "--env", "RANCHER_MODERN_UI_ENABLED=false", backend,
+            )
+            validate_container(identity, backend, volume_names)
+            return identity
+
+        rancher = create_backend("-backend", True)
+        modern = create(
+            "container", prefix + "-console", "--name", prefix + "-console", *common, "--memory", "256m", console,
+        )
+        validate_container(modern, console, set())
         boot(rancher, "Start fresh Rancher")
         poll("Fresh backend did not become ready", rancher, lambda: backend_ready(rancher))
         first = poll("Fresh schema did not validate", rancher, lambda: schema(rancher, checksum))
@@ -172,6 +203,21 @@ def rehearse(backend, console):
         require(schema(rancher, checksum) == first, "Verify migration record unchanged after restart")
         poll("Packaged console proxy did not recover", modern, lambda: console_ready(modern), 60)
         print("PASS: console HTML and bundle, native API proxy, and unchanged migration after restart", flush=True)
+        if configuration_reversal:
+            poll("Enabled configuration did not load", rancher, lambda: configuration(rancher, True))
+            stop(rancher)
+            disabled = create_backend("-backend-disabled", False)
+            boot(disabled, "Start backend with customization disabled")
+            poll("Classic backend did not recover with customization disabled", disabled, lambda: backend_ready(disabled))
+            poll("Disabled configuration did not load", disabled, lambda: configuration(disabled, False))
+            require(schema(disabled, checksum) == first, "Verify disabled mode preserved the community schema")
+            stop(disabled)
+            boot(rancher, "Restore enabled backend")
+            poll("Backend did not recover after enabling customization", rancher, lambda: backend_ready(rancher))
+            poll("Enabled configuration did not return", rancher, lambda: configuration(rancher, True))
+            require(schema(rancher, checksum) == first, "Verify unchanged community schema after reversal")
+            poll("Console proxy did not recover after reversal", modern, lambda: console_ready(modern), 60)
+            print("PASS: customization on/off/on, classic API fallback and unchanged database", flush=True)
     finally:
         failed = []
         for kind, name, identity in reversed(owned):
@@ -194,11 +240,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--backend-image", required=True)
     parser.add_argument("--console-image", required=True)
+    parser.add_argument("--configuration-reversal", action="store_true")
     args = parser.parse_args()
     try:
         backend, console = image_id(args.backend_image), image_id(args.console_image)
         print(f"Backend {backend}\nConsole {console}", flush=True)
-        rehearse(backend, console)
+        rehearse(backend, console, configuration_reversal=args.configuration_reversal)
     except RehearsalError as error:
         parser.exit(1, f"FAIL: {error}\n")
 

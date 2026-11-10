@@ -47,9 +47,13 @@ Use two previously built local Linux images. The rehearsal uses fresh owned volu
 python -m migration.test_fresh_install_lab --backend-image rancho-backend:local --console-image rancho-console:local
 ```
 
+Add `--configuration-reversal` to exercise customization on, off and on again with the same isolated database volumes. The rehearsal verifies requested and effective RBAC/schema flags, classic UI and API delivery, preservation of the migration record and recovery of the console proxy. This profile keeps OIDC disabled.
+
 ## Rehearsal with one pinned artifact
 
 Run the combined gate with three local images and Playwright Chromium available in the Python environment. Leave loopback port 18091 free for the owned rollback proxy. The tool resolves the image IDs once, runs fresh installation and frontend upgrade/rollback on the same console candidate, and reports the selected IDs, configuration digest and cleanup. The report covers these two checks. The remaining release gates must be recorded separately.
+
+Pass `--configuration-reversal` here too to include the runtime flag reversal in the same report.
 
 ```sh
 python -m scripts.release_artifact_rehearsal --backend-image rancho-backend:local --previous-console-image rancho-console:previous --candidate-console-image rancho-console:candidate

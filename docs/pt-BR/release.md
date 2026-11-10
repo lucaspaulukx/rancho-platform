@@ -47,9 +47,13 @@ Use duas imagens Linux locais já compiladas. O ensaio usa volumes próprios nov
 python -m migration.test_fresh_install_lab --backend-image rancho-backend:local --console-image rancho-console:local
 ```
 
+Adicione `--configuration-reversal` para ativar, desativar e reativar a customização nos mesmos volumes isolados de banco. O ensaio confere as flags solicitadas e efetivas de RBAC/schema, a entrega da UI clássica e da API, a preservação do registro de migração e a recuperação do proxy do console. Esse perfil mantém o OIDC desativado.
+
 ## Ensaio com um artefato fixado
 
 Execute o teste combinado com três imagens locais e o Chromium do Playwright disponível no ambiente Python. Deixe a porta local 18091 livre para o proxy temporário de rollback. A ferramenta resolve os IDs das imagens uma vez, executa a instalação limpa e o upgrade/rollback do frontend com a mesma imagem candidata e registra os IDs, o hash da configuração e a limpeza. O relatório cobre essas duas verificações. Registre separadamente os demais critérios de release.
+
+Passe `--configuration-reversal` também nesse comando para registrar a reversão de flags em execução no mesmo relatório.
 
 ```sh
 python -m scripts.release_artifact_rehearsal --backend-image rancho-backend:local --previous-console-image rancho-console:previous --candidate-console-image rancho-console:candidate

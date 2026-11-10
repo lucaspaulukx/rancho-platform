@@ -24,7 +24,7 @@ def run_check(arguments):
     ).stdout
 
 
-def rehearse(backend, previous, candidate, chromium, report):
+def rehearse(backend, previous, candidate, chromium, report, *, configuration_reversal=False):
     report['stage'] = 'resolve-images'
     images = {
         'backend': image_id(backend),
@@ -36,12 +36,18 @@ def rehearse(backend, previous, candidate, chromium, report):
         raise ValueError('Distinct console images required')
 
     report['stage'] = 'fresh-install'
-    run_check([
+    fresh_args = [
         '-m', 'migration.test_fresh_install_lab',
         '--backend-image', images['backend'],
         '--console-image', images['candidateConsole'],
-    ])
+    ]
+    if configuration_reversal:
+        fresh_args.append('--configuration-reversal')
+        report['configurationReversalPassed'] = False
+    run_check(fresh_args)
     report['freshInstallPassed'] = True
+    if configuration_reversal:
+        report['configurationReversalPassed'] = True
 
     report['stage'] = 'frontend-rollback'
     args = [
@@ -69,6 +75,7 @@ def main():
     parser.add_argument('--previous-console-image', required=True)
     parser.add_argument('--candidate-console-image', required=True)
     parser.add_argument('--chromium-executable')
+    parser.add_argument('--configuration-reversal', action='store_true')
     args = parser.parse_args()
     report = {
         'status': 'failed',
@@ -80,7 +87,7 @@ def main():
     }
     try:
         rehearse(args.backend_image, args.previous_console_image, args.candidate_console_image,
-                 args.chromium_executable, report)
+                 args.chromium_executable, report, configuration_reversal=args.configuration_reversal)
     except Exception as error:
         report['errorType'] = type(error).__name__
     print(json.dumps(report, indent=2))
