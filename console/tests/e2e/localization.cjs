@@ -323,10 +323,10 @@ async function main() {
     await about.getByText('Rancher 1.6.30', { exact: true }).isVisible());
   await about.getByRole('button', { name: 'Close dialog', exact: true }).click();
   result.stage = 'authenticated-rtl';
-  for (const [locale, stacks] of [
-    ['de-DE', 'Stacks'], ['fr-FR', 'Stacks'], ['ja-JP', 'スタック'],
-    ['zh-Hans', '堆栈'], ['ru-RU', 'Стеки'], ['uk-UA', 'Стеки'],
-    ['hu-HU', 'Stackek'], ['fa-IR', 'پشته‌ها'],
+  for (const [locale, stacks, active] of [
+    ['de-DE', 'Stacks', 'Aktiv'], ['fr-FR', 'Stacks', 'Actif'], ['ja-JP', 'スタック', 'アクティブ'],
+    ['zh-Hans', '堆栈', '已激活'], ['ru-RU', 'Стеки', 'Активно'], ['uk-UA', 'Стеки', 'Активно'],
+    ['hu-HU', 'Stackek', 'Aktív'], ['fa-IR', 'پشته‌ها', 'فعال'],
   ]) {
     await workspace.locator('.language-selector select').selectOption(locale);
     const stacksLink = workspace.locator('.sidebar a[href="/console/stacks?env=1a12"]');
@@ -334,6 +334,9 @@ async function main() {
       await stacksLink.getAttribute('title') === stacks &&
       new URL(workspace.url()).searchParams.get('env') === '1a12' &&
       await workspace.getByTestId('app-shell').getAttribute('class').then((value) => value.includes('sidebar-collapsed')));
+    const state = workspace.locator('.resource-summary .badge').getByText(active, { exact: true });
+    await state.waitFor();
+    check(`${locale} translates the native environment state badge`, await state.isVisible());
   }
   await workspace.locator('.language-selector select').selectOption('fa-IR');
   await workspace.getByRole('combobox', { name: 'زبان', exact: true }).waitFor();
@@ -477,6 +480,11 @@ async function main() {
   await translatedPermission.getByRole('option', { name: 'Read Only', exact: true }).waitFor({ state: 'attached' });
   check('group role translation preserves the draft grant identifier and route',
     await translatedPermission.inputValue() === 'readonly' && groupPage.url() === groupsUrl);
+  await localePeer.locator('.language-selector select').selectOption('fa-IR');
+  await translatedPermission.getByRole('option', { name: 'فقط خواندنی', exact: true }).waitFor({ state: 'attached' });
+  check('Persian preview translates the grant label and retains the readonly value',
+    await translatedPermission.inputValue() === 'readonly' &&
+    await groupPage.locator('html').getAttribute('dir') === 'rtl');
   if (axe) {
     result.stage = 'accessibility-results';
     check('axe checks for six routes in both themes on mobile and desktop',

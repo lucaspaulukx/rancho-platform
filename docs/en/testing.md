@@ -104,6 +104,8 @@ Set `PLAYWRIGHT_MODULES` and `CHROMIUM_EXECUTABLE` if Playwright or Chromium are
 
 Set `UX06_LAYOUT_ONLY=1` to run only the narrow and RTL layout checks. They exercise long environment and stack names in the flat Services and Containers views, and check the alignment of the tree toolbar and metric totals in Persian.
 
+The layout check also verifies a long French state label at 320 px.
+
 Set `UX06_SOAK_SECONDS` to an integer from 60 to 900 to run only the inventory soak. In a visible Chromium tab it checks recurring refreshes and automatic recovery from two synthetic read failures. It reports post-GC heap, renderer task time, scope and row counts.
 
 ### Native host metrics soak
