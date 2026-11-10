@@ -1,4 +1,12 @@
 export const zhHans = {
+  'operations.search': '搜索运维资源',
+  'operations.searchPlaceholder': '堆栈、服务、容器、镜像或 ID…',
+  'operations.state': '状态',
+  'operations.allStates': '所有状态',
+  'operations.includeSystem': '包含基础设施',
+  'operations.empty': '没有资源符合这些筛选条件',
+  'operations.emptyHint': '请检查搜索条件、状态或基础设施选项。这里只显示所选环境中的资源。',
+
   'groups.role.readonly': '只读',
   'groups.role.restricted': '受限',
   'groups.role.member': '成员',

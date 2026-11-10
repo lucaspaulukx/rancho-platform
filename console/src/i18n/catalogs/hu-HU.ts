@@ -1,4 +1,13 @@
 export const huHU = {
+  'operations.search': 'Keresés a műveletekben',
+  'operations.searchPlaceholder': 'Stack, szolgáltatás, konténer, lemezkép vagy azonosító…',
+  'operations.state': 'Állapot',
+  'operations.allStates': 'Minden állapot',
+  'operations.includeSystem': 'Infrastruktúra megjelenítése',
+  'operations.empty': 'Egyetlen erőforrás sem felel meg a szűrőknek',
+  'operations.emptyHint':
+    'Ellenőrizze a keresést, az állapotot vagy az infrastruktúra beállítását. Csak a kiválasztott környezet erőforrásai jelennek meg.',
+
   'groups.role.readonly': 'Csak olvasható',
   'groups.role.restricted': 'Korlátozott',
   'groups.role.member': 'Tag',

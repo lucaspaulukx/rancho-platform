@@ -1,4 +1,13 @@
 export const ukUA = {
+  'operations.search': 'Пошук в операціях',
+  'operations.searchPlaceholder': 'Стек, сервіс, контейнер, образ або ID…',
+  'operations.state': 'Стан',
+  'operations.allStates': 'Усі стани',
+  'operations.includeSystem': 'Показувати інфраструктуру',
+  'operations.empty': 'Немає ресурсів, що відповідають цим фільтрам',
+  'operations.emptyHint':
+    'Перевірте пошук, стан або параметр інфраструктури. Відображаються лише ресурси вибраного середовища.',
+
   'groups.role.readonly': 'Лише читання',
   'groups.role.restricted': 'Обмежений доступ',
   'groups.role.member': 'Учасник',

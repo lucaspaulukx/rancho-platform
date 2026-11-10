@@ -1,4 +1,13 @@
 export const deDE = {
+  'operations.search': 'Vorgänge durchsuchen',
+  'operations.searchPlaceholder': 'Stack, Dienst, Container, Image oder ID…',
+  'operations.state': 'Status',
+  'operations.allStates': 'Alle Status',
+  'operations.includeSystem': 'Infrastruktur einbeziehen',
+  'operations.empty': 'Keine Ressourcen entsprechen diesen Filtern',
+  'operations.emptyHint':
+    'Prüfen Sie die Suche, den Status oder die Infrastruktur-Option. Angezeigt werden nur Ressourcen der ausgewählten Umgebung.',
+
   'groups.role.readonly': 'Schreibgeschützt',
   'groups.role.restricted': 'Eingeschränkt',
   'groups.role.member': 'Mitglied',

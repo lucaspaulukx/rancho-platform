@@ -1,4 +1,13 @@
 export const ruRU = {
+  'operations.search': 'Поиск в операциях',
+  'operations.searchPlaceholder': 'Стек, сервис, контейнер, образ или ID…',
+  'operations.state': 'Состояние',
+  'operations.allStates': 'Все состояния',
+  'operations.includeSystem': 'Показывать инфраструктуру',
+  'operations.empty': 'Нет ресурсов, соответствующих этим фильтрам',
+  'operations.emptyHint':
+    'Проверьте поиск, состояние или настройку инфраструктуры. Отображаются только ресурсы выбранного окружения.',
+
   'groups.role.readonly': 'Только чтение',
   'groups.role.restricted': 'Ограниченный доступ',
   'groups.role.member': 'Участник',

@@ -225,6 +225,23 @@ async function main() {
     await language().inputValue() === 'en-US' &&
     await workspace.getByRole('link', { name: 'Services', exact: true }).getAttribute('href') === '/console/services?env=1a12');
 
+  result.stage = 'operation-filter-previews';
+  for (const [locale, label] of [
+    ['de-DE', 'Vorgänge durchsuchen'], ['fr-FR', 'Rechercher dans les opérations'],
+    ['hu-HU', 'Keresés a műveletekben'], ['ja-JP', '操作対象を検索'],
+    ['fa-IR', 'جست‌وجو در عملیات'], ['ru-RU', 'Поиск в операциях'],
+    ['uk-UA', 'Пошук в операціях'], ['zh-Hans', '搜索运维资源'],
+  ]) {
+    await workspace.locator('.language-selector select').selectOption(locale);
+    const filter = workspace.getByLabel(label, { exact: true });
+    await filter.waitFor();
+    check(`${locale} translates the Operations filter and preserves the search and URL`,
+      await filter.inputValue() === 'localization-acceptance' &&
+      await filter.evaluate((node, previous) => node === previous, searchControl) &&
+      workspace.url() === workspaceUrl);
+  }
+  await workspace.locator('.language-selector select').selectOption('en-US');
+
   result.stage = 'open-appearance-dialog';
   await workspace.getByLabel('User menu', { exact: true }).click();
   await workspace.getByRole('button', { name: 'Appearance', exact: true }).click();

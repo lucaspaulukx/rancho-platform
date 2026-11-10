@@ -1,4 +1,13 @@
 export const jaJP = {
+  'operations.search': '操作対象を検索',
+  'operations.searchPlaceholder': 'スタック、サービス、コンテナ、イメージ、ID…',
+  'operations.state': '状態',
+  'operations.allStates': 'すべての状態',
+  'operations.includeSystem': 'インフラストラクチャを含める',
+  'operations.empty': 'フィルターに一致するリソースがありません',
+  'operations.emptyHint':
+    '検索条件、状態、またはインフラストラクチャの設定を確認してください。選択した環境のリソースのみが表示されます。',
+
   'groups.role.readonly': '読み取り専用',
   'groups.role.restricted': '制限付き',
   'groups.role.member': 'メンバー',
