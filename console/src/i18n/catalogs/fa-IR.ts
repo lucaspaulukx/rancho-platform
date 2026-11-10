@@ -1,4 +1,12 @@
 export const faIR = {
+  'operations.stackMetric': 'پشته',
+  'operations.serviceMetric': 'سرویس',
+  'operations.containerMetric': 'کانتینر',
+  'operations.totals': 'مجموع منابع محیط · به‌روزرسانی هر ۱۵ ثانیه',
+  'operations.visibleStacks': '{count} پشتهٔ قابل مشاهده',
+  'operations.visibleServices': '{count} سرویس قابل مشاهده',
+  'operations.visibleContainers': '{count} کانتینر مطابق فیلتر',
+  'operations.hiddenSystem': ' · {count} پشتهٔ زیرساخت پنهان است',
   'operations.stacks': 'پشته‌ها',
   'operations.services': 'سرویس‌ها',
   'operations.containers': 'کانتینرها',

@@ -64,7 +64,7 @@ describe('Registered locale catalog gate', () => {
       (key) =>
         /^(auth|ui|common|language|runtime|shell|recovery|resourceState)\./.test(key) ||
         key.startsWith('groups.role.') ||
-        /^operations\.(search|searchPlaceholder|state|allStates|includeSystem|empty|emptyHint|stacks|services|containers|view|expandAll|collapseAll|topology)$/.test(
+        /^operations\.(search|searchPlaceholder|state|allStates|includeSystem|empty|emptyHint|stacks|services|containers|view|expandAll|collapseAll|topology|stackMetric|serviceMetric|containerMetric|totals|visibleStacks|visibleServices|visibleContainers|hiddenSystem)$/.test(
           key,
         ) ||
         key === 'environment.selected' ||

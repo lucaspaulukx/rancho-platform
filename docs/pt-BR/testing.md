@@ -50,6 +50,14 @@ python -m unittest migration.test_tool migration.test_crypto_stream migration.te
 
 O último comando executa contratos. Comandos `*_lab`, integração de bootstrap e harnesses físicos são ações operacionais distintas; confira precondições/ownership antes de executá-los. Um nome de teste unitário não torna um ensaio de banco inofensivo.
 
+### Ensaio isolado com 20 ambientes
+
+Execute no laboratório local do Rancher com um banco sintético próprio. O teste gera um backup criptografado, restaura uma cópia sem rede nem montagem de volumes de origem e prepara nela uma fixture com schema original e 20 ambientes. Ele verifica a consistência da restauração, a aplicação do schema, a idempotência, o rollback e a limpeza. Este ensaio valida o fluxo de banco. O boot do Rancher e o login federado têm testes de aceite separados.
+
+```sh
+python -m migration.test_original_rehearsal
+```
+
 ## Aceite nativo e de navegador
 
 Use host/guest Docker dedicado e compatível com a geração legada. Harnesses físicos em `console/tests/` restringem-se intencionalmente a sandbox nomeado, environment/host esperados e ownership explícito. Não são diagnósticos genéricos de produção nem automaticamente portáveis para qualquer instalação nova. Leia o script e provisione a fixture exigida antes de executá-lo.

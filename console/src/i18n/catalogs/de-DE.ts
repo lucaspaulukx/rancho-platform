@@ -1,4 +1,12 @@
 export const deDE = {
+  'operations.stackMetric': 'Stacks',
+  'operations.serviceMetric': 'Dienste',
+  'operations.containerMetric': 'Container',
+  'operations.totals': 'Gesamtzahlen der Umgebung · alle 15 s aktualisiert',
+  'operations.visibleStacks': 'Sichtbare Stacks · {count}',
+  'operations.visibleServices': 'Sichtbare Dienste · {count}',
+  'operations.visibleContainers': 'Passende Container · {count}',
+  'operations.hiddenSystem': ' · Ausgeblendete Infrastruktur-Stacks: {count}',
   'operations.stacks': 'Stacks',
   'operations.services': 'Dienste',
   'operations.containers': 'Container',

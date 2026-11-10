@@ -1,4 +1,12 @@
 export const huHU = {
+  'operations.stackMetric': 'stack',
+  'operations.serviceMetric': 'szolgáltatás',
+  'operations.containerMetric': 'konténer',
+  'operations.totals': 'Környezeti összesítés · frissítés 15 másodpercenként',
+  'operations.visibleStacks': '{count} látható stack',
+  'operations.visibleServices': '{count} látható szolgáltatás',
+  'operations.visibleContainers': '{count} megfelelő konténer',
+  'operations.hiddenSystem': ' · {count} rejtett infrastruktúra-stack',
   'operations.stacks': 'Stackek',
   'operations.services': 'Szolgáltatások',
   'operations.containers': 'Konténerek',

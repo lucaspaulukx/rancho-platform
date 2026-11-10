@@ -246,16 +246,24 @@ async function main() {
   await workspace.getByRole('tab', { name: 'Services', exact: true }).click();
   const serviceUrl = workspace.url();
   assert.equal(new URL(serviceUrl).searchParams.get('view'), 'services');
-  for (const [locale, services, view] of [
-    ['de-DE', 'Dienste', 'Vorgangsansicht'], ['fr-FR', 'Services', 'Vue des opérations'],
-    ['hu-HU', 'Szolgáltatások', 'Műveleti nézet'], ['ja-JP', 'サービス', '操作ビュー'],
-    ['fa-IR', 'سرویس‌ها', 'نمای عملیات'], ['ru-RU', 'Сервисы', 'Представление операций'],
-    ['uk-UA', 'Сервіси', 'Подання операцій'], ['zh-Hans', '服务', '运维视图'],
+  for (const [locale, services, view, countLabel] of [
+    ['de-DE', 'Dienste', 'Vorgangsansicht', 'Sichtbare Dienste · {count}'],
+    ['fr-FR', 'Services', 'Vue des opérations', 'Services visibles · {count}'],
+    ['hu-HU', 'Szolgáltatások', 'Műveleti nézet', '{count} látható szolgáltatás'],
+    ['ja-JP', 'サービス', '操作ビュー', '表示中のサービス：{count} 件'],
+    ['fa-IR', 'سرویس‌ها', 'نمای عملیات', '{count} سرویس قابل مشاهده'],
+    ['ru-RU', 'Сервисы', 'Представление операций', 'Видимые сервисы · {count}'],
+    ['uk-UA', 'Сервіси', 'Подання операцій', 'Видимі сервіси · {count}'],
+    ['zh-Hans', '服务', '运维视图', '显示 {count} 个服务'],
   ]) {
     await workspace.locator('.language-selector select').selectOption(locale);
     const tabs = workspace.getByRole('tablist', { name: view, exact: true });
     const service = tabs.getByRole('tab', { name: services, selected: true, exact: true });
     await service.waitFor();
+    const count = countLabel.replace('{count}', new Intl.NumberFormat(locale).format(0));
+    const toolbar = workspace.locator('.operation-tree-tools > span');
+    check(`${locale} formats the visible service count in the active locale`,
+      (await toolbar.textContent()).trim().startsWith(count));
     check(`${locale} translates the selected Services tab and preserves its route and filter`,
       await workspace.getByRole('tabpanel', { name: services, exact: true }).isVisible() &&
       workspace.url() === serviceUrl &&
