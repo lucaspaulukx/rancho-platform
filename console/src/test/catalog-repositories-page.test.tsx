@@ -5,6 +5,8 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CatalogRepositories } from '../pages/CatalogRepositories';
 import { api } from '../api';
+import type { Locale } from '../i18n/locales';
+import { I18nProvider } from '../i18n/provider';
 const state = vi.hoisted(() => ({ admin: true, enabled: true }));
 vi.mock('../state', () => ({
   useApp: () => ({
@@ -39,12 +41,24 @@ const raw = {
 function mount() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = createMemoryRouter([{ path: '/', element: <CatalogRepositories /> }]);
-  render(
+  const page = (locale: Locale) => (
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: locale,
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: false,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <RouterProvider router={router} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
-  return client;
+  const { rerender } = render(page('pt-BR'));
+  return { client, showLocale: (locale: Locale) => rerender(page(locale)) };
 }
 beforeEach(() => {
   vi.clearAllMocks();
@@ -53,7 +67,7 @@ beforeEach(() => {
 });
 describe('Editor administrativo de repositórios', () => {
   it('não guarda URLs no cache da listagem', async () => {
-    const client = mount();
+    const { client } = mount();
     await screen.findByText('library');
     expect(
       JSON.stringify(client.getQueryData(['data', 'admin', 'catalog-repositories'])),
@@ -91,5 +105,24 @@ describe('Editor administrativo de repositórios', () => {
     expect(
       screen.getByLabelText('Confirmo remover todos os repositórios globais'),
     ).not.toBeChecked();
+  });
+  it('translates branch validation during review and preserves the draft without writing', async () => {
+    const user = userEvent.setup();
+    const { showLocale } = mount();
+    await screen.findByText('library');
+    await user.click(screen.getByRole('button', { name: 'Configurar repositórios' }));
+    const branch = await screen.findByLabelText('Branch do repositório 1');
+    await user.clear(branch);
+    await user.type(branch, 'feature..invalid');
+    await user.click(screen.getByRole('button', { name: 'Revisar repositórios' }));
+    await user.click(screen.getByRole('button', { name: 'Confirmar' }));
+    await screen.findByText('Branch inválida. Use um nome de referência Git.');
+
+    showLocale('en-US');
+    expect(screen.getByText('Invalid branch. Use a Git reference name.')).toBeInTheDocument();
+    expect(api).toHaveBeenCalledTimes(4);
+    expect(vi.mocked(api).mock.calls.every(([, , method]) => method === undefined)).toBe(true);
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByLabelText('Repository branch 1')).toHaveValue('feature..invalid');
   });
 });

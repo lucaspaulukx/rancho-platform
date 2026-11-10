@@ -12,6 +12,7 @@ import {
   repositoryDocument,
   repositoryMetadata,
   repositoryPayload,
+  CatalogRepositoryValidationError,
   type RepositoryDocument,
   type RepositoryDraft,
 } from '../catalog-repositories';
@@ -56,7 +57,11 @@ export function CatalogRepositories() {
 function RepositoryScope() {
   const { t } = useI18n();
   function errorText(error: Error) {
-    if (error instanceof SettingValidationError) return t(error.key);
+    if (
+      error instanceof SettingValidationError ||
+      error instanceof CatalogRepositoryValidationError
+    )
+      return t(error.key);
     if (!(error instanceof CatalogRepositoryError)) return error.message;
     return error.key === 'catalogRepositories.httpError'
       ? t(error.key, { status: error.params!.status })
@@ -176,6 +181,7 @@ function RepositoryScope() {
         <Loading />
       ) : query.error ? (
         query.error instanceof CatalogRepositoryError ||
+        query.error instanceof CatalogRepositoryValidationError ||
         query.error instanceof SettingValidationError ? (
           <div className="error-state">
             <Alert>{errorText(query.error)}</Alert>

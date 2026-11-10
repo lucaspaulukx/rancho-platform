@@ -6,12 +6,17 @@ import { allPages, api, ApiError, type Resource } from '../api';
 import { useApp, useDataKey } from '../state';
 import { useActionScope } from '../hooks/useActionScope';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
-import { useEnvironmentCatalogAccess } from '../hooks/useEnvironmentCatalogAccess';
+import {
+  EnvironmentCatalogAccessError,
+  useEnvironmentCatalogAccess,
+} from '../hooks/useEnvironmentCatalogAccess';
+import { CatalogRepositoryValidationError } from '../catalog-repositories';
 import {
   environmentRepositoryMetadata,
   environmentRepositoryPath,
   prepareEnvironmentRepository,
   repositoryDraft,
+  EnvironmentRepositoryValidationError,
   type EnvironmentRepository,
   type EnvironmentRepositoryDraft,
 } from '../environment-catalogs';
@@ -49,12 +54,24 @@ const emptyDraft = (): EnvironmentRepositoryDraft => ({
 });
 export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
   const { t } = useI18n();
-  const errorText = (error: Error) =>
-    error instanceof EnvironmentCatalogError
-      ? error.status === undefined
+  function errorText(error: Error) {
+    if (
+      error instanceof CatalogRepositoryValidationError ||
+      error instanceof EnvironmentRepositoryValidationError
+    )
+      return t(error.key);
+    if (error instanceof EnvironmentCatalogAccessError) {
+      const { failure } = error;
+      return failure.key === 'environmentCatalogs.access.http'
+        ? t(failure.key, { status: failure.status })
+        : t(failure.key);
+    }
+    if (error instanceof EnvironmentCatalogError)
+      return error.status === undefined
         ? t(error.key)
-        : t('environmentCatalogs.error.http', { status: error.status })
-      : error.message;
+        : t('environmentCatalogs.error.http', { status: error.status });
+    return error.message;
+  }
   const app = useApp(),
     scope = useActionScope(),
     client = useQueryClient(),

@@ -1,4 +1,3 @@
-/** Local account administration UI; helper validation errors remain at their source. */
 export const enLocalAccountPanel = {
   'localAccountPanel.create': 'Create local account',
   'localAccountPanel.profile': 'Edit account profile',
@@ -63,6 +62,27 @@ export const enLocalAccountPanel = {
   'localAccountPanel.error.credential': 'Invalid credential.',
   'localAccountPanel.error.changedOperation': 'The operation has changed. Reopen the panel.',
   'localAccountPanel.error.http': 'Account operation was not completed (HTTP {status}).',
+  'localAccountPanel.validation.accountUnavailable':
+    'This account is unavailable for user administration.',
+  'localAccountPanel.validation.invalidAccount': 'Invalid account.',
+  'localAccountPanel.validation.accountChanged': 'The account has changed. Reopen the panel.',
+  'localAccountPanel.validation.selfAdministration':
+    'Use another administrator account to change your privileges or deactivate your account.',
+  'localAccountPanel.validation.lastAdmin': 'Keep at least one administrator active.',
+  'localAccountPanel.validation.deactivateFirst': 'Deactivate the account before deleting it.',
+  'localAccountPanel.validation.actionUnavailable':
+    'This operation is unavailable in the current state.',
+  'localAccountPanel.validation.accountContract': 'The account contract is unavailable.',
+  'localAccountPanel.validation.invalidProfile': 'Enter a valid name and role.',
+  'localAccountPanel.validation.fieldsChanged':
+    'The account fields have changed. Reopen the panel.',
+  'localAccountPanel.validation.credentialUnavailable': 'Credential creation is unavailable.',
+  'localAccountPanel.validation.passwordContract':
+    'The password protection contract is unavailable.',
+  'localAccountPanel.validation.loginPassword':
+    'Enter a login without spaces or colons and a password.',
+  'localAccountPanel.validation.credentialChanged': 'The credential contract has changed.',
+  'localAccountPanel.validation.newPassword': 'Enter the new local password.',
 } as const;
 export const ptLocalAccountPanel = {
   'localAccountPanel.create': 'Criar conta local',
@@ -127,4 +147,23 @@ export const ptLocalAccountPanel = {
   'localAccountPanel.error.credential': 'Credencial inválida.',
   'localAccountPanel.error.changedOperation': 'A operação mudou. Reabra o painel.',
   'localAccountPanel.error.http': 'Operação de conta não concluída (HTTP {status}).',
+  'localAccountPanel.validation.accountUnavailable':
+    'Conta indisponível para administração de usuários.',
+  'localAccountPanel.validation.invalidAccount': 'Conta inválida.',
+  'localAccountPanel.validation.accountChanged': 'A conta mudou. Reabra o painel.',
+  'localAccountPanel.validation.selfAdministration':
+    'Use outro administrador para alterar os privilégios ou desativar sua própria conta.',
+  'localAccountPanel.validation.lastAdmin': 'Mantenha pelo menos um administrador ativo.',
+  'localAccountPanel.validation.deactivateFirst': 'Desative a conta antes de excluí-la.',
+  'localAccountPanel.validation.actionUnavailable':
+    'Esta operação não está disponível no estado atual.',
+  'localAccountPanel.validation.accountContract': 'Contrato de conta indisponível.',
+  'localAccountPanel.validation.invalidProfile': 'Informe nome e perfil válidos.',
+  'localAccountPanel.validation.fieldsChanged': 'Os campos da conta mudaram. Reabra o painel.',
+  'localAccountPanel.validation.credentialUnavailable': 'Criação de credencial indisponível.',
+  'localAccountPanel.validation.passwordContract': 'Contrato de proteção da senha indisponível.',
+  'localAccountPanel.validation.loginPassword':
+    'Informe login sem espaços/dois pontos e uma senha.',
+  'localAccountPanel.validation.credentialChanged': 'Contrato de credencial alterado.',
+  'localAccountPanel.validation.newPassword': 'Informe a nova senha local.',
 } as const satisfies Record<keyof typeof enLocalAccountPanel, string>;

@@ -2,7 +2,14 @@ import { useI18n } from '../i18n/provider';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api, type Resource } from '../api';
-import { auditMetadata, auditNext, auditQuery, type AuditEvent, type AuditFilters } from '../audit';
+import {
+  AuditError,
+  auditMetadata,
+  auditNext,
+  auditQuery,
+  type AuditEvent,
+  type AuditFilters,
+} from '../audit';
 import { useApp } from '../state';
 import {
   Alert,
@@ -15,11 +22,6 @@ import {
   PageHeader,
 } from '../components/ui';
 import { formatResourceDate } from '../resource-format';
-class AuditPageError extends Error {
-  constructor(readonly key: 'auditPage.invalidResponse' | 'auditPage.reviewFilters') {
-    super(key);
-  }
-}
 const initial: AuditFilters = { event: '', resource: '', account: '' };
 export function Audit() {
   const app = useApp();
@@ -45,7 +47,7 @@ function AuditScope() {
         undefined,
         signal,
       );
-      if (!Array.isArray(result.data)) throw new AuditPageError('auditPage.invalidResponse');
+      if (!Array.isArray(result.data)) throw new AuditError('auditPage.invalidResponse');
       return { rows: result.data.map(auditMetadata), next: auditNext(result.pagination?.next) };
     },
   });
@@ -58,7 +60,7 @@ function AuditScope() {
       setSelected(null);
       setValidation(null);
     } catch (e) {
-      setValidation(e instanceof Error ? e : new AuditPageError('auditPage.reviewFilters'));
+      setValidation(e instanceof Error ? e : new AuditError('auditPage.reviewFilters'));
     }
   }
   if (!app.admin || !app.config.modules.audit) return <Alert>{t('auditPage.unavailable')}</Alert>;
@@ -121,9 +123,7 @@ function AuditScope() {
           </Button>
         </div>
         {validation && (
-          <Alert>
-            {validation instanceof AuditPageError ? t(validation.key) : validation.message}
-          </Alert>
+          <Alert>{validation instanceof AuditError ? t(validation.key) : validation.message}</Alert>
         )}
       </form>
       <Alert tone="info">{t('auditPage.privacy')}</Alert>
@@ -131,9 +131,7 @@ function AuditScope() {
         <Loading />
       ) : query.error ? (
         <ErrorState
-          error={
-            query.error instanceof AuditPageError ? new Error(t(query.error.key)) : query.error
-          }
+          error={query.error instanceof AuditError ? new Error(t(query.error.key)) : query.error}
           retry={() => void query.refetch()}
         />
       ) : (

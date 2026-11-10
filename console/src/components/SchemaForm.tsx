@@ -146,6 +146,20 @@ class SchemaPayloadError extends Error {
   }
 }
 
+export function schemaPayloadValidationMessage(
+  error: Error | null | undefined,
+  t: ReturnType<typeof useI18n>['t'],
+  label?: (name: string) => string | undefined,
+) {
+  if (!(error instanceof SchemaPayloadError)) return undefined;
+  const [key, name, limit] = error.detail;
+  if (key === 'schemaForm.validation.depth') return t(key);
+  const field = label?.(name) ?? fieldLabel(name, t);
+  if (key === 'schemaForm.validation.minLength' || key === 'schemaForm.validation.maxLength')
+    return t(key, { field, limit: String(limit) });
+  return t(key, { field });
+}
+
 export function preparePayload(
   schema: Schema,
   values: Record<string, unknown>,
@@ -1015,14 +1029,7 @@ export function SchemaForm({
   function describeError(value?: Error | null) {
     if (value instanceof DeviceValidationError || value instanceof ResourceValidationError)
       return t(value.key);
-    if (!(value instanceof SchemaPayloadError)) return workloadValidationMessage(value, t);
-    const [key, name, limit] = value.detail;
-    if (key === 'schemaForm.validation.depth') return t(key);
-    const labelKey = fieldLabelKey(name);
-    const field = labelKey ? t(labelKey) : humanizeFieldName(name);
-    if (key === 'schemaForm.validation.minLength' || key === 'schemaForm.validation.maxLength')
-      return t(key, { field, limit: String(limit) });
-    return t(key, { field });
+    return schemaPayloadValidationMessage(value, t) ?? workloadValidationMessage(value, t);
   }
   const validationText =
     validation === 'review' ? t('schemaForm.review') : describeError(validation);

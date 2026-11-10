@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider, useI18n } from '../i18n/provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Processes } from '../pages/Processes';
 import { api, type Resource, type Schema } from '../api';
@@ -72,11 +73,31 @@ vi.mock('../api', async () => ({
     throw new Error('Unexpected process request');
   }),
 }));
-function mount() {
+function SwitchLanguage() {
+  const { setLocale } = useI18n();
+  return <button onClick={() => setLocale('en-US')}>English</button>;
+}
+function mount(localized = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <Processes />
+      <I18nProvider
+        policy={
+          localized
+            ? {
+                enabled: true,
+                preview: true,
+                defaultLocale: 'pt-BR',
+                availableLocales: ['pt-BR', 'en-US'],
+                selectable: true,
+                detectBrowser: false,
+              }
+            : undefined
+        }
+      >
+        {localized && <SwitchLanguage />}
+        <Processes />
+      </I18nProvider>
     </QueryClientProvider>,
   );
   return client;
@@ -89,6 +110,7 @@ async function review() {
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.removeItem('rancho.console.locale.anonymous');
   Object.assign(backend, {
     admin: true,
     enabled: true,
@@ -135,7 +157,7 @@ describe('Tela de processos', () => {
   it.each(['changed', 'denied'] as const)(
     'recusa %s depois da confirmação sem enviar replay',
     async (kind) => {
-      mount();
+      mount(true);
       const user = await review();
       backend[kind] = true;
       await user.click(screen.getByRole('button', { name: 'Confirmar' }));
@@ -144,6 +166,16 @@ describe('Tela de processos', () => {
           ? 'O processo mudou. Atualize e revise novamente.'
           : 'O replay não está mais disponível.',
       );
+      const calls = vi.mocked(api).mock.calls.length;
+      fireEvent.click(screen.getByText('English'));
+      expect(
+        screen.getByText(
+          kind === 'changed'
+            ? 'The process changed. Refresh and review it again.'
+            : 'Replay is no longer available.',
+        ),
+      ).toBeInTheDocument();
+      expect(api).toHaveBeenCalledTimes(calls);
       expect(backend.posts).toBe(0);
     },
   );

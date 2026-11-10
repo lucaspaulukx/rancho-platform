@@ -7,6 +7,7 @@ import { useSchemas } from '../hooks/useSchemas';
 import { useRequestScope } from '../hooks/useRequestScope';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
 import {
+  ProcessError,
   processMetadata,
   processNext,
   processQuery,
@@ -32,14 +33,6 @@ import { formatResourceDate } from '../resource-format';
 const Pools = lazy(() =>
   import('./EngineMonitoring').then((module) => ({ default: module.ProcessPools })),
 );
-class ProcessPageError extends Error {
-  constructor(
-    readonly key:
-      'processes.invalidResponse' | 'processes.replayUnavailable' | 'processes.reviewFilters',
-  ) {
-    super(key);
-  }
-}
 const initial: ProcessFilters = { state: 'all', process: '', resource: '', id: '' };
 export function Processes() {
   const app = useApp();
@@ -92,7 +85,7 @@ function ProcessViews() {
 function ProcessesScope({ active }: { active: boolean }) {
   const { t, locale } = useI18n();
   const errorText = (error: Error) =>
-    error instanceof ProcessPageError ? t(error.key) : error.message;
+    error instanceof ProcessError ? t(error.key) : error.message;
   const app = useApp(),
     client = useQueryClient(),
     toast = useToast(),
@@ -117,7 +110,7 @@ function ProcessesScope({ active }: { active: boolean }) {
         undefined,
         signal,
       );
-      if (!Array.isArray(page.data)) throw new ProcessPageError('processes.invalidResponse');
+      if (!Array.isArray(page.data)) throw new ProcessError('processes.invalidResponse');
       return { rows: page.data.map(processMetadata), next: processNext(page.pagination?.next) };
     },
   });
@@ -131,7 +124,7 @@ function ProcessesScope({ active }: { active: boolean }) {
         !app.config.modules.processReplay ||
         !replay
       )
-        throw new ProcessPageError('processes.replayUnavailable');
+        throw new ProcessError('processes.replayUnavailable');
       const signal = scope.signal();
       const contract = await api<Schema>('schemas/processInstance', undefined, undefined, signal);
       scope.assertCurrent();
@@ -172,7 +165,7 @@ function ProcessesScope({ active }: { active: boolean }) {
             setValidation(null);
           } catch (error) {
             setValidation(
-              error instanceof Error ? error : new ProcessPageError('processes.reviewFilters'),
+              error instanceof Error ? error : new ProcessError('processes.reviewFilters'),
             );
           }
         }}
@@ -244,9 +237,7 @@ function ProcessesScope({ active }: { active: boolean }) {
       ) : query.error ? (
         <ErrorState
           error={
-            query.error instanceof ProcessPageError
-              ? new Error(errorText(query.error))
-              : query.error
+            query.error instanceof ProcessError ? new Error(errorText(query.error)) : query.error
           }
           retry={() => void query.refetch()}
         />

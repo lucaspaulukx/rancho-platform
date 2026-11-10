@@ -1,5 +1,18 @@
 import type { Resource, Schema, Token } from './api';
 import { preparePayload } from './components/SchemaForm';
+import { ptLocalAccountPanel } from './i18n/domains/local-account-panel';
+
+type LocalAccountValidationKey = Extract<
+  keyof typeof ptLocalAccountPanel,
+  `localAccountPanel.validation.${string}`
+>;
+
+export class LocalAccountValidationError extends Error {
+  constructor(readonly key: LocalAccountValidationKey) {
+    super(ptLocalAccountPanel[key]);
+  }
+}
+
 export type AccountOperation =
   'create' | 'profile' | 'password' | 'activate' | 'deactivate' | 'remove';
 export interface LocalAccount extends Resource {
@@ -14,7 +27,7 @@ export function sessionAccountId(token: Token): string | undefined {
 }
 export function localAccountMetadata(row: Resource): LocalAccount {
   if (!['user', 'admin'].includes(String(row.kind)))
-    throw new Error('Conta indisponível para administração de usuários.');
+    throw new LocalAccountValidationError('localAccountPanel.validation.accountUnavailable');
   return {
     id: row.id,
     type: 'account',
@@ -32,7 +45,8 @@ export function localAccountMetadata(row: Resource): LocalAccount {
   };
 }
 export function accountPath(id: string) {
-  if (!/^1a[1-9]\d*$/.test(id)) throw new Error('Conta inválida.');
+  if (!/^1a[1-9]\d*$/.test(id))
+    throw new LocalAccountValidationError('localAccountPanel.validation.invalidAccount');
   return 'accounts/' + id;
 }
 export function accountSnapshot(row: Resource) {
@@ -59,44 +73,42 @@ export function validateAccountChange(
     fresh.removed ||
     accountSnapshot(before) !== accountSnapshot(fresh)
   )
-    throw new Error('A conta mudou. Reabra o painel.');
+    throw new LocalAccountValidationError('localAccountPanel.validation.accountChanged');
   const loss =
     (mode === 'profile' && kind !== 'admin') || mode === 'deactivate' || mode === 'remove';
   if (loss && fresh.id === own && fresh.kind === 'admin')
-    throw new Error(
-      'Use outro administrador para alterar os privilégios ou desativar sua própria conta.',
-    );
+    throw new LocalAccountValidationError('localAccountPanel.validation.selfAdministration');
   if (
     loss &&
     fresh.kind === 'admin' &&
     fresh.state === 'active' &&
     !rows.some((v) => v.id !== fresh.id && v.kind === 'admin' && v.state === 'active' && !v.removed)
   )
-    throw new Error('Mantenha pelo menos um administrador ativo.');
+    throw new LocalAccountValidationError('localAccountPanel.validation.lastAdmin');
   if (mode === 'remove' && fresh.state !== 'inactive')
-    throw new Error('Desative a conta antes de excluí-la.');
+    throw new LocalAccountValidationError('localAccountPanel.validation.deactivateFirst');
   if (['activate', 'deactivate', 'remove'].includes(mode) && !fresh.actions?.[mode])
-    throw new Error('Esta operação não está disponível no estado atual.');
+    throw new LocalAccountValidationError('localAccountPanel.validation.actionUnavailable');
 }
 export function accountProfile(
-  schema: Schema,
+  schema: Schema | undefined,
   name: string,
   description: string,
   kind: string,
   creating = false,
 ) {
   if (
-    schema.id !== 'account' ||
+    schema?.id !== 'account' ||
     !(creating
       ? schema.collectionMethods?.includes('POST')
       : schema.resourceMethods?.includes('PUT'))
   )
-    throw new Error('Contrato de conta indisponível.');
+    throw new LocalAccountValidationError('localAccountPanel.validation.accountContract');
   if (!name.trim() || /[\x00-\x1f\x7f]/.test(name) || !['user', 'admin'].includes(kind))
-    throw new Error('Informe nome e perfil válidos.');
+    throw new LocalAccountValidationError('localAccountPanel.validation.invalidProfile');
   for (const field of ['name', 'description', 'kind'])
     if (!(creating ? schema.resourceFields[field]?.create : schema.resourceFields[field]?.update))
-      throw new Error('Os campos da conta mudaram. Reabra o painel.');
+      throw new LocalAccountValidationError('localAccountPanel.validation.fieldsChanged');
   const values = { name: name.trim(), description, kind };
   // The same value shape is writable; using the native create validators applies lengths/types.
   const prepared = preparePayload(
@@ -124,32 +136,38 @@ export function credentialMetadata(row: Resource) {
     removed: !!row.removed,
   };
 }
-export function passwordCreate(schema: Schema, account: string, login: string, password: string) {
+export function passwordCreate(
+  schema: Schema | undefined,
+  account: string,
+  login: string,
+  password: string,
+) {
   accountPath(account);
-  if (schema.id !== 'password' || !schema.collectionMethods?.includes('POST'))
-    throw new Error('Criação de credencial indisponível.');
+  if (schema?.id !== 'password' || !schema.collectionMethods?.includes('POST'))
+    throw new LocalAccountValidationError('localAccountPanel.validation.credentialUnavailable');
   if (
     schema.resourceFields.secretValue?.type !== 'password' ||
     schema.resourceFields.secretValue.readOnCreateOnly !== true
   )
-    throw new Error('Contrato de proteção da senha indisponível.');
+    throw new LocalAccountValidationError('localAccountPanel.validation.passwordContract');
   if (!login.trim() || /[\x00-\x20\x7f:]/.test(login) || !password)
-    throw new Error('Informe login sem espaços/dois pontos e uma senha.');
+    throw new LocalAccountValidationError('localAccountPanel.validation.loginPassword');
   for (const key of ['accountId', 'publicValue', 'secretValue'])
-    if (!schema.resourceFields[key]?.create) throw new Error('Contrato de credencial alterado.');
+    if (!schema.resourceFields[key]?.create)
+      throw new LocalAccountValidationError('localAccountPanel.validation.credentialChanged');
   return preparePayload(schema, {
     accountId: account,
     publicValue: login.trim(),
     secretValue: password,
   });
 }
-export function passwordReset(schema: Schema, password: string) {
+export function passwordReset(schema: Schema | undefined, password: string) {
   if (
-    schema.id !== 'changeSecretInput' ||
+    schema?.id !== 'changeSecretInput' ||
     !schema.resourceFields.newSecret?.create ||
     !schema.resourceFields.oldSecret?.create ||
     !password
   )
-    throw new Error('Informe a nova senha local.');
+    throw new LocalAccountValidationError('localAccountPanel.validation.newPassword');
   return { oldSecret: '', newSecret: password };
 }

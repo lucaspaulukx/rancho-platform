@@ -19,6 +19,7 @@ import {
   accountPath,
   accountProfile,
   localAccountMetadata,
+  LocalAccountValidationError,
   credentialMetadata,
   passwordCreate,
   passwordReset,
@@ -27,6 +28,17 @@ import {
   type AccountOperation,
 } from '../local-accounts';
 import { Alert, Button, CheckboxField, Confirm, Field, Loading, Modal, useToast } from './ui';
+import { schemaPayloadValidationMessage } from './SchemaForm';
+
+const payloadLabelKeys: Readonly<
+  Record<string, `localAccountPanel.${'name' | 'description' | 'kind' | 'login' | 'newPassword'}`>
+> = {
+  name: 'localAccountPanel.name',
+  description: 'localAccountPanel.description',
+  kind: 'localAccountPanel.kind',
+  publicValue: 'localAccountPanel.login',
+  secretValue: 'localAccountPanel.newPassword',
+};
 
 type PanelErrorKey = Exclude<
   Extract<keyof typeof enLocalAccountPanel, `localAccountPanel.error.${string}`>,
@@ -66,12 +78,18 @@ export function LocalAccountPanel({
     ),
     client = useQueryClient(),
     toast = useToast();
-  const errorText = (error: Error) =>
-    error instanceof AccountPanelError
-      ? error.status !== undefined
+  function errorText(error: Error) {
+    if (error instanceof LocalAccountValidationError) return t(error.key);
+    if (error instanceof AccountPanelError)
+      return error.status !== undefined
         ? t('localAccountPanel.error.http', { status: error.status })
-        : t(error.key)
-      : error.message;
+        : t(error.key);
+    return (
+      schemaPayloadValidationMessage(error, t, (name) =>
+        Object.hasOwn(payloadLabelKeys, name) ? t(payloadLabelKeys[name]) : undefined,
+      ) ?? error.message
+    );
+  }
   const enabled = app.admin && app.config.modules.localAccountAdministration;
   const ownAccount = sessionAccountId(app.token);
   const [current, setCurrent] = useState<Resource | null>(null),

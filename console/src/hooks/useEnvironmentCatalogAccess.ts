@@ -3,6 +3,28 @@ import { api, ApiError, type Collection, type Token } from '../api';
 import { useApp, useDataKey } from '../state';
 import { sessionAccountId } from '../local-accounts';
 import { environmentCatalogWriter } from '../environment-access';
+import { ptEnvironmentCatalogs } from '../i18n/domains/environment-catalogs';
+
+type EnvironmentCatalogAccessFailure =
+  | {
+      key:
+        | 'environmentCatalogs.access.disabled'
+        | 'environmentCatalogs.access.identityChanged'
+        | 'environmentCatalogs.access.denied';
+    }
+  | { key: 'environmentCatalogs.access.http'; status: number };
+
+export class EnvironmentCatalogAccessError extends Error {
+  constructor(readonly failure: EnvironmentCatalogAccessFailure) {
+    const message = ptEnvironmentCatalogs[failure.key];
+    super(
+      failure.key === 'environmentCatalogs.access.http'
+        ? message.replace('{status}', String(failure.status))
+        : message,
+    );
+  }
+}
+
 export function useEnvironmentCatalogAccess() {
   const app = useApp(),
     project = app.project?.id,
@@ -34,16 +56,22 @@ export function useEnvironmentCatalogAccess() {
         environmentCatalogWriter(authorization.data, project!, own)));
   async function check(signal: AbortSignal) {
     try {
-      if (!enabled) throw new Error('A administração de fontes está desativada.');
+      if (!enabled)
+        throw new EnvironmentCatalogAccessError({ key: 'environmentCatalogs.access.disabled' });
       const token = (await api<Collection<Token>>('token', undefined, undefined, signal)).data?.[0];
       if (!token || !own || sessionAccountId(token) !== own)
-        throw new Error('A identidade da sessão mudou.');
+        throw new EnvironmentCatalogAccessError({
+          key: 'environmentCatalogs.access.identityChanged',
+        });
       if (token.userType === 'admin') return;
       if (!delegated || !environmentCatalogWriter(await report(signal), project!, own))
-        throw new Error('Seu acesso não permite gerenciar fontes neste environment.');
+        throw new EnvironmentCatalogAccessError({ key: 'environmentCatalogs.access.denied' });
     } catch (error) {
       if (error instanceof ApiError)
-        throw new Error(`Não foi possível validar seu acesso às fontes (HTTP ${error.status}).`);
+        throw new EnvironmentCatalogAccessError({
+          key: 'environmentCatalogs.access.http',
+          status: error.status,
+        });
       throw error;
     }
   }
