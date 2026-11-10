@@ -1,4 +1,5 @@
 import { useI18n } from '../i18n/provider';
+import { resourceStateLabel } from '../i18n/resource-state';
 import { ptSchemaForm } from '../i18n/domains/schema-form';
 import { localizedNavigation } from '../navigation';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
@@ -956,7 +957,9 @@ function EnvironmentSummary() {
         <div className="metric">
           <div>
             <p>{t('resourcesPage.environmentState')}</p>
-            <strong style={{ fontSize: 21 }}>{app.project.state}</strong>
+            <strong style={{ fontSize: 21 }}>
+              <bdi>{resourceStateLabel(t, app.project.state)}</bdi>
+            </strong>
             <small>{app.project.orchestration || 'Rancher'}</small>
           </div>
           <div className="metric-icon">

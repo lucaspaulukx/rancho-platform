@@ -1,4 +1,22 @@
 export const enCatalogPage = {
+  'catalogPage.validation.route': 'The catalog returned an invalid route.',
+  'catalogPage.validation.questions': 'The template questions are invalid.',
+  'catalogPage.validation.variables': 'The template has invalid or duplicate variables.',
+  'catalogPage.validation.type': 'The field {label} uses an unsupported type: {type}.',
+  'catalogPage.validation.options': 'The template has an invalid list of options.',
+  'catalogPage.validation.stackName': 'Enter a name for the stack.',
+  'catalogPage.validation.otherTemplate': 'The selected version belongs to another template.',
+  'catalogPage.validation.missingFiles': 'The version did not provide configuration files.',
+  'catalogPage.validation.dockerCompose': 'This version has no usable Docker Compose file.',
+  'catalogPage.validation.required': 'Fill in {label}.',
+  'catalogPage.validation.boolean': 'Choose a valid value for {label}.',
+  'catalogPage.validation.number': 'Enter a valid number for {label}.',
+  'catalogPage.validation.range': '{label} is outside the allowed range.',
+  'catalogPage.validation.string': 'Review {label}.',
+  'catalogPage.validation.enum': 'Choose a valid option for {label}.',
+  'catalogPage.validation.reference': 'Select an available resource for {label}.',
+  'catalogPage.validation.date': 'Enter a valid date for {label}.',
+  'catalogPage.validation.upgradeOrigin': 'This version belongs to another catalog or template.',
   'catalogPage.filesDescription':
     'Original content of the selected version. Rancher will process the parameters.',
   'catalogPage.stoppedHint':
@@ -79,6 +97,24 @@ export const enCatalogPage = {
 } as const;
 
 export const ptCatalogPage = {
+  'catalogPage.validation.route': 'O catálogo retornou uma rota inválida.',
+  'catalogPage.validation.questions': 'As perguntas do template são inválidas.',
+  'catalogPage.validation.variables': 'O template possui variáveis inválidas ou duplicadas.',
+  'catalogPage.validation.type': 'O campo {label} usa um tipo ainda não suportado: {type}.',
+  'catalogPage.validation.options': 'O template possui uma lista de opções inválida.',
+  'catalogPage.validation.stackName': 'Informe um nome para a stack.',
+  'catalogPage.validation.otherTemplate': 'A versão selecionada pertence a outro template.',
+  'catalogPage.validation.missingFiles': 'A versão não disponibilizou os arquivos de configuração.',
+  'catalogPage.validation.dockerCompose': 'Esta versão não possui um Docker Compose utilizável.',
+  'catalogPage.validation.required': 'Preencha {label}.',
+  'catalogPage.validation.boolean': 'Escolha um valor válido para {label}.',
+  'catalogPage.validation.number': 'Informe um número válido para {label}.',
+  'catalogPage.validation.range': '{label} está fora dos limites permitidos.',
+  'catalogPage.validation.string': 'Revise {label}.',
+  'catalogPage.validation.enum': 'Escolha uma opção válida em {label}.',
+  'catalogPage.validation.reference': 'Selecione um recurso disponível em {label}.',
+  'catalogPage.validation.date': 'Informe uma data válida em {label}.',
+  'catalogPage.validation.upgradeOrigin': 'Esta versão pertence a outro catálogo ou template.',
   'catalogPage.filesDescription':
     'Conteúdo original da versão selecionada. Os parâmetros serão processados pelo Rancher.',
   'catalogPage.stoppedHint':

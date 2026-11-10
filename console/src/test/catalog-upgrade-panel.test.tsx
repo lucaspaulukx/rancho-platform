@@ -1,14 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { CatalogUpgrade, QuestionField } from '../pages/Catalog';
 import type { Resource } from '../api';
+import type { Locale } from '../i18n/locales';
+import { I18nProvider } from '../i18n/provider';
 
 const backend = vi.hoisted(() => ({
   stack: {} as Resource,
   readonly: false,
+  invalidVersionLink: false,
   posts: [] as Record<string, unknown>[],
 }));
 const schema = {
@@ -58,7 +61,9 @@ vi.mock('../api', async () => {
           links: { self: path },
           defaultVersion: 'v2',
           versionLinks: {
-            v1: '/v1-catalog/templateversions/community:demo:0',
+            v1: backend.invalidVersionLink
+              ? 'https://external.invalid/v1-catalog/templateversions/community:demo:0'
+              : '/v1-catalog/templateversions/community:demo:0',
             v2: '/v1-catalog/templateversions/community:demo:1',
           },
         };
@@ -71,7 +76,14 @@ vi.mock('../api', async () => {
           links: { self: path },
           files: { 'docker-compose.yml': 'services: {}' },
           questions: [
-            { variable: 'replicas', label: 'Réplicas', type: 'int', required: true, default: 1 },
+            {
+              variable: 'replicas',
+              label: 'Réplicas',
+              type: 'int',
+              required: true,
+              default: 1,
+              max: 5,
+            },
           ],
         };
       throw new Error('Unexpected test request');
@@ -96,12 +108,24 @@ function mount() {
       ),
     },
   ]);
-  render(
+  const page = (locale: Locale) => (
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: locale,
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: false,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <RouterProvider router={router} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
-  return { updated, client, router };
+  const { rerender } = render(page('pt-BR'));
+  return { updated, client, router, showLocale: (locale: Locale) => rerender(page(locale)) };
 }
 beforeEach(() => {
   backend.stack = {
@@ -115,6 +139,7 @@ beforeEach(() => {
     actions: { upgrade: '/upgrade' },
   };
   backend.readonly = false;
+  backend.invalidVersionLink = false;
   backend.posts = [];
 });
 describe('Painel de upgrade do catálogo', () => {
@@ -186,6 +211,33 @@ describe('Painel de upgrade do catálogo', () => {
     await userEvent.clear(screen.getByLabelText('Réplicas *'));
     expect(screen.getByRole('checkbox', { name: /Autorizo recriar/ })).not.toBeChecked();
     expect(submit).toBeDisabled();
+    expect(backend.posts).toHaveLength(0);
+    router.dispose();
+    client.clear();
+  });
+  it('translates local validation while preserving native question labels and answers', async () => {
+    const { router, client, showLocale } = mount();
+    const input = await screen.findByLabelText('Réplicas *');
+    await userEvent.clear(input);
+    await userEvent.type(input, '8');
+    await userEvent.click(screen.getByRole('checkbox', { name: /Autorizo recriar/ }));
+    // Exercise the payload validator directly, beyond the browser's own max check.
+    fireEvent.submit(input.closest('form')!);
+    expect(screen.getByText('Réplicas está fora dos limites permitidos.')).toBeInTheDocument();
+    showLocale('en-US');
+    expect(screen.getByText('Réplicas is outside the allowed range.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Réplicas *')).toHaveValue(8);
+    expect(backend.posts).toHaveLength(0);
+    router.dispose();
+    client.clear();
+  });
+  it('renders invalid catalog version routes as localized errors instead of opening a form', async () => {
+    backend.invalidVersionLink = true;
+    const { router, client, showLocale } = mount();
+    await screen.findByText('O catálogo retornou uma rota inválida.');
+    showLocale('en-US');
+    expect(screen.getByText('The catalog returned an invalid route.')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Réplicas *')).not.toBeInTheDocument();
     expect(backend.posts).toHaveLength(0);
     router.dispose();
     client.clear();

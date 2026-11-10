@@ -1,4 +1,32 @@
 import { safeApiUrl, type Resource, type Schema } from './api';
+import { ptWebhooksPage } from './i18n/domains/webhooks-page';
+
+type WebhookValidationKey = Extract<
+  keyof typeof ptWebhooksPage,
+  `webhooksPage.validation.${string}`
+>;
+type NumericValidationKey = 'webhooksPage.validation.integer' | 'webhooksPage.validation.range';
+type WebhookNumberField =
+  | 'webhooksPage.minimum'
+  | 'webhooksPage.maximum'
+  | 'webhooksPage.amount'
+  | 'webhooksPage.batchSize'
+  | 'webhooksPage.interval';
+type WebhookValidationFailure =
+  | { key: Exclude<WebhookValidationKey, NumericValidationKey> }
+  | { key: NumericValidationKey; label: WebhookNumberField };
+
+export class WebhookValidationError extends Error {
+  constructor(readonly failure: WebhookValidationFailure) {
+    const message = ptWebhooksPage[failure.key];
+    super(
+      'label' in failure
+        ? message.replace('{label}', () => ptWebhooksPage[failure.label])
+        : message,
+    );
+  }
+}
+
 export const webhookDrivers = ['scaleService', 'serviceUpgrade', 'scaleHost'] as const;
 export type WebhookDriver = (typeof webhookDrivers)[number];
 export interface SelectorRow {
@@ -47,7 +75,7 @@ export function webhookPath(project: string, id?: string) {
     !/^1a[1-9]\d*$/.test(project) ||
     (id !== undefined && !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/.test(id))
   )
-    throw new Error('Escopo de webhook inválido.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.scope' });
   return (
     '/v1-webhooks/receivers' +
     (id ? '/' + encodeURIComponent(id) : '') +
@@ -60,7 +88,7 @@ export interface ReceiverMetadata {
   name: string;
   driver: string;
   state: string;
-  target: string;
+  target: string | null;
 }
 export function receiverMetadata(v: Resource): ReceiverMetadata {
   if (
@@ -68,7 +96,7 @@ export function receiverMetadata(v: Resource): ReceiverMetadata {
     typeof v.id !== 'string' ||
     !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/.test(v.id)
   )
-    throw new Error('Receiver inválido.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.receiver' });
   return {
     id: v.id,
     name: typeof v.name === 'string' ? v.name.slice(0, 255) : v.id,
@@ -80,16 +108,22 @@ export function receiverMetadata(v: Resource): ReceiverMetadata {
       typeof v.scaleServiceConfig === 'object' &&
       typeof (v.scaleServiceConfig as Record<string, unknown>).serviceId === 'string'
         ? String((v.scaleServiceConfig as Record<string, unknown>).serviceId)
-        : 'Seletor de labels',
+        : null,
   };
 }
 export function webhookNext(value: unknown, project: string) {
   if (!value) return null;
-  if (typeof value !== 'string') throw new Error('Paginação de webhook inválida.');
-  const path = safeApiUrl(value),
-    url = new URL(path, location.origin);
+  if (typeof value !== 'string')
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.pagination' });
+  let path: string;
+  try {
+    path = safeApiUrl(value);
+  } catch {
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.pagination' });
+  }
+  const url = new URL(path, location.origin);
   if (url.pathname !== '/v1-webhooks/receivers' || url.searchParams.get('projectId') !== project)
-    throw new Error('A paginação mudou o environment de webhooks.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.paginationScope' });
   return path;
 }
 export function webhookWriter(report: unknown, project: string) {
@@ -113,7 +147,7 @@ export function webhookCreateAllowed(schema?: Schema) {
 }
 export function webhookSelectors(rows: SelectorRow[]) {
   if (!rows.length || rows.length > 64)
-    throw new Error('Defina entre 1 e 64 labels para limitar o alvo.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.selectorCount' });
   const result: Record<string, string> = {};
   for (const row of rows) {
     const key = row.key.trim();
@@ -123,7 +157,7 @@ export function webhookSelectors(rows: SelectorRow[]) {
       /[\x00-\x1f\x7f]/.test(row.value) ||
       Object.hasOwn(result, key)
     )
-      throw new Error('Revise labels válidas, sem repetição de chaves.');
+      throw new WebhookValidationError({ key: 'webhooksPage.validation.selectorKeys' });
     Object.defineProperty(result, key, {
       value: row.value,
       enumerable: true,
@@ -133,17 +167,18 @@ export function webhookSelectors(rows: SelectorRow[]) {
   }
   return result;
 }
-function number(value: string, label: string, schema?: { min?: number; max?: number }) {
-  if (!/^\d+$/.test(value.trim())) throw new Error(`${label} deve ser um inteiro positivo.`);
+function number(value: string, label: WebhookNumberField, schema?: { min?: number; max?: number }) {
+  if (!/^\d+$/.test(value.trim()))
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.integer', label });
   const n = Number(value);
   if (!Number.isSafeInteger(n) || n < Math.max(1, schema?.min ?? 1) || n > (schema?.max ?? 100000))
-    throw new Error(`${label} está fora dos limites permitidos.`);
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.range', label });
   return n;
 }
 function choice(value: string, field: string, schema: Schema) {
   const options = schema.resourceFields[field]?.options;
   if (!options?.includes(value) || !schema.resourceFields[field]?.create)
-    throw new Error('Uma opção não está mais disponível no contrato do webhook.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.choice' });
   return value;
 }
 export function prepareWebhook(
@@ -162,21 +197,21 @@ export function prepareWebhook(
     !config ||
     !receiver.resourceFields[draft.driver + 'Config']?.create
   )
-    throw new Error('A criação deste driver não está disponível.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.driver' });
   const name = draft.name.trim();
   if (!name || name.length > 255 || /[\x00-\x1f\x7f]/.test(name))
-    throw new Error('Informe um nome válido para o webhook.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.name' });
   let body: Record<string, unknown> = { type: draft.driver };
   const required: string[] = [];
   if (draft.driver === 'scaleService' || draft.driver === 'scaleHost') {
     required.push('action', 'amount', 'min', 'max');
-    const min = number(draft.min, 'Mínimo', config.resourceFields.min),
-      max = number(draft.max, 'Máximo', config.resourceFields.max);
-    if (max <= min) throw new Error('O máximo deve ser maior que o mínimo.');
+    const min = number(draft.min, 'webhooksPage.minimum', config.resourceFields.min),
+      max = number(draft.max, 'webhooksPage.maximum', config.resourceFields.max);
+    if (max <= min) throw new WebhookValidationError({ key: 'webhooksPage.validation.bounds' });
     body = {
       ...body,
       action: choice(draft.action, 'action', config),
-      amount: number(draft.amount, 'Quantidade', config.resourceFields.amount),
+      amount: number(draft.amount, 'webhooksPage.amount', config.resourceFields.amount),
       min,
       max,
     };
@@ -190,7 +225,7 @@ export function prepareWebhook(
           !v.removed &&
           ['active', 'inactive'].includes(v.state || ''),
       );
-      if (!service) throw new Error('Escolha um serviço disponível neste environment.');
+      if (!service) throw new WebhookValidationError({ key: 'webhooksPage.validation.service' });
       body.serviceId = service.id;
     } else {
       required.push('hostSelector');
@@ -212,15 +247,15 @@ export function prepareWebhook(
     );
     const tag = draft.tag.trim();
     if (!tag || tag.length > 255 || /\s|[\x00-\x1f\x7f]/.test(tag))
-      throw new Error('Informe uma tag válida para limitar a atualização.');
+      throw new WebhookValidationError({ key: 'webhooksPage.validation.tag' });
     body = {
       ...body,
       tag,
       serviceSelector: webhookSelectors(draft.selectors),
-      batchSize: number(draft.batchSize, 'Lote', config.resourceFields.batchSize),
+      batchSize: number(draft.batchSize, 'webhooksPage.batchSize', config.resourceFields.batchSize),
       intervalMillis: number(
         draft.intervalSeconds,
-        'Intervalo em segundos',
+        'webhooksPage.interval',
         config.resourceFields.intervalMillis,
       ),
       payloadFormat: choice(draft.payloadFormat, 'payloadFormat', config),
@@ -228,20 +263,21 @@ export function prepareWebhook(
       startFirst: draft.startFirst,
     };
     if (typeof draft.startFirst !== 'boolean')
-      throw new Error('Revise a estratégia de atualização.');
+      throw new WebhookValidationError({ key: 'webhooksPage.validation.strategy' });
   }
   if (required.some((name) => config.resourceFields[name]?.create !== true))
-    throw new Error('O contrato do driver mudou. Reabra o formulário.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.contract' });
   return { name, driver: draft.driver, [draft.driver + 'Config']: body };
 }
 export function receiverSecret(value: Resource, project: string) {
   const row = receiverMetadata(value);
-  if (typeof value.url !== 'string') throw new Error('A URL não está disponível para este acesso.');
+  if (typeof value.url !== 'string')
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.urlDenied' });
   let url: URL;
   try {
     url = new URL(value.url);
   } catch {
-    throw new Error('O servidor retornou uma URL de webhook inválida.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.urlInvalid' });
   }
   if (
     !['http:', 'https:'].includes(url.protocol) ||
@@ -253,23 +289,27 @@ export function receiverSecret(value: Resource, project: string) {
     !url.searchParams.get('key') ||
     [...url.searchParams.keys()].some((k) => !['key', 'projectId'].includes(k))
   )
-    throw new Error('A URL retornada não corresponde ao environment.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.urlScope' });
   return { id: row.id, url: url.toString() };
 }
-export function cloneReceiver(value: Resource): WebhookDraft {
+export function cloneReceiver(
+  value: Resource,
+  formatName = (name: string) =>
+    ptWebhooksPage['webhooksPage.cloneName'].replace('{name}', () => name),
+): WebhookDraft {
   const row = receiverMetadata(value);
   if (!webhookDrivers.includes(row.driver as WebhookDriver))
-    throw new Error('Este driver não tem formulário de clonagem disponível.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.cloneDriver' });
   const driver = row.driver as WebhookDriver,
     config = value[driver + 'Config'];
   if (!config || typeof config !== 'object' || Array.isArray(config))
-    throw new Error('Configuração de receiver indisponível.');
+    throw new WebhookValidationError({ key: 'webhooksPage.validation.cloneConfiguration' });
   const v = config as Record<string, unknown>,
     d = newWebhookDraft();
   const selector = v[driver === 'scaleHost' ? 'hostSelector' : 'serviceSelector'];
   return {
     ...d,
-    name: row.name + ' - cópia',
+    name: formatName(row.name),
     driver,
     serviceId: typeof v.serviceId === 'string' ? v.serviceId : '',
     action: v.action === 'down' ? 'down' : 'up',

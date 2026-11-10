@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Resource } from '../api';
 import { useI18n } from '../i18n/provider';
+import { resourceStateLabel } from '../i18n/resource-state';
 import { useApp } from '../state';
 import { ResourceStream } from './ResourceStream';
 import { Button, Empty, Field, Modal } from './ui';
@@ -68,7 +69,7 @@ export function WorkloadStreams({
               >
                 {choices.map((value) => (
                   <option key={value.id} value={value.id}>
-                    {value.name || value.id} · {value.state}
+                    {value.name || value.id} · {resourceStateLabel(t, value.state)}
                   </option>
                 ))}
               </select>

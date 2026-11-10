@@ -18,6 +18,7 @@ import {
   webhookCreateAllowed,
   prepareWebhook,
   cloneReceiver,
+  WebhookValidationError,
   type WebhookDraft,
   type ReceiverMetadata,
 } from '../webhooks';
@@ -33,6 +34,7 @@ import {
   Loading,
   Modal,
   PageHeader,
+  ResourceStateBadge,
   useToast,
 } from '../components/ui';
 import { ActionMenu } from '../components/ActionMenu';
@@ -100,6 +102,10 @@ export function Webhooks() {
 function WebhookScope({ project }: { project: string }) {
   const { t } = useI18n();
   function errorText(error: Error) {
+    if (error instanceof WebhookValidationError) {
+      const { failure } = error;
+      return 'label' in failure ? t(failure.key, { label: t(failure.label) }) : t(failure.key);
+    }
     if (!(error instanceof WebhookPageError)) return error.message;
     return error.key === 'webhooksPage.httpError'
       ? t(error.key, { status: error.params!.status })
@@ -226,7 +232,7 @@ function WebhookScope({ project }: { project: string }) {
       if (receiverMetadata(value).id !== row.id)
         throw new WebhookPageError('webhooksPage.receiverUnavailable');
       if (clone) {
-        setDraft(cloneReceiver(value));
+        setDraft(cloneReceiver(value, (name) => t('webhooksPage.cloneName', { name })));
         setEditor(true);
         setDirty(true);
       } else {
@@ -306,6 +312,7 @@ function WebhookScope({ project }: { project: string }) {
   const blocker = useBlocker(dirty || write.isPending);
   usePageLeaveGuard(dirty || write.isPending, app.config.modules.unsavedChangesGuard);
   const pending = write.isPending || !!opening;
+  const loadError = list.error ?? schema.error;
   const options = schema.data?.[draft.driver]?.resourceFields;
   function selectField(label: string, name: keyof WebhookDraft, values: string[] | undefined) {
     return (
@@ -387,10 +394,10 @@ function WebhookScope({ project }: { project: string }) {
       {error && <Alert>{errorText(error)}</Alert>}
       {list.isPending || schema.isPending ? (
         <Loading />
-      ) : list.error || schema.error ? (
-        (list.error || schema.error) instanceof WebhookPageError ? (
+      ) : loadError ? (
+        loadError instanceof WebhookPageError || loadError instanceof WebhookValidationError ? (
           <div className="error-state">
-            <Alert>{errorText((list.error || schema.error)!)}</Alert>
+            <Alert>{errorText(loadError)}</Alert>
             <Button
               onClick={() => {
                 void list.refetch();
@@ -402,7 +409,7 @@ function WebhookScope({ project }: { project: string }) {
           </div>
         ) : (
           <ErrorState
-            error={list.error || schema.error}
+            error={loadError}
             retry={() => {
               void list.refetch();
               void schema.refetch();
@@ -413,7 +420,7 @@ function WebhookScope({ project }: { project: string }) {
         <DataTable
           rows={list.data || []}
           rowKey={(v) => v.id}
-          searchText={(v) => `${v.name} ${v.driver} ${v.target}`}
+          searchText={(v) => `${v.name} ${v.driver} ${v.target ?? t('webhooksPage.labelSelector')}`}
           columns={[
             { key: 'name', label: t('webhooksPage.name'), render: (v) => v.name },
             {
@@ -424,9 +431,16 @@ function WebhookScope({ project }: { project: string }) {
             {
               key: 'target',
               label: t('webhooksPage.target'),
-              render: (v) => services.data?.find((s) => s.id === v.target)?.name || v.target,
+              render: (v) =>
+                v.target
+                  ? services.data?.find((s) => s.id === v.target)?.name || v.target
+                  : t('webhooksPage.labelSelector'),
             },
-            { key: 'state', label: t('webhooksPage.state'), render: (v) => v.state || '—' },
+            {
+              key: 'state',
+              label: t('webhooksPage.state'),
+              render: (v) => <ResourceStateBadge state={v.state} />,
+            },
             {
               key: 'actions',
               label: t('webhooksPage.actions'),
