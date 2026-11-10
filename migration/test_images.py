@@ -25,7 +25,9 @@ class ImageTransportTests(unittest.TestCase):
                 integrity = crypto_stream.encrypt(io.BytesIO(b'synthetic archive'), out, password)
             metadata = {'archive': 'images.tar.enc', 'imageIds': ['sha256:' + 'a' * 64], 'integrity': integrity}
             artifact = directory / 'images.tar.enc'
-            artifact.write_bytes(artifact.read_bytes()[:-1] + b'x')
+            corrupted = bytearray(artifact.read_bytes())
+            corrupted[-1] ^= 1
+            artifact.write_bytes(corrupted)
             with patch.object(images.subprocess, 'run') as docker:
                 with self.assertRaises(MigrationError):
                     images.load_missing(directory, metadata, password)

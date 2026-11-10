@@ -64,7 +64,9 @@ class RecoveryTests(unittest.TestCase):
             with (target / 'metadata.enc').open('xb') as out:
                 crypto_stream.encrypt(io.BytesIO(json.dumps(metadata).encode()), out, self.password)
             artifact = target / 'volume-0.tar.gz.enc'
-            artifact.write_bytes(artifact.read_bytes()[:-1] + b'x')
+            corrupted = bytearray(artifact.read_bytes())
+            corrupted[-1] ^= 1
+            artifact.write_bytes(corrupted)
             with patch.object(recovery, 'run') as docker:
                 with self.assertRaises(MigrationError):
                     recovery.rehearse_files(target, self.password)
