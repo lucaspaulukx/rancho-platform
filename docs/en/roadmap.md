@@ -126,7 +126,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 | REL03 | Frontend/backend rollback | An isolated frontend image rollback verified old tabs, a compatible shared configuration and immutable asset retention. Matching backend and data restoration and classic-client acceptance remain |
 | REL04 | Reproducible distribution | Pins/lockfiles/source CI/inventory available; isolated fresh-install rehearsal verified classic UI and the separate console. Final upgrade, licenses, provenance and security review remain |
 | REL05 | Final security | Pending unified route/action/scope/CSRF/secret/cache/dependency/legacy-risk acceptance |
-| REL06 | Local release acceptance | Pending mandatory gates on one artifact, exact cleanup and reproducible evidence |
+| REL06 | Local release acceptance | Docker rehearsal passed fresh installation and frontend rollback using the same candidate image ID, with cleanup verified. Remaining mandatory gates still need evidence on one release artifact. |
 
 ## Execution order and optional domains
 

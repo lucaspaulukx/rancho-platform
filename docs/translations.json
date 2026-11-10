@@ -108,8 +108,8 @@
         "pt-BR": "docs/pt-BR/release.md",
         "en": "docs/en/release.md"
       },
-      "reviewedSourceSha256": "5777b8415062e9fde4b6af82de653571ed9f2862fd6c4156727d8270ef1d8e12",
-      "reviewedTranslationSha256": "17555fccaaffe184cc1428382344eb642b6edaada22b72c2ad57784dfef55659"
+      "reviewedSourceSha256": "b21ff5dd90f6d1708c58927a21fce8216ee7239c9a1d8a2dee755e7a4a4abe27",
+      "reviewedTranslationSha256": "8d83c3d7a818abba3f44f2def3e6df1517ce038f1c703ec7b1cb831804da019d"
     },
     {
       "source": "docs/pt-BR/roadmap.md",
@@ -118,8 +118,8 @@
         "pt-BR": "docs/pt-BR/roadmap.md",
         "en": "docs/en/roadmap.md"
       },
-      "reviewedSourceSha256": "d70865031a829caecf5177779435a9380ca3762a418156679c16daf5d20df713",
-      "reviewedTranslationSha256": "126309f0cda983c199b45221c634082dc13d90a01f7ca276a60d9de721b3f0f7"
+      "reviewedSourceSha256": "709c003f306a5db3266e1d4e2a942d781cd2b4355f396664c84b227247c1669b",
+      "reviewedTranslationSha256": "60336942c51c27ccb7d670bb68942bb7f2e865cfa80ea9873a5e834b0c7fef96"
     },
     {
       "source": "docs/pt-BR/security-model.md",
