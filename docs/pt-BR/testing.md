@@ -60,6 +60,14 @@ Entrypoints mantidos incluem `physical_ulimits.py`, `ulimit_upgrade_acceptance.p
 
 O helper de transporte do scheduler é diagnóstico limitado para a rede gerenciada legada. Confere ownership/IP/MAC, instala regra temporária para peer/destino exatos e remove antes das asserções de stream/inspect. Teste aprovado com esse helper não prova estabilidade CNI nativa. Não afrouxe timeouts do produto para disfarçar falha de alocação.
 
+### Verificações automatizadas de acessibilidade
+
+Execute o teste de localização no navegador com `--accessibility` e as dependências de desenvolvimento do console instaladas. Ele usa axe em Grupos, Usuários, Chaves de API, Configurações, Auditoria e Ambientes a 390 e 1440 px nos temas escuro e claro. O teste reporta identificadores de regras e contagens. Revise as verificações manuais indicadas no relatório e exercite os fluxos críticos com teclado e leitor de tela antes da release.
+
+```sh
+python console/tests/localization_acceptance.py --accessibility
+```
+
 ## Evidências e escopo
 
 `physical_security_options.py` compara um container com a opção nativa `no-new-privileges` com um controle equivalente. Exige Docker no host legado isolado original e compara os valores da API do ambiente, as opções de segurança do Docker e `NoNewPrivs` nos processos em execução. O teste cobre uma opção e um runtime.

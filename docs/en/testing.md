@@ -60,6 +60,14 @@ Examples of maintained acceptance entrypoints include `physical_ulimits.py`, `ul
 
 The scheduler transport helper is a bounded diagnostic for the legacy managed-network path. It checks ownership/IP/MAC, installs a temporary rule for the exact peer/destination, and removes it before stream/inspection assertions. A passing test using that helper does not prove native CNI stability. Do not relax product timeouts to disguise an allocation failure.
 
+### Optional automated accessibility checks
+
+Run the owned-browser localization test with `--accessibility` and the console development dependencies installed. It runs axe on Groups, Users, API Keys, Settings, Audit and Environments at 390 and 1440 px in dark and light themes. The gate reports rule IDs and counts. Review the separate manual-check entries and exercise critical workflows with a keyboard and screen reader before release.
+
+```sh
+python console/tests/localization_acceptance.py --accessibility
+```
+
 ## Evidence and scope
 
 `physical_security_options.py` compares a native `no-new-privileges` container with an otherwise identical control. It requires Docker on the original isolated legacy host, then compares scoped API values, Docker's security options and `NoNewPrivs` in the running processes. The test is limited to one option and one runtime.

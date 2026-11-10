@@ -4,6 +4,7 @@ Creates one own admin session, overrides only each browser context's frontend
 configuration response, and revokes that session in finally. No workload,
 identity, grant, database or deployed configuration changes are performed.
 """
+import argparse
 import hashlib
 import json
 import os
@@ -30,7 +31,7 @@ def config_digest():
         return hashlib.sha256(content).hexdigest()
 
 
-def main():
+def main(*, accessibility=False):
     if REPORT.exists():
         archive = ROOT / 'migration-runs'
         archive.mkdir(exist_ok=True)
@@ -52,6 +53,7 @@ def main():
         assert browser.is_file() and (runtime / 'bin/node.exe').is_file()
         payload = {
             'runtimeModules': str(runtime / 'node_modules'), 'browserExecutable': str(browser),
+            'accessibility': accessibility,
             'cookies': [{'name': cookie.name, 'value': cookie.value} for cookie in admin.cookies
                         if cookie.name in ('token', 'CSRF')],
         }
@@ -68,7 +70,7 @@ def main():
         allowed = {
             'status', 'checks', 'browserClosed', 'pageErrors', 'blockedRequests',
             'configurationOverrides', 'contextsClosed', 'stage', 'timedOut',
-            'unmetPrecondition', 'errorType', 'errorLines',
+            'unmetPrecondition', 'errorType', 'errorLines', 'accessibility',
         }
         assert isinstance(measured, dict) and set(measured) <= allowed
         result['browser'] = measured
@@ -110,4 +112,7 @@ def main():
 
 
 if __name__ == '__main__':
-    raise SystemExit(main())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--accessibility', action='store_true',
+                        help='Also scan six routes with axe at desktop and mobile widths in both themes.')
+    raise SystemExit(main(accessibility=parser.parse_args().accessibility))

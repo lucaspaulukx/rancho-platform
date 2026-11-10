@@ -9,6 +9,8 @@ const result = {
   status: 'failed', checks: [], browserClosed: false, pageErrors: 0,
   blockedRequests: 0, configurationOverrides: 0, contextsClosed: 0,
 };
+const accessibilityRoutes = ['groups', 'users', 'api-keys', 'settings', 'audit', 'environments'];
+let axe;
 let browser;
 const contexts = new Set();
 const budget = setTimeout(() => { result.timedOut = true; void browser?.close(); }, 90_000);
@@ -85,9 +87,33 @@ async function contrast(select) {
   });
 }
 
+async function scanAccessibility(page, route) {
+  await page.evaluate(axe);
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const theme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme: theme });
+      await page.waitForFunction((expected) => document.documentElement.dataset.theme === expected, theme);
+      const findings = await page.evaluate(async () => {
+        const report = await window.axe.run(document, {
+          runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] },
+        });
+        const summary = ({ id, nodes }) => ({ id, count: nodes.length });
+        return { violations: report.violations.map(summary), manualReview: report.incomplete.map(summary) };
+      });
+      result.accessibility.push({ route, width, theme, ...findings });
+    }
+  }
+}
+
 async function main() {
   assert(Array.isArray(input.cookies) && input.cookies.some((cookie) => cookie.name === 'token'));
   browser = await chromium.launch({ headless: true, executablePath: input.browserExecutable });
+  if (input.accessibility) {
+    result.stage = 'accessibility-setup';
+    axe = fs.readFileSync(path.resolve(__dirname, '../../node_modules/axe-core/axe.min.js'), 'utf8');
+    result.accessibility = [];
+  }
 
   result.stage = 'disabled-public-layout';
   const disabled = await context({ enabled: false });
@@ -275,6 +301,10 @@ async function main() {
       assert(fits);
       check(route + ' fits the viewport at ' + width + ' px');
     }
+    if (axe && accessibilityRoutes.includes(route)) {
+      result.stage = 'accessibility-' + route;
+      await scanAccessibility(workspace, route);
+    }
     await workspace.setViewportSize({ width: 1440, height: 1000 });
   }
   await workspace.goto(origin + '/console/environments/1a12?env=1a12');
@@ -416,6 +446,12 @@ async function main() {
     await registryEditor.getByLabel(/^Registry address(?: \*)?$/).inputValue() === 'ftp://registry.invalid' &&
     await registryEditor.getByLabel('Name', { exact: true }).inputValue() === 'synthetic-registry' &&
     registryPage.url() === registryUrl);
+  if (axe) {
+    result.stage = 'accessibility-results';
+    check('axe checks for six routes in both themes on mobile and desktop',
+      result.accessibility.length === accessibilityRoutes.length * 4 &&
+      result.accessibility.every(({ violations }) => violations.length === 0));
+  }
   check('no browser HTTP mutations or external navigation', result.blockedRequests === 0);
   check('no JavaScript errors', result.pageErrors === 0);
   result.status = 'passed';
