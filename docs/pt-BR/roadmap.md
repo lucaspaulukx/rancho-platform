@@ -18,7 +18,7 @@ Estados descrevem capacidades mantidas e aceites restantes, não diário de exec
 | UX01 | Shell, marca, navegação, seletor, login/sem-acesso | Implementado; falta regressão final de rotas/temas |
 | UX02 | Tabelas, filtros, seleção, menus, drawers, revisão/rascunhos | Recortes implementados; falta matriz completa de teclado/foco/erro parcial/contexto |
 | UX03 | Tokens de tema e overrides | Implementado; conferir contraste efetivo nas rotas finais |
-| UX04 | Recuperação de chunks/abas antigas e retenção de assets | Implementado; falta upgrade/rollback final com aba antiga aberta |
+| UX04 | Recuperação de chunks/abas antigas e retenção de assets | Abas antigas carregaram os chunks originais durante upgrade e rollback isolados do frontend. Um novo documento carregou a imagem restaurada. Falta o aceite final no artefato e na topologia de release |
 | UX05 | Acessibilidade manual/leitor de tela | Pendente aceite manual dos fluxos críticos |
 | UX06 | Alto volume/performance | Limites gzip no build e benchmark sintético de inventário no navegador disponíveis. Latência, heap e renderização medidos em 20 ambientes com 2.000 containers cada. A paginação opcional limita a lista plana de Containers a 50 linhas renderizadas e preserva a busca e a seleção no inventário completo. A árvore de workloads reutiliza um índice de containers por serviço durante a montagem. A paginação opcional limita Stacks e Serviços expandidos a 100 linhas de recursos e até dois cabeçalhos de contexto, preservando a árvore. Falta medir a latência real do backend e o comportamento em sessões longas, além de definir os critérios finais de release |
 | CFG01 | Flags frontend/backend e fallback clássico | Parcial; falta matriz final de dependência/on/off/reversão |
@@ -123,7 +123,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 |---|---|---|
 | REL01 | Migrações versionadas de banco/config | Schema aditivo/runtime e engine original sintético validados; falta aceite completo de pacote fresco |
 | REL02 | Backup/recuperação Rancher/IdP completos | DB/estado/imagens/login isolado criptografados validados em recortes; faltam workloads/storage/topologias completos |
-| REL03 | Rollback frontend/backend | Parcial; faltam imagem/config/dados anteriores e compatibilidade aba antiga/cliente clássico |
+| REL03 | Rollback frontend/backend | Rollback isolado da imagem do frontend verificou abas antigas, uma configuração compartilhada compatível e retenção de assets imutáveis. Faltam restauração correspondente de backend e dados e aceite do cliente clássico |
 | REL04 | Distribuição reproduzível | Pins/lockfiles/CI/inventário disponíveis; faltam bootstrap/install/upgrade/licenças/proveniência/segurança finais |
 | REL05 | Segurança final | Pendente aceite unificado rotas/ações/escopos/CSRF/secrets/cache/dependências/risco legado |
 | REL06 | Aceite local de release | Pendentes gates obrigatórios no mesmo artefato, cleanup exato e evidência reproduzível |

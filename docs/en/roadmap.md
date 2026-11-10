@@ -18,7 +18,7 @@ Statuses below describe maintained capabilities and remaining acceptance, not an
 | UX01 | Shell, branding, navigation, environment selector, login/no-access | Implemented; final all-route/theme regression remains |
 | UX02 | Tables, filters, selection, menus, drawers, review/drafts | Implemented slices; complete keyboard/focus/partial-error/context matrix remains |
 | UX03 | Theme tokens and overrides | Implemented; verify effective contrast across final routes |
-| UX04 | Old-tab/chunk recovery and retained assets | Implemented; final upgrade/rollback with an open old tab remains |
+| UX04 | Old-tab/chunk recovery and retained assets | Old tabs fetched their original lazy chunks during an isolated frontend upgrade and rollback. A fresh document loaded the restored image. Final release artifact and topology acceptance remain |
 | UX05 | Manual accessibility/screen reader | Pending critical-flow manual acceptance |
 | UX06 | High volume/performance | Build gzip budgets and a synthetic browser inventory benchmark are in place. Measured latency, heap and rendering across 20 environments with 2,000 containers each. Optional client pagination bounds the flat Containers view to 50 rendered rows while preserving full inventory search and selection. The workload tree reuses an index of containers by service during projection. Optional pagination bounds expanded Stacks and Services to 100 logical rows plus up to two parent headings while retaining the nested workspace. Real backend latency, longer sessions and final release thresholds remain |
 | CFG01 | Frontend/backend flags and classic fallback | Partial; final dependency/on/off/reversal matrix remains |
@@ -123,7 +123,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 |---|---|---|
 | REL01 | Versioned DB/config migrations | Additive/runtime and synthetic original-engine upgrade validated; complete fresh-package acceptance remains |
 | REL02 | Full Rancher/IdP backup and recovery | Encrypted DB/state/image/isolated-login slices validated; workload/storage/topology completeness remains |
-| REL03 | Frontend/backend rollback | Partial; previous image/config/data and old-tab/classic-client compatibility remain |
+| REL03 | Frontend/backend rollback | An isolated frontend image rollback verified old tabs, a compatible shared configuration and immutable asset retention. Matching backend and data restoration and classic-client acceptance remain |
 | REL04 | Reproducible distribution | Pins/lockfiles/source CI/inventory available; final bootstrap/install/upgrade/licenses/provenance/security review remains |
 | REL05 | Final security | Pending unified route/action/scope/CSRF/secret/cache/dependency/legacy-risk acceptance |
 | REL06 | Local release acceptance | Pending mandatory gates on one artifact, exact cleanup and reproducible evidence |
