@@ -36,6 +36,8 @@ python -m unittest discover -s tests -p test_repository_layout.py
 python -m unittest discover -s tests -p test_artifact_inventory.py
 ```
 
+Run `python scripts/check_backend_contracts.py` with a JDK that supports `javac --release 8`. It compiles the selected classes directly from the exported Cattle patch, then runs the configuration, OIDC logout and provider-readiness contracts without a lab or upstream clone.
+
 The staged-content scanner checks the index; review unstaged work separately. History scanning and language freshness checks have explicit limits and do not certify secret absence, translation quality, license compliance or production readiness.
 
 ## Backend and migration
