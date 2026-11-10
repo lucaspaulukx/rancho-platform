@@ -11,7 +11,9 @@ import time
 import urllib.request
 
 from migration.engines import ORIGINAL, authentication_probe, rehearse_engines
+from migration.classic_browser_bridge import browser_bridge
 from migration.recovery import OWNER, backup, inspect, require_stopped_cleanly
+from migration.test_classic_browser_lab import check_browser
 from migration.test_fresh_install_lab import image_id
 from migration.tool import Database, run
 
@@ -20,6 +22,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--quiesce', action='store_true', required=True)
     parser.add_argument('--backend-image', default='rancher16-local-rbac:schema-validation')
+    parser.add_argument('--classic-browser', action='store_true')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     config = dict(line.split('=', 1) for line in (root / '.env').read_text().splitlines() if '=' in line)
@@ -69,6 +72,17 @@ def main():
         check('rollback runs the pinned original backend', inspect(copies['rancher'])['Image'] == original)
         count = Database(copies['rancher']).query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='cattle' AND (table_name LIKE 'local_rbac_%' OR table_name='community_schema_migration');")
         check('rollback engine uses restored original schema without custom tables', count == '0')
+        if args.classic_browser:
+            browser = {'stage': 'bridge', 'sessionRevoked': False}
+            report['originalClassicBrowser'] = browser
+            try:
+                with browser_bridge(anchor) as (base, headers):
+                    check_browser(base, credentials['rancherUsername'], credentials['rancherPassword'], browser, headers)
+            except Exception as error:
+                browser.update(status='failed', errorType=type(error).__name__)
+                raise RuntimeError('Classic browser rehearsal failed; see safe report stage.') from None
+            browser.update(status='passed', stage='complete')
+            check('restored original classic login and environment list', browser['sessionRevoked'])
 
     try:
         print('PASS: cold source captured and resumed; beginning original20 engine upgrade.', flush=True)

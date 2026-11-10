@@ -115,7 +115,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 | ADM04 | Drivers de máquinas/catálogos | CRUD implementado; falta provisionamento/reativação isolados |
 | INT01 | API keys | Gestão implementada; falta aceite técnico completo de escopo/expiração |
 | INT02 | Webhooks/receivers | Configuração implementada; faltam entrega local real/retries/negação |
-| HELP01 | Sobre/capacidades/versão/atribuição | Implementado; falta consistência final de artefato/licenças/capacidades |
+| HELP01 | Sobre/capacidades/versão/atribuição | O console fixado exibiu no Chromium as versões do produto e da base Rancher, a marca Rancher, a licença Inter igual à do código-fonte e os rótulos de capacidades OIDC/RBAC. Falta conferir a configuração final e os valores das capacidades |
 
 ## Entrega e recuperação
 
@@ -123,8 +123,8 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 |---|---|---|
 | REL01 | Migrações versionadas de banco/config | Schema aditivo/runtime e engine original sintético validados; boot isolado com imagens locais verificou schema e reinício idempotente. Faltam o aceite do pacote final e o bootstrap federado |
 | REL02 | Backup/recuperação Rancher/IdP completos | Captura a frio e restauração isolada de Rancher e Keycloak confirmaram login local e federado, preservação das contagens de inventário e permissões e acesso zero no primeiro login federado. Os recortes de recuperação de banco, estado e imagens criptografadas foram testados. Falta o aceite de workloads, armazenamento e topologia final |
-| REL03 | Rollback frontend/backend | Rollback isolado do frontend verificou abas antigas, configuração compatível e retenção de assets imutáveis. Um ensaio sintético separado com 20 ambientes restaurou o backend e o banco originais, conferiu a entrega dos arquivos do cliente clássico e preservou o laboratório em execução. O Chromium validou o login clássico e a lista de ambientes no candidato fixado. Faltam o teste no navegador sobre o backend original restaurado e o aceite da topologia final |
-| REL04 | Distribuição reproduzível | Pins/lockfiles/CI/inventário disponíveis; ensaio de instalação limpa isolado verificou UI clássica e console separado. Faltam upgrade, licenças, proveniência e revisão de segurança finais |
+| REL03 | Rollback frontend/backend | Rollback isolado do frontend verificou abas antigas, configuração compatível e retenção de assets imutáveis. Um ensaio sintético separado com 20 ambientes restaurou o backend e o banco originais e preservou o laboratório em execução. O Chromium validou login clássico, lista de ambientes e revogação da sessão no candidato e no original restaurado. Faltam aceite de workloads, armazenamento e topologia final |
+| REL04 | Distribuição reproduzível | Pins, lockfiles, CI de código-fonte e instalação limpa verificados. O inventário offline rodou no par fixado de backend e console e no lockfile. Faltam revisão de licenças das dependências, proveniência, topologia final e revisão de segurança |
 | REL05 | Segurança final | Pendente aceite unificado rotas/ações/escopos/CSRF/secrets/cache/dependências/risco legado |
 | REL06 | Aceite local de release | Ensaio Docker validou instalação limpa e rollback do frontend com o mesmo ID de imagem candidata e confirmou a remoção dos recursos temporários. Um ensaio sintético separado validou upgrade e rollback de backend e banco com o ID do backend do mesmo par candidato. As demais verificações obrigatórias ainda precisam de evidência em um único artefato de release |
 
