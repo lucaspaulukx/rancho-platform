@@ -50,6 +50,12 @@ export const ptServiceEditors = {
   'serviceEditors.before': 'Antes · {count} vínculo(s)',
   'serviceEditors.after': 'Depois · {count} vínculo(s)',
   'serviceEditors.summary': '{target} · alias: {alias}',
+  'serviceEditors.scaleError.integer': 'Informe uma quantidade inteira de containers.',
+  'serviceEditors.scaleError.range': 'A escala está fora dos limites permitidos pelo Rancher.',
+  'serviceEditors.scaleError.unavailable': 'A escala não está disponível para este recurso.',
+  'serviceEditors.scaleError.changed':
+    'A escala foi alterada por outro cliente. Reabra o painel para atualizar.',
+  'serviceEditors.scaleError.unchanged': 'Informe uma escala diferente da atual.',
   'serviceEditors.confirmZero':
     'Confirme o encerramento dos containers antes de aplicar escala zero.',
   'serviceEditors.reviewScale': 'Revise a escala.',
@@ -113,6 +119,12 @@ export const enServiceEditors = {
   'serviceEditors.before': 'Before · {count} link(s)',
   'serviceEditors.after': 'After · {count} link(s)',
   'serviceEditors.summary': '{target} · alias: {alias}',
+  'serviceEditors.scaleError.integer': 'Enter a whole number of containers.',
+  'serviceEditors.scaleError.range': 'The scale is outside the range Rancher allows.',
+  'serviceEditors.scaleError.unavailable': 'Scaling is unavailable for this resource.',
+  'serviceEditors.scaleError.changed':
+    'Another client changed the scale. Reopen the panel to refresh it.',
+  'serviceEditors.scaleError.unchanged': 'Enter a scale different from the current scale.',
   'serviceEditors.confirmZero':
     'Confirm that containers will stop before applying a scale of zero.',
   'serviceEditors.reviewScale': 'Review the scale.',

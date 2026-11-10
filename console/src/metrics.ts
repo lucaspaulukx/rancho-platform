@@ -1,5 +1,6 @@
 import { safeApiUrl, type Resource } from './api';
 import type { ConsoleConfig } from './config';
+import { ptResourceMetrics } from './i18n/domains/resource-metrics';
 export interface MetricCounters {
   ts: number;
   cpu?: number;
@@ -144,7 +145,28 @@ export function serviceMetricsEnabled(modules: ConsoleConfig['modules']) {
     modules.contextActions
   );
 }
-export class ServiceMetricsError extends Error {}
+export type MetricsErrorKey =
+  | 'resourceMetrics.wrongEnvironment'
+  | 'resourceMetrics.resourceDenied'
+  | 'resourceMetrics.incomplete'
+  | 'resourceMetrics.targetLimit'
+  | 'resourceMetrics.noTargets'
+  | 'resourceMetrics.negotiation'
+  | 'resourceMetrics.invalidSample'
+  | 'resourceMetrics.connectionFailed'
+  | 'resourceMetrics.sessionDenied'
+  | 'resourceMetrics.membershipChanged'
+  | 'resourceMetrics.failed'
+  | 'resourceMetrics.serviceUnavailable'
+  | 'resourceMetrics.serviceLinkMismatch'
+  | 'resourceMetrics.serviceEnvironmentMismatch'
+  | 'resourceMetrics.serviceContainerMismatch'
+  | 'resourceMetrics.serviceContainerConflict';
+export class MetricsError extends Error {
+  constructor(readonly key: MetricsErrorKey) {
+    super(ptResourceMetrics[key]);
+  }
+}
 export const MAX_SERVICE_METRIC_TARGETS = 64;
 export function scopedServiceMetricLink(
   service: Resource,
@@ -152,12 +174,11 @@ export function scopedServiceMetricLink(
   link: 'self' | 'instances' | 'containerStats',
 ) {
   if (service.type !== 'service' || service.accountId !== environment || !service.links[link])
-    throw new ServiceMetricsError('O servidor não disponibiliza métricas para este serviço.');
+    throw new MetricsError('resourceMetrics.serviceUnavailable');
   const path = safeApiUrl(service.links[link]).replace(/\/$/, '');
   const base = `/v2-beta/projects/${encodeURIComponent(environment)}/services/${encodeURIComponent(service.id)}`;
   const expected = link === 'self' ? base : `${base}/${link.toLowerCase()}`;
-  if (path !== expected)
-    throw new ServiceMetricsError('O endereço de métricas não pertence ao serviço selecionado.');
+  if (path !== expected) throw new MetricsError('resourceMetrics.serviceLinkMismatch');
   return link === 'instances' ? `${path}?limit=${MAX_SERVICE_METRIC_TARGETS + 1}` : path;
 }
 
@@ -172,9 +193,9 @@ export function serviceMetricTargets(
   environment: string,
 ) {
   if (service.type !== 'service' || service.accountId !== environment)
-    throw new ServiceMetricsError('O serviço não pertence ao environment selecionado.');
+    throw new MetricsError('resourceMetrics.serviceEnvironmentMismatch');
   if (instances.length > MAX_SERVICE_METRIC_TARGETS)
-    throw new ServiceMetricsError('O painel suporta até 64 containers por serviço.');
+    throw new MetricsError('resourceMetrics.targetLimit');
   const aliases = new Map<string, string>();
   const targets: ServiceMetricTarget[] = [];
   for (const instance of instances) {
@@ -187,12 +208,10 @@ export function serviceMetricTargets(
       typeof instance.id !== 'string' ||
       !/^1i[0-9]+$/.test(instance.id)
     )
-      throw new ServiceMetricsError(
-        'A lista de containers não corresponde ao serviço selecionado.',
-      );
+      throw new MetricsError('resourceMetrics.serviceContainerMismatch');
     const identifiers = [...new Set(metricIdentifiers(instance))];
     if (identifiers.some((value) => value.length > 128 || aliases.has(value)))
-      throw new ServiceMetricsError('A lista de containers contém identidades conflitantes.');
+      throw new MetricsError('resourceMetrics.serviceContainerConflict');
     for (const value of identifiers) aliases.set(value, instance.id);
     targets.push({ id: instance.id, name: instance.name || instance.id, identifiers });
   }

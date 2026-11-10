@@ -1,14 +1,8 @@
 import { useI18n } from '../i18n/provider';
 import { useState, type FormEvent } from 'react';
 import type { Resource, Schema } from '../api';
-import { prepareServiceScale } from '../service-scaling';
+import { prepareServiceScale, ServiceScaleValidationError } from '../service-scaling';
 import { Alert, Field } from './ui';
-
-class ServiceEditorError extends Error {
-  constructor(readonly key: 'serviceEditors.confirmZero' | 'serviceEditors.reviewScale') {
-    super(key);
-  }
-}
 
 export function ServiceScaleForm({
   resource,
@@ -27,7 +21,7 @@ export function ServiceScaleForm({
 }) {
   const { t, formats } = useI18n();
   const errorText = (error: Error) =>
-    error instanceof ServiceEditorError ? t(error.key) : error.message;
+    error instanceof ServiceScaleValidationError ? t(error.key) : error.message;
   const [value, setValue] = useState(String(resource.scale));
   const [zero, setZero] = useState(false);
   const [validation, setValidation] = useState<Error | null>(null);
@@ -36,12 +30,15 @@ export function ServiceScaleForm({
     if (busy) return;
     try {
       const payload = prepareServiceScale(resource, resource, schema, value);
-      if (payload.scale === 0 && !zero) throw new ServiceEditorError('serviceEditors.confirmZero');
+      if (payload.scale === 0 && !zero)
+        throw new ServiceScaleValidationError('serviceEditors.confirmZero');
       setValidation(null);
       onSubmit(payload);
     } catch (caught) {
       setValidation(
-        caught instanceof Error ? caught : new ServiceEditorError('serviceEditors.reviewScale'),
+        caught instanceof Error
+          ? caught
+          : new ServiceScaleValidationError('serviceEditors.reviewScale'),
       );
     }
   }

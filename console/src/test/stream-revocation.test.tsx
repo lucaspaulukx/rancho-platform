@@ -510,9 +510,33 @@ describe('Drawer de métricas de serviço', () => {
   it('não emite acesso para uma lista que contém container de outro escopo', async () => {
     context.config.modules.serviceMetrics = true;
     const fetcher = install(() => [{ ...a, accountId: '1a99' }]);
-    render(<ResourceMetrics resource={service} onClose={vi.fn()} />);
+    function SwitchLanguage() {
+      const { setLocale } = useI18n();
+      return <button onClick={() => setLocale('en-US')}>English</button>;
+    }
+    render(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: true,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <SwitchLanguage />
+        <ResourceMetrics resource={service} onClose={vi.fn()} />
+      </I18nProvider>,
+    );
     expect(await screen.findByText(/lista de containers não corresponde/)).toBeInTheDocument();
     expect(fetcher.mock.calls.map(([path]) => path)).not.toContain(base + '/containerstats');
+    fetcher.mockClear();
+    fireEvent.click(screen.getByText('English'));
+    expect(
+      screen.getByText('The container list does not match the selected service.'),
+    ).toBeInTheDocument();
+    expect(fetcher).not.toHaveBeenCalled();
     expect(Socket.instances).toHaveLength(0);
   });
 });

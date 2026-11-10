@@ -70,16 +70,18 @@ function renderCreator(locale: Locale = 'pt-BR') {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
-  return render(
+  const view = (defaultLocale: Locale) => (
     <QueryClientProvider client={client}>
       <I18nProvider
-        policy={{ ...localization, defaultLocale: locale }}
+        policy={{ ...localization, defaultLocale, selectable: false }}
         identity="device-fixture-admin"
       >
         <RouterProvider router={router} />
       </I18nProvider>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
+  const { rerender } = render(view(locale));
+  return (nextLocale: Locale) => rerender(view(nextLocale));
 }
 
 beforeEach(() => {
@@ -235,6 +237,50 @@ describe('Structured device creation integration', () => {
     expect(screen.getByLabelText('Container path 1')).toHaveValue('/dev/fixture');
     expect(screen.getByLabelText('Name')).toHaveValue('device-fixture');
   });
+
+  it.each([
+    {
+      change: 'permission',
+      portuguese: 'Sua permissão de criar não está mais disponível.',
+      english: 'Your permission to create is no longer available.',
+    },
+    {
+      change: 'field',
+      portuguese: 'O campo name não está mais disponível para criação. Reabra o painel.',
+      english: 'The name field is no longer available for creation. Reopen the panel.',
+    },
+  ])(
+    'retranslates a creation $change error in the open form',
+    async ({ change, portuguese, english }) => {
+      const user = userEvent.setup();
+      const changeLocale = renderCreator();
+      const name = screen.getByLabelText('Nome');
+      await user.type(name, 'creation-fixture');
+      await user.type(screen.getByLabelText('Imagem *'), 'alpine:3.20');
+
+      if (change === 'permission') backend.current = { ...container, collectionMethods: ['GET'] };
+      else
+        backend.refreshed = [
+          {
+            ...container,
+            resourceFields: {
+              ...container.resourceFields,
+              name: { type: 'string', create: false },
+            },
+          },
+        ];
+      await user.click(screen.getByRole('button', { name: 'Criar' }));
+      expect(await screen.findByRole('alert')).toHaveTextContent(portuguese);
+      expect(backend.posts).toEqual([]);
+
+      changeLocale('en-US');
+      expect(screen.getByRole('alert')).toHaveTextContent(english);
+      expect(screen.getByLabelText('Name')).toBe(name);
+      expect(name).toHaveValue('creation-fixture');
+      expect(screen.getByLabelText('Image *')).toHaveValue('alpine:3.20');
+      expect(backend.posts).toEqual([]);
+    },
+  );
 
   it('keeps device validation errors as keys so inline and submit feedback follow a language change', async () => {
     const submit = vi.fn(),

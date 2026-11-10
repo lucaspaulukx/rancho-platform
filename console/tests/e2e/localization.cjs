@@ -254,6 +254,24 @@ async function main() {
     await workspace.getByRole('heading', { name: title, exact: true }).waitFor();
     check('translated administrative route ' + route + ' keeps scope',
       new URL(workspace.url()).searchParams.get('env') === '1a12');
+    for (const width of [320, 390]) {
+      await workspace.setViewportSize({ width, height: 844 });
+      result.stage = 'administration-layout-' + route + '-' + width;
+      await workspace.locator('main .loading:visible').waitFor({ state: 'hidden' });
+      const fits = await workspace.evaluate(() => {
+        const main = document.querySelector('main');
+        const actions = main?.querySelectorAll('.page-actions > .button') ?? [];
+        return main && main.scrollWidth <= main.clientWidth + 1 &&
+          document.documentElement.scrollWidth <= innerWidth + 1 &&
+          [...actions].every((action) => {
+            const box = action.getBoundingClientRect();
+            return box.left >= -1 && box.right <= innerWidth + 1;
+          });
+      });
+      assert(fits);
+      check(route + ' fits the viewport at ' + width + ' px');
+    }
+    await workspace.setViewportSize({ width: 1440, height: 1000 });
   }
   await workspace.goto(origin + '/console/environments/1a12?env=1a12');
   await workspace.getByRole('heading', { name: 'Resources in this environment', exact: true }).waitFor();

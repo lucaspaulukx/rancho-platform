@@ -7,6 +7,44 @@ import { preparePayload } from './components/SchemaForm';
 import { validateWorkloadHealthChecks } from './workload-healthchecks';
 import { validateWorkloadScheduling } from './workload-scheduling';
 import { validateSidecars } from './workload-sidecars';
+import { ptResourceCreator } from './i18n/domains/resource-creator';
+import type { createTranslator } from './i18n/messages';
+
+type NamedCreationError =
+  'resourceCreator.validation.fieldUnavailable' | 'resourceCreator.validation.schemaUnavailable';
+type CreationErrorDetail =
+  | [
+      key:
+        | 'resourceCreator.unavailable'
+        | 'resourceCreator.schemaUnavailable'
+        | 'resourceCreator.permissionChanged'
+        | 'resourceCreator.stackUnavailable'
+        | 'resourceCreator.schemaChanged'
+        | 'resourceCreator.validation.unavailable'
+        | 'resourceCreator.validation.depth',
+    ]
+  | [key: NamedCreationError, name: string];
+
+export class ResourceCreationError extends Error {
+  readonly detail: CreationErrorDetail;
+
+  constructor(...detail: CreationErrorDetail) {
+    const [key, name] = detail;
+    super(ptResourceCreator[key].replace('{name}', () => name ?? ''));
+    this.detail = detail;
+  }
+
+  format(t: ReturnType<typeof createTranslator>['t']) {
+    const [key, name] = this.detail;
+    if (
+      key === 'resourceCreator.validation.fieldUnavailable' ||
+      key === 'resourceCreator.validation.schemaUnavailable'
+    )
+      return t(key, { name });
+    return t(key);
+  }
+}
+
 export type WorkloadField = [string, SchemaField];
 const sections: { title: string; description: string; fields: string[] }[] = [
   {
@@ -136,13 +174,13 @@ export function validateWorkloadCreation(
   devices = false,
 ) {
   if (!['service', 'container'].includes(schema.id) || !schema.collectionMethods?.includes('POST'))
-    throw new Error('A criação deste workload não está mais disponível.');
+    throw new ResourceCreationError('resourceCreator.validation.unavailable');
   function validate(current: Schema, payload: Record<string, unknown>, depth = 0) {
-    if (depth > 12) throw new Error('A configuração tem níveis demais.');
+    if (depth > 12) throw new ResourceCreationError('resourceCreator.validation.depth');
     for (const [name, value] of Object.entries(payload)) {
       const field = current.resourceFields[name];
       if (!field?.create)
-        throw new Error(`O campo ${name} não está mais disponível para criação. Reabra o painel.`);
+        throw new ResourceCreationError('resourceCreator.validation.fieldUnavailable', name);
       const nested = schemas[field.type];
       if (
         value &&
@@ -152,7 +190,7 @@ export function validateWorkloadCreation(
         !field.type.startsWith('map[') &&
         !['json', 'object'].includes(field.type)
       )
-        throw new Error(`O schema de ${name} não está mais disponível. Reabra o painel.`);
+        throw new ResourceCreationError('resourceCreator.validation.schemaUnavailable', name);
       if (nested && value && typeof value === 'object' && !Array.isArray(value))
         validate(nested, value as Record<string, unknown>, depth + 1);
       const arrayType = /^array\[([^\]]+)\]$/.exec(field.type)?.[1];
