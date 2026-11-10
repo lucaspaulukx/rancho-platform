@@ -16,7 +16,7 @@ Statuses below describe maintained capabilities and remaining acceptance, not an
 | ID | Capability | State and remaining gate |
 |---|---|---|
 | UX01 | Shell, branding, navigation, environment selector, login/no-access | Implemented; the shared header wraps action buttons on narrow screens. A browser check covers thirteen routes at 320 and 390 px. Final all-route/theme regression remains |
-| UX02 | Tables, filters, selection, menus, drawers, review/drafts | Implemented slices; complete keyboard/focus/partial-error/context matrix remains |
+| UX02 | Tables, filters, selection, menus, drawers, review/drafts | Implemented slices. Mobile keyboard navigation through the Operations menu and detail drawer verifies disabled-action skipping and focus restoration. The remaining keyboard, partial-error and context matrix is pending |
 | UX03 | Theme tokens and overrides | Implemented; verify effective contrast across final routes |
 | UX04 | Old-tab/chunk recovery and retained assets | Old tabs fetched their original lazy chunks during an isolated frontend upgrade and rollback. A fresh document loaded the restored image. Final release artifact and topology acceptance remain |
 | UX05 | Manual accessibility/screen reader | Automated axe checks cover six administrative routes at two widths in both themes. Manual keyboard and screen-reader acceptance of critical workflows remains |
@@ -108,7 +108,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 |---|---|---|
 | OBS01 | Contextual logs/terminal/metrics | Implemented real-data slices; final focus/resize/buffer/environment regression remains |
 | OBS02 | Open-stream revocation | UI and personal/shared API-key host-stream slices validated; technical paths and final artifact regression remain |
-| OBS03 | Final-build soak | Six-minute native host metrics slice verified continuous frames, explicit reconnect, bounded CSV history, heap and renderer task time. Final-artifact soak with concurrent logs, terminal and container/service metrics remains |
+| OBS03 | Final-build soak | Six-minute native tests verified host reconnect and a five-stream browser soak on one console image and one legacy host. Logs, terminal and host/container/service metrics ran concurrently with bounded CSV history and exact cleanup. Service metrics were enabled in the test browser. Acceptance with deployed flags and final topology remains |
 | ADM01 | Local accounts/profile/password/lifecycle | Implemented; final concurrency/OIDC-admin/technical matrix remains |
 | ADM02 | Audit/settings/process/replay | Implemented slices; final permission/privacy/error/native-effect regression remains |
 | ADM03 | HA/pools | Monitoring implemented; physical configuration/failover remains |

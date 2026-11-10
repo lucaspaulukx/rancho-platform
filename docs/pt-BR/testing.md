@@ -116,4 +116,14 @@ Execute no laboratório local UI-OPS-LAB com o host existente ativo. O teste abr
 python console/tests/host_metrics_soak.py --seconds 360
 ```
 
+### Streams nativos concorrentes
+
+Execute no UI-OPS-LAB com o host legado ativo. O teste provisiona um serviço próprio com uma réplica e abre logs, terminal e métricas de host, container e serviço em páginas separadas. O relatório registra frames, intervalos máximos, respostas do terminal, limites do histórico CSV, hash do asset carregado e limpeza dos sockets, da fixture e da sessão temporária.
+
+Ative as métricas de serviço na configuração servida para o aceite de release. Use `--service-preview` para ativar o recurso no contexto de navegador do teste durante um ensaio com o recurso desligado. Se o scheduler legado local precisar do diagnóstico isolado, passe `--scheduler-relay`. O teste confirma a remoção do relay antes de abrir os streams. As duas opções são registradas no relatório.
+
+```sh
+python console/tests/concurrent_streams_soak.py --seconds 360
+```
+
 Separe unitário/componente, build limpo, renderização browser, comportamento nativo real e CI remoto. Registre identidade do artefato, flags, escopo, controles, resultados medidos e cleanup; publique somente resumos sanitizados. Teste `nofile` em um host não valida todos os limites ou multi-host. Probe curto de WebSocket não prova estabilidade do scheduler/soak. Restore offline de DB não prova recuperação de engine/IdP/workloads. Aceites restantes ficam no [roadmap](roadmap.md).

@@ -28,7 +28,7 @@ def wait_until(page, predicate, seconds):
         page.wait_for_timeout(200)
 
 
-def csv_history(page, drawer):
+def csv_history(page, drawer, *, container_id=None):
     with page.expect_download() as pending:
         drawer.get_by_role('button', name='CSV', exact=True).click()
     download = pending.value
@@ -37,8 +37,13 @@ def csv_history(page, drawer):
         assert path.stat().st_size <= 65_536
         with path.open(encoding='utf-8', newline='') as stream:
             reader = csv.DictReader(stream)
-            assert reader.fieldnames == CSV_FIELDS
-            times = [datetime.fromisoformat(row['ts'].replace('Z', '+00:00')) for row in reader]
+            fields = ['containerId', *CSV_FIELDS] if container_id is not None else CSV_FIELDS
+            assert reader.fieldnames == fields
+            times = []
+            for row in reader:
+                if container_id is not None:
+                    assert row['containerId'] == container_id
+                times.append(datetime.fromisoformat(row['ts'].replace('Z', '+00:00')))
         assert 2 <= len(times) <= 300
         assert all(left < right for left, right in zip(times, times[1:]))
         span = (times[-1] - times[0]).total_seconds()
