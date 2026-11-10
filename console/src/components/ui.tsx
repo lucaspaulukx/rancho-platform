@@ -1,5 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useI18n } from '../i18n/provider';
+import { resourceStateLabel } from '../i18n/resource-state';
 import {
   AlertCircle,
   CheckCircle2,
@@ -158,6 +159,15 @@ export function Badge({ children, state }: { children: ReactNode; state?: string
     </span>
   );
 }
+export function ResourceStateBadge({ state }: { state?: string }) {
+  const { t } = useI18n();
+  return (
+    <Badge state={state}>
+      <bdi>{resourceStateLabel(t, state)}</bdi>
+    </Badge>
+  );
+}
+
 export function Field({
   label,
   hint,

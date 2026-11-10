@@ -1,6 +1,7 @@
 // Runs against the built local console with synthetic, read-only API responses.
 // Set UX06_BASELINE=1 to measure the unpaginated path, including in older builds.
 // Set UX06_SOAK_SECONDS=60–900 to run only the visible-tab polling soak.
+// Set UX06_LAYOUT_ONLY=1 to run only the narrow and RTL layout smoke.
 const assert = require('node:assert/strict');
 const os = require('node:os');
 const path = require('node:path');
@@ -18,6 +19,8 @@ const counts = { stacks: 20, services: 200, containers: 2000 };
 const coldRuns = 3;
 const refreshTimeoutMs = 22_000; // Inventory polls every 15 seconds.
 const soakFailureMessage = 'UX06 synthetic inventory read failure';
+const longEnvironmentName = 'synthetic-environment-' + 'x'.repeat(80);
+const longStackName = 'synthetic-stack-' + 'x'.repeat(80);
 const round = (number) => Math.round(number * 100) / 100;
 const projectId = (index) => `1a${9000 + index}`;
 const projectName = (index) => `UX06 environment ${String(index).padStart(2, '0')}`;
@@ -123,6 +126,63 @@ async function checkScope(page, id, count) {
   assert.equal(names.length, count);
   assert.ok(names.every((name) => name.startsWith(`ux06-${id}-container-`)));
   return names;
+}
+
+async function checkOperationLayout(page) {
+  const heading = page.getByRole('heading', { name: longEnvironmentName, exact: true });
+  const checkText = async (locator) => {
+    const fits = await locator.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const text = range.getBoundingClientRect();
+      return (
+        box.left >= -1 &&
+        box.right <= innerWidth + 1 &&
+        text.left >= box.left - 1 &&
+        text.right <= box.right + 1
+      );
+    });
+    assert.ok(fits, 'the full name must fit inside its column and viewport');
+  };
+
+  const stackContext = (kind) =>
+    page
+      .locator(`.operation-row.${kind} .operation-count`)
+      .filter({ hasText: longStackName })
+      .first();
+  await checkText(heading);
+  await checkText(stackContext('container'));
+  await page.locator('#operation-view-1').click();
+  await checkText(stackContext('service'));
+
+  await page.setViewportSize(viewport);
+  await page.locator('.language-selector select').selectOption('fa-IR');
+  await page.waitForFunction(() => document.documentElement.dir === 'rtl');
+  const metrics = page.locator('.operation-metrics > span');
+  const treeTools = page.locator('.operation-tree-tools > span');
+  assert.ok(
+    await metrics.evaluate((totals) => {
+      const row = totals.parentElement;
+      const left = row.getBoundingClientRect().left;
+      const inset = parseFloat(getComputedStyle(row).paddingInlineEnd);
+      return Math.abs(totals.getBoundingClientRect().left - left - inset) <= 2;
+    }),
+    'RTL totals align with the inline end of the metrics row',
+  );
+  assert.ok(
+    await treeTools.evaluate(
+      (count) =>
+        Math.abs(
+          count.parentElement.getBoundingClientRect().right - count.getBoundingClientRect().right,
+        ) <= 1,
+    ),
+    'RTL tree count aligns with the inline start of the toolbar',
+  );
+  await checkText(heading);
+  await page.setViewportSize({ ...mobileViewport, width: 320 });
+  await checkText(heading);
+  await checkText(stackContext('service'));
 }
 
 async function paint(page) {
@@ -461,7 +521,15 @@ async function checkSoak(context, page, requests, readFailure, seconds) {
 
 async function run(
   browser,
-  { pagination, grouped, sweep = false, smoke = false, soakSeconds, size = viewport },
+  {
+    pagination,
+    grouped,
+    sweep = false,
+    smoke = false,
+    layout = false,
+    soakSeconds,
+    size = viewport,
+  },
 ) {
   const context = await browser.newContext({
     viewport: size,
@@ -502,6 +570,11 @@ async function run(
             return route.fulfill({ status: 503, json: { message: soakFailureMessage } });
           }
           if (entry.collection) requests.push(entry);
+          if (layout && (url.pathname === '/v2-beta/projects' || entry.collection === 'stacks')) {
+            const json = JSON.parse(entry.body);
+            json.data[0].name = entry.collection === 'stacks' ? longStackName : longEnvironmentName;
+            return route.fulfill({ json });
+          }
           return route.fulfill({ contentType: 'application/json', body: entry.body });
         }
         if (url.pathname === '/console/console-config.json') {
@@ -509,6 +582,16 @@ async function run(
           const config = await response.json();
           config.workloadInventoryPagination = pagination;
           config.workloadTreePagination = grouped === true;
+          if (layout) {
+            config.localization = {
+              enabled: true,
+              defaultLocale: 'pt-BR',
+              availableLocales: ['pt-BR', 'en-US', 'fa-IR'],
+              selectable: true,
+              detectBrowser: false,
+              preview: true,
+            };
+          }
           return route.fulfill({ response, json: config });
         }
         if (
@@ -638,12 +721,17 @@ async function run(
           true,
         );
       }
+      if (layout) {
+        stage = 'long names and RTL layout';
+        await checkOperationLayout(page);
+      }
       checkNetwork();
       return {
         assetEntry: initialRender.assetEntry,
         renderedRows: initialRender.renderedRows,
         paginationControls: pagination,
         ...(pagination && { viewport: size, nextPage: true, documentFitsViewport: true }),
+        ...(layout && { longNamesAndRtlLayout: true }),
         initialApiRequests,
       };
     }
@@ -795,6 +883,16 @@ async function run(
       console.log(JSON.stringify({ status: 'passed', assetEntry, ...evidence, soak }, null, 2));
       return;
     }
+    if (process.env.UX06_LAYOUT_ONLY === '1') {
+      const smoke = await run(browser, {
+        pagination: true,
+        smoke: true,
+        layout: true,
+        size: mobileViewport,
+      });
+      console.log(JSON.stringify({ status: 'passed', ...evidence, smoke }, null, 2));
+      return;
+    }
     const samples = [];
     for (let index = 0; index < coldRuns; index += 1)
       samples.push(await run(browser, { pagination, sweep: index === 0 }));
@@ -804,7 +902,7 @@ async function run(
       : null;
     if (disabledSmoke) assert.equal(disabledSmoke.assetEntry, samples[0].assetEntry);
     const mobileSmoke = pagination
-      ? await run(browser, { pagination, smoke: true, size: mobileViewport })
+      ? await run(browser, { pagination, smoke: true, layout: true, size: mobileViewport })
       : null;
     if (mobileSmoke) assert.equal(mobileSmoke.assetEntry, samples[0].assetEntry);
     const grouped = pagination

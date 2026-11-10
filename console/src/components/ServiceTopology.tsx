@@ -18,7 +18,7 @@ import { allPages, type Resource, type Schema } from '../api';
 import { ptTopology } from '../i18n/domains/topology';
 import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
-import { Alert, Badge, Button, Empty, ErrorState, Field, Loading, Modal } from './ui';
+import { Alert, ResourceStateBadge, Button, Empty, ErrorState, Field, Loading, Modal } from './ui';
 
 type ServiceNode = Node<{ label: string; state: string; stack: string }, 'service'>;
 class TopologyError extends Error {
@@ -105,7 +105,7 @@ function ServiceGraphNode({
       <Handle type="target" position={targetPosition} />
       <strong title={data.label}>{data.label}</strong>
       <span title={data.stack}>{data.stack || t('topology.noStack')}</span>
-      <Badge state={data.state}>{data.state}</Badge>
+      <ResourceStateBadge state={data.state} />
       <Handle type="source" position={sourcePosition} />
     </div>
   );

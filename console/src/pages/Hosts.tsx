@@ -11,7 +11,7 @@ import { containersOnHost, hostSummary } from '../hosts';
 import { metricsLink } from '../metrics';
 import {
   Alert,
-  Badge,
+  ResourceStateBadge,
   Button,
   DataTable,
   Empty,
@@ -147,7 +147,7 @@ function HostsContext() {
                     <h2>
                       <Server size={18} /> {String(value.name || value.hostname || value.id)}
                     </h2>
-                    <Badge state={value.state}>{value.state}</Badge>
+                    <ResourceStateBadge state={value.state} />
                   </div>
                   <dl className="details-grid">
                     <div>
@@ -225,7 +225,7 @@ function HostsContext() {
                     {
                       key: 'state',
                       label: t('hostsPage.state'),
-                      render: (value) => <Badge state={value.state}>{value.state}</Badge>,
+                      render: (value) => <ResourceStateBadge state={value.state} />,
                     },
                     {
                       key: 'image',

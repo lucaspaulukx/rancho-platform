@@ -13,6 +13,7 @@ import type { NavItem } from '../navigation';
 import {
   Alert,
   Badge,
+  ResourceStateBadge,
   Button,
   Confirm,
   DataTable,
@@ -376,7 +377,7 @@ function ResourceContext({ item }: { item: NavItem }) {
       {resource ? (
         <>
           <div className="resource-summary panel">
-            <Badge state={resource.state}>{resource.state || '—'}</Badge>
+            <ResourceStateBadge state={resource.state} />
             <span className="muted">{resource.id}</span>
             <div className="resource-actions">
               {app.config.modules.observability &&
@@ -492,7 +493,7 @@ function ResourceContext({ item }: { item: NavItem }) {
                 key: 'state',
                 label: t('resourcesPage.state'),
                 sortValue: (r) => r.state || '',
-                render: (r) => <Badge state={r.state}>{r.state || '—'}</Badge>,
+                render: (r) => <ResourceStateBadge state={r.state} />,
               },
               {
                 key: 'description',
@@ -846,7 +847,7 @@ function RelatedCollection({ name, url }: { name: string; url: string }) {
               {
                 key: 'state',
                 label: t('resourcesPage.state'),
-                render: (r) => <Badge state={r.state}>{r.state || '—'}</Badge>,
+                render: (r) => <ResourceStateBadge state={r.state} />,
               },
             ]}
           />
@@ -965,7 +966,7 @@ function EnvironmentSummary() {
       <section className="panel">
         <div className="panel-heading">
           <h2>{t('resourcesPage.environmentContext')}</h2>
-          <Badge state={app.project.state}>{app.project.state}</Badge>
+          <ResourceStateBadge state={app.project.state} />
         </div>
         <dl className="details-grid">
           <div>

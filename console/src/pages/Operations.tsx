@@ -19,6 +19,7 @@ import {
 import type { Resource, Schema } from '../api';
 import { useApp } from '../state';
 import { useI18n } from '../i18n/provider';
+import { resourceStateLabel } from '../i18n/resource-state';
 import { useSchemas, canManageResource } from '../hooks/useSchemas';
 import { useWorkloadInventory } from './Workloads';
 import { workloadTree, type ServiceNode, type StackNode } from '../workload-tree';
@@ -26,7 +27,7 @@ import { workloadTreePage } from '../workload-tree-page';
 import { imageName, stackContents } from '../workloads';
 import { serviceMetricsEnabled } from '../metrics';
 import {
-  Badge,
+  ResourceStateBadge,
   Button,
   Empty,
   ErrorState,
@@ -416,7 +417,7 @@ export function OperationsPage({
               <option value="">{t('operations.allStates')}</option>
               {states.map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {resourceStateLabel(t, value)}
                 </option>
               ))}
             </select>
@@ -766,9 +767,9 @@ function OperationRow({
         {extra}
       </div>
       <div className="operation-state">
-        <Badge state={resource.state}>{resource.state || '—'}</Badge>
+        <ResourceStateBadge state={resource.state} />
         {typeof resource.healthState === 'string' && (
-          <Badge state={resource.healthState}>{resource.healthState}</Badge>
+          <ResourceStateBadge state={resource.healthState} />
         )}
       </div>
       <div className="operation-row-actions">

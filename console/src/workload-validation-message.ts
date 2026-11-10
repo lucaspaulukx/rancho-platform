@@ -1,4 +1,5 @@
 import type { createTranslator } from './i18n/messages';
+import { BindingValidationError } from './workload-bindings';
 import { HealthCheckValidationError } from './workload-healthchecks';
 import { WorkloadPolicyValidationError } from './workload-scheduling';
 import { SidecarValidationError } from './workload-sidecars';
@@ -8,7 +9,8 @@ export function workloadValidationMessage(
   t: ReturnType<typeof createTranslator>['t'],
 ) {
   if (error instanceof SidecarValidationError) return error.format(t);
-  if (error instanceof WorkloadPolicyValidationError) return t(error.key);
+  if (error instanceof WorkloadPolicyValidationError || error instanceof BindingValidationError)
+    return t(error.key);
   if (error instanceof HealthCheckValidationError) {
     const detail = error.detail;
     if (detail.key === 'healthCheckValidation.field') return t(detail.key, { name: detail.name });

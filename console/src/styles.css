@@ -835,6 +835,12 @@ select optgroup {
   gap: 24px;
   margin-bottom: 28px;
 }
+.page-header > div:first-child {
+  min-inline-size: 0;
+}
+.page-header h1 {
+  overflow-wrap: anywhere;
+}
 .page-description {
   font-size: 13px;
   line-height: 1.7;
@@ -1838,7 +1844,7 @@ input[type='checkbox']:focus-visible {
   font-weight: 600;
 }
 .operation-metrics > span {
-  margin-left: auto;
+  margin-inline-start: auto;
   font-size: 11px;
 }
 .operation-toolbar {
@@ -1858,7 +1864,7 @@ input[type='checkbox']:focus-visible {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-right: auto;
+  margin-inline-end: auto;
   font-size: 11px;
 }
 .operation-tree-tools .button {
@@ -1973,6 +1979,7 @@ input[type='checkbox']:focus-visible {
 .operation-count {
   font-size: 10px;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 .operation-row-actions {
   display: flex;
@@ -2140,7 +2147,7 @@ input[type='checkbox']:focus-visible {
   }
   .operation-metrics > span {
     width: 100%;
-    margin-left: 0;
+    margin-inline-start: 0;
   }
   .operation-service.nested {
     margin-inline-start: 10px;

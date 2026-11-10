@@ -76,6 +76,7 @@ vi.mock('../pages/Workloads', () => ({
           name: 'web-1',
           links: {},
           state: 'running',
+          healthState: 'healthy',
           actions: { logs: 'logs', execute: 'execute', restart: 'restart' },
         },
         {
@@ -223,7 +224,17 @@ describe('Workspace unificado', () => {
     router.dispose();
   });
 
-  it('keeps the active workload view and native action when changing language', async () => {
+  it('translates workload states while retaining the active view, filter and native action', async () => {
+    fixture.extraContainers = [
+      {
+        id: 'c3',
+        type: 'container',
+        accountId: 'p1',
+        name: 'external-worker',
+        links: {},
+        state: 'provider-paused',
+      },
+    ];
     function SwitchLanguage() {
       const { setLocale } = useI18n();
       return <button onClick={() => setLocale('en-US')}>English</button>;
@@ -247,10 +258,23 @@ describe('Workspace unificado', () => {
       </I18nProvider>,
     );
     await userEvent.click(screen.getByRole('tab', { name: 'Containers' }));
+    const panel = within(screen.getByRole('tabpanel', { name: 'Containers' }));
+    expect(panel.getAllByText('Em execução')).toHaveLength(2);
+    expect(panel.getByText('Saudável')).toBeInTheDocument();
+    expect(panel.getByText('provider-paused')).toBeInTheDocument();
+    const filter = screen.getByRole('combobox', { name: 'Estado' });
+    const running = within(filter).getByRole('option', { name: 'Em execução' });
+    expect(running).toHaveValue('running');
+    await userEvent.selectOptions(filter, running);
+    expect(panel.queryByText('provider-paused')).not.toBeInTheDocument();
+
     await userEvent.click(screen.getByRole('button', { name: 'English' }));
     expect(router.state.location.search).toContain('view=containers');
-    const panel = screen.getByRole('tabpanel', { name: 'Containers' });
-    await userEvent.click(within(panel).getByRole('button', { name: /Actions.*web-1/ }));
+    expect(router.state.location.search).toContain('state=running');
+    expect(screen.getByRole('combobox', { name: 'State' })).toHaveValue('running');
+    expect(panel.getAllByText('Running')).toHaveLength(2);
+    expect(panel.getByText('Healthy')).toBeInTheDocument();
+    await userEvent.click(panel.getByRole('button', { name: /Actions.*web-1/ }));
     await userEvent.click(screen.getByRole('menuitem', { name: 'Restart' }));
     expect(screen.getByRole('dialog', { name: 'Operação do recurso' })).toHaveTextContent(
       'restart',

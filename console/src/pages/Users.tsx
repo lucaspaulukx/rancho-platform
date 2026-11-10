@@ -9,6 +9,7 @@ import { useLocalAccessData } from '../hooks/useLocalAccessData';
 import {
   Alert,
   Badge,
+  ResourceStateBadge,
   Button,
   DataTable,
   Empty,
@@ -116,7 +117,7 @@ export function Users() {
                   {t('users.effectiveAccess')}
                 </Button>
               )}
-              <Badge state={user.state}>{user.state}</Badge>
+              <ResourceStateBadge state={user.state} />
               {accountAdministration && actions(user)}
             </div>
             <dl className="details-grid">
@@ -254,7 +255,7 @@ export function Users() {
               key: 'state',
               label: t('users.state'),
               sortValue: (user) => user.state,
-              render: (user) => <Badge state={user.state}>{user.state}</Badge>,
+              render: (user) => <ResourceStateBadge state={user.state} />,
             },
             {
               key: 'groups',

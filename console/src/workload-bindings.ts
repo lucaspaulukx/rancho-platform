@@ -1,4 +1,17 @@
 import type { Schema } from './api';
+import { ptBindingsEditor } from './i18n/domains/bindings-editor';
+
+type BindingValidationKey = Extract<
+  keyof typeof ptBindingsEditor,
+  `bindingsEditor.validation.${string}`
+>;
+
+export class BindingValidationError extends Error {
+  constructor(readonly key: BindingValidationKey) {
+    super(ptBindingsEditor[key]);
+  }
+}
+
 export type BindingKind = 'ports' | 'dataVolumes';
 export interface PortDraft {
   kind: 'ports';
@@ -109,7 +122,7 @@ export function encodeBinding(row: BindingDraft): string {
 }
 export function validateBindings(kind: BindingKind, values: unknown, baseline: unknown = []): void {
   if (!Array.isArray(values) || values.length > 100 || values.some((v) => typeof v !== 'string'))
-    throw new Error('Mantenha até 100 entradas nativas por campo.');
+    throw new BindingValidationError('bindingsEditor.validation.limit');
   const retained = new Map<string, number>();
   for (const v of Array.isArray(baseline) ? baseline : [])
     if (typeof v === 'string' && decodeBinding(kind, v, 0).kind === 'native')
@@ -123,14 +136,13 @@ export function validateBindings(kind: BindingKind, values: unknown, baseline: u
         retained.set(value, retained.get(value)! - 1);
         continue;
       }
-      throw new Error(
-        kind === 'ports'
-          ? 'Revise portas inteiras de 1 a 65535, protocolo e IP de publicação.'
-          : 'Revise origem, destino absoluto e acesso de cada volume.',
+      throw new BindingValidationError(
+        kind === 'ports' ? 'bindingsEditor.validation.ports' : 'bindingsEditor.validation.volumes',
       );
     }
     if (row.kind === 'ports') {
-      if (row.ip && !row.host) throw new Error('Um IP de publicação exige porta no host.');
+      if (row.ip && !row.host)
+        throw new BindingValidationError('bindingsEditor.validation.ipNeedsHostPort');
       if (row.host) {
         const host = String(Number(row.host)),
           ip = row.ip.includes(':')
@@ -144,7 +156,7 @@ export function validateBindings(kind: BindingKind, values: unknown, baseline: u
               (v.ip === ip || ['0.0.0.0', '::'].includes(ip) || ['0.0.0.0', '::'].includes(v.ip)),
           )
         )
-          throw new Error('Há publicações conflitantes na mesma porta e protocolo.');
+          throw new BindingValidationError('bindingsEditor.validation.portConflict');
         listeners.push({ host, ip, protocol: row.protocol });
       }
     } else {
@@ -155,7 +167,8 @@ export function validateBindings(kind: BindingKind, values: unknown, baseline: u
         else parts.push(part);
       }
       const path = '/' + parts.join('/');
-      if (targets.has(path)) throw new Error('Não repita o destino de montagem de um volume.');
+      if (targets.has(path))
+        throw new BindingValidationError('bindingsEditor.validation.duplicateTarget');
       targets.add(path);
     }
   }
@@ -167,7 +180,7 @@ export function validateBindingFields(
   baseline: Record<string, unknown> = {},
   depth = 0,
 ) {
-  if (depth > 12) throw new Error('A configuração tem níveis demais.');
+  if (depth > 12) throw new BindingValidationError('bindingsEditor.validation.depth');
   for (const [name, field] of Object.entries(schema.resourceFields)) {
     const value = values[name];
     if (value === undefined || value === null) continue;
