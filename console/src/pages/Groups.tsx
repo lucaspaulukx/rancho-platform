@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useEffect, useRef, useState } from 'react';
 
 import { useBlocker } from 'react-router-dom';
@@ -400,7 +401,7 @@ export function GroupEditor({
         {save.error && (
           <div style={{ marginTop: 20 }}>
             <Alert>
-              {save.error.message}
+              {requestErrorText(save.error, t)}
               {'status' in save.error && save.error.status === 409 && <p>{t('groups.conflict')}</p>}
             </Alert>
           </div>
@@ -652,7 +653,7 @@ export function Groups() {
         }}
         busy={remove.isPending}
       />
-      {remove.error && <Alert>{remove.error.message}</Alert>}
+      {remove.error && <Alert>{requestErrorText(remove.error, t)}</Alert>}
     </>
   );
 }

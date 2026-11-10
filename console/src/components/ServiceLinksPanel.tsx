@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useI18n } from '../i18n/provider';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
 import { useRef, useState } from 'react';
@@ -70,7 +71,7 @@ export default function ServiceLinksPanel({
   const errorText = (error: Error) =>
     error instanceof ServiceEditorError || error instanceof ServiceLinkValidationError
       ? t(error.key)
-      : error.message;
+      : requestErrorText(error, t);
   const app = useApp();
   const scope = useActionScope();
   const schemas = useSchemas(true);

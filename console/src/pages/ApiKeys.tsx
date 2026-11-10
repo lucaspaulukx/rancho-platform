@@ -1,3 +1,4 @@
+import { ConsoleRequestError } from '../request-errors';
 import { useEffect, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -66,7 +67,8 @@ async function keyRequest<T>(request: Promise<T>) {
 export function ApiKeys() {
   const { t } = useI18n();
   function errorText(error: Error) {
-    if (error instanceof KeyValidationError) return t(error.key);
+    if (error instanceof KeyValidationError || error instanceof ConsoleRequestError)
+      return t(error.key);
     const status =
       error instanceof ApiError || error instanceof KeyPageError ? error.status : undefined;
     if (status !== undefined) return t('apiKeys.httpFailed', { status });

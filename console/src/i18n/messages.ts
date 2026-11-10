@@ -9,6 +9,7 @@ import { ruRU } from './catalogs/ru-RU';
 import { ukUA } from './catalogs/uk-UA';
 import { enAuth, ptAuth } from './domains/auth';
 import { enUi, ptUi } from './domains/ui';
+import { enRequestErrors, ptRequestErrors } from './domains/request-errors';
 import { enShell, ptShell } from './domains/shell';
 import { enRecovery, ptRecovery } from './domains/recovery';
 import { enDevices, ptDevices } from './domains/devices';
@@ -78,6 +79,7 @@ import { enResourceStream, ptResourceStream } from './domains/resource-stream';
 export const englishMessages = {
   ...enAuth,
   ...enUi,
+  ...enRequestErrors,
   ...enShell,
   ...enRecovery,
   ...enDevices,
@@ -169,6 +171,7 @@ export type MessageCatalog = Partial<{
 export const portugueseMessages = {
   ...ptAuth,
   ...ptUi,
+  ...ptRequestErrors,
   ...ptShell,
   ...ptRecovery,
   ...ptDevices,

@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useI18n } from '../i18n/provider';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -333,7 +334,7 @@ export function RegistryCredentials({
         busy={run.isPending}
         onConfirm={() => run.mutate()}
       />
-      {run.error && <Alert>{localizeError(run.error).message}</Alert>}
+      {run.error && <Alert>{requestErrorText(localizeError(run.error), t)}</Alert>}
     </section>
   );
 }

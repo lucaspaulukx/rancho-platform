@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useEffect, useRef, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -150,7 +151,9 @@ export function BulkOperation({ plan, onClose }: { plan: BulkPlan; onClose: () =
           </p>
         )}
         {error && (
-          <Alert>{error instanceof BulkOperationError ? t(error.messageKey) : error.message}</Alert>
+          <Alert>
+            {error instanceof BulkOperationError ? t(error.messageKey) : requestErrorText(error, t)}
+          </Alert>
         )}
         <DataTable
           rows={rows}

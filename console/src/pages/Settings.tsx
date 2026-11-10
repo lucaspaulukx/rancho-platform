@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -56,7 +57,7 @@ function SettingsScope() {
         : t(error.key)
       : error instanceof SettingValidationError
         ? t(error.key)
-        : error.message;
+        : requestErrorText(error, t);
   async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
     try {
       return await api<T>(path, body, method, signal);

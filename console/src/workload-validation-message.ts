@@ -1,3 +1,4 @@
+import { requestErrorText } from './request-errors';
 import type { createTranslator } from './i18n/messages';
 import { BindingValidationError } from './workload-bindings';
 import { HealthCheckValidationError } from './workload-healthchecks';
@@ -18,5 +19,5 @@ export function workloadValidationMessage(
       return t(detail.key, { label: t(detail.labelKey), min: detail.min, max: detail.max });
     return t(detail.key);
   }
-  return error?.message;
+  return error ? requestErrorText(error, t) : undefined;
 }

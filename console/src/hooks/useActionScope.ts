@@ -1,3 +1,4 @@
+import { ConsoleRequestError } from '../request-errors';
 import { useEffect, useRef } from 'react';
 import type { Resource } from '../api';
 import { useApp } from '../state';
@@ -29,7 +30,7 @@ export function useActionScope() {
       generation.current !== version ||
       controller.current.signal.aborted
     )
-      throw new Error('O contexto mudou. Reabra o painel antes de continuar.');
+      throw new ConsoleRequestError('requestError.scopeChanged');
   }
   return {
     environment,
@@ -46,7 +47,7 @@ export function useActionScope() {
         actual.accountId !== environment ||
         actual.removed
       )
-        throw new Error('O recurso não está disponível neste environment.');
+        throw new ConsoleRequestError('requestError.resourceOutOfScope');
     },
   };
 }

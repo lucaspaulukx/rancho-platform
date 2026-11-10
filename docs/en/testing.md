@@ -60,6 +60,8 @@ Examples of maintained acceptance entrypoints include `physical_ulimits.py`, `ul
 
 The scheduler transport helper is a bounded diagnostic for the legacy managed-network path. It checks ownership/IP/MAC, installs a temporary rule for the exact peer/destination, and removes it before stream/inspection assertions. A passing test using that helper does not prove native CNI stability. Do not relax product timeouts to disguise an allocation failure.
 
+The localization harness injects a synthetic cross-origin pagination link on the Hosts page. It checks that the link stays blocked and the visible error changes language in place without revealing the link.
+
 ### Optional automated accessibility checks
 
 Run the owned-browser localization test with `--accessibility` and the console development dependencies installed. It runs axe on Groups, Users, API Keys, Settings, Audit and Environments at 390 and 1440 px in dark and light themes. The gate reports rule IDs and counts. Review the separate manual-check entries and exercise critical workflows with a keyboard and screen reader before release.

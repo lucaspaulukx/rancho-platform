@@ -1,3 +1,4 @@
+import { ConsoleRequestError } from './request-errors';
 import { navigateBrowser } from './browser-navigation';
 export interface Policy {
   enabled: boolean;
@@ -67,15 +68,20 @@ function csrf() {
   );
 }
 export function safeApiUrl(path: string): string {
-  const url = new URL(
-    path.startsWith('/') || /^https?:/.test(path) ? path : `/v2-beta/${path}`,
-    location.origin,
-  );
+  let url: URL;
+  try {
+    url = new URL(
+      path.startsWith('/') || /^https?:/.test(path) ? path : `/v2-beta/${path}`,
+      location.origin,
+    );
+  } catch {
+    throw new ConsoleRequestError('requestError.unsafeUrl');
+  }
   if (
     url.origin !== location.origin ||
     !/^\/(v2-beta|v1-catalog|v1-webhooks|v1-auth)(\/|$)/.test(url.pathname)
   ) {
-    throw new Error('O servidor retornou um endereço de API não permitido.');
+    throw new ConsoleRequestError('requestError.unsafeUrl');
   }
   return url.pathname + url.search;
 }
@@ -302,11 +308,11 @@ export async function allPages<T>(
   let next: string | undefined = path;
   while (next) {
     const safe = safeApiUrl(next);
-    if (seen.has(safe)) throw new Error('A paginação retornou um ciclo.');
+    if (seen.has(safe)) throw new ConsoleRequestError('requestError.paginationCycle');
     seen.add(safe);
-    if (seen.size > 100) throw new Error('A coleção é muito grande. Refine os filtros.');
+    if (seen.size > 100) throw new ConsoleRequestError('requestError.paginationLimit');
     const page = await api<Collection<T>>(safe, undefined, undefined, signal, headers);
-    if (!Array.isArray(page.data)) throw new Error('Resposta de coleção inválida.');
+    if (!Array.isArray(page?.data)) throw new ConsoleRequestError('requestError.invalidCollection');
     items.push(...page.data);
     next = page.pagination?.next;
   }

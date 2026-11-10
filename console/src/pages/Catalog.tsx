@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useI18n } from '../i18n/provider';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
@@ -269,7 +270,7 @@ export function CatalogUpgrade({
 }) {
   const { t } = useI18n();
   const errorText = (error: Error) =>
-    error instanceof CatalogPageError ? t(error.key) : error.message;
+    error instanceof CatalogPageError ? t(error.key) : requestErrorText(error, t);
   const app = useApp(),
     scope = useActionScope();
   const [current, setCurrent] = useState<Resource | null>(null);
@@ -587,7 +588,7 @@ function CatalogVersionForm(props: FormProps) {
   } catch (error) {
     invalid =
       error instanceof Error
-        ? localizedCatalogError(error, t).message
+        ? requestErrorText(localizedCatalogError(error, t), t)
         : t('catalogPage.invalidTemplate');
   }
   const query = useQuery({
@@ -655,7 +656,9 @@ function CatalogParameters({
 }: FormProps & { questions: CatalogQuestion[]; references: CatalogReferences }) {
   const { t } = useI18n();
   const errorText = (error: Error) =>
-    error instanceof CatalogPageError ? t(error.key) : localizedCatalogError(error, t).message;
+    error instanceof CatalogPageError
+      ? t(error.key)
+      : requestErrorText(localizedCatalogError(error, t), t);
   const app = useApp();
   const scope = useActionScope();
   const client = useQueryClient();

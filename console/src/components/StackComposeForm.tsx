@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useI18n } from '../i18n/provider';
 import { useState, type FormEvent } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
@@ -51,7 +52,8 @@ export function StackComposeForm({
     }
   }
   function describeError(value: Error | null) {
-    if (!(value instanceof StackComposeValidationError)) return value?.message;
+    if (!(value instanceof StackComposeValidationError))
+      return value ? requestErrorText(value, t) : undefined;
     const [key, parameter] = value.detail;
     if (key === 'composeValidation.fileTooLarge' || key === 'composeValidation.nullCharacter')
       return t(key, { label: parameter });

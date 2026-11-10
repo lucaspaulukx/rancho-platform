@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import type { enLocalAccountPanel } from '../i18n/domains/local-account-panel';
 import { useI18n } from '../i18n/provider';
 import { useEffect, useState } from 'react';
@@ -87,7 +88,7 @@ export function LocalAccountPanel({
     return (
       schemaPayloadValidationMessage(error, t, (name) =>
         Object.hasOwn(payloadLabelKeys, name) ? t(payloadLabelKeys[name]) : undefined,
-      ) ?? error.message
+      ) ?? requestErrorText(error, t)
     );
   }
   const enabled = app.admin && app.config.modules.localAccountAdministration;
