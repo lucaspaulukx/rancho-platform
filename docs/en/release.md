@@ -39,6 +39,14 @@ python scripts/artifact_inventory.py scan --output migration-runs/artifact-inven
 
 Public CycloneDX projections allow package identities/versions/hashes/licenses and graph references, excluding image configuration, environment, private file paths and unknown metadata. Package names can still be private and need review. Runtime image and development lockfile inventory are different evidence; bundled JavaScript or old Go binaries may not be completely detected. Unknown licenses are unresolved review, not approval. This is neither a CVE scanner nor legal certification, and it publishes nothing automatically.
 
+## Isolated fresh installation
+
+Use two previously built local Linux images. The rehearsal uses fresh owned volumes and a private bridge with no published ports. It checks the classic UI, the console proxy, the schema migration and idempotence after restarting the backend. The trial uses embedded MySQL and leaves OIDC and the backend modern redirect off.
+
+```sh
+python -m migration.test_fresh_install_lab --backend-image rancho-backend:local --console-image rancho-console:local
+```
+
 ## Final acceptance
 
 Use one identified release candidate for authentication/RBAC/streams, contextual operations, accessibility/performance, classic compatibility, fresh installation, upgrade and full recovery/rollback. Record limits and supported topologies. Configure a private security-reporting channel before going public. Keep [migration](migration.md) and [recovery](recovery.md) procedures matched to the artifact; do not infer a universal migration guarantee from synthetic tests.
