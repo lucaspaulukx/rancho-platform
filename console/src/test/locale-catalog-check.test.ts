@@ -64,13 +64,10 @@ describe('Registered locale catalog gate', () => {
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
     const previewScope = Object.keys(englishMessages).filter(
       (key) =>
-        /^(auth|ui|common|details|language|runtime|shell|recovery|resourceState|resourceMetrics|resourcePanel|resourceStream|workloadStreams)\./.test(
+        /^(auth|ui|common|details|language|operations|runtime|shell|recovery|resourceState|resourceMetrics|resourcePanel|resourceStream|workloadStreams)\./.test(
           key,
         ) ||
         key.startsWith('groups.role.') ||
-        /^operations\.(search|searchPlaceholder|state|allStates|includeSystem|empty|emptyHint|stacks|services|containers|view|expandAll|collapseAll|topology|stackMetric|serviceMetric|containerMetric|totals|visibleStacks|visibleServices|visibleContainers|hiddenSystem|resourceActions|details|logs|terminal|metrics|edit|scale|balancer|createService|logsUnavailable|terminalUnavailable)$/.test(
-          key,
-        ) ||
         key === 'environment.selected' ||
         key === 'selection.count',
     );
