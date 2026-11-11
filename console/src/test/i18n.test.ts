@@ -14,6 +14,7 @@ import {
   validateCatalog,
 } from '../i18n/messages';
 import { formatResourceDate } from '../resource-format';
+import { frFR } from '../i18n/catalogs/fr-FR';
 
 describe('Original Rancher locale contract', () => {
   it('contains exactly ten production locales, with Persian RTL and no diagnostic locale', () => {
@@ -137,7 +138,7 @@ describe('Typed message catalogs', () => {
     expect(partial.translatedKeys).toEqual(['common.cancel']);
   });
   it('uses registered French preview messages with English fallback outside the preview', () => {
-    const french = createTranslator('fr-FR');
+    const french = createTranslator('fr-FR', frFR);
     expect(french.t('common.cancel')).toBe('Annuler');
     expect(french.resolvedLocale('selection.count')).toBe('fr-FR');
     expect(french.resolvedLocale('resourceCreator.kind.service')).toBe('en-US');

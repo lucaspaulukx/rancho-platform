@@ -1,12 +1,4 @@
 import { localeDirection, localeFormats, type Locale } from './locales';
-import { frFR } from './catalogs/fr-FR';
-import { deDE } from './catalogs/de-DE';
-import { jaJP } from './catalogs/ja-JP';
-import { zhHans } from './catalogs/zh-Hans';
-import { huHU } from './catalogs/hu-HU';
-import { faIR } from './catalogs/fa-IR';
-import { ruRU } from './catalogs/ru-RU';
-import { ukUA } from './catalogs/uk-UA';
 import { enAuth, ptAuth } from './domains/auth';
 import { enUi, ptUi } from './domains/ui';
 import { enRequestErrors, ptRequestErrors } from './domains/request-errors';
@@ -241,17 +233,6 @@ export const portugueseMessages = {
   'selection.count': { one: '{count} item selecionado', other: '{count} itens selecionados' },
 } satisfies MessageCatalog;
 
-export const previewCatalogs: Readonly<Partial<Record<Locale, MessageCatalog>>> = {
-  'de-DE': deDE,
-  'fr-FR': frFR,
-  'hu-HU': huHU,
-  'ja-JP': jaJP,
-  'fa-IR': faIR,
-  'ru-RU': ruRU,
-  'uk-UA': ukUA,
-  'zh-Hans': zhHans,
-};
-
 function record(value: unknown): value is Record<string, unknown> {
   return (
     !!value &&
@@ -308,11 +289,7 @@ export function createTranslator(locale: Locale, translation?: unknown) {
   localeDirection(locale);
   const catalog = validateCatalog(
     translation ??
-      (locale === 'pt-BR'
-        ? portugueseMessages
-        : locale === 'en-US'
-          ? englishMessages
-          : (previewCatalogs[locale] ?? {})),
+      (locale === 'pt-BR' ? portugueseMessages : locale === 'en-US' ? englishMessages : {}),
   );
   function source(key: MessageKey): { message: string | PluralMessage; locale: Locale } {
     if (!Object.hasOwn(englishMessages, key)) throw new Error('Unknown message key.');

@@ -60,4 +60,19 @@ describe('Production bundle budgets', () => {
       checkBundleBudgets(manifest, () => 1, { ...budgets, totalJavaScriptGzip: 0 }),
     ).toThrow();
   });
+  it('requires each preview catalog to stay outside the initial import graph', () => {
+    const sizeOf = (file: string) => sizes[file];
+    const preview = { ...manifest, lazy: { ...manifest.lazy, isDynamicEntry: true } };
+    expect(checkBundleBudgets(preview, sizeOf, budgets, ['lazy']).status).toBe('passed');
+    expect(checkBundleBudgets(preview, sizeOf, budgets, ['missing']).failures).toContain(
+      'preview-catalog-loading',
+    );
+    const eager = {
+      ...preview,
+      shared: { ...preview.shared, imports: ['cycle', 'lazy'] },
+    };
+    expect(checkBundleBudgets(eager, sizeOf, budgets, ['lazy']).failures).toContain(
+      'preview-catalog-loading',
+    );
+  });
 });
