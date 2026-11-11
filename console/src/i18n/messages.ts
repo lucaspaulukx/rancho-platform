@@ -134,6 +134,8 @@ export const englishMessages = {
   'common.loading': 'Loading…',
   'language.label': 'Language',
   'language.preview': 'Preview · translations incomplete',
+  'localeLoad.failed':
+    'Could not load the selected language. The current language is still active.',
   'runtime.disabledTitle': 'Console disabled',
   'runtime.disabledDescription': 'This console is disabled in the instance configuration.',
   'runtime.classic': 'Open classic Rancher',
@@ -226,6 +228,8 @@ export const portugueseMessages = {
   'common.loading': 'Carregando…',
   'language.label': 'Idioma',
   'language.preview': 'Prévia · traduções incompletas',
+  'localeLoad.failed':
+    'Não foi possível carregar o idioma selecionado. O idioma atual continua ativo.',
   'runtime.disabledTitle': 'Console desativada',
   'runtime.disabledDescription': 'Esta console está desativada na configuração da instância.',
   'runtime.classic': 'Abrir Rancher clássico',

@@ -57,6 +57,9 @@ it('keeps the visible language on a catalog failure and ignores a stale retry', 
     const persian = screen.getByRole('button', { name: 'Persian' });
     fireEvent.click(persian);
     await waitFor(() => expect(load).toHaveBeenCalledTimes(1));
+    const status = await screen.findByText(/Não foi possível carregar o idioma selecionado/);
+    expect(status).toBeVisible();
+    expect(status).toHaveAttribute('role', 'status');
     expect(screen.getByTestId('locale')).toHaveTextContent('pt-BR');
     fireEvent.click(persian);
     await waitFor(() => expect(load).toHaveBeenCalledTimes(2));
@@ -66,6 +69,7 @@ it('keeps the visible language on a catalog failure and ignores a stale retry', 
     expect(document.documentElement.dir).toBe('ltr');
     fireEvent.click(persian);
     await waitFor(() => expect(screen.getByTestId('locale')).toHaveTextContent('fa-IR'));
+    expect(screen.queryByText(/Não foi possível carregar o idioma selecionado/)).toBeNull();
     expect(document.documentElement.dir).toBe('rtl');
   } finally {
     load.mockRestore();

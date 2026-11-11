@@ -5,7 +5,7 @@ import { localeInventory, type Locale } from '../i18n/locales';
 
 export function LanguageSelector() {
   const id = useId();
-  const { policy, locale, setLocale, preview, t } = useI18n();
+  const { policy, locale, setLocale, preview, catalogFailed, t } = useI18n();
   if (!policy.enabled) return null;
   const selectable = policy.selectable && policy.availableLocales.length > 1;
   if (!selectable && !preview) return null;
@@ -38,6 +38,9 @@ export function LanguageSelector() {
           {t('language.preview')}
         </span>
       )}
+      <span className="muted language-status" role="status">
+        {catalogFailed ? t('localeLoad.failed') : null}
+      </span>
     </div>
   );
 }
