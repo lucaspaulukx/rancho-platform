@@ -154,9 +154,18 @@ async function main() {
   check('public document language updates', await publicPage.locator('html').getAttribute('lang') === 'en-US');
   await publicPage.setViewportSize({ width: 390, height: 844 });
   check('public mobile selector stays in viewport', await insideViewport(publicPage.getByRole('combobox', { name: 'Language', exact: true })));
+  async function loginFitsMobile() {
+    let fits = true;
+    for (const width of [320, 390]) {
+      await publicPage.setViewportSize({ width, height: 844 });
+      fits = await publicPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth) && fits;
+    }
+    return fits;
+  }
   await publicPage.getByRole('combobox', { name: 'Language', exact: true }).selectOption('fr-FR');
   await publicPage.getByRole('heading', { name: 'Accédez à votre environnement', exact: true }).waitFor();
   check('French preview translates sign-in while preserving both drafts and the URL',
+    await loginFitsMobile() &&
     await publicPage.locator('html').getAttribute('lang') === 'fr-FR' &&
     await publicPage.getByText('Aperçu · traductions incomplètes', { exact: true }).isVisible() &&
     await username.inputValue() === 'localization-draft-only' &&
@@ -173,6 +182,7 @@ async function main() {
     await publicPage.locator('.language-selector select').selectOption(locale);
     await publicPage.getByRole('heading', { name: title, exact: true }).waitFor();
     check(`${locale} login preview keeps mobile controls, drafts and URL`,
+      await loginFitsMobile() &&
       await insideViewport(publicPage.getByRole('combobox', { name: label, exact: true })) &&
       await publicPage.getByText(notice, { exact: true }).isVisible() &&
       await publicPage.locator('html').getAttribute('lang') === locale &&

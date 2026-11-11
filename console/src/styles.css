@@ -2460,6 +2460,7 @@ input[type='checkbox']:focus-visible {
 .auth-form-container .button {
   width: 100%;
   min-height: 44px;
+  white-space: normal;
 }
 .auth-form-container form {
   margin-top: 25px;
@@ -2784,7 +2785,7 @@ input[type='checkbox']:focus-visible {
     max-width: 125px;
   }
   .auth-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .auth-story {
     padding: 25px;
