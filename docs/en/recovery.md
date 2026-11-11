@@ -44,6 +44,12 @@ Provide restored administrator credentials through no-echo prompts or private `R
 
 Validate restored inventory/grants, Rancher/IdP login, OIDC discovery/callback/ticket flow, new-user no-access, denied environment creation and session revocation. Synthetic original-to-custom upgrade/rollback and workload return are separate acceptance from restoring the same artifact. `engineRecoveryAccepted` describes only the measured slice; `completeMigrationAccepted` remains false until all release gates pass.
 
+The named synthetic lab can rehearse hybrid and exclusive OIDC on two independent copies of the same backup. Run during a local maintenance window. The source is briefly stopped for cold capture and then restarted with its existing configuration. The hybrid control accepts the local administrator password. The exclusive copy advertises automatic login, rejects that password and completes a real Keycloak authorization-code flow. Both copies validate the restored database. Browser autologin navigation has its own acceptance test.
+
+```sh
+python -m migration.test_engine_recovery_lab --quiesce --backend-image rancho-backend:candidate --exclusive-oidc
+```
+
 ## Rollback and limits
 
 Recover database, Rancher cryptographic state, IdP and image/configuration as a matching set. Stop the replacement engine before restoring the previous set. Do not run old and new engines against shared storage or assume disabling a schema flag reverses DDL. Preserve sanitized error/cleanup/restart results and treat failed recovery as a failed gate. See [migration](migration.md), [access migration](access-migration.md) and [roadmap](roadmap.md).

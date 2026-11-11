@@ -15,8 +15,9 @@ from migration.tool import Database, MigrationError, run
 ORIGINAL = 'sha256:95b55603122c28baea4e8d94663aa34ad770bbc624a9ed6ef986fb3ea5224d91'
 
 
-def authentication_probe(anchor, credentials, expected_environments, *, local_only=False):
-    private = {**credentials, 'expectedEnvironments': expected_environments, 'localOnly': local_only}
+def authentication_probe(anchor, credentials, expected_environments, *, local_only=False, oidc_only=False):
+    private = {**credentials, 'expectedEnvironments': expected_environments, 'localOnly': local_only,
+               'oidcOnly': oidc_only}
     program = (ROOT / 'engine-probe.cjs').read_text(encoding='utf-8')
     probe = subprocess.run(['docker', 'exec', '-i', anchor, 'node', '-e', program],
                            input=json.dumps(private).encode(), capture_output=True, timeout=480)
@@ -38,7 +39,9 @@ def isolated_shape(container, anchor_id, allowed_volumes):
 
 
 def rehearse_engines(directory, password, credentials, *, target_image=None, original_twenty=False,
-                     schema_migrations=None, _after_probe=None, probe_oidc=True):
+                     schema_migrations=None, _after_probe=None, probe_oidc=True, oidc_only=False):
+    if oidc_only and (original_twenty or not probe_oidc):
+        raise MigrationError('Exclusive OIDC requires a recovery copy with its restored identity provider.')
     directory = Path(directory)
     label = secrets.token_hex(16)
     containers = []
@@ -108,7 +111,8 @@ def rehearse_engines(directory, password, credentials, *, target_image=None, ori
                     environment.update(RANCHER_OIDC_ISSUER='http://localhost:18081/realms/rancher-lab',
                                        RANCHER_OIDC_BACKCHANNEL='http://localhost:18081/realms/rancher-lab',
                                        RANCHER_OIDC_CALLBACK='http://localhost:18090/oidc/callback',
-                                       RANCHER_OIDC_ONLY='false', RANCHER_OIDC_AUTO_LOGIN='false',
+                                       RANCHER_OIDC_ONLY=str(oidc_only).lower(),
+                                       RANCHER_OIDC_AUTO_LOGIN=str(oidc_only).lower(),
                                        CATTLE_SERVER_IP='127.0.0.1')
                     if schema_migrations is not None:
                         environment['RANCHER_SCHEMA_MIGRATIONS_ENABLED'] = str(schema_migrations).lower()
@@ -160,7 +164,10 @@ def rehearse_engines(directory, password, credentials, *, target_image=None, ori
                 copies[role] = container_id
                 run(['start', container_id])
             journal(directory, 'isolated-engines-started', sourceStorageMounted=False, publishedPorts=0)
-            code, outcome = authentication_probe(anchor, credentials, metadata['databasePreflight']['inventoryCounts']['environments'], local_only=not probe_oidc)
+            code, outcome = authentication_probe(
+                anchor, credentials, metadata['databasePreflight']['inventoryCounts']['environments'],
+                local_only=not probe_oidc, oidc_only=oidc_only,
+            )
             if code or outcome.get('status') != 'passed':
                 # Probe stage/check labels come only from the packaged public probe.
                 journal(directory, 'isolated-login-failed', probe=outcome)

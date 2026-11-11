@@ -69,13 +69,20 @@ async function main() {
     check('classic ' + name + ' bundle served', asset.status === 200
       && asset.contentType?.includes('javascript') && typeof asset.data === 'string' && asset.data.length > 0);
   }
-  stage = 'restored-local-administrator';
+  stage = config.oidcOnly ? 'exclusive-oidc-policy' : 'restored-local-administrator';
   const native = await request('http://localhost:8080/v2-beta/token', {
     body: { code: config.rancherUsername + ':' + config.rancherPassword } });
-  check('restored local administrator password and state', native.status === 201 && native.data.userType === 'admin' && !!native.data.jwt);
-  jars.get('native').set('token', native.data.jwt);
-  const projects = await request('http://localhost:8080/v2-beta/projects?all=true&limit=-1');
-  check('restored environment inventory', projects.status === 200 && projects.data.data.length === config.expectedEnvironments);
+  if (config.oidcOnly) {
+    const policy = await request('http://localhost:8080/oidc/status');
+    check('exclusive OIDC and automatic login advertised', policy.status === 200 &&
+      policy.data.only === true && policy.data.autoLogin === true);
+    check('valid local administrator password rejected in exclusive mode', native.status === 403);
+  } else {
+    check('restored local administrator password and state', native.status === 201 && native.data.userType === 'admin' && !!native.data.jwt);
+    jars.get('native').set('token', native.data.jwt);
+    const projects = await request('http://localhost:8080/v2-beta/projects?all=true&limit=-1');
+    check('restored environment inventory', projects.status === 200 && projects.data.data.length === config.expectedEnvironments);
+  }
   stage = 'restored-keycloak-administrator';
   const master = await request('http://localhost:18081/realms/master/protocol/openid-connect/token', { jar: 'master', form: true,
     body: { client_id: 'admin-cli', grant_type: 'password', username: config.keycloakUsername, password: config.keycloakPassword } });
@@ -105,11 +112,14 @@ async function main() {
   check('new user has zero environment access', empty.status === 200 && empty.data.data.length === 0);
   const forbidden = await request('http://localhost:8080/v2-beta/projects', { jar: 'oidc', body: { name: 'must-not-exist' } });
   check('new user cannot create environment', forbidden.status === 403);
-  const after = await request('http://localhost:8080/v2-beta/projects?all=true&limit=-1');
-  check('OIDC first login created no environment', after.status === 200 && after.data.data.length === config.expectedEnvironments);
+  if (!config.oidcOnly) {
+    const after = await request('http://localhost:8080/v2-beta/projects?all=true&limit=-1');
+    check('OIDC first login created no environment', after.status === 200 && after.data.data.length === config.expectedEnvironments);
+  }
   }
   stage = 'revoke-copy-sessions';
-  for (const jar of config.localOnly ? ['native'] : ['oidc', 'native']) {
+  const sessionJars = config.oidcOnly ? ['oidc'] : config.localOnly ? ['native'] : ['oidc', 'native'];
+  for (const jar of sessionJars) {
     const revoked = await request('http://localhost:8080/v2-beta/token/current', { jar, method: 'DELETE' });
     check('recovered ' + jar + ' session revoked', [200, 202, 204].includes(revoked.status));
   }

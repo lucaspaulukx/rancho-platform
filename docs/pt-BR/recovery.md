@@ -44,6 +44,12 @@ Forneça credenciais administrativas restauradas por prompts sem eco ou variáve
 
 Valide inventário/grants restaurados, login Rancher/IdP, descoberta/callback/ticket OIDC, novo usuário sem acesso, criação de environment negada e revogação de sessões. Upgrade original→custom sintético/rollback e retorno de workloads são aceites separados de restaurar o mesmo artefato. `engineRecoveryAccepted` identifica somente o recorte medido; `completeMigrationAccepted` segue false até todos os gates de release.
 
+O laboratório sintético indicado pode testar o modo híbrido e o OIDC exclusivo em duas cópias independentes do mesmo backup. Execute durante uma janela de manutenção local. A origem é interrompida brevemente para captura a frio e reinicia com a configuração anterior. O controle híbrido aceita a senha do administrador local. A cópia exclusiva anuncia entrada automática, recusa essa senha e conclui o fluxo real de código de autorização no Keycloak. As duas cópias validam o banco restaurado. A navegação automática no navegador tem teste de aceite próprio.
+
+```sh
+python -m migration.test_engine_recovery_lab --quiesce --backend-image rancho-backend:candidate --exclusive-oidc
+```
+
 ## Rollback e limites
 
 Recupere banco, estado criptográfico Rancher, IdP e imagem/configuração correspondentes. Pare o engine novo antes de restaurar o conjunto anterior. Não execute engines antigo/novo sobre storage compartilhado nem suponha que desligar schema desfaz DDL. Preserve resultados sanitizados de erro/cleanup/retomada e trate recuperação falha como gate reprovado. Veja [migração](migration.md), [migração de acesso](access-migration.md) e [roadmap](roadmap.md).
