@@ -10,6 +10,35 @@ export const huHU = {
   'workloadStreams.selectionHint':
     'Csak a kiválasztott konténer látható. Konténerváltáskor az előző kapcsolat bezárul.',
 
+  'resourceStream.scope': 'Az erőforrás nem a kiválasztott környezethez tartozik.',
+  'resourceStream.invalidFrame': 'Érvénytelen kapcsolati üzenet érkezett.',
+  'resourceStream.failed': 'A kapcsolódás sikertelen. Zárja be ezt a panelt, majd próbálja újra.',
+  'resourceStream.revoked':
+    'A kapcsolat megszakadt, mert a munkamenete már nem érhető el, vagy nincs meg a szükséges jogosultsága.',
+  'resourceStream.unavailable': 'Az erőforrás már nem érhető el, vagy lejárt a hozzáférése.',
+  'resourceStream.startFailed':
+    'Nem sikerült létrehozni a kapcsolatot. Ellenőrizze az erőforrás állapotát és a jogosultságait.',
+  'resourceStream.logs': 'Naplók',
+  'resourceStream.console': 'Konzol',
+  'resourceStream.connected': 'Kapcsolódva',
+  'resourceStream.closed': 'Kapcsolat lezárva',
+  'resourceStream.connecting': 'Kapcsolódás…',
+  'resourceStream.waiting': 'Várakozás a kapcsolatra',
+  'resourceStream.description': 'Környezet: {name} · {status}',
+  'resourceStream.close': 'Kapcsolat lezárása',
+  'resourceStream.warning':
+    'A konzol a kiválasztott konténerben futtatja a parancsokat a Rancher által megadott jogosultságokkal.',
+  'resourceStream.connect': 'Kapcsolódás a konténerhez',
+  'resourceStream.terminal': 'A konténer terminálja',
+  'resourceStream.filter': 'Naplók szűrése',
+  'resourceStream.filterPlaceholder': 'Beérkezett sorok szűrése…',
+  'resourceStream.resume': 'Görgetés folytatása',
+  'resourceStream.pause': 'Görgetés szüneteltetése',
+  'resourceStream.download': 'Letöltés',
+  'resourceStream.buffer':
+    'A puffer legfeljebb az utolsó 2000 sort és 512 KB-ot tárol. A keresés és a letöltés csak az ezen a panelen fogadott tartalomra vonatkozik.',
+  'resourceStream.logLabel': 'A konténer naplói',
+
   'operations.stackMetric': 'stack',
   'operations.serviceMetric': 'szolgáltatás',
   'operations.containerMetric': 'konténer',

@@ -10,6 +10,35 @@ export const ruRU = {
   'workloadStreams.selectionHint':
     'Отображается только выбранный контейнер. При переключении на другой контейнер предыдущее соединение закрывается.',
 
+  'resourceStream.scope': 'Ресурс не относится к выбранному окружению.',
+  'resourceStream.invalidFrame': 'Получено недопустимое сообщение соединения.',
+  'resourceStream.failed': 'Не удалось подключиться. Закройте эту панель и попробуйте снова.',
+  'resourceStream.revoked':
+    'Соединение закрыто, поскольку сеанс больше недоступен или у вас больше нет необходимого разрешения.',
+  'resourceStream.unavailable': 'Ресурс больше недоступен или срок действия вашего доступа истёк.',
+  'resourceStream.startFailed':
+    'Не удалось установить соединение. Проверьте состояние ресурса и свои разрешения.',
+  'resourceStream.logs': 'Журналы',
+  'resourceStream.console': 'Консоль',
+  'resourceStream.connected': 'Подключено',
+  'resourceStream.closed': 'Соединение закрыто',
+  'resourceStream.connecting': 'Подключение…',
+  'resourceStream.waiting': 'Ожидание подключения',
+  'resourceStream.description': 'Окружение: {name} · {status}',
+  'resourceStream.close': 'Закрыть соединение',
+  'resourceStream.warning':
+    'Консоль выполняет команды в выбранном контейнере с разрешениями, предоставленными Rancher.',
+  'resourceStream.connect': 'Подключиться к контейнеру',
+  'resourceStream.terminal': 'Терминал контейнера',
+  'resourceStream.filter': 'Фильтровать журналы',
+  'resourceStream.filterPlaceholder': 'Фильтровать полученные строки…',
+  'resourceStream.resume': 'Возобновить прокрутку',
+  'resourceStream.pause': 'Приостановить прокрутку',
+  'resourceStream.download': 'Скачать',
+  'resourceStream.buffer':
+    'В буфере хранится до 2 000 последних строк общим объёмом не более 512 КБ. Поиск и скачивание охватывают только содержимое, полученное в этой панели.',
+  'resourceStream.logLabel': 'Журналы контейнера',
+
   'operations.stackMetric': 'стеки',
   'operations.serviceMetric': 'сервисы',
   'operations.containerMetric': 'контейнеры',

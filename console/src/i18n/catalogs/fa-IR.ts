@@ -10,6 +10,34 @@ export const faIR = {
   'workloadStreams.selectionHint':
     'فقط کانتینر انتخاب‌شده نمایش داده می‌شود. با تغییر کانتینر، اتصال قبلی بسته می‌شود.',
 
+  'resourceStream.scope': 'این منبع به محیط انتخاب‌شده تعلق ندارد.',
+  'resourceStream.invalidFrame': 'یک پیام نامعتبر برای اتصال دریافت شد.',
+  'resourceStream.failed': 'اتصال برقرار نشد. این پنل را ببندید و دوباره تلاش کنید.',
+  'resourceStream.revoked':
+    'اتصال بسته شد، چون نشست شما دیگر در دسترس نیست یا مجوز لازم را ندارید.',
+  'resourceStream.unavailable': 'منبع دیگر در دسترس نیست یا دسترسی شما منقضی شده است.',
+  'resourceStream.startFailed': 'برقراری اتصال ممکن نبود. وضعیت منبع و مجوزهای خود را بررسی کنید.',
+  'resourceStream.logs': 'لاگ‌ها',
+  'resourceStream.console': 'کنسول',
+  'resourceStream.connected': 'متصل',
+  'resourceStream.closed': 'اتصال بسته شد',
+  'resourceStream.connecting': 'در حال اتصال…',
+  'resourceStream.waiting': 'در انتظار اتصال',
+  'resourceStream.description': 'محیط: {name} · {status}',
+  'resourceStream.close': 'بستن اتصال',
+  'resourceStream.warning':
+    'کنسول فرمان‌ها را در کانتینر انتخاب‌شده با مجوزهایی که Rancher داده است اجرا می‌کند.',
+  'resourceStream.connect': 'اتصال به کانتینر',
+  'resourceStream.terminal': 'ترمینال کانتینر',
+  'resourceStream.filter': 'فیلتر کردن لاگ‌ها',
+  'resourceStream.filterPlaceholder': 'فیلتر کردن سطرهای دریافت‌شده…',
+  'resourceStream.resume': 'ادامهٔ پیمایش',
+  'resourceStream.pause': 'توقف موقت پیمایش',
+  'resourceStream.download': 'دانلود',
+  'resourceStream.buffer':
+    'بافر فقط ۲٬۰۰۰ سطر آخر را تا سقف ۵۱۲ کیلوبایت نگه می‌دارد. جست‌وجو و دانلود فقط روی محتوای دریافت‌شده در این پنل انجام می‌شود.',
+  'resourceStream.logLabel': 'لاگ‌های کانتینر',
+
   'operations.stackMetric': 'پشته',
   'operations.serviceMetric': 'سرویس',
   'operations.containerMetric': 'کانتینر',

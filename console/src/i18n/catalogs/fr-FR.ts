@@ -10,6 +10,35 @@ export const frFR = {
   'workloadStreams.selectionHint':
     'Seul le conteneur sélectionné est affiché. Changer de conteneur ferme la connexion précédente.',
 
+  'resourceStream.scope': 'La ressource n’appartient pas à l’environnement sélectionné.',
+  'resourceStream.invalidFrame': 'Un message de connexion non valide a été reçu.',
+  'resourceStream.failed': 'La connexion a échoué. Fermez ce panneau et réessayez.',
+  'resourceStream.revoked':
+    'La connexion a été fermée parce que votre session n’est plus disponible ou que vous n’avez plus l’autorisation requise.',
+  'resourceStream.unavailable': 'La ressource n’est plus disponible ou votre accès a expiré.',
+  'resourceStream.startFailed':
+    'Impossible d’établir la connexion. Vérifiez l’état de la ressource et vos autorisations.',
+  'resourceStream.logs': 'Journaux',
+  'resourceStream.console': 'Console',
+  'resourceStream.connected': 'Connecté',
+  'resourceStream.closed': 'Connexion fermée',
+  'resourceStream.connecting': 'Connexion en cours…',
+  'resourceStream.waiting': 'En attente de connexion',
+  'resourceStream.description': 'Environnement : {name} · {status}',
+  'resourceStream.close': 'Fermer la connexion',
+  'resourceStream.warning':
+    'La console exécute des commandes dans le conteneur sélectionné avec les autorisations accordées par Rancher.',
+  'resourceStream.connect': 'Se connecter au conteneur',
+  'resourceStream.terminal': 'Terminal du conteneur',
+  'resourceStream.filter': 'Filtrer les journaux',
+  'resourceStream.filterPlaceholder': 'Filtrer les lignes reçues…',
+  'resourceStream.resume': 'Reprendre le défilement',
+  'resourceStream.pause': 'Suspendre le défilement',
+  'resourceStream.download': 'Télécharger',
+  'resourceStream.buffer':
+    'Le tampon est limité aux 2 000 dernières lignes et à 512 Ko. La recherche et le téléchargement portent uniquement sur le contenu reçu dans ce panneau.',
+  'resourceStream.logLabel': 'Journaux du conteneur',
+
   'operations.stackMetric': 'stacks',
   'operations.serviceMetric': 'services',
   'operations.containerMetric': 'conteneurs',

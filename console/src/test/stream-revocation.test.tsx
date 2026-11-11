@@ -100,9 +100,12 @@ afterEach(() => {
   context.server.effective.METRICS_PAYLOAD_TRANSPORT_ENABLED = false;
 });
 describe('Revogação de conexões já abertas', () => {
-  it.each(['en-US', 'fa-IR'] as const)(
+  it.each([
+    ['en-US', 'Filter logs'],
+    ['fa-IR', 'فیلتر کردن لاگ‌ها'],
+  ] as const)(
     'preserva a conexão de logs e o filtro ao trocar para %s',
-    async (locale) => {
+    async (locale, filterLabel) => {
       const fetcher = setup();
       function Viewer() {
         const { setLocale } = useI18n();
@@ -138,7 +141,7 @@ describe('Revogação de conexões já abertas', () => {
       fireEvent.change(filter, { target: { value: 'fixture' } });
       fetcher.mockClear();
       fireEvent.click(screen.getByRole('button', { name: 'Change language' }));
-      expect(screen.getByRole('textbox', { name: 'Filter logs' })).toBe(filter);
+      expect(screen.getByRole('textbox', { name: filterLabel })).toBe(filter);
       expect(filter).toHaveValue('fixture');
       expect(Socket.instances).toEqual([socket]);
       expect(socket.close).not.toHaveBeenCalled();

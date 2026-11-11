@@ -10,6 +10,37 @@ export const deDE = {
   'workloadStreams.selectionHint':
     'Es wird nur der ausgewählte Container angezeigt. Beim Wechsel des Containers wird die bisherige Verbindung geschlossen.',
 
+  'resourceStream.scope': 'Die Ressource gehört nicht zur ausgewählten Umgebung.',
+  'resourceStream.invalidFrame': 'Eine ungültige Verbindungsnachricht wurde empfangen.',
+  'resourceStream.failed':
+    'Die Verbindung ist fehlgeschlagen. Schließen Sie dieses Fenster und versuchen Sie es erneut.',
+  'resourceStream.revoked':
+    'Die Verbindung wurde geschlossen, weil Ihre Sitzung nicht mehr verfügbar ist oder Ihnen die Berechtigung fehlt.',
+  'resourceStream.unavailable':
+    'Die Ressource ist nicht mehr verfügbar oder Ihr Zugriff ist abgelaufen.',
+  'resourceStream.startFailed':
+    'Die Verbindung konnte nicht hergestellt werden. Prüfen Sie den Zustand der Ressource und Ihre Berechtigungen.',
+  'resourceStream.logs': 'Logs',
+  'resourceStream.console': 'Konsole',
+  'resourceStream.connected': 'Verbunden',
+  'resourceStream.closed': 'Verbindung geschlossen',
+  'resourceStream.connecting': 'Verbindung wird hergestellt…',
+  'resourceStream.waiting': 'Warten auf Verbindung',
+  'resourceStream.description': 'Umgebung: {name} · {status}',
+  'resourceStream.close': 'Verbindung schließen',
+  'resourceStream.warning':
+    'Die Konsole führt Befehle im ausgewählten Container mit den von Rancher erteilten Berechtigungen aus.',
+  'resourceStream.connect': 'Mit Container verbinden',
+  'resourceStream.terminal': 'Container-Terminal',
+  'resourceStream.filter': 'Logs filtern',
+  'resourceStream.filterPlaceholder': 'Empfangene Zeilen filtern…',
+  'resourceStream.resume': 'Scrollen fortsetzen',
+  'resourceStream.pause': 'Scrollen anhalten',
+  'resourceStream.download': 'Herunterladen',
+  'resourceStream.buffer':
+    'Der Puffer ist auf die letzten 2.000 Zeilen und 512 KB begrenzt. Suche und Download verwenden nur die in diesem Fenster empfangenen Inhalte.',
+  'resourceStream.logLabel': 'Container-Logs',
+
   'operations.stackMetric': 'Stacks',
   'operations.serviceMetric': 'Dienste',
   'operations.containerMetric': 'Container',
