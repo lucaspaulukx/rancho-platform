@@ -56,7 +56,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 
 | ID | Capacidade | Estado e gate restante |
 |---|---|---|
-| AUTH01 | Local/OIDC, callback, exclusivo/autologin/sem-acesso | Em duas restaurações do mesmo backup, o modo híbrido aceitou a senha do administrador local e o exclusivo a recusou. A cópia exclusiva anunciou entrada automática e validou o login pelo Keycloak, a ausência de acesso no primeiro login e a revogação da sessão. Faltam a navegação no navegador e a matriz final de sessões e links diretos |
+| AUTH01 | Local/OIDC, callback, exclusivo/autologin/sem-acesso | Duas restaurações do mesmo backup validaram as políticas híbrida e exclusiva. No par de imagens fixado, o Chromium verificou login real pelo Keycloak, navegação automática, retorno sem atualização manual, recarga da tela sem acesso, saída, ticket inválido e recuperação de redirecionamento interrompido ou indisponibilidade simulada do IdP. A reversão restaurou o login local e as permissões de grupo. Faltam as demais combinações de sessões e links diretos |
 | AUTH02 | Conta/perfil global atuais | Implementado; falta regressão técnica final; reset de senha não revoga JWT sozinho |
 | AUTH03 | Expiração criptográfica | HTTP local/OIDC e streams UI validados em recortes; faltam caminhos técnicos/ociosidade/carga completos |
 | AUTH04 | Logout federado/falha do IdP | Recortes implementados; manter regressão sem loops/fallback local no exclusivo |
