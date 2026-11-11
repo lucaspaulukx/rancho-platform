@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { Button, CheckboxField, DataTable, ErrorState, Modal, Tabs } from '../components/ui';
@@ -99,7 +99,7 @@ describe('Checkbox compartilhada', () => {
 });
 
 describe('Confirmação de remoção em lote', () => {
-  it('não envia nada sem nome exato e impede novo envio após confirmação', async () => {
+  it('preserva o nome de confirmação ao trocar de idioma e envia a remoção uma vez', async () => {
     const target = {
       id: 'fixture',
       type: 'container',
@@ -125,7 +125,18 @@ describe('Confirmação de remoção em lote', () => {
     ]);
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <RouterProvider router={router} />
+        <I18nProvider
+          policy={{
+            enabled: true,
+            preview: true,
+            defaultLocale: 'pt-BR',
+            availableLocales: ['pt-BR', 'fr-FR'],
+            selectable: true,
+            detectBrowser: false,
+          }}
+        >
+          <RouterProvider router={router} />
+        </I18nProvider>
       </QueryClientProvider>,
     );
     const confirm = screen.getByRole('button', { name: 'Confirmar 1 operação' });
@@ -135,11 +146,21 @@ describe('Confirmação de remoção em lote', () => {
     expect(confirm).toBeDisabled();
     expect(transport).not.toHaveBeenCalled();
     await userEvent.clear(input);
-    await userEvent.type(input, 'Operações');
-    await userEvent.click(confirm);
-    expect(await screen.findByText('Recebida')).toBeInTheDocument();
+    await userEvent.type(input, 'Opera');
+    const key = 'rancho.console.locale.anonymous';
+    localStorage.setItem(key, JSON.stringify({ version: 1, locale: 'fr-FR' }));
+    fireEvent(window, new StorageEvent('storage', { key }));
+    const translated = await screen.findByRole('button', { name: 'Confirmer 1 opération' });
+    expect(translated).toBe(confirm);
+    expect(translated).toBeDisabled();
+    expect(screen.getByLabelText('Confirmer le nom de l’environnement')).toBe(input);
+    expect(input).toHaveValue('Opera');
+    expect(transport).not.toHaveBeenCalled();
+    await userEvent.type(input, 'ções');
+    await userEvent.click(translated);
+    expect(await screen.findByText('Reçue', { exact: true })).toBeInTheDocument();
     expect(transport).toHaveBeenCalledTimes(2);
-    expect(screen.queryByRole('button', { name: 'Confirmar 1 operação' })).not.toBeInTheDocument();
+    expect(translated).not.toBeInTheDocument();
     router.dispose();
   });
 });

@@ -208,6 +208,56 @@ export const frFR = {
   'resourceMetrics.caption':
     '5 dernières minutes de cette connexion · jusqu’à 300 mesures · {status}',
 
+  'bulkOperation.title': 'Action groupée : {action}',
+  'bulkOperation.resources': {
+    one: '{count} ressource',
+    many: '{count} ressources',
+    other: '{count} ressources',
+  },
+  'bulkOperation.description': 'Environnement : {name} · {resources}',
+  'bulkOperation.confirm': {
+    one: 'Confirmer {count} opération',
+    many: 'Confirmer {count} opérations',
+    other: 'Confirmer {count} opérations',
+  },
+  'bulkOperation.closeResults': 'Fermer les résultats',
+  'bulkOperation.warning':
+    'L’opération s’applique à chaque ressource de la liste. Un échec n’annule pas les opérations déjà reçues par Rancher. Vérifiez les ressources ciblées avant de confirmer.',
+  'bulkOperation.restartHint':
+    'Les services redémarrent par lots de 1 conteneur, avec un intervalle de 2 secondes entre les lots. L’envoi est suivi pour chaque ressource. Vérifiez l’état final dans la vue des opérations.',
+  'bulkOperation.removeWarning':
+    'La suppression peut arrêter des conteneurs et supprimer des ressources dépendantes dans le cadre du cycle de vie géré par Rancher. Il n’y a pas d’annulation automatique.',
+  'bulkOperation.confirmEnvironment': 'Confirmer le nom de l’environnement',
+  'bulkOperation.sending': 'Envoi des opérations en cours',
+  'bulkOperation.finished': 'Envoi terminé',
+  'bulkOperation.progress':
+    '{status} · {received} réponses sur {total}. Suivez l’état final dans la vue des opérations.',
+  'bulkOperation.resource': 'Ressource',
+  'bulkOperation.result': 'Résultat',
+  'bulkOperation.status.accepted': 'Reçue',
+  'bulkOperation.status.failed': 'Échec',
+  'bulkOperation.status.unknown': 'Vérifier l’état',
+  'bulkOperation.queued': 'En attente d’envoi',
+  'bulkOperation.pending': 'En attente de confirmation',
+  'bulkOperation.runningTitle': 'Opération en cours',
+  'bulkOperation.runningDescription':
+    'Attendez la fin de l’envoi du lot avant de changer de vue ou d’environnement.',
+  'bulkOperation.stay': 'Rester sur cette vue',
+  'bulkOperation.message.startFailed': 'Impossible de lancer le lot.',
+  'bulkOperation.message.invalidSelection':
+    'Sélectionnez entre 1 et 100 ressources pour que l’opération soit valide.',
+  'bulkOperation.message.duplicateResources': 'Le lot contient des ressources en double.',
+  'bulkOperation.message.mixedRemoval': 'La suppression groupée exige des ressources du même type.',
+  'bulkOperation.message.wrongEnvironment':
+    'La ressource n’appartient pas à l’environnement de ce lot.',
+  'bulkOperation.message.actionUnavailable':
+    'L’action n’est plus disponible. Vérifiez l’état et vos autorisations.',
+  'bulkOperation.message.accepted': 'Opération reçue par Rancher. Suivez l’état de la ressource.',
+  'bulkOperation.message.unknown':
+    'Aucune réponse n’a été confirmée. Vérifiez l’état avant de réessayer.',
+  'bulkOperation.message.timeout': 'Impossible d’interroger la ressource dans le délai imparti.',
+  'bulkOperation.message.failed': 'Impossible d’appliquer l’opération.',
+
   'operations.selectEnvironment': 'Sélectionner un environnement',
   'operations.selectEnvironmentHint':
     'Choisissez un environnement autorisé dans la barre supérieure pour gérer ses ressources.',

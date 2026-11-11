@@ -1,4 +1,53 @@
 export const ukUA = {
+  'bulkOperation.title': 'Групова дія — {action}',
+  'bulkOperation.resources': {
+    one: '{count} ресурс',
+    few: '{count} ресурси',
+    many: '{count} ресурсів',
+    other: '{count} ресурсу',
+  },
+  'bulkOperation.description': 'Середовище: {name} · {resources}',
+  'bulkOperation.confirm': {
+    one: 'Підтвердити {count} операцію',
+    few: 'Підтвердити {count} операції',
+    many: 'Підтвердити {count} операцій',
+    other: 'Підтвердити {count} операції',
+  },
+  'bulkOperation.closeResults': 'Закрити результати',
+  'bulkOperation.warning':
+    'Операцію буде застосовано до кожного ресурсу зі списку. Помилка не скасовує операції, які вже отримав Rancher. Перевірте вибрані ресурси перед підтвердженням.',
+  'bulkOperation.restartHint':
+    'Сервіси перезапускаються по одному контейнеру з інтервалом у 2 секунди між контейнерами. Надсилання відстежується окремо для кожного ресурсу. Перевірте кінцевий стан у розділі «Операції».',
+  'bulkOperation.removeWarning':
+    'Під час видалення Rancher може зупинити контейнери й видалити залежні ресурси в межах життєвого циклу. Автоматичне скасування недоступне.',
+  'bulkOperation.confirmEnvironment': 'Підтвердьте назву середовища',
+  'bulkOperation.sending': 'Надсилання операцій',
+  'bulkOperation.finished': 'Надсилання завершено',
+  'bulkOperation.progress':
+    '{status} · Отримано відповідей: {received} із {total}. Відстежуйте кінцевий стан у розділі «Операції».',
+  'bulkOperation.resource': 'Ресурс',
+  'bulkOperation.result': 'Результат',
+  'bulkOperation.status.accepted': 'Прийнято',
+  'bulkOperation.status.failed': 'Помилка',
+  'bulkOperation.status.unknown': 'Перевірити стан',
+  'bulkOperation.queued': 'Очікує надсилання',
+  'bulkOperation.pending': 'Очікує підтвердження',
+  'bulkOperation.runningTitle': 'Операція триває',
+  'bulkOperation.runningDescription':
+    'Зачекайте, доки завершиться надсилання пакета, перш ніж перейти на іншу сторінку або змінити середовище.',
+  'bulkOperation.stay': 'Залишитися на цій сторінці',
+  'bulkOperation.message.startFailed': 'Не вдалося розпочати надсилання пакета.',
+  'bulkOperation.message.invalidSelection': 'Виберіть від 1 до 100 ресурсів для операції.',
+  'bulkOperation.message.duplicateResources': 'Пакет містить повторювані ресурси.',
+  'bulkOperation.message.mixedRemoval': 'Для групового видалення потрібні ресурси одного типу.',
+  'bulkOperation.message.wrongEnvironment': 'Ресурс не належить до середовища цього пакета.',
+  'bulkOperation.message.actionUnavailable':
+    'Дія більше недоступна. Перевірте стан ресурсу та свої дозволи.',
+  'bulkOperation.message.accepted': 'Rancher отримав операцію. Відстежуйте стан ресурсу.',
+  'bulkOperation.message.unknown':
+    'Відповідь не підтверджено. Перевірте стан ресурсу перед повторною спробою.',
+  'bulkOperation.message.timeout': 'Не вдалося вчасно отримати дані ресурсу.',
+  'bulkOperation.message.failed': 'Не вдалося застосувати операцію.',
   'resourceMetrics.disabled': 'Метрики вимкнено',
   'resourceMetrics.enable': 'Увімкніть модуль метрик у налаштуваннях консолі.',
   'resourceMetrics.paused': 'Призупинено',

@@ -208,6 +208,53 @@ export const deDE = {
   'resourceMetrics.cpuNoteReported': '100 % entsprechen einem Kern · {cores} Kerne gemeldet.',
   'resourceMetrics.caption': 'Letzte 5 Minuten dieser Verbindung · bis zu 300 Messwerte · {status}',
 
+  'bulkOperation.title': 'Sammelaktion: {action}',
+  'bulkOperation.resources': { one: '{count} Ressource', other: '{count} Ressourcen' },
+  'bulkOperation.description': 'Umgebung: {name} · {resources}',
+  'bulkOperation.confirm': {
+    one: '{count} Vorgang bestätigen',
+    other: '{count} Vorgänge bestätigen',
+  },
+  'bulkOperation.closeResults': 'Ergebnisse schließen',
+  'bulkOperation.warning':
+    'Der Vorgang wird auf jede aufgeführte Ressource angewendet. Ein Fehler macht Vorgänge, die Rancher bereits entgegengenommen hat, nicht rückgängig. Prüfen Sie die betroffenen Ressourcen vor der Bestätigung.',
+  'bulkOperation.restartHint':
+    'Dienste werden in Gruppen von jeweils 1 Container neu gestartet. Zwischen den Gruppen liegen 2 Sekunden. Die Übermittlung wird für jede Ressource einzeln verfolgt. Prüfen Sie den endgültigen Status in der Vorgangsansicht.',
+  'bulkOperation.removeWarning':
+    'Beim Entfernen kann Rancher im Rahmen seines Lebenszyklus Container stoppen und abhängige Ressourcen entfernen. Der Vorgang wird nicht automatisch rückgängig gemacht.',
+  'bulkOperation.confirmEnvironment': 'Namen der Umgebung bestätigen',
+  'bulkOperation.sending': 'Vorgänge werden übermittelt',
+  'bulkOperation.finished': 'Übermittlung beendet',
+  'bulkOperation.progress':
+    '{status} · {received} von {total} Antworten. Verfolgen Sie den endgültigen Status in der Vorgangsansicht.',
+  'bulkOperation.resource': 'Ressource',
+  'bulkOperation.result': 'Ergebnis',
+  'bulkOperation.status.accepted': 'Entgegengenommen',
+  'bulkOperation.status.failed': 'Fehlgeschlagen',
+  'bulkOperation.status.unknown': 'Status prüfen',
+  'bulkOperation.queued': 'Wartet auf Übermittlung',
+  'bulkOperation.pending': 'Wartet auf Bestätigung',
+  'bulkOperation.runningTitle': 'Vorgang läuft',
+  'bulkOperation.runningDescription':
+    'Warten Sie, bis alle Vorgänge übermittelt wurden, bevor Sie die Ansicht oder die Umgebung wechseln.',
+  'bulkOperation.stay': 'In dieser Ansicht bleiben',
+  'bulkOperation.message.startFailed': 'Die Sammelaktion konnte nicht gestartet werden.',
+  'bulkOperation.message.invalidSelection':
+    'Wählen Sie zwischen 1 und 100 Ressourcen für einen gültigen Vorgang aus.',
+  'bulkOperation.message.duplicateResources': 'Die Sammelaktion enthält doppelte Ressourcen.',
+  'bulkOperation.message.mixedRemoval':
+    'Beim gemeinsamen Entfernen müssen alle Ressourcen denselben Typ haben.',
+  'bulkOperation.message.wrongEnvironment':
+    'Die Ressource gehört nicht zur Umgebung dieser Sammelaktion.',
+  'bulkOperation.message.actionUnavailable':
+    'Die Aktion ist nicht mehr verfügbar. Prüfen Sie den Status und Ihre Berechtigungen.',
+  'bulkOperation.message.accepted':
+    'Von Rancher entgegengenommen. Verfolgen Sie den Status der Ressource.',
+  'bulkOperation.message.unknown':
+    'Es wurde keine Antwort bestätigt. Prüfen Sie den Status, bevor Sie es erneut versuchen.',
+  'bulkOperation.message.timeout': 'Die Ressource konnte nicht rechtzeitig abgefragt werden.',
+  'bulkOperation.message.failed': 'Der Vorgang konnte nicht ausgeführt werden.',
+
   'operations.selectEnvironment': 'Umgebung auswählen',
   'operations.selectEnvironmentHint':
     'Wählen Sie in der oberen Leiste eine autorisierte Umgebung aus, um deren Ressourcen zu verwalten.',

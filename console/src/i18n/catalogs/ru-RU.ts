@@ -1,4 +1,53 @@
 export const ruRU = {
+  'bulkOperation.title': 'Массовое действие — {action}',
+  'bulkOperation.resources': {
+    one: '{count} ресурс',
+    few: '{count} ресурса',
+    many: '{count} ресурсов',
+    other: '{count} ресурса',
+  },
+  'bulkOperation.description': 'Среда: {name} · {resources}',
+  'bulkOperation.confirm': {
+    one: 'Подтвердить {count} операцию',
+    few: 'Подтвердить {count} операции',
+    many: 'Подтвердить {count} операций',
+    other: 'Подтвердить {count} операции',
+  },
+  'bulkOperation.closeResults': 'Закрыть результаты',
+  'bulkOperation.warning':
+    'Операция будет применена к каждому ресурсу в списке. Ошибка не отменяет операции, уже полученные Rancher. Проверьте выбранные ресурсы перед подтверждением.',
+  'bulkOperation.restartHint':
+    'Сервисы перезапускаются по одному контейнеру с интервалом 2 секунды между контейнерами. Отправка отслеживается отдельно для каждого ресурса. Проверьте итоговое состояние в разделе «Операции».',
+  'bulkOperation.removeWarning':
+    'При удалении Rancher может остановить контейнеры и удалить зависимые ресурсы в рамках жизненного цикла. Автоматическая отмена недоступна.',
+  'bulkOperation.confirmEnvironment': 'Подтвердите имя среды',
+  'bulkOperation.sending': 'Отправка операций',
+  'bulkOperation.finished': 'Отправка завершена',
+  'bulkOperation.progress':
+    '{status} · Получено ответов: {received} из {total}. Отслеживайте итоговое состояние в разделе «Операции».',
+  'bulkOperation.resource': 'Ресурс',
+  'bulkOperation.result': 'Результат',
+  'bulkOperation.status.accepted': 'Принято',
+  'bulkOperation.status.failed': 'Ошибка',
+  'bulkOperation.status.unknown': 'Проверить состояние',
+  'bulkOperation.queued': 'Ожидает отправки',
+  'bulkOperation.pending': 'Ожидает подтверждения',
+  'bulkOperation.runningTitle': 'Операция выполняется',
+  'bulkOperation.runningDescription':
+    'Дождитесь завершения отправки пакета, прежде чем переходить на другую страницу или менять среду.',
+  'bulkOperation.stay': 'Остаться на этой странице',
+  'bulkOperation.message.startFailed': 'Не удалось начать отправку пакета.',
+  'bulkOperation.message.invalidSelection': 'Выберите от 1 до 100 ресурсов для операции.',
+  'bulkOperation.message.duplicateResources': 'В пакете есть повторяющиеся ресурсы.',
+  'bulkOperation.message.mixedRemoval': 'Для массового удаления нужны ресурсы одного типа.',
+  'bulkOperation.message.wrongEnvironment': 'Ресурс не относится к среде этого пакета.',
+  'bulkOperation.message.actionUnavailable':
+    'Действие больше недоступно. Проверьте состояние ресурса и свои разрешения.',
+  'bulkOperation.message.accepted': 'Получено Rancher. Отслеживайте состояние ресурса.',
+  'bulkOperation.message.unknown':
+    'Ответ не подтверждён. Проверьте состояние ресурса, прежде чем повторить попытку.',
+  'bulkOperation.message.timeout': 'Не удалось вовремя запросить данные ресурса.',
+  'bulkOperation.message.failed': 'Не удалось применить операцию.',
   'resourceMetrics.disabled': 'Метрики отключены',
   'resourceMetrics.enable': 'Включите модуль метрик в настройках консоли.',
   'resourceMetrics.paused': 'На паузе',
