@@ -15,6 +15,8 @@ import {
 } from '../i18n/messages';
 import { formatResourceDate } from '../resource-format';
 import { frFR } from '../i18n/catalogs/fr-FR';
+import { ruRU } from '../i18n/catalogs/ru-RU';
+import { ukUA } from '../i18n/catalogs/uk-UA';
 
 describe('Original Rancher locale contract', () => {
   it('contains exactly ten production locales, with Persian RTL and no diagnostic locale', () => {
@@ -159,6 +161,21 @@ describe('Typed message catalogs', () => {
     expect(russian.t('selection.count', { count: 3 })).toBe('3 элемента');
     expect(russian.t('selection.count', { count: 5 })).toBe('5 элементов');
     expect(() => validateCatalog({ 'selection.count': { one: '{count} item' } })).toThrow();
+  });
+  it('uses the one, few and many certificate expiry forms in Russian and Ukrainian previews', () => {
+    const ru = createTranslator('ru-RU', ruRU);
+    const uk = createTranslator('uk-UA', ukUA);
+    const counts = [1, 2, 5];
+    expect(counts.map((count) => ru.t('details.certificate.expiring', { count }))).toEqual([
+      'Срок действия истекает через 1 день',
+      'Срок действия истекает через 2 дня',
+      'Срок действия истекает через 5 дней',
+    ]);
+    expect(counts.map((count) => uk.t('details.certificate.expiring', { count }))).toEqual([
+      'Термін дії спливає через 1 день',
+      'Термін дії спливає через 2 дні',
+      'Термін дії спливає через 5 днів',
+    ]);
   });
   it('rejects corrupted catalog shapes, unknown keys, empty text and changed placeholders', () => {
     for (const value of [
