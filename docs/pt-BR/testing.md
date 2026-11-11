@@ -72,6 +72,14 @@ Adicione `--classic-browser` com o Chromium do Playwright instalado para conferi
 
 ## Aceite nativo e de navegador
 
+Execute os testes unitários, a verificação dos catálogos e o build do console sem o laboratório Docker. Para testes de navegador com login local, inicie Rancher e console. Adicione o Keycloak para verificar OIDC. O host Docker legado só é necessário nos testes que executam workloads ou abrem streams reais. Quando o teste exigir o host, inicie o serviço explicitamente na raiz do repositório.
+
+```sh
+docker compose -f compose.yaml -f compose.console.yaml -f compose.legacy-host.yaml up -d --no-deps legacy-test-host
+```
+
+Após os testes, desligue a VM com `python console/tests/legacy_guest.py shutdown`. A VM tem limite de 2.300 MiB e guarda seu disco no volume nomeado.
+
 Execute `python console/tests/standalone_metadata_readback.py` com o Chromium do Playwright e o host legado isolado em execução. O teste cria um container avulso, edita nome e descrição em Operações, confere sua identidade no Rancher e no Docker e remove o recurso de teste.
 
 Execute `python tests/flag_integration.py --browser --release-images BACKEND_SHA256_ID CONSOLE_SHA256_ID` no laboratório local indicado durante uma janela de manutenção. O teste recria o backend do Rancher com OIDC exclusivo, entrada automática e grupos locais desativados. Ele verifica o login e as falhas no navegador, restaura a configuração híbrida e confere o acesso dos grupos e as variáveis de ambiente originais do backend. Use os IDs imutáveis das imagens registrados no relatório de release.
