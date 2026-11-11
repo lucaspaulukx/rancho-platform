@@ -1,4 +1,15 @@
 export const deDE = {
+  'workloadStreams.logs': 'Logs der Ressource',
+  'workloadStreams.terminal': 'Terminal der Ressource',
+  'workloadStreams.emptyTitle': 'Keine Container verfügbar',
+  'workloadStreams.emptyDescription':
+    'Rancher hat diesen Vorgang für die Container dieser Ressource nicht freigegeben.',
+  'workloadStreams.stack': 'Stack:',
+  'workloadStreams.service': 'Dienst:',
+  'workloadStreams.container': 'Container',
+  'workloadStreams.selectionHint':
+    'Es wird nur der ausgewählte Container angezeigt. Beim Wechsel des Containers wird die bisherige Verbindung geschlossen.',
+
   'operations.stackMetric': 'Stacks',
   'operations.serviceMetric': 'Dienste',
   'operations.containerMetric': 'Container',

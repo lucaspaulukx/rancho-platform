@@ -1,4 +1,15 @@
 export const jaJP = {
+  'workloadStreams.logs': 'リソースのログ',
+  'workloadStreams.terminal': 'リソースのターミナル',
+  'workloadStreams.emptyTitle': '利用可能なコンテナがありません',
+  'workloadStreams.emptyDescription':
+    'Rancher では、このリソースのコンテナに対してこの操作を利用できません。',
+  'workloadStreams.stack': 'スタック：',
+  'workloadStreams.service': 'サービス：',
+  'workloadStreams.container': 'コンテナ',
+  'workloadStreams.selectionHint':
+    '選択したコンテナのみを表示しています。コンテナを切り替えると、直前の接続が閉じられます。',
+
   'operations.stackMetric': 'スタック',
   'operations.serviceMetric': 'サービス',
   'operations.containerMetric': 'コンテナ',

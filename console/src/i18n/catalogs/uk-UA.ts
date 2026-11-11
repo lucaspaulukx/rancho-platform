@@ -1,4 +1,15 @@
 export const ukUA = {
+  'workloadStreams.logs': 'Журнали ресурсу',
+  'workloadStreams.terminal': 'Термінал ресурсу',
+  'workloadStreams.emptyTitle': 'Немає доступних контейнерів',
+  'workloadStreams.emptyDescription':
+    'Rancher не надав можливості виконати цю операцію для контейнерів цього ресурсу.',
+  'workloadStreams.stack': 'Стек:',
+  'workloadStreams.service': 'Сервіс:',
+  'workloadStreams.container': 'Контейнер',
+  'workloadStreams.selectionHint':
+    'Відображається лише вибраний контейнер. Перемикання на інший контейнер закриває попереднє з’єднання.',
+
   'operations.stackMetric': 'стеки',
   'operations.serviceMetric': 'сервіси',
   'operations.containerMetric': 'контейнери',

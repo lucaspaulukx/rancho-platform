@@ -12,7 +12,8 @@
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
-      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415"
+      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "fa-IR": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -26,7 +27,8 @@
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
-      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415"
+      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "fr-FR": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -40,7 +42,8 @@
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
-      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415"
+      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "hu-HU": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -54,7 +57,8 @@
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
-      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415"
+      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "ja-JP": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -68,7 +72,8 @@
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
-      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415"
+      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "ru-RU": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -82,7 +87,8 @@
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
-      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415"
+      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "uk-UA": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -96,7 +102,8 @@
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
-      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415"
+      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "zh-Hans": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -110,7 +117,8 @@
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
-      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415"
+      "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     }
   },
   "version": 1
