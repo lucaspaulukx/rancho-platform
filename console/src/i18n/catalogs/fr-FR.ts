@@ -39,6 +39,79 @@ export const frFR = {
     'Le tampon est limité aux 2 000 dernières lignes et à 512 Ko. La recherche et le téléchargement portent uniquement sur le contenu reçu dans ce panneau.',
   'resourceStream.logLabel': 'Journaux du conteneur',
 
+  'resourceMetrics.disabled': 'Métriques désactivées',
+  'resourceMetrics.enable': 'Activez le module de métriques dans la configuration de la console.',
+  'resourceMetrics.paused': 'En pause',
+  'resourceMetrics.live': 'En direct',
+  'resourceMetrics.stale': 'Aucune nouvelle mesure',
+  'resourceMetrics.closed': 'Connexion fermée',
+  'resourceMetrics.connecting': 'Connexion en cours…',
+  'resourceMetrics.resume': 'Reprendre',
+  'resourceMetrics.pause': 'Mettre en pause',
+  'resourceMetrics.reconnect': 'Rétablir la connexion aux métriques',
+  'resourceMetrics.container': 'Conteneur du service',
+  'resourceMetrics.awaiting': 'en attente de mesures',
+  'resourceMetrics.cpu': 'CPU',
+  'resourceMetrics.cpuUsage': 'Utilisation du CPU',
+  'resourceMetrics.memory': 'Mémoire',
+  'resourceMetrics.memoryUsed': 'Mémoire utilisée',
+  'resourceMetrics.noMemoryLimit': 'L’agent n’a signalé aucune limite de mémoire.',
+  'resourceMetrics.network': 'Réseau',
+  'resourceMetrics.received': 'Reçu',
+  'resourceMetrics.sent': 'Envoyé',
+  'resourceMetrics.networkNote':
+    'Les débits sont calculés à partir de mesures successives des mêmes interfaces.',
+  'resourceMetrics.disk': 'Disque',
+  'resourceMetrics.read': 'Lecture',
+  'resourceMetrics.write': 'Écriture',
+  'resourceMetrics.diskNote': 'Les compteurs manquants sont indiqués comme indisponibles.',
+  'resourceMetrics.unavailableCounter': 'Compteur indisponible',
+  'resourceMetrics.waitingAgent': 'En attente des données de l’agent…',
+  'resourceMetrics.close': 'Fermer',
+  'resourceMetrics.csv': 'CSV',
+  'resourceMetrics.staleWarning':
+    'L’agent n’a pas envoyé de nouvelles mesures récemment. Les dernières valeurs et leurs horodatages restent visibles.',
+  'resourceMetrics.history':
+    'L’historique est conservé tant que ce panneau est ouvert. Les autorisations sont revérifiées toutes les 15 secondes.',
+  'resourceMetrics.wrongEnvironment':
+    'La ressource n’appartient pas à l’environnement sélectionné.',
+  'resourceMetrics.resourceDenied':
+    'La collecte des métriques s’est arrêtée parce que la ressource ou l’autorisation requise n’est plus disponible.',
+  'resourceMetrics.serviceUnavailable': 'Le serveur ne fournit pas de métriques pour ce service.',
+  'resourceMetrics.serviceLinkMismatch':
+    'L’adresse des métriques n’appartient pas au service sélectionné.',
+  'resourceMetrics.serviceEnvironmentMismatch':
+    'Le service n’appartient pas à l’environnement sélectionné.',
+  'resourceMetrics.serviceContainerMismatch':
+    'La liste des conteneurs ne correspond pas au service sélectionné.',
+  'resourceMetrics.serviceContainerConflict':
+    'La liste des conteneurs contient des identités contradictoires.',
+  'resourceMetrics.incomplete': 'La liste des conteneurs du service est incomplète.',
+  'resourceMetrics.targetLimit': 'Ce panneau prend en charge jusqu’à 64 conteneurs par service.',
+  'resourceMetrics.noTargets':
+    'Aucun conteneur de ce service n’est en cours d’exécution pour permettre la collecte de métriques.',
+  'resourceMetrics.negotiation': 'Impossible de négocier la connexion aux métriques.',
+  'resourceMetrics.invalidSample': 'Le serveur a envoyé une mesure non valide.',
+  'resourceMetrics.connectionFailed':
+    'La connexion aux métriques a échoué. Essayez de vous reconnecter.',
+  'resourceMetrics.sessionDenied':
+    'La collecte des métriques s’est arrêtée parce que votre session n’est plus disponible ou que vous n’avez plus l’autorisation requise.',
+  'resourceMetrics.membershipChanged':
+    'Les conteneurs du service ont changé. Reconnectez-vous pour actualiser les métriques.',
+  'resourceMetrics.failed':
+    'Impossible de récupérer les métriques de cette ressource. Vérifiez son état, la connexion à l’agent et vos autorisations.',
+  'resourceMetrics.title': 'Métriques · {name}',
+  'resourceMetrics.description': 'Environnement : {name} · mesures en direct de Rancher',
+  'resourceMetrics.containerHint':
+    'Cette connexion a reçu des mesures pour {sampled} conteneurs sur {total}. L’export CSV porte sur le conteneur sélectionné.',
+  'resourceMetrics.lastSample': 'dernière mesure à {time}',
+  'resourceMetrics.memoryLimit': 'Limite signalée : {limit} MiB.',
+  'resourceMetrics.chartLabel': '{title} : évolution des mesures',
+  'resourceMetrics.cpuNote': '100 % correspondent à un cœur.',
+  'resourceMetrics.cpuNoteReported': '100 % correspondent à un cœur · {cores} cœurs signalés.',
+  'resourceMetrics.caption':
+    '5 dernières minutes de cette connexion · jusqu’à 300 mesures · {status}',
+
   'operations.stackMetric': 'stacks',
   'operations.serviceMetric': 'services',
   'operations.containerMetric': 'conteneurs',

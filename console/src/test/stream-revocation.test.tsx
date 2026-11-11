@@ -151,6 +151,44 @@ describe('Revogação de conexões já abertas', () => {
       view.unmount();
     },
   );
+  it('updates the metrics panel language without reopening the connection', async () => {
+    const fetcher = setup();
+    function Viewer() {
+      const { setLocale } = useI18n();
+      return (
+        <>
+          <button onClick={() => setLocale('fr-FR')}>French</button>
+          <ResourceMetrics resource={resource} onClose={vi.fn()} />
+        </>
+      );
+    }
+    render(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'fr-FR'],
+          selectable: true,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <Viewer />
+      </I18nProvider>,
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(Socket.instances).toHaveLength(1));
+    const [socket] = Socket.instances;
+    const panel = screen.getByRole('dialog');
+    fetcher.mockClear();
+    fireEvent.click(screen.getByText('French'));
+    expect(await screen.findByRole('dialog', { name: 'Métriques · fixture' })).toBe(panel);
+    expect(Socket.instances).toEqual([socket]);
+    expect(socket.close).not.toHaveBeenCalled();
+    expect(fetcher).not.toHaveBeenCalled();
+  });
   it.each(['logs', 'execute', 'metrics'] as const)(
     'encerra %s ao desativar observabilidade sem novas requisições',
     async (mode) => {
