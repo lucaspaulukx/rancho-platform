@@ -64,7 +64,7 @@ describe('Registered locale catalog gate', () => {
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
     const previewScope = Object.keys(englishMessages).filter(
       (key) =>
-        /^(auth|ui|common|details|language|runtime|shell|recovery|resourceState|resourceMetrics|resourceStream|workloadStreams)\./.test(
+        /^(auth|ui|common|details|language|runtime|shell|recovery|resourceState|resourceMetrics|resourcePanel|resourceStream|workloadStreams)\./.test(
           key,
         ) ||
         key.startsWith('groups.role.') ||
@@ -85,8 +85,12 @@ describe('Registered locale catalog gate', () => {
       'zh-Hans',
     ] as const;
     expect(Object.keys(previewCatalogs)).toEqual(previewLocales);
-    for (const locale of previewLocales)
-      expect(Object.keys(previewCatalogs[locale]!).sort()).toEqual(previewScope.sort());
+    for (const locale of previewLocales) {
+      const catalog = previewCatalogs[locale]!;
+      expect(Object.keys(catalog).sort()).toEqual(previewScope.sort());
+      expect(catalog['resourcePanel.editPrefix']).toMatch(/ $/);
+      expect(catalog['resourcePanel.scalePrefix']).toMatch(/ $/);
+    }
     expect(report.previewCatalogKeyCounts).toEqual(
       Object.fromEntries(previewLocales.map((locale) => [locale, previewScope.length])),
     );

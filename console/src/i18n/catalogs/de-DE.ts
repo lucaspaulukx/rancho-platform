@@ -41,6 +41,60 @@ export const deDE = {
     'Der Puffer ist auf die letzten 2.000 Zeilen und 512 KB begrenzt. Suche und Download verwenden nur die in diesem Fenster empfangenen Inhalte.',
   'resourceStream.logLabel': 'Container-Logs',
 
+  'resourcePanel.upgradeStack': 'Stack aktualisieren',
+  'resourcePanel.saved':
+    'Rancher hat den Vorgang entgegengenommen. Verfolgen Sie seinen Status auf dieser Seite.',
+  'resourcePanel.save': 'Änderungen speichern',
+  'resourcePanel.applyScale': 'Skalierung anwenden',
+  'resourcePanel.confirm': 'Vorgang bestätigen',
+  'resourcePanel.discardTitle': 'Entwurf verwerfen?',
+  'resourcePanel.discardDescription': 'Die Änderungen wurden noch nicht gespeichert.',
+  'resourcePanel.pendingTitle': 'Vorgang läuft',
+  'resourcePanel.leaveTitle': 'Ohne Speichern verlassen?',
+  'resourcePanel.pendingDescription':
+    'Warten Sie auf die Antwort von Rancher, bevor Sie den Kontext wechseln.',
+  'resourcePanel.leaveDescription': 'In diesem Bereich gibt es ungespeicherte Änderungen.',
+  'resourcePanel.close': 'Schließen',
+  'resourcePanel.directLink': 'Direktlink',
+  'resourcePanel.balancer': 'Load Balancer konfigurieren',
+  'resourcePanel.scale': 'Dienst skalieren',
+  'resourcePanel.metrics': 'Metriken',
+  'resourcePanel.edit': 'Bearbeiten',
+  'resourcePanel.back': 'Zurück zur Ressource',
+  'resourcePanel.readOnly':
+    'Mit Ihrem Profil können Sie diese Ressource ansehen. Änderungen sind nicht möglich.',
+  'resourcePanel.inputUnavailable':
+    'Der Server hat die für diesen Vorgang erforderlichen Felder nicht bereitgestellt.',
+  'resourcePanel.scaleUnavailable':
+    'Die Skalierung ist in diesem Status oder Modul nicht verfügbar.',
+  'resourcePanel.composeTitle': 'Compose exportiert',
+  'resourcePanel.composeDescription': 'Das Ergebnis bleibt bis zum Schließen in diesem Bereich.',
+  'resourcePanel.download': 'Herunterladen',
+  'resourcePanel.closeResult': 'Ergebnis schließen',
+  'resourcePanel.operationUnavailable': 'Dieser Vorgang ist für Ihr Konto nicht verfügbar.',
+  'resourcePanel.editSchemaUnavailable': 'Das Schema für die Bearbeitung ist nicht verfügbar.',
+  'resourcePanel.editPermissionUnavailable': 'Sie haben keine Bearbeitungsberechtigung mehr.',
+  'resourcePanel.scalingDisabled': 'Das Skalierungsmodul ist deaktiviert.',
+  'resourcePanel.actionUnavailable':
+    'Der Vorgang ist in diesem Status nicht mehr verfügbar. Aktualisieren Sie die Ressource.',
+  'resourcePanel.bindingsDisabled': 'Die Bearbeitung von Ports und Volumes ist deaktiviert.',
+  'resourcePanel.healthCheckDisabled': 'Die Bearbeitung der Zustandsprüfung ist deaktiviert.',
+  'resourcePanel.sidecarsDisabled': 'Die Bearbeitung von Sidecars ist deaktiviert.',
+  'resourcePanel.schedulingDisabled': 'Die Bearbeitung von Affinitäten ist deaktiviert.',
+  'resourcePanel.memoryDisabled':
+    'Die Aktualisierung der Arbeitsspeichereinstellungen ist deaktiviert.',
+  'resourcePanel.cpuDisabled': 'Die Aktualisierung der CPU- und E/A-Einstellungen ist deaktiviert.',
+  'resourcePanel.securityDisabled':
+    'Die Aktualisierung der Sicherheitseinstellungen ist deaktiviert.',
+  'resourcePanel.ulimitsDisabled': 'Die Aktualisierung der Prozesslimits ist deaktiviert.',
+  'resourcePanel.editPrefix': 'Bearbeiten · ',
+  'resourcePanel.scalePrefix': 'Dienst skalieren · ',
+  'resourcePanel.environment': 'Umgebung: {name} · {id}',
+  'resourcePanel.health': 'Gesundheitsstatus: {state}',
+  'resourcePanel.actionNotice':
+    'Der Vorgang „{action}“ wird nur auf {name} in der Umgebung {environment} angewendet.',
+  'resourcePanel.downloadLabel': '{filename} herunterladen',
+
   'details.field.id': 'ID',
   'details.field.name': 'Name',
   'details.field.description': 'Beschreibung',
