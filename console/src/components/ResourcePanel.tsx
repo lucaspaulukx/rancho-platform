@@ -8,7 +8,6 @@ import { api, allPages, type Resource, type Schema } from '../api';
 import { useActionScope } from '../hooks/useActionScope';
 import { useI18n } from '../i18n/provider';
 import { resourceStateLabel } from '../i18n/resource-state';
-import { ptSchemaForm } from '../i18n/domains/schema-form';
 import { useApp, useDataKey } from '../state';
 import { canManageResource, useSchemas } from '../hooks/useSchemas';
 import {
@@ -188,14 +187,7 @@ function ResourcePanelContext({
 }) {
   const { t } = useI18n();
   function actionName(name: string) {
-    const exact = `schemaForm.label.${name}`;
-    const lower = `schemaForm.label.${name.toLowerCase()}`;
-    type LabelKey = Extract<keyof typeof ptSchemaForm, `schemaForm.label.${string}`>;
-    return Object.hasOwn(ptSchemaForm, exact)
-      ? t(exact as LabelKey)
-      : Object.hasOwn(ptSchemaForm, lower)
-        ? t(lower as LabelKey)
-        : fieldLabel(name);
+    return fieldLabel(name, t);
   }
   const app = useApp();
   const scope = useActionScope();

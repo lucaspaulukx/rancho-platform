@@ -213,13 +213,14 @@ it('keeps Compose source left to right and preserves the draft when switching to
   expect(source).toHaveValue(draft);
 });
 
-it('retranslates an existing schema validation error without sending the draft', () => {
+it('retranslates an existing schema validation error without sending the draft', async () => {
   const submit = vi.fn();
   function Form() {
     const { setLocale } = useI18n();
     return (
       <>
         <button onClick={() => setLocale('en-US')}>English</button>
+        <button onClick={() => setLocale('fa-IR')}>Persian</button>
         <SchemaForm
           id="localized-validation"
           schema={{
@@ -239,7 +240,7 @@ it('retranslates an existing schema validation error without sending the draft',
       policy={{
         enabled: true,
         defaultLocale: 'pt-BR',
-        availableLocales: ['pt-BR', 'en-US'],
+        availableLocales: ['pt-BR', 'en-US', 'fa-IR'],
         selectable: true,
         detectBrowser: false,
         preview: true,
@@ -255,6 +256,14 @@ it('retranslates an existing schema validation error without sending the draft',
   fireEvent.click(screen.getByRole('button', { name: 'English' }));
   expect(screen.getByText(/Name.*at least 5 characters/)).toBeInTheDocument();
   expect(screen.getByRole('textbox', { name: 'Name' })).toBe(name);
+  fireEvent.click(screen.getByRole('button', { name: 'Persian' }));
+  const label = faIR['schemaForm.label.name'];
+  expect(await screen.findByRole('textbox', { name: label })).toBe(name);
+  const validation = faIR['schemaForm.validation.minLength']
+    .replace('{field}', label)
+    .replace('{limit}', new Intl.NumberFormat('fa-IR').format(5));
+  expect(screen.getByText(validation)).toBeInTheDocument();
+  expect(document.documentElement.dir).toBe('rtl');
   expect(name).toHaveValue('abc');
   expect(submit).not.toHaveBeenCalled();
 });
