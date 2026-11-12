@@ -66,6 +66,15 @@ class ArtifactInventoryContract(unittest.TestCase):
         source = fixture(); duplicate = copy.deepcopy(source['components'][0]); duplicate['name'] = 'different'; source['components'].append(duplicate)
         with self.assertRaises(ValueError): inventory.public_bom(source, 'backend', 'a' * 64, 'runtime-image')
 
+    def test_file_reference_cannot_hide_a_package_dependency(self):
+        for append in (True, False):
+            with self.subTest(file_last=append):
+                source = fixture()
+                file = {'type': 'file', 'name': 'private-file', 'bom-ref': 'old-library'}
+                source['components'].insert(len(source['components']) if append else 0, file)
+                with self.assertRaisesRegex(ValueError, 'Ambiguous component reference'):
+                    inventory.public_bom(source, 'backend', 'a' * 64, 'runtime-image')
+
     def test_plan_only_inspects_scalar_image_fields(self):
         with patch.object(inventory, 'image_info', return_value={'imageId': 'sha256:' + 'a' * 64, 'sizeBytes': 100}), patch.object(inventory, 'digest_file', return_value='b' * 64), patch.object(inventory, 'command') as mutate:
             result = inventory.plan('backend', 'console')
