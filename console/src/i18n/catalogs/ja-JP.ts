@@ -604,4 +604,38 @@ export const jaJP = {
   'resourceCreator.contextTitle': 'コンテキストを切り替えますか？',
   'resourceCreator.pending': 'Rancher からの応答を待ってください。',
   'resourceCreator.unsaved': '保存されていない下書きがあります。',
+  'workloadControls.cpuShares.label': 'CPU ウェイト',
+  'workloadControls.cpuShares.hint':
+    'CPU の取り合いが発生したときの相対的な優先度です。使用量は制限しません。CPU 予約が正の値の場合は、予約がこのウェイトに優先します。Cattle エージェントは、0 の場合も最小値の 2 を適用します。',
+  'workloadControls.cpuPeriod.label': 'CPU ピリオド (µs)',
+  'workloadControls.cpuPeriod.hint':
+    '制限を適用する時間枠は 1,000〜1,000,000 µs です。0 の場合は Docker の既定値（通常は 100,000 µs）を使用します。',
+  'workloadControls.cpuQuota.label': 'CPU クォータ (µs)',
+  'workloadControls.cpuQuota.hint':
+    '1 ピリオドあたりに使用できる時間です。たとえば、50,000 / 100,000 は CPU 0.5 個分に相当します。0 または -1 の場合は明示的なクォータを設定しません。',
+  'workloadControls.cpuSet.label': '使用を許可する CPU',
+  'workloadControls.cpuSet.hint':
+    'CPU のインデックスを 0,1 や 0-3 のように指定します。指定した CPU をホストで使用できる必要があります。',
+  'workloadControls.blkioWeight.label': 'I/O ウェイト',
+  'workloadControls.blkioWeight.hint':
+    '10〜1,000 の相対的なウェイトです。0 の場合は既定値を使用します。カーネルの対応状況に依存し、MB/s 単位の転送レートは指定しません。',
+  'workloadControls.milliCpuReservation.label': 'CPU 予約（ミリコア）',
+  'workloadControls.milliCpuReservation.hint':
+    'スケジューリング時の予約量です。1,000 ミリコアは CPU 1 個分に相当します。正の値を指定すると CPU ウェイトも上書きします（250 ミリコア → ウェイト 256）。実行時のクォータは設定しません。',
+  'workloadControls.capabilityHint':
+    '必要なケーパビリティのみを選択してください。ALL はすべての選択肢を表します。Docker が設定を適用します。',
+  'workloadControls.unknownCapability':
+    '現在の仕様で定義されていない値です：{value}。作成前に確認してください。',
+  'workloadControls.capabilityLabel': '{label}：ケーパビリティ {index}',
+  'workloadControls.select': '選択…',
+  'workloadControls.removeLabel': '{label} {index} を削除',
+  'workloadControls.removeCapability': 'ケーパビリティを削除',
+  'workloadControls.addLabel': '{label}を追加',
+  'workloadControls.cpuInteger': '小数や指数表記を使わず、整数を入力してください。',
+  'workloadControls.cpuSafeInteger': '安全な範囲内の整数を入力してください。',
+  'workloadControls.cpuIndices':
+    'CPU のインデックスをカンマで区切るか、0-3 のような範囲で指定してください。',
+  'workloadControls.cpuRanges':
+    '安全な整数の範囲内で、CPU インデックスを昇順の範囲で指定してください。',
+  'workloadControls.cpuReview': '{label}を確認してください。{hint}',
 } as const;

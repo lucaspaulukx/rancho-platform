@@ -601,4 +601,38 @@ export const faIR = {
   'resourceCreator.contextTitle': 'زمینه تغییر کند؟',
   'resourceCreator.pending': 'منتظر پاسخ Rancher بمانید.',
   'resourceCreator.unsaved': 'یک پیش‌نویس ذخیره‌نشده وجود دارد.',
+  'workloadControls.cpuShares.label': 'وزن CPU',
+  'workloadControls.cpuShares.hint':
+    'اولویت نسبی هنگام رقابت برای استفاده از CPU، بدون محدود کردن میزان مصرف. مقدار مثبت رزرو CPU بر این وزن اولویت دارد. عامل Cattle حداقل مقدار 2 را حتی برای مقدار صفر اعمال می‌کند.',
+  'workloadControls.cpuPeriod.label': 'دورهٔ CPU (µs)',
+  'workloadControls.cpuPeriod.hint':
+    'بازهٔ زمانی اعمال محدودیت از 1,000 تا 1,000,000 µs است. مقدار صفر از پیش‌فرض Docker استفاده می‌کند که معمولاً 100,000 µs است.',
+  'workloadControls.cpuQuota.label': 'سهمیهٔ CPU (µs)',
+  'workloadControls.cpuQuota.hint':
+    'زمان قابل استفاده در هر دوره. برای نمونه، 50,000 / 100,000 معادل 0.5 واحد CPU است. مقدار صفر یا -1 سهمیهٔ صریحی تعیین نمی‌کند.',
+  'workloadControls.cpuSet.label': 'CPUهای مجاز',
+  'workloadControls.cpuSet.hint':
+    'شاخص‌های CPU را به‌صورت 0,1 یا 0-3 وارد کنید. میزبان باید این CPUها را در دسترس قرار دهد.',
+  'workloadControls.blkioWeight.label': 'وزن ورودی/خروجی',
+  'workloadControls.blkioWeight.hint':
+    'وزن نسبی از 10 تا 1,000 است و مقدار صفر از پیش‌فرض استفاده می‌کند. این تنظیم به پشتیبانی هسته بستگی دارد و نرخی بر حسب MB/s تعیین نمی‌کند.',
+  'workloadControls.milliCpuReservation.label': 'رزرو CPU (میلی‌هسته)',
+  'workloadControls.milliCpuReservation.hint':
+    'مقدار رزرو برای زمان‌بندی. 1,000 میلی‌هسته برابر با 1 واحد CPU است. مقدار مثبت جایگزین وزن CPU نیز می‌شود (250 میلی‌هسته → وزن 256). سهمیه‌ای برای زمان اجرا تعیین نمی‌کند.',
+  'workloadControls.capabilityHint':
+    'فقط قابلیت‌های موردنیاز را انتخاب کنید. ALL نشان‌دهندهٔ همهٔ گزینه‌هاست. Docker این پیکربندی را اعمال می‌کند.',
+  'workloadControls.unknownCapability':
+    'مقدار خارج از قرارداد فعلی: {value}. پیش از ایجاد، آن را بررسی کنید.',
+  'workloadControls.capabilityLabel': '{label}: قابلیت {index}',
+  'workloadControls.select': 'انتخاب…',
+  'workloadControls.removeLabel': 'حذف {label} {index}',
+  'workloadControls.removeCapability': 'حذف قابلیت',
+  'workloadControls.addLabel': 'افزودن {label}',
+  'workloadControls.cpuInteger': 'یک عدد صحیح بدون بخش اعشاری یا نماد علمی وارد کنید.',
+  'workloadControls.cpuSafeInteger': 'یک عدد صحیح در محدودهٔ امن وارد کنید.',
+  'workloadControls.cpuIndices':
+    'شاخص‌های CPU را با ویرگول جدا کنید یا بازه‌ای مانند 0-3 وارد کنید.',
+  'workloadControls.cpuRanges':
+    'بازه‌های صعودی وارد کنید و شاخص‌های CPU را در محدودهٔ اعداد صحیح امن نگه دارید.',
+  'workloadControls.cpuReview': '{label} را بررسی کنید. {hint}',
 } as const;

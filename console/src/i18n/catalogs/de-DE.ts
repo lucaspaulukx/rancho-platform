@@ -1,4 +1,41 @@
 export const deDE = {
+  'workloadControls.cpuShares.label': 'CPU-Gewichtung',
+  'workloadControls.cpuShares.hint':
+    'Relative Priorität bei konkurrierender CPU-Nutzung. Sie begrenzt die Nutzung nicht. Eine positive CPU-Reservierung hat Vorrang vor dieser Gewichtung. Der Cattle-Agent verwendet mindestens 2, auch wenn der Wert 0 ist.',
+  'workloadControls.cpuPeriod.label': 'CPU-Periode (µs)',
+  'workloadControls.cpuPeriod.hint':
+    'Zeitfenster für das Limit: 1.000 bis 1.000.000 µs. Bei 0 gilt der Docker-Standardwert (in der Regel 100.000 µs).',
+  'workloadControls.cpuQuota.label': 'CPU-Kontingent (µs)',
+  'workloadControls.cpuQuota.hint':
+    'Verfügbare Zeit pro Periode. Beispiel: 50.000 / 100.000 entspricht 0,5 CPU. Bei 0 oder -1 wird kein explizites Kontingent festgelegt.',
+  'workloadControls.cpuSet.label': 'Zulässige CPUs',
+  'workloadControls.cpuSet.hint':
+    'CPU-Indizes wie 0,1 oder 0-3. Diese CPUs müssen auf dem Host verfügbar sein.',
+  'workloadControls.blkioWeight.label': 'E/A-Gewichtung',
+  'workloadControls.blkioWeight.hint':
+    'Relative Gewichtung von 10 bis 1.000. Bei 0 gilt der Standardwert. Die Gewichtung setzt Kernel-Unterstützung voraus und legt keine Übertragungsrate in MB/s fest.',
+  'workloadControls.milliCpuReservation.label': 'CPU-Reservierung (Millicores)',
+  'workloadControls.milliCpuReservation.hint':
+    'Reservierung für die Platzierung: 1.000 Millicores = 1 CPU. Ein positiver Wert ersetzt auch die CPU-Gewichtung (250 Millicores → Gewichtung 256). Die Reservierung legt kein Laufzeitkontingent fest.',
+  'workloadControls.capabilityHint':
+    'Wählen Sie nur die benötigten Capabilities aus. ALL steht für alle Optionen. Docker wendet die Konfiguration an.',
+  'workloadControls.unknownCapability':
+    'Der Wert {value} ist im aktuellen Vertrag nicht vorgesehen. Prüfen Sie ihn vor dem Erstellen.',
+  'workloadControls.capabilityLabel': '{label}: Capability {index}',
+  'workloadControls.select': 'Auswählen…',
+  'workloadControls.removeLabel': '{label} {index} entfernen',
+  'workloadControls.removeCapability': 'Capability entfernen',
+  'workloadControls.addLabel': '{label} hinzufügen',
+  'workloadControls.cpuInteger':
+    'Geben Sie eine ganze Zahl ohne Nachkommastellen oder Exponentialschreibweise ein.',
+  'workloadControls.cpuSafeInteger':
+    'Geben Sie eine ganze Zahl innerhalb des sicher darstellbaren Bereichs ein.',
+  'workloadControls.cpuIndices':
+    'Verwenden Sie durch Kommas getrennte CPU-Indizes oder Bereiche wie 0-3.',
+  'workloadControls.cpuRanges':
+    'Verwenden Sie aufsteigende Bereiche ganzzahliger CPU-Indizes im sicher darstellbaren Bereich.',
+  'workloadControls.cpuReview': 'Prüfen Sie {label}. {hint}',
+
   'requestError.scopeChanged':
     'Der Kontext hat sich geändert. Öffnen Sie das Fenster erneut, bevor Sie fortfahren.',
   'requestError.resourceOutOfScope': 'Die Ressource ist in dieser Umgebung nicht verfügbar.',

@@ -640,4 +640,38 @@ export const ruRU = {
   'resourceCreator.contextTitle': 'Сменить контекст?',
   'resourceCreator.pending': 'Дождитесь ответа Rancher.',
   'resourceCreator.unsaved': 'Есть несохранённый черновик.',
+  'workloadControls.cpuShares.label': 'Вес ЦП',
+  'workloadControls.cpuShares.hint':
+    'Относительный приоритет при конкуренции за ресурсы ЦП без ограничения использования. Положительное значение резерва ЦП имеет приоритет над этим весом. Агент Cattle применяет минимальный вес 2, в том числе при значении 0.',
+  'workloadControls.cpuPeriod.label': 'Период ЦП (µs)',
+  'workloadControls.cpuPeriod.hint':
+    'Интервал для ограничения: от 1 000 до 1 000 000 µs. При значении 0 используется стандартный период Docker (обычно 100 000 µs).',
+  'workloadControls.cpuQuota.label': 'Квота ЦП (µs)',
+  'workloadControls.cpuQuota.hint':
+    'Доступное время за период. Например, 50 000 / 100 000 соответствует 0,5 ЦП. При значении 0 или -1 явная квота не задаётся.',
+  'workloadControls.cpuSet.label': 'Разрешённые ЦП',
+  'workloadControls.cpuSet.hint':
+    'Индексы ЦП, например 0,1 или 0-3. Эти ЦП должны быть доступны на хосте.',
+  'workloadControls.blkioWeight.label': 'Вес ввода-вывода',
+  'workloadControls.blkioWeight.hint':
+    'Относительный вес от 10 до 1 000. При значении 0 используется вес по умолчанию. Зависит от поддержки ядром и не задаёт скорость в MB/s.',
+  'workloadControls.milliCpuReservation.label': 'Резерв ЦП (миллиядра)',
+  'workloadControls.milliCpuReservation.hint':
+    'Резерв при планировании: 1 000 миллиядер = 1 ЦП. Положительное значение также заменяет вес ЦП (250 миллиядер → вес 256). Квота на время работы не задаётся.',
+  'workloadControls.capabilityHint':
+    'Выберите только необходимые возможности (capabilities). ALL означает все доступные варианты. Настройки применит Docker.',
+  'workloadControls.unknownCapability':
+    'Значение не предусмотрено текущим контрактом: {value}. Проверьте его перед созданием.',
+  'workloadControls.capabilityLabel': '{label}: возможность {index}',
+  'workloadControls.select': 'Выбрать…',
+  'workloadControls.removeLabel': 'Удалить «{label}» {index}',
+  'workloadControls.removeCapability': 'Удалить возможность',
+  'workloadControls.addLabel': 'Добавить «{label}»',
+  'workloadControls.cpuInteger': 'Укажите целое число без дробной части и экспоненциальной записи.',
+  'workloadControls.cpuSafeInteger': 'Укажите целое число в безопасном диапазоне.',
+  'workloadControls.cpuIndices':
+    'Укажите индексы ЦП через запятую или используйте диапазоны, например 0-3.',
+  'workloadControls.cpuRanges':
+    'Укажите диапазоны индексов ЦП в порядке возрастания. Индексы должны быть безопасными целыми числами.',
+  'workloadControls.cpuReview': 'Проверьте поле «{label}». {hint}',
 } as const;

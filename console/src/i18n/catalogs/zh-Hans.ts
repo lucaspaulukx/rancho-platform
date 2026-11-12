@@ -565,4 +565,33 @@ export const zhHans = {
   'resourceCreator.contextTitle': '切换上下文？',
   'resourceCreator.pending': '请等待 Rancher 响应。',
   'resourceCreator.unsaved': '有未保存的草稿。',
+  'workloadControls.cpuShares.label': 'CPU 权重',
+  'workloadControls.cpuShares.hint':
+    '多个任务争用 CPU 时的相对优先级，不限制 CPU 用量。CPU 预留值为正数时优先于此权重。即使设为 0，Cattle 代理也会应用最小值 2。',
+  'workloadControls.cpuPeriod.label': 'CPU 周期（µs）',
+  'workloadControls.cpuPeriod.hint':
+    '应用限额的时间窗口为 1,000 至 1,000,000 µs。设为 0 时使用 Docker 的默认值（通常为 100,000 µs）。',
+  'workloadControls.cpuQuota.label': 'CPU 配额（µs）',
+  'workloadControls.cpuQuota.hint':
+    '每个周期内可用的 CPU 时间。例如，50,000 / 100,000 相当于 0.5 个 CPU。设为 0 或 -1 时不设置显式配额。',
+  'workloadControls.cpuSet.label': '允许使用的 CPU',
+  'workloadControls.cpuSet.hint': '指定 CPU 索引，例如 0,1 或 0-3。主机必须提供这些 CPU。',
+  'workloadControls.blkioWeight.label': 'I/O 权重',
+  'workloadControls.blkioWeight.hint':
+    '相对权重为 10 至 1,000，设为 0 时使用默认值。此设置取决于内核支持，不规定以 MB/s 为单位的速率。',
+  'workloadControls.milliCpuReservation.label': 'CPU 预留（毫核）',
+  'workloadControls.milliCpuReservation.hint':
+    '调度时预留的 CPU。1,000 毫核等于 1 个 CPU。预留值为正数时还会替换 CPU 权重（250 毫核 → 权重 256）。此设置不限制运行时的 CPU 配额。',
+  'workloadControls.capabilityHint': '请仅选择所需的能力。ALL 代表所有选项。Docker 将应用此配置。',
+  'workloadControls.unknownCapability': '当前接口规范未定义此值：{value}。请在创建前检查。',
+  'workloadControls.capabilityLabel': '{label}：能力 {index}',
+  'workloadControls.select': '选择…',
+  'workloadControls.removeLabel': '移除{label} {index}',
+  'workloadControls.removeCapability': '移除能力',
+  'workloadControls.addLabel': '添加{label}',
+  'workloadControls.cpuInteger': '请输入整数，勿使用小数或指数表示法。',
+  'workloadControls.cpuSafeInteger': '请输入安全范围内的整数。',
+  'workloadControls.cpuIndices': '请使用逗号分隔的 CPU 索引，或使用 0-3 这样的范围。',
+  'workloadControls.cpuRanges': '请按升序指定 CPU 索引范围，并确保索引是安全整数。',
+  'workloadControls.cpuReview': '请检查{label}。{hint}',
 } as const;
