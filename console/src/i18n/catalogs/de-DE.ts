@@ -1,4 +1,72 @@
 export const deDE = {
+  'workloadsPage.noServices': 'Keine Dienste in diesem Kontext',
+  'workloadsPage.noContainers': 'Keine Container in diesem Kontext',
+  'workloadsPage.emptyDescription': 'Prüfen Sie die gewählte Umgebung und die Filter.',
+  'workloadsPage.service': 'Dienst',
+  'workloadsPage.container': 'Container',
+  'workloadsPage.state': 'Status',
+  'workloadsPage.stack': 'Stack',
+  'workloadsPage.noStack': 'Kein Stack',
+  'workloadsPage.image': 'Image',
+  'workloadsPage.scale': 'Container / Skalierung',
+  'workloadsPage.host': 'Host',
+  'workloadsPage.details': 'Details',
+  'workloadsPage.refresh': 'Inventar aktualisieren',
+  'workloadsPage.searchStack': 'Stacks suchen',
+  'workloadsPage.searchPlaceholder': 'Name, Beschreibung oder ID…',
+  'workloadsPage.allStacks': 'Alle Stacks',
+  'workloadsPage.allStates': 'Alle Status',
+  'workloadsPage.includeInfra': 'Infrastruktur einbeziehen',
+  'workloadsPage.unavailableStack':
+    'Der gewählte Stack ist in dieser Umgebung nicht vorhanden oder für Ihr Konto nicht verfügbar.',
+  'workloadsPage.infraStack': 'Infrastruktur-Stack',
+  'workloadsPage.appStack': 'Anwendungs-Stack',
+  'workloadsPage.unknownHealth': 'nicht gemeldet',
+  'workloadsPage.noStacks': 'Kein Stack entspricht diesem Filter',
+  'workloadsPage.noStacksDescription':
+    'Prüfen Sie die Filter oder erstellen Sie einen Stack in dieser Umgebung.',
+  'workloadsPage.stackResources': 'Ressourcen des Stacks',
+  'workloadsPage.serviceContainers': 'Container des Dienstes',
+  'workloadsPage.services': 'Dienste',
+  'workloadsPage.containers': 'Container',
+  'workloadsPage.health': 'Zustand: {state}',
+  'workloadsPage.open': '{name} öffnen',
+  'workloadsPage.openStack': 'Stack {name} öffnen',
+  'workloadsPage.inventorySummary': '{stacks} Stacks · {services} Dienste · {containers} Container',
+  'workloadsPage.servicesTab': 'Dienste ({count})',
+  'workloadsPage.containersTab': 'Container ({count})',
+  'resourceValidation.memoryFormat':
+    'Geben Sie einen nichtnegativen Speicherwert ohne Exponentialschreibweise ein.',
+  'resourceValidation.memoryRange': 'Der Speicherwert liegt außerhalb der zulässigen Grenzen.',
+  'resourceValidation.memoryBytes':
+    'Der Speicherwert muss in ganzen Bytes im sicheren Wertebereich liegen.',
+  'resourceValidation.depth': 'Die Konfiguration ist zu tief verschachtelt.',
+  'resourceValidation.memoryValues':
+    'Speicher und Reservierung müssen in nichtnegativen ganzen Bytes angegeben werden.',
+  'resourceValidation.memoryReservation':
+    'Die Speicherreservierung darf das Limit nicht überschreiten.',
+  'resourceValidation.limitInteger':
+    'Geben Sie eine ganze Zahl von -1 bis 2147483647 ein. -1 bedeutet unbegrenzt.',
+  'resourceValidation.limitRange':
+    'Das Limit liegt außerhalb des von dieser Rancher-Instanz akzeptierten Bereichs.',
+  'resourceValidation.limitCount': 'Konfigurieren Sie bis zu 32 Prozesslimits.',
+  'resourceValidation.limitFormat': 'Die Liste der Prozesslimits hat ein inkompatibles Format.',
+  'resourceValidation.limitNames': 'Wählen Sie bekannte Limitnamen ohne Duplikate.',
+  'resourceValidation.limitOrder': 'Das weiche Limit darf das harte Limit nicht überschreiten.',
+  'resourceValidation.limitContract':
+    'Der aktuelle API-Vertrag erlaubt keine Konfiguration von Prozesslimits.',
+  'composeValidation.createUnavailable': 'Stacks können derzeit nicht erstellt werden.',
+  'composeValidation.nameRequired': 'Geben Sie den Namen des Stacks ein.',
+  'composeValidation.dockerRequired': 'Füllen Sie Docker Compose aus.',
+  'composeValidation.fileTooLarge': '{label} akzeptiert bis zu 512 KiB in UTF-8.',
+  'composeValidation.nullCharacter': '{label} enthält ein Nullzeichen.',
+  'composeValidation.variableName':
+    'Jede Variable benötigt einen gültigen Namen, zum Beispiel APP_PORT.',
+  'composeValidation.duplicateVariable': 'Doppelte Variable: {name}.',
+  'composeValidation.createChanged': 'Stacks können nicht mehr erstellt werden.',
+  'composeValidation.fieldChanged':
+    'Rancher erlaubt die Eingabe von {name} nicht mehr. Öffnen Sie das Panel erneut.',
+
   'composeEditor.hideLabel': '{label} ausblenden',
   'composeEditor.showLabel': '{label} anzeigen',
   'composeEditor.size': '{lines} Zeile(n) · {bytes} Byte',

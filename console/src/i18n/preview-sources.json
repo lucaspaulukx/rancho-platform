@@ -6,6 +6,7 @@
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
       "common": "50cd88d777836fd8144c5e057ae9d7cf4d28f4ebcdbbe882b2a8d088c745a51b",
       "composeEditor": "1f47a610fd369be3646e7033e59d016a12a21e8e156ee296b959b700537353b5",
+      "composeValidation": "844dd2a221ba2226ab205b2835e3cf87f48e0a1dd6e5006cc94f1f590212a31d",
       "details": "2579b845d9bb82db94201cd78b188514a4f5abe70a0b3b9b89950197bffe8e6b",
       "deviceUpgrade": "f6be5078318d9e5c24ff39872d5b1a0f9452969da6dcf5717cf07c1f4b6c0253",
       "deviceUpgradeForm": "599a7c06ad86b4a5ebace42bd779495e2d181c44df7cb998a4551389b72a1f79",
@@ -24,6 +25,7 @@
       "resourcePanel": "9025dfed6025acd688cc1dc16b129008eb9cb08d4fe5545b73f8713045f92eec",
       "resourceState": "09c1d131e47dadf1a8077170f9c8cafed4581f6e4e02ba67395b42ac8e1cba32",
       "resourceStream": "04acc6412a8340c0a728ebb58af8d56677d357d75a6a0eb5872be1390ad03325",
+      "resourceValidation": "48d09e597c784d731312dfba36a71f30e5bdad4d939d8bc93cb0290908a081fe",
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "schedulingEditor": "f81af91e6cef1676ae1b1d92eb29aa4f36cc97834e40ec639cc8e9f58eb0a3ea",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
@@ -37,7 +39,8 @@
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
-      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
+      "workloadsPage": "1a502e57608a2155f02294aec861104e6c4dce78534f741697fb2283bc5f34c5"
     },
     "fa-IR": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -45,6 +48,7 @@
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
       "common": "50cd88d777836fd8144c5e057ae9d7cf4d28f4ebcdbbe882b2a8d088c745a51b",
       "composeEditor": "1f47a610fd369be3646e7033e59d016a12a21e8e156ee296b959b700537353b5",
+      "composeValidation": "844dd2a221ba2226ab205b2835e3cf87f48e0a1dd6e5006cc94f1f590212a31d",
       "details": "2579b845d9bb82db94201cd78b188514a4f5abe70a0b3b9b89950197bffe8e6b",
       "deviceUpgrade": "f6be5078318d9e5c24ff39872d5b1a0f9452969da6dcf5717cf07c1f4b6c0253",
       "deviceUpgradeForm": "599a7c06ad86b4a5ebace42bd779495e2d181c44df7cb998a4551389b72a1f79",
@@ -63,6 +67,7 @@
       "resourcePanel": "9025dfed6025acd688cc1dc16b129008eb9cb08d4fe5545b73f8713045f92eec",
       "resourceState": "09c1d131e47dadf1a8077170f9c8cafed4581f6e4e02ba67395b42ac8e1cba32",
       "resourceStream": "04acc6412a8340c0a728ebb58af8d56677d357d75a6a0eb5872be1390ad03325",
+      "resourceValidation": "48d09e597c784d731312dfba36a71f30e5bdad4d939d8bc93cb0290908a081fe",
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "schedulingEditor": "f81af91e6cef1676ae1b1d92eb29aa4f36cc97834e40ec639cc8e9f58eb0a3ea",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
@@ -76,7 +81,8 @@
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
-      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
+      "workloadsPage": "1a502e57608a2155f02294aec861104e6c4dce78534f741697fb2283bc5f34c5"
     },
     "fr-FR": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -84,6 +90,7 @@
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
       "common": "50cd88d777836fd8144c5e057ae9d7cf4d28f4ebcdbbe882b2a8d088c745a51b",
       "composeEditor": "1f47a610fd369be3646e7033e59d016a12a21e8e156ee296b959b700537353b5",
+      "composeValidation": "844dd2a221ba2226ab205b2835e3cf87f48e0a1dd6e5006cc94f1f590212a31d",
       "details": "2579b845d9bb82db94201cd78b188514a4f5abe70a0b3b9b89950197bffe8e6b",
       "deviceUpgrade": "f6be5078318d9e5c24ff39872d5b1a0f9452969da6dcf5717cf07c1f4b6c0253",
       "deviceUpgradeForm": "599a7c06ad86b4a5ebace42bd779495e2d181c44df7cb998a4551389b72a1f79",
@@ -102,6 +109,7 @@
       "resourcePanel": "9025dfed6025acd688cc1dc16b129008eb9cb08d4fe5545b73f8713045f92eec",
       "resourceState": "09c1d131e47dadf1a8077170f9c8cafed4581f6e4e02ba67395b42ac8e1cba32",
       "resourceStream": "04acc6412a8340c0a728ebb58af8d56677d357d75a6a0eb5872be1390ad03325",
+      "resourceValidation": "48d09e597c784d731312dfba36a71f30e5bdad4d939d8bc93cb0290908a081fe",
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "schedulingEditor": "f81af91e6cef1676ae1b1d92eb29aa4f36cc97834e40ec639cc8e9f58eb0a3ea",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
@@ -115,7 +123,8 @@
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
-      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
+      "workloadsPage": "1a502e57608a2155f02294aec861104e6c4dce78534f741697fb2283bc5f34c5"
     },
     "hu-HU": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -123,6 +132,7 @@
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
       "common": "50cd88d777836fd8144c5e057ae9d7cf4d28f4ebcdbbe882b2a8d088c745a51b",
       "composeEditor": "1f47a610fd369be3646e7033e59d016a12a21e8e156ee296b959b700537353b5",
+      "composeValidation": "844dd2a221ba2226ab205b2835e3cf87f48e0a1dd6e5006cc94f1f590212a31d",
       "details": "2579b845d9bb82db94201cd78b188514a4f5abe70a0b3b9b89950197bffe8e6b",
       "deviceUpgrade": "f6be5078318d9e5c24ff39872d5b1a0f9452969da6dcf5717cf07c1f4b6c0253",
       "deviceUpgradeForm": "599a7c06ad86b4a5ebace42bd779495e2d181c44df7cb998a4551389b72a1f79",
@@ -141,6 +151,7 @@
       "resourcePanel": "9025dfed6025acd688cc1dc16b129008eb9cb08d4fe5545b73f8713045f92eec",
       "resourceState": "09c1d131e47dadf1a8077170f9c8cafed4581f6e4e02ba67395b42ac8e1cba32",
       "resourceStream": "04acc6412a8340c0a728ebb58af8d56677d357d75a6a0eb5872be1390ad03325",
+      "resourceValidation": "48d09e597c784d731312dfba36a71f30e5bdad4d939d8bc93cb0290908a081fe",
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "schedulingEditor": "f81af91e6cef1676ae1b1d92eb29aa4f36cc97834e40ec639cc8e9f58eb0a3ea",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
@@ -154,7 +165,8 @@
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
-      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
+      "workloadsPage": "1a502e57608a2155f02294aec861104e6c4dce78534f741697fb2283bc5f34c5"
     },
     "ja-JP": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -162,6 +174,7 @@
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
       "common": "50cd88d777836fd8144c5e057ae9d7cf4d28f4ebcdbbe882b2a8d088c745a51b",
       "composeEditor": "1f47a610fd369be3646e7033e59d016a12a21e8e156ee296b959b700537353b5",
+      "composeValidation": "844dd2a221ba2226ab205b2835e3cf87f48e0a1dd6e5006cc94f1f590212a31d",
       "details": "2579b845d9bb82db94201cd78b188514a4f5abe70a0b3b9b89950197bffe8e6b",
       "deviceUpgrade": "f6be5078318d9e5c24ff39872d5b1a0f9452969da6dcf5717cf07c1f4b6c0253",
       "deviceUpgradeForm": "599a7c06ad86b4a5ebace42bd779495e2d181c44df7cb998a4551389b72a1f79",
@@ -180,6 +193,7 @@
       "resourcePanel": "9025dfed6025acd688cc1dc16b129008eb9cb08d4fe5545b73f8713045f92eec",
       "resourceState": "09c1d131e47dadf1a8077170f9c8cafed4581f6e4e02ba67395b42ac8e1cba32",
       "resourceStream": "04acc6412a8340c0a728ebb58af8d56677d357d75a6a0eb5872be1390ad03325",
+      "resourceValidation": "48d09e597c784d731312dfba36a71f30e5bdad4d939d8bc93cb0290908a081fe",
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "schedulingEditor": "f81af91e6cef1676ae1b1d92eb29aa4f36cc97834e40ec639cc8e9f58eb0a3ea",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
@@ -193,7 +207,8 @@
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
-      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
+      "workloadsPage": "1a502e57608a2155f02294aec861104e6c4dce78534f741697fb2283bc5f34c5"
     },
     "ru-RU": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -201,6 +216,7 @@
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
       "common": "50cd88d777836fd8144c5e057ae9d7cf4d28f4ebcdbbe882b2a8d088c745a51b",
       "composeEditor": "1f47a610fd369be3646e7033e59d016a12a21e8e156ee296b959b700537353b5",
+      "composeValidation": "844dd2a221ba2226ab205b2835e3cf87f48e0a1dd6e5006cc94f1f590212a31d",
       "details": "2579b845d9bb82db94201cd78b188514a4f5abe70a0b3b9b89950197bffe8e6b",
       "deviceUpgrade": "f6be5078318d9e5c24ff39872d5b1a0f9452969da6dcf5717cf07c1f4b6c0253",
       "deviceUpgradeForm": "599a7c06ad86b4a5ebace42bd779495e2d181c44df7cb998a4551389b72a1f79",
@@ -219,6 +235,7 @@
       "resourcePanel": "9025dfed6025acd688cc1dc16b129008eb9cb08d4fe5545b73f8713045f92eec",
       "resourceState": "09c1d131e47dadf1a8077170f9c8cafed4581f6e4e02ba67395b42ac8e1cba32",
       "resourceStream": "04acc6412a8340c0a728ebb58af8d56677d357d75a6a0eb5872be1390ad03325",
+      "resourceValidation": "48d09e597c784d731312dfba36a71f30e5bdad4d939d8bc93cb0290908a081fe",
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "schedulingEditor": "f81af91e6cef1676ae1b1d92eb29aa4f36cc97834e40ec639cc8e9f58eb0a3ea",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
@@ -232,7 +249,8 @@
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
-      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
+      "workloadsPage": "1a502e57608a2155f02294aec861104e6c4dce78534f741697fb2283bc5f34c5"
     },
     "uk-UA": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -240,6 +258,7 @@
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
       "common": "50cd88d777836fd8144c5e057ae9d7cf4d28f4ebcdbbe882b2a8d088c745a51b",
       "composeEditor": "1f47a610fd369be3646e7033e59d016a12a21e8e156ee296b959b700537353b5",
+      "composeValidation": "844dd2a221ba2226ab205b2835e3cf87f48e0a1dd6e5006cc94f1f590212a31d",
       "details": "2579b845d9bb82db94201cd78b188514a4f5abe70a0b3b9b89950197bffe8e6b",
       "deviceUpgrade": "f6be5078318d9e5c24ff39872d5b1a0f9452969da6dcf5717cf07c1f4b6c0253",
       "deviceUpgradeForm": "599a7c06ad86b4a5ebace42bd779495e2d181c44df7cb998a4551389b72a1f79",
@@ -258,6 +277,7 @@
       "resourcePanel": "9025dfed6025acd688cc1dc16b129008eb9cb08d4fe5545b73f8713045f92eec",
       "resourceState": "09c1d131e47dadf1a8077170f9c8cafed4581f6e4e02ba67395b42ac8e1cba32",
       "resourceStream": "04acc6412a8340c0a728ebb58af8d56677d357d75a6a0eb5872be1390ad03325",
+      "resourceValidation": "48d09e597c784d731312dfba36a71f30e5bdad4d939d8bc93cb0290908a081fe",
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "schedulingEditor": "f81af91e6cef1676ae1b1d92eb29aa4f36cc97834e40ec639cc8e9f58eb0a3ea",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
@@ -271,7 +291,8 @@
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
-      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
+      "workloadsPage": "1a502e57608a2155f02294aec861104e6c4dce78534f741697fb2283bc5f34c5"
     },
     "zh-Hans": {
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
@@ -279,6 +300,7 @@
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
       "common": "50cd88d777836fd8144c5e057ae9d7cf4d28f4ebcdbbe882b2a8d088c745a51b",
       "composeEditor": "1f47a610fd369be3646e7033e59d016a12a21e8e156ee296b959b700537353b5",
+      "composeValidation": "844dd2a221ba2226ab205b2835e3cf87f48e0a1dd6e5006cc94f1f590212a31d",
       "details": "2579b845d9bb82db94201cd78b188514a4f5abe70a0b3b9b89950197bffe8e6b",
       "deviceUpgrade": "f6be5078318d9e5c24ff39872d5b1a0f9452969da6dcf5717cf07c1f4b6c0253",
       "deviceUpgradeForm": "599a7c06ad86b4a5ebace42bd779495e2d181c44df7cb998a4551389b72a1f79",
@@ -297,6 +319,7 @@
       "resourcePanel": "9025dfed6025acd688cc1dc16b129008eb9cb08d4fe5545b73f8713045f92eec",
       "resourceState": "09c1d131e47dadf1a8077170f9c8cafed4581f6e4e02ba67395b42ac8e1cba32",
       "resourceStream": "04acc6412a8340c0a728ebb58af8d56677d357d75a6a0eb5872be1390ad03325",
+      "resourceValidation": "48d09e597c784d731312dfba36a71f30e5bdad4d939d8bc93cb0290908a081fe",
       "runtime": "165d4184b7ab390b675f3e627e84dc23b9524ea3d9363a2190ed95b6bd797416",
       "schedulingEditor": "f81af91e6cef1676ae1b1d92eb29aa4f36cc97834e40ec639cc8e9f58eb0a3ea",
       "selection": "faa3fab9702217e2b36d6eb62e4abd15dcb6264203590f5f04cbf14ace6fee23",
@@ -310,7 +333,8 @@
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
-      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
+      "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
+      "workloadsPage": "1a502e57608a2155f02294aec861104e6c4dce78534f741697fb2283bc5f34c5"
     }
   },
   "version": 1

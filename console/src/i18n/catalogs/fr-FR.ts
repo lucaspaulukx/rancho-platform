@@ -1,4 +1,73 @@
 export const frFR = {
+  'workloadsPage.noServices': 'Aucun service dans ce contexte',
+  'workloadsPage.noContainers': 'Aucun conteneur dans ce contexte',
+  'workloadsPage.emptyDescription': 'Vérifiez l’environnement sélectionné et les filtres.',
+  'workloadsPage.service': 'Service',
+  'workloadsPage.container': 'Conteneur',
+  'workloadsPage.state': 'État',
+  'workloadsPage.stack': 'Stack',
+  'workloadsPage.noStack': 'Sans stack',
+  'workloadsPage.image': 'Image',
+  'workloadsPage.scale': 'Conteneurs / échelle',
+  'workloadsPage.host': 'Hôte',
+  'workloadsPage.details': 'Détails',
+  'workloadsPage.refresh': 'Actualiser l’inventaire',
+  'workloadsPage.searchStack': 'Rechercher des stacks',
+  'workloadsPage.searchPlaceholder': 'Nom, description ou identifiant…',
+  'workloadsPage.allStacks': 'Toutes les stacks',
+  'workloadsPage.allStates': 'Tous les états',
+  'workloadsPage.includeInfra': 'Inclure l’infrastructure',
+  'workloadsPage.unavailableStack':
+    'La stack sélectionnée n’existe pas dans cet environnement ou est inaccessible à votre compte.',
+  'workloadsPage.infraStack': 'Stack d’infrastructure',
+  'workloadsPage.appStack': 'Stack d’application',
+  'workloadsPage.unknownHealth': 'non renseigné',
+  'workloadsPage.noStacks': 'Aucune stack ne correspond à ce filtre',
+  'workloadsPage.noStacksDescription':
+    'Vérifiez les filtres ou créez une stack dans cet environnement.',
+  'workloadsPage.stackResources': 'Ressources de la stack',
+  'workloadsPage.serviceContainers': 'Conteneurs du service',
+  'workloadsPage.services': 'services',
+  'workloadsPage.containers': 'conteneurs',
+  'workloadsPage.health': 'État de santé : {state}',
+  'workloadsPage.open': 'Ouvrir {name}',
+  'workloadsPage.openStack': 'Ouvrir la stack {name}',
+  'workloadsPage.inventorySummary':
+    '{stacks} stacks · {services} services · {containers} conteneurs',
+  'workloadsPage.servicesTab': 'Services ({count})',
+  'workloadsPage.containersTab': 'Conteneurs ({count})',
+  'resourceValidation.memoryFormat':
+    'Saisissez une valeur de mémoire positive ou nulle, sans notation exponentielle.',
+  'resourceValidation.memoryRange': 'La mémoire est hors limites.',
+  'resourceValidation.memoryBytes':
+    'La mémoire doit correspondre à un nombre entier d’octets dans la plage sûre.',
+  'resourceValidation.depth': 'La configuration comporte trop de niveaux imbriqués.',
+  'resourceValidation.memoryValues':
+    'La mémoire et la réservation doivent être des nombres entiers positifs ou nuls d’octets.',
+  'resourceValidation.memoryReservation':
+    'La réservation de mémoire ne peut pas dépasser la limite.',
+  'resourceValidation.limitInteger':
+    'Saisissez un entier de -1 à 2147483647. -1 signifie illimité.',
+  'resourceValidation.limitRange':
+    'La limite dépasse la plage acceptée par cette instance Rancher.',
+  'resourceValidation.limitCount': 'Configurez jusqu’à 32 limites de processus.',
+  'resourceValidation.limitFormat': 'La liste des limites de processus a un format incompatible.',
+  'resourceValidation.limitNames': 'Choisissez des noms de limite connus, sans doublons.',
+  'resourceValidation.limitOrder': 'La limite souple ne peut pas dépasser la limite stricte.',
+  'resourceValidation.limitContract':
+    'Le contrat actuel ne permet pas de configurer les limites de processus.',
+  'composeValidation.createUnavailable': 'La création de stacks est indisponible.',
+  'composeValidation.nameRequired': 'Saisissez le nom de la stack.',
+  'composeValidation.dockerRequired': 'Renseignez Docker Compose.',
+  'composeValidation.fileTooLarge': '{label} accepte jusqu’à 512 KiB en UTF-8.',
+  'composeValidation.nullCharacter': '{label} contient un caractère nul.',
+  'composeValidation.variableName':
+    'Chaque variable doit avoir un nom valide, par exemple APP_PORT.',
+  'composeValidation.duplicateVariable': 'Variable en double : {name}.',
+  'composeValidation.createChanged': 'La création de stacks n’est plus disponible.',
+  'composeValidation.fieldChanged':
+    'Rancher ne permet plus de renseigner {name}. Rouvrez le panneau.',
+
   'composeEditor.hideLabel': 'Masquer {label}',
   'composeEditor.showLabel': 'Afficher {label}',
   'composeEditor.size': 'Lignes : {lines} · octets : {bytes}',
