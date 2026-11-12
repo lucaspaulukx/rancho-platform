@@ -63,6 +63,7 @@ describe('Registered locale catalog gate', () => {
     expect(report.registeredPortugueseKeys).toBe(report.registeredEnglishKeys);
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
     const previewDomains = new Set([
+      'accessDiagnostics',
       'auth',
       'bindingsEditor',
       'bulkOperation',
@@ -74,6 +75,7 @@ describe('Registered locale catalog gate', () => {
       'deviceUpgradeForm',
       'devices',
       'environmentEditor',
+      'groups',
       'healthCheckEditor',
       'healthCheckValidation',
       'language',
@@ -108,7 +110,6 @@ describe('Registered locale catalog gate', () => {
     const previewScope = Object.keys(englishMessages).filter(
       (key) =>
         previewDomains.has(key.split('.')[0]!) ||
-        key.startsWith('groups.role.') ||
         key === 'environment.selected' ||
         key === 'selection.count',
     );
@@ -126,6 +127,7 @@ describe('Registered locale catalog gate', () => {
     for (const locale of previewLocales) {
       const catalog = previewCatalogs[locale]!;
       expect(Object.keys(catalog).sort()).toEqual(previewScope.sort());
+      expect(catalog['groups.inactive']).toMatch(/^ · /);
       expect(catalog['resourcePanel.editPrefix']).toMatch(/ $/);
       expect(catalog['resourcePanel.scalePrefix']).toMatch(/ $/);
     }

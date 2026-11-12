@@ -7,6 +7,8 @@ import { GroupEditor } from '../pages/Groups';
 import { ToastProvider } from '../components/ui';
 import { AccessDiagnostics, GroupAudit } from '../components/AccessDiagnostics';
 import { I18nProvider } from '../i18n/provider';
+import { faIR } from '../i18n/catalogs/fa-IR';
+import type { Locale } from '../i18n/locales';
 
 vi.mock('../state', () => ({
   useApp: () => ({ identity: 'fixture', project: { id: '1a12' } }),
@@ -28,6 +30,14 @@ function mount(element: React.ReactNode) {
       {element}
     </QueryClientProvider>,
   );
+}
+
+function switchLocale(locale: Locale) {
+  act(() => {
+    const key = 'rancho.console.locale.anonymous';
+    localStorage.setItem(key, JSON.stringify({ version: 1, locale }));
+    window.dispatchEvent(new StorageEvent('storage', { key }));
+  });
 }
 
 describe('Diagnóstico backend e snapshots de grupos', () => {
@@ -65,10 +75,27 @@ describe('Diagnóstico backend e snapshots de grupos', () => {
         },
       ],
     });
-    mount(<AccessDiagnostics account={account} projects={projects} onClose={vi.fn()} />);
+    mount(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'fa-IR'],
+          selectable: true,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <AccessDiagnostics account={account} projects={projects} onClose={vi.fn()} />
+      </I18nProvider>,
+    );
     expect(await screen.findByText('Não determinado')).toBeInTheDocument();
     expect(screen.getByText(/Diagnóstico parcial/)).toBeInTheDocument();
     expect(screen.queryByText('Proprietário')).not.toBeInTheDocument();
+    switchLocale('fa-IR');
+    expect(await screen.findByText(faIR['accessDiagnostics.undetermined'])).toBeInTheDocument();
+    expect(screen.getByText(faIR['accessDiagnostics.partialWarning'])).toBeInTheDocument();
+    expect(screen.queryByText(faIR['groups.role.owner'])).not.toBeInTheDocument();
   });
   it('rejeita diagnóstico retornado para outra conta', async () => {
     respond({
@@ -179,7 +206,7 @@ describe('Manutenção de vínculos de grupos', () => {
           policy={{
             enabled: true,
             defaultLocale: 'pt-BR',
-            availableLocales: ['pt-BR', 'en-US'],
+            availableLocales: ['pt-BR', 'en-US', 'fa-IR'],
             selectable: true,
             detectBrowser: false,
             preview: true,
@@ -196,16 +223,17 @@ describe('Manutenção de vínculos de grupos', () => {
     const readOnly = within(permission).getByRole('option', { name: 'Somente leitura' });
     expect(readOnly).toHaveValue('readonly');
     await userEvent.selectOptions(permission, readOnly);
-    act(() => {
-      localStorage.setItem(
-        'rancho.console.locale.anonymous',
-        JSON.stringify({ version: 1, locale: 'en-US' }),
-      );
-      window.dispatchEvent(new StorageEvent('storage', { key: 'rancho.console.locale.anonymous' }));
-    });
+    switchLocale('en-US');
     expect(screen.getByRole('combobox', { name: 'Permission in Operações' })).toBe(permission);
     expect(permission).toHaveValue('readonly');
     expect(within(permission).getByRole('option', { name: 'Read Only' })).toHaveValue('readonly');
+    switchLocale('fa-IR');
+    const persianPermission = faIR['groups.permissionLabel'].replace('{name}', 'Operações');
+    expect(await screen.findByRole('combobox', { name: persianPermission })).toBe(permission);
+    expect(permission).toHaveValue('readonly');
+    await userEvent.click(screen.getByRole('tab', { name: faIR['groups.review'] }));
+    expect(screen.getByText(faIR['groups.role.readonly'])).toBeInTheDocument();
+    switchLocale('en-US');
     await userEvent.click(screen.getByRole('tab', { name: 'Review' }));
     expect(screen.getByText('Read Only')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('tab', { name: 'Members (0)' }));
