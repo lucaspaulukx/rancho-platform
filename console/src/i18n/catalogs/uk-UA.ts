@@ -199,7 +199,12 @@ export const ukUA = {
   'operations.create': 'Створити',
   'operations.refresh': 'Оновити',
   'operations.bulkActions': 'Групові дії',
-  'operations.selection': 'Вибрано ресурсів: {count} · максимум 100',
+  'operations.selection': {
+    one: 'Вибрано {count} ресурс · максимум 100',
+    few: 'Вибрано {count} ресурси · максимум 100',
+    many: 'Вибрано {count} ресурсів · максимум 100',
+    other: 'Вибрано {count} ресурсу · максимум 100',
+  },
   'operations.selectedAction': 'Вибрано дію «{action}»',
   'operations.noCommonAction': 'Для вибраних ресурсів немає спільних доступних дій.',
   'operations.clearSelection': 'Скасувати вибір',

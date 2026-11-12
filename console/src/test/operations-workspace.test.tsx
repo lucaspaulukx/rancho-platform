@@ -178,7 +178,7 @@ describe('Workspace unificado', () => {
     expect(continuation.getByRole('button', { name: 'web' })).toBeInTheDocument();
     expect(continuation.getAllByRole('button', { name: /^web-\d+$/ })).toHaveLength(9);
     expect(continuation.queryByRole('button', { name: 'web-1' })).not.toBeInTheDocument();
-    expect(screen.getByText('1 recursos selecionados · limite 100')).toBeInTheDocument();
+    expect(screen.getByText('1 recurso selecionado · limite 100')).toBeInTheDocument();
     fireEvent.click(continuation.getByRole('button', { name: 'Ações de web-107' }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'Reiniciar' }));
     const dialog = screen.getByRole('dialog', { name: 'Operação do recurso' });
@@ -197,7 +197,7 @@ describe('Workspace unificado', () => {
     await userEvent.click(panel.getByRole('checkbox', { name: 'Selecionar web-1' }));
     await userEvent.click(panel.getByRole('button', { name: 'Próxima página' }));
     expect(panel.getAllByRole('checkbox')).toHaveLength(2);
-    expect(panel.getByText('1 recursos selecionados · limite 100')).toBeInTheDocument();
+    expect(panel.getByText('1 recurso selecionado · limite 100')).toBeInTheDocument();
     await userEvent.click(panel.getByRole('checkbox', { name: 'Selecionar web-52' }));
     expect(panel.getByText('2 recursos selecionados · limite 100')).toBeInTheDocument();
 
@@ -286,6 +286,7 @@ describe('Workspace unificado', () => {
     expect(await panel.findByRole('checkbox', { name: 'Sélectionner web-1' })).toBe(selected);
     expect(selected).toBeChecked();
     expect(panel.getByRole('region', { name: 'Actions groupées' })).toBeInTheDocument();
+    expect(panel.getByText('1 ressource sélectionnée · limite de 100')).toBeInTheDocument();
     expect(router.state.location.search).toBe(route);
     await userEvent.click(panel.getByRole('button', { name: 'Actions pour web-1' }));
     await userEvent.click(screen.getByRole('menuitem', { name: 'Redémarrer' }));

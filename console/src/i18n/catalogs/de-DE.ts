@@ -264,7 +264,10 @@ export const deDE = {
   'operations.create': 'Erstellen',
   'operations.refresh': 'Aktualisieren',
   'operations.bulkActions': 'Sammelaktionen',
-  'operations.selection': 'Ausgewählte Ressourcen: {count} · maximal 100',
+  'operations.selection': {
+    one: '{count} Ressource ausgewählt · maximal 100',
+    other: '{count} Ressourcen ausgewählt · maximal 100',
+  },
   'operations.selectedAction': 'Ausgewählte Aktion: {action}',
   'operations.noCommonAction':
     'Für die ausgewählten Ressourcen ist keine gemeinsame Aktion verfügbar.',

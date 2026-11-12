@@ -200,7 +200,12 @@ export const ruRU = {
   'operations.create': 'Создать',
   'operations.refresh': 'Обновить',
   'operations.bulkActions': 'Массовые действия',
-  'operations.selection': 'Выбрано ресурсов: {count} · максимум 100',
+  'operations.selection': {
+    one: 'Выбран {count} ресурс · максимум 100',
+    few: 'Выбрано {count} ресурса · максимум 100',
+    many: 'Выбрано {count} ресурсов · максимум 100',
+    other: 'Выбрано {count} ресурса · максимум 100',
+  },
   'operations.selectedAction': 'Выбрано действие «{action}»',
   'operations.noCommonAction': 'Для выбранных ресурсов нет общих доступных действий.',
   'operations.clearSelection': 'Снять выделение',
