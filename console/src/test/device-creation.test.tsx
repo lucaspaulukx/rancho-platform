@@ -287,7 +287,7 @@ describe('Structured device creation integration', () => {
         await screen.findByRole('dialog', { name: 'Créer : conteneur autonome' }),
       ).toBeVisible();
       expect(screen.getByRole('alert')).toHaveTextContent(french);
-      expect(screen.getByLabelText('Name')).toBe(name);
+      expect(screen.getByLabelText('Nom')).toBe(name);
       expect(name).toHaveValue('creation-fixture');
       changeLocale('de-DE');
       expect(
