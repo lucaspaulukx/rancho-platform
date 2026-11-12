@@ -2,5 +2,6 @@
   "initialJavaScriptGzip": 262144,
   "initialCssGzip": 20480,
   "largestLazyJavaScriptGzip": 102400,
-  "totalJavaScriptGzip": 614400
+  "applicationJavaScriptGzip": 614400,
+  "largestPreviewCatalogGzip": 65536
 }

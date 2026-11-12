@@ -6,7 +6,7 @@
 
 The owned-browser `console/tests/localization_acceptance.py` harness also simulates one failed Audit JavaScript module response. It verifies localized recovery, retains the environment URL and reloads the actual module after transport returns. Its browser contexts allow read-only API traffic and use a temporary session that is revoked during cleanup.
 
-The production build runs `check:bundles` after Vite. It reads the generated manifest, follows static imports and checks gzip sizes against `console/scripts/bundle-budgets.json`. Limits cover initial JavaScript (256 KiB), initial CSS (20 KiB), the largest lazy JavaScript chunk (100 KiB) and total JavaScript (600 KiB). Shared imports and CSS are counted once. Each preview catalog must have its own dynamic entry outside the initial import graph. These artifact budgets complement runtime measurements of latency, memory and rendering. Review the change and its measured cost before adjusting a limit.
+The production build runs `check:bundles` after Vite. It follows manifest imports and checks gzip sizes against `console/scripts/bundle-budgets.json`. The limits are 256 KiB for initial JavaScript, 20 KiB for initial CSS, 100 KiB for any lazy JavaScript chunk, 600 KiB for application JavaScript and 64 KiB for each preview catalog. A preview catalog counts toward its own limit when it has a dedicated dynamic entry and no static importer. Shared code stays in the application total, and the report also shows the size of the complete JavaScript package.
 
 
 
