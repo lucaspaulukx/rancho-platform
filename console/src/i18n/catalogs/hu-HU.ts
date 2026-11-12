@@ -1,4 +1,251 @@
 export const huHU = {
+  'composeEditor.hideLabel': '{label} elrejtése',
+  'composeEditor.showLabel': '{label} megjelenítése',
+  'composeEditor.size': '{lines} sor · {bytes} bájt',
+  'composeEditor.hide': 'Elrejtés',
+  'composeEditor.show': 'Megjelenítés',
+  'composeEditor.hint':
+    'A tartalom átalakítás nélkül kerül a Rancherhez. A korlát 512 KiB UTF-8 kódolás esetén.',
+  'composeEditor.hidden':
+    'A tartalom rejtve van. A szerkesztéshez válassza a „Megjelenítés” lehetőséget.',
+  'composeEditor.stackName': 'Stack neve',
+  'composeEditor.nameHint': 'Betűk, számjegyek és kötőjelek. Legfeljebb 63 karakter.',
+  'composeEditor.description': 'Leírás',
+  'composeEditor.creationMode': 'A stack létrehozásának módja',
+  'composeEditor.docker': 'Docker Compose',
+  'composeEditor.rancher': 'Rancher Compose (nem kötelező)',
+  'composeEditor.start': 'Szolgáltatások indítása importálás után',
+  'composeEditor.startDescription':
+    'Konténereket hoz létre a kiválasztott környezetben. Hagyja üresen a jelölőnégyzetet, ha indítás előtt ellenőrizni szeretné a szolgáltatásokat.',
+  'composeEditor.startWarning':
+    'Az importálás konténereket hozhat létre és erőforrásokat használhat fel a kiválasztott környezetben.',
+  'composeEditor.startManually':
+    'A szolgáltatások importálása automatikus indítás nélkül történik. Az „Indítás” művelettel indíthatja el őket.',
+  'composeEditor.empty': 'Üres stack',
+  'composeEditor.import': 'Compose importálása',
+  'composeEditor.compatibility':
+    'A Rancher 1.6 verzióval kompatibilis formátumot használjon. A kiszolgáló ellenőrzi a fájlokat és elvégzi az importálást. Az eredmény a stackben követhető.',
+  'composeEditor.variables': 'Interpolációs változók',
+  'composeEditor.variablesNote':
+    'A Rancher ezeket az értékeket a fájlok importálásakor használja. Az értékek nem kerülnek a konzol beállításai közé.',
+  'composeEditor.addVariable': 'Változó hozzáadása',
+  'composeEditor.emptyHint':
+    'Hozza létre a stacket, majd adjon hozzá szolgáltatásokat a stack sorának menüjéből.',
+  'composeEditor.variableName': 'A(z) {index}. változó neve',
+  'composeEditor.variableValue': 'A(z) {index}. változó értéke',
+  'composeEditor.removeVariable': 'A(z) {index}. változó eltávolítása',
+  'composeEditor.review': 'Ellenőrizze a stacket.',
+
+  'serviceEditors.linkError.environment': 'A szolgáltatás nem ehhez a környezethez tartozik.',
+  'serviceEditors.linkError.foreign': 'Egyes kapcsolatok másik környezethez tartoznak.',
+  'serviceEditors.linkError.changed':
+    'Egy másik kliens módosította a kapcsolatokat. Zárja be, majd nyissa meg újra a panelt.',
+  'serviceEditors.linkError.advanced':
+    'Egyes kapcsolatok speciálisak, átmenetiek vagy elérhetetlen célokra mutatnak. A konfiguráció megőrzéséhez használja a natív űrlapot.',
+  'serviceEditors.linkError.unavailable':
+    'A kapcsolatok szerkesztése ebben a kontextusban nem érhető el.',
+  'serviceEditors.linkError.limit': 'Műveletenként legfeljebb 100 kapcsolatot szerkesszen.',
+  'serviceEditors.linkError.contract':
+    'A kapcsolatok szerződése megváltozott. Nyissa meg újra a panelt.',
+  'serviceEditors.linkError.stack': 'A szolgáltatás stackje nem érhető el ehhez a művelethez.',
+  'serviceEditors.linkError.target':
+    'Válasszon a forrástól eltérő, elérhető alkalmazásszolgáltatást ebben a környezetben.',
+  'serviceEditors.linkError.alias':
+    'Érvénytelen álnév. Betűket, számjegyeket, kötőjelet, pontot vagy aláhúzásjelet használjon.',
+  'serviceEditors.linkError.duplicate':
+    'A célok és az álnevek csak egyszer szerepelhetnek a listában.',
+  'serviceEditors.unsupported': 'Ezek a kapcsolatok nem szerkeszthetők.',
+  'serviceEditors.reopen': 'Nyissa meg újra a kapcsolatszerkesztőt.',
+  'serviceEditors.contract': 'A szolgáltatáskapcsolatok szerződése nem érhető el.',
+  'serviceEditors.changed': 'A kapcsolatok szerződése megváltozott. Nyissa meg újra a panelt.',
+  'serviceEditors.confirmRemove': 'Erősítse meg az összes kapcsolat eltávolítását.',
+  'serviceEditors.sent':
+    'A kapcsolatok elküldve a Ranchernek. Kövesse a konfigurációt és a topológiát.',
+  'serviceEditors.reviewLinks': 'Ellenőrizze a kapcsolatokat.',
+  'serviceEditors.close': 'Bezárás',
+  'serviceEditors.review': 'Módosítások ellenőrzése',
+  'serviceEditors.linkInfo':
+    'Válassza ki az alkalmazás által használt szolgáltatásokat. A választható álnév a natív konfigurációban azonosítja a célt. A lista módosítása hatással lehet a névfeloldásra és a hálózati kapcsolatra.',
+  'serviceEditors.denied':
+    'A fiókja vagy az aktuális állapot nem teszi lehetővé a kapcsolatok módosítását.',
+  'serviceEditors.empty': 'Ennek a szolgáltatásnak nincs kimenő kapcsolata.',
+  'serviceEditors.select': 'Szolgáltatás kiválasztása…',
+  'serviceEditors.aliasHint':
+    'Nem kötelező. Álnév hiányában a Rancher a szolgáltatás nevét használja.',
+  'serviceEditors.add': 'Kapcsolat hozzáadása',
+  'serviceEditors.acknowledge': 'Megerősítem a szolgáltatás összes kapcsolatának eltávolítását',
+  'serviceEditors.apply': 'Alkalmazza a szolgáltatáskapcsolatokat?',
+  'serviceEditors.serviceName': 'szolgáltatás neve',
+  'serviceEditors.discard': 'Elveti a mentetlen kapcsolatokat?',
+  'serviceEditors.discardDescription': 'A Rancher konfigurációja változatlan marad.',
+  'serviceEditors.context': 'Másik nézetre vált?',
+  'serviceEditors.contextDescription':
+    'Vannak mentetlen kapcsolatok. Várja meg a folyamatban lévő beküldés befejezését.',
+  'serviceEditors.link': '{index}. kapcsolat',
+  'serviceEditors.remove': 'A(z) {index}. kapcsolat eltávolítása',
+  'serviceEditors.target': '{index}. célszolgáltatás',
+  'serviceEditors.alias': 'A(z) {index}. kapcsolat álneve',
+  'serviceEditors.targetMissing': 'Nem elérhető cél ({id})',
+  'serviceEditors.title': 'Kapcsolatok · {name}',
+  'serviceEditors.environment': 'Környezet: {name}',
+  'serviceEditors.applyDescription':
+    'A(z) {name} listáját {count} kapcsolat váltja fel, kizárólag ebben a környezetben: {environment}.',
+  'serviceEditors.before': 'Előtte · {count} kapcsolat',
+  'serviceEditors.after': 'Utána · {count} kapcsolat',
+  'serviceEditors.summary': '{target} · álnév: {alias}',
+  'serviceEditors.scaleError.integer': 'Egész számmal adja meg a konténerek számát.',
+  'serviceEditors.scaleError.range':
+    'A példányszám kívül esik a Rancher által engedélyezett tartományon.',
+  'serviceEditors.scaleError.unavailable': 'A skálázás nem érhető el ehhez az erőforráshoz.',
+  'serviceEditors.scaleError.changed':
+    'Egy másik kliens módosította a példányszámot. A frissítéshez nyissa meg újra a panelt.',
+  'serviceEditors.scaleError.unchanged': 'Adjon meg a jelenlegitől eltérő példányszámot.',
+  'serviceEditors.confirmZero':
+    'A nulla példányszám alkalmazása előtt erősítse meg a konténerek leállítását.',
+  'serviceEditors.reviewScale': 'Ellenőrizze a példányszámot.',
+  'serviceEditors.quantity': 'A konténerek kívánt száma',
+  'serviceEditors.scaleInfo':
+    'A Rancher módosítja a szolgáltatás tényleges példányszámát. A csökkentés konténerek leállításával járhat, a növelés pedig a rendelkezésre álló kapacitástól függ. Időbe telhet, amíg a futó konténerek száma eléri a beállított példányszámot.',
+  'serviceEditors.acknowledgeZero':
+    'Tudomásul veszem, hogy a nulla példányszám leállítja a szolgáltatás konténereit',
+  'serviceEditors.templateHint': 'A művelet megőrzi a katalógussablon válaszait.',
+  'serviceEditors.currentScale': 'Jelenleg beállított példányszám: {scale}.',
+
+  'stackComposeUpgradePanel.dockerCompose': 'Docker Compose',
+  'stackComposeUpgradePanel.rancherCompose': 'Rancher Compose',
+  'stackComposeUpgradePanel.impact':
+    'Tudomásul veszem, hogy a frissítés szolgáltatásokat indíthat és konténereket cserélhet le',
+  'stackComposeUpgradePanel.reviewTitle': 'Frissíti a stacket a Compose használatával?',
+  'stackComposeUpgradePanel.reviewDescription':
+    'Az ellenőrzés közben a fájlok rejtve vannak. A beküldés előtt a rendszer újra ellenőrzi a stacket és az exportját. A meglévő paraméterek megmaradnak. A kiszolgáló ellenőrzi a YAML-t és végrehajtja a frissítést.',
+  'stackComposeUpgradePanel.discardTitle': 'Elveti a Compose-módosításokat?',
+  'stackComposeUpgradePanel.discardDescription':
+    'A módosított fájlok még nincsenek elküldve a Ranchernek.',
+  'stackComposeUpgradePanel.leaveTitle': 'Kilép függőben lévő Compose-módosításokkal?',
+  'stackComposeUpgradePanel.leaveDescription':
+    'A fájlok még nincsenek elküldve. Várja meg a folyamatban lévő frissítés befejezését.',
+  'stackComposeUpgradePanel.close': 'Bezárás',
+  'stackComposeUpgradePanel.review': 'Frissítés ellenőrzése',
+  'stackComposeUpgradePanel.warning':
+    'A Compose-frissítés szolgáltatásokat indíthat és konténereket hozhat létre újra. A Rancher megtartja a meglévő szolgáltatások példányszámát. A módosításhoz használja a „Szolgáltatás skálázása” műveletet. Az új szolgáltatások 1 példánnyal indulhatnak akkor is, ha a fájlban scale: 0 szerepel. Az export nem a környezet teljes biztonsági mentése. Folytatás előtt ellenőrizze a példányszámokat és a fájlokat.',
+  'stackComposeUpgradePanel.title': 'Compose frissítése · {name}',
+  'stackComposeUpgradePanel.description':
+    'Környezet: {name}. A fájlok exportálva az aktuális konfigurációból.',
+  'stackComposeUpgradePanel.saved':
+    'A frissítési kérés beérkezett. Kövesse a stack állapotát, és a natív műveletekkel fejezze be vagy állítsa vissza a frissítést.',
+  'stackComposeUpgradePanel.unavailable': 'A Compose-szerkesztő nem érhető el ehhez a stackhez.',
+  'stackComposeUpgradePanel.permission':
+    'Az exportáláshoz vagy frissítéshez szükséges jogosultság nem érhető el.',
+  'stackComposeUpgradePanel.loadFailed': 'A Compose nem érhető el.',
+  'stackComposeUpgradePanel.reopen': 'Nyissa meg újra a Compose-szerkesztőt.',
+  'stackComposeUpgradePanel.requestFailed': 'Nem sikerült befejezni a Compose-műveletet.',
+  'stackComposeUpgradePanel.httpError':
+    'A Compose-művelet nem fejeződött be (HTTP {status}). Ellenőrizze a fájlt vagy a stack folyamatait.',
+  'stackComposeUpgradePanel.validation.stackUnavailable':
+    'A stack ebben a környezetben vagy állapotban nem érhető el.',
+  'stackComposeUpgradePanel.validation.noSource':
+    'Ehhez a stackhez nincs Compose-forrás. Használja a szolgáltatásszerkesztőket.',
+  'stackComposeUpgradePanel.validation.actionUnavailable': 'A stackművelet nem érhető el.',
+  'stackComposeUpgradePanel.validation.invalidTarget': 'Érvénytelen stackműveleti cél.',
+  'stackComposeUpgradePanel.validation.invalidExport': 'Érvénytelen Compose-export.',
+  'stackComposeUpgradePanel.validation.exportTooLarge':
+    'Az export meghaladja a fájlonkénti 512 KiB-os korlátot.',
+  'stackComposeUpgradePanel.validation.confirmImpact':
+    'Erősítse meg, hogy tudomásul veszi a stack frissítésének hatását.',
+  'stackComposeUpgradePanel.validation.contractUnavailable':
+    'A stack frissítési szerződése nem érhető el.',
+  'stackComposeUpgradePanel.validation.stackChanged':
+    'A stack vagy a szolgáltatásai megváltoztak. Nyissa meg újra a szerkesztőt.',
+  'stackComposeUpgradePanel.validation.changeRequired':
+    'Beküldés előtt módosítson egy Compose-fájlt.',
+  'stackComposeUpgradePanel.validation.fieldDenied': 'A Compose-mező nem engedélyezett.',
+  'stackComposeUpgradePanel.validation.invalidFiles':
+    'Ellenőrizze a Compose-fájlokat és az UTF-8 kódolású fájlokra vonatkozó 512 KiB-os korlátot.',
+  'stackComposeUpgradePanel.validation.preserveParameters':
+    'A jelenlegi paraméterek ezzel a szerződéssel nem őrizhetők meg.',
+  'stackComposeUpgradePanel.validation.invalidParameter':
+    'Az egyik stackparaméter kívül esik a szerződésen.',
+
+  'serviceUpgradeForm.validation.contract': 'A frissítési szerződés nem érhető el.',
+  'serviceUpgradeForm.validation.sidecarContract': 'A sidecar-szerződés nem érhető el.',
+  'serviceUpgradeForm.validation.image': 'Adjon meg érvényes konténerképet szóközök nélkül.',
+  'serviceUpgradeForm.validation.batch': 'A kötegméret legalább 1 értékű egész szám legyen.',
+  'serviceUpgradeForm.validation.interval': 'Az időköz legalább 100 ms értékű egész szám legyen.',
+  'serviceUpgradeForm.validation.order': 'Ellenőrizze a frissítési sorrendet.',
+  'serviceUpgradeForm.validation.differentImage': 'Válasszon a jelenlegitől eltérő konténerképet.',
+  'serviceUpgradeForm.validation.health': 'Ellenőrizze az állapot-ellenőrzést.',
+  'serviceUpgradeForm.validation.healthContract': 'Az állapot-ellenőrzési szerződés nem érhető el.',
+  'serviceUpgradeForm.validation.ulimitContract': 'A folyamatkorlátok szerződése nem érhető el.',
+  'serviceUpgradeForm.validation.securityContract': 'Ellenőrizze a biztonsági szerződést.',
+  'serviceUpgradeForm.validation.memory':
+    'Adjon meg korlátot és foglalást. Az explicit érték eltávolításához adjon meg 0-t.',
+  'serviceUpgradeForm.validation.cpuContract': 'A CPU- és I/O-szerződés nem érhető el.',
+  'serviceUpgradeForm.validation.schedulingContract': 'Az ütemezési szerződés nem érhető el.',
+  'serviceUpgradeForm.validation.sidecarUpgradeContract':
+    'A sidecar-frissítési szerződés nem érhető el.',
+  'serviceUpgradeForm.review': 'Ellenőrizze a frissítést.',
+  'serviceUpgradeForm.limitsNotice':
+    'A korlátok módosítása lecseréli a szolgáltatás konténereit. Az üres lista eltávolítja az explicit korlátokat, és a Docker alapértelmezett értékeit alkalmazza.',
+  'serviceUpgradeForm.securityNotice':
+    'A biztonsági módosítások lecserélik a szolgáltatás konténereit. Megerősítés előtt ellenőrizze a Linux-jogosultságokat, a gazdagéphez való hozzáférést és a fájlrendszer beállításait.',
+  'serviceUpgradeForm.batchNotice':
+    'Kötegenként legfeljebb {batch} konténer frissül, a kötegek között {interval} ms telik el. A portok, változók, kötetek és sidecarok megtartják a jelenlegi beállításokat, kivéve a fent kifejezetten módosítottakat. A rendelkezésre állás a kapacitástól és az alkalmazás állapotától függ.',
+  'serviceUpgradeForm.follow':
+    'A frissítés után itt követheti az állapotot. A „Frissítés befejezése” és a „Frissítés visszaállítása” akkor jelenik meg, amikor a Rancher elérhetővé teszi ezeket a műveleteket.',
+  'serviceUpgradeForm.impact':
+    'Szolgáltatás: {service}. A közzétett portok módosíthatják a hozzáférést. A csatolások módosítása elérhetetlenné teheti a meglévő adatokat. A sidecarok szerkesztése vagy eltávolítása lecseréli a segédkonténereket, és hatással lehet az adatokra vagy a hálózatra. Az állapot-ellenőrzések újralétrehozhatják a konténereket, vagy megszakíthatják a frissítést, ha a végpont hibás. A Rancher a kiválasztott stratégia szerint cseréli le a konténereket. Megerősítés előtt ellenőrizze a mezőket.',
+  'serviceUpgradeForm.image': 'Új konténerkép',
+  'serviceUpgradeForm.bindings': 'Portok és kötetek szerkesztése ebben a frissítésben',
+  'serviceUpgradeForm.health': 'Állapot-ellenőrzés szerkesztése ebben a frissítésben',
+  'serviceUpgradeForm.sidecars': 'Sidecarok szerkesztése ebben a frissítésben',
+  'serviceUpgradeForm.ulimits': 'Folyamatkorlátok szerkesztése ebben a frissítésben',
+  'serviceUpgradeForm.security': 'Biztonsági beállítások szerkesztése ebben a frissítésben',
+  'serviceUpgradeForm.privileged': 'Privilegizált mód',
+  'serviceUpgradeForm.readOnly': 'Csak olvasható fájlrendszer',
+  'serviceUpgradeForm.memory': 'Memória szerkesztése ebben a frissítésben',
+  'serviceUpgradeForm.memoryLimit': 'Memóriakorlát',
+  'serviceUpgradeForm.memoryReservation': 'Memóriafoglalás',
+  'serviceUpgradeForm.cpu': 'CPU és I/O szerkesztése ebben a frissítésben',
+  'serviceUpgradeForm.affinity': 'Affinitások szerkesztése ebben a frissítésben',
+  'serviceUpgradeForm.batch': 'Konténerek száma kötegenként',
+  'serviceUpgradeForm.interval': 'Kötegek közötti időköz (ms)',
+  'serviceUpgradeForm.configuration': 'Konfigurációfrissítés',
+  'serviceUpgradeForm.imageUpgrade': 'Konténerkép frissítése',
+  'serviceUpgradeForm.currentImage': 'Jelenlegi konténerkép:',
+  'serviceUpgradeForm.capAdd': 'Hozzáadott jogosultságok',
+  'serviceUpgradeForm.capDrop': 'Eltávolított jogosultságok',
+  'serviceUpgradeForm.startFirst': 'Új konténerek indítása a jelenlegiek leállítása előtt',
+  'serviceUpgradeForm.confirm': 'Frissíti a szolgáltatás konfigurációját?',
+  'sidecarValidation.depth': 'A sidecar-konfiguráció túl sok szintet tartalmaz.',
+  'sidecarValidation.fieldUnavailable':
+    'A sidecar {name} mezője nem érhető el. Nyissa meg újra a panelt.',
+  'sidecarValidation.reviewItems': 'Ellenőrizze a sidecar-konfiguráció elemeit.',
+  'sidecarValidation.fieldContract': 'A(z) {name} mező sidecar-szerződése nem érhető el.',
+  'sidecarValidation.limit': 'Legfeljebb 50 sidecart tartalmazó listát használjon.',
+  'sidecarValidation.contract': 'A sidecar-szerződés nem érhető el.',
+  'sidecarValidation.review': 'Ellenőrizze a sidecar-konfigurációt.',
+  'sidecarValidation.name':
+    'A sidecarok neve legyen egyedi, térjen el a szolgáltatás nevétől, és legfeljebb 63 betűt, számjegyet vagy kötőjelet tartalmazzon.',
+  'sidecarValidation.image': 'Adjon meg érvényes konténerképet a(z) {name} sidecarhoz.',
+  'sidecarValidation.reservedImage':
+    'Ez a konténerkép a Rancher eltávolítási szerződésének van fenntartva. Használja a „Sidecar eltávolítása” műveletet.',
+  'sidecarValidation.networkMode':
+    'A container hálózati móddal használhatja a szolgáltatás egy másik konténerének hálózatát.',
+  'sidecarValidation.links':
+    'Ellenőrizze a szolgáltatás konténerei közötti hálózati és kötetkapcsolatokat.',
+  'sidecarValidation.cycle':
+    'A sidecarok közötti hálózati és kötetkapcsolatok nem alkothatnak ciklust.',
+  'workloadPolicyValidation.limit': 'Legfeljebb 100 affinitási szabályt használjon.',
+  'workloadPolicyValidation.rule':
+    'Érvényes kulcsokat és értékeket adjon meg az affinitási szabályokban, vesszők és sortörések nélkül.',
+  'workloadPolicyValidation.map': 'Érvénytelen ütemezési címkék.',
+  'workloadPolicyValidation.text': 'A címkéknek szöveget kell tartalmazniuk.',
+  'workloadPolicyValidation.global':
+    'Globális ütemezésnél csak kötelező vagy kizáró szabályokkal használt gazdagépcímkék adhatók meg.',
+  'workloadPolicyValidation.depth': 'A konfiguráció túl sok egymásba ágyazott szintet tartalmaz.',
+  'workloadPolicyValidation.capabilities':
+    'Ellenőrizze a biztonsági jogosultságokat az aktuális szerződés alapján.',
+
   'bindingsEditor.portsTitle': 'Közzétett portok',
   'bindingsEditor.volumesTitle': 'Kötetek',
   'bindingsEditor.portsHint':

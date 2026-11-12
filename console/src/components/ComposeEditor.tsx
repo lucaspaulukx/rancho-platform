@@ -51,7 +51,7 @@ export function ComposeEditor({
       )}
       <small className="muted">
         {t('composeEditor.size', {
-          lines: String(value ? value.split('\n').length : 0),
+          lines: value ? value.split('\n').length : 0,
           bytes: new TextEncoder().encode(value).byteLength,
         })}
       </small>

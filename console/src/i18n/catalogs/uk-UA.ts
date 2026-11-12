@@ -849,4 +849,235 @@ export const ukUA = {
   'selectorRows.removeRow': 'Видалити мітку {index}',
   'selectorRows.remove': 'Видалити',
   'selectorRows.add': 'Додати мітку',
+  'serviceUpgradeForm.validation.contract': 'Контракт оновлення недоступний.',
+  'serviceUpgradeForm.validation.sidecarContract': 'Контракт допоміжних контейнерів недоступний.',
+  'serviceUpgradeForm.validation.image': 'Укажіть допустимий образ без пробілів.',
+  'serviceUpgradeForm.validation.batch': 'Розмір партії має бути цілим числом не менше ніж 1.',
+  'serviceUpgradeForm.validation.interval': 'Інтервал має бути цілим числом не менше ніж 100 мс.',
+  'serviceUpgradeForm.validation.order': 'Перевірте порядок оновлення.',
+  'serviceUpgradeForm.validation.differentImage': 'Виберіть образ, відмінний від поточного.',
+  'serviceUpgradeForm.validation.health': 'Перегляньте налаштування перевірки працездатності.',
+  'serviceUpgradeForm.validation.healthContract': 'Контракт перевірки працездатності недоступний.',
+  'serviceUpgradeForm.validation.ulimitContract': 'Контракт обмежень процесів недоступний.',
+  'serviceUpgradeForm.validation.securityContract': 'Перевірте контракт безпеки.',
+  'serviceUpgradeForm.validation.memory':
+    'Укажіть обмеження й резерв. Введіть 0, щоб прибрати явне значення.',
+  'serviceUpgradeForm.validation.cpuContract': 'Контракт ЦП і вводу-виводу недоступний.',
+  'serviceUpgradeForm.validation.schedulingContract': 'Контракт розміщення недоступний.',
+  'serviceUpgradeForm.validation.sidecarUpgradeContract':
+    'Контракт оновлення допоміжних контейнерів недоступний.',
+  'serviceUpgradeForm.review': 'Перевірте параметри оновлення.',
+  'serviceUpgradeForm.limitsNotice':
+    'Зміна обмежень призводить до заміни контейнерів сервісу. Порожній список видаляє явні обмеження й відновлює типові значення Docker.',
+  'serviceUpgradeForm.securityNotice':
+    'Зміни параметрів безпеки призводять до заміни контейнерів сервісу. Перед підтвердженням перевірте можливості, доступ до хоста й налаштування файлової системи.',
+  'serviceUpgradeForm.batchNotice':
+    'За один раз буде оновлено до {batch} контейнерів з інтервалом {interval} мс між партіями. Для портів, змінних, томів і допоміжних контейнерів застосовуються поточні налаштування з урахуванням змін вище. Доступність залежить від ресурсів і працездатності застосунку.',
+  'serviceUpgradeForm.follow':
+    'Відстежуйте стан тут після оновлення. Дії завершення й відкочування з’являться, коли Rancher зробить їх доступними.',
+  'serviceUpgradeForm.impact':
+    'Сервіс {service}. Опубліковані порти можуть змінити доступ. Зміна монтування може зробити наявні дані недоступними. Зміна або видалення допоміжних контейнерів призводить до їх заміни й може вплинути на дані або мережу. У разі збою кінцевої точки перевірки працездатності можуть призвести до створення контейнерів заново або перервати оновлення. Rancher замінює контейнери за вибраною стратегією. Перевірте поля перед підтвердженням.',
+  'serviceUpgradeForm.image': 'Новий образ',
+  'serviceUpgradeForm.bindings': 'Змінити порти й томи під час цього оновлення',
+  'serviceUpgradeForm.health': 'Змінити перевірку працездатності під час цього оновлення',
+  'serviceUpgradeForm.sidecars': 'Змінити допоміжні контейнери під час цього оновлення',
+  'serviceUpgradeForm.ulimits': 'Змінити обмеження процесів під час цього оновлення',
+  'serviceUpgradeForm.security': 'Змінити параметри безпеки під час цього оновлення',
+  'serviceUpgradeForm.privileged': 'Привілейований режим',
+  'serviceUpgradeForm.readOnly': 'Файлова система лише для читання',
+  'serviceUpgradeForm.memory': 'Змінити параметри пам’яті під час цього оновлення',
+  'serviceUpgradeForm.memoryLimit': 'Обмеження пам’яті',
+  'serviceUpgradeForm.memoryReservation': 'Резерв пам’яті',
+  'serviceUpgradeForm.cpu': 'Змінити ЦП і ввід-вивід під час цього оновлення',
+  'serviceUpgradeForm.affinity': 'Змінити правила розміщення під час цього оновлення',
+  'serviceUpgradeForm.batch': 'Контейнерів у партії',
+  'serviceUpgradeForm.interval': 'Інтервал між партіями (мс)',
+  'serviceUpgradeForm.configuration': 'Оновлення конфігурації',
+  'serviceUpgradeForm.imageUpgrade': 'Оновлення образу',
+  'serviceUpgradeForm.currentImage': 'Поточний образ:',
+  'serviceUpgradeForm.capAdd': 'Додані можливості',
+  'serviceUpgradeForm.capDrop': 'Видалені можливості',
+  'serviceUpgradeForm.startFirst': 'Запускати нові контейнери перед зупинкою поточних',
+  'serviceUpgradeForm.confirm': 'Оновити конфігурацію сервісу?',
+  'sidecarValidation.depth': 'У конфігурації допоміжних контейнерів забагато рівнів вкладеності.',
+  'sidecarValidation.fieldUnavailable':
+    'Поле допоміжного контейнера {name} недоступне. Відкрийте панель знову.',
+  'sidecarValidation.reviewItems': 'Перевірте елементи конфігурації допоміжних контейнерів.',
+  'sidecarValidation.fieldContract': 'Контракт допоміжного контейнера для {name} недоступний.',
+  'sidecarValidation.limit': 'Укажіть щонайбільше 50 допоміжних контейнерів.',
+  'sidecarValidation.contract': 'Контракт допоміжних контейнерів недоступний.',
+  'sidecarValidation.review': 'Перевірте конфігурацію допоміжних контейнерів.',
+  'sidecarValidation.name':
+    'Задайте унікальні імена допоміжних контейнерів, відмінні від імені сервісу й завдовжки до 63 літер, цифр або дефісів.',
+  'sidecarValidation.image': 'Укажіть допустимий образ для допоміжного контейнера {name}.',
+  'sidecarValidation.reservedImage':
+    'Цей образ зарезервовано для видалення в Rancher. Скористайтеся дією «Видалити допоміжний контейнер».',
+  'sidecarValidation.networkMode':
+    'Скористайтеся мережевим режимом container, щоб використовувати мережу іншого контейнера в цьому сервісі.',
+  'sidecarValidation.links':
+    'Перевірте мережеві зв’язки та зв’язки томів між контейнерами сервісу.',
+  'sidecarValidation.cycle':
+    'Мережеві зв’язки та зв’язки томів між допоміжними контейнерами не мають утворювати циклів.',
+  'workloadPolicyValidation.limit': 'Використовуйте щонайбільше 100 правил розміщення.',
+  'workloadPolicyValidation.rule':
+    'Укажіть допустимі ключі й значення в правилах розміщення без ком і переносів рядків.',
+  'workloadPolicyValidation.map': 'Недопустимі мітки розміщення.',
+  'workloadPolicyValidation.text': 'Мітки мають містити текст.',
+  'workloadPolicyValidation.global':
+    'Для глобального розміщення допустимі лише мітки хостів з обов’язковими правилами або правилами виключення.',
+  'workloadPolicyValidation.depth': 'У конфігурації забагато рівнів вкладеності.',
+  'workloadPolicyValidation.capabilities': 'Звірте можливості безпеки з поточним контрактом.',
+  'serviceEditors.linkError.environment': 'Сервіс не належить до цього середовища.',
+  'serviceEditors.linkError.foreign': 'Деякі зв’язки належать до іншого середовища.',
+  'serviceEditors.linkError.changed':
+    'Інший клієнт змінив зв’язки. Закрийте й знову відкрийте панель.',
+  'serviceEditors.linkError.advanced':
+    'У списку є розширені або перехідні зв’язки чи зв’язки з недоступними цілями. Скористайтеся формою Rancher, щоб зберегти конфігурацію.',
+  'serviceEditors.linkError.unavailable': 'У цьому контексті змінювати зв’язки неможливо.',
+  'serviceEditors.linkError.limit': 'За одну операцію можна змінити до 100 зв’язків.',
+  'serviceEditors.linkError.contract': 'Контракт зв’язків змінився. Відкрийте панель знову.',
+  'serviceEditors.linkError.stack': 'Стек сервісу недоступний для цієї операції.',
+  'serviceEditors.linkError.target':
+    'Виберіть доступний сервіс застосунку в цьому середовищі, відмінний від вихідного.',
+  'serviceEditors.linkError.alias':
+    'Недопустимий псевдонім. Використовуйте літери, цифри, дефіси, крапки або підкреслення.',
+  'serviceEditors.linkError.duplicate': 'Укажіть унікальні цілі та псевдоніми.',
+  'serviceEditors.unsupported': 'Ці зв’язки неможливо змінити.',
+  'serviceEditors.reopen': 'Відкрийте редактор зв’язків знову.',
+  'serviceEditors.contract': 'Контракт зв’язків сервісу недоступний.',
+  'serviceEditors.changed': 'Контракт зв’язків змінився. Відкрийте панель знову.',
+  'serviceEditors.confirmRemove': 'Підтвердьте видалення всіх зв’язків.',
+  'serviceEditors.sent': 'Зв’язки надіслано до Rancher. Відстежуйте конфігурацію й топологію.',
+  'serviceEditors.reviewLinks': 'Перевірте зв’язки.',
+  'serviceEditors.close': 'Закрити',
+  'serviceEditors.review': 'Переглянути зміни',
+  'serviceEditors.linkInfo':
+    'Виберіть сервіси, які використовує цей застосунок. Необов’язковий псевдонім визначає ціль у конфігурації Rancher. Зміна списку може вплинути на розпізнавання імен і підключення до мережі.',
+  'serviceEditors.denied':
+    'Ваш обліковий запис або поточний стан не дають змоги змінювати зв’язки.',
+  'serviceEditors.empty': 'Цей сервіс не має вихідних зв’язків.',
+  'serviceEditors.select': 'Вибрати сервіс…',
+  'serviceEditors.aliasHint':
+    'Необов’язково. Якщо псевдонім не задано, Rancher використовує ім’я сервісу.',
+  'serviceEditors.add': 'Додати зв’язок',
+  'serviceEditors.acknowledge': 'Підтверджую видалення всіх зв’язків цього сервісу',
+  'serviceEditors.apply': 'Застосувати зв’язки сервісу?',
+  'serviceEditors.serviceName': 'ім’я сервісу',
+  'serviceEditors.discard': 'Скасувати незбережені зміни зв’язків?',
+  'serviceEditors.discardDescription': 'Конфігурація Rancher збережеться в поточному вигляді.',
+  'serviceEditors.context': 'Змінити контекст?',
+  'serviceEditors.contextDescription':
+    'Є незбережені зміни зв’язків. Дочекайтеся завершення надсилання, якщо воно триває.',
+  'serviceEditors.link': 'Зв’язок {index}',
+  'serviceEditors.remove': 'Видалити зв’язок {index}',
+  'serviceEditors.target': 'Цільовий сервіс {index}',
+  'serviceEditors.alias': 'Псевдонім зв’язку {index}',
+  'serviceEditors.targetMissing': 'Недоступна ціль ({id})',
+  'serviceEditors.title': 'Зв’язки · {name}',
+  'serviceEditors.environment': 'Середовище: {name}',
+  'serviceEditors.applyDescription':
+    'Список зв’язків сервісу {name} буде замінено лише в середовищі {environment}. Нова кількість зв’язків: {count}.',
+  'serviceEditors.before': 'До зміни · Кількість зв’язків: {count}',
+  'serviceEditors.after': 'Після зміни · Кількість зв’язків: {count}',
+  'serviceEditors.summary': '{target} · псевдонім: {alias}',
+  'serviceEditors.scaleError.integer': 'Укажіть цілу кількість контейнерів.',
+  'serviceEditors.scaleError.range': 'Масштаб виходить за межі, дозволені Rancher.',
+  'serviceEditors.scaleError.unavailable': 'Масштабування цього ресурсу недоступне.',
+  'serviceEditors.scaleError.changed':
+    'Інший клієнт змінив масштаб. Відкрийте панель знову, щоб оновити дані.',
+  'serviceEditors.scaleError.unchanged': 'Укажіть масштаб, відмінний від поточного.',
+  'serviceEditors.confirmZero':
+    'Підтвердьте зупинку контейнерів, перш ніж застосувати нульовий масштаб.',
+  'serviceEditors.reviewScale': 'Перевірте масштаб.',
+  'serviceEditors.quantity': 'Бажана кількість контейнерів',
+  'serviceEditors.scaleInfo':
+    'Rancher змінить фактичний масштаб сервісу. Зменшення кількості може зупинити контейнери. Збільшення залежить від доступних ресурсів. Кількість запущених контейнерів може досягти заданого значення не одразу.',
+  'serviceEditors.acknowledgeZero':
+    'Я розумію, що нульовий масштаб зупинить контейнери цього сервісу',
+  'serviceEditors.templateHint': 'Ця операція зберігає поточні відповіді для шаблону каталогу.',
+  'serviceEditors.currentScale': 'Поточний заданий масштаб: {scale}.',
+  'stackComposeUpgradePanel.dockerCompose': 'Docker Compose',
+  'stackComposeUpgradePanel.rancherCompose': 'Rancher Compose',
+  'stackComposeUpgradePanel.impact':
+    'Я розумію, що оновлення може запустити сервіси й замінити контейнери',
+  'stackComposeUpgradePanel.reviewTitle': 'Оновити стек за допомогою Compose?',
+  'stackComposeUpgradePanel.reviewDescription':
+    'Файли приховано на етапі перевірки. Перед надсиланням стек і експорт буде перевірено повторно. Поточні параметри зберігаються. Сервер перевіряє YAML і виконує оновлення.',
+  'stackComposeUpgradePanel.discardTitle': 'Скасувати зміни Compose?',
+  'stackComposeUpgradePanel.discardDescription': 'Змінені файли ще не надіслано до Rancher.',
+  'stackComposeUpgradePanel.leaveTitle': 'Вийти з незбереженими змінами Compose?',
+  'stackComposeUpgradePanel.leaveDescription':
+    'Файли ще не надіслано. Якщо оновлення триває, дочекайтеся його завершення.',
+  'stackComposeUpgradePanel.close': 'Закрити',
+  'stackComposeUpgradePanel.review': 'Переглянути оновлення',
+  'stackComposeUpgradePanel.warning':
+    'Оновлення Compose може запустити сервіси й створити контейнери заново. Rancher зберігає масштаб наявних сервісів. Щоб змінити його, скористайтеся дією «Масштабувати сервіс». Нові сервіси можуть запуститися з масштабом 1, навіть якщо у файлі вказано scale: 0. Експорт містить лише частину даних середовища. Перевірте масштаб і файли, перш ніж продовжити.',
+  'stackComposeUpgradePanel.title': 'Оновлення Compose · {name}',
+  'stackComposeUpgradePanel.description':
+    'Середовище: {name}. Файли експортовано з поточної конфігурації.',
+  'stackComposeUpgradePanel.saved':
+    'Запит на оновлення отримано. Відстежуйте стан стека й скористайтеся діями Rancher для завершення або відкочування.',
+  'stackComposeUpgradePanel.unavailable': 'Редактор Compose недоступний для цього стека.',
+  'stackComposeUpgradePanel.permission': 'Ви не маєте дозволу на експорт або оновлення.',
+  'stackComposeUpgradePanel.loadFailed': 'Compose недоступний.',
+  'stackComposeUpgradePanel.reopen': 'Відкрийте редактор Compose знову.',
+  'stackComposeUpgradePanel.requestFailed': 'Не вдалося виконати операцію Compose.',
+  'stackComposeUpgradePanel.httpError':
+    'Операцію Compose не завершено (HTTP {status}). Перевірте файл або процеси стека.',
+  'stackComposeUpgradePanel.validation.stackUnavailable':
+    'Стек недоступний у цьому середовищі або в поточному стані.',
+  'stackComposeUpgradePanel.validation.noSource':
+    'Цей стек не має вихідних файлів Compose. Скористайтеся редакторами сервісів.',
+  'stackComposeUpgradePanel.validation.actionUnavailable': 'Дія зі стеком недоступна.',
+  'stackComposeUpgradePanel.validation.invalidTarget': 'Недопустима ціль дії зі стеком.',
+  'stackComposeUpgradePanel.validation.invalidExport': 'Недопустимий експорт Compose.',
+  'stackComposeUpgradePanel.validation.exportTooLarge':
+    'Експорт перевищує обмеження 512 KiB на файл.',
+  'stackComposeUpgradePanel.validation.confirmImpact': 'Підтвердьте наслідки оновлення стека.',
+  'stackComposeUpgradePanel.validation.contractUnavailable':
+    'Контракт оновлення стека недоступний.',
+  'stackComposeUpgradePanel.validation.stackChanged':
+    'Стек або його сервіси змінилися. Відкрийте редактор знову.',
+  'stackComposeUpgradePanel.validation.changeRequired': 'Змініть файл Compose перед надсиланням.',
+  'stackComposeUpgradePanel.validation.fieldDenied': 'Це поле Compose недопустиме.',
+  'stackComposeUpgradePanel.validation.invalidFiles':
+    'Перевірте файли Compose й обмеження 512 KiB у кодуванні UTF-8.',
+  'stackComposeUpgradePanel.validation.preserveParameters':
+    'Поточні параметри неможливо зберегти за цим контрактом.',
+  'stackComposeUpgradePanel.validation.invalidParameter':
+    'Один із параметрів стека не відповідає контракту.',
+  'composeEditor.hideLabel': 'Приховати «{label}»',
+  'composeEditor.showLabel': 'Показати «{label}»',
+  'composeEditor.size': 'Рядків: {lines} · Байтів: {bytes}',
+  'composeEditor.hide': 'Приховати',
+  'composeEditor.show': 'Показати',
+  'composeEditor.hint':
+    'Вміст надсилається до Rancher без перетворення. Щонайбільше 512 KiB у кодуванні UTF-8.',
+  'composeEditor.hidden': 'Вміст приховано. Натисніть «Показати», щоб відредагувати його.',
+  'composeEditor.stackName': 'Ім’я стека',
+  'composeEditor.nameHint': 'До 63 символів. Допустимі літери, цифри й дефіси.',
+  'composeEditor.description': 'Опис',
+  'composeEditor.creationMode': 'Спосіб створення стека',
+  'composeEditor.docker': 'Docker Compose',
+  'composeEditor.rancher': 'Rancher Compose (необов’язково)',
+  'composeEditor.start': 'Запустити сервіси після імпорту',
+  'composeEditor.startDescription':
+    'Створює контейнери у вибраному середовищі. Зніміть прапорець, щоб перевірити сервіси перед запуском.',
+  'composeEditor.startWarning':
+    'Імпорт може створити контейнери й використати ресурси у вибраному середовищі.',
+  'composeEditor.startManually':
+    'Сервіси буде імпортовано без автоматичного запуску. Їх можна запустити за допомогою дії запуску.',
+  'composeEditor.empty': 'Порожній стек',
+  'composeEditor.import': 'Імпортувати Compose',
+  'composeEditor.compatibility':
+    'Використовуйте формат, сумісний із Rancher 1.6. Сервер перевіряє файли й виконує імпорт. Відстежуйте результат у стеку.',
+  'composeEditor.variables': 'Змінні для підстановки',
+  'composeEditor.variablesNote':
+    'Rancher використовує ці значення під час імпорту файлів. Вони не зберігаються в налаштуваннях консолі.',
+  'composeEditor.addVariable': 'Додати змінну',
+  'composeEditor.emptyHint': 'Створіть стек і додайте сервіси через меню в його рядку.',
+  'composeEditor.variableName': 'Ім’я змінної {index}',
+  'composeEditor.variableValue': 'Значення змінної {index}',
+  'composeEditor.removeVariable': 'Видалити змінну {index}',
+  'composeEditor.review': 'Перевірте параметри стека.',
 } as const;
