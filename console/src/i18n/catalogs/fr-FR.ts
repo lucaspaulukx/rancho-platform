@@ -345,6 +345,33 @@ export const frFR = {
   'operations.expandAll': 'Tout développer',
   'operations.collapseAll': 'Tout réduire',
   'operations.topology': 'Topologie',
+
+  'topology.title': 'Topologie des services',
+  'topology.close': 'Fermer',
+  'topology.unavailableTitle': 'Topologie indisponible',
+  'topology.unavailableDescription':
+    'Le serveur ne fournit pas la liste des liens entre services dans ce contexte.',
+  'topology.emptyTitle': 'Aucun service',
+  'topology.emptyDescription': 'Aucun service n’est disponible dans cet environnement.',
+  'topology.stack': 'Stack',
+  'topology.allStacks': 'Toutes les stacks',
+  'topology.noStack': 'Sans stack',
+  'topology.summary': '{services} services · {links} liens natifs',
+  'topology.unresolved':
+    '{count} liens pointent vers des services hors de cet inventaire. La topologie est incomplète.',
+  'topology.limit':
+    'La topologie dépasse la limite de 500 services ou 2 000 liens. Utilisez la vue en liste.',
+  'topology.wrongEnvironment': 'La topologie contient des ressources d’un autre environnement.',
+  'topology.duplicateServices': 'L’inventaire contient des services en double.',
+  'topology.region': 'Topologie des services de l’environnement',
+  'topology.controls': 'Commandes de la topologie',
+  'topology.zoomIn': 'Agrandir la topologie',
+  'topology.zoomOut': 'Réduire la topologie',
+  'topology.fitView': 'Ajuster la topologie à la vue',
+  'topology.nodeKeyboard':
+    'Appuyez sur Entrée ou Espace pour sélectionner un nœud. Utilisez les touches fléchées pour le déplacer ou Échap pour le désélectionner.',
+  'topology.nodeMoved': 'Nœud sélectionné déplacé. Position : x {x}, y {y}.',
+  'topology.link': 'Lien de {source} vers {target}',
   'operations.search': 'Rechercher dans les opérations',
   'operations.searchPlaceholder': 'Stack, service, conteneur, image ou ID…',
   'operations.state': 'État',
