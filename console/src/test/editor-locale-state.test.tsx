@@ -8,6 +8,67 @@ import { MemoryEditor } from '../components/MemoryEditor';
 import { SchemaForm } from '../components/SchemaForm';
 import { ComposeEditor } from '../components/ComposeEditor';
 import { CpuResourceEditor } from '../components/CpuResourceEditor';
+import { HealthCheckEditor } from '../components/HealthCheckEditor';
+import { frFR } from '../i18n/catalogs/fr-FR';
+
+it('preserves the HTTP health check draft and native values when switching to French', async () => {
+  const change = vi.fn();
+  const initial = { port: '8080', requestLine: 'HEAD "/ready" "HTTP/1.1"' };
+  function Editor() {
+    const { setLocale } = useI18n();
+    const [value, setValue] = useState<unknown>(initial);
+    return (
+      <>
+        <button onClick={() => setLocale('fr-FR')}>Français</button>
+        <HealthCheckEditor
+          schema={{
+            id: 'instanceHealthCheck',
+            pluralName: 'instanceHealthChecks',
+            links: {},
+            resourceFields: { requestLine: { type: 'string', create: true } },
+          }}
+          value={value}
+          onChange={(next) => {
+            setValue(next);
+            change(next);
+          }}
+        />
+      </>
+    );
+  }
+  render(
+    <I18nProvider
+      policy={{
+        enabled: true,
+        defaultLocale: 'pt-BR',
+        availableLocales: ['pt-BR', 'fr-FR'],
+        selectable: true,
+        detectBrowser: false,
+        preview: true,
+      }}
+    >
+      <Editor />
+    </I18nProvider>,
+  );
+  const path = screen.getByRole('textbox', { name: 'Caminho da verificação HTTP' });
+  fireEvent.change(path, { target: { value: '/internal/status' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Français' }));
+  expect(await screen.findByRole('textbox', { name: frFR['healthCheckEditor.path'] })).toBe(path);
+  expect(path).toHaveValue('/internal/status');
+  expect(screen.getByRole('combobox', { name: frFR['healthCheckEditor.type'] })).toHaveValue(
+    'http',
+  );
+  expect(screen.getByRole('combobox', { name: frFR['healthCheckEditor.method'] })).toHaveValue(
+    'HEAD',
+  );
+  expect(screen.getByRole('combobox', { name: frFR['healthCheckEditor.version'] })).toHaveValue(
+    'HTTP/1.1',
+  );
+  expect(change).toHaveBeenCalledExactlyOnceWith({
+    port: '8080',
+    requestLine: 'HEAD "/internal/status" "HTTP/1.1"',
+  });
+});
 
 it('retranslates the native CPU validation message without changing the draft', async () => {
   const change = vi.fn();

@@ -62,11 +62,34 @@ describe('Registered locale catalog gate', () => {
     expect(report.registeredEnglishKeys).toBe(Object.keys(englishMessages).length);
     expect(report.registeredPortugueseKeys).toBe(report.registeredEnglishKeys);
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
+    const previewDomains = new Set([
+      'auth',
+      'bulkOperation',
+      'common',
+      'details',
+      'healthCheckEditor',
+      'healthCheckValidation',
+      'language',
+      'operations',
+      'recovery',
+      'requestError',
+      'resourceCreator',
+      'resourceLimits',
+      'resourceMetrics',
+      'resourcePanel',
+      'resourceState',
+      'resourceStream',
+      'runtime',
+      'schedulingEditor',
+      'shell',
+      'topology',
+      'ui',
+      'workloadControls',
+      'workloadStreams',
+    ]);
     const previewScope = Object.keys(englishMessages).filter(
       (key) =>
-        /^(auth|bulkOperation|ui|common|details|language|operations|requestError|runtime|shell|recovery|resourceCreator|resourceState|resourceMetrics|resourcePanel|resourceStream|topology|workloadControls|workloadStreams)\./.test(
-          key,
-        ) ||
+        previewDomains.has(key.split('.')[0]!) ||
         key.startsWith('groups.role.') ||
         key === 'environment.selected' ||
         key === 'selection.count',
