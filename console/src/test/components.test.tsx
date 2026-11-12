@@ -15,10 +15,78 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BulkOperation } from '../components/BulkOperation';
 import ServiceTopology from '../components/ServiceTopology';
+import { RegistryCredentials } from '../components/RegistryCredentials';
+import { frFR } from '../i18n/catalogs/fr-FR';
 
 vi.mock('../state', () => ({
   useApp: () => ({ identity: 'fixture', project: { id: 'p1', name: 'Operações' } }),
+  useDataKey: (...parts: string[]) => ['data', 'fixture', ...parts],
 }));
+
+it('translates a rejected registry credential save without exposing the API response', async () => {
+  const collection = '/v2-beta/projects/p1/registrycredentials';
+  const schema: Schema = {
+    id: 'registryCredential',
+    pluralName: 'registryCredentials',
+    links: { self: '/v2-beta/projects/p1/schemas/registryCredential', collection },
+    collectionMethods: ['GET', 'POST'],
+    resourceFields: {
+      publicValue: { type: 'string', create: true },
+      secretValue: { type: 'password', create: true },
+    },
+  };
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+    if (init?.method === 'POST')
+      return Response.json({ message: 'fixture-private-response' }, { status: 422 });
+    if (String(input).startsWith(collection)) return Response.json({ data: [] });
+    if (String(input) === schema.links.self) return Response.json(schema);
+    return Response.json({ data: [schema] });
+  });
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const user = userEvent.setup();
+  const view = render(
+    <QueryClientProvider client={client}>
+      <I18nProvider
+        policy={{
+          enabled: true,
+          preview: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'fr-FR'],
+          selectable: true,
+          detectBrowser: false,
+        }}
+      >
+        <RegistryCredentials
+          registry={{ id: 'r1', type: 'registry', name: 'fixture-registry', links: {} }}
+          onDirty={vi.fn()}
+          onPending={vi.fn()}
+        />
+      </I18nProvider>
+    </QueryClientProvider>,
+  );
+  try {
+    await user.click(await screen.findByRole('button', { name: 'Adicionar credencial' }));
+    const secret = screen.getByLabelText('Senha ou token');
+    await user.type(secret, 'fixture-password');
+    await user.click(screen.getByRole('button', { name: 'Salvar credencial' }));
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('HTTP 422');
+    const key = 'rancho.console.locale.anonymous';
+    localStorage.setItem(key, JSON.stringify({ version: 1, locale: 'fr-FR' }));
+    fireEvent(window, new StorageEvent('storage', { key }));
+    expect(await screen.findByLabelText(frFR['registryCredentials.secretLabel'])).toBe(secret);
+    expect(secret).toHaveValue('fixture-password');
+    expect(alert).toHaveTextContent(
+      frFR['registryCredentials.error.save'].replace('{status}', '422'),
+    );
+    expect(alert).not.toHaveTextContent('fixture-private-response');
+    expect(fetcher.mock.calls.filter(([, init]) => init?.method === 'POST')).toHaveLength(1);
+  } finally {
+    view.unmount();
+    client.clear();
+    fetcher.mockRestore();
+  }
+});
 
 it('translates a rejected pagination link in place without exposing or following it', async () => {
   const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
@@ -10,6 +10,8 @@ import {
   prepareEnvironmentTemplate,
 } from '../components/EnvironmentEditor';
 import type { Resource, Schema } from '../api';
+import { frFR } from '../i18n/catalogs/fr-FR';
+import { I18nProvider } from '../i18n/provider';
 vi.mock('../state', () => ({
   useApp: () => ({
     identity: 'fixture-admin',
@@ -434,7 +436,7 @@ describe('Editor de environments com templates nativos', () => {
     expect(JSON.stringify(metadata)).not.toContain('hidden-answer');
     expect(template.stacks[0].answers.privateFixture).toBe('hidden-answer');
   });
-  it('seleciona o template por nome, mostra a infraestrutura e preserva o nome digitado', async () => {
+  it('preserva o nome e o template selecionado ao trocar o idioma', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => Response.json({ data: [template] })),
@@ -452,30 +454,54 @@ describe('Editor de environments com templates nativos', () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const view = render(
       <QueryClientProvider client={client}>
-        <EnvironmentEditor
-          schema={schema}
-          schemas={{
-            projectTemplate: {
-              id: 'projectTemplate',
-              pluralName: 'projecttemplates',
-              links: { collection: '/v2-beta/projecttemplates' },
-              resourceFields: {},
-            },
+        <I18nProvider
+          policy={{
+            enabled: true,
+            defaultLocale: 'pt-BR',
+            availableLocales: ['pt-BR', 'fr-FR'],
+            selectable: true,
+            detectBrowser: false,
+            preview: true,
           }}
-          onSubmit={submit}
-          onDirtyChange={vi.fn()}
-        />
+        >
+          <EnvironmentEditor
+            schema={schema}
+            schemas={{
+              projectTemplate: {
+                id: 'projectTemplate',
+                pluralName: 'projecttemplates',
+                links: { collection: '/v2-beta/projecttemplates' },
+                resourceFields: {},
+              },
+            }}
+            onSubmit={submit}
+            onDirtyChange={vi.fn()}
+          />
+        </I18nProvider>
         <button type="submit" form="resource-form">
           Salvar
         </button>
       </QueryClientProvider>,
     );
-    await userEvent.type(await screen.findByLabelText('Nome *'), 'new-environment');
-    await userEvent.selectOptions(screen.getByLabelText('Template do environment'), '1pt5');
+    const name = await screen.findByLabelText('Nome *');
+    const select = screen.getByLabelText('Template do environment');
+    await userEvent.type(name, 'new-environment');
+    await userEvent.selectOptions(select, '1pt5');
     expect(screen.getByRole('region', { name: 'Infraestrutura do template' })).toHaveTextContent(
       'network-services',
     );
-    expect(screen.getByLabelText('Nome *')).toHaveValue('new-environment');
+    const key = 'rancho.console.locale.anonymous';
+    localStorage.setItem(key, JSON.stringify({ version: 1, locale: 'fr-FR' }));
+    fireEvent(window, new StorageEvent('storage', { key }));
+    const infrastructure = await screen.findByRole('region', {
+      name: frFR['environmentEditor.infrastructure'],
+    });
+    expect(infrastructure).toHaveTextContent('network-services');
+    expect(infrastructure).toHaveTextContent(frFR['environmentEditor.provisionNotice']);
+    expect(screen.getByLabelText(`${frFR['schemaForm.label.name']} *`)).toBe(name);
+    expect(name).toHaveValue('new-environment');
+    expect(select).toHaveValue('1pt5');
+    expect(submit).not.toHaveBeenCalled();
     await userEvent.click(screen.getByRole('button', { name: 'Salvar' }));
     expect(submit).toHaveBeenCalledWith({ name: 'new-environment', projectTemplateId: '1pt5' });
     await waitFor(() =>
