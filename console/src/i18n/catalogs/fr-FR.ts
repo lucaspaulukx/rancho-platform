@@ -1,4 +1,143 @@
 export const frFR = {
+  'users.profile': 'Modifier le profil du compte',
+  'users.password': 'Réinitialiser le mot de passe local',
+  'users.activate': 'Activer le compte',
+  'users.deactivate': 'Désactiver le compte',
+  'users.deactivateReason': 'Demandez à un autre administrateur de désactiver votre compte.',
+  'users.remove': 'Supprimer le compte',
+  'users.removeReason':
+    'Désactivez le compte avant de le supprimer. Pour votre propre compte, demandez à un autre administrateur de le supprimer.',
+  'users.notFound': 'Utilisateur introuvable',
+  'users.notFoundDescription': 'Ce compte est indisponible dans cette instance.',
+  'users.title': 'Utilisateurs',
+  'users.detailDescription': 'Compte Rancher et appartenance aux groupes locaux.',
+  'users.description': 'Consultez vos comptes et gérez les accès de l’équipe par groupe.',
+  'users.eyebrow': 'CONTRÔLE DES ACCÈS',
+  'users.back': 'Retour',
+  'users.create': 'Créer un compte local',
+  'users.accountData': 'Détails du compte',
+  'users.effectiveAccess': 'Accès effectif',
+  'users.identification': 'Identification',
+  'users.globalRole': 'Rôle global',
+  'users.administrator': 'Administrateur',
+  'users.user': 'Utilisateur',
+  'users.name': 'Nom',
+  'users.notProvided': 'Non renseigné',
+  'users.localGroups': 'Groupes locaux',
+  'users.managementDisabled': 'Gestion désactivée',
+  'users.adminNotice':
+    'Ce compte dispose de privilèges d’administration globaux. L’appartenance à des groupes ne réduit pas ces privilèges.',
+  'users.membership': 'Appartenance aux groupes',
+  'users.groupsDisabled':
+    'La gestion des groupes est désactivée dans cette console ou sur le serveur.',
+  'users.emptyGroups': 'Aucun groupe local',
+  'users.emptyGroupsDescription': 'Créez un groupe pour organiser les accès de l’équipe.',
+  'users.group': 'Groupe',
+  'users.participation': 'Appartenance',
+  'users.member': 'Membre',
+  'users.notMember': 'Non membre',
+  'users.environments': 'Environnements',
+  'users.management': 'Gestion',
+  'users.editGroup': 'Modifier le groupe',
+  'users.grants': 'Autorisations de groupe',
+  'users.grantsDescription':
+    'Les associations ci-dessous indiquent les autorisations accordées par chaque groupe. Rancher tient aussi compte des autorisations directes et des privilèges globaux.',
+  'users.state': 'État',
+  'users.disabled': 'Désactivé',
+  'users.details': 'Détails',
+  'users.actions': 'Actions',
+  'users.accountActions': 'Actions du compte {account}',
+  'users.open': 'Ouvrir {account}',
+
+  'localAccountPanel.create': 'Créer un compte local',
+  'localAccountPanel.profile': 'Modifier le profil du compte',
+  'localAccountPanel.password': 'Réinitialiser le mot de passe local',
+  'localAccountPanel.activate': 'Activer le compte',
+  'localAccountPanel.deactivate': 'Désactiver le compte',
+  'localAccountPanel.remove': 'Supprimer le compte',
+  'localAccountPanel.createDescription':
+    'Le compte est créé sans accès aux environnements. Accordez les accès par groupe après la création.',
+  'localAccountPanel.cancel': 'Annuler',
+  'localAccountPanel.reviewOperation': 'Vérifier l’opération',
+  'localAccountPanel.reviewChanges': 'Vérifier les modifications',
+  'localAccountPanel.name': 'Nom du compte',
+  'localAccountPanel.description': 'Description du compte',
+  'localAccountPanel.kind': 'Rôle global du compte',
+  'localAccountPanel.user': 'Utilisateur',
+  'localAccountPanel.admin': 'Administrateur',
+  'localAccountPanel.confirmAdmin':
+    'Je confirme l’attribution des droits d’administration globaux de Rancher',
+  'localAccountPanel.adminDescription':
+    'Les administrateurs peuvent accéder à tous les environnements et paramètres, indépendamment des groupes.',
+  'localAccountPanel.login': 'Identifiant local',
+  'localAccountPanel.newPassword': 'Nouveau mot de passe local',
+  'localAccountPanel.confirmPassword': 'Confirmer le mot de passe local',
+  'localAccountPanel.passwordNotice':
+    'Cette modification concerne uniquement les identifiants locaux. La modification du mot de passe ne révoque pas les sessions JWT déjà émises. Désactivez le compte pour bloquer son utilisation. Les mots de passe Keycloak sont gérés par le fournisseur.',
+  'localAccountPanel.deactivateNotice':
+    'Le compte ne pourra plus s’authentifier et sa prochaine vérification de session sera rejetée. Les groupes et accès existants seront conservés.',
+  'localAccountPanel.removeNotice':
+    'Le compte doit être inactif. Rancher effectue une suppression logique. Cet écran ne supprime définitivement ni le compte ni les données des environnements.',
+  'localAccountPanel.activateNotice':
+    'Le compte pourra de nouveau s’authentifier et pourra retrouver ses accès directs et ses accès de groupe existants.',
+  'localAccountPanel.reviewTitle': 'Appliquer la modification du compte ?',
+  'localAccountPanel.newAccount': 'nouveau compte',
+  'localAccountPanel.abandon': 'Abandonner l’inscription incomplète ?',
+  'localAccountPanel.discard': 'Abandonner les modifications du compte ?',
+  'localAccountPanel.unsent': 'Les modifications n’ont pas encore été envoyées.',
+  'localAccountPanel.leave': 'Quitter avec une modification en attente ?',
+  'localAccountPanel.incomplete':
+    'Le compte a déjà été créé et ses identifiants peuvent être incomplets.',
+  'localAccountPanel.success': 'Rancher a reçu l’opération. Suivez l’état du compte.',
+  'localAccountPanel.accountDescription':
+    'Compte {account}. Les privilèges globaux sont indépendants des groupes.',
+  'localAccountPanel.pending':
+    'Le compte {account} a déjà été créé. Complétez ses identifiants dans ce formulaire. Le nouvel envoi réutilisera ce compte.',
+  'localAccountPanel.reviewAdmin':
+    '{operation} : {account}. Le rôle d’administrateur dispose d’un accès global. Les identifiants restent protégés pendant cette vérification.',
+  'localAccountPanel.reviewDescription':
+    '{operation} : {account}. Les identifiants restent protégés pendant cette vérification.',
+  'localAccountPanel.pendingDiscard':
+    'Le compte {account} existe déjà. Fermer le panneau ne le supprime pas et ses identifiants peuvent être incomplets. Vérifiez ce compte avant de lancer une nouvelle inscription.',
+  'localAccountPanel.error.operation': 'L’opération sur le compte n’a pas pu aboutir.',
+  'localAccountPanel.error.list': 'Impossible d’interroger la gestion des comptes.',
+  'localAccountPanel.error.unavailable': 'La gestion des comptes est indisponible.',
+  'localAccountPanel.error.permission': 'Votre autorisation d’administration a changé.',
+  'localAccountPanel.error.passwordMismatch': 'Les mots de passe ne correspondent pas.',
+  'localAccountPanel.error.confirmPrivilege': 'Confirmez l’accès d’administration global.',
+  'localAccountPanel.error.duplicateLogin':
+    'Des identifiants existent déjà pour ce nom de connexion.',
+  'localAccountPanel.error.notCreated': 'Le compte n’a pas été créé.',
+  'localAccountPanel.error.reopen': 'Rouvrez le panneau du compte.',
+  'localAccountPanel.error.credentialCount':
+    'Ce compte doit avoir un seul jeu d’identifiants locaux actifs. Les identifiants OIDC sont gérés par le fournisseur.',
+  'localAccountPanel.error.credential': 'Identifiants non valides.',
+  'localAccountPanel.error.changedOperation': 'L’opération a changé. Rouvrez le panneau.',
+  'localAccountPanel.error.http': 'L’opération sur le compte n’a pas abouti (HTTP {status}).',
+  'localAccountPanel.validation.accountUnavailable':
+    'Ce compte est indisponible pour la gestion des utilisateurs.',
+  'localAccountPanel.validation.invalidAccount': 'Compte non valide.',
+  'localAccountPanel.validation.accountChanged': 'Le compte a changé. Rouvrez le panneau.',
+  'localAccountPanel.validation.selfAdministration':
+    'Utilisez un autre compte administrateur pour modifier vos privilèges ou désactiver votre compte.',
+  'localAccountPanel.validation.lastAdmin': 'Conservez au moins un administrateur actif.',
+  'localAccountPanel.validation.deactivateFirst': 'Désactivez le compte avant de le supprimer.',
+  'localAccountPanel.validation.actionUnavailable':
+    'Cette opération est indisponible dans l’état actuel.',
+  'localAccountPanel.validation.accountContract': 'Le contrat du compte est indisponible.',
+  'localAccountPanel.validation.invalidProfile':
+    'Saisissez un nom valide et choisissez un rôle valide.',
+  'localAccountPanel.validation.fieldsChanged':
+    'Les champs du compte ont changé. Rouvrez le panneau.',
+  'localAccountPanel.validation.credentialUnavailable':
+    'La création d’identifiants est indisponible.',
+  'localAccountPanel.validation.passwordContract':
+    'Le contrat de protection du mot de passe est indisponible.',
+  'localAccountPanel.validation.loginPassword':
+    'Saisissez un nom de connexion sans espace ni deux-points, ainsi qu’un mot de passe.',
+  'localAccountPanel.validation.credentialChanged': 'Le contrat des identifiants a changé.',
+  'localAccountPanel.validation.newPassword': 'Saisissez le nouveau mot de passe local.',
+
   'accessDiagnostics.description': 'Autorisations et rôle calculés par le serveur Rancher.',
   'accessDiagnostics.environment': 'Environnement',
   'accessDiagnostics.noEnvironment': 'Aucun environnement',

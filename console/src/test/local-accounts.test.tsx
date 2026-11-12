@@ -16,6 +16,7 @@ import {
 import { LocalAccountPanel } from '../components/LocalAccountPanel';
 import { I18nProvider } from '../i18n/provider';
 import type { Locale } from '../i18n/locales';
+import { faIR } from '../i18n/catalogs/fa-IR';
 const state = vi.hoisted(() => ({ admin: true, enabled: true }));
 vi.mock('../state', () => ({
   useApp: () => ({
@@ -108,7 +109,7 @@ function mount(mode: 'create' | 'password' = 'create') {
         policy={{
           enabled: true,
           defaultLocale,
-          availableLocales: ['pt-BR', 'en-US'],
+          availableLocales: ['pt-BR', 'en-US', 'fa-IR'],
           selectable: false,
           detectBrowser: false,
           preview: true,
@@ -243,15 +244,20 @@ describe('Contas locais: fronteiras de privilégio e credencial', () => {
       login: 'invalid:login',
       portuguese: 'Informe login sem espaços/dois pontos e uma senha.',
       english: 'Enter a login without spaces or colons and a password.',
+      persian: () => faIR['localAccountPanel.validation.loginPassword'],
     },
     {
       login: 'valid-login',
       portuguese: 'Nova senha local aceita até 4 caracteres.',
       english: 'New local password accepts up to 4 characters.',
+      persian: () =>
+        faIR['schemaForm.validation.maxLength']
+          .replace('{field}', faIR['localAccountPanel.newPassword'])
+          .replace('{limit}', new Intl.NumberFormat('fa-IR').format(4)),
     },
   ])(
     'retranslates an invalid credential without sending the draft ($login)',
-    async ({ login, portuguese, english }) => {
+    async ({ login, portuguese, english, persian }) => {
       vi.mocked(allPages).mockResolvedValueOnce([
         accountSchema,
         {
@@ -277,6 +283,9 @@ describe('Contas locais: fronteiras de privilégio e credencial', () => {
 
       changeLocale('en-US');
       expect(screen.getByText(english)).toBeVisible();
+      changeLocale('fa-IR');
+      expect(await screen.findByText(persian())).toBeVisible();
+      expect(screen.getByLabelText(faIR['localAccountPanel.newPassword'])).toBe(passwordInput);
       expect(loginInput).toHaveValue(login);
       expect(passwordInput).toHaveAttribute('type', 'password');
       expect(passwordInput).toHaveValue(password);
