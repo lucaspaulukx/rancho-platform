@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { Button, CheckboxField, DataTable, ErrorState, Modal, Tabs } from '../components/ui';
@@ -38,6 +38,7 @@ it('translates a rejected pagination link in place without exposing or following
       return (
         <>
           <button onClick={() => setLocale('en-US')}>English</button>
+          <button onClick={() => setLocale('fr-FR')}>Français</button>
           <ErrorState error={error} />
         </>
       );
@@ -48,7 +49,7 @@ it('translates a rejected pagination link in place without exposing or following
           enabled: true,
           preview: true,
           defaultLocale: 'pt-BR',
-          availableLocales: ['pt-BR', 'en-US'],
+          availableLocales: ['pt-BR', 'en-US', 'fr-FR'],
           selectable: true,
           detectBrowser: false,
         }}
@@ -61,6 +62,11 @@ it('translates a rejected pagination link in place without exposing or following
     await userEvent.click(screen.getByRole('button', { name: 'English' }));
     expect(screen.getByRole('alert')).toBe(alert);
     expect(alert).toHaveTextContent('The server returned a disallowed API address.');
+    await userEvent.click(screen.getByRole('button', { name: 'Français' }));
+    await waitFor(() =>
+      expect(alert).toHaveTextContent('Le serveur a renvoyé une adresse d’API non autorisée.'),
+    );
+    expect(screen.getByRole('alert')).toBe(alert);
     expect(alert).not.toHaveTextContent('synthetic-private');
     expect(fetcher).toHaveBeenCalledTimes(1);
   } finally {

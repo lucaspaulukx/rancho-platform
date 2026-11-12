@@ -1,4 +1,11 @@
 export const ukUA = {
+  'requestError.scopeChanged': 'Контекст змінився. Перш ніж продовжити, відкрийте панель знову.',
+  'requestError.resourceOutOfScope': 'Ресурс недоступний у цьому середовищі.',
+  'requestError.unsafeUrl': 'Сервер повернув недозволену адресу API.',
+  'requestError.paginationCycle': 'API повернув цикл розбиття на сторінки.',
+  'requestError.paginationLimit': 'Колекція завелика. Уточніть фільтри.',
+  'requestError.invalidCollection': 'API повернув недійсну колекцію.',
+
   'bulkOperation.title': 'Групова дія — {action}',
   'bulkOperation.resources': {
     one: '{count} ресурс',

@@ -1,4 +1,11 @@
 export const zhHans = {
+  'requestError.scopeChanged': '上下文已更改。请重新打开面板后再继续。',
+  'requestError.resourceOutOfScope': '此环境中无法使用该资源。',
+  'requestError.unsafeUrl': '服务器返回了不允许的 API 地址。',
+  'requestError.paginationCycle': 'API 返回了循环分页。',
+  'requestError.paginationLimit': '集合过大。请缩小筛选范围。',
+  'requestError.invalidCollection': 'API 返回了无效的集合。',
+
   'details.field.id': 'ID',
   'details.field.name': '名称',
   'details.field.description': '描述',

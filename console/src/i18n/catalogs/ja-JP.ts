@@ -1,4 +1,12 @@
 export const jaJP = {
+  'requestError.scopeChanged':
+    'コンテキストが変更されました。パネルを開き直してから続行してください。',
+  'requestError.resourceOutOfScope': 'この環境ではリソースを利用できません。',
+  'requestError.unsafeUrl': 'サーバーが許可されていない API アドレスを返しました。',
+  'requestError.paginationCycle': 'API がページネーションのループを返しました。',
+  'requestError.paginationLimit': 'コレクションが大きすぎます。フィルターで絞り込んでください。',
+  'requestError.invalidCollection': 'API が無効なコレクションを返しました。',
+
   'details.field.id': 'ID',
   'details.field.name': '名前',
   'details.field.description': '説明',

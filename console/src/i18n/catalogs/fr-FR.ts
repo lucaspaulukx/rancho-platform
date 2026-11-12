@@ -1,4 +1,11 @@
 export const frFR = {
+  'requestError.scopeChanged': 'Le contexte a changé. Rouvrez le panneau avant de continuer.',
+  'requestError.resourceOutOfScope': 'La ressource est indisponible dans cet environnement.',
+  'requestError.unsafeUrl': 'Le serveur a renvoyé une adresse d’API non autorisée.',
+  'requestError.paginationCycle': 'L’API a renvoyé une boucle de pagination.',
+  'requestError.paginationLimit': 'La collection est trop volumineuse. Affinez les filtres.',
+  'requestError.invalidCollection': 'L’API a renvoyé une collection non valide.',
+
   'resourceCreator.kind.stack': 'Stack',
   'resourceCreator.kind.service': 'Service',
   'resourceCreator.kind.loadBalancerService': 'Équilibreur de charge',

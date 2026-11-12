@@ -1,4 +1,13 @@
 export const deDE = {
+  'requestError.scopeChanged':
+    'Der Kontext hat sich geändert. Öffnen Sie das Fenster erneut, bevor Sie fortfahren.',
+  'requestError.resourceOutOfScope': 'Die Ressource ist in dieser Umgebung nicht verfügbar.',
+  'requestError.unsafeUrl': 'Der Server hat eine unzulässige API-Adresse zurückgegeben.',
+  'requestError.paginationCycle':
+    'Die API hat eine Schleife in der Seitennavigation zurückgegeben.',
+  'requestError.paginationLimit': 'Die Sammlung ist zu groß. Schränken Sie die Filter ein.',
+  'requestError.invalidCollection': 'Die API hat eine ungültige Sammlung zurückgegeben.',
+
   'resourceCreator.kind.stack': 'Stack',
   'resourceCreator.kind.service': 'Dienst',
   'resourceCreator.kind.loadBalancerService': 'Load Balancer',
