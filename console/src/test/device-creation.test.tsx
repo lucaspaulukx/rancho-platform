@@ -58,7 +58,7 @@ vi.mock('../api', async () => ({
 const localization = {
   enabled: true,
   defaultLocale: 'en-US' as Locale,
-  availableLocales: ['pt-BR', 'en-US'] as Locale[],
+  availableLocales: ['pt-BR', 'en-US', 'fr-FR', 'de-DE'] as Locale[],
   selectable: true,
   detectBrowser: false,
   preview: true,
@@ -243,15 +243,17 @@ describe('Structured device creation integration', () => {
       change: 'permission',
       portuguese: 'Sua permissão de criar não está mais disponível.',
       english: 'Your permission to create is no longer available.',
+      french: 'Vous n’avez plus l’autorisation de créer des ressources.',
     },
     {
       change: 'field',
       portuguese: 'O campo name não está mais disponível para criação. Reabra o painel.',
       english: 'The name field is no longer available for creation. Reopen the panel.',
+      french: 'Le champ name n’est plus disponible pour la création. Rouvrez le panneau.',
     },
   ])(
     'retranslates a creation $change error in the open form',
-    async ({ change, portuguese, english }) => {
+    async ({ change, portuguese, english, french }) => {
       const user = userEvent.setup();
       const changeLocale = renderCreator();
       const name = screen.getByLabelText('Nome');
@@ -278,6 +280,20 @@ describe('Structured device creation integration', () => {
       expect(screen.getByLabelText('Name')).toBe(name);
       expect(name).toHaveValue('creation-fixture');
       expect(screen.getByLabelText('Image *')).toHaveValue('alpine:3.20');
+      expect(backend.posts).toEqual([]);
+
+      changeLocale('fr-FR');
+      expect(
+        await screen.findByRole('dialog', { name: 'Créer : conteneur autonome' }),
+      ).toBeVisible();
+      expect(screen.getByRole('alert')).toHaveTextContent(french);
+      expect(screen.getByLabelText('Name')).toBe(name);
+      expect(name).toHaveValue('creation-fixture');
+      changeLocale('de-DE');
+      expect(
+        await screen.findByRole('dialog', { name: 'Erstellen: Eigenständiger Container' }),
+      ).toBeVisible();
+      expect(name).toHaveValue('creation-fixture');
       expect(backend.posts).toEqual([]);
     },
   );

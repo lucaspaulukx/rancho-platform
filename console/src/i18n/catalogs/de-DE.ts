@@ -1,4 +1,36 @@
 export const deDE = {
+  'resourceCreator.kind.stack': 'Stack',
+  'resourceCreator.kind.service': 'Dienst',
+  'resourceCreator.kind.loadBalancerService': 'Load Balancer',
+  'resourceCreator.kind.dnsService': 'Dienstalias',
+  'resourceCreator.kind.externalService': 'Externer Dienst',
+  'resourceCreator.kind.container': 'Eigenständiger Container',
+  'resourceCreator.kind.resource': 'Ressource',
+  'resourceCreator.title': 'Erstellen: {kind}',
+  'resourceCreator.stackContext': 'Umgebung: {environment} · Stack: {stack}',
+  'resourceCreator.create': 'Erstellen',
+  'resourceCreator.created': '{kind} {name} wurde erstellt. Verfolgen Sie den Status im Vorgang.',
+  'resourceCreator.unavailable': 'In diesem Kontext können keine Ressourcen erstellt werden.',
+  'resourceCreator.schemaUnavailable': 'Das Schema zum Erstellen ist nicht verfügbar.',
+  'resourceCreator.permissionChanged':
+    'Sie haben keine Berechtigung mehr, Ressourcen zu erstellen.',
+  'resourceCreator.stackUnavailable': 'Zu diesem Stack können keine Dienste hinzugefügt werden.',
+  'resourceCreator.schemaChanged': 'Das Schema zum Erstellen ist nicht mehr verfügbar.',
+  'resourceCreator.validation.unavailable': 'Diese Ressource kann nicht mehr erstellt werden.',
+  'resourceCreator.validation.depth': 'Die Konfiguration ist zu tief verschachtelt.',
+  'resourceCreator.validation.fieldUnavailable':
+    'Das Feld {name} steht beim Erstellen nicht mehr zur Verfügung. Öffnen Sie das Panel erneut.',
+  'resourceCreator.validation.schemaUnavailable':
+    'Das Schema für {name} ist nicht mehr verfügbar. Öffnen Sie das Panel erneut.',
+  'resourceCreator.creationDenied':
+    'Ihr Profil oder der Server erlaubt es nicht, diese Ressource in der ausgewählten Umgebung zu erstellen.',
+  'resourceCreator.discardTitle': 'Entwurf verwerfen?',
+  'resourceCreator.discardDescription':
+    'Die Ressource wurde noch nicht erstellt. Ihre Eingaben werden verworfen.',
+  'resourceCreator.contextTitle': 'Kontext wechseln?',
+  'resourceCreator.pending': 'Warten Sie auf die Antwort von Rancher.',
+  'resourceCreator.unsaved': 'Es gibt einen ungespeicherten Entwurf.',
+
   'workloadStreams.logs': 'Logs der Ressource',
   'workloadStreams.terminal': 'Terminal der Ressource',
   'workloadStreams.emptyTitle': 'Keine Container verfügbar',
