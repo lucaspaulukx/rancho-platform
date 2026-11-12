@@ -209,11 +209,11 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
         <Layers3 size={18} />
         <strong>{app.project!.name}</strong>
         <span className="muted">
-          {t('workloadsPage.inventorySummary', {
-            stacks: inventory.stacks.length,
-            services: inventory.services.length,
-            containers: inventory.containers.length,
-          })}
+          {[
+            t('workloadsPage.stackCount', { count: inventory.stacks.length }),
+            t('workloadsPage.serviceCount', { count: inventory.services.length }),
+            t('workloadsPage.containerCount', { count: inventory.containers.length }),
+          ].join(' · ')}
         </span>
         <Button variant="ghost" onClick={() => void query.refetch()} disabled={query.isFetching}>
           {t('workloadsPage.refresh')}

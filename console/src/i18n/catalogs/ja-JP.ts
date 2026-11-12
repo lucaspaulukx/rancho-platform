@@ -1082,8 +1082,9 @@ export const jaJP = {
   'workloadsPage.health': 'ヘルス：{state}',
   'workloadsPage.open': '{name}を開く',
   'workloadsPage.openStack': 'スタック「{name}」を開く',
-  'workloadsPage.inventorySummary':
-    'スタック {stacks} 件 · サービス {services} 件 · コンテナ {containers} 件',
+  'workloadsPage.stackCount': { other: '{count} スタック' },
+  'workloadsPage.serviceCount': { other: '{count} サービス' },
+  'workloadsPage.containerCount': { other: '{count} コンテナ' },
   'workloadsPage.servicesTab': 'サービス ({count})',
   'workloadsPage.containersTab': 'コンテナ ({count})',
   'resourceValidation.memoryFormat':

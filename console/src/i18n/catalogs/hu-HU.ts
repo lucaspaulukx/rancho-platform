@@ -32,8 +32,9 @@ export const huHU = {
   'workloadsPage.health': 'Egészségi állapot: {state}',
   'workloadsPage.open': 'Megnyitás: {name}',
   'workloadsPage.openStack': 'Stack megnyitása: {name}',
-  'workloadsPage.inventorySummary':
-    '{stacks} stack · {services} szolgáltatás · {containers} konténer',
+  'workloadsPage.stackCount': { other: '{count} stack' },
+  'workloadsPage.serviceCount': { other: '{count} szolgáltatás' },
+  'workloadsPage.containerCount': { other: '{count} konténer' },
   'workloadsPage.servicesTab': 'Szolgáltatások ({count})',
   'workloadsPage.containersTab': 'Konténerek ({count})',
   'resourceValidation.memoryFormat':

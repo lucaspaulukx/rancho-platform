@@ -1068,7 +1068,9 @@ export const faIR = {
   'workloadsPage.health': 'سلامت: {state}',
   'workloadsPage.open': 'باز کردن {name}',
   'workloadsPage.openStack': 'باز کردن پشتهٔ {name}',
-  'workloadsPage.inventorySummary': '{stacks} پشته · {services} سرویس · {containers} کانتینر',
+  'workloadsPage.stackCount': { other: '{count} پشته' },
+  'workloadsPage.serviceCount': { other: '{count} سرویس' },
+  'workloadsPage.containerCount': { other: '{count} کانتینر' },
   'workloadsPage.servicesTab': 'سرویس‌ها ({count})',
   'workloadsPage.containersTab': 'کانتینرها ({count})',
   'resourceValidation.memoryFormat':

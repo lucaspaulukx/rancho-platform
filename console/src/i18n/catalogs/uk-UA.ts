@@ -31,8 +31,24 @@ export const ukUA = {
   'workloadsPage.health': 'Працездатність: {state}',
   'workloadsPage.open': 'Відкрити {name}',
   'workloadsPage.openStack': 'Відкрити стек {name}',
-  'workloadsPage.inventorySummary':
-    'Стеки: {stacks} · Сервіси: {services} · Контейнери: {containers}',
+  'workloadsPage.stackCount': {
+    one: '{count} стек',
+    few: '{count} стеки',
+    many: '{count} стеків',
+    other: '{count} стека',
+  },
+  'workloadsPage.serviceCount': {
+    one: '{count} сервіс',
+    few: '{count} сервіси',
+    many: '{count} сервісів',
+    other: '{count} сервісу',
+  },
+  'workloadsPage.containerCount': {
+    one: '{count} контейнер',
+    few: '{count} контейнери',
+    many: '{count} контейнерів',
+    other: '{count} контейнера',
+  },
   'workloadsPage.servicesTab': 'Сервіси ({count})',
   'workloadsPage.containersTab': 'Контейнери ({count})',
   'resourceValidation.memoryFormat':

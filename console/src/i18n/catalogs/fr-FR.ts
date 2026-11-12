@@ -32,8 +32,9 @@ export const frFR = {
   'workloadsPage.health': 'État de santé : {state}',
   'workloadsPage.open': 'Ouvrir {name}',
   'workloadsPage.openStack': 'Ouvrir la stack {name}',
-  'workloadsPage.inventorySummary':
-    '{stacks} stacks · {services} services · {containers} conteneurs',
+  'workloadsPage.stackCount': { one: '{count} stack', other: '{count} stacks' },
+  'workloadsPage.serviceCount': { one: '{count} service', other: '{count} services' },
+  'workloadsPage.containerCount': { one: '{count} conteneur', other: '{count} conteneurs' },
   'workloadsPage.servicesTab': 'Services ({count})',
   'workloadsPage.containersTab': 'Conteneurs ({count})',
   'resourceValidation.memoryFormat':

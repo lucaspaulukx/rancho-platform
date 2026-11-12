@@ -32,8 +32,9 @@ export const enWorkloadsPage = {
   'workloadsPage.health': 'Health: {state}',
   'workloadsPage.open': 'Open {name}',
   'workloadsPage.openStack': 'Open stack {name}',
-  'workloadsPage.inventorySummary':
-    '{stacks} stacks · {services} services · {containers} containers',
+  'workloadsPage.stackCount': { one: '{count} stack', other: '{count} stacks' },
+  'workloadsPage.serviceCount': { one: '{count} service', other: '{count} services' },
+  'workloadsPage.containerCount': { one: '{count} container', other: '{count} containers' },
   'workloadsPage.servicesTab': 'Services ({count})',
   'workloadsPage.containersTab': 'Containers ({count})',
 } as const;
@@ -70,8 +71,13 @@ export const ptWorkloadsPage = {
   'workloadsPage.health': 'Saúde: {state}',
   'workloadsPage.open': 'Abrir {name}',
   'workloadsPage.openStack': 'Abrir stack {name}',
-  'workloadsPage.inventorySummary':
-    '{stacks} stacks · {services} serviços · {containers} containers',
+  'workloadsPage.stackCount': { one: '{count} stack', other: '{count} stacks' },
+  'workloadsPage.serviceCount': { one: '{count} serviço', other: '{count} serviços' },
+  'workloadsPage.containerCount': { one: '{count} container', other: '{count} containers' },
   'workloadsPage.servicesTab': 'Serviços ({count})',
   'workloadsPage.containersTab': 'Containers ({count})',
-} as const satisfies Record<keyof typeof enWorkloadsPage, string>;
+} as const satisfies {
+  [Key in keyof typeof enWorkloadsPage]: (typeof enWorkloadsPage)[Key] extends string
+    ? string
+    : { one: string; other: string };
+};
