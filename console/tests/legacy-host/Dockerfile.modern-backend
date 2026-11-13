@@ -59,8 +59,8 @@ RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars --mount=fr
     rm "$lib"/spring-*-5.3.39.jar; \
     install -m 0644 /tmp/spring-jars/*.jar "$lib/"
 
-FROM debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git tini zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1 && rm -rf /var/lib/apt/lists/*
+FROM ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca17dcecaf5
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git tini && rm -rf /var/lib/apt/lists/*
 COPY --from=cattle /opt/rancho-java17 /opt/rancho-java17
 COPY --from=cattle /opt/war /opt/cattle
 COPY --from=cattle /usr/share/cattle/artifacts /usr/share/cattle/artifacts
