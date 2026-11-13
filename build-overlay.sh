@@ -27,6 +27,9 @@ for artifact in commons-compress-1.5 commons-io-2.4 commons-lang3-3.1 commons-co
     rm "$LIB/$artifact.jar"
 done
 install -m 0644 /lab/runtime-jars/commons-archive/*.jar "$LIB/"
+test -f "$LIB/hsqldb-2.3.1.jar"
+rm "$LIB/hsqldb-2.3.1.jar"
+install -m 0644 /lab/runtime-jars/hsqldb/hsqldb-2.7.4-jdk8.jar "$LIB/"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$ROOT/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java" >> /lab/sources
