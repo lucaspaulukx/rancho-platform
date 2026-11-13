@@ -42,6 +42,7 @@ ADD --checksum=sha256:adbe656fc622e2457fefa09529d4b7c1126a3c4ff1c9306907764fcc93
 ADD --checksum=sha256:f314077e4196a4199a1d7b252db644f39fa6541bb7dc6e92bbb9001d6714d7d9 https://repo.maven.apache.org/maven2/org/springframework/spring-jdbc/5.3.39/spring-jdbc-5.3.39.jar /spring/spring-jdbc-5.3.39.jar
 ADD --checksum=sha256:defdd2e72eb88729e40bc6773c6860d3c52136c46861d27806379562ffc4b21b https://repo.maven.apache.org/maven2/org/springframework/spring-tx/5.3.39/spring-tx-5.3.39.jar /spring/spring-tx-5.3.39.jar
 ADD --checksum=sha256:444f243b936119b5488029f2d9399a3980855c60b493b9e2811464c6433a2b71 https://repo.maven.apache.org/maven2/org/springframework/spring-web/5.3.39/spring-web-5.3.39.jar /spring/spring-web-5.3.39.jar
+ADD --checksum=sha256:96d3dd843dc2911de01cdabcd50064cb9e860353102a0a78c96fd833d396fc7d https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.15.0/gson-2.15.0.jar /gson/gson-2.15.0.jar
 
 FROM rancher/server:v1.6.30@sha256:95b55603122c28baea4e8d94663aa34ad770bbc624a9ed6ef986fb3ea5224d91
 COPY --from=stream-proxy /out/websocket-proxy /usr/bin/websocket-proxy
