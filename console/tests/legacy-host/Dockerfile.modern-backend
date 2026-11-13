@@ -58,13 +58,15 @@ ADD --checksum=sha256:9f303cf6186e85361207920c74bf4f90e2e3403004df4cdcfd6099fd62
 ADD --checksum=sha256:830364d9fb534a501fb54f76e2caf64ec461b34b12c5fd9b7795102b91df9348 https://repo.maven.apache.org/maven2/org/eclipse/jetty/jetty-xml/12.1.15/jetty-xml-12.1.15.jar /jetty-xml-12.1.15.jar
 
 FROM ${BACKEND_JAVA17_IMAGE} AS cattle
-COPY modern-backend-single-node.patch modern-backend-servlet.patch modern-backend-logback.patch modern-backend-guava.patch ServletApplicationContext.java configure-modern-servlets.py migrate-spring-annotations.py configure-jetty-descriptors.py /tmp/modern-backend/
+COPY modern-backend-single-node.patch modern-backend-servlet.patch modern-backend-logback.patch modern-backend-guava.patch modern-agent-config-url.patch ServletApplicationContext.java configure-modern-servlets.py migrate-spring-annotations.py configure-jetty-descriptors.py /tmp/modern-backend/
 RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars --mount=from=spring-jars,target=/tmp/spring-jars --mount=from=guava-jars,target=/tmp/guava-jars set -eu; \
     cd /lab/cattle; \
     git apply --ignore-space-change /tmp/modern-backend/*.patch; \
     cp -aL /usr/share/cattle/war /opt/war; \
     python3 /tmp/modern-backend/configure-modern-servlets.py; \
     python3 /tmp/modern-backend/configure-jetty-descriptors.py; \
+    /usr/lib/jvm/zulu-8-amd64/bin/jar uf /opt/war/WEB-INF/lib/cattle-resources-0.5.0-SNAPSHOT.jar \
+        -C resources/content config-content/configscripts/config.sh; \
     lib=/opt/war/WEB-INF/lib; \
     rm "$lib/h2-1.4.187.jar" "$lib/hazelcast-3.8.jar" "$lib/spring-web-5.3.39.jar" \
         "$lib/cattle-hazelcast-eventing-0.5.0-SNAPSHOT.jar" \
