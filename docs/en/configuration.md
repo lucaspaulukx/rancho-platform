@@ -89,6 +89,8 @@ The base compose leaves stream/payload/audit/schema switches opt-in. The modern 
 
 OIDC secrets belong in ignored/private configuration, never in docs or public realm files. The realm template uses environment placeholders and exact callbacks. Preserve existing credentials/realm on startup. Prove an application administrator and a recovery path before enabling exclusive login. Keycloak administration does not automatically grant Rancher administration; groups remain managed locally.
 
+The bundled Keycloak runs only as a development fixture. The explicit H2 username and password preserve the previous development database defaults for this lab. A copied lab database was tested with Keycloak 26.8.2. Keycloak does not support H2 dev-file migrations. Keep a backup before changing the lab image and use a supported external database for a real Keycloak deployment.
+
 Backend/proxy protocol markers must agree before enabling a guard. Disabling a flag can remove protection or group access; it is not a data rollback. Audit history remains sensitive, and removing direct grants requires restoring them before disabling local RBAC. See [security](security-model.md), [access migration](access-migration.md) and [recovery](recovery.md).
 
 ## Runtime database schema
