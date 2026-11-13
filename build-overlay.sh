@@ -11,7 +11,10 @@ for artifact in jackson-annotations-2.5.3 jackson-core-2.5.3 jackson-databind-2.
     test -f "$LIB/$artifact.jar"
     rm "$LIB/$artifact.jar"
 done
-install -m 0644 /lab/jackson/*.jar "$LIB/"
+install -m 0644 /lab/runtime-jars/jackson/*.jar "$LIB/"
+test -f "$LIB/freemarker-2.3.20.jar"
+rm "$LIB/freemarker-2.3.20.jar"
+install -m 0644 /lab/runtime-jars/freemarker/freemarker-2.3.35.jar "$LIB/"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java" "$AUTH/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java" "$AUTH/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java" "$APP/src/main/java/io/cattle/platform/app/IaasApiConfig.java" "$APP/src/main/java/io/cattle/platform/app/ApiServerConfig.java" >> /lab/sources
