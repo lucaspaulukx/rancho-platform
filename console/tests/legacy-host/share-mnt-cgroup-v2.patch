@@ -1,0 +1,22 @@
+diff --git a/main.go b/main.go
+index 2963ef8..52f5d11 100644
+--- a/main.go
++++ b/main.go
+@@ -23,6 +23,7 @@ var (
+ 	// VERSION gets overridden at build time using -X main.VERSION=$VERSION
+ 	VERSION       = "dev"
+ 	cgroupPattern = regexp.MustCompile("^.*/docker-([a-z0-9]+).scope$")
++	unifiedDockerPattern = regexp.MustCompile("^0::(?:/[^/]*)*/docker/([a-f0-9]{64})$")
+ 	// Add the statepath as found on most OS's, and prefix with '/var' for Boot2Docker
+ 	statePaths = []string{
+ 		"/run/runc",
+@@ -174,6 +175,9 @@ func findContainerID() (string, error) {
+ 	f.Seek(0, 0)
+ 	scanner = bufio.NewScanner(f)
+ 	for scanner.Scan() {
++		if match := unifiedDockerPattern.FindStringSubmatch(scanner.Text()); len(match) == 2 {
++			return match[1], nil
++		}
+ 		matches := cgroupPattern.FindAllStringSubmatch(scanner.Text(), -1)
+ 		if len(matches) > 0 && len(matches[0]) > 1 && matches[0][1] != "" {
+ 			return matches[0][1], nil
