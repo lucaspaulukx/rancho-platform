@@ -56,7 +56,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 
 | ID | Capability | State and remaining gate |
 |---|---|---|
-| AUTH01 | Local/OIDC, callback, exclusive/autologin/no-access | On two restores of the same backup, hybrid mode accepted the local administrator password and exclusive mode rejected it. The exclusive copy advertised automatic login and completed Keycloak sign-in, first-login access denial and session revocation. Browser navigation and the final session/deep-link matrix remain |
+| AUTH01 | Local/OIDC, callback, exclusive/autologin/no-access | Two restores of the same backup verified hybrid and exclusive login policies. Chromium verified Keycloak login, automatic navigation, callback without manual refresh, no-access reload, logout, invalid tickets and interrupted provider redirects. Mode rollback restored local login and group grants. A local console build returned a reader to the requested Stacks path, environment and fragment after real Keycloak login. The remaining session and deep-link combinations still need coverage |
 | AUTH02 | Current account/global profile | Implemented; final technical-credential regression remains; password reset does not itself revoke JWTs |
 | AUTH03 | Cryptographic expiry | Local/OIDC HTTP and UI-stream slices validated; technical/idle/load completeness remains |
 | AUTH04 | Federated logout and IdP failure | Implemented slices; retain no-loop/no-local-fallback regression in exclusive mode |
@@ -84,7 +84,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 | OPS09 | Memory/reservation | Creation/upgrade/rollback slices validated; remaining resource/OOM matrix remains |
 | OPS10 | Capabilities/readOnly/privileged/security options | Capability/readOnly reset/finish and device creation validated, including independent primary and sidecar mappings on one host. Primary service device upgrade, rollback, finish and reset verified through the console at scale zero and through native replacement on one Docker host. Native no-new-privileges creation verified against an equivalent control at process level. Independent sidecar device upgrade, rollback, finish and reset were verified through the console at scale zero and through native replacement on one Docker host. The primary mapping was preserved during replacement of both containers. Multiple hosts, other security options and privilege variants remain |
 | OPS11 | CPU/IO/process limits | One-host CPU/IO and nofile create/upgrade/rollback/reset validated, including independent sidecar creation; other limits/load/compatibility remain |
-| OPS12 | Standalone container editing/recreation | Partial; mutable/immutable fields and native recreation contract remain |
+| OPS12 | Standalone container editing/recreation | Chromium edited name and description through the Operations menu. The native schema exposed only those fields for update, and Docker confirmed the original container and image stayed running. Native recreation of immutable configuration remains |
 | OPS13 | Details/graph/code/statistics by type | Partial; per-replica service metrics implemented, complete type/field/action inventory remains |
 
 ## Infrastructure, data and catalogs
