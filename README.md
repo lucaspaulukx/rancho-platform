@@ -1,6 +1,6 @@
 # Rancho Platform
 
-[English](README.md) | [Português (Brasil)](docs/pt-BR/overview.md)
+[🇺🇸 English](README.md) · [🇧🇷 Português (Brasil)](docs/pt-BR/overview.md)
 
 [![Console validation](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)
 [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-2563eb)](LICENSE)
