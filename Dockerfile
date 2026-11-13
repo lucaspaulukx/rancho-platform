@@ -31,6 +31,17 @@ ADD --checksum=sha256:2af190b300cbb0b35e248ccf5f4a06b6072030aeb3da7a98ec73abe5b4
 ADD --checksum=sha256:8d8b41a4b149bdae8d331f059a578870954d1e3ff29f8269a9eb3ee19a7e4ef7 https://repo.maven.apache.org/maven2/org/bouncycastle/bcpkix-jdk18on/1.86/bcpkix-jdk18on-1.86.jar /bouncycastle/bcpkix-jdk18on-1.86.jar
 ADD --checksum=sha256:1c268e15f785aafb1e4670d8d6e5f856f69475e96c162dadcd1ff9b350e9139f https://repo.maven.apache.org/maven2/org/bouncycastle/bcutil-jdk18on/1.86/bcutil-jdk18on-1.86.jar /bouncycastle/bcutil-jdk18on-1.86.jar
 ADD --checksum=sha256:2e194eba45a67dee19a4e272f4a04b18de8054e9f598b094382f6dae0b0e4b5e https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/2.7/snakeyaml-2.7.jar /yaml/snakeyaml-2.7.jar
+ADD --checksum=sha256:aa706e4f749982c0bae5fa637433c44c24f0fff5d16dc41deea6d30c3dfa7c85 https://repo.maven.apache.org/maven2/org/springframework/spring-aop/5.3.39/spring-aop-5.3.39.jar /spring/spring-aop-5.3.39.jar
+ADD --checksum=sha256:61debd1d90e89967b1bb8e35da8669e981a3438478fc015df31a6b90cea1a20e https://repo.maven.apache.org/maven2/org/springframework/spring-aspects/5.3.39/spring-aspects-5.3.39.jar /spring/spring-aspects-5.3.39.jar
+ADD --checksum=sha256:b6697a5d8facb81aa75e5a46d959d4256da9ce3b40d33f3b5bbd42a8b1ed5722 https://repo.maven.apache.org/maven2/org/springframework/spring-beans/5.3.39/spring-beans-5.3.39.jar /spring/spring-beans-5.3.39.jar
+ADD --checksum=sha256:9e644fc33bece9a9cb82538167a1b9640ae7b7d80252e893d89b8926a2f81633 https://repo.maven.apache.org/maven2/org/springframework/spring-context/5.3.39/spring-context-5.3.39.jar /spring/spring-context-5.3.39.jar
+ADD --checksum=sha256:f57a73ce3d33bf84d2cad726c1e3077fa8f3c3df05d3065ea7c3d72977e13b16 https://repo.maven.apache.org/maven2/org/springframework/spring-context-support/5.3.39/spring-context-support-5.3.39.jar /spring/spring-context-support-5.3.39.jar
+ADD --checksum=sha256:3a1ddcf05420a9181bd9cacb6062a3edc493e14d555961ad50e1a6360eb1e75f https://repo.maven.apache.org/maven2/org/springframework/spring-core/5.3.39/spring-core-5.3.39.jar /spring/spring-core-5.3.39.jar
+ADD --checksum=sha256:d5337774d889fcdc9c08b0c8b8aaa1018d4c95b9b441db0118f7ae4d328f2810 https://repo.maven.apache.org/maven2/org/springframework/spring-expression/5.3.39/spring-expression-5.3.39.jar /spring/spring-expression-5.3.39.jar
+ADD --checksum=sha256:adbe656fc622e2457fefa09529d4b7c1126a3c4ff1c9306907764fcc93f1b725 https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/5.3.39/spring-jcl-5.3.39.jar /spring/spring-jcl-5.3.39.jar
+ADD --checksum=sha256:f314077e4196a4199a1d7b252db644f39fa6541bb7dc6e92bbb9001d6714d7d9 https://repo.maven.apache.org/maven2/org/springframework/spring-jdbc/5.3.39/spring-jdbc-5.3.39.jar /spring/spring-jdbc-5.3.39.jar
+ADD --checksum=sha256:defdd2e72eb88729e40bc6773c6860d3c52136c46861d27806379562ffc4b21b https://repo.maven.apache.org/maven2/org/springframework/spring-tx/5.3.39/spring-tx-5.3.39.jar /spring/spring-tx-5.3.39.jar
+ADD --checksum=sha256:444f243b936119b5488029f2d9399a3980855c60b493b9e2811464c6433a2b71 https://repo.maven.apache.org/maven2/org/springframework/spring-web/5.3.39/spring-web-5.3.39.jar /spring/spring-web-5.3.39.jar
 
 FROM rancher/server:v1.6.30@sha256:95b55603122c28baea4e8d94663aa34ad770bbc624a9ed6ef986fb3ea5224d91
 COPY --from=stream-proxy /out/websocket-proxy /usr/bin/websocket-proxy
