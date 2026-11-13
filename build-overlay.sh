@@ -94,7 +94,7 @@ cp /lab/schema/001-local-groups.sql io/cattle/platform/iaas/api/auth/localrbac/m
 cd "$APP/src/main/resources"
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-app-config-0.5.0-SNAPSHOT.jar" META-INF/cattle/iaas-api/defaults.properties META-INF/cattle/api-server/defaults.properties
 cd "$ROOT/resources/content"
-/usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-resources-0.5.0-SNAPSHOT.jar" schema/admin/admin-auth.json schema/user/user-auth.json schema/base/localGroup.json schema/base/localGroupAudit.json schema/base/localAccessReport.json
+/usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-resources-0.5.0-SNAPSHOT.jar" schema/admin/admin-auth.json schema/user/user-auth.json schema/base/localGroup.json schema/base/localGroupAudit.json schema/base/localAccessReport.json db/core-060.xml
 cp /lab/web/* "$WAR/"
 for xml in "$WAR/WEB-INF/web.xml" "$WAR/WEB-INF/content/WEB-INF/web.xml"; do
     [ ! -f "$xml" ] || sed -i 's@</web-app>@<servlet><servlet-name>LocalOidc</servlet-name><servlet-class>io.cattle.platform.iaas.api.auth.localrbac.OidcServlet</servlet-class></servlet><servlet-mapping><servlet-name>LocalOidc</servlet-name><url-pattern>/oidc/*</url-pattern></servlet-mapping></web-app>@' "$xml"

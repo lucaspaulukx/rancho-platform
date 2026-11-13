@@ -867,6 +867,27 @@ index 05685f7..36a8c16 100644
  
  # 5 Minutes
  api.show.removed.for.seconds=-300
+diff --git a/resources/content/db/core-060.xml b/resources/content/db/core-060.xml
+index fc1194f..a0ffe0d 100644
+--- a/resources/content/db/core-060.xml
++++ b/resources/content/db/core-060.xml
+@@ -2,14 +2,14 @@
+ <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+     <property name="mediumtext" value="TEXT" dbms="postgresql" />
+     <property name="mediumtext" value="MEDIUMTEXT" />
+-    <changeSet dbms="!mysql" author="darren (generated)" id="dump1">
++    <changeSet dbms="!mysql,!mariadb" author="darren (generated)" id="dump1">
+         <validCheckSum>7:46c16c76490ce496b22a9faa6bf6db0c</validCheckSum>
+         <createIndex indexName="idx_label_key_value" tableName="label" unique="false">
+             <column name="key"/>
+             <column name="value"/>
+         </createIndex>
+     </changeSet>
+-    <changeSet dbms="mysql" author="darren (generated)" id="dump1">
++    <changeSet dbms="mysql,mariadb" author="darren (generated)" id="dump1">
+         <validCheckSum>7:46c16c76490ce496b22a9faa6bf6db0c</validCheckSum>
+         <validCheckSum>7:435f414e3ee3bafb1de08adb404c7c68</validCheckSum>
+         <sql>
 diff --git a/resources/content/schema/admin/admin-auth.json b/resources/content/schema/admin/admin-auth.json
 index 931a830..62ea426 100644
 --- a/resources/content/schema/admin/admin-auth.json
