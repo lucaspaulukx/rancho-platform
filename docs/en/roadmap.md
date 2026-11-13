@@ -148,6 +148,10 @@ The single-node profile now uses Ubuntu 24.04. The preceding Debian 13 scan coun
 
 A disposable Linux VM with Docker 29.9.2, cgroups v2 and the experimental agent and host API packages registered a host and ran an Alpine container in host-network mode. Native stop, start and restart succeeded. The native WebSockets delivered logs, command output and container metrics. A stack service using host networking and a named volume reached healthy state and was deactivated and reactivated. Managed networking, storage persistence and broader stack acceptance remain open.
 
+The modern single-node backend registered a Docker 29.9.2 host after fixes to agent activation and bootstrap archive delivery. The host-network checks passed for container creation and lifecycle, a stack service stop/start, and reading data from a named volume in a second container. With the embedded proxy and the agent connected, native logs, exec and metrics passed. Managed container creation failed because the fixture had no provisioned managed network. Infrastructure catalog provisioning and service DNS still require acceptance.
+
+A separate isolated MySQL 5.5 logical backup restored its Rancher schema into MariaDB 10.11. The new backend applied the schema migration and preserved the existing service count across restart. This snapshot contained no live instances, hosts or volumes. The external database rehearsal covers the Rancher schema; the source MySQL grant tables stay with the original engine.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.
