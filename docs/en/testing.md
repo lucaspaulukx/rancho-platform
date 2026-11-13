@@ -118,6 +118,8 @@ python console/tests/localization_acceptance.py --accessibility
 
 Run `python console/tests/gateway_security.py` with the named loopback Rancher and Nginx console containers available on port 18090. The check uses one disposable administrator session and revokes it at the end. It checks cache policy and security headers through Nginx, including an invalid OIDC callback, without requiring a running identity provider. It verifies that hashed scripts retain immutable caching.
 
+Run `python console/tests/gateway_authorization.py` with the same local gateway and Keycloak running. The test requires the named RBAC-DEV/RBAC-PROD fixtures and uses three disposable sessions. It checks project scope, read-only writes, OIDC ticket replay, absence of credential fields in public OIDC configuration and foreign-origin requests carrying a session cookie. Verify that a reverse proxy in front of Nginx preserves the public Host header for origin matching.
+
 `physical_security_options.py` compares a native `no-new-privileges` container with an otherwise identical control. It requires Docker on the original isolated legacy host, then compares scoped API values, Docker's security options and `NoNewPrivs` in the running processes. The test is limited to one option and one runtime.
 
 `physical_devices.py` separately exercises the default-off editor through real standalone creation, then verifies exact native/Docker mapping, nonprivileged mode, character-device read and the actual write-open outcome. It verifies revoked-member denial and exact cleanup. The /dev/null fixture does not certify write isolation because of native default allowlists; service upgrades, physical sidecars and other devices/runtimes need separate acceptance.
