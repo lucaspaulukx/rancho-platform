@@ -5,6 +5,7 @@ import { I18nProvider, useI18n } from '../i18n/provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Processes } from '../pages/Processes';
 import { api, type Resource, type Schema } from '../api';
+import { faIR } from '../i18n/catalogs/fa-IR';
 const backend = vi.hoisted(() => ({
   admin: true,
   enabled: true,
@@ -75,7 +76,12 @@ vi.mock('../api', async () => ({
 }));
 function SwitchLanguage() {
   const { setLocale } = useI18n();
-  return <button onClick={() => setLocale('en-US')}>English</button>;
+  return (
+    <>
+      <button onClick={() => setLocale('en-US')}>English</button>
+      <button onClick={() => setLocale('fa-IR')}>Persian</button>
+    </>
+  );
 }
 function mount(localized = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -88,7 +94,7 @@ function mount(localized = false) {
                 enabled: true,
                 preview: true,
                 defaultLocale: 'pt-BR',
-                availableLocales: ['pt-BR', 'en-US'],
+                availableLocales: ['pt-BR', 'en-US', 'fa-IR'],
                 selectable: true,
                 detectBrowser: false,
               }
@@ -175,6 +181,9 @@ describe('Tela de processos', () => {
             : 'Replay is no longer available.',
         ),
       ).toBeInTheDocument();
+      fireEvent.click(screen.getByText('Persian'));
+      const key = kind === 'changed' ? 'processes.recordChanged' : 'processes.replayChanged';
+      expect(await screen.findByText(faIR[key])).toBeInTheDocument();
       expect(api).toHaveBeenCalledTimes(calls);
       expect(backend.posts).toBe(0);
     },

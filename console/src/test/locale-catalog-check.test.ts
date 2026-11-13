@@ -65,6 +65,7 @@ describe('Registered locale catalog gate', () => {
     const previewDomains = new Set([
       'accessDiagnostics',
       'apiKeys',
+      'auditPage',
       'auth',
       'bindingsEditor',
       'bulkOperation',
@@ -85,6 +86,7 @@ describe('Registered locale catalog gate', () => {
       'language',
       'localAccountPanel',
       'operations',
+      'processes',
       'recovery',
       'registryCredentials',
       'requestError',
@@ -103,6 +105,7 @@ describe('Registered locale catalog gate', () => {
       'selectorRows',
       'serviceEditors',
       'serviceUpgradeForm',
+      'settings',
       'shell',
       'sidecarValidation',
       'stackComposeUpgradePanel',
