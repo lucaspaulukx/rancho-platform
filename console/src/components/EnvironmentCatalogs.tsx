@@ -310,6 +310,7 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
                   id={id}
                   aria-describedby={description}
                   type={revealed ? 'text' : 'password'}
+                  dir="ltr"
                   autoComplete="new-password"
                   value={draft.url}
                   onChange={(e) => setDraft({ ...draft, url: e.target.value })}
@@ -321,6 +322,7 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
                 <input
                   id={id}
                   value={draft.branch}
+                  dir="ltr"
                   onChange={(e) => setDraft({ ...draft, branch: e.target.value })}
                   autoComplete="off"
                 />

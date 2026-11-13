@@ -1,4 +1,241 @@
 export const frFR = {
+  'catalogRepositories.defaultBranch': 'Valeur par défaut du serveur',
+  'catalogRepositories.title': 'Dépôts de catalogue',
+  'catalogRepositories.description':
+    'Configuration des sources Git globales. Les modifications peuvent affecter tous les environnements.',
+  'catalogRepositories.override': 'Valeur de remplacement en base de données.',
+  'catalogRepositories.noOverride': 'Aucune valeur de remplacement en base de données.',
+  'catalogRepositories.tableLabel': 'Dépôts globaux configurés',
+  'catalogRepositories.repository': 'Dépôt',
+  'catalogRepositories.branch': 'Branche configurée',
+  'catalogRepositories.emptyTitle': 'Aucun dépôt global configuré',
+  'catalogRepositories.emptyDescription':
+    'Des sources propres à un environnement peuvent rester disponibles.',
+  'catalogRepositories.editorTitle': 'Configurer les dépôts globaux',
+  'catalogRepositories.editorDescription':
+    'Les entrées de ce formulaire affectent toute l’instance. Les URL sont protégées par défaut.',
+  'catalogRepositories.showUrls': 'Afficher les URL des dépôts',
+  'catalogRepositories.urlHint':
+    'Git, SSH, HTTP ou HTTPS. Les URL HTTP ne doivent pas contenir d’identifiants.',
+  'catalogRepositories.branchHint':
+    'Laissez le champ vide pour conserver la valeur par défaut du serveur.',
+  'catalogRepositories.confirmEmpty': 'Je confirme le retrait de tous les dépôts globaux',
+  'catalogRepositories.saveTitle': 'Enregistrer les dépôts globaux ?',
+  'catalogRepositories.discardTitle': 'Abandonner les modifications des dépôts ?',
+  'catalogRepositories.discardDescription':
+    'Les modifications n’ont pas encore été envoyées au serveur.',
+  'catalogRepositories.leaveTitle': 'Quitter avec une modification en attente ?',
+  'catalogRepositories.leaveDescription':
+    'Les dépôts n’ont pas encore été enregistrés. Attendez la fin de tout envoi en cours.',
+  'catalogRepositories.unavailable': 'Les dépôts sont indisponibles avec ces droits d’accès.',
+  'catalogRepositories.refresh': 'Actualiser la liste',
+  'catalogRepositories.configure': 'Configurer les dépôts',
+  'catalogRepositories.notice':
+    'La liste affiche la configuration du serveur sans vérifier le clonage, les commits ni la synchronisation. Les catalogues propres à chaque environnement restent inchangés.',
+  'catalogRepositories.cancel': 'Annuler',
+  'catalogRepositories.review': 'Vérifier les dépôts',
+  'catalogRepositories.remove': 'Retirer le dépôt',
+  'catalogRepositories.add': 'Ajouter un dépôt',
+  'catalogRepositories.nameLabel': 'Nom du dépôt {index}',
+  'catalogRepositories.urlLabel': 'URL du dépôt {index}',
+  'catalogRepositories.branchLabel': 'Branche du dépôt {index}',
+  'catalogRepositories.removeLabel': 'Retirer le dépôt {index}',
+  'catalogRepositories.reviewDescription':
+    'Nombre de dépôts globaux à configurer : {count}. Le serveur peut accéder à ces URL et effectuer des clonages Git. L’enregistrement ne vérifie pas la synchronisation. Les URL restent protégées pendant cette vérification.',
+  'catalogRepositories.repositoryIndex': 'Dépôt {index}',
+  'catalogRepositories.source': 'Source : {source}.',
+  'catalogRepositories.saved':
+    'Configuration enregistrée. Le service de catalogue clone et synchronise les dépôts.',
+  'catalogRepositories.httpError': 'L’opération sur le catalogue n’a pas abouti (HTTP {status}).',
+  'catalogRepositories.requestError': 'L’opération sur le catalogue n’a pas pu aboutir.',
+  'catalogRepositories.configurationUnavailable': 'Configuration indisponible.',
+  'catalogRepositories.reopen': 'Rouvrez l’éditeur.',
+  'catalogRepositories.retry': 'Réessayer',
+  'catalogRepositories.validation.configuration': 'Configuration du catalogue non valide.',
+  'catalogRepositories.validation.jsonRequired':
+    'Cet éditeur nécessite catalog.url au format JSON. Conservez la valeur et utilisez les paramètres du serveur pour les formats anciens.',
+  'catalogRepositories.validation.document': 'Document de catalogue non pris en charge.',
+  'catalogRepositories.validation.entry': 'Entrée de catalogue non prise en charge.',
+  'catalogRepositories.validation.limit': 'Trop de dépôts.',
+  'catalogRepositories.validation.uniqueNames':
+    'Utilisez des noms uniques, sans espaces ni clés réservées.',
+  'catalogRepositories.validation.reopen': 'Rouvrez l’éditeur de dépôts.',
+  'catalogRepositories.validation.confirmEmpty': 'Confirmez le retrait de tous les dépôts globaux.',
+  'catalogRepositories.validation.url': 'URL du dépôt non valide.',
+  'catalogRepositories.validation.urlParts':
+    'Utilisez une URL Git, SSH, HTTP ou HTTPS sans mot de passe, fragment ni identifiants HTTP.',
+  'catalogRepositories.validation.branch': 'Branche non valide. Utilisez un nom de référence Git.',
+
+  'environmentCatalogs.title': 'Dépôts de l’environnement',
+  'environmentCatalogs.close': 'Fermer',
+  'environmentCatalogs.notice':
+    'Cette configuration s’applique uniquement à cet environnement. L’enregistrement peut lancer un clonage Git sur le serveur. La liste ne confirme pas la synchronisation. Ce formulaire ne lance aucun modèle ni aucune stack existante.',
+  'environmentCatalogs.sources': 'Sources du catalogue de l’environnement',
+  'environmentCatalogs.repository': 'Dépôt',
+  'environmentCatalogs.scope': 'Périmètre',
+  'environmentCatalogs.thisEnvironment': 'Cet environnement',
+  'environmentCatalogs.global': 'Global',
+  'environmentCatalogs.branch': 'Branche',
+  'environmentCatalogs.serverDefault': 'Valeur par défaut du serveur',
+  'environmentCatalogs.actions': 'Actions',
+  'environmentCatalogs.readOnly': 'Lecture seule',
+  'environmentCatalogs.empty': 'Aucun dépôt disponible',
+  'environmentCatalogs.emptyDescription': 'Ajoutez une source native pour cet environnement.',
+  'environmentCatalogs.add': 'Ajouter un dépôt à l’environnement',
+  'environmentCatalogs.editSource': 'Modifier la source de l’environnement',
+  'environmentCatalogs.newSource': 'Nouvelle source de l’environnement',
+  'environmentCatalogs.name': 'Nom du dépôt',
+  'environmentCatalogs.showUrl': 'Afficher l’URL du dépôt',
+  'environmentCatalogs.url': 'URL Git',
+  'environmentCatalogs.urlHint':
+    'HTTP, HTTPS, Git ou SSH. L’URL ne doit contenir aucun mot de passe. Le serveur accédera à cette adresse.',
+  'environmentCatalogs.repositoryBranch': 'Branche du dépôt',
+  'environmentCatalogs.typeNotice':
+    'Type : catalogue Cattle natif. Le nom ne peut plus être modifié après la création.',
+  'environmentCatalogs.cancel': 'Annuler la modification',
+  'environmentCatalogs.review': 'Vérifier la source de l’environnement',
+  'environmentCatalogs.removeTitle': 'Retirer la source de l’environnement ?',
+  'environmentCatalogs.saveTitle': 'Enregistrer la source de l’environnement ?',
+  'environmentCatalogs.discard': 'Abandonner les modifications du dépôt ?',
+  'environmentCatalogs.unsent': 'La modification n’a pas encore été envoyée au serveur.',
+  'environmentCatalogs.leave': 'Quitter avec une modification en attente ?',
+  'environmentCatalogs.wait': 'Attendez la fin de tout envoi en cours avant de quitter.',
+  'environmentCatalogs.removed': 'Dépôt retiré de cet environnement.',
+  'environmentCatalogs.saved':
+    'Dépôt enregistré. Attendez la synchronisation par le service de catalogue.',
+  'environmentCatalogs.description':
+    'Sources de {environment}. Les dépôts globaux sont affichés en lecture seule.',
+  'environmentCatalogs.edit': 'Modifier {name}',
+  'environmentCatalogs.remove': 'Retirer {name}',
+  'environmentCatalogs.removeDescription':
+    '{name} dans {environment}. La source ne sera plus disponible dans cet environnement. Les stacks existantes et les sources globales seront conservées.',
+  'environmentCatalogs.saveDescription':
+    '{name} dans {environment}. Le serveur peut cloner le dépôt à l’URL configurée. La synchronisation sera vérifiée séparément. Les sources globales seront conservées.',
+  'environmentCatalogs.error.operation': 'L’opération sur le catalogue n’a pas pu aboutir.',
+  'environmentCatalogs.error.list': 'Impossible d’interroger les dépôts de cet environnement.',
+  'environmentCatalogs.error.unavailable': 'Dépôt indisponible dans cet environnement.',
+  'environmentCatalogs.error.reopen': 'Rouvrez l’éditeur.',
+  'environmentCatalogs.error.http': 'L’opération sur le catalogue n’a pas abouti (HTTP {status}).',
+  'environmentCatalogs.access.disabled': 'La gestion des sources du catalogue est désactivée.',
+  'environmentCatalogs.access.identityChanged': 'L’identité de la session a changé.',
+  'environmentCatalogs.access.denied':
+    'Vos droits d’accès ne permettent pas de gérer les sources dans cet environnement.',
+  'environmentCatalogs.access.http':
+    'Impossible de vérifier l’accès aux sources du catalogue (HTTP {status}).',
+  'environmentCatalogs.validation.configuration':
+    'Aucune configuration n’est disponible pour ce dépôt.',
+  'environmentCatalogs.validation.name': 'Nom de dépôt non pris en charge.',
+  'environmentCatalogs.validation.environment': 'Environnement non valide.',
+  'environmentCatalogs.validation.changed': 'Le dépôt a changé. Rouvrez l’éditeur.',
+  'environmentCatalogs.validation.readOnly': 'Ce type de dépôt est disponible en lecture seule.',
+  'environmentCatalogs.validation.duplicate': 'Un dépôt de ce nom existe déjà.',
+  'environmentCatalogs.validation.native': 'Choisissez un catalogue Cattle natif.',
+
+  'catalogPage.validation.route': 'Le catalogue a renvoyé un chemin non valide.',
+  'catalogPage.validation.questions': 'Les questions du modèle ne sont pas valides.',
+  'catalogPage.validation.variables': 'Le modèle contient des variables non valides ou en double.',
+  'catalogPage.validation.type': 'Le champ {label} utilise un type non pris en charge : {type}.',
+  'catalogPage.validation.options': 'La liste d’options du modèle n’est pas valide.',
+  'catalogPage.validation.stackName': 'Saisissez un nom pour la stack.',
+  'catalogPage.validation.otherTemplate': 'La version sélectionnée appartient à un autre modèle.',
+  'catalogPage.validation.missingFiles': 'La version n’a fourni aucun fichier de configuration.',
+  'catalogPage.validation.dockerCompose':
+    'Cette version ne contient aucun fichier Docker Compose utilisable.',
+  'catalogPage.validation.required': 'Renseignez {label}.',
+  'catalogPage.validation.boolean': 'Choisissez une valeur valide pour {label}.',
+  'catalogPage.validation.number': 'Saisissez un nombre valide pour {label}.',
+  'catalogPage.validation.range': '{label} est hors des limites autorisées.',
+  'catalogPage.validation.string': 'Vérifiez {label}.',
+  'catalogPage.validation.enum': 'Choisissez une option valide pour {label}.',
+  'catalogPage.validation.reference': 'Sélectionnez une ressource disponible pour {label}.',
+  'catalogPage.validation.date': 'Saisissez une date valide pour {label}.',
+  'catalogPage.validation.upgradeOrigin':
+    'Cette version appartient à un autre catalogue ou à un autre modèle.',
+  'catalogPage.filesDescription':
+    'Contenu d’origine de la version sélectionnée. Rancher traitera les paramètres.',
+  'catalogPage.stoppedHint':
+    'La stack sera créée sans démarrer ses services. Vous pourrez les démarrer depuis la vue des opérations.',
+  'catalogPage.authorize':
+    'J’autorise la recréation des conteneurs et le démarrage des services selon cette configuration',
+  'catalogPage.emptyDescription':
+    'Vérifiez les filtres et la disponibilité du catalogue dans cet environnement.',
+  'catalogPage.startHint':
+    'Rancher peut créer les conteneurs et les ressources décrits dans le modèle.',
+  'catalogPage.updated':
+    'Demande de mise à niveau reçue. Suivez la stack et ses services dans la vue des opérations.',
+  'catalogPage.noVersionDescription':
+    'Le catalogue n’a renvoyé aucune version compatible avec cette instance.',
+  'catalogPage.stackChanged': 'Un autre client a modifié la stack. Fermez et rouvrez le panneau.',
+  'catalogPage.created':
+    'Stack créée. Suivez les services et leur état dans la vue des opérations.',
+  'catalogPage.description':
+    'Choisissez une application, vérifiez sa version et configurez votre stack.',
+  'catalogPage.upgradeUnavailable':
+    'La mise à niveau depuis le catalogue est indisponible dans cet état.',
+  'catalogPage.selectEnvironmentDescription':
+    'Choisissez l’environnement dont vous souhaitez consulter le catalogue.',
+  'catalogPage.wait': 'Attendez la réponse de Rancher avant de changer de contexte.',
+  'catalogPage.versionChanged':
+    'La version du catalogue a changé. Rouvrez le panneau pour la vérifier.',
+  'catalogPage.upgradePermission':
+    'Vous n’avez plus l’autorisation d’effectuer des mises à niveau.',
+  'catalogPage.createPermission': 'Vous n’avez plus l’autorisation de créer.',
+  'catalogPage.confirmImpact': 'Confirmez l’impact de la mise à niveau avant l’envoi.',
+  'catalogPage.discardDescription': 'Les paramètres saisis n’ont pas encore été enregistrés.',
+  'catalogPage.upgradeState': 'La mise à niveau est indisponible dans cet état.',
+  'catalogPage.leaveDescription': 'Les paramètres du modèle seront abandonnés.',
+  'catalogPage.defaultDescription': 'Versions et configuration de l’application.',
+  'catalogPage.includeInfra': 'Inclure les modèles d’infrastructure',
+  'catalogPage.startServices': 'Démarrer les services après la création de la stack',
+  'catalogPage.launchUnavailable': 'Le lancement est indisponible.',
+  'catalogPage.versionRevalidation': 'La version ne peut pas être vérifiée à nouveau.',
+  'catalogPage.readStackFailed': 'Impossible de lire la stack.',
+  'catalogPage.empty': 'Aucun modèle disponible',
+  'catalogPage.noVersion': 'Aucune version disponible',
+  'catalogPage.selectEnvironment': 'Sélectionner un environnement',
+  'catalogPage.discardTitle': 'Abandonner la configuration ?',
+  'catalogPage.parameters': 'Paramètres de l’application',
+  'catalogPage.invalidTemplate': 'Le modèle n’est pas valide.',
+  'catalogPage.reviewConfiguration': 'Vérifiez la configuration.',
+  'catalogPage.sources': 'Sources de l’environnement',
+  'catalogPage.stay': 'Rester sur cet écran',
+  'catalogPage.stackConfiguration': 'Configuration de la stack',
+  'catalogPage.creating': 'Création en cours',
+  'catalogPage.files': 'Fichiers du modèle',
+  'catalogPage.allCategories': 'Toutes les catégories',
+  'catalogPage.show': 'Afficher pour modifier',
+  'catalogPage.refresh': 'Actualiser la liste',
+  'catalogPage.allCatalogs': 'Tous les catalogues',
+  'catalogPage.templateVersion': 'Version du modèle',
+  'catalogPage.versionFiles': 'Fichiers de la version',
+  'catalogPage.leave': 'Quitter sans enregistrer ?',
+  'catalogPage.hide': 'Masquer le contenu',
+  'catalogPage.upgrade': 'Mettre à niveau la stack',
+  'catalogPage.stackName': 'Nom de la stack *',
+  'catalogPage.hidden': 'Contenu masqué',
+  'catalogPage.defaultVersion': 'Version par défaut',
+  'catalogPage.configuration': 'Configuration',
+  'catalogPage.versions': 'Voir les versions',
+  'catalogPage.create': 'Créer une stack',
+  'catalogPage.select': 'Sélectionner…',
+  'catalogPage.categories': 'Catégories',
+  'catalogPage.category': 'Catégorie',
+  'catalogPage.application': 'Application',
+  'catalogPage.defaultSuffix': ' · par défaut',
+  'catalogPage.fieldDescription': 'Description',
+  'catalogPage.title': 'Catalogue',
+  'catalogPage.close': 'Fermer',
+  'catalogPage.cattleInfo':
+    'Cette console permet de lancer des modèles dans les environnements Cattle. Vous pouvez consulter les versions et leurs fichiers.',
+  'catalogPage.launchInfo':
+    'Vous pouvez consulter les fichiers. Le lancement est indisponible pour votre compte ou ce type d’environnement.',
+  'catalogPage.impactWarning':
+    'La mise à niveau native peut démarrer des services arrêtés, recréer des conteneurs et modifier les ressources définies par le modèle. Vérifiez les paramètres et le nombre de réplicas avant de l’autoriser. Modifier ce paramètre dans le modèle ne garantit pas que le nombre effectif de réplicas change. Vérifiez et ajustez les services dans la vue des opérations avant la mise à niveau.',
+  'catalogPage.upgradeTitle': 'Mettre à niveau la stack · {name}',
+  'catalogPage.environmentDescription': 'Environnement : {name} · {description}',
+  'catalogPage.existingStack':
+    'Stack existante : {name} · référence actuelle : {version}. Vérifiez la version, les paramètres et les fichiers avant l’envoi. La mise à niveau peut recréer des services et des conteneurs.',
+
   'processes.sent':
     'Demande de réexécution envoyée au moteur. Suivez l’état renvoyé par le serveur.',
   'processes.description': 'Exécutions du moteur et leurs ressources sources.',
