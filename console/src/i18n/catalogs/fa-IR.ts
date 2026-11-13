@@ -5,6 +5,7 @@ export const faIR = {
   'requestError.paginationCycle': 'API یک چرخهٔ صفحه‌بندی برگرداند.',
   'requestError.paginationLimit': 'مجموعه بیش از حد بزرگ است. فیلترها را محدودتر کنید.',
   'requestError.invalidCollection': 'API یک مجموعهٔ نامعتبر برگرداند.',
+  'requestError.failed': 'انجام درخواست ممکن نبود.',
 
   'details.field.id': 'شناسه',
   'details.field.name': 'نام',

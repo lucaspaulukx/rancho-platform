@@ -7,6 +7,17 @@ export class ConsoleRequestError extends Error {
   }
 }
 
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    readonly detail?: string,
+  ) {
+    super(detail ?? ptRequestErrors['requestError.failed']);
+  }
+}
+
 export function requestErrorText(error: Error, t: ReturnType<typeof createTranslator>['t']) {
-  return error instanceof ConsoleRequestError ? t(error.key) : error.message;
+  if (error instanceof ConsoleRequestError) return t(error.key);
+  if (error instanceof ApiError && error.detail === undefined) return t('requestError.failed');
+  return error.message;
 }

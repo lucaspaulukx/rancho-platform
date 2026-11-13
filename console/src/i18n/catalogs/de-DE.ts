@@ -2360,6 +2360,7 @@ export const deDE = {
     'Die API hat eine Schleife in der Seitennavigation zurückgegeben.',
   'requestError.paginationLimit': 'Die Sammlung ist zu groß. Schränken Sie die Filter ein.',
   'requestError.invalidCollection': 'Die API hat eine ungültige Sammlung zurückgegeben.',
+  'requestError.failed': 'Die Anfrage konnte nicht abgeschlossen werden.',
 
   'resourceCreator.kind.stack': 'Stack',
   'resourceCreator.kind.service': 'Dienst',
