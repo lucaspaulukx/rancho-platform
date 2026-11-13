@@ -550,6 +550,30 @@ index aec39a6..f2572fa 100644
          Map<String, Object> project = CollectionUtils.toMap(apiRequest.getRequestObject());
          if (authDao.getAccountById(policy.getAccountId()).getKind().equalsIgnoreCase(ProjectConstants.TYPE)) {
              throw new ClientVisibleException(ResponseCodes.FORBIDDEN);
+diff --git a/code/iaas/service-discovery/api/src/main/java/io/cattle/platform/servicediscovery/api/service/impl/ServiceDiscoveryApiServiceImpl.java b/code/iaas/service-discovery/api/src/main/java/io/cattle/platform/servicediscovery/api/service/impl/ServiceDiscoveryApiServiceImpl.java
+index 30edf99..fa1d6cc 100644
+--- a/code/iaas/service-discovery/api/src/main/java/io/cattle/platform/servicediscovery/api/service/impl/ServiceDiscoveryApiServiceImpl.java
++++ b/code/iaas/service-discovery/api/src/main/java/io/cattle/platform/servicediscovery/api/service/impl/ServiceDiscoveryApiServiceImpl.java
+@@ -155,7 +155,7 @@ public class ServiceDiscoveryApiServiceImpl implements ServiceDiscoveryApiServic
+         DumperOptions options = new DumperOptions();
+         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+         options.setLineBreak(LineBreak.WIN);
+-        Representer representer = new SkipNullRepresenter();
++        Representer representer = new SkipNullRepresenter(options);
+         representer.addClassTag(LBConfigMetadataStyle.class, Tag.MAP);
+         
+         Yaml yaml = new Yaml(representer, options);
+@@ -164,6 +164,10 @@ public class ServiceDiscoveryApiServiceImpl implements ServiceDiscoveryApiServic
+     }
+ 
+     private class SkipNullRepresenter extends Representer {
++        SkipNullRepresenter(DumperOptions options) {
++            super(options);
++        }
++
+         @Override
+         protected NodeTuple representJavaBeanProperty(Object javaBean, Property property,
+                 Object propertyValue, Tag customTag) {
 diff --git a/code/implementation/docker/machine/src/main/java/io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher.java b/code/implementation/docker/machine/src/main/java/io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher.java
 index 2d075e3..3fb985a 100644
 --- a/code/implementation/docker/machine/src/main/java/io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher.java
@@ -705,6 +729,56 @@ index 0b600be..241181c 100644
  
      public String getUrl() {
          return url;
+diff --git a/code/implementation/system-stack/src/main/java/io/cattle/platform/systemstack/catalog/impl/CatalogServiceImpl.java b/code/implementation/system-stack/src/main/java/io/cattle/platform/systemstack/catalog/impl/CatalogServiceImpl.java
+index 1c8acd2..b918e62 100644
+--- a/code/implementation/system-stack/src/main/java/io/cattle/platform/systemstack/catalog/impl/CatalogServiceImpl.java
++++ b/code/implementation/system-stack/src/main/java/io/cattle/platform/systemstack/catalog/impl/CatalogServiceImpl.java
+@@ -32,7 +32,9 @@ import org.apache.http.client.ResponseHandler;
+ import org.apache.http.client.fluent.Request;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
++import org.yaml.snakeyaml.LoaderOptions;
+ import org.yaml.snakeyaml.Yaml;
++import org.yaml.snakeyaml.constructor.SafeConstructor;
+ 
+ import com.netflix.config.DynamicBooleanProperty;
+ import com.netflix.config.DynamicStringProperty;
+@@ -279,7 +281,7 @@ public class CatalogServiceImpl implements CatalogService {
+ 
+         TemplateCollection collection = getTemplates(catalogTemplateUrl.toString());
+ 
+-        Yaml yaml = new Yaml();
++        Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
+         if (collection.getData() != null) {
+             for (Template template : collection.getData()) {
+                 if (template.getVersionLinks() == null) {
+@@ -299,8 +301,12 @@ public class CatalogServiceImpl implements CatalogService {
+                     continue;
+                 }
+ 
++                Object document = yaml.load(file);
++                if (!(document instanceof Map)) {
++                    continue;
++                }
+                 @SuppressWarnings("unchecked")
+-                Map<Object, Object> project = yaml.loadAs(file, Map.class);
++                Map<Object, Object> project = (Map<Object, Object>) document;
+                 result.put("catalog://" + template.getId(), project);
+             }
+         }
+diff --git a/code/meta-parent/pom.xml b/code/meta-parent/pom.xml
+index 881c7f3..e5978f1 100644
+--- a/code/meta-parent/pom.xml
++++ b/code/meta-parent/pom.xml
+@@ -422,7 +422,7 @@
+             <dependency>
+                 <groupId>org.yaml</groupId>
+                 <artifactId>snakeyaml</artifactId>
+-                <version>1.15</version>
++                <version>2.7</version>
+             </dependency>
+         </dependencies>
+     </dependencyManagement>
 diff --git a/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java b/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
 index 40fe2eb..b7c2c10 100644
 --- a/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
