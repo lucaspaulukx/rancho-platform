@@ -1,0 +1,12 @@
+ARG BACKEND_IMAGE=rancho-backend:local
+FROM golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 AS packages
+ENV GO111MODULE=off GOPATH=/go CGO_ENABLED=0
+ADD --checksum=sha256:230588a9c554b0c834db396f89ac504aafdcc218007982f6e5ac38fe67292963 https://codeload.github.com/rancher/agent/tar.gz/c8663d12dd253ef13258750dca056d4b1219fc10 /tmp/agent.tar.gz
+ADD --checksum=sha256:9205a704a980d5470495438bca4a5d5d17fb6b06ae218df58ae4d330cb137bd6 https://codeload.github.com/rancher/host-api/tar.gz/d56f3d0283c4910e9cc62d9123419f6caa2f9429 /tmp/host-api.tar.gz
+COPY build-modern-packages.sh /tmp/build-modern-packages.sh
+RUN --network=none sh /tmp/build-modern-packages.sh
+
+FROM ${BACKEND_IMAGE}
+COPY --from=packages /out/go-agent.tar.gz /usr/share/cattle/artifacts/go-agent.tar.gz
+COPY --from=packages /out/host-api.tar.gz /usr/share/cattle/artifacts/host-api.tar.gz
+COPY --from=packages /out/licenses/ /usr/share/doc/rancho-modern-agent/
