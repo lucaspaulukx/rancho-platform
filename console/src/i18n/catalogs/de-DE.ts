@@ -1,4 +1,107 @@
 export const deDE = {
+  'hostsPage.selectEnvironment': 'Umgebung auswählen',
+  'hostsPage.environmentDescription': 'Hosts gehören zur ausgewählten Umgebung.',
+  'hostsPage.title': 'Hosts',
+  'hostsPage.description': 'Infrastruktur, Kapazität und Container pro Host.',
+  'hostsPage.back': 'Zurück zu den Hosts',
+  'hostsPage.add': 'Host hinzufügen',
+  'hostsPage.manage': 'Host verwalten',
+  'hostsPage.metrics': 'Host-Metriken',
+  'hostsPage.refresh': 'Hosts aktualisieren',
+  'hostsPage.unavailable': 'Host nicht verfügbar',
+  'hostsPage.unavailableDescription':
+    'Der Host existiert in dieser Umgebung nicht oder wurde entfernt.',
+  'hostsPage.search': 'Hosts suchen',
+  'hostsPage.searchPlaceholder': 'Name, Adresse oder Status…',
+  'hostsPage.empty': 'Keine Hosts gefunden',
+  'hostsPage.emptyDescription': 'Registrieren Sie einen Host oder passen Sie die Suche an.',
+  'hostsPage.agentAddress': 'Agent-Adresse',
+  'hostsPage.agent': 'Agent',
+  'hostsPage.cpus': 'CPUs',
+  'hostsPage.memory': 'Gesamter Arbeitsspeicher',
+  'hostsPage.system': 'System',
+  'hostsPage.docker': 'Docker',
+  'hostsPage.hostFailure': 'Rancher hat einen Fehler auf diesem Host gemeldet.',
+  'hostsPage.viewContainers': 'Container anzeigen',
+  'hostsPage.detailsActions': 'Details und Aktionen',
+  'hostsPage.containersTitle': 'Container auf diesem Host',
+  'hostsPage.container': 'Container',
+  'hostsPage.state': 'Status',
+  'hostsPage.image': 'Image',
+  'hostsPage.actions': 'Aktionen',
+  'hostsPage.logs': 'Logs',
+  'hostsPage.terminal': 'Terminal',
+  'hostsPage.enableWorkloads':
+    'Aktivieren Sie das Workloads-Modul, um Container auf diesem Host anzuzeigen.',
+
+  'hostRegistration.unavailable':
+    'Die Registrierung wurde nicht verfügbar. Versuchen Sie es erneut.',
+  'hostRegistration.pending':
+    'Die Registrierung wird noch vorbereitet. Warten Sie und versuchen Sie es erneut.',
+  'hostRegistration.failed': 'Die Registrierung konnte nicht vorbereitet werden.',
+  'hostRegistration.title': 'Host hinzufügen',
+  'hostRegistration.environment': 'Umgebung: {name}',
+  'hostRegistration.close': 'Schließen',
+  'hostRegistration.register': 'Docker-Host registrieren',
+  'hostRegistration.instructions':
+    'Führen Sie den Befehl auf dem Host aus, den Sie hinzufügen möchten. Der Host muss die Rancher-Serveradresse erreichen können und eine mit Rancher 1.6 kompatible Docker-Version verwenden.',
+  'hostRegistration.warning':
+    'Der Befehl autorisiert einen Agenten in dieser Umgebung und führt einen privilegierten Container auf dem ausgewählten Host aus. Geben Sie ihn nur an die Administratoren dieses Hosts weiter.',
+  'hostRegistration.denied':
+    'Ihre Rolle erlaubt es nicht, Hosts in dieser Umgebung zu registrieren.',
+  'hostRegistration.refresh': 'Befehl aktualisieren',
+  'hostRegistration.prepare': 'Registrierungsbefehl vorbereiten',
+  'hostRegistration.command': 'Registrierungsbefehl',
+  'hostRegistration.notice':
+    'Der Befehl wird nur in diesem Panel angezeigt. Der neue Host erscheint in der Liste, sobald sich der Agent verbindet.',
+  'secretField.copyFailed':
+    'Kopieren fehlgeschlagen. Zeigen Sie den Wert an und kopieren Sie ihn manuell.',
+  'secretField.hide': 'Ausblenden',
+  'secretField.reveal': 'Anzeigen',
+  'secretField.copied': 'Kopiert',
+  'secretField.copy': 'Kopieren',
+
+  'engineMonitoring.clusterUnavailable':
+    'Mit diesen Zugriffsrechten ist die Clusterüberwachung nicht verfügbar.',
+  'engineMonitoring.clusterTitle': 'HA und Cluster-Mitglieder',
+  'engineMonitoring.clusterDescription':
+    'Vom Server gemeldete Mitglieder und ihre letzten Heartbeats.',
+  'engineMonitoring.refresh': 'Aktualisieren',
+  'engineMonitoring.autoMembers': 'Mitglieder automatisch aktualisieren (5 s)',
+  'engineMonitoring.clusterNotice':
+    'Diese Einträge bestätigen weder das Quorum noch die Verfügbarkeit des Clusters. HA wird bei der Bereitstellung konfiguriert. Die Anzeige dieser Seite ändert den Server nicht.',
+  'engineMonitoring.incomplete':
+    'Einige Metadaten der Mitglieder sind unvollständig. Nicht verfügbare Felder sind unten gekennzeichnet.',
+  'engineMonitoring.membersLabel': 'Gemeldete Cluster-Mitglieder',
+  'engineMonitoring.noMembers': 'Keine Mitglieder gemeldet',
+  'engineMonitoring.noMembersDescription':
+    'Der Server hat für diese Abfrage keine Mitglieder zurückgegeben.',
+  'engineMonitoring.uuid': 'UUID',
+  'engineMonitoring.address': 'Gemeldete Adresse',
+  'engineMonitoring.port': 'HTTP-Port',
+  'engineMonitoring.clustered': 'Gemeldete Cluster-Zugehörigkeit',
+  'engineMonitoring.notProvided': 'Nicht angegeben',
+  'engineMonitoring.yes': 'Ja',
+  'engineMonitoring.no': 'Nein',
+  'engineMonitoring.heartbeat': 'Letzter Heartbeat',
+  'engineMonitoring.poolsUnavailable': 'Mit diesen Zugriffsrechten sind die Pools nicht verfügbar.',
+  'engineMonitoring.poolsTitle': 'Engine-Pools',
+  'engineMonitoring.refreshPools': 'Pools aktualisieren',
+  'engineMonitoring.autoPools': 'Pools automatisch aktualisieren (5 s)',
+  'engineMonitoring.poolsNotice':
+    'Die Werte für aktive Aufgaben, Worker und Warteschlange stammen aus der aktuellen Abfrage. Abgeschlossene und abgelehnte Aufgaben sind kumulative Zähler im Serverprozess und geben keine Auskunft über Fehler seit der letzten Aktualisierung.',
+  'engineMonitoring.poolsLabel': 'Ausführungspools der Engine',
+  'engineMonitoring.noPools': 'Keine Pools gemeldet',
+  'engineMonitoring.noPoolsDescription':
+    'Der Server hat für diese Abfrage keine Executoren zurückgegeben.',
+  'engineMonitoring.pool': 'Pool',
+  'engineMonitoring.active': 'Aktiv',
+  'engineMonitoring.workers': 'Worker (Minimum–Maximum)',
+  'engineMonitoring.queue': 'Warteschlange',
+  'engineMonitoring.capacity': 'Verbleibende Warteschlangenkapazität',
+  'engineMonitoring.completed': 'Abgeschlossen (kumulativ)',
+  'engineMonitoring.rejected': 'Abgelehnt (kumulativ)',
+
   'webhooksPage.validation.scope': 'Ungültiger Webhook-Geltungsbereich.',
   'webhooksPage.validation.receiver': 'Ungültiger Empfänger.',
   'webhooksPage.validation.pagination': 'Ungültige Webhook-Seitennavigation.',

@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ClusterMonitoring, ProcessPools } from '../pages/EngineMonitoring';
 import { Processes } from '../pages/Processes';
 import { allPages, type Resource } from '../api';
+import { faIR } from '../i18n/catalogs/fa-IR';
+import { I18nProvider } from '../i18n/provider';
 const state = vi.hoisted(() => ({ admin: true, cluster: true, pools: true }));
 vi.mock('../state', () => ({
   useApp: () => ({
@@ -102,8 +104,24 @@ beforeEach(() => {
 });
 describe('Monitoramento de HA e pools', () => {
   it('membros só entram no cache após DTO e tabela recebe foco para rolagem', async () => {
-    const client = mount(<ClusterMonitoring />);
-    await screen.findByText('node-1');
+    const client = mount(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          preview: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'fa-IR'],
+          selectable: true,
+          detectBrowser: false,
+        }}
+      >
+        <ClusterMonitoring />
+      </I18nProvider>,
+    );
+    const node = await screen.findByText('node-1');
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: 'Atualizar membros automaticamente (5 s)' }),
+    );
     expect(
       JSON.stringify(
         client
@@ -112,10 +130,23 @@ describe('Monitoramento de HA e pools', () => {
           .map((q) => q.state.data),
       ),
     ).not.toContain('synthetic-private');
-    expect(screen.getByRole('region', { name: 'Membros reportados do cluster' })).toHaveAttribute(
-      'tabindex',
-      '0',
+    const table = screen.getByRole('region', { name: 'Membros reportados do cluster' });
+    expect(table).toHaveAttribute('tabindex', '0');
+    table.focus();
+    const requests = vi.mocked(allPages).mock.calls.length;
+    const key = 'rancho.console.locale.anonymous';
+    localStorage.setItem(key, JSON.stringify({ version: 1, locale: 'fa-IR' }));
+    fireEvent(window, new StorageEvent('storage', { key }));
+    expect(await screen.findByRole('region', { name: faIR['engineMonitoring.membersLabel'] })).toBe(
+      table,
     );
+    expect(table).toHaveFocus();
+    expect(screen.getByText('node-1')).toBe(node);
+    expect(screen.getByText(faIR['engineMonitoring.clusterNotice'])).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: faIR['engineMonitoring.autoMembers'] }),
+    ).not.toBeChecked();
+    expect(vi.mocked(allPages)).toHaveBeenCalledTimes(requests);
   });
   it('pools não mostram payloads livres nem controles de mutação', async () => {
     const client = mount(<ProcessPools />);

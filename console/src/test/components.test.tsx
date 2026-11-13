@@ -17,6 +17,7 @@ import { BulkOperation } from '../components/BulkOperation';
 import ServiceTopology from '../components/ServiceTopology';
 import { RegistryCredentials } from '../components/RegistryCredentials';
 import { frFR } from '../i18n/catalogs/fr-FR';
+import { faIR } from '../i18n/catalogs/fa-IR';
 
 vi.mock('../state', () => ({
   useApp: () => ({ identity: 'fixture', project: { id: 'p1', name: 'Operações' } }),
@@ -296,13 +297,31 @@ it('translates the open service topology without changing the stack or fetching 
 describe('Comandos de registro protegidos', () => {
   it('não coloca a credencial no campo multilinha antes de revelar', async () => {
     render(
-      <SecretField label="Comando do agente" value="docker run fixture-private-token" multiline />,
+      <I18nProvider
+        policy={{
+          enabled: true,
+          preview: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'fa-IR'],
+          selectable: true,
+          detectBrowser: false,
+        }}
+      >
+        <SecretField label="Comando do agente" value="docker run fixture-private-token" multiline />
+      </I18nProvider>,
     );
     const field = screen.getByLabelText('Comando do agente');
+    expect(field).toHaveAttribute('dir', 'ltr');
     expect(field).not.toHaveValue(expect.stringContaining('fixture-private-token'));
     await userEvent.click(screen.getByRole('button', { name: 'Revelar' }));
     expect(field).toHaveValue('docker run fixture-private-token');
-    await userEvent.click(screen.getByRole('button', { name: 'Ocultar' }));
+    const key = 'rancho.console.locale.anonymous';
+    localStorage.setItem(key, JSON.stringify({ version: 1, locale: 'fa-IR' }));
+    fireEvent(window, new StorageEvent('storage', { key }));
+    const hide = await screen.findByRole('button', { name: faIR['secretField.hide'] });
+    expect(document.documentElement.dir).toBe('rtl');
+    expect(field).toHaveValue('docker run fixture-private-token');
+    await userEvent.click(hide);
     expect(field).not.toHaveValue(expect.stringContaining('fixture-private-token'));
   });
 });
