@@ -5,6 +5,7 @@ export const zhHans = {
   'requestError.paginationCycle': 'API 返回了循环分页。',
   'requestError.paginationLimit': '集合过大。请缩小筛选范围。',
   'requestError.invalidCollection': 'API 返回了无效的集合。',
+  'requestError.failed': '无法完成请求。',
 
   'details.field.id': 'ID',
   'details.field.name': '名称',

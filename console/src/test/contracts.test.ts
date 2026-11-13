@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { allPages, safeApiUrl, type Resource, type Schema } from '../api';
+import { allPages, api, ApiError, safeApiUrl, type Resource, type Schema } from '../api';
+import { createTranslator } from '../i18n/messages';
+import { requestErrorText } from '../request-errors';
 import { validateConfig } from '../config';
 import config from '../../public/console-config.json';
 import { preparePayload } from '../components/SchemaForm';
@@ -36,6 +38,24 @@ describe('Configuração pública e temas', () => {
     ).toThrow('Contraste'));
 });
 describe('Transporte e paginação', () => {
+  it.each([
+    ['<html>Gateway unavailable</html>', 'The request could not be completed.'],
+    ['null', 'The request could not be completed.'],
+    ['{"message":" ","code":"LegacyCode"}', 'LegacyCode'],
+    ['{"message":"Native detail","code":"LegacyCode"}', 'Native detail'],
+  ])('localizes missing HTTP details and preserves native text (%s)', async (body, expected) => {
+    const fetcher = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(body, { status: 502 }));
+    try {
+      const error = await api('projects').catch((failure: unknown) => failure);
+      expect(error).toBeInstanceOf(ApiError);
+      expect(error).toMatchObject({ status: 502 });
+      expect(requestErrorText(error as ApiError, createTranslator('en-US').t)).toBe(expected);
+    } finally {
+      fetcher.mockRestore();
+    }
+  });
   it('permite apenas APIs conhecidas da mesma origem', () => {
     expect(safeApiUrl('projects?limit=20')).toBe('/v2-beta/projects?limit=20');
     expect(safeApiUrl('/v1-catalog/templates')).toBe('/v1-catalog/templates');
