@@ -23,7 +23,7 @@ Trivy 0.74.0 scans of the initial lab images and subsequent candidates on Novemb
 | Console gateway | 3 / 73 | 0 / 0 |
 | Optional Keycloak | 8 / 101 | 0 / 6 |
 
-These counts describe the images scanned and depend on the advisory database. The legacy backend base has reached end of support. The experimental single-node backend on Ubuntu 24.04 reports **0 critical / 3 high** in its scan. The [roadmap](docs/en/roadmap.md#beta-image-security-gate) tracks the remaining findings, the experimental backend and the beta acceptance gates.
+These counts describe the images scanned and depend on the advisory database. The legacy backend base has reached end of support. The experimental single-node backend on Ubuntu 24.04 reports **0 critical / 0 high** in its scan. The [roadmap](docs/en/roadmap.md#beta-image-security-gate) tracks the remaining findings, the experimental backend and the beta acceptance gates.
 
 ## Features
 
