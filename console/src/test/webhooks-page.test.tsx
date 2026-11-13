@@ -7,6 +7,7 @@ import contract from './fixtures/webhook-schema.json';
 import { Webhooks } from '../pages/Webhooks';
 import { I18nProvider, useI18n } from '../i18n/provider';
 import { api, type Resource } from '../api';
+import { frFR } from '../i18n/catalogs/fr-FR';
 const backend = vi.hoisted(() => ({
   readonly: false,
   revoked: false,
@@ -77,7 +78,12 @@ vi.mock('../api', async () => ({
 }));
 function SwitchLanguage() {
   const { setLocale } = useI18n();
-  return <button onClick={() => setLocale('en-US')}>English</button>;
+  return (
+    <>
+      <button onClick={() => setLocale('en-US')}>English</button>
+      <button onClick={() => setLocale('fr-FR')}>Français</button>
+    </>
+  );
 }
 function mount(localized = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } }),
@@ -90,7 +96,7 @@ function mount(localized = false) {
             ? {
                 enabled: true,
                 defaultLocale: 'pt-BR',
-                availableLocales: ['pt-BR', 'en-US'],
+                availableLocales: ['pt-BR', 'en-US', 'fr-FR'],
                 selectable: true,
                 detectBrowser: false,
                 preview: true,
@@ -142,6 +148,7 @@ describe('Tela de webhooks', () => {
     await user.click(screen.getByRole('button', { name: 'Confirmar' }));
     await screen.findByLabelText('URL de invocação');
     expect(screen.getByLabelText('URL de invocação')).toHaveAttribute('type', 'password');
+    expect(screen.getByLabelText('URL de invocação')).toHaveAttribute('dir', 'ltr');
     await user.click(screen.getByRole('button', { name: 'Copiar URL' }));
     expect(await navigator.clipboard.readText()).toContain('synthetic-private-webhook');
     expect(cached(client)).not.toContain('synthetic-private');
@@ -245,6 +252,12 @@ describe('Tela de webhooks', () => {
     fireEvent.click(screen.getByText('English'));
     expect(screen.getAllByText('Amount per event must be a positive integer.')).not.toHaveLength(0);
     expect(screen.getByLabelText('Amount per event')).toBe(amount);
+    fireEvent.click(screen.getByText('Français'));
+    const label = frFR['webhooksPage.amount'];
+    expect(await screen.findByLabelText(label)).toBe(amount);
+    expect(
+      screen.getAllByText(frFR['webhooksPage.validation.integer'].replace('{label}', label)),
+    ).not.toHaveLength(0);
     expect(amount).toHaveValue('1.5');
     expect(vi.mocked(api)).toHaveBeenCalledTimes(requests);
     expect(backend.posts).toHaveLength(0);

@@ -709,6 +709,7 @@ function WebhookScope({ project }: { project: string }) {
           {(id) => (
             <input
               id={id}
+              dir="ltr"
               type={revealed ? 'text' : 'password'}
               value={secret?.url || ''}
               readOnly

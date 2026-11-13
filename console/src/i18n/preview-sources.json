@@ -2,6 +2,7 @@
   "catalogs": {
     "de-DE": {
       "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
+      "apiKeys": "5d3341aaff3f04409b440eb16c8b8c085aa423aff323b04f41a10d34376bbd65",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -44,6 +45,7 @@
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "users": "4ea68e5ded46b5d38639bf60549073724a770da41c7d96061c0b8030845d7af5",
+      "webhooksPage": "c26c98d180c0a23b689da719e3a16ba29fa41857dc82e05de1dbb0ecc47a7091",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
@@ -51,6 +53,7 @@
     },
     "fa-IR": {
       "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
+      "apiKeys": "5d3341aaff3f04409b440eb16c8b8c085aa423aff323b04f41a10d34376bbd65",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -93,6 +96,7 @@
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "users": "4ea68e5ded46b5d38639bf60549073724a770da41c7d96061c0b8030845d7af5",
+      "webhooksPage": "c26c98d180c0a23b689da719e3a16ba29fa41857dc82e05de1dbb0ecc47a7091",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
@@ -100,6 +104,7 @@
     },
     "fr-FR": {
       "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
+      "apiKeys": "5d3341aaff3f04409b440eb16c8b8c085aa423aff323b04f41a10d34376bbd65",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -142,6 +147,7 @@
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "users": "4ea68e5ded46b5d38639bf60549073724a770da41c7d96061c0b8030845d7af5",
+      "webhooksPage": "c26c98d180c0a23b689da719e3a16ba29fa41857dc82e05de1dbb0ecc47a7091",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
@@ -149,6 +155,7 @@
     },
     "hu-HU": {
       "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
+      "apiKeys": "5d3341aaff3f04409b440eb16c8b8c085aa423aff323b04f41a10d34376bbd65",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -191,6 +198,7 @@
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "users": "4ea68e5ded46b5d38639bf60549073724a770da41c7d96061c0b8030845d7af5",
+      "webhooksPage": "c26c98d180c0a23b689da719e3a16ba29fa41857dc82e05de1dbb0ecc47a7091",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
@@ -198,6 +206,7 @@
     },
     "ja-JP": {
       "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
+      "apiKeys": "5d3341aaff3f04409b440eb16c8b8c085aa423aff323b04f41a10d34376bbd65",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -240,6 +249,7 @@
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "users": "4ea68e5ded46b5d38639bf60549073724a770da41c7d96061c0b8030845d7af5",
+      "webhooksPage": "c26c98d180c0a23b689da719e3a16ba29fa41857dc82e05de1dbb0ecc47a7091",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
@@ -247,6 +257,7 @@
     },
     "ru-RU": {
       "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
+      "apiKeys": "5d3341aaff3f04409b440eb16c8b8c085aa423aff323b04f41a10d34376bbd65",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -289,6 +300,7 @@
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "users": "4ea68e5ded46b5d38639bf60549073724a770da41c7d96061c0b8030845d7af5",
+      "webhooksPage": "c26c98d180c0a23b689da719e3a16ba29fa41857dc82e05de1dbb0ecc47a7091",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
@@ -296,6 +308,7 @@
     },
     "uk-UA": {
       "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
+      "apiKeys": "5d3341aaff3f04409b440eb16c8b8c085aa423aff323b04f41a10d34376bbd65",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -338,6 +351,7 @@
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "users": "4ea68e5ded46b5d38639bf60549073724a770da41c7d96061c0b8030845d7af5",
+      "webhooksPage": "c26c98d180c0a23b689da719e3a16ba29fa41857dc82e05de1dbb0ecc47a7091",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
@@ -345,6 +359,7 @@
     },
     "zh-Hans": {
       "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
+      "apiKeys": "5d3341aaff3f04409b440eb16c8b8c085aa423aff323b04f41a10d34376bbd65",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -387,6 +402,7 @@
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
       "users": "4ea68e5ded46b5d38639bf60549073724a770da41c7d96061c0b8030845d7af5",
+      "webhooksPage": "c26c98d180c0a23b689da719e3a16ba29fa41857dc82e05de1dbb0ecc47a7091",
       "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadPolicyValidation": "65d4b2d50042d3679e19ca39d6ce73fe91a6ac91268391aff98d5681dbd1c6e2",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c",
