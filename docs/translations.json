@@ -18,8 +18,8 @@
         "en": "README.md",
         "pt-BR": "docs/pt-BR/overview.md"
       },
-      "reviewedSourceSha256": "e06b5af284856859868ae3fb4d1b8b624a06e70fa75b178ee178ba447ead1133",
-      "reviewedTranslationSha256": "65997c7c873b50cdf8305797d1acfa7715be3a00b36087e38e5cc4c029d1b71c"
+      "reviewedSourceSha256": "cb9228c088953ae78cdcd2366163ba2edf5c5db72078925a2e9b35e32e4fd16c",
+      "reviewedTranslationSha256": "ce2221f6d254e4e41990dd0b32c642a0c2ff08f5a4b3beee4667db44a8b11513"
     },
     {
       "source": "SECURITY.md",

@@ -58,6 +58,8 @@ Fontes oficiais são pinados em `upstream.json`; mudanças ficam em `patches/`. 
 
 Revise o plano e as [fronteiras de migração/recuperação](migration.md). Credenciais/realm existentes são preservados; credenciais geradas ficam no `.env` ignorado. Não conecte laboratório descartável a dados ou agentes produtivos.
 
+Em um laboratório descartável recém-criado, execute `python tests/integration.py` para inicializar a autenticação local e criar os exemplos de RBAC. Entre no console como `labadmin` com a senha `RANCHER_ADMIN_PASSWORD` do seu `.env` local.
+
 - Console moderna: http://localhost:18090/console/
 - Rancher clássico: http://localhost:18080/
 - Keycloak local: http://localhost:18081/
