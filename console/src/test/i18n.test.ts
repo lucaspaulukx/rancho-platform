@@ -139,13 +139,13 @@ describe('Typed message catalogs', () => {
     expect(partial.t('common.save')).toBe('Save');
     expect(partial.translatedKeys).toEqual(['common.cancel']);
   });
-  it('uses registered French preview messages with English fallback outside the preview', () => {
+  it('uses French preview messages for both shared controls and instance information', () => {
     const french = createTranslator('fr-FR', frFR);
     expect(french.t('common.cancel')).toBe('Annuler');
     expect(french.resolvedLocale('selection.count')).toBe('fr-FR');
     expect(french.resolvedLocale('resourceCreator.kind.service')).toBe('fr-FR');
-    expect(french.resolvedLocale('aboutPage.title')).toBe('en-US');
-    expect(french.t('aboutPage.title')).toBe(createTranslator('en-US').t('aboutPage.title'));
+    expect(french.resolvedLocale('aboutPage.title')).toBe('fr-FR');
+    expect(french.t('aboutPage.title')).toBe(frFR['aboutPage.title']);
   });
   it('supports language-specific plural forms and requires an other form', () => {
     const russian = createTranslator('ru-RU', {

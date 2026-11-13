@@ -1,4 +1,422 @@
 export const frFR = {
+  'aboutPage.flag.API_KEY_STREAM_GUARD_ENABLED': 'Nouvelle validation des clés API dans les flux',
+  'aboutPage.flag.AUDIT_CREDENTIAL_REDACTION_ENABLED': 'Protection des identifiants dans l’audit',
+  'aboutPage.flag.CUSTOMIZATION_ENABLED': 'Personnalisation de l’instance',
+  'aboutPage.flag.SCHEMA_MIGRATIONS_ENABLED': 'Gestion des versions des tables communautaires',
+  'aboutPage.flag.LOCAL_RBAC_ENABLED': 'Groupes locaux et RBAC',
+  'aboutPage.flag.NO_ACCESS_VIEW_ENABLED': 'Écran d’absence d’accès',
+  'aboutPage.flag.ENV_CREATION_ADMIN_ONLY':
+    'Création d’environnements réservée aux administrateurs',
+  'aboutPage.flag.DISABLE_AUTO_ENVIRONMENT':
+    'Blocage de la création automatique d’environnements personnels',
+  'aboutPage.flag.SESSION_ACCOUNT_GUARD_ENABLED':
+    'Sessions liées à l’état et au rôle actuels du compte',
+  'aboutPage.flag.METRICS_PAYLOAD_TRANSPORT_ENABLED':
+    'Négociation des métriques volumineuses sur WebSocket',
+  'aboutPage.flag.HOST_STREAM_SESSION_GUARD_ENABLED':
+    'Nouvelle validation des sessions de journaux, terminaux et métriques',
+  'aboutPage.flag.SUBSCRIPTION_SESSION_GUARD_ENABLED':
+    'Nouvelle validation des sessions pour les abonnements WebSocket',
+  'aboutPage.flag.CATALOG_WRITE_GUARD_ENABLED': 'Protection en écriture du catalogue selon le rôle',
+  'aboutPage.flag.OIDC_ENABLED': 'Authentification OIDC',
+  'aboutPage.flag.OIDC_LOGIN_PREFLIGHT_ENABLED':
+    'Vérification préalable du fournisseur d’authentification',
+  'aboutPage.flag.OIDC_FEDERATED_LOGOUT_ENABLED': 'Déconnexion fédérée OIDC facultative',
+  'aboutPage.flag.OIDC_ONLY': 'Connexion exclusivement via OIDC',
+  'aboutPage.flag.OIDC_AUTO_LOGIN': 'Connexion automatique via OIDC',
+  'aboutPage.module.groups': 'Groupes',
+  'aboutPage.module.users': 'Utilisateurs',
+  'aboutPage.module.localAccountAdministration': 'Gestion des comptes locaux et des identifiants',
+  'aboutPage.module.environments': 'Environnements',
+  'aboutPage.module.networkPolicies': 'Politiques réseau',
+  'aboutPage.module.workloads': 'Charges de travail',
+  'aboutPage.module.contextActions': 'Opérations contextuelles',
+  'aboutPage.module.workloadUpgrades': 'Mises à niveau des images',
+  'aboutPage.module.workloadScaling': 'Ajustement du nombre de réplicas des services',
+  'aboutPage.module.stackComposeUpgrades': 'Compose pour les stacks existantes',
+  'aboutPage.module.stackComposeEditor': 'Éditeur Compose',
+  'aboutPage.module.customCheckboxes': 'Cases à cocher du thème',
+  'aboutPage.module.serviceLinksEditor': 'Liens entre services',
+  'aboutPage.module.balancerRulesEditor': 'Règles de l’équilibreur de charge',
+  'aboutPage.module.unsavedChangesGuard': 'Protection des modifications non enregistrées',
+  'aboutPage.module.workloadCreationSections': 'Création par section',
+  'aboutPage.module.workloadBindingEditors': 'Ports et volumes structurés',
+  'aboutPage.module.workloadHealthChecks': 'Contrôles d’état de santé à la création',
+  'aboutPage.module.workloadHealthCheckUpgrades': 'Mise à niveau des contrôles d’état de santé',
+  'aboutPage.module.workloadSidecars': 'Sidecars lors de la création de services',
+  'aboutPage.module.workloadSecurityUpgrades': 'Mises à niveau contextuelles de la sécurité',
+  'aboutPage.module.workloadSecurityEditors': 'Capacités de sécurité à la création',
+  'aboutPage.module.workloadResourceUpgrades':
+    'Mises à niveau contextuelles de la mémoire, du CPU et des E/S',
+  'aboutPage.module.workloadResourceEditors': 'Éditeurs de mémoire, de CPU et d’E/S',
+  'aboutPage.module.workloadScheduling': 'Affinités lors de la création de charges de travail',
+  'aboutPage.module.workloadSchedulingUpgrades': 'Mises à niveau contextuelles des affinités',
+  'aboutPage.module.workloadSidecarUpgrades': 'Mises à niveau des sidecars',
+  'aboutPage.module.catalogUpgrades': 'Mises à niveau depuis le catalogue',
+  'aboutPage.module.bulkActions': 'Opérations groupées',
+  'aboutPage.module.hosts': 'Hôtes',
+  'aboutPage.module.data': 'Données et certificats',
+  'aboutPage.module.catalog': 'Catalogue',
+  'aboutPage.module.observability': 'Journaux et terminal',
+  'aboutPage.module.metrics': 'Métriques',
+  'aboutPage.module.metricsPayloadTransport': 'Transport négocié des métriques volumineuses',
+  'aboutPage.module.serviceMetrics': 'Métriques des conteneurs dans le contexte du service',
+  'aboutPage.module.workloadUlimitEditors': 'Éditeur de limites de processus à la création',
+  'aboutPage.module.workloadUlimitUpgrades':
+    'Limites de processus lors des mises à niveau de services',
+  'aboutPage.module.workloadDeviceEditors': 'Éditeur de périphériques à la création',
+  'aboutPage.module.workloadDeviceUpgrades': 'Périphériques lors des mises à niveau de services',
+  'aboutPage.module.admin': 'Administration générale',
+  'aboutPage.module.api': 'Intégrations supplémentaires',
+  'aboutPage.module.apiKeys': 'Clés API',
+  'aboutPage.module.audit': 'Audit',
+  'aboutPage.module.about': 'À propos et fonctionnalités',
+  'aboutPage.module.processes': 'Processus du moteur',
+  'aboutPage.module.processReplay': 'Réexécution des processus',
+  'aboutPage.module.settings': 'Paramètres du serveur',
+  'aboutPage.module.workloadConfigUpgrades': 'Mises à niveau des ports et volumes',
+  'aboutPage.module.webhooks': 'Webhooks natifs',
+  'aboutPage.module.catalogRepositories': 'Dépôts de catalogue globaux',
+  'aboutPage.module.environmentCatalogs': 'Dépôts par environnement',
+  'aboutPage.module.environmentCatalogDelegation':
+    'Délégation des sources de catalogue par environnement',
+  'aboutPage.module.machineDrivers': 'Pilotes de machines',
+  'aboutPage.module.driverActivation': 'Activation des pilotes',
+  'aboutPage.module.clusterMonitoring': 'Membres du cluster HA',
+  'aboutPage.module.processPools': 'Pools du moteur',
+  'aboutPage.module.optional': 'Orchestrateurs facultatifs',
+  'aboutPage.title': 'À propos de cette console',
+  'aboutPage.description':
+    'Fonctionnalités de Rancher et options de personnalisation de la console.',
+  'aboutPage.product': 'Produit',
+  'aboutPage.capabilities': 'Fonctionnalités',
+  'aboutPage.consoleInfo': 'Informations sur la console',
+  'aboutPage.modernConsole': 'Console moderne',
+  'aboutPage.labBase': 'Base du laboratoire',
+  'aboutPage.operations':
+    'Gérez les stacks, services et conteneurs avec un accès centralisé et l’authentification OIDC. Rancher conserve son identité et ses règles d’autorisation côté serveur.',
+  'aboutPage.migration':
+    'La migration est en cours. Les modules disponibles dépendent des options activées et des autorisations de votre compte. Les fonctionnalités en cours de validation restent désactivées.',
+  'aboutPage.attribution':
+    'Cette console est une personnalisation indépendante. Les marques identifient leurs produits et organisations respectifs et n’impliquent aucune certification ni approbation officielle de Rancher.',
+  'aboutPage.classic': 'Ouvrir Rancher classique',
+  'aboutPage.interLicense': 'Licence de la police Inter',
+  'aboutPage.readOnly':
+    'Vue en lecture seule. Les fonctionnalités du serveur proviennent de la configuration de l’instance, et les options de la console du fichier de configuration. Les changements d’apparence n’affectent pas les autorisations.',
+  'aboutPage.server': 'Serveur',
+  'aboutPage.modules': 'Modules de la console',
+  'aboutPage.active': 'Actif',
+  'aboutPage.inactive': 'Inactif',
+  'aboutPage.unknown': 'Non signalé',
+  'aboutPage.flagStatus':
+    'Demandé : {requested} · Effectif : {effective} · Disponible : {available}',
+
+  'environmentTemplates.title': 'Modèles d’environnement',
+  'environmentTemplates.close': 'Fermer',
+  'environmentTemplates.create': 'Créer un modèle',
+  'environmentTemplates.refresh': 'Actualiser les modèles',
+  'environmentTemplates.opening': 'Ouverture du modèle…',
+  'environmentTemplates.unavailable': 'Modèles indisponibles',
+  'environmentTemplates.unavailableDescription': 'L’API n’a fourni aucun modèle pour ce compte.',
+  'environmentTemplates.name': 'Nom',
+  'environmentTemplates.state': 'État',
+  'environmentTemplates.stacks': 'Stacks',
+  'environmentTemplates.visibility': 'Visibilité',
+  'environmentTemplates.public': 'Public',
+  'environmentTemplates.private': 'Privé',
+  'environmentTemplates.actions': 'Actions',
+  'environmentTemplates.open': 'Ouvrir le modèle',
+  'environmentTemplates.copy': 'Copier le modèle',
+  'environmentTemplates.remove': 'Retirer le modèle',
+  'environmentTemplates.new': 'Nouveau modèle d’environnement',
+  'environmentTemplates.cancel': 'Annuler',
+  'environmentTemplates.save': 'Enregistrer le modèle',
+  'environmentTemplates.templateName': 'Nom du modèle *',
+  'environmentTemplates.description': 'Description du modèle',
+  'environmentTemplates.templateVisibility': 'Visibilité du modèle',
+  'environmentTemplates.publicAccounts': 'Visible par les autres comptes',
+  'environmentTemplates.infrastructureStacks': 'Stacks d’infrastructure',
+  'environmentTemplates.addCompose': 'Ajouter une stack Compose',
+  'environmentTemplates.addCatalog': 'Ajouter une stack du catalogue',
+  'environmentTemplates.publish': 'Publier le modèle ?',
+  'environmentTemplates.publishDescription':
+    'Les autres comptes pourront lire les stacks, les réponses et les fichiers Compose de ce modèle. Confirmez qu’il ne contient aucun identifiant ni aucune donnée privée.',
+  'environmentTemplates.removeTitle': 'Retirer le modèle ?',
+  'environmentTemplates.discard': 'Abandonner les modifications ?',
+  'environmentTemplates.discardDescription':
+    'Les modifications non enregistrées de ce modèle seront abandonnées.',
+  'environmentTemplates.catalogStack': 'Stack d’infrastructure du catalogue',
+  'environmentTemplates.addStack': 'Ajouter une stack',
+  'environmentTemplates.infraTemplate': 'Modèle d’infrastructure',
+  'environmentTemplates.select': 'Sélectionner…',
+  'environmentTemplates.infraVersion': 'Version de l’infrastructure',
+  'environmentTemplates.catalogStackName': 'Nom de la stack du catalogue *',
+  'environmentTemplates.unsupported':
+    'Cette version exige des références à des services, des certificats ou des secrets du futur environnement. Conservez les associations existantes ou choisissez une autre version.',
+  'environmentTemplates.removeStack': 'Retirer la stack du modèle',
+  'environmentTemplates.catalogTemplate': 'Modèle du catalogue',
+  'environmentTemplates.catalogVersion': 'Version du catalogue',
+  'environmentTemplates.defaultVersion': 'Version par défaut du catalogue',
+  'environmentTemplates.bindings': 'Associations natives',
+  'environmentTemplates.compound': 'Valeur composite conservée',
+  'environmentTemplates.openLabel': 'Ouvrir le modèle {name}',
+  'environmentTemplates.copyLabel': 'Copier le modèle {name}',
+  'environmentTemplates.removeLabel': 'Retirer le modèle {name}',
+  'environmentTemplates.editorTitle': 'Modèle · {name}',
+  'environmentTemplates.removeDescription': 'Retirer {name} avec l’action native de Rancher ?',
+  'environmentTemplates.stackIndex': 'Stack {index}',
+  'environmentTemplates.removeStackLabel': 'Retirer la stack {index}',
+  'environmentTemplates.stackName': 'Nom de la stack {index}',
+  'environmentTemplates.dockerCompose': 'Docker Compose de la stack {index}',
+  'environmentTemplates.rancherCompose': 'Rancher Compose de la stack {index}',
+  'environmentTemplates.parameter': 'Paramètre {name} de la stack {index}',
+  'environmentTemplates.error.failed':
+    'L’opération n’a pas pu aboutir. Vérifiez vos autorisations et rechargez les modèles.',
+  'environmentTemplates.error.scope':
+    'Le contexte a changé. Rouvrez les modèles avant de continuer.',
+  'environmentTemplates.error.permission':
+    'Vous n’avez plus l’autorisation d’enregistrer ce modèle.',
+  'environmentTemplates.error.edit': 'Ce modèle ne peut plus être modifié.',
+  'environmentTemplates.error.changed':
+    'Une autre opération a modifié le modèle. Fermez-le et rouvrez-le avant de l’enregistrer.',
+  'environmentTemplates.error.fields': 'Les champs de ce modèle ne peuvent pas être modifiés.',
+  'environmentTemplates.error.remove': 'L’action native de retrait n’est plus disponible.',
+  'environmentTemplates.error.version': 'La version appartient à un autre modèle.',
+  'environmentTemplates.error.review': 'Vérifiez la configuration de la stack.',
+  'environmentTemplates.validation.name':
+    'Saisissez un nom de modèle de 255 caractères au maximum.',
+  'environmentTemplates.validation.description':
+    'La description du modèle doit contenir au plus 1024 caractères.',
+  'environmentTemplates.validation.stackCount': 'Le modèle peut contenir jusqu’à 100 stacks.',
+  'environmentTemplates.validation.invalidStack': 'Une stack du modèle n’est pas valide.',
+  'environmentTemplates.validation.duplicateStack':
+    'Les noms de stack doivent être uniques dans le modèle.',
+  'environmentTemplates.validation.stackSource':
+    'Chaque stack nécessite un modèle du catalogue ou Docker Compose.',
+  'environmentTemplates.validation.answers': 'Une stack contient des réponses non valides.',
+
+  'machineDrivers.saveDescription':
+    'Rancher peut télécharger et exécuter le binaire lors de l’enregistrement ou de la modification. Les URL et la somme de contrôle restent protégées pendant cette vérification.',
+  'machineDrivers.activateDescription':
+    'Le serveur peut télécharger et exécuter le binaire configuré. Confirmez sa source avant de continuer.',
+  'machineDrivers.description':
+    'Fournisseurs de machines disponibles dans Rancher. Les opérations affectent toute l’instance.',
+  'machineDrivers.removeDescription':
+    'L’entrée sera retirée. Cet écran ne supprime pas les machines déjà provisionnées.',
+  'machineDrivers.binaryHint':
+    'Utilisez un binaire provenant d’une source fiable. L’enregistrement peut exécuter du code sur le serveur.',
+  'machineDrivers.deactivateDescription':
+    'Le fournisseur ne sera plus disponible pour de nouveaux provisionnements.',
+  'machineDrivers.leaveDescription':
+    'Le pilote n’a pas encore été enregistré. Attendez la fin de tout envoi en cours.',
+  'machineDrivers.nameHint': 'Rancher déterminera le nom à partir de l’URL du binaire.',
+  'machineDrivers.sent': 'Opération envoyée. Suivez l’état du pilote dans la liste.',
+  'machineDrivers.operationFailed': 'Impossible de terminer l’opération sur le pilote.',
+  'machineDrivers.discardDescription': 'Les champs n’ont pas encore été envoyés au serveur.',
+  'machineDrivers.auto': 'Actualiser automatiquement les pilotes (5 s)',
+  'machineDrivers.loadFailed': 'Impossible de charger les pilotes.',
+  'machineDrivers.driversUnavailable': 'Les pilotes sont indisponibles avec ces droits d’accès.',
+  'machineDrivers.changed': 'Le pilote a changé. Actualisez la liste.',
+  'machineDrivers.activationDisabled': 'L’activation des pilotes est désactivée.',
+  'machineDrivers.discardTitle': 'Abandonner les modifications du pilote ?',
+  'machineDrivers.leaveTitle': 'Quitter avec une modification en attente ?',
+  'machineDrivers.editUnavailable': 'La modification manuelle est indisponible.',
+  'machineDrivers.uiUrl': 'URL de l’interface (facultative)',
+  'machineDrivers.show': 'Afficher les URL et la somme de contrôle',
+  'machineDrivers.unavailable': 'Pilote indisponible.',
+  'machineDrivers.accessUnavailable': 'Accès indisponible.',
+  'machineDrivers.fieldDescription': 'Description (facultative)',
+  'machineDrivers.title': 'Pilotes de machines',
+  'machineDrivers.checksum': 'Somme de contrôle (facultative)',
+  'machineDrivers.reopen': 'Rouvrez l’éditeur.',
+  'machineDrivers.add': 'Ajouter un pilote',
+  'machineDrivers.removeDriver': 'Retirer le pilote',
+  'machineDrivers.review': 'Vérifier le pilote',
+  'machineDrivers.binaryUrl': 'URL du binaire',
+  'machineDrivers.saveTitle': 'Enregistrer le pilote ?',
+  'machineDrivers.custom': 'Personnalisé',
+  'machineDrivers.edit': 'Modifier le pilote',
+  'machineDrivers.deactivate': 'Désactiver',
+  'machineDrivers.refresh': 'Actualiser',
+  'machineDrivers.reactivate': 'Réactiver',
+  'machineDrivers.builtin': 'Intégré',
+  'machineDrivers.catalog': 'Catalogue',
+  'machineDrivers.cancel': 'Annuler',
+  'machineDrivers.remove': 'Retirer',
+  'machineDrivers.activate': 'Activer',
+  'machineDrivers.driver': 'Pilote',
+  'machineDrivers.state': 'État',
+  'machineDrivers.origin': 'Origine',
+  'machineDrivers.actions': 'Actions',
+  'machineDrivers.httpFailed': 'L’opération sur le pilote n’a pas abouti (HTTP {status}).',
+  'machineDrivers.info':
+    'L’enregistrement demande un pilote inactif. L’enregistrement et la modification peuvent télécharger et exécuter le binaire sur le serveur. L’URL de l’interface est enregistrée. Cette console ne charge pas son code.',
+  'machineDrivers.actionLabel': '{action} le pilote',
+  'machineDrivers.rowActions': 'Actions du pilote {name}',
+  'machineDrivers.actionTitle': '{action} le pilote ?',
+  'machineDrivers.actionDescription': '{name}. {effect}',
+  'machineDrivers.validation.resource': 'Pilote non valide.',
+  'machineDrivers.validation.reference': 'Référence de pilote non valide.',
+  'machineDrivers.validation.actionLink': 'Lien d’action du pilote non valide.',
+  'machineDrivers.validation.fields': 'Configuration du pilote non valide.',
+  'machineDrivers.validation.changed':
+    'Le pilote a changé. Actualisez la liste et rouvrez le panneau.',
+  'machineDrivers.validation.operation': 'L’opération est indisponible.',
+  'machineDrivers.validation.custom': 'Seuls les pilotes personnalisés peuvent être modifiés.',
+  'machineDrivers.validation.transition': 'Attendez la fin du changement d’état du pilote.',
+  'machineDrivers.validation.fieldContract':
+    'Rancher n’accepte pas ce champ ou cette valeur du pilote.',
+  'machineDrivers.validation.url': 'Saisissez une URL HTTP ou HTTPS valide.',
+  'machineDrivers.validation.urlParts':
+    'Utilisez une URL HTTP ou HTTPS sans nom d’utilisateur, mot de passe ni fragment.',
+  'machineDrivers.validation.inactiveCreate':
+    'L’enregistrement d’un pilote inactif est indisponible.',
+  'machineDrivers.validation.action': 'L’action est indisponible.',
+  'machineDrivers.validation.remove': 'Le retrait manuel est indisponible pour ce pilote.',
+
+  'networkPoliciesPage.title': 'Politiques réseau',
+  'networkPoliciesPage.noNetwork': 'Aucun réseau compatible',
+  'networkPoliciesPage.noNetworkDescription':
+    'Les politiques natives nécessitent un réseau ipsec ou vxlan dans cet environnement.',
+  'networkPoliciesPage.defaultScope': 'Autres communications',
+  'networkPoliciesPage.allow': 'Autoriser',
+  'networkPoliciesPage.deny': 'Refuser',
+  'networkPoliciesPage.confirmTitle': 'Appliquer les politiques réseau ?',
+  'networkPoliciesPage.discardTitle': 'Abandonner les modifications réseau ?',
+  'networkPoliciesPage.discardDescription':
+    'Les modifications n’ont pas encore été envoyées à Rancher.',
+  'networkPoliciesPage.titleHeading': 'Politiques réseau',
+  'networkPoliciesPage.description':
+    'Contrôlez la communication entre les stacks, les services et les conteneurs de cet environnement.',
+  'networkPoliciesPage.view': 'Voir les politiques réseau',
+  'networkPoliciesPage.close': 'Fermer',
+  'networkPoliciesPage.managerWarning':
+    'Le network-policy-manager est inactif ou défaillant. Les règles restent consultables. Les modifications sont indisponibles jusqu’à la validation de cette infrastructure.',
+  'networkPoliciesPage.advancedNotice':
+    'Ce réseau contient des règles avancées ou non reconnues. L’éditeur simplifié ne les remplace pas.',
+  'networkPoliciesPage.allowOption': 'Autoriser',
+  'networkPoliciesPage.denyOption': 'Refuser',
+  'networkPoliciesPage.discard': 'Abandonner les modifications',
+  'networkPoliciesPage.review': 'Vérifier la modification',
+  'networkPoliciesPage.cancel': 'Annuler',
+  'networkPoliciesPage.confirm': 'Confirmer',
+  'networkPoliciesPage.confirmDescription':
+    'La modification peut interrompre les connexions existantes dans {name}. Rancher recevra la configuration. Son application dépend du gestionnaire de politiques.',
+  'networkPoliciesPage.linkedScope': 'Services liés',
+  'networkPoliciesPage.serviceScope': 'Conteneurs du même service',
+  'networkPoliciesPage.stackScope': 'Services de la même stack',
+  'networkPoliciesPage.reopen': 'Rouvrez la politique avant de l’enregistrer.',
+  'networkPoliciesPage.contextChanged': 'Le contexte a changé. Rouvrez le panneau.',
+  'networkPoliciesPage.validation.networkUnavailable':
+    'Le réseau est indisponible dans cet environnement.',
+  'networkPoliciesPage.validation.permissionChanged':
+    'Vous n’avez plus l’autorisation de modifier les politiques réseau.',
+  'networkPoliciesPage.validation.managerUnavailable':
+    'Le gestionnaire de politiques doit être actif et fonctionner correctement.',
+  'networkPoliciesPage.validation.advancedRules':
+    'Ce réseau contient des règles avancées qui doivent être conservées.',
+  'networkPoliciesPage.validation.rulesChanged':
+    'Les politiques ont changé. Rouvrez le panneau avant d’enregistrer.',
+  'networkPoliciesPage.validation.action':
+    'Sélectionnez « Autoriser » ou « Refuser » pour chaque règle.',
+
+  'balancerRulesPanel.info':
+    'Organisez les routes et les cibles de cet équilibreur de charge. Les ports publiés sont accessibles sur le réseau de l’hôte. Les modifications peuvent interrompre des connexions. Le service ne démarrera pas automatiquement.',
+  'balancerRulesPanel.sent': 'Règles envoyées à Rancher. Suivez l’état de l’équilibreur de charge.',
+  'balancerRulesPanel.denied':
+    'Votre compte ou l’état actuel empêche la modification de ces règles.',
+  'balancerRulesPanel.acknowledge':
+    'J’ai vérifié les ports publiés et leur impact sur la connectivité',
+  'balancerRulesPanel.noConversion': 'Cet éditeur ne convertira aucune règle ni aucun port.',
+  'balancerRulesPanel.contextDescription':
+    'Des règles n’ont pas été enregistrées. Attendez la fin de tout envoi en cours.',
+  'balancerRulesPanel.discardDescription': 'La configuration de Rancher restera telle quelle.',
+  'balancerRulesPanel.confirmPorts': 'Confirmez l’impact des ports publiés.',
+  'balancerRulesPanel.hostnameHint':
+    'Facultatif. Laissez le champ vide pour accepter tous les noms d’hôte.',
+  'balancerRulesPanel.advanced': 'Cible définie par la configuration avancée',
+  'balancerRulesPanel.reopen': 'Rouvrez l’éditeur de l’équilibreur de charge.',
+  'balancerRulesPanel.apply': 'Appliquer les règles de l’équilibreur de charge ?',
+  'balancerRulesPanel.discard': 'Abandonner les règles non enregistrées ?',
+  'balancerRulesPanel.unsupported': 'Configuration non prise en charge.',
+  'balancerRulesPanel.pathHint': 'Facultatif. Exemple : /api',
+  'balancerRulesPanel.hostPublished': 'Publié sur les hôtes',
+  'balancerRulesPanel.select': 'Sélectionner un service…',
+  'balancerRulesPanel.disabled': 'Éditeur désactivé.',
+  'balancerRulesPanel.review': 'Vérifier les modifications',
+  'balancerRulesPanel.preserved': 'Règles conservées',
+  'balancerRulesPanel.context': 'Changer de contexte ?',
+  'balancerRulesPanel.reviewRules': 'Vérifiez les règles.',
+  'balancerRulesPanel.add': 'Ajouter une règle',
+  'balancerRulesPanel.published': 'Publié',
+  'balancerRulesPanel.internal': 'Interne',
+  'balancerRulesPanel.close': 'Fermer',
+  'balancerRulesPanel.native': 'Natif',
+  'balancerRulesPanel.rule': 'Règle {index}',
+  'balancerRulesPanel.remove': 'Retirer la règle {index}',
+  'balancerRulesPanel.protocol': 'Protocole {index}',
+  'balancerRulesPanel.access': 'Accès {index}',
+  'balancerRulesPanel.sourcePort': 'Port source {index}',
+  'balancerRulesPanel.targetPort': 'Port cible {index}',
+  'balancerRulesPanel.target': 'Service cible {index}',
+  'balancerRulesPanel.hostname': 'Nom d’hôte {index}',
+  'balancerRulesPanel.path': 'Chemin {index}',
+  'balancerRulesPanel.unavailableTarget': 'Cible indisponible ({id})',
+  'balancerRulesPanel.title': 'Équilibreur de charge · {name}',
+  'balancerRulesPanel.environment': 'Environnement : {name}',
+  'balancerRulesPanel.applyDescription':
+    'Les règles de {name} seront mises à jour uniquement dans {environment}. Les connexions peuvent être affectées.',
+  'balancerRulesPanel.sourceIp': 'Adresse IP de publication conservée : {ip}',
+  'balancerRulesPanel.before': 'Avant · Nombre de règles : {count}',
+  'balancerRulesPanel.after': 'Après · Nombre de règles : {count}',
+  'balancerRulesPanel.preservation':
+    '{reason} La configuration existante a été conservée. Fermez ce panneau et choisissez « Modifier la configuration » pour utiliser le formulaire natif.',
+  'balancerRulesPanel.validation.configuration':
+    'La configuration de l’équilibreur de charge est indisponible.',
+  'balancerRulesPanel.validation.changed':
+    'Un autre client a modifié l’équilibreur de charge. Fermez et rouvrez le panneau.',
+  'balancerRulesPanel.validation.portFormat':
+    'Le format du port n’est pas pris en charge. Utilisez l’éditeur natif.',
+  'balancerRulesPanel.validation.invalidBinding': 'Liaison de port non valide.',
+  'balancerRulesPanel.validation.nativeBinding':
+    'Cette liaison nécessite l’éditeur natif. Les liaisons de ports seront conservées.',
+  'balancerRulesPanel.validation.port': 'Saisissez des ports entiers compris entre 1 et 65535.',
+  'balancerRulesPanel.validation.native': 'Cet équilibreur de charge nécessite l’éditeur natif.',
+  'balancerRulesPanel.validation.advanced':
+    'Utilisez l’éditeur natif pour ces règles avancées afin de conserver tous les protocoles et toutes les cibles.',
+  'balancerRulesPanel.validation.advancedTcp':
+    'Utilisez l’éditeur natif pour cette règle TCP avancée.',
+  'balancerRulesPanel.validation.listener':
+    'Le point d’écoute est ambigu ou n’a pas de liaison. Utilisez l’éditeur natif.',
+  'balancerRulesPanel.validation.unmatchedPorts':
+    'Certains ports n’ont pas de règle correspondante. Utilisez l’éditeur natif.',
+  'balancerRulesPanel.validation.incompleteContract':
+    'Le contrat est incomplet. Rouvrez le panneau ou utilisez l’éditeur natif.',
+  'balancerRulesPanel.validation.unknownField':
+    'Champ non reconnu : {name}. Utilisez l’éditeur natif pour conserver la configuration.',
+  'balancerRulesPanel.validation.schemaUnavailable': 'Schéma indisponible : {name}.',
+  'balancerRulesPanel.validation.unavailable':
+    'L’équilibreur de charge ne peut pas être modifié dans ce contexte.',
+  'balancerRulesPanel.validation.stackUnavailable':
+    'La stack de l’équilibreur de charge est indisponible.',
+  'balancerRulesPanel.validation.ruleCount': 'Conservez entre 1 et 100 règles.',
+  'balancerRulesPanel.validation.ruleContract':
+    'Le contrat des règles a changé. Rouvrez le panneau.',
+  'balancerRulesPanel.validation.portContract': 'Le contrat des ports est indisponible.',
+  'balancerRulesPanel.validation.ruleKey': 'L’identifiant de la règle est en double ou non valide.',
+  'balancerRulesPanel.validation.protocolAccess': 'Protocole ou type d’accès non valide.',
+  'balancerRulesPanel.validation.preservedIp': 'Conservez l’adresse IP de publication existante.',
+  'balancerRulesPanel.validation.protocolContract':
+    'Le contrat actuel ne prend plus en charge ce protocole.',
+  'balancerRulesPanel.validation.portLimits': 'Le port est hors des limites du contrat actuel.',
+  'balancerRulesPanel.validation.target':
+    'Choisissez un service applicatif disponible dans cet environnement.',
+  'balancerRulesPanel.validation.hostnamePath':
+    'Vérifiez le nom d’hôte et le chemin HTTP. Le chemin doit commencer par /.',
+  'balancerRulesPanel.validation.portConflict':
+    'Les règles du même port doivent utiliser le même protocole, le même type d’accès et la même adresse IP.',
+  'balancerRulesPanel.validation.routeDuplicate': 'Utilisez chaque route entrante une seule fois.',
+
   'catalogRepositories.defaultBranch': 'Valeur par défaut du serveur',
   'catalogRepositories.title': 'Dépôts de catalogue',
   'catalogRepositories.description':
@@ -2545,4 +2963,6 @@ export const frFR = {
   'recovery.renderDescription':
     'Une erreur d’interface s’est produite. Vous pouvez ouvrir une autre section ou recharger cette page. Les modifications non enregistrées dans cet onglet peuvent être perdues.',
   'recovery.reload': 'Recharger la console',
+  'localeLoad.failed':
+    'Impossible de charger la langue sélectionnée. La langue actuelle reste active.',
 } as const;

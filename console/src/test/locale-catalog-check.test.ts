@@ -42,13 +42,9 @@ describe('Registered locale catalog gate', () => {
     expect(refreshed.catalogs['fr-FR'].auth).not.toBe(inputs.previewSources.catalogs['fr-FR'].auth);
   });
 
-  it('ignores source order and untranslated domains but rejects a missing source manifest', () => {
+  it('ignores source order but rejects a missing source manifest', () => {
     const reordered = Object.fromEntries(Object.entries(englishMessages).reverse());
     expect(checkRegisteredCatalogs({ ...inputs, englishMessages: reordered }).status).toBe(
-      'passed',
-    );
-    const unrelated = { ...englishMessages, 'aboutPage.title': 'About this instance' };
-    expect(checkRegisteredCatalogs({ ...inputs, englishMessages: unrelated }).status).toBe(
       'passed',
     );
     expect(checkRegisteredCatalogs({ ...inputs, previewSources: undefined }).failures).toContain(
@@ -62,71 +58,7 @@ describe('Registered locale catalog gate', () => {
     expect(report.registeredEnglishKeys).toBe(Object.keys(englishMessages).length);
     expect(report.registeredPortugueseKeys).toBe(report.registeredEnglishKeys);
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
-    const previewDomains = new Set([
-      'accessDiagnostics',
-      'apiKeys',
-      'auditPage',
-      'auth',
-      'bindingsEditor',
-      'bulkOperation',
-      'catalogPage',
-      'catalogRepositories',
-      'common',
-      'composeEditor',
-      'composeValidation',
-      'details',
-      'deviceUpgrade',
-      'deviceUpgradeForm',
-      'devices',
-      'environmentEditor',
-      'engineMonitoring',
-      'environmentCatalogs',
-      'groups',
-      'healthCheckEditor',
-      'healthCheckValidation',
-      'hostRegistration',
-      'hostsPage',
-      'language',
-      'localAccountPanel',
-      'operations',
-      'processes',
-      'recovery',
-      'registryCredentials',
-      'requestError',
-      'resourceCreator',
-      'resourceLimits',
-      'resourceMetrics',
-      'resourcePanel',
-      'resourcesPage',
-      'resourceState',
-      'resourceStream',
-      'resourceValidation',
-      'runtime',
-      'schedulingEditor',
-      'schemaForm',
-      'secretField',
-      'selectorRows',
-      'serviceEditors',
-      'serviceUpgradeForm',
-      'settings',
-      'shell',
-      'sidecarValidation',
-      'stackComposeUpgradePanel',
-      'topology',
-      'ui',
-      'users',
-      'webhooksPage',
-      'workloadControls',
-      'workloadPolicyValidation',
-      'workloadsPage',
-      'workloadStreams',
-    ]);
-    const previewScope = Object.keys(englishMessages).filter(
-      (key) =>
-        previewDomains.has(key.split('.')[0]!) ||
-        key === 'environment.selected' ||
-        key === 'selection.count',
-    );
+    const previewScope = Object.keys(englishMessages).sort();
     const previewLocales = [
       'de-DE',
       'fr-FR',
@@ -140,7 +72,7 @@ describe('Registered locale catalog gate', () => {
     expect(Object.keys(previewCatalogs)).toEqual(previewLocales);
     for (const locale of previewLocales) {
       const catalog = previewCatalogs[locale]!;
-      expect(Object.keys(catalog).sort()).toEqual(previewScope.sort());
+      expect(Object.keys(catalog).sort()).toEqual(previewScope);
       expect(catalog['catalogPage.defaultSuffix']).toMatch(/^ · /);
       expect(catalog['groups.inactive']).toMatch(/^ · /);
       expect(catalog['resourcePanel.editPrefix']).toMatch(/ $/);
@@ -150,37 +82,25 @@ describe('Registered locale catalog gate', () => {
       Object.fromEntries(previewLocales.map((locale) => [locale, previewScope.length])),
     );
     expect(report.missingPreviewKeysByLocale).toEqual(
-      Object.fromEntries(
-        previewLocales.map((locale) => [
-          locale,
-          report.registeredEnglishKeys - previewScope.length,
-        ]),
-      ),
+      Object.fromEntries(previewLocales.map((locale) => [locale, 0])),
     );
-    expect(report.pendingCatalogLocales).toEqual([
-      'de-DE',
-      'fr-FR',
-      'hu-HU',
-      'ja-JP',
-      'fa-IR',
-      'ru-RU',
-      'uk-UA',
-      'zh-Hans',
-    ]);
+    expect(report.pendingCatalogLocales).toEqual([]);
     expect(report.interfaceCoverage).toBe('not-measured');
     expect(report.allRoutesTranslated).toBe(false);
     expect(report.failures).toEqual([]);
   });
-  it('tracks complete registered catalogs without treating them as complete interface coverage', () => {
-    const catalogs = { ...previewCatalogs, 'fr-FR': englishMessages };
+  it('rejects a partial catalog even when its source fingerprints match', () => {
+    const { 'auth.loginTitle': _missing, ...partial } = previewCatalogs['fr-FR']!;
+    const catalogs = { ...previewCatalogs, 'fr-FR': partial };
     const report = checkRegisteredCatalogs({
       ...inputs,
       previewCatalogs: catalogs,
       previewSources: previewSourceSnapshot(englishMessages, catalogs),
     });
-    expect(report.status).toBe('passed');
-    expect(report.missingPreviewKeysByLocale['fr-FR']).toBe(0);
-    expect(report.pendingCatalogLocales).not.toContain('fr-FR');
+    expect(report.status).toBe('failed');
+    expect(report.failures).toEqual(['incomplete-preview-catalog']);
+    expect(report.missingPreviewKeysByLocale['fr-FR']).toBe(1);
+    expect(report.pendingCatalogLocales).toEqual(['fr-FR']);
     expect(report.allRoutesTranslated).toBe(false);
   });
   it('rejects a missing preview catalog even when its source fingerprint is also removed', () => {

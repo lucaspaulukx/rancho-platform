@@ -406,8 +406,8 @@ async function main() {
         Math.abs(box.right - document.documentElement.clientWidth) <= 1 &&
         getComputedStyle(sidebar).borderLeftWidth === '1px';
     }));
-  await workspace.getByRole('button', { name: 'View network policies', exact: true }).click();
-  const rtlDrawer = workspace.getByRole('dialog', { name: 'Network policies', exact: true });
+  await workspace.getByRole('button', { name: 'مشاهدهٔ سیاست‌های شبکه', exact: true }).click();
+  const rtlDrawer = workspace.getByRole('dialog', { name: 'سیاست‌های شبکه', exact: true });
   await rtlDrawer.waitFor();
   check('Persian desktop drawer opens at inline end without changing environment',
     await rtlDrawer.evaluate((drawer) => Math.abs(drawer.getBoundingClientRect().left) <= 1) &&
@@ -442,10 +442,10 @@ async function main() {
   await workspace.setViewportSize({ width: 1440, height: 1000 });
   await workspace.goto(origin + '/console/stacks?env=1a12');
   await workspace.locator('details.creation-menu > summary').click();
-  await workspace.locator('.creation-options').getByRole('button', { name: 'Stack', exact: true }).click();
-  const creator = workspace.getByRole('dialog', { name: 'Create stack', exact: true });
+  await workspace.locator('.creation-options').getByRole('button', { name: 'پشته', exact: true }).click();
+  const creator = workspace.getByRole('dialog', { name: 'ایجاد پشته', exact: true });
   await creator.waitFor();
-  await creator.getByLabel('How to create the stack', { exact: true }).selectOption('compose');
+  await creator.getByLabel('روش ایجاد پشته', { exact: true }).selectOption('compose');
   const composeSource = creator.getByRole('textbox', { name: 'Docker Compose', exact: true });
   const yamlDraft = 'services:\n  web:\n    image: alpine:3.20\n';
   await composeSource.fill(yamlDraft);
@@ -482,7 +482,7 @@ async function main() {
     simulatedFailures === 1 && recoveryPage.url() === recoveryUrl &&
     await recoveryPage.locator('html').getAttribute('dir') === 'rtl');
   await recoveryPage.getByRole('button', { name: 'بارگیری دوبارهٔ کنسول', exact: true }).click();
-  await recoveryPage.getByRole('heading', { name: 'Audit', exact: true }).waitFor();
+  await recoveryPage.getByRole('heading', { name: 'ممیزی', exact: true }).waitFor();
   check('reload recovers the actual lazy module after transport returns',
     simulatedFailures === 1 && recoveryPage.url() === recoveryUrl &&
     await recoveryPage.locator('html').getAttribute('lang') === 'fa-IR');
@@ -518,7 +518,8 @@ async function main() {
   const hostsUrl = origin + '/console/hosts?env=1a12';
   await failedInventory.goto(hostsUrl);
   const inventoryAlert = failedInventory.locator('main .error-state').getByRole('alert');
-  await inventoryAlert.getByText('The server returned a disallowed API address.', { exact: true }).waitFor();
+  await failedInventory.locator('.language-selector select').selectOption('fa-IR');
+  await inventoryAlert.getByText('سرور یک نشانی غیرمجاز API برگرداند.', { exact: true }).waitFor();
   await failedInventory.locator('.language-selector select').selectOption('pt-BR');
   await inventoryAlert.getByText('O servidor retornou um endereço de API não permitido.', { exact: true }).waitFor();
   check('blocked pagination remains local and updates its visible error in place',
@@ -529,6 +530,7 @@ async function main() {
   const groupPage = await page(authenticated);
   const groupsUrl = origin + '/console/groups?env=1a12';
   await groupPage.goto(groupsUrl);
+  await groupPage.locator('.language-selector select').selectOption('pt-BR');
   await groupPage.getByRole('button', { name: 'Criar grupo', exact: true }).click();
   const groupEditor = groupPage.getByRole('dialog');
   await groupEditor.getByRole('tab', { name: 'Environments (0)', exact: true }).click();
@@ -540,9 +542,10 @@ async function main() {
   check('group role translation preserves the draft grant identifier and route',
     await translatedPermission.inputValue() === 'readonly' && groupPage.url() === groupsUrl);
   await localePeer.locator('.language-selector select').selectOption('fa-IR');
-  await translatedPermission.getByRole('option', { name: 'فقط خواندنی', exact: true }).waitFor({ state: 'attached' });
+  const persianPermission = groupEditor.getByRole('combobox', { name: 'مجوز در UI-OPS-LAB', exact: true });
+  await persianPermission.getByRole('option', { name: 'فقط خواندنی', exact: true }).waitFor({ state: 'attached' });
   check('Persian preview translates the grant label and retains the readonly value',
-    await translatedPermission.inputValue() === 'readonly' &&
+    await persianPermission.inputValue() === 'readonly' &&
     await groupPage.locator('html').getAttribute('dir') === 'rtl');
   if (axe) {
     result.stage = 'accessibility-results';
