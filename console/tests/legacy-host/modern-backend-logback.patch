@@ -1,0 +1,200 @@
+--- a/code/framework/logback/src/main/resources/logback/logback-error.xml
++++ b/code/framework/logback/src/main/resources/logback/logback-error.xml
+@@ -4,12 +4,12 @@
+             <level>WARN</level>
+         </filter>
+         <file>${logDir}cattle-error.log</file>
+-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
++        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+             <fileNamePattern>${logDir}cattle-error${fileNamePattern}</fileNamePattern>
+             <maxHistory>${maxHistory}</maxHistory>
+-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
++
+                 <maxFileSize>${maxFileSize}</maxFileSize>
+-            </timeBasedFileNamingAndTriggeringPolicy>
++
+         </rollingPolicy>
+         <encoder>
+             <pattern>${pattern}</pattern>
+--- a/code/framework/logback/src/main/resources/logback/logback-events.xml
++++ b/code/framework/logback/src/main/resources/logback/logback-events.xml
+@@ -5,12 +5,12 @@
+
+     <appender name="SYNC_FILE_EVENT_IN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+         <file>${logDir}cattle-event-in.log</file>
+-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
++        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+             <fileNamePattern>${logDir}cattle-event-in${fileNamePattern}</fileNamePattern>
+             <maxHistory>${maxHistory}</maxHistory>
+-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
++
+                 <maxFileSize>${maxFileSize}</maxFileSize>
+-            </timeBasedFileNamingAndTriggeringPolicy>
++
+         </rollingPolicy>
+         <encoder>
+             <pattern>${eventPattern}</pattern>
+@@ -22,12 +22,12 @@
+
+     <appender name="SYNC_FILE_EVENT_OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+         <file>${logDir}cattle-event-out.log</file>
+-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
++        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+             <fileNamePattern>${logDir}cattle-event-out${fileNamePattern}</fileNamePattern>
+             <maxHistory>${maxHistory}</maxHistory>
+-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
++
+                 <maxFileSize>${maxFileSize}</maxFileSize>
+-            </timeBasedFileNamingAndTriggeringPolicy>
++
+         </rollingPolicy>
+         <encoder>
+             <pattern>${eventPattern}</pattern>
+--- a/code/framework/logback/src/main/resources/logback/logback-file.xml
++++ b/code/framework/logback/src/main/resources/logback/logback-file.xml
+@@ -1,12 +1,12 @@
+ <included>
+     <appender name="SYNC_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+         <file>${logDir}cattle-debug.log</file>
+-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
++        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+             <fileNamePattern>${logDir}cattle-debug${fileNamePattern}</fileNamePattern>
+             <maxHistory>${maxHistory}</maxHistory>
+-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
++
+                 <maxFileSize>${maxFileSize}</maxFileSize>
+-            </timeBasedFileNamingAndTriggeringPolicy>
++
+         </rollingPolicy>
+         <encoder>
+             <pattern>${pattern}</pattern>
+--- a/code/framework/logback/src/main/resources/logback/logback-logstash-console.xml
++++ b/code/framework/logback/src/main/resources/logback/logback-logstash-console.xml
+@@ -5,12 +5,12 @@
+             <level>${aggregationLevel}</level>
+         </filter>
+         <file>${logDir}logstash.log</file>
+-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
++        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+             <fileNamePattern>${logDir}logstash${fileNamePattern}</fileNamePattern>
+             <maxHistory>${maxHistory}</maxHistory>
+-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
++
+                 <maxFileSize>${maxFileSize}</maxFileSize>
+-            </timeBasedFileNamingAndTriggeringPolicy>
++
+         </rollingPolicy>
+
+         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+--- a/code/framework/logback/src/main/resources/logback/logback-logstash-file.xml
++++ b/code/framework/logback/src/main/resources/logback/logback-logstash-file.xml
+@@ -4,12 +4,12 @@
+             <level>${aggregationLevel}</level>
+         </filter>
+         <file>${logDir}logstash.log</file>
+-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
++        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+             <fileNamePattern>${logDir}logstash${fileNamePattern}</fileNamePattern>
+             <maxHistory>${maxHistory}</maxHistory>
+-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
++
+                 <maxFileSize>${maxFileSize}</maxFileSize>
+-            </timeBasedFileNamingAndTriggeringPolicy>
++
+         </rollingPolicy>
+
+         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+--- a/code/framework/logback/src/main/resources/logback/logback.xml
++++ b/code/framework/logback/src/main/resources/logback/logback.xml
+@@ -90,51 +90,81 @@
+
+     <define name="serverId" class="io.cattle.platform.logback.ServerIdProperty" />
+
+-    <jmxConfigurator/>
+-
+-    <if condition='property("logstashConsole").equals("true")' >
++    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
++        <key>logstashConsole</key>
++        <value>true</value>
++    </condition>
++    <if>
+         <then>
+             <include resource="logback/logback-logstash-console.xml" />
+         </then>
+     </if>
+
+-    <if condition='property("logstashFile").equals("true")' >
++    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
++        <key>logstashFile</key>
++        <value>true</value>
++    </condition>
++    <if>
+         <then>
+             <include resource="logback/logback-logstash-file.xml" />
+         </then>
+     </if>
+
+-    <if condition='property("logstashSyslog").equals("true")' >
++    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
++        <key>logstashSyslog</key>
++        <value>true</value>
++    </condition>
++    <if>
+         <then>
+             <include resource="logback/logback-logstash-syslog.xml" />
+         </then>
+     </if>
+
+-    <if condition='property("file").equals("true")' >
++    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
++        <key>file</key>
++        <value>true</value>
++    </condition>
++    <if>
+         <then>
+             <include resource="logback/logback-file.xml" />
+         </then>
+     </if>
+
+-    <if condition='property("error").equals("true")' >
++    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
++        <key>error</key>
++        <value>true</value>
++    </condition>
++    <if>
+         <then>
+             <include resource="logback/logback-error.xml" />
+         </then>
+     </if>
+
+-    <if condition='property("events").equals("true")' >
++    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
++        <key>events</key>
++        <value>true</value>
++    </condition>
++    <if>
+         <then>
+             <include resource="logback/logback-events.xml" />
+         </then>
+     </if>
+
+-    <if condition='property("gelf").equals("true")' >
++    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
++        <key>gelf</key>
++        <value>true</value>
++    </condition>
++    <if>
+         <then>
+             <include resource="logback/logback-gelf.xml" />
+         </then>
+     </if>
+
+-    <if condition='property("console").equals("true")' >
++    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
++        <key>console</key>
++        <value>true</value>
++    </condition>
++    <if>
+         <then>
+             <include resource="logback/logback-console.xml" />
+         </then>
