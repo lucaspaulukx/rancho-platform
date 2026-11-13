@@ -110,6 +110,21 @@ index 4bf09a1..b7ea0c2 100644
          }
      }
  }
+diff --git a/code/framework/launcher/src/main/java/io/cattle/platform/launcher/Main.java b/code/framework/launcher/src/main/java/io/cattle/platform/launcher/Main.java
+index 40518b1..c91b82c 100644
+--- a/code/framework/launcher/src/main/java/io/cattle/platform/launcher/Main.java
++++ b/code/framework/launcher/src/main/java/io/cattle/platform/launcher/Main.java
+@@ -82,7 +82,9 @@ public class Main {
+ 
+         URL[] urlArray = urls.toArray(new URL[urls.size()]);
+ 
+-        ClassLoader cl = Boolean.getBoolean("cattle.main.inherit.cl") ? Main.class.getClassLoader() : null;
++        // On Java 9 and later, platform modules such as java.sql live above the bootstrap loader.
++        ClassLoader cl = Boolean.getBoolean("cattle.main.inherit.cl")
++                ? Main.class.getClassLoader() : ClassLoader.getSystemClassLoader().getParent();
+         return new URLClassLoader(urlArray, cl, factory);
+     }
+ 
 diff --git a/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java b/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java
 index b6f6727..3603805 100644
 --- a/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java
