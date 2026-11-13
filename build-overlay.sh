@@ -43,6 +43,11 @@ install -m 0644 /lab/runtime-jars/liquibase/liquibase-core-4.8.0.jar "$LIB/"
 test -f "$LIB/commons-fileupload-1.3.3.jar"
 rm "$LIB/commons-fileupload-1.3.3.jar"
 install -m 0644 /lab/runtime-jars/fileupload/commons-fileupload-1.6.0.jar "$LIB/"
+for artifact in bcpkix-jdk15on-1.54 bcprov-jdk15on-1.54; do
+    test -f "$LIB/$artifact.jar"
+    rm "$LIB/$artifact.jar"
+done
+install -m 0644 /lab/runtime-jars/bouncycastle/*.jar "$LIB/"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$ROOT/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java" >> /lab/sources
