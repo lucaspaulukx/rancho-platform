@@ -23,6 +23,8 @@ ADD --checksum=sha256:df90bba0fe3cb586b7f164e78fe8f8f4da3f2dd5c27fa645f888100ccc
 ADD --checksum=sha256:4eeeae8d20c078abb64b015ec158add383ac581571cddc45c68f0c9ae0230720 https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar /commons-archive/commons-lang3-3.18.0.jar
 ADD --checksum=sha256:5c3881e4f556855e9c532927ee0c9dfde94cc66760d5805c031a59887070af5f https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.19.0/commons-codec-1.19.0.jar /commons-archive/commons-codec-1.19.0.jar
 ADD --checksum=sha256:ef5aadd0e7456bee48828b5e4655645ac306f937a7ec47e31e3fa3507c29b846 https://repo.maven.apache.org/maven2/org/hsqldb/hsqldb/2.7.4/hsqldb-2.7.4-jdk8.jar /hsqldb/hsqldb-2.7.4-jdk8.jar
+ADD --checksum=sha256:9e44ba68ec9a3f21286fa2a8bbb003b735c0f69101bb43144b79f4f8aaa74709 https://repo.maven.apache.org/maven2/commons-beanutils/commons-beanutils/1.11.0/commons-beanutils-1.11.0.jar /beanutils/commons-beanutils-1.11.0.jar
+ADD --checksum=sha256:6d7a744e4027649fbb50895df9497d109f98c766a637062fe8d2eabbb3140ba4 https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.5/commons-logging-1.3.5.jar /beanutils/commons-logging-1.3.5.jar
 
 FROM rancher/server:v1.6.30@sha256:95b55603122c28baea4e8d94663aa34ad770bbc624a9ed6ef986fb3ea5224d91
 COPY --from=stream-proxy /out/websocket-proxy /usr/bin/websocket-proxy
