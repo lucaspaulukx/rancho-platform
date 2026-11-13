@@ -22,4 +22,6 @@ for setting in MODULE_PROFILE_HAZELCAST_EVENTING MODULE_PROFILE_HAZELCAST_LOCK M
 done
 
 exec /opt/rancho-java17/bin/java -Xms128m -Xmx1024m -Dlogback.bootstrap.level=WARN \
-    -cp /opt/cattle:/opt/cattle/etc/cattle io.cattle.platform.launcher.Main "$@"
+    "-Dcattle.home=${CATTLE_HOME%/}/" \
+    -cp "/opt/cattle:/opt/cattle/etc/cattle:/opt/cattle/WEB-INF/lib/*:/opt/cattle/WEB-INF/jetty/*" \
+    io.cattle.platform.launcher.jetty.Main "$@"
