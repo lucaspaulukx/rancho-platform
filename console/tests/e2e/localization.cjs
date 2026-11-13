@@ -323,42 +323,58 @@ async function main() {
   check('English mobile environment menu remains within the viewport', await insideViewport(ltrEnvironment));
   await workspace.keyboard.press('Escape');
   await workspace.setViewportSize({ width: 1440, height: 1000 });
-  for (const [route, title] of [
-    ['groups', 'Groups and permissions'],
-    ['users', 'Users'],
-    ['api-keys', 'API keys'],
-    ['settings', 'Server settings'],
-    ['audit', 'Audit'],
-    ['processes', 'Processes'],
-    ['drivers', 'Machine drivers'],
-    ['catalog-repositories', 'Catalog repositories'],
-    ['hosts', 'Hosts'],
-    ['catalog', 'Catalog'],
-    ['webhooks', 'Webhooks'],
-    ['environments', 'Environments'],
-    ['volumes', 'Volumes'],
+  for (const [route, title, persianTitle] of [
+    ['', 'UI-OPS-LAB', 'UI-OPS-LAB'],
+    ['stacks', 'UI-OPS-LAB', 'UI-OPS-LAB'],
+    ['services', 'UI-OPS-LAB', 'UI-OPS-LAB'],
+    ['containers', 'UI-OPS-LAB', 'UI-OPS-LAB'],
+    ['groups', 'Groups and permissions', 'گروه‌ها و مجوزها'],
+    ['users', 'Users', 'کاربران'],
+    ['api-keys', 'API keys', 'کلیدهای API'],
+    ['settings', 'Server settings', 'تنظیمات سرور'],
+    ['audit', 'Audit', 'ممیزی'],
+    ['processes', 'Processes', 'فرایندها'],
+    ['drivers', 'Machine drivers', 'درایورهای ماشین'],
+    ['catalog-repositories', 'Catalog repositories', 'مخزن‌های کاتالوگ'],
+    ['hosts', 'Hosts', 'میزبان‌ها'],
+    ['catalog', 'Catalog', 'کاتالوگ'],
+    ['webhooks', 'Webhooks', 'وب‌هوک‌ها'],
+    ['environments', 'Environments', 'محیط‌ها'],
+    ['volumes', 'Volumes', 'حجم‌ها'],
+    ['registries', 'Registries', 'رجیستری‌ها'],
+    ['secrets', 'Secrets', 'اسرار'],
+    ['certificates', 'Certificates', 'گواهی‌ها'],
+    ['ha', 'HA and cluster members', 'HA و اعضای خوشه'],
   ]) {
+    const routeName = route || 'overview';
     await workspace.goto(origin + '/console/' + route + '?env=1a12');
-    await workspace.getByRole('heading', { name: title, exact: true }).waitFor();
-    check('translated administrative route ' + route + ' keeps scope',
-      new URL(workspace.url()).searchParams.get('env') === '1a12');
-    for (const width of [320, 390]) {
-      await workspace.setViewportSize({ width, height: 844 });
-      result.stage = 'administration-layout-' + route + '-' + width;
-      await workspace.locator('main .loading:visible').waitFor({ state: 'hidden' });
-      const fits = await workspace.evaluate(() => {
-        const main = document.querySelector('main');
-        const actions = main?.querySelectorAll('.page-actions > .button') ?? [];
-        return main && main.scrollWidth <= main.clientWidth + 1 &&
-          document.documentElement.scrollWidth <= innerWidth + 1 &&
-          [...actions].every((action) => {
-            const box = action.getBoundingClientRect();
-            return box.left >= -1 && box.right <= innerWidth + 1;
-          });
-      });
-      assert(fits);
-      check(route + ' fits the viewport at ' + width + ' px');
+    for (const [locale, direction, heading] of [['en-US', 'ltr', title], ['fa-IR', 'rtl', persianTitle]]) {
+      result.stage = 'navigation-' + routeName + '-' + locale;
+      await workspace.locator('.language-selector select').selectOption(locale);
+      await workspace.locator(`html[lang="${locale}"][dir="${direction}"]`).waitFor();
+      await workspace.locator('main').getByRole('heading', { level: 1, name: heading, exact: true }).waitFor();
+      check(routeName + ' keeps scope in ' + locale,
+        new URL(workspace.url()).searchParams.get('env') === '1a12');
+      for (const width of [320, 390]) {
+        await workspace.setViewportSize({ width, height: 844 });
+        result.stage = 'navigation-layout-' + routeName + '-' + locale + '-' + width;
+        await workspace.locator('main .loading:visible').waitFor({ state: 'hidden' });
+        const fits = await workspace.evaluate(() => {
+          const main = document.querySelector('main');
+          const actions = main?.querySelectorAll('.page-actions > .button') ?? [];
+          return main && main.scrollWidth <= main.clientWidth + 1 &&
+            document.documentElement.scrollWidth <= innerWidth + 1 &&
+            [...actions].every((action) => {
+              const box = action.getBoundingClientRect();
+              return box.left >= -1 && box.right <= innerWidth + 1;
+            });
+        });
+        assert(fits);
+        check(routeName + ' fits the viewport in ' + locale + ' at ' + width + ' px');
+      }
     }
+    await workspace.locator('.language-selector select').selectOption('en-US');
+    await workspace.locator('html[lang="en-US"]').waitFor();
     if (axe && accessibilityRoutes.includes(route)) {
       result.stage = 'accessibility-' + route;
       await scanAccessibility(workspace, route);

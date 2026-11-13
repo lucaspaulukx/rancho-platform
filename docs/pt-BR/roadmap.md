@@ -15,7 +15,7 @@ Estados descrevem capacidades mantidas e aceites restantes, não diário de exec
 
 | ID | Capacidade | Estado e gate restante |
 |---|---|---|
-| UX01 | Shell, marca, navegação, seletor, login/sem-acesso | Implementado; as ações do cabeçalho compartilhado quebram linha em telas estreitas. O teste de navegador cobre treze rotas a 320 e 390 px. Falta regressão final de rotas e temas |
+| UX01 | Shell, marca, navegação, seletor, login/sem-acesso | Implementado; as ações do cabeçalho compartilhado quebram linha em telas estreitas. O teste no navegador cobre as 21 rotas principais do menu em inglês e persa, a 320 e 390 px. Falta regressão final de rotas e temas |
 | UX02 | Tabelas, filtros, seleção, menus, drawers, revisão/rascunhos | Recortes implementados. O teste mobile do menu de Operações e do painel de detalhes verifica ações desabilitadas e retorno de foco pelo teclado. Falta a matriz restante de teclado, erro parcial e contexto |
 | UX03 | Tokens de tema e overrides | Implementado; conferir contraste efetivo nas rotas finais |
 | UX04 | Recuperação de chunks/abas antigas e retenção de assets | Abas antigas carregaram os chunks originais durante upgrade e rollback isolados do frontend. Um novo documento carregou a imagem restaurada. Falta o aceite final no artefato e na topologia de release |
