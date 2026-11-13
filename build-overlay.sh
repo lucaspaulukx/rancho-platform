@@ -35,10 +35,15 @@ for artifact in commons-beanutils-1.8.3 commons-logging-1.2; do
     rm "$LIB/$artifact.jar"
 done
 install -m 0644 /lab/runtime-jars/beanutils/*.jar "$LIB/"
+for artifact in liquibase-core-3.1.0 liquibase-slf4j-1.2.1; do
+    test -f "$LIB/$artifact.jar"
+    rm "$LIB/$artifact.jar"
+done
+install -m 0644 /lab/runtime-jars/liquibase/liquibase-core-4.8.0.jar "$LIB/"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$ROOT/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java" >> /lab/sources
-printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java" "$AUTH/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java" "$AUTH/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java" "$APP/src/main/java/io/cattle/platform/app/IaasApiConfig.java" "$APP/src/main/java/io/cattle/platform/app/ApiServerConfig.java" >> /lab/sources
+printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java" "$AUTH/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java" "$AUTH/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java" "$APP/src/main/java/io/cattle/platform/app/IaasApiConfig.java" "$APP/src/main/java/io/cattle/platform/app/ApiServerConfig.java" "$APP/src/main/java/io/cattle/platform/app/SystemConfig.java" >> /lab/sources
 printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java" "$AUTH/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenUtils.java" >> /lab/sources
 printf '%s\n' "$ROOT/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java" >> /lab/sources
 printf '%s\n' "$ROOT/code/implementation/host-api/src/main/java/io/cattle/platform/host/service/impl/HostApiServiceImpl.java" "$ROOT/code/implementation/docker/machine/src/main/java/io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher.java" >> /lab/sources
