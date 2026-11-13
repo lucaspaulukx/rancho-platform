@@ -61,6 +61,21 @@ python -m scripts.release_artifact_rehearsal --backend-image rancho-backend:loca
 
 Para o [ensaio sintético de upgrade e rollback do backend](testing.md#upgrade-e-rollback-do-engine-original), passe o ID `images.backend` do relatório combinado como `--backend-image`. Compare esse ID com `images.candidateBackend` no relatório do engine antes de reunir as evidências. O ensaio do engine exige o laboratório local indicado e uma janela de manutenção para a captura a frio.
 
+## Instalação experimental de nó único
+
+Gere o runtime e a console a partir do mesmo checkout. Execute a preparação das fontes fixadas antes de compilar o Dockerfile da raiz.
+
+```sh
+docker build -t rancho-backend-legacy-build:local .
+docker build -f console/tests/legacy-host/Dockerfile.java17 --build-arg BACKEND_IMAGE=rancho-backend-legacy-build:local -t rancho-backend-java17:local console/tests/legacy-host
+docker build -f console/tests/legacy-host/Dockerfile.modern-backend -t rancho-backend-modern-runtime:local console/tests/legacy-host
+docker build -f console/tests/legacy-host/Dockerfile.modern-packages --build-arg BACKEND_IMAGE=rancho-backend-modern-runtime:local -t rancho-backend-modern:local console/tests/legacy-host
+docker build -t rancho-console:local console
+docker compose -f compose.modern.yaml --env-file <local-env-file> up -d --pull never
+```
+
+Defina um `RANCHO_DB_PASSWORD` exclusivo no arquivo de ambiente e proteja esse arquivo. A console fica disponível em loopback em `http://localhost:18090/console/`. Em um banco novo, inicialize a autenticação do administrador local antes de expor a console por um proxy de rede. O OIDC inicia desativado. Para habilitá-lo, configure emissor, ID e segredo do cliente e callback, e registre no provedor de identidade o callback na origem da console. Use HTTPS para acesso pela rede. Execute a instalação com uma réplica do servidor Rancher.
+
 ## Aceite final
 
 Use um candidato identificado para autenticação/RBAC/streams, operação contextual, acessibilidade/performance, compatibilidade clássica, instalação nova, upgrade e recuperação/rollback completos. Registre limites/topologias. Configure canal privado de segurança antes de abrir o projeto. Mantenha [migração](migration.md) e [recuperação](recovery.md) vinculadas ao artefato; testes sintéticos não garantem migração universal.

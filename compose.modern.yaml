@@ -1,0 +1,77 @@
+name: rancho-modern
+services:
+  db:
+    image: mariadb:10.11@sha256:7d829180b5b2a9ba74f6242876ab401a0d7dd338a807e522ef92bc9698760f20
+    environment:
+      MARIADB_DATABASE: cattle
+      MARIADB_USER: cattle
+      MARIADB_PASSWORD: ${RANCHO_DB_PASSWORD:?Set RANCHO_DB_PASSWORD}
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    volumes:
+      - db:/var/lib/mysql
+    networks: [database]
+
+  rancher:
+    image: ${RANCHO_BACKEND_IMAGE:-rancho-backend-modern:local}
+    environment:
+      CATTLE_DB_CATTLE_MYSQL_HOST: db
+      CATTLE_DB_CATTLE_USERNAME: cattle
+      CATTLE_DB_CATTLE_PASSWORD: ${RANCHO_DB_PASSWORD:?Set RANCHO_DB_PASSWORD}
+      CATTLE_USE_LOCAL_ARTIFACTS: "true"
+      CATTLE_HOST_API_PROXY_MODE: embedded
+      RANCHER_CUSTOMIZATION_ENABLED: "true"
+      RANCHER_SCHEMA_MIGRATIONS_ENABLED: "true"
+      RANCHER_LOCAL_RBAC_ENABLED: "true"
+      RANCHER_DISABLE_AUTO_ENVIRONMENT: "true"
+      RANCHER_ENV_CREATION_ADMIN_ONLY: "true"
+      RANCHER_AUDIT_CREDENTIAL_REDACTION_ENABLED: "true"
+      RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED: "true"
+      RANCHER_METRICS_PAYLOAD_TRANSPORT_ENABLED: "true"
+      RANCHER_SUBSCRIPTION_SESSION_GUARD_ENABLED: "true"
+      RANCHER_OIDC_ENABLED: ${RANCHER_OIDC_ENABLED:-false}
+      RANCHER_OIDC_ISSUER: ${RANCHER_OIDC_ISSUER:-}
+      RANCHER_OIDC_CLIENT_ID: ${RANCHER_OIDC_CLIENT_ID:-}
+      RANCHER_OIDC_CLIENT_SECRET: ${RANCHER_OIDC_CLIENT_SECRET:-}
+      RANCHER_OIDC_CALLBACK: ${RANCHER_OIDC_CALLBACK:-}
+      RANCHER_OIDC_BACKCHANNEL: ${RANCHER_OIDC_BACKCHANNEL:-}
+      RANCHER_OIDC_ONLY: ${RANCHER_OIDC_ONLY:-false}
+      RANCHER_OIDC_AUTO_LOGIN: ${RANCHER_OIDC_AUTO_LOGIN:-false}
+      RANCHER_OIDC_LOGIN_PREFLIGHT_ENABLED: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/ping"]
+      interval: 5s
+      timeout: 3s
+      start_period: 90s
+      retries: 12
+    volumes:
+      - state:/var/lib/cattle
+    networks: [database, app]
+
+  console:
+    image: ${RANCHO_CONSOLE_IMAGE:-rancho-console:local}
+    depends_on:
+      rancher:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${RANCHO_CONSOLE_PORT:-18090}:8080"
+    volumes:
+      - assets:/var/cache/console-runtime
+    networks: [app]
+
+networks:
+  database:
+    internal: true
+  app:
+
+volumes:
+  db:
+  state:
+  assets:
