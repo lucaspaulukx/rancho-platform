@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { Settings } from '../pages/Settings';
 import { I18nProvider } from '../i18n/provider';
+import { faIR } from '../i18n/catalogs/fa-IR';
 import type { Resource, Schema } from '../api';
 const state = vi.hoisted(() => ({
   changed: false,
@@ -73,7 +74,7 @@ function mount(localized = false) {
             ? {
                 enabled: true,
                 defaultLocale: 'pt-BR',
-                availableLocales: ['pt-BR', 'en-US'],
+                availableLocales: ['pt-BR', 'en-US', 'fa-IR'],
                 selectable: true,
                 detectBrowser: false,
                 preview: true,
@@ -216,6 +217,13 @@ describe('Página de configurações', () => {
     });
     expect(screen.getByText('Unable to complete the settings operation.')).toBeInTheDocument();
     expect(screen.getByLabelText('Configured value')).toBe(draft);
+    const key = 'rancho.console.locale.anonymous';
+    act(() => {
+      localStorage.setItem(key, JSON.stringify({ version: 1, locale: 'fa-IR' }));
+      window.dispatchEvent(new StorageEvent('storage', { key }));
+    });
+    expect(await screen.findByText(faIR['settings.operationFailed'])).toBeInTheDocument();
+    expect(screen.getByLabelText(faIR['settings.configured'])).toBe(draft);
     expect(draft).toHaveValue(displayedValue);
     expect(state.posts).toEqual([{ value: 'new\nmultiline' }]);
     expect(state.posts).toHaveLength(1);
