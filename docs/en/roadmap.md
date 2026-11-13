@@ -132,6 +132,10 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 
 Beta blocked by legacy image findings. A Trivy scan of the lab backend image found 30 critical and 88 high package/advisory matches and identified Ubuntu 14.04 as end of support. Jackson Databind 2.5.3 accounted for 19 critical matches. The existing console image had 3 critical and 73 high matches, and the local Keycloak image had 8 critical and 101 high matches. These image results are separate from the console production lockfile audit. Verify affected components and supported upgrades, rebuild and rescan the candidate, and repeat native and migration acceptance on that image. The unified route/action/scope/CSRF/secret/cache gate also remains open.
 
+The local Jackson 2.21.8 experiment booted on Docker 29.9.2 with fresh disposable data and no external network. Health, API discovery, schemas, token discovery and OIDC status responded. The image scan dropped from 30 to 11 critical and from 88 to 57 high matches. This experiment still needs a reproducible build and migration and workload regression.
+
+Docker compatibility is a separate acceptance gate. [Rancher 1.6.30 release notes](https://forums.suse.com/t/rancher-release-v1-6-30/17359) list Docker versions through 19.03 for managed hosts. Booting Rancher Server on Docker 29 does not establish agent support on that engine. Use a separate disposable Linux host to test registration, Docker API negotiation, managed networking, volumes, stack lifecycle, logs, exec and metrics before expanding support. Record the exact daemon, API floor, agent and system image versions for every run.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.

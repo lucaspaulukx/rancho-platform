@@ -132,6 +132,10 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 
 Beta bloqueada por achados na imagem legada. A varredura Trivy da imagem do backend do laboratório encontrou 30 ocorrências críticas e 88 altas por pacote e aviso e identificou o Ubuntu 14.04 como fora de suporte. Jackson Databind 2.5.3 concentrou 19 ocorrências críticas. A imagem existente da console teve 3 ocorrências críticas e 73 altas, e a imagem local do Keycloak teve 8 críticas e 101 altas. Esses resultados das imagens são separados da auditoria do lockfile de produção da console. Verifique os componentes afetados e as atualizações suportadas, reconstrua e escaneie a candidata e repita o aceite nativo e de migração nessa imagem. A validação unificada de rotas, ações, escopo, CSRF, segredos e cache também continua aberta.
 
+O experimento local com Jackson 2.21.8 iniciou no Docker 29.9.2 com dados descartáveis e sem rede externa. Saúde, descoberta da API, schemas, descoberta de token e status OIDC responderam. A varredura da imagem caiu de 30 para 11 ocorrências críticas e de 88 para 57 altas. O experimento ainda precisa de um build reproduzível e de regressão de migração e workloads.
+
+A compatibilidade com Docker tem um critério de aceite próprio. As [notas do Rancher 1.6.30](https://forums.suse.com/t/rancher-release-v1-6-30/17359) listam versões até o Docker 19.03 para hosts gerenciados. Iniciar o Rancher Server no Docker 29 não valida o agente nesse engine. Use um host Linux descartável para testar registro, negociação da API Docker, rede gerenciada, volumes, ciclo de vida de stacks, logs, terminal e métricas antes de ampliar o suporte. Registre a versão exata do daemon, a versão mínima da API, o agente e as imagens de sistema em cada execução.
+
 ## Ordem e domínios opcionais
 
 Conclua contratos/efeitos nativos de workloads, depois infraestrutura/dados/catálogo/integrações. Feche identidade técnica/streams e migração segura de grants, seguido de acessibilidade/performance e regressão final de configuração/recuperação/release. Gate falho retorna à implementação; não aumente timeouts ou esconda limites para obter aprovação.
