@@ -1,0 +1,94 @@
+--- a/code/framework/module/src/main/java/io/cattle/platform/spring/web/StartupListener.java
++++ b/code/framework/module/src/main/java/io/cattle/platform/spring/web/StartupListener.java
+@@ -18,7 +18,6 @@
+
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+-import org.springframework.web.context.support.WebApplicationContextUtils;
+
+ import com.netflix.config.DynamicStringListProperty;
+
+@@ -32,8 +31,8 @@
+
+     @Override
+     public void contextInitialized(ServletContextEvent event) {
+-        WebApplicationContextUtils
+-            .getRequiredWebApplicationContext(event.getServletContext())
++        ServletApplicationContext
++            .getRequiredContext(event.getServletContext())
+             .getAutowireCapableBeanFactory()
+             .autowireBean(this);
+
+@@ -98,5 +97,4 @@
+
+     }
+
+-
+ }
+--- a/code/framework/module/src/main/java/io/cattle/platform/spring/web/SpringFilter.java
++++ b/code/framework/module/src/main/java/io/cattle/platform/spring/web/SpringFilter.java
+@@ -4,14 +4,13 @@
+ import javax.servlet.FilterConfig;
+ import javax.servlet.ServletException;
+
+-import org.springframework.web.context.support.WebApplicationContextUtils;
+
+ public abstract class SpringFilter implements Filter {
+
+     @Override
+     public void init(FilterConfig filterConfig) throws ServletException {
+-        WebApplicationContextUtils
+-            .getRequiredWebApplicationContext(filterConfig.getServletContext())
++        ServletApplicationContext
++            .getRequiredContext(filterConfig.getServletContext())
+             .getAutowireCapableBeanFactory()
+             .autowireBean(this);
+     }
+--- a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcServlet.java
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcServlet.java
+@@ -2,14 +2,14 @@
+
+ import java.io.IOException;
+ import javax.servlet.http.*;
+-import org.springframework.web.context.support.WebApplicationContextUtils;
++import io.cattle.platform.spring.web.ServletApplicationContext;
+
+ public class OidcServlet extends HttpServlet {
+     protected void doGet(HttpServletRequest request,HttpServletResponse response) throws IOException {
+         response.setHeader("Cache-Control","no-store");
+         response.setHeader("Referrer-Policy","no-referrer");
+         response.setHeader("X-Content-Type-Options","nosniff");
+-        OidcSupport oidc=WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext()).getBean(OidcSupport.class);
++        OidcSupport oidc=ServletApplicationContext.getRequiredContext(getServletContext()).getBean(OidcSupport.class);
+         try {
+             String path=request.getPathInfo();
+             if ("/config".equals(path)) {
+@@ -45,7 +45,7 @@
+         response.setHeader("X-Content-Type-Options","nosniff");
+         response.setContentType("application/json");
+         if (!"/logout".equals(request.getPathInfo())) { response.setStatus(404); response.getWriter().write("{}"); return; }
+-        OidcSupport oidc=WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext()).getBean(OidcSupport.class);
++        OidcSupport oidc=ServletApplicationContext.getRequiredContext(getServletContext()).getBean(OidcSupport.class);
+         try {
+             new com.fasterxml.jackson.databind.ObjectMapper().writeValue(response.getWriter(),oidc.prepareLogout(request));
+         } catch (io.github.ibuildthecloud.gdapi.exception.ClientVisibleException rejected) {
+--- a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/HostStreamGuardServlet.java
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/HostStreamGuardServlet.java
+@@ -4,7 +4,7 @@
+ import java.io.IOException;
+ import java.util.Map;
+ import javax.servlet.http.*;
+-import org.springframework.web.context.support.WebApplicationContextUtils;
++import io.cattle.platform.spring.web.ServletApplicationContext;
+
+ /** Stateless read-only proof check, independent of OIDC and browser CSRF cookies. */
+ public class HostStreamGuardServlet extends HttpServlet {
+@@ -35,7 +35,7 @@
+                 bytes.write(block,0,next);
+             }
+             Map<?,?> body = new com.fasterxml.jackson.databind.ObjectMapper().readValue(bytes.toByteArray(), Map.class);
+-            UiHostStreamSessionGuard guard = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext()).getBean(UiHostStreamSessionGuard.class);
++            UiHostStreamSessionGuard guard = ServletApplicationContext.getRequiredContext(getServletContext()).getBean(UiHostStreamSessionGuard.class);
+             if (body.get("token") instanceof String && body.get("path") instanceof String) {
+                 Map<String,Object> result = guard.check((String)body.get("token"),(String)body.get("path"),Boolean.TRUE.equals(body.get("renew")));
+                 allowed = Boolean.TRUE.equals(result.get("allowed"));
