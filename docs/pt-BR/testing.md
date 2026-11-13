@@ -116,6 +116,8 @@ python console/tests/localization_acceptance.py --accessibility
 
 ## Evidências e escopo
 
+Execute `python console/tests/gateway_security.py` com os containers locais do Rancher e do Nginx da console disponíveis na porta 18090. O teste usa uma sessão descartável de administrador e a revoga ao terminar. Verifica a política de cache e os cabeçalhos de segurança pelo Nginx, incluindo um callback OIDC inválido, sem precisar iniciar o provedor de identidade. Também verifica que scripts com hash mantêm o cache imutável.
+
 `physical_security_options.py` compara um container com a opção nativa `no-new-privileges` com um controle equivalente. Exige Docker no host legado isolado original e compara os valores da API do ambiente, as opções de segurança do Docker e `NoNewPrivs` nos processos em execução. O teste cobre uma opção e um runtime.
 
 `physical_devices.py` exercita separadamente o editor default off pela criação real de container avulso, verificando mapeamento nativo/Docker exato, modo não privilegiado, leitura de dispositivo char e resultado real de abertura para escrita. Confere negação ao membro revogado e limpeza exata. A fixture /dev/null não certifica isolamento de escrita pelas permissões padrão nativas; upgrades de serviços, sidecars físicos e outros dispositivos/runtimes exigem aceites separados.
