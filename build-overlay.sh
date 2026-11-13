@@ -58,6 +58,9 @@ install -m 0644 /lab/runtime-jars/yaml/snakeyaml-2.7.jar "$LIB/"
 test -f "$LIB/spring-core-4.3.2.RELEASE.jar"
 rm "$LIB"/spring-*.jar "$LIB/commons-logging-1.3.5.jar"
 install -m 0644 /lab/runtime-jars/spring/*.jar "$LIB/"
+test -f "$LIB/gson-2.1.jar"
+rm "$LIB/gson-2.1.jar"
+install -m 0644 /lab/runtime-jars/gson/gson-2.15.0.jar "$LIB/"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$ROOT/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java" >> /lab/sources
