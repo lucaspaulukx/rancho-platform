@@ -21,6 +21,12 @@ install -m 0644 /lab/runtime-jars/nimbus/nimbus-jose-jwt-9.37.4.jar "$LIB/"
 test -f "$LIB/postgresql-9.4.1208.jre7.jar"
 rm "$LIB/postgresql-9.4.1208.jre7.jar"
 install -m 0644 /lab/runtime-jars/postgresql/postgresql-42.7.14.jar "$LIB/"
+# Commons Compress uses the matching IO, Lang and Codec runtime libraries.
+for artifact in commons-compress-1.5 commons-io-2.4 commons-lang3-3.1 commons-codec-1.6; do
+    test -f "$LIB/$artifact.jar"
+    rm "$LIB/$artifact.jar"
+done
+install -m 0644 /lab/runtime-jars/commons-archive/*.jar "$LIB/"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$ROOT/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java" >> /lab/sources
