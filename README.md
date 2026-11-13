@@ -4,7 +4,7 @@
 
 Independent modern console and optional local-groups/OIDC extensions for Rancher1.6 Docker/Cattle. Preserve Rancher identity and backend authorization while operating stacks, services and containers in one contextual workspace.
 
-The project is under development and the repository remains private during preparation. This is not an official Rancher release or production certification. See the [roadmap](docs/en/roadmap.md) for capabilities and remaining acceptance.
+The community alpha is intended for isolated lab evaluation. Rancho is independent of Rancher and runs on the legacy Rancher 1.6 engine. See the [roadmap](docs/en/roadmap.md) for capabilities and remaining acceptance.
 
 ## Documentation
 
@@ -14,12 +14,12 @@ Start with [architecture](docs/en/architecture.md), [contributing](CONTRIBUTING.
 
 ## Build
 
-Requirements: Git, Python3.10+, Node24 and Linux-container Docker for backend/lab work. The optional lab bootstrap uses PowerShell7.
+For the frontend checks, install Git and Node 24. The backend lab also requires Python 3.10+, Docker in Linux-container mode and PowerShell 7.
 
 ```sh
 git clone https://github.com/lucaspaulukx/rancho-platform.git
 cd rancho-platform
-python scripts/upstream.py apply
+git switch --detach v0.1.0-alpha.1
 cd console
 npm ci
 npm test

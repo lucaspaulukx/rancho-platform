@@ -7,7 +7,7 @@
 
 ## Fronteira atual
 
-O repositório permanece privado durante a preparação. Fonte disponível, CI verde ou recorte aceito não autorizam mudar visibilidade, publicar pacote, fazer merge ou cutover produtivo. O aceite é controlado por capacidade/risco no [roadmap](roadmap.md), não por contagem acumulada de testes.
+A versão alfa comunitária disponibiliza o código-fonte para avaliação em laboratório isolado. Fonte disponível, CI verde ou recorte aceito não autorizam mudar visibilidade, publicar pacote, fazer merge ou cutover produtivo. O aceite é controlado por capacidade/risco no [roadmap](roadmap.md), não por contagem acumulada de testes.
 
 O pacote contém fontes de aplicação/extensões, patches pinados, testes, templates, licenças e documentação mantida. Clones de consulta, dependências instaladas, credenciais/realms locais, dumps, evidências de sessão, estado de fixtures, backups e notas de máquina ficam fora do versionamento. Git preserva versões anteriores; elas não são instruções de onboarding.
 
