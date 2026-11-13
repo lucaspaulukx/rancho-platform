@@ -13,6 +13,18 @@ Opere stacks, serviços e containers do Rancher 1.6 Docker/Cattle em uma só tel
 > [!IMPORTANT]
 > O Rancho é um projeto comunitário independente que usa o engine legado do Rancher 1.6. Use a versão alfa em laboratório isolado, com dados sintéticos ou uma cópia isolada. O aceite de produção segue em aberto.
 
+## Evolução da segurança das imagens
+
+Em 13 de novembro de 2026, o Trivy 0.74.0 encontrou as seguintes ocorrências críticas e altas em pacotes das imagens iniciais do laboratório e das candidatas posteriores.
+
+| Imagem | Inicial críticas / altas | Candidata críticas / altas |
+|---|---:|---:|
+| Backend com base legada | 30 / 88 | 5 / 22 |
+| Gateway da console | 3 / 73 | 0 / 0 |
+| Keycloak opcional | 8 / 101 | 0 / 6 |
+
+As contagens valem para as imagens analisadas e dependem da base de avisos. A base legada do backend chegou ao fim do suporte. O [roadmap](roadmap.md) acompanha os achados restantes, o backend Debian experimental e os critérios de aceite da beta.
+
 ## Funcionalidades
 
 - **Operação de workloads** · Inspecione stacks e containers, abra streams e execute as ações disponíveis no Rancher sem sair da tela.

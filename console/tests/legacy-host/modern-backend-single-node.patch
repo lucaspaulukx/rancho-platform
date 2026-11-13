@@ -1,0 +1,237 @@
+--- a/code/packaging/app-config/src/main/java/io/cattle/platform/app/AppConfig.java
++++ b/code/packaging/app-config/src/main/java/io/cattle/platform/app/AppConfig.java
+@@ -9,8 +9,7 @@
+     SystemConfig.class, CoreModelConfig.class, TypesConfig.class,
+     SystemServicesConfig.class, AgentServerConfig.class,
+     ArchaiusConfig.class, AllocatorServerConfig.class, ApiServerConfig.class, IaasApiConfig.class,
+-    ProcessConfig.class, HzCommonConfig.class, HzEventingConfig.class,
+-    HzLockingConfig.class})
++    ProcessConfig.class})
+ @ImportResource({"classpath:META-INF/cattle/legacy/spring-legacy-context.xml"})
+ public class AppConfig {
+ }
+--- a/code/implementation/hazelcast/common/src/main/java/io/cattle/platform/hazelcast/membership/DBDiscovery.java
++++ b/code/implementation/hazelcast/common/src/main/java/io/cattle/platform/hazelcast/membership/DBDiscovery.java
+@@ -10,8 +10,6 @@
+ import java.io.FileInputStream;
+ import java.io.FileOutputStream;
+ import java.io.IOException;
+-import java.net.InetSocketAddress;
+-import java.net.Socket;
+ import java.util.HashMap;
+ import java.util.Iterator;
+ import java.util.Map;
+@@ -23,6 +21,7 @@
+ import java.util.concurrent.TimeUnit;
+
+ import javax.annotation.PostConstruct;
++import javax.annotation.PreDestroy;
+ import javax.inject.Inject;
+
+ import org.apache.cloudstack.managed.context.NoExceptionRunnable;
+@@ -31,16 +30,11 @@
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+
+-import com.hazelcast.nio.Address;
+-import com.hazelcast.spi.discovery.DiscoveryNode;
+-import com.hazelcast.spi.discovery.DiscoveryStrategy;
+-import com.hazelcast.spi.discovery.SimpleDiscoveryNode;
+-import com.hazelcast.spi.partitiongroup.PartitionGroupStrategy;
+ import com.netflix.config.DynamicBooleanProperty;
+ import com.netflix.config.DynamicIntProperty;
+ import com.netflix.config.DynamicStringProperty;
+
+-public class DBDiscovery extends NoExceptionRunnable implements DiscoveryStrategy, ClusterService {
++public class DBDiscovery extends NoExceptionRunnable implements ClusterService {
+
+     public static final DynamicStringProperty ADVERTISE_ADDRESS = ArchaiusUtil.getString("cluster.advertise.address");
+     public static final DynamicStringProperty HTTP_PORT = ArchaiusUtil.getString("cluster.advertise.http.port");
+@@ -51,20 +45,13 @@
+     public static final DynamicIntProperty MISSED_COUNT = ArchaiusUtil.getInt("cluster.checkin.misses");
+     public static final DynamicStringProperty ID_FILE = ArchaiusUtil.getString("cluster.id.file");
+
+-    private static final DynamicBooleanProperty CLUSTERED = ArchaiusUtil.getBoolean("module.profile.hazelcast.eventing");
+-
+     private static final Logger log = LoggerFactory.getLogger("ConsoleStatus");
+
+     @Inject
+     ClusterMembershipDAO clusterMembershipDao;
+     @Inject
+-    ObjectManager objectManager;
+-    @Inject
+     JsonMapper jsonMapper;
+     ScheduledExecutorService executorService;
+-    DiscoveryNode selfNode;
+-
+-    Map<String, DiscoveryNode> hzNodes = new TreeMap<>();
+     Map<Long, ClusteredMember> members = new TreeMap<>();
+     String uuid = UUID.randomUUID().toString();
+     ScheduledFuture<?> future;
+@@ -74,6 +61,11 @@
+
+     @PostConstruct
+     public void init() {
++        if (ArchaiusUtil.getBoolean("module.profile.hazelcast.eventing").get()
++                || ArchaiusUtil.getBoolean("module.profile.hazelcast.lock").get()
++                || ArchaiusUtil.getBoolean("module.profile.hazelcast.config.custom").get()) {
++            throw new IllegalStateException("This backend supports single-node mode only");
++        }
+         try {
+             readId();
+             checkin();
+@@ -89,11 +81,6 @@
+     }
+
+     protected void readId() throws IOException {
+-        if (CLUSTERED.get()) {
+-            uuid = getLocalAddress();
+-            return;
+-        }
+-
+         String file = ID_FILE.get();
+         if (StringUtils.isBlank(file)) {
+             return;
+@@ -111,23 +98,10 @@
+         }
+     }
+
+-    @Override
+-    public void start() {
+-    }
+-
+-    @Override
+-    public synchronized Iterable<DiscoveryNode> discoverNodes() {
+-        return hzNodes.values();
+-    }
+-
+-    @Override
++    @PreDestroy
+     public void destroy() {
+         future.cancel(true);
+-    }
+-
+-    @Override
+-    public Map<String, Object> discoverLocalMetadata() {
+-        return new HashMap<>();
++        executorService.shutdownNow();
+     }
+
+     protected String getAddress(String address) {
+@@ -147,7 +121,7 @@
+
+     public ClusterConfig getLocalConfig() {
+         ClusterConfig config = new ClusterConfig();
+-        config.setClustered(CLUSTERED.get());
++        config.setClustered(false);
+         config.setAdvertiseAddress(getLocalAddress());
+         if (StringUtils.isBlank(HTTP_PORT.get())) {
+             config.setHttpPort(Integer.parseInt(DEFAULT_HTTP_PORT.get()));
+@@ -203,13 +177,12 @@
+             }
+         }
+
+-        setupHz(activeSet, config);
+-        setupMembers(activeSet, config);
++        setupMembers(activeSet);
+
+         this.notifyAll();
+     }
+
+-    protected void setupMembers(Map<Long, ClusterMembership> activeSet, ClusterConfig config) throws IOException {
++    protected void setupMembers(Map<Long, ClusterMembership> activeSet) throws IOException {
+         Map<Long, ClusteredMember> members = new TreeMap<>();
+
+         for (Map.Entry<Long, ClusterMembership> entry : activeSet.entrySet()) {
+@@ -222,47 +195,9 @@
+         this.members = members;
+     }
+
+-    protected void setupHz(Map<Long, ClusterMembership> activeSet, ClusterConfig selfConfig) {
+-        Map<String, DiscoveryNode> newNodes = new TreeMap<>();
+-        for (ClusterMembership member : activeSet.values()) {
+-            try {
+-                ClusterConfig config = jsonMapper.readValue(member.getConfig(), ClusterConfig.class);
+-                String address = getAddress(config.getAdvertiseAddress());
+-                String[] parts = address.split(":");
+-
+-                newNodes.put(address, new SimpleDiscoveryNode(new Address(parts[0], Integer.parseInt(parts[1]))));
+-            } catch (Exception e) {
+-                log.error("Failed to register cluster member {} {}", member.getUuid(), member.getConfig());
+-            }
+-        }
+-
+-        if (selfNode != null) {
+-            newNodes.put(selfConfig.getAdvertiseAddress(), selfNode);
+-        }
+-
+-        if (!this.hzNodes.keySet().equals(newNodes.keySet())) {
+-            log.info("Cluster membership changed {}", newNodes.keySet());
+-        }
+-
+-        this.hzNodes = newNodes;
+-    }
+-
+-    @Override
+-    public PartitionGroupStrategy getPartitionGroupStrategy() {
+-        return null;
+-    }
+-
+     private static class Checkin {
+         long heartbeat;
+         long count;
+-    }
+-
+-    public DiscoveryNode getSelfNode() {
+-        return selfNode;
+-    }
+-
+-    public void setSelfNode(DiscoveryNode selfNode) {
+-        this.selfNode = selfNode;
+     }
+
+     @Override
+@@ -294,42 +229,8 @@
+             return true;
+         }
+
+-        ClusterConfig local = getLocalConfig();
+-        if (!local.isClustered()) {
+-            if (logStartup) {
+-                log.info("Waiting to become master");
+-                logStartup = false;
+-            }
+-            // Non-clustered only are ready when they are master;
+-            return false;
+-        }
+-
+-        ClusteredMember master = getMaster();
+-
+-        if (master == null) {
+-            if (logStartup) {
+-                log.info("Waiting for a master");
+-            }
+-            return false;
+-        }
+-
+-        // Clustered are not ready until master is clustered also
+-        if (master.isClustered()) {
+-            String[] parts = master.getConfig().getAdvertiseAddress().split(":");
+-            try (
+-                Socket socket = new Socket();
+-            ) {
+-                socket.connect(new InetSocketAddress(parts[0], Integer.parseInt(parts[1])), 5000);
+-                log.info("Connection test to master");
+-            } catch (IOException e) {
+-                log.error("Failed to connect to master at {}", master.getAdvertiseAddress());
+-                return false;
+-            }
+-            return true;
+-        }
+-
+         if (logStartup) {
+-            log.info("Waiting for non-clustered master to die");
++            log.info("Waiting to become master");
+             logStartup = false;
+         }
+         return false;
