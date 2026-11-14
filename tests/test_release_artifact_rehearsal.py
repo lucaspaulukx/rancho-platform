@@ -6,6 +6,26 @@ from scripts import release_artifact_rehearsal as rehearsal
 
 
 class ReleaseArtifactRehearsalTest(unittest.TestCase):
+    def test_modern_rehearsal_pins_database_and_backend_across_both_migration_stages(self):
+        report = {}
+        rollback = {'status': 'passed', 'cleanupComplete': True,
+                    'images': {'previous': 'previous-id', 'candidate': 'candidate-id'},
+                    'configurationSha256': 'a' * 64}
+        with (patch.object(rehearsal, 'image_id', side_effect=[
+            'backend-id', 'previous-id', 'candidate-id', 'database-id', 'restore-id',
+        ]), patch.object(rehearsal, 'run_check', side_effect=['', '', json.dumps(rollback)]) as check):
+            rehearsal.rehearse('backend:tag', 'previous:tag', 'candidate:tag', None, report,
+                               modern_database='db:tag', restore_image='restore:tag')
+        first, database, frontend = (call.args[0] for call in check.call_args_list)
+        self.assertEqual(first, ['-m', 'migration.test_first_start_lab',
+                                '--backend-image', 'backend-id', '--console-image', 'candidate-id',
+                                '--database-image', 'database-id', '--restore-image', 'restore-id'])
+        self.assertEqual(database, ['-m', 'migration.rehearse_modern_backend',
+                                   '--backend-image', 'backend-id', '--database-image', 'database-id'])
+        self.assertEqual(frontend[-2:], ['--candidate-image', 'candidate-id'])
+        self.assertTrue(report['firstStartMigrationPassed'])
+        self.assertTrue(report['databaseRollbackPassed'])
+
     def test_pins_the_same_candidate_in_both_stages(self):
         report = {}
         rollback = {
