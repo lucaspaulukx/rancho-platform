@@ -1,0 +1,8 @@
+--- a/package/start-ipsec.sh
++++ b/package/start-ipsec.sh
+@@ -2 +2 @@
+-set -e -x
++set -e
+@@ -40 +40 @@
+-        if [ -z /etc/ipsec/psk.txt ]; then
++        if [ ! -s /etc/ipsec/psk.txt ]; then
