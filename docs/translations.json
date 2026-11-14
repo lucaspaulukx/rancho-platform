@@ -108,8 +108,8 @@
         "pt-BR": "docs/pt-BR/recovery.md",
         "en": "docs/en/recovery.md"
       },
-      "reviewedSourceSha256": "7ba04aac058515f006af1553d4ffb465762615dcff23a41f682af985b941755c",
-      "reviewedTranslationSha256": "7cf4e343358111cd69ffd621eb8c4cb1a6ec3431191b27cc99390a3088332b25"
+      "reviewedSourceSha256": "3808c56f4efed661d7dde941afd2fc9948b32b53cf73be748eb52b59ab6d3570",
+      "reviewedTranslationSha256": "41156cacf5adae3f00c17bef424c556080006a3969cb3dd4ccad0ff08592184b"
     },
     {
       "source": "docs/pt-BR/release.md",
@@ -148,8 +148,8 @@
         "pt-BR": "docs/pt-BR/testing.md",
         "en": "docs/en/testing.md"
       },
-      "reviewedSourceSha256": "b21959c66cc6c721e18de0cc87fd48cd5b7c4d363759ca6da1394392343dcd7a",
-      "reviewedTranslationSha256": "c94a2e263edab971df3f524fda7ab10bd1cd5e050ed349ee25b00324be34569e"
+      "reviewedSourceSha256": "e9b81bb73e78661672925ed151ff22776e1cc3493d06280cb32179e803373e8b",
+      "reviewedTranslationSha256": "188a02484fa5da1672f10437b5d81ba8cd10a9ad5dd54e7602c7f816a5d45e07"
     },
     {
       "source": "docs/pt-BR/ui-guidelines.md",

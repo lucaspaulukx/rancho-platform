@@ -42,6 +42,9 @@ Use o ensaio de workload com volume nomeado para verificar se um serviço novo c
 python -m migration.test_workload_volume_recovery_lab
 ```
 
+
+Um ensaio separado em uma VM Linux isolada usou Docker 29.9.2 e o agente moderno do Rancher. Depois de desativar o serviço no Cattle e confirmar no Docker que nenhum container escrevia no volume, o ensaio autenticou e descriptografou o backup do volume local. O Cattle criou outro container para o mesmo serviço. Ele leu os dados restaurados com o checksum, proprietário, permissões e link simbólico originais. O retorno aos dados originais do volume, seguido de reativação do serviço, passou pelas mesmas verificações. O ensaio usou um serviço no modo de rede host e um volume local do Docker. A reversão da VM ou do Docker Engine e os drivers de volumes compartilhados ainda exigem ensaios próprios.
+
 ## Ensaio de engine e identidade
 
 `migration.engines` inicia cópias restauradas Rancher/IdP em um namespace loopback-only, sem egress externo, portas publicadas, storage da origem ou socket Docker. Helpers usam somente esse namespace. Ajustes de hostname/IP/callback devem ficar na cópia; não mude a origem para aprovar o ensaio.
