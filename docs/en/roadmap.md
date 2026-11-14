@@ -158,6 +158,8 @@ With all seven legacy system images loaded into the Docker 29 VM, the node regis
 
 The legacy network manager starts with Docker API 1.22. Docker 29.9.2 in the lab requires API 1.40 or newer. The opt-in `console/tests/legacy-host/Dockerfile.modern-network-manager` build recompiles plugin-manager v0.7.22 and defaults to API 1.40. The selected upstream route and conntrack tests passed. The image scan reported zero high or critical findings, down from 27 high in the legacy network manager. The stock catalog still uses the legacy image. Managed address assignment and service traffic remain release gates.
 
+On one isolated Docker 29.9.2 node with the manager and metadata candidates, two managed containers exchanged HTTP over their Cattle addresses. A managed container reached a stack service by both its short name and its `rancher.internal` name using the catalog DNS image. The IPsec router failed because the guest kernel lacked legacy `ip_tables` support. Cross-host traffic remains unverified. The optional `console/tests/legacy-host/Dockerfile.modern-dns` build recompiles DNS v0.17.4 from pinned source. Upstream tests and an isolated DNS query passed, and the scan found zero critical or high findings compared with 27 high in the legacy DNS image. Integration between the rebuilt DNS and the catalog stack remains open.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.
