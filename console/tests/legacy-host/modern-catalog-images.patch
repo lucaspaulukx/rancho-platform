@@ -1,0 +1,86 @@
+--- a/infra-templates/ipsec/18/docker-compose.yml.tpl
++++ b/infra-templates/ipsec/18/docker-compose.yml.tpl
+@@ -1,11 +1,9 @@
+ version: '2'
+-
+-{{- $netImage:="rancher/net:v0.13.17" }}
+ 
+ services:
+   ipsec:
+     # IMPORTANT!!!! DO NOT CHANGE VERSION ON UPGRADE
+-    image: rancher/net:holder
++    image: rancho-ipsec-holder:local
+     command: sh -c "echo Refer to router sidekick for logs; mkfifo f; exec cat f"
+     network_mode: ipsec
+     ports:
+@@ -20,7 +18,7 @@
+   router:
+     cap_add:
+       - NET_ADMIN
+-    image: {{$netImage}}
++    image: rancho-ipsec-router:local
+     command: start-ipsec.sh
+     network_mode: container:ipsec
+     environment:
+@@ -43,7 +41,7 @@
+       net.ipv4.conf.eth0.send_redirects: '0'
+       net.ipv4.xfrm4_gc_thresh: '2147483647'
+   connectivity-check:
+-    image: {{$netImage}}
++    image: rancho-ipsec-cni:local
+     command:
+       - connectivity-check
+       {{- if ne .Values.CONNECTIVITY_CHECK_INTERVAL "5000" }}
+@@ -59,7 +57,7 @@
+     network_mode: container:ipsec
+   cni-driver:
+     privileged: true
+-    image: {{$netImage}}
++    image: rancho-ipsec-cni:local
+     command: start-cni-driver.sh
+     network_mode: host
+     pid: host
+--- a/infra-templates/network-services/29/docker-compose.yml.tpl
++++ b/infra-templates/network-services/29/docker-compose.yml.tpl
+@@ -1,8 +1,8 @@
+ version: '2'
+ 
+-{{- $netManagerImage:="rancher/network-manager:v0.7.22" }}
+-{{- $metadataImage:="rancher/metadata:v0.10.4" }}
+-{{- $dnsImage:="rancher/dns:v0.17.4" }}
++{{- $netManagerImage:="rancho-network-manager:local" }}
++{{- $metadataImage:="rancho-metadata:local" }}
++{{- $dnsImage:="rancho-dns:local" }}
+ 
+ services:
+   network-manager:
+--- a/infra-templates/healthcheck/7/docker-compose.yml
++++ b/infra-templates/healthcheck/7/docker-compose.yml
+@@ -1,10 +1,14 @@
+ version: '2'
+ services:
+   healthcheck:
++    ulimits:
++      nofile:
++        soft: 32768
++        hard: 32768
+     labels:
+       io.rancher.container.create_agent: 'true'
+       io.rancher.scheduler.global: 'true'
+-    image: rancher/healthcheck:v0.3.8
++    image: rancho-healthcheck:local
+     command: healthcheck --metadata-address 169.254.169.250
+     logging:
+       driver: json-file
+--- a/infra-templates/scheduler/13/docker-compose.yml
++++ b/infra-templates/scheduler/13/docker-compose.yml
+@@ -1,7 +1,8 @@
+ version: '2'
+ services:
+   scheduler:
+-    image: rancher/scheduler:v0.8.6
++    network_mode: bridge
++    image: rancho-scheduler:local
+     command: scheduler --metadata-address 169.254.169.250
+     environment:
+         RANCHER_DEBUG: '${RANCHER_DEBUG}'
