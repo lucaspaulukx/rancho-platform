@@ -95,6 +95,14 @@ done
 git -C "$catalog_checkout" apply "$absolute_patch_path"
 ```
 
+O Compose moderno aceita `RANCHO_DATABASE_IMAGE`. Para usar a imagem MariaDB 10.11 com o auxiliar `gosu` recompilado, gere a imagem localmente e defina `RANCHO_DATABASE_IMAGE=rancho-mariadb:local` no arquivo de ambiente usado pelo Compose. O banco continua com o entrypoint original em rede interna. Use `--database-image rancho-mariadb:local` no ensaio de migração sintética para validar a mesma imagem.
+
+```sh
+docker build -f console/tests/legacy-host/Dockerfile.modern-mariadb -t rancho-mariadb:local console/tests/legacy-host
+```
+
+A imagem oficial fixada do MariaDB 10.11.19 reportou um achado crítico e 25 altos, todos no runtime Go vinculado ao `gosu`. A imagem opcional recompila o mesmo código do gosu 1.20 com Go 1.27.3. Com a base de avisos de 13 de novembro de 2026, a imagem derivada reportou zero achados críticos e altos. A instalação limpa pelo gateway da Console e o reinício do backend passaram com esse banco.
+
 ## Aceite final
 
 Use um candidato identificado para autenticação/RBAC/streams, operação contextual, acessibilidade/performance, compatibilidade clássica, instalação nova, upgrade e recuperação/rollback completos. Registre limites/topologias. Configure canal privado de segurança antes de abrir o projeto. Mantenha [migração](migration.md) e [recuperação](recovery.md) vinculadas ao artefato; testes sintéticos não garantem migração universal.
