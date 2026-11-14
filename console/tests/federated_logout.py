@@ -58,7 +58,7 @@ def main():
     def apply(only=False, auto=False):
         OVERLAY.write_bytes(('services:\n  rancher:\n    environment:\n      RANCHER_OIDC_FEDERATED_LOGOUT_ENABLED: "true"\n      RANCHER_OIDC_ONLY: "' + str(only).lower() + '"\n      RANCHER_OIDC_AUTO_LOGIN: "' + str(auto).lower() + '"\n').encode())
         state['policyOverride'] = True; save()
-        docker('compose', '-f', 'compose.yaml', '-f', 'compose.console.yaml', '-f', str(OVERLAY), 'up', '-d', '--no-deps', 'rancher')
+        docker('compose', '-f', 'compose.yaml', '-f', 'compose.oidc-test.yaml', '-f', 'compose.console.yaml', '-f', str(OVERLAY), 'up', '-d', '--no-deps', 'rancher')
         wait_policy(only, auto, True)
     def provider_ready():
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
@@ -175,7 +175,7 @@ def main():
                 docker('start', 'rancher16-keycloak-lab'); provider_ready()
                 state['providerStopped'] = False; save()
             if state['policyOverride']:
-                docker('compose', '-f', 'compose.yaml', '-f', 'compose.console.yaml', 'up', '-d', '--no-deps', 'rancher')
+                docker('compose', '-f', 'compose.yaml', '-f', 'compose.oidc-test.yaml', '-f', 'compose.console.yaml', 'up', '-d', '--no-deps', 'rancher')
                 wait_policy(False, False, False)
                 state['policyOverride'] = False; save()
                 OVERLAY.unlink(missing_ok=True)

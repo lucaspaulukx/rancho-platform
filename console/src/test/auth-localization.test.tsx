@@ -96,9 +96,7 @@ describe('Authentication localization without session side effects', () => {
   it('returns to the requested console path after the external OIDC round trip', async () => {
     const destination = '/stacks?env=1a12#services';
     const initial = mount(<Login />, 'pt-BR', destination);
-    await userEvent
-      .setup()
-      .click(await screen.findByRole('button', { name: 'Entrar com Keycloak' }));
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Entrar com SSO' }));
     expect(fixture.oidcLogin).toHaveBeenCalledTimes(1);
     initial.unmount();
 
@@ -135,7 +133,7 @@ describe('Authentication localization without session side effects', () => {
     expect(screen.getByRole('heading', { name: 'Access your environment' })).toBeInTheDocument();
     expect(screen.getByLabelText('Username')).toHaveValue('fixture-user');
     expect(screen.getByLabelText('Password')).toHaveValue('synthetic-password');
-    expect(screen.getByRole('button', { name: 'Sign in with Keycloak' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign in with SSO' })).toBeInTheDocument();
     expect(screen.getByLabelText('Fixture route')).toHaveTextContent('/login?env=1a12');
     expect(fixture.api).not.toHaveBeenCalled();
     expect(fixture.oidcLogin).not.toHaveBeenCalled();

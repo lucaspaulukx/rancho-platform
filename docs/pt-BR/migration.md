@@ -55,6 +55,23 @@ A ferramenta verifica o selo do manifesto e o dump antes de criar recursos no Do
 
 Recursos temporários têm identidades aleatórias e labels conferidas antes do cleanup. Não há prune global. Relatórios novos de operação/ensaio/falha excluem saída bruta do banco. Corrija a causa e repita com novo backup/diretório; não edite relatório para aprovar. Divergência entre observação da origem e dump pode refletir concorrência e não torna a origem quiescente.
 
+## Hosts existentes e versões do Docker
+
+Restaurar o servidor, atualizar o agente Rancher e atualizar o Docker Engine são três operações separadas. A restauração do banco recupera o cadastro dos hosts. O container do agente, seu estado local e o Docker Engine continuam em cada VM. Se o Rancher restaurado usar a mesma URL acessível, TLS confiável e credenciais e estado correspondentes entre servidor e agente, o agente existente pode tentar reconectar com a mesma identidade de host. Confirme isso em uma cópia isolada. Um host no inventário restaurado confirma o cadastro no banco. Confira se o agente está conectado e se as operações funcionam.
+
+| Plano | O que a beta comprova |
+|---|---|
+| Restaurar o servidor e consultar o inventário | O Docker das VMs de workload pode ficar como está. O servidor e a console sobem sem hosts de workload. |
+| Manter o Docker Engine, o agente e os serviços de sistema Cattle existentes | Ensaie essa combinação primeiro. O Rancher 1.6.30 listava o Docker 19.03 entre as versões suportadas. A reconexão dos agentes legados à beta e a operação completa dos workloads Cattle nesses engines seguem sem validação. |
+| Usar o agente e as imagens de sistema recompilados | VMs novas Linux amd64 com Docker Engine **29.9.2**, kernel Ubuntu **6.8** e **cgroups v2** passaram em registro, rede gerenciada, IPsec e DNS de serviço. O reinício e a reconexão também foram testados com o agente persistente já modernizado. A atualização do agente legado no mesmo host e a mistura de gerações no mesmo environment seguem sem validação. |
+
+A imagem de bootstrap moderna inclui o **CLI** do Docker fixado em 29.9.2. Alguns componentes recompilados do agente e da rede usam a API Docker **1.40**. Confira a seção **Server** de `docker version` em cada host. O intervalo de APIs aceito pelo daemon precisa incluir a 1.40. Isso confirma apenas a compatibilidade de API para essas chamadas. Por exemplo, o Docker 19.03 anuncia a API 1.40 e o Docker 18.09 anuncia até a 1.39. O daemon Docker 29.9.2 testado rejeitou as chamadas do agente legado pela API 1.22. Confira a versão exata do engine e o intervalo de APIs antes de escolher a substituição. [Matriz de APIs do Docker Engine](https://docs.docker.com/reference/api/engine/) · [Notas do Rancher 1.6.30](https://forums.suse.com/t/rancher-release-v1-6-30/17359)
+
+1. **Inventarie cada host.** Registre `docker version`, o ID da imagem do agente em execução (`docker inspect --format '{{.Image}}' rancher-agent`, usando o nome real do container), a URL do servidor e a confiança TLS, o mount de estado do agente e as imagens de sistema Cattle em uso. Preserve a configuração e as referências de imagem originais.
+2. **Ensaie primeiro a migração do servidor com o software atual do host.** Use cópias do servidor e de um host representativo em uma rede isolada da produção. Preserve as definições das stacks de infraestrutura existentes e deixe o override do catálogo moderno fora desse ensaio. Confirme a mesma identidade do host, reconexão do agente, ciclo de vida dos workloads, logs e terminal, volumes e, quando aplicável, rede e DNS entre hosts. Repita as verificações após reiniciar o agente. Se algum teste falhar, use o procedimento de rollback abaixo.
+3. **Planeje a atualização do Docker separadamente.** A atualização do pacote é uma operação explícita em cada VM, feita pelo gerenciador de pacotes do sistema ou pela automação do operador, em janela de manutenção. O instalador do Rancho não altera esse pacote. Use um host descartável novo e um environment Cattle novo para validar o agente e o catálogo modernos antes de planejar a migração dos workloads. Mantenha o host original disponível para rollback. Uma mudança de tag não substitui o container do agente em execução. Agentes existentes e o contêiner principal IPsec exigem ensaio próprio de atualização e rollback antes de uma substituição no mesmo ambiente.
+
+
 ## Identidade, engine e gates de cutover
 
 Preserve grants diretos até [migração de acesso](access-migration.md) explícita. Teste novo usuário sem acesso, readonly/member, administração local/OIDC e recuperação antes do login exclusivo. Confira versões exatas de agente/Docker, Compose, rede/LB/TLS/storage, logs/terminal e credenciais técnicas.

@@ -2774,7 +2774,7 @@ export const huHU = {
   'auth.methodsUnavailable': 'Nem sikerült ellenőrizni a bejelentkezési módokat.',
   'auth.retry': 'Újrapróbálkozás',
   'auth.checkingAccess': 'Hozzáférés ellenőrzése…',
-  'auth.keycloakLogin': 'Bejelentkezés Keycloakkal',
+  'auth.ssoLogin': 'Bejelentkezés SSO-val',
   'auth.localAlternative': 'vagy használja a helyi fiókját',
   'auth.username': 'Felhasználónév',
   'auth.password': 'Jelszó',

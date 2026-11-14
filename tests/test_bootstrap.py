@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class BootstrapTests(unittest.TestCase):
-    def plan(self, classic=False, existing=False):
+    def plan(self, classic=False, existing=False, identity_provider=False):
         with tempfile.TemporaryDirectory(prefix='rancher-bootstrap-plan-') as directory:
             folder = Path(directory)
             shutil.copy2(ROOT / 'Start-Lab.ps1', folder / 'Start-Lab.ps1')
@@ -23,6 +23,8 @@ class BootstrapTests(unittest.TestCase):
             command = ['pwsh', '-NoProfile', '-File', str(folder / 'Start-Lab.ps1'), '-PlanOnly']
             if classic:
                 command += ['-ClassicOnly']
+            if identity_provider:
+                command += ['-WithTestIdentityProvider']
             result = subprocess.run(command, capture_output=True, timeout=20, text=True)
             self.assertEqual(result.returncode, 0)
             self.assertNotIn('private-fixture-not-a-real-secret', result.stdout)
@@ -35,17 +37,22 @@ class BootstrapTests(unittest.TestCase):
 
     def test_fresh_modern_plan_is_read_only(self):
         plan = self.plan()
-        self.assertEqual(plan['services'], ['rancher', 'keycloak', 'console'])
+        self.assertEqual(plan['services'], ['rancher', 'console'])
         self.assertTrue(plan['createsMissingPrivateEnv'])
+        self.assertFalse(plan['createsMissingRealm'])
+
+    def test_provider_fixture_is_opt_in(self):
+        plan = self.plan(identity_provider=True)
+        self.assertEqual(plan['services'], ['rancher', 'keycloak', 'console'])
         self.assertTrue(plan['createsMissingRealm'])
 
     def test_existing_secrets_and_realm_are_preserved(self):
-        plan = self.plan(existing=True)
+        plan = self.plan(existing=True, identity_provider=True)
         self.assertFalse(plan['createsMissingPrivateEnv'])
         self.assertFalse(plan['createsMissingRealm'])
 
     def test_classic_only_does_not_start_console(self):
-        self.assertEqual(self.plan(classic=True)['services'], ['rancher', 'keycloak'])
+        self.assertEqual(self.plan(classic=True)['services'], ['rancher'])
 
     def test_public_realm_has_both_callbacks_and_no_literal_credentials(self):
         realm = json.loads((ROOT / 'keycloak/realm.template.json').read_text(encoding='utf-8'))

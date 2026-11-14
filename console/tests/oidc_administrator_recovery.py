@@ -19,7 +19,7 @@ assert mode() is False
 before_accounts=accounts();before_groups=groups();before_projects=projects();state={'name':username,'marker':marker,'account':None,'keycloakUser':None,'baselineAccounts':before_accounts,'baselineGroups':before_groups,'baselineProjects':before_projects,'exclusiveOverlayApplied':False}
 def save():STATE.write_text(json.dumps(state,indent=2),encoding='utf-8')
 def compose(extra=False):
- args=['docker','compose','-f','compose.yaml','-f','compose.console.yaml','-f','compose.legacy-host.yaml']
+ args=['docker','compose','-f','compose.yaml','-f','compose.oidc-test.yaml','-f','compose.console.yaml','-f','compose.legacy-host.yaml']
  if extra:args+=['-f',str(OVERLAY)]
  subprocess.run(args+['up','-d','--no-deps','rancher'],cwd=ROOT,capture_output=True,text=True,check=True,timeout=120)
 def wait_mode(expected):

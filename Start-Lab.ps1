@@ -1,17 +1,20 @@
 [CmdletBinding()]
-param([switch]$PlanOnly, [switch]$ClassicOnly)
+param([switch]$PlanOnly, [switch]$ClassicOnly, [switch]$WithTestIdentityProvider)
 
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
+$services = @('rancher')
+if ($WithTestIdentityProvider) { $services += 'keycloak' }
+if (-not $ClassicOnly) { $services += 'console' }
 if ($PlanOnly) {
     [ordered]@{
         action = 'local-laboratory-bootstrap'
         sourceModified = $false
         startsContainers = $false
         preservesExistingCredentialsAndRealm = $true
-        services = $(if ($ClassicOnly) { @('rancher','keycloak') } else { @('rancher','keycloak','console') })
+        services = $services
         createsMissingPrivateEnv = -not (Test-Path -LiteralPath '.env')
-        createsMissingRealm = -not (Test-Path -LiteralPath 'keycloak/realm.json')
+        createsMissingRealm = $WithTestIdentityProvider -and -not (Test-Path -LiteralPath 'keycloak/realm.json')
     } | ConvertTo-Json -Depth 4
     exit 0
 }
@@ -31,18 +34,24 @@ if (-not (Test-Path -LiteralPath '.env')) {
 }
 $labConfig = @{}
 Get-Content -LiteralPath '.env' | Where-Object { $_ -match '^[A-Za-z_][A-Za-z0-9_]*=' } | ForEach-Object { $key,$value = $_ -split '=',2; $labConfig[$key]=$value }
-foreach ($name in @('OIDC_CLIENT_SECRET','KEYCLOAK_ADMIN_PASSWORD','RANCHER_ADMIN_PASSWORD','LAB_USER_PASSWORD')) {
+$required = @('RANCHER_ADMIN_PASSWORD')
+if ($WithTestIdentityProvider) {
+    $required += @('OIDC_CLIENT_SECRET','KEYCLOAK_ADMIN_PASSWORD','LAB_USER_PASSWORD')
+}
+foreach ($name in $required) {
     if ([string]::IsNullOrWhiteSpace($labConfig[$name])) { throw "Variavel obrigatoria ausente em .env: $name. O arquivo existente nao foi alterado." }
 }
-New-Item -ItemType Directory -Force keycloak | Out-Null
-if (-not (Test-Path -LiteralPath 'keycloak/realm.json')) {
+if ($WithTestIdentityProvider -and -not (Test-Path -LiteralPath 'keycloak/realm.json')) {
     Copy-Item -LiteralPath 'keycloak/realm.template.json' -Destination 'keycloak/realm.json'
 }
 docker volume create rancher16-rbac-lab-db | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'Falha ao preparar volume do laboratorio.' }
 $composeArguments = @('compose','-f','compose.yaml')
+if ($WithTestIdentityProvider) { $composeArguments += @('-f','compose.oidc-test.yaml') }
 if (-not $ClassicOnly) { $composeArguments += @('-f','compose.console.yaml') }
 & docker @composeArguments up -d --build
 if ($LASTEXITCODE -ne 0) { throw 'Falha ao iniciar o laboratorio.' }
-Write-Host 'Console: http://localhost:18090/console/ | Rancher: http://localhost:18080 | Keycloak: http://localhost:18081'
-Write-Host 'Credenciais descartaveis em .env. Execute tests/integration.py para inicializar e validar o primeiro laboratorio.'
+Write-Host 'Rancher: http://localhost:18080'
+if (-not $ClassicOnly) { Write-Host 'Console: http://localhost:18090/console/' }
+if ($WithTestIdentityProvider) { Write-Host 'Provedor OIDC de teste: http://localhost:18081' }
+Write-Host 'Credenciais descartaveis em .env. Execute python tests/integration.py --local-auth-only para inicializar o administrador local.'

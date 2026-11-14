@@ -172,7 +172,7 @@ export function Login() {
               {settings.data?.enabled && (
                 <Button variant="primary" busy={oidcPending} onClick={() => void beginOidc()}>
                   <ShieldCheck size={18} />
-                  {t('auth.keycloakLogin')}
+                  {t('auth.ssoLogin')}
                   <ArrowRight size={17} />
                 </Button>
               )}
