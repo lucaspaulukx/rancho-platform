@@ -66,6 +66,13 @@ Supply a separate backup passphrase, at least20 characters, through the no-echo 
 
 Database backup alone is insufficient. Also capture consistent Rancher cryptographic state, complete dedicated IdP data/configuration/keys, compose/manifests, certificates and matching immutable images. Keep protected copies off the source host and test recovery. Do not archive a live MySQL datadir as a consistent backup or substitute `docker commit` for volume backup. See [recovery](recovery.md).
 
+To repeat the automated acceptance check using only disposable fixtures, start with the local images from the release guide and build the restore image. The test also checks that another sealed backup is refused on the same populated database.
+
+```sh
+docker build -f migration/Dockerfile.restore -t rancho-migration-restore:local .
+python -m migration.test_first_start_lab
+```
+
 ## Offline rehearsal
 
 ```sh
