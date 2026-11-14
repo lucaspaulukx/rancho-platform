@@ -1,0 +1,22 @@
+FROM golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 AS build
+ENV GO111MODULE=off GOPATH=/go CGO_ENABLED=0
+WORKDIR /go/src/github.com/rancher/rancher-metadata
+ADD --checksum=sha256:289153dab44e4fbdc0f34adcce026d6257c6dd1268254e9cee6d7671dd1f3e1e https://codeload.github.com/rancher/rancher-metadata/tar.gz/626e4cec979c8c5e2c8a93354576fbd74af8d890 /tmp/metadata.tar.gz
+COPY metadata-codec-alphabet.patch /tmp/
+RUN --network=none tar -xzf /tmp/metadata.tar.gz --strip-components=1 && \
+    git apply --unidiff-zero /tmp/metadata-codec-alphabet.patch && \
+    go test -vet=off ./... && \
+    go build -trimpath -buildvcs=false -ldflags="-X main.VERSION=v0.10.4" -o /out/rancher-metadata . && \
+    /out/rancher-metadata --version && \
+    mkdir -p /out/licenses && \
+    find . -type f \( -iname '*license*' -o -iname 'notice*' -o -iname 'copying*' -o -iname 'patents*' \) \
+        -exec cp --parents '{}' /out/licenses/ \;
+
+FROM ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca17dcecaf5
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates iproute2 && rm -rf /var/lib/apt/lists/*
+COPY --from=build /out/rancher-metadata /usr/bin/rancher-metadata
+COPY --from=build /go/src/github.com/rancher/rancher-metadata/package/linux/amd64/start.sh /usr/bin/start.sh
+COPY --from=build /out/licenses/ /usr/share/doc/rancho-metadata/
+COPY --chmod=0755 modern-metadata-entry.sh /rancher-entrypoint.sh
+ENTRYPOINT ["/rancher-entrypoint.sh"]
+CMD ["rancher-metadata"]
