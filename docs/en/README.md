@@ -4,7 +4,7 @@
 
 Choose a language for each document. Pending translations are explicit; this is not yet complete English documentation.
 
-Reviewed pairs: 15/15. Bilingual instruction/template files: 8.
+Reviewed pairs: 16/16. Bilingual instruction/template files: 8.
 
 | Document | Português (Brasil) | English |
 |---|---|---|
@@ -16,6 +16,7 @@ Reviewed pairs: 15/15. Bilingual instruction/template files: 8.
 | Architecture | [Abrir](../pt-BR/architecture.md) | [Open](architecture.md) |
 | Configuration and feature flags | [Abrir](../pt-BR/configuration.md) | [Open](configuration.md) |
 | Maintaining documentation | [Abrir](../pt-BR/documentation.md) | [Open](documentation.md) |
+| Migration rehearsal with screenshots | [Abrir](../pt-BR/migration-evidence.md) | [Open](migration-evidence.md) |
 | Migration from Rancher 1.6 | [Abrir](../pt-BR/migration.md) | [Open](migration.md) |
 | Backup and isolated recovery | [Abrir](../pt-BR/recovery.md) | [Open](recovery.md) |
 | Release preparation | [Abrir](../pt-BR/release.md) | [Open](release.md) |

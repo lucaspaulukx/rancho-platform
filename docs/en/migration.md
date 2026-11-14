@@ -21,6 +21,29 @@ python -m unittest migration.test_tool -v
 
 Activate the virtual environment using the appropriate command for your platform before installing dependencies.
 
+## Automated restore on first startup
+
+Prepare the [modern backend and Console images](release.md#experimental-single-node-installation). Use a new Compose project with empty target volumes. Create `.env.rancho-migration` and a private file containing the passphrase used for the sealed backup. Run the backup in a no-write window and keep the original system available for rollback.
+
+```dotenv
+RANCHO_DB_PASSWORD=<unique-target-database-password>
+RANCHO_MIGRATION_BACKUP_DIRECTORY=<absolute-path-to-backup-001>
+RANCHO_MIGRATION_PASSPHRASE_FILE=<absolute-path-to-private-passphrase-file>
+RANCHO_CONSOLE_PORT=18090
+```
+
+Run the following three commands from the repository root. Change the source container name to match your installation. If you already have a sealed backup, start with the Compose command. An installation that uses local authentication should keep a working local administrator account in the backup, since the rehearsal turns off external OIDC.
+
+```sh
+python -m migration.tool preflight --source-container rancher-server --output migration-runs/preflight-001 --check-tables
+python -m migration.tool backup-db --source-container rancher-server --output migration-runs/backup-001 --include-server-identity
+docker compose -p rancho-rehearsal --env-file .env.rancho-migration -f compose.modern.yaml -f compose.migrate.yaml up -d --build --wait
+```
+
+Compose starts MariaDB, runs the restore image, and starts the backend only after the import succeeds. The restore image authenticates the bundle, imports the SQL, verifies inventory and installs the encrypted server identity when present. The backend applies its versioned schema automatically. Open `http://localhost:18090/console/`. For an existing authenticated installation use its original local Rancher login. Repeat the same Compose command to verify that the backup is skipped. The restore log reports `already-applied`. To inspect that log, use the same Compose project and files with `logs restore-backup`. The importer checks the backup identity against markers on both volumes. A different backup or a partially imported destination requires a new project and volumes. Keep the failure logs and original backup. The isolated profile disables OIDC, catalog execution and database events. Host Engine upgrades, volume copies and production networking require their own procedure.
+
+[See screenshots and results from the migration rehearsal](migration-evidence.md).
+
 ## Read-only diagnosis
 
 Replace `rancher-server` with the correct database container. The default MySQL client uses local root without a password, suitable only for compatible local setups. Otherwise supply `--defaults-file /run/private/mysql-client.cnf`, a protected file already inside that container. The tool does not create it on the source; never put passwords in arguments.

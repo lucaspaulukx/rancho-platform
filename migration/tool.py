@@ -18,6 +18,7 @@ import time
 
 FORMAT = b'RANCHER-DB-GCM-1\n'
 MANIFEST_FORMAT = b'RANCHER-DB-MANIFEST-GCM-1\n'
+IDENTITY_FORMAT = b'RANCHO-SERVER-IDENTITY-GCM-1\n'
 CORE = ('account', 'project_member', 'environment', 'service', 'instance', 'host', 'volume')
 MAX_BYTES = 256 * 1024 * 1024
 MAX_MANIFEST_BYTES = 1024 * 1024
@@ -178,7 +179,7 @@ def compare(before, after):
     return before['inventoryCounts'] == after['inventoryCounts'] and before['tableChecksums'] == after['tableChecksums']
 
 
-def backup(db, directory, password):
+def backup(db, directory, password, *, include_server_identity=False):
     initial = preflight(db)
     if not initial['offlineRehearsalSupported']:
         raise MigrationError('Only all-InnoDB MySQL5.5 internal snapshots are accepted by this rehearsal version.')
@@ -188,6 +189,19 @@ def backup(db, directory, password):
                     'encryptedBackupSha256': hashlib.sha256(encrypted).hexdigest(),
                     'plaintextDumpSha256': hashlib.sha256(data).hexdigest(),
                     'encryptedBytes': len(encrypted), 'completeRecoveryBackup': False})
+    if include_server_identity:
+        identity = {}
+        for name in ('keys.properties', 'cluster-id'):
+            content = run(['exec', db.container, 'sh', '-ec',
+                           'test -f "$1" && test "$(wc -c < "$1")" -le 65536 && cat "$1"',
+                           'sh', '/var/lib/cattle/' + name])
+            if not content:
+                raise MigrationError('Missing server identity file.')
+            identity[name] = content.hex()
+        sealed_identity = encrypt(json.dumps(identity).encode(), password,
+                                  format_header=IDENTITY_FORMAT)
+        initial['serverIdentitySha256'] = hashlib.sha256(sealed_identity).hexdigest()
+        write_new(directory / 'server-identity.enc', sealed_identity)
     manifest = (json.dumps(initial, indent=2) + '\n').encode()
     if len(manifest) > MAX_MANIFEST_BYTES:
         raise MigrationError('Backup manifest exceeds the supported limit.')
@@ -236,6 +250,16 @@ def read_backup_manifest(directory, password, trusted_legacy_metadata_sha256):
     return metadata
 
 
+def read_backup_sql(directory, password, metadata):
+    encrypted = read_bundle_file(directory / 'cattle.sql.enc', MAX_BYTES + 1024)
+    if hashlib.sha256(encrypted).hexdigest() != metadata.get('encryptedBackupSha256'):
+        raise MigrationError('Encrypted backup checksum differs; no restore attempted.')
+    sql = decrypt(encrypted, password)
+    if hashlib.sha256(sql).hexdigest() != metadata.get('plaintextDumpSha256'):
+        raise MigrationError('Dump checksum differs; no restore attempted.')
+    return sql
+
+
 def own_resource(kind, name, marker):
     field = '{{index .Config.Labels "community.console.rehearsal"}}' if kind == 'container' else '{{index .Labels "community.console.rehearsal"}}'
     args = ['inspect'] if kind == 'container' else ['volume', 'inspect']
@@ -246,12 +270,7 @@ def rehearse(directory, password, *, trusted_legacy_metadata_sha256=None, _fixtu
     if directory.is_symlink() or not directory.is_dir():
         raise MigrationError('Expected an existing private backup directory, not a symlink.')
     metadata = read_backup_manifest(directory, password, trusted_legacy_metadata_sha256)
-    encrypted = read_bundle_file(directory / 'cattle.sql.enc', MAX_BYTES + 1024)
-    if hashlib.sha256(encrypted).hexdigest() != metadata['encryptedBackupSha256']:
-        raise MigrationError('Encrypted backup checksum differs; no restore attempted.')
-    sql = decrypt(encrypted, password)  # Authenticate fully BEFORE creating resources or executing SQL.
-    if hashlib.sha256(sql).hexdigest() != metadata['plaintextDumpSha256']:
-        raise MigrationError('Dump checksum differs; no restore attempted.')
+    sql = read_backup_sql(directory, password, metadata)
     # Backups must be produced by this tool from one Cattle database; SQL is executable input.
     # The restore sandbox has no network, no host binds, no Docker socket or source volume.
     image = metadata['sourceImageId']
@@ -354,12 +373,16 @@ def main(argv=None):
     parser.add_argument('--defaults-file', help='Existing MySQL client defaults file INSIDE source container; never a password argument.')
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--check-tables', action='store_true')
+    parser.add_argument('--include-server-identity', action='store_true',
+                        help='Encrypt the original server identity alongside the database backup.')
     parser.add_argument('--trusted-legacy-metadata-sha256', help='Independently trusted SHA-256 of the exact legacy backup.json bytes.')
     args = parser.parse_args(argv)
     directory = args.output.resolve()
     allow_failure_report = False
     started = datetime.now(timezone.utc).isoformat()
     try:
+        if args.include_server_identity and args.command != 'backup-db':
+            raise MigrationError('Server identity capture requires backup-db.')
         trusted_legacy_digest = args.trusted_legacy_metadata_sha256
         if trusted_legacy_digest is not None:
             if args.command != 'rehearse-db' or not re.fullmatch(r'[a-fA-F0-9]{64}', trusted_legacy_digest):
@@ -386,7 +409,7 @@ def main(argv=None):
                 write_new(directory / 'preflight.json', (json.dumps(report, indent=2) + '\n').encode())
             else:
                 password = os.environ.get('RANCHER_MIGRATION_BACKUP_PASSWORD') or getpass.getpass('Backup passphrase: ')
-                report = backup(db, directory, password)
+                report = backup(db, directory, password, include_server_identity=args.include_server_identity)
         event = {'startedAtUtc': started, 'finishedAtUtc': datetime.now(timezone.utc).isoformat(),
                  'command': args.command, 'status': 'passed', 'toolVersion': 1,
                  'completeMigrationAccepted': False, 'sourceModifiedByTool': False}
