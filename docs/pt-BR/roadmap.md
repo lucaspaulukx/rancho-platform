@@ -170,6 +170,8 @@ O teste nativo de recuperação em um nó também passou com a imagem recompilad
 
 Na mesma VM isolada, mover o scheduler da rede gerenciada pelo Cattle para a bridge Docker permitiu alocar 15 workloads gerenciados em cinco rodadas. Os logs do scheduler registraram uma abertura de assinatura e zero timeouts de pong durante o ensaio. O patch opcional do catálogo registra o modo bridge e os limites de descritores do healthcheck. Um environment criado do zero herdou as duas configurações do catálogo com o patch. Depois do registro de um novo host, os seis serviços de infraestrutura ficaram saudáveis e dois containers gerenciados trocaram tráfego HTTP. A verificação prolongada em múltiplos hosts segue pendente.
 
+O teste do bootstrap moderno também verificou a imagem do agente persistente. O script de registro do Cattle seleciona a tag padrão do agente. No daemon Docker descartável, aplicar a tag `rancher/agent:v1.2.11` à imagem moderna fez o agente persistente usar o mesmo ID de imagem. Após reiniciar o agente, o host manteve o registro e um novo container entrou em execução nesse host. Upgrade e registro com CA privada seguem pendentes.
+
 ## Ordem e domínios opcionais
 
 Conclua contratos/efeitos nativos de workloads, depois infraestrutura/dados/catálogo/integrações. Feche identidade técnica/streams e migração segura de grants, seguido de acessibilidade/performance e regressão final de configuração/recuperação/release. Gate falho retorna à implementação; não aumente timeouts ou esconda limites para obter aprovação.
