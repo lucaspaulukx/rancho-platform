@@ -4,14 +4,14 @@
 
 [![Validação do console](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)
 [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-2563eb)](../../LICENSE)
-[![Alfa comunitária](https://img.shields.io/badge/status-alfa%20comunit%C3%A1ria-9a5b00)](https://github.com/lucaspaulukx/rancho-platform/releases)
+[![Beta comunitária](https://img.shields.io/badge/status-beta%20comunit%C3%A1ria-9a5b00)](https://github.com/lucaspaulukx/rancho-platform/releases)
 
 Opere stacks, serviços e containers do Rancher 1.6 Docker/Cattle em uma só tela, com logs, terminal e métricas no contexto do workload.
 
 [Releases](https://github.com/lucaspaulukx/rancho-platform/releases) · [Migração](migration.md) · [Roadmap](roadmap.md) · [Contribuição](contributing.md) · [Segurança](security.md)
 
 > [!IMPORTANT]
-> O Rancho é um projeto comunitário independente que usa o engine legado do Rancher 1.6. Use a versão alfa em laboratório isolado, com dados sintéticos ou uma cópia isolada. O aceite de produção segue em aberto.
+> O Rancho é um projeto comunitário independente que usa o engine legado do Rancher 1.6. A beta comunitária destina-se a laboratório isolado Linux amd64 com um servidor Rancho, MariaDB 10.11 e hosts Cattle Docker 29.
 
 ## Evolução da segurança das imagens
 
@@ -23,9 +23,9 @@ Em 13 de novembro de 2026, o Trivy 0.74.0 encontrou as seguintes ocorrências cr
 | Backend experimental de nó único com Ubuntu 24.04 | — | 0 / 0 |
 | Gateway da console | 3 / 73 | 0 / 0 |
 | Keycloak opcional | 8 / 101 | 0 / 6 |
-| Agente experimental de bootstrap do host Docker | — | 0 / 27 |
+| Agente experimental de bootstrap do host Docker | 0 / 27 | 0 / 0 |
 
-A coluna inicial mostra as varreduras anteriores dos respectivos componentes. As contagens dependem da base de avisos. A base legada do backend chegou ao fim do suporte. Cada imagem de sistema legada do Cattle analisada separadamente apresentou de 27 a 29 ocorrências altas. Os achados do agente de host e das imagens de sistema do Cattle seguem como critérios para a liberação da beta. Consulte o [roadmap de segurança](roadmap.md#segurança-das-imagens-para-a-beta).
+A coluna inicial mostra as varreduras anteriores dos respectivos componentes. As contagens dependem da base de avisos. A base legada do backend chegou ao fim do suporte. Cada imagem de sistema legada do Cattle analisada separadamente apresentou de 27 a 29 ocorrências altas. O bootstrap recompilado e as oito imagens de sistema recompiladas do Cattle apresentaram 0 achados críticos e 0 altos na mesma base de avisos. A imagem derivada do MariaDB passou de 1 achado crítico e 25 altos para 0 e 0. A imagem opcional do Keycloak para testes fica fora do runtime distribuído na beta. Consulte o [roadmap de segurança](roadmap.md#segurança-das-imagens-para-a-beta).
 
 ## Funcionalidades
 
@@ -44,7 +44,7 @@ Comece por [arquitetura](architecture.md), [contribuição](contributing.md), [c
 ```sh
 git clone https://github.com/lucaspaulukx/rancho-platform.git
 cd rancho-platform
-git switch --detach v0.1.0-alpha.1
+git switch --detach v0.1.0-beta.1
 ```
 
 <details>
@@ -63,7 +63,11 @@ Fontes oficiais são pinados em `upstream.json`; mudanças ficam em `patches/`. 
 
 </details>
 
-## Execute o laboratório local
+## Instale a beta
+
+Compile e execute o perfil de nó único com o [guia de instalação da beta](release.md#instalação-experimental-de-nó-único). Siga o [guia de migração](migration.md) antes de restaurar um banco do Rancher 1.6.
+
+## Execute o laboratório de comparação com a versão legada
 
 ```powershell
 ./Start-Lab.ps1 -PlanOnly
