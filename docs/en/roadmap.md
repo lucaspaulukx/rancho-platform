@@ -164,6 +164,8 @@ The follow-up IPsec test booted the disposable Docker 29.9.2 guest with the Ubun
 
 The optional `Dockerfile.modern-bootstrap` in `console/tests/legacy-host/` builds on the local modern-client image tagged `rancho-agent-modern-client:local`. It ports the pinned registration scripts and their API client to Python 3. A prototype on the Docker 29 VM registered a fresh host and ran a container. The packaged candidate built and scanned with zero reported high or critical findings. Agent upgrade, reconnect, private CA, and the behavior of copied legacy code beyond the scanner's coverage still require validation.
 
+The packaged Python 3 bootstrap registered a new Docker 29.9.2 host and ran a container. In a separate Cattle environment on the same guest, the rebuilt network manager, metadata, DNS, scheduler and healthcheck images ran together. Managed peers exchanged HTTP, and a workload fetched a response by stack service name using the rebuilt DNS. HAProxy initially failed to reload with the guest defaults of 1024 soft and 4096 hard file descriptors. Setting `nofile` to 32768 soft and hard on the healthcheck launch configuration made the HAProxy statistics socket respond. An isolated reload with that limit installed a changed backend configuration. A packaged catalog profile and native health failure and recovery checks remain open.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.
