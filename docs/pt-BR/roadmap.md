@@ -96,7 +96,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 | INF03 | Rede/IPsec/políticas | Parcial; faltam conflitos físicos/multi-host/regras adicionais |
 | INF04 | Balanceadores TCP/HTTP/TLS | Parcial; faltam tráfego real, certificado/erro, targets/rotas/portas |
 | DATA01 | Registries/secrets/certificados | Parcial; falta matriz completa CRUD/permissão/uso real/privacidade |
-| DATA02 | Volumes/mounts/pools | Cobertura nativa parcial; faltam dependências em uso/drivers/remoção segura |
+| DATA02 | Volumes/mounts/pools | A recuperação criptografada de um volume local nomeado passou com um workload substituto e preservou conteúdo, IDs de proprietário, permissões e destinos dos links simbólicos. Dependências em uso, drivers compartilhados e remoção segura seguem em aberto |
 | DATA03 | Snapshot/backup target/restore | Planejado/condicional; exige destino isolado e checksum |
 | CAT01 | Template/versão/lançamento/upgrade | Recortes implementados; faltam clone/sync reais e falha remota/ref/credencial |
 | CAT02 | Fontes globais/por environment | CRUD/delegação implementados; falta refresh/clone físico no escopo |
