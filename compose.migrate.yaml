@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: migration/Dockerfile.restore
-    image: rancho-migration-restore:local
+    image: ${RANCHO_MIGRATION_RESTORE_IMAGE:-rancho-migration-restore:local}
     environment:
       MYSQL_PWD: ${RANCHO_DB_PASSWORD:?Set RANCHO_DB_PASSWORD}
     depends_on:
