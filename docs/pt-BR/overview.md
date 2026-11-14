@@ -20,10 +20,12 @@ Em 13 de novembro de 2026, o Trivy 0.74.0 encontrou as seguintes ocorrências cr
 | Imagem | Inicial críticas / altas | Candidata críticas / altas |
 |---|---:|---:|
 | Backend com base legada | 30 / 88 | 5 / 22 |
+| Backend experimental de nó único com Ubuntu 24.04 | — | 0 / 0 |
 | Gateway da console | 3 / 73 | 0 / 0 |
 | Keycloak opcional | 8 / 101 | 0 / 6 |
+| Agente experimental de bootstrap do host Docker | — | 0 / 27 |
 
-As contagens valem para as imagens analisadas e dependem da base de avisos. A base legada do backend chegou ao fim do suporte. O backend experimental de nó único com Ubuntu 24.04 apresenta **0 críticas / 0 altas** no scan. O [roadmap](roadmap.md) acompanha os achados restantes, o backend experimental e os critérios de aceite da beta.
+A coluna inicial mostra as varreduras anteriores dos respectivos componentes. As contagens dependem da base de avisos. A base legada do backend chegou ao fim do suporte. Cada imagem de sistema legada do Cattle analisada separadamente apresentou de 27 a 29 ocorrências altas. Os achados do agente de host e das imagens de sistema do Cattle seguem como critérios para a liberação da beta. Consulte o [roadmap de segurança](roadmap.md#segurança-das-imagens-para-a-beta).
 
 ## Funcionalidades
 
