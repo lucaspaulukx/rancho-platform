@@ -166,6 +166,8 @@ The optional `Dockerfile.modern-bootstrap` in `console/tests/legacy-host/` build
 
 The packaged Python 3 bootstrap registered a new Docker 29.9.2 host and ran a container. In a separate Cattle environment on the same guest, the rebuilt network manager, metadata, DNS, scheduler and healthcheck images ran together. Managed peers exchanged HTTP, and a workload fetched a response by stack service name using the rebuilt DNS. HAProxy initially failed to reload with the guest defaults of 1024 soft and 4096 hard file descriptors. Setting `nofile` to 32768 soft and hard on the healthcheck launch configuration made the HAProxy statistics socket respond. An isolated reload with that limit installed a changed backend configuration. A packaged catalog profile and native health failure and recovery checks remain open.
 
+The native single-node health recovery test also passed with the rebuilt healthcheck image. After the controlled HTTP endpoint began returning 503, Cattle replaced the failed instance and the replacement became healthy. The first allocation exceeded the initial observation window. The rebuilt scheduler logged intermittent WebSocket pong timeouts, and allocation took longer than expected. Require stable scheduler subscriptions during sustained allocation and verify cross-host IPsec before shipping the modern profile.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.
