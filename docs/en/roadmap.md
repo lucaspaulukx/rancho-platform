@@ -168,6 +168,8 @@ The packaged Python 3 bootstrap registered a new Docker 29.9.2 host and ran a co
 
 The native single-node health recovery test also passed with the rebuilt healthcheck image. After the controlled HTTP endpoint began returning 503, Cattle replaced the failed instance and the replacement became healthy. The first allocation exceeded the initial observation window. The rebuilt scheduler logged intermittent WebSocket pong timeouts, and allocation took longer than expected. Require stable scheduler subscriptions during sustained allocation and verify cross-host IPsec before shipping the modern profile.
 
+In the same isolated guest, moving the scheduler from Cattle-managed networking to the Docker bridge passed 15 managed workload allocations across five rounds. The scheduler logs showed one subscription startup and zero pong timeouts during that run. The optional catalog patch records the bridge mode and the healthcheck descriptor limits. Fresh catalog provisioning with that patch and sustained verification on multiple hosts remain open.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.

@@ -168,6 +168,8 @@ A imagem de bootstrap em Python 3 registrou um host novo com Docker 29.9.2 e exe
 
 O teste nativo de recuperação em um nó também passou com a imagem recompilada de healthcheck. Depois que o endpoint HTTP controlado começou a responder 503, o Cattle substituiu a instância com falha e a substituta ficou saudável. A primeira alocação excedeu a janela inicial de observação. O scheduler recompilado registrou timeouts intermitentes de pong no WebSocket e a alocação demorou além do esperado. A liberação do perfil moderno ainda depende de assinaturas estáveis do scheduler durante alocação contínua e de tráfego IPsec entre hosts.
 
+Na mesma VM isolada, mover o scheduler da rede gerenciada pelo Cattle para a bridge Docker permitiu alocar 15 workloads gerenciados em cinco rodadas. Os logs do scheduler registraram uma abertura de assinatura e zero timeouts de pong durante o ensaio. O patch opcional do catálogo registra o modo bridge e os limites de descritores do healthcheck. O provisionamento do zero com esse patch e a verificação prolongada em múltiplos hosts ainda estão pendentes.
+
 ## Ordem e domínios opcionais
 
 Conclua contratos/efeitos nativos de workloads, depois infraestrutura/dados/catálogo/integrações. Feche identidade técnica/streams e migração segura de grants, seguido de acessibilidade/performance e regressão final de configuração/recuperação/release. Gate falho retorna à implementação; não aumente timeouts ou esconda limites para obter aprovação.
