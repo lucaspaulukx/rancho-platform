@@ -85,6 +85,16 @@ docker run --rm --network none --ulimit nofile=32768:32768 --entrypoint /bin/bas
 
 The optional `console/tests/legacy-host/modern-catalog-runtime.patch` applies to Rancher catalog commit `52a5850bc49247eadd84045da890deaeaeddb9a4`. Apply it to a separate catalog copy in the isolated lab and point the lab at that copy. It sets the healthcheck descriptor limits and runs the scheduler on the Docker bridge. The catalog image tags still select the standard Rancher images unless the corresponding rebuilt images are loaded under those tags on the disposable daemon.
 
+On a fresh Cattle environment, the alternative patch `console/tests/legacy-host/modern-catalog-images.patch` includes the runtime settings and explicitly selects the rebuilt images. Build the local tags below and load them on every disposable host before registering the hosts. Set the catalog path and patch path in the shell before applying the patch. Apply this patch to the original pinned catalog as a standalone change. Use a fresh environment: upgrading the IPsec holder on an existing network requires separate acceptance.
+
+```sh
+fixture=console/tests/legacy-host
+for component in ipsec-holder ipsec-router ipsec-cni network-manager metadata dns healthcheck scheduler; do
+  docker build -f "$fixture/Dockerfile.modern-$component" -t "rancho-$component:local" "$fixture" || exit
+done
+git -C "$catalog_checkout" apply "$absolute_patch_path"
+```
+
 ## Final acceptance
 
 Use one identified release candidate for authentication/RBAC/streams, contextual operations, accessibility/performance, classic compatibility, fresh installation, upgrade and full recovery/rollback. Record limits and supported topologies. Configure a private security-reporting channel before going public. Keep [migration](migration.md) and [recovery](recovery.md) procedures matched to the artifact; do not infer a universal migration guarantee from synthetic tests.
