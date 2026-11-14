@@ -172,6 +172,8 @@ Na mesma VM isolada, mover o scheduler da rede gerenciada pelo Cattle para a bri
 
 O teste do bootstrap moderno também verificou a imagem do agente persistente. O script de registro do Cattle seleciona a tag padrão do agente. No daemon Docker descartável, aplicar a tag `rancher/agent:v1.2.11` à imagem moderna fez o agente persistente usar o mesmo ID de imagem. Após reiniciar o agente, o host manteve o registro e um novo container entrou em execução nesse host. Upgrade e registro com CA privada seguem pendentes.
 
+O ensaio isolado com dois hosts passou em VMs com Docker 29.9.2 e kernel Ubuntu 6.8. Os dois hosts entraram em um environment novo provisionado pelo catálogo com o patch. Um container gerenciado em uma VM respondeu à solicitação HTTP de um container gerenciado na outra VM. Os roteadores IPsec mostraram associações instaladas com contadores de pacotes acima de zero. Esse ensaio usou a imagem legada do roteador IPsec e o agente modern-client. Um build experimental separado em Ubuntu 24.04 para o binário IPsec e o strongSwan reportou zero achados altos ou críticos. Ainda falta integrar esse substituto e os demais componentes legados de rede.
+
 ## Ordem e domínios opcionais
 
 Conclua contratos/efeitos nativos de workloads, depois infraestrutura/dados/catálogo/integrações. Feche identidade técnica/streams e migração segura de grants, seguido de acessibilidade/performance e regressão final de configuração/recuperação/release. Gate falho retorna à implementação; não aumente timeouts ou esconda limites para obter aprovação.
