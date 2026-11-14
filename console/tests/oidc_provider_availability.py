@@ -24,7 +24,7 @@ def wait(read,predicate,attempts=65):
 def accounts():return {a['id']:{k:a.get(k) for k in ('name','kind','state','description')} for a in u.api('accounts?limit=-1')['data'] if not a.get('removed') and a.get('kind') in ('user','admin')}
 def digest(value):return hashlib.sha256(json.dumps(value,sort_keys=True).encode()).hexdigest()
 def compose(extra=False):
- args=['compose','-f','compose.yaml','-f','compose.console.yaml','-f','compose.legacy-host.yaml']
+ args=['compose','-f','compose.yaml','-f','compose.oidc-test.yaml','-f','compose.console.yaml','-f','compose.legacy-host.yaml']
  if extra:args+=['-f',str(OVERLAY)]
  docker(*args,'up','-d','--no-deps','rancher')
 def configure(only,auto,preflight=True):
@@ -55,9 +55,9 @@ ERROR='Não foi possível acessar o provedor de login. Tente novamente.'
 def failed_login(page,auto=False):
  counter=[];page.on('request',lambda r:counter.append(1) if urllib.parse.urlparse(r.url).path=='/oidc/readiness' else None)
  page.goto(lab.BASE+'/console/login')
- if not auto:page.get_by_role('button',name='Entrar com Keycloak',exact=True).click()
+ if not auto:page.get_by_role('button',name='Entrar com SSO',exact=True).click()
  expect(page.get_by_role('alert')).to_contain_text(ERROR,timeout=30000)
- expect(page.get_by_role('button',name='Entrar com Keycloak',exact=True)).to_be_enabled()
+ expect(page.get_by_role('button',name='Entrar com SSO',exact=True)).to_be_enabled()
  assert urllib.parse.urlparse(page.url).netloc=='localhost:18090'
  page.wait_for_timeout(1500);assert len(counter)==1
  return counter
@@ -97,7 +97,7 @@ try:
        page.screenshot(path=str(ROOT/'evidence/e2e-isolated'/('oidc-outage-'+theme+'-'+str(width)+'.png')),animations='disabled')
      page.set_viewport_size({'width':1440,'height':1000});page.get_by_label('Usuário',exact=True).fill('labadmin');page.get_by_label('Senha',exact=True).fill(lab.CONFIG['RANCHER_ADMIN_PASSWORD']);page.get_by_role('button',name='Entrar com conta local',exact=True).click();expect(page.get_by_label('Navegação principal',exact=True)).to_be_visible();check('hybrid local login works while provider is unavailable')
      c.close();c=context();page=c.new_page();counter=failed_login(page)
-    start_provider();check(name+': provider discovery and backend readiness recover');page.get_by_role('button',name='Entrar com Keycloak',exact=True).click();page.wait_for_url(lambda url:urllib.parse.urlparse(url).netloc=='localhost:18081',timeout=30000);expect(page.locator('input[name="username"]')).to_be_visible();page.locator('input[name="username"]').fill('leitor');page.locator('input[name="password"]').fill(lab.CONFIG['LAB_USER_PASSWORD']);page.locator('button[type="submit"],input[type="submit"]').click();expect(page.get_by_label('Navegação principal',exact=True)).to_be_visible(timeout=30000);assert 'oidc_ticket' not in page.url and len(counter)==2;check(name+': explicit retry authenticates after provider recovery without refresh')
+    start_provider();check(name+': provider discovery and backend readiness recover');page.get_by_role('button',name='Entrar com SSO',exact=True).click();page.wait_for_url(lambda url:urllib.parse.urlparse(url).netloc=='localhost:18081',timeout=30000);expect(page.locator('input[name="username"]')).to_be_visible();page.locator('input[name="username"]').fill('leitor');page.locator('input[name="password"]').fill(lab.CONFIG['LAB_USER_PASSWORD']);page.locator('button[type="submit"],input[type="submit"]').click();expect(page.get_by_label('Navegação principal',exact=True)).to_be_visible(timeout=30000);assert 'oidc_ticket' not in page.url and len(counter)==2;check(name+': explicit retry authenticates after provider recovery without refresh')
    finally:c.close()
    if name=='automatic':
     code,_,_=u.request('/oidc/callback?state=console-invalid-state&code=console-invalid-code');check('invalid callback still rejects JSON API callers',code==401)

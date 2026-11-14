@@ -30,7 +30,7 @@ The initial column shows earlier scans of the corresponding components. Counts d
 ## Features
 
 - **Workload operations** · Inspect stacks and containers, open streams and run available Rancher actions from the same workspace.
-- **Access management** · Assign environment permissions through local groups and optionally sign in with an OIDC provider such as Keycloak.
+- **Access management** · Assign environment permissions through local groups and optionally sign in with an existing OIDC provider.
 - **Migration rehearsal** · Check the source database, back it up and rehearse restore and rollback in isolation. [Migration guide](docs/en/migration.md)
 
 ## Documentation
@@ -76,11 +76,10 @@ Build and run the single-server profile using the [beta installation guide](docs
 
 Review the plan and [migration/recovery boundaries](docs/en/migration.md) first. Existing credentials/realm are preserved; generated credentials remain in ignored `.env`. Do not connect a disposable lab to production data or agents.
 
-For a fresh disposable lab, run `python tests/integration.py` to initialize local authentication and create the sample RBAC fixtures. Sign in to the console as `labadmin` using `RANCHER_ADMIN_PASSWORD` from your local `.env`.
+For a fresh disposable lab, run `python tests/integration.py --local-auth-only` to initialize local authentication. The [external OIDC guide](docs/en/configuration.md#external-openid-connect-provider) explains how to configure SSO. Sign in to the console as `labadmin` using `RANCHER_ADMIN_PASSWORD` from your local `.env`.
 
 - Modern console: http://localhost:18090/console/
 - Classic Rancher: http://localhost:18080/
-- Local Keycloak: http://localhost:18081/
 
 See the [console guide](console/README.md) for development and [recovery](docs/en/recovery.md) for maintenance. A frontend build does not prove physical effects or complete migration recovery.
 

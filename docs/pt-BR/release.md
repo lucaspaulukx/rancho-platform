@@ -63,6 +63,8 @@ Para o [ensaio sintético de upgrade e rollback do backend](testing.md#upgrade-e
 
 ## Instalação experimental de nó único
 
+Para uma instalação Rancher existente, consulte [hosts existentes e versões do Docker](migration.md#hosts-existentes-e-versões-do-docker) antes de escolher o catálogo Cattle moderno.
+
 Gere o runtime e a console a partir do mesmo checkout. Execute a preparação das fontes fixadas antes de compilar o Dockerfile da raiz.
 
 ```sh
@@ -74,6 +76,8 @@ docker build -t rancho-console:local console
 ```
 
 Defina um `RANCHO_DB_PASSWORD` exclusivo no arquivo de ambiente e proteja esse arquivo. A console fica disponível em loopback em `http://localhost:18090/console/`. Em um banco novo, inicialize a autenticação do administrador local antes de expor a console por um proxy de rede. O OIDC inicia desativado. Para habilitá-lo, configure emissor, ID e segredo do cliente e callback, e registre no provedor de identidade o callback na origem da console. Use HTTPS para acesso pela rede. Execute a instalação com uma réplica do servidor Rancher.
+
+Configure [um provedor OIDC existente](configuration.md#provedor-openid-connect-externo) se quiser SSO. O exemplo usa uma aplicação Microsoft Entra ID de tenant único.
 
 Para a imagem opcional de healthcheck do Cattle com Ubuntu 24.04, configure os limites flexível e rígido de `nofile` em 32768 no **serviço de healthcheck** do catálogo isolado. A integração no Docker 29 confirmou que os limites chegaram ao container e que o HAProxy expôs seu socket de estatísticas. Reproduza a inicialização e o reload em um container descartável com:
 

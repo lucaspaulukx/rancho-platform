@@ -8,7 +8,7 @@ import time
 from integration import Session, ROOT, CONFIG
 
 checks = []
-COMPOSE = ['docker', 'compose', '-f', 'compose.yaml', '-f', 'compose.console.yaml',
+COMPOSE = ['docker', 'compose', '-f', 'compose.yaml', '-f', 'compose.oidc-test.yaml', '-f', 'compose.console.yaml',
            '-f', 'compose.legacy-host.yaml']
 BACKEND = 'rancher16-rbac-lab'
 CONSOLE = 'rancher16-community-console'

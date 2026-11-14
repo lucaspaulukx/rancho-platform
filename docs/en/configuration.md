@@ -96,3 +96,23 @@ Backend/proxy protocol markers must agree before enabling a guard. Disabling a f
 ## Runtime database schema
 
 `migration/sql/001-local-groups.sql` is the canonical additive migration embedded in the backend. With schema migrations enabled, startup uses a named MySQL lock, normalized-LF SHA256 and structural checks for columns, types, sizes, nullability, engines and indexes. Future versions or checksum mismatches are rejected. A version is recorded only after successful verification. MySQL5.5 DDL auto-commits, so interrupted partial initialization must be repeatable without a premature success record. No table dropping, identity reassociation or automatic direct-grant conversion is part of this migration. Off preserves the earlier bootstrap path; rollback requires a matching backup, not just a binary downgrade.
+
+## External OpenID Connect provider
+
+Rancho can use an existing OpenID Connect provider. The normal Compose and laboratory startup run without an identity-provider container. OIDC starts disabled. Use a confidential web application with the authorization code flow, PKCE S256 and an HTTPS callback reachable from the browser. Rancho discovers the authorization, token and signing-key endpoints from the issuer metadata and verifies RS256-signed ID tokens. Set the callback to the exact URL registered with the provider.
+
+For Microsoft Entra ID, register a single-tenant application, add the Web redirect URI and create a client secret. Use the tenant ID in the issuer. Rancho checks that the token issuer matches the configured issuer exactly. Keep the secret value in the private Compose environment file. [Microsoft Entra OIDC](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc) · [Web app redirect URI](https://learn.microsoft.com/en-us/entra/identity-platform/reply-url)
+
+```dotenv
+RANCHER_OIDC_ENABLED=true
+RANCHER_OIDC_ISSUER=https://login.microsoftonline.com/<tenant-id>/v2.0
+RANCHER_OIDC_CLIENT_ID=<application-client-id>
+RANCHER_OIDC_CLIENT_SECRET=<client-secret-value>
+RANCHER_OIDC_CALLBACK=https://rancho.example.org/oidc/callback
+RANCHER_OIDC_ONLY=false
+RANCHER_OIDC_AUTO_LOGIN=false
+```
+
+For another provider, use its issuer and application credentials. Leave the backchannel unset if the backend can reach the public issuer directly. The new console labels the action **Sign in with SSO**. Run a login test with your tenant and an account that has no Rancho grants. Group membership and environment permissions stay in Rancho. Enable OIDC-only mode and auto-login after confirming administrative access and recovery. The beta's end-to-end tests used a disposable OIDC provider. The Entra example has not been tested against a live tenant. Direct SAML login is outside this integration.
+
+For automated lab tests that need sample OIDC users, start `./Start-Lab.ps1 -WithTestIdentityProvider`. The override `compose.oidc-test.yaml` starts a disposable Keycloak with the sample realm. Run `python tests/integration.py` in that lab to exercise the end-to-end OIDC fixtures.
