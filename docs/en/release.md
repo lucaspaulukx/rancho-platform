@@ -67,6 +67,8 @@ For the modern MariaDB profile, add the two arguments below. The command pins al
 python -m scripts.release_artifact_rehearsal --backend-image rancho-backend-modern:local --previous-console-image rancho-console:previous --candidate-console-image rancho-console:local --modern-database-image rancho-mariadb:local --restore-image rancho-migration-restore:local
 ```
 
+The first-start restore helper uses a pinned Python 3.13 Alpine base and installs binary wheels. Trivy 0.74.0 with the November 13, 2026 advisory database reported 2 critical and 81 high package/advisory matches on the previous Debian-based helper and zero of either severity on the Alpine build. The MariaDB client connects to `db` on the private Compose network and allows that database's default self-signed certificate. Keep this one-shot helper on the internal database network defined in `compose.migrate.yaml`.
+
 ## Experimental single-node installation
 
 For an existing Rancher installation, review [existing hosts and Docker versions](migration.md#existing-hosts-and-docker-versions) before selecting the modern Cattle catalog.
