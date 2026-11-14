@@ -178,6 +178,8 @@ O environment isolado de dois hosts também aceitou o protótipo recompilado do 
 
 Os dois convidados Docker 29.9.2 foram registrados com o bootstrap moderno e iniciaram as oito imagens de sistema recompiladas do Cattle a partir de um template de catálogo novo. As quatro stacks de infraestrutura e os seis serviços ficaram saudáveis. Um container gerenciado de um convidado obteve a resposta HTTP do outro convidado. Os dois roteadores IPsec registraram pacotes nos contadores XFRM. A varredura Trivy das oito imagens e do bootstrap reportou zero achados críticos e altos na base de avisos de 13 de novembro de 2026. O teste confirma o provisionamento inicial. Stacks IPsec existentes precisam de ensaio próprio de atualização e reversão.
 
+O ensaio do IPsec existente confirmou tráfego entre dois hosts antes da atualização. A troca do roteador pelo upgrade nativo reimplantou o conjunto no primeiro host, incluindo o holder, e ficou parada. A inicialização manual do conjunto original restabeleceu o tráfego dos workloads. O rollback nativo continuou em andamento. A atualização do IPsec no próprio ambiente segue como condição para a liberação. Consulte o [procedimento de migração dos hosts existentes](migration.md#hosts-existentes-e-versões-do-docker).
+
 ## Ordem e domínios opcionais
 
 Conclua contratos/efeitos nativos de workloads, depois infraestrutura/dados/catálogo/integrações. Feche identidade técnica/streams e migração segura de grants, seguido de acessibilidade/performance e regressão final de configuração/recuperação/release. Gate falho retorna à implementação; não aumente timeouts ou esconda limites para obter aprovação.

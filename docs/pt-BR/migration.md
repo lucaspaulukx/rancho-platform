@@ -112,6 +112,8 @@ Em uma VM Linux amd64 descartável no QEMU, o Rancher 1.6.30 registrou o agente 
 
 O ensaio usou binários estáticos do Docker e um serviço em modo host network em uma única VM. A atualização pelo gerenciador de pacotes da distribuição, reinício da VM, redes IPsec gerenciadas existentes, storage compartilhado e rollback da VM atualizada ainda precisam de validação própria. A recuperação depende tanto do backup do banco do Rancher quanto do backup dos volumes da VM cliente.
 
+Em um laboratório separado com dois hosts, a stack IPsec existente transportou tráfego HTTP entre dois workloads no Docker 29.9.2 antes da atualização. A atualização nativa do sidekick do roteador tentou substituir o holder no primeiro host, embora a imagem do holder fosse a mesma. O substituto ficou sem iniciar. O tráfego entre hosts voltou após a inicialização manual do holder e dos sidekicks originais, enquanto o serviço ainda informava `rolling-back`. Preserve a rede original e use um environment separado para o catálogo moderno até validar a atualização e a reversão no próprio ambiente.
+
 ## Identidade, engine e gates de cutover
 
 Preserve grants diretos até [migração de acesso](access-migration.md) explícita. Teste novo usuário sem acesso, readonly/member, administração local/OIDC e recuperação antes do login exclusivo. Confira versões exatas de agente/Docker, Compose, rede/LB/TLS/storage, logs/terminal e credenciais técnicas.
