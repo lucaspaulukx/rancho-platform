@@ -76,6 +76,13 @@ docker compose -f compose.modern.yaml --env-file <local-env-file> up -d --pull n
 
 Set a unique `RANCHO_DB_PASSWORD` in the local env file and protect that file. The console is available on loopback at `http://localhost:18090/console/`. On a fresh database, initialize local administrator authentication before exposing the console through a network proxy. OIDC starts disabled. To enable it, set the issuer, client ID, client secret and callback, and register the callback at the console origin in the identity provider. Use HTTPS for network access. Run the deployment with one Rancher server replica.
 
+For the optional Ubuntu 24.04 Cattle healthcheck image, configure `nofile` soft and hard limits of 32768 on the **healthcheck service** in the isolated catalog. The integration on Docker 29 confirmed those limits reached the container and HAProxy exposed its stats socket. Reproduce a clean start and reload in a disposable container with:
+
+```sh
+docker build -f console/tests/legacy-host/Dockerfile.modern-healthcheck -t rancho-healthcheck-modern:local console/tests/legacy-host
+docker run --rm --network none --ulimit nofile=32768:32768 --entrypoint /bin/bash -i rancho-healthcheck-modern:local -s < console/tests/legacy-host/smoke-modern-healthcheck.sh
+```
+
 ## Final acceptance
 
 Use one identified release candidate for authentication/RBAC/streams, contextual operations, accessibility/performance, classic compatibility, fresh installation, upgrade and full recovery/rollback. Record limits and supported topologies. Configure a private security-reporting channel before going public. Keep [migration](migration.md) and [recovery](recovery.md) procedures matched to the artifact; do not infer a universal migration guarantee from synthetic tests.
