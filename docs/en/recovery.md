@@ -36,6 +36,12 @@ Authenticate all archives and linked hashes before allocating destinations. Rest
 
 File recovery does not start engines or prove login. Matching encrypted configuration and image artifacts are necessary; plaintext realm export alone is not complete IdP recovery. Retain a protected off-host copy and verify that the operator can actually decrypt it.
 
+Use the named-volume workload rehearsal to verify that a new service can start and read recovered data from a separate volume. It creates a synthetic workload, stops its writer cleanly, encrypts the original volume, and restores it to a new volume. The workload verifies the checksum during startup. The tool compares file hashes, owner IDs, modes and symlink targets, confirms that the original volume is unchanged, then removes its fixtures. Load the pinned original Rancher and Node images used above, and the local `alpine:3.20` image. The fixture runs directly in Docker with networking disabled. Rancher scheduler recovery and shared volume drivers are separate tests.
+
+```sh
+python -m migration.test_workload_volume_recovery_lab
+```
+
 ## Engine and identity rehearsal
 
 `migration.engines` starts restored Rancher/IdP copies in one loopback-only namespace: no external egress, published ports, source storage or Docker socket. Helpers use only that namespace. Copy-only hostname/IP/callback adjustments must remain confined to the copy; never apply them to the source to make a rehearsal pass.

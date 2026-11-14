@@ -141,6 +141,30 @@ def manifest(name):
         return json.loads(result)
 
 
+def archive_local_volume(image, name, archive, password):
+    before = manifest(name)
+    with archive.open('xb') as destination:
+        with helper(image, ['tar', '--create', '--gzip', '--format=pax', '--acls', '--xattrs',
+                            '--numeric-owner', '--sparse', '--file=-', '--directory=/data', '.'],
+                    mounts=[mount_volume(name)],
+                    output=lambda stream: crypto_stream.encrypt(stream, destination, password)) as checksum:
+            pass
+    if before != manifest(name):
+        raise MigrationError('Source storage changed during backup; discard the incomplete bundle.')
+    return before, checksum
+
+
+def restore_local_volume(image, name, archive, password, integrity, expected):
+    with helper(image, ['tar', '--extract', '--gzip', '--acls', '--xattrs', '--numeric-owner',
+                        '--same-owner', '--same-permissions', '--file=-', '--directory=/data'],
+                mounts=[mount_volume(name, readonly=False)],
+                writer=lambda stream: crypto_stream.decrypt_to(archive, stream, password,
+                                                              expected_sha256=integrity['sha256'])):
+        pass
+    if manifest(name) != expected:
+        raise MigrationError('Restored content/ownership/modes differ; engine startup prohibited.')
+
+
 def read_configuration(source):
     bindings = []
     for mount in source['Mounts']:
@@ -211,17 +235,9 @@ def backup(names, directory, password, *, quiesce=False, include_images=False):
             select_sources(names)  # Detect a separately restarted writer as well as selected sources.
             if any(inspect(s['Id'])['State']['Running'] for s in sources.values()):
                 raise MigrationError('A source restarted during cold capture; discard this incomplete backup.')
-            before = manifest(volume['name'])
             filename = 'volume-' + str(index) + '.tar.gz.enc'
             path = directory / filename
-            with path.open('xb') as destination:
-                with helper(tar_image, ['tar', '--create', '--gzip', '--format=pax', '--acls', '--xattrs',
-                                       '--numeric-owner', '--sparse', '--file=-', '--directory=/data', '.'],
-                            mounts=[mount_volume(volume['name'])],
-                            output=lambda stream: crypto_stream.encrypt(stream, destination, password)) as checksum:
-                    pass
-            if before != manifest(volume['name']):
-                raise MigrationError('Source storage changed during backup; discard the incomplete bundle.')
+            before, checksum = archive_local_volume(tar_image, volume['name'], path, password)
             metadata['volumes'].append({**volume, 'archive': filename, 'integrity': checksum, 'manifest': before})
             journal(directory, 'volume-encrypted', index=index, encryptedBytes=checksum['encryptedBytes'])
         private = io.BytesIO(json.dumps(metadata, sort_keys=True).encode())
@@ -290,14 +306,8 @@ def restored_volumes(directory, password, *, load_images=False):
             name = 'rancher-recovery-copy-' + secrets.token_hex(12)
             run(['volume', 'create', '--label', OWNER + '=' + label, name])
             owned.append(name)
-            with helper(image, ['tar', '--extract', '--gzip', '--acls', '--xattrs', '--numeric-owner',
-                                 '--same-owner', '--same-permissions', '--file=-', '--directory=/data'],
-                        mounts=[mount_volume(name, readonly=False)],
-                        writer=lambda stream: crypto_stream.decrypt_to(directory / volume['archive'], stream, password,
-                                                                      expected_sha256=volume['integrity']['sha256'])):
-                pass
-            if manifest(name) != volume['manifest']:
-                raise MigrationError('Restored content/ownership/modes differ; engine startup prohibited.')
+            restore_local_volume(image, name, directory / volume['archive'], password,
+                                 volume['integrity'], volume['manifest'])
             journal(directory, 'file-restore-verified', index=index)
         yield metadata, owned
     except BaseException:
