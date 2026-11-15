@@ -25,6 +25,20 @@ The upstream lock pins official commit identities. Build from those sources and 
 
 Source/console CI uses read-only repository permission, pinned actions and no lab secrets. It checks source and history, scanner contracts, offline migration contracts, locked install, formatting, frontend tests and TypeScript/Vite. Physical backend, HA and end-to-end migration acceptance run separately. Public-release documentation requires every active pt-BR/English pair reviewed, current and linked.
 
+## Verify a source package
+
+The manually dispatched `Source release provenance` workflow on `main` packages the selected commit and signs the ZIP's digest. Download the archived workflow artifact and set `commit` to the full commit hash of the release. Verify both the checksum and the GitHub attestation.
+
+```sh
+sha256sum -c SHA256SUMS.txt
+gh attestation verify "rancho-platform-${commit}-source.zip" \
+  --repo lucaspaulukx/rancho-platform \
+  --signer-workflow lucaspaulukx/rancho-platform/.github/workflows/source-provenance.yml \
+  --source-ref refs/heads/main --source-digest "$commit" --deny-self-hosted-runners
+```
+
+This workflow attests the source archive. Runtime images require separate attestations tied to their OCI manifest digests. The workflow stores the ZIP and checksum as CI artifacts for release preparation.
+
 ## Artifact inventory
 
 The offline inventory tool uses a pinned Syft image and already-local application image IDs. `plan` resolves scalar identities/sizes and manifest hashes without exporting images or restarting services. Scanning is explicit, with a new output directory.
