@@ -55,6 +55,8 @@ Repita `--extra-image NOME=IMAGEM` para incluir cada imagem adicional do perfil 
 
 Projeções CycloneDX públicas permitem identidades/versões/hashes/licenças e relações, excluindo configuração de imagem, environment, caminhos privados e metadados desconhecidos. O CI offline verifica que referências ambíguas são rejeitadas antes que um arquivo filtrado oculte uma dependência de pacote. Nomes de pacotes ainda podem ser privados e exigem revisão. Runtime e lockfile de desenvolvimento são evidências distintas; JS incorporado e Go antigo podem ter detecção incompleta. Licenças desconhecidas são pendências, não aprovação. Não é scanner CVE nem certificação jurídica e não publica automaticamente.
 
+A imagem moderna do backend inclui a licença do Cattle em `/usr/share/doc/rancho-cattle` e os avisos do proxy WebSocket e de suas dependências empacotadas em `/usr/share/doc/community-websocket-proxy`. Confira esses diretórios na imagem final durante a revisão de dependências.
+
 ## Instalação limpa isolada
 
 Use duas imagens Linux locais já compiladas. O ensaio usa volumes próprios novos e uma rede privada sem portas publicadas. Verifica a UI clássica, o proxy do console, a migração de schema e a idempotência após reiniciar o backend. O teste usa MySQL embutido com OIDC e redirecionamento moderno do backend desligados.

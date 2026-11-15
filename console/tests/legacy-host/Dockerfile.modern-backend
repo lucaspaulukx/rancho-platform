@@ -141,6 +141,8 @@ COPY --from=jetty /opt/war /opt/cattle
 COPY --from=cattle /usr/share/cattle/artifacts /usr/share/cattle/artifacts
 COPY --from=cattle /usr/share/cattle/env_vars /usr/share/cattle/env_vars
 COPY --from=cattle /usr/bin/rancher-* /usr/bin/docker-machine* /usr/bin/compose /usr/bin/websocket-proxy /usr/bin/
+COPY --from=cattle /lab/cattle/LICENSE /usr/share/doc/rancho-cattle/LICENSE
+COPY --from=cattle /usr/share/doc/community-websocket-proxy /usr/share/doc/community-websocket-proxy
 COPY modern-backend-entry.sh /usr/local/bin/rancho-entry
 ENV CATTLE_HOME=/var/lib/cattle CATTLE_DB_CATTLE_DATABASE=mysql DEFAULT_CATTLE_API_UI_INDEX=local
 ENV RANCHER_HOST_STREAM_PROXY_PROTOCOL=1 RANCHER_METRICS_PAYLOAD_PROXY_PROTOCOL=1 RANCHER_API_KEY_STREAM_PROXY_PROTOCOL=1
