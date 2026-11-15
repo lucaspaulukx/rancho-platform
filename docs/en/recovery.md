@@ -45,6 +45,12 @@ python -m migration.test_workload_volume_recovery_lab
 
 A separate isolated Linux VM rehearsal used Docker 29.9.2 and the modern Rancher agent. After the Cattle service was deactivated and Docker confirmed there were no writers, the rehearsal authenticated and decrypted the local volume archive. Cattle created a new container for the same service. It read the restored data with the original checksum, owner, mode and symlink. Switching back to the original volume contents and reactivating the service passed the same checks. This exercise used a host-network service and a local Docker volume. See the separate [cold VM and database rollback rehearsal](migration.md#cold-rollback-of-the-vm-and-database). Shared volume drivers still require their own recovery test.
 
+## Shared NFS storage rehearsal
+
+Two isolated Docker 29.9.2 hosts mounted the same NFSv3 export through Docker's local volume driver. A Cattle workload wrote to the export on the first host, and a read-only workload on the second host verified the data and file metadata. After both workloads stopped and neither host had a running container using the volume, the rehearsal archived the export on the storage server and authenticated the encrypted archive. A new Cattle workload on the second host read from a distinct restored export. The checksum, numeric ownership, file mode and symlink target matched. A workload on the first host then verified the original export remained readable.
+
+For an existing installation, inventory the export, mount options and every writer before taking a backup. Quiesce all writers, use the storage system's backup procedure and restore to a separate export. Start a read-only workload on another host to verify the data and ownership before directing traffic or enabling writes. Keep the original export available for rollback and keep any writes made after cutover in the recovery plan. The Rancho automated recovery command covers local volumes without driver options. It refuses NFS and other remote mounts, whose backup and restore remain operator-managed.
+
 ## Engine and identity rehearsal
 
 `migration.engines` starts restored Rancher/IdP copies in one loopback-only namespace: no external egress, published ports, source storage or Docker socket. Helpers use only that namespace. Copy-only hostname/IP/callback adjustments must remain confined to the copy; never apply them to the source to make a rehearsal pass.
