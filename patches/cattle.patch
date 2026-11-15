@@ -289,6 +289,21 @@ index 42b2a92..219b649 100644
          authorize(method, requiredRoles, roles, methodRoles);
  
          if ("POST".equals(method) || "PUT".equals(method)) {
+diff --git a/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/servlet/filter/ProxyFilter.java b/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/servlet/filter/ProxyFilter.java
+index a101863..02b9a5d 100644
+--- a/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/servlet/filter/ProxyFilter.java
++++ b/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/servlet/filter/ProxyFilter.java
+@@ -29,6 +29,10 @@ public class ProxyFilter implements Filter {
+     @Override
+     public void init(FilterConfig filterConfig) throws ServletException {
+         proxy = filterConfig.getInitParameter("proxy");
++        if (proxy != null) {
++            // The dispatcher path cannot contain an empty segment. The proxy handler restores the scheme.
++            proxy = proxy.replaceFirst("^(https?):/{2}", "$1:/");
++        }
+         String value = filterConfig.getInitParameter("redirects");
+         if (StringUtils.isNotBlank(value)) {
+             redirects = Boolean.parseBoolean(value);
 diff --git a/code/iaas/auth-logic/pom.xml b/code/iaas/auth-logic/pom.xml
 index 585f732..5ecbbfb 100644
 --- a/code/iaas/auth-logic/pom.xml

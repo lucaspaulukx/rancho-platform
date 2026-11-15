@@ -66,7 +66,8 @@ find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/so
 printf '%s\n' "$ROOT/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java" >> /lab/sources
 printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java" "$AUTH/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java" "$AUTH/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java" "$APP/src/main/java/io/cattle/platform/app/IaasApiConfig.java" "$APP/src/main/java/io/cattle/platform/app/ApiServerConfig.java" "$APP/src/main/java/io/cattle/platform/app/SystemConfig.java" >> /lab/sources
 printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java" "$AUTH/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenUtils.java" >> /lab/sources
-printf '%s\n' "$ROOT/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java" >> /lab/sources
+printf '%s\n' "$ROOT/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java" \
+    "$ROOT/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/servlet/filter/ProxyFilter.java" >> /lab/sources
 printf '%s\n' "$ROOT/code/implementation/host-api/src/main/java/io/cattle/platform/host/service/impl/HostApiServiceImpl.java" "$ROOT/code/implementation/docker/machine/src/main/java/io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher.java" >> /lab/sources
 printf '%s\n' "$ROOT/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ServiceContainerStatsLinkHandler.java" >> /lab/sources
 for file in StatsAccess StatsPayloadTransport ContainerStatsLinkHandler HostStatsLinkHandler; do
@@ -89,7 +90,9 @@ cp /lab/schema/001-local-groups.sql io/cattle/platform/iaas/api/auth/localrbac/m
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-iaas-auth-logic-0.5.0-SNAPSHOT.jar" io/cattle/platform/iaas/api/auth
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$LIB/cattle-framework-token-0.5.0-SNAPSHOT.jar" io/cattle/platform/token/impl/JwtTokenServiceImpl.class
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-app-config-0.5.0-SNAPSHOT.jar" io/cattle/platform/app
-/usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-iaas-api-logic-0.5.0-SNAPSHOT.jar" io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy*.class
+/usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-iaas-api-logic-0.5.0-SNAPSHOT.jar" \
+    io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy*.class \
+    io/cattle/platform/iaas/api/servlet/filter/ProxyFilter.class
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-host-api-0.5.0-SNAPSHOT.jar" io/cattle/platform/host/service/impl/HostApiServiceImpl*.class
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-host-stats-0.5.0-SNAPSHOT.jar" io/cattle/platform/host/stats/api
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-docker-machine-0.5.0-SNAPSHOT.jar" io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher*.class
