@@ -1,8 +1,10 @@
 FROM python:3.13-alpine3.24@sha256:9ef1a599f863231c3d91e941389bfdc4a2d6070557243d54df1a4e57015b960e
 RUN apk add --no-cache mariadb-client
 WORKDIR /opt/rancho
-COPY migration/requirements.txt ./
-RUN pip install --no-cache-dir --only-binary=:all: -r requirements.txt \
+COPY migration/requirements.txt migration/requirements.restore.txt ./
+RUN pip install --no-cache-dir --only-binary=:all: --require-hashes \
+        -c requirements.txt -r requirements.restore.txt \
+    && python -c 'from cryptography.hazmat.backends.openssl.backend import backend; version = backend.openssl_version_text(); print(version); assert backend.openssl_version_number() >= 0x40000030, version' \
     && pip uninstall --yes pip
 COPY migration/__init__.py migration/tool.py migration/restore_on_start.py migration/
 ENTRYPOINT ["python", "-m", "migration.restore_on_start"]
