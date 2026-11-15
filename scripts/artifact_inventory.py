@@ -125,8 +125,17 @@ def image_info(reference):
     return {'imageId': identity, 'sizeBytes': int(size)}
 
 
-def plan(backend, console):
-    images = {'backend': image_info(backend), 'console': image_info(console)}
+def plan(backend, console, extra_images=()):
+    references = {'backend': backend, 'console': console}
+    for item in extra_images:
+        label, separator, reference = item.partition('=')
+        if not separator or not re.fullmatch(r'[a-z][a-z0-9-]{0,39}', label) or not reference or reference.startswith('-'):
+            raise ValueError('Additional images must use NAME=IMAGE with a lowercase label')
+        name = 'runtime-' + label
+        if name in references:
+            raise ValueError('Duplicate additional image label')
+        references[name] = reference
+    images = {name: image_info(reference) for name, reference in references.items()}
     scanner = image_info(SCANNER)
     size = sum(v['sizeBytes'] for v in images.values())
     manifests = {'package.json': digest_file(ROOT / 'console/package.json'), 'package-lock.json': digest_file(ROOT / 'console/package-lock.json')}
@@ -230,9 +239,14 @@ def main():
     parser.add_argument('action', choices=('plan', 'scan'))
     parser.add_argument('--backend-image', default='rancher16-local-rbac:dev')
     parser.add_argument('--console-image', default='rancher16-community-console:dev')
+    parser.add_argument('--extra-image', action='append', default=[], metavar='NAME=IMAGE',
+                        help='Add a local runtime image to the inventory. Repeat for each component.')
     parser.add_argument('--output')
     args = parser.parse_args()
-    evidence = plan(args.backend_image, args.console_image)
+    try:
+        evidence = plan(args.backend_image, args.console_image, args.extra_image)
+    except ValueError as error:
+        parser.error(str(error))
     if args.action == 'plan':
         print(json.dumps(evidence, indent=2))
     else:
