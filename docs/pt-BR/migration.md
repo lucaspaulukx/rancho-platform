@@ -120,6 +120,17 @@ A restauração do disco anterior e do banco correspondente no endereço origina
 
 Em um laboratório separado com dois hosts, a stack IPsec existente transportou tráfego HTTP entre dois workloads no Docker 29.9.2 antes da atualização. A atualização nativa do sidekick do roteador tentou substituir o holder no primeiro host, embora a imagem do holder fosse a mesma. O substituto ficou sem iniciar. O tráfego entre hosts voltou após a inicialização manual do holder e dos sidekicks originais, enquanto o serviço ainda informava `rolling-back`. Preserve a rede original e use um environment separado para o catálogo moderno até validar a atualização e a reversão no próprio ambiente.
 
+#### Troca de tráfego para um environment separado
+
+Um ensaio com quatro VMs manteve online o environment com o catálogo original e um environment novo com o catálogo moderno. Cada um tinha dois hosts com Docker 29.9.2. Em cada environment, um cliente gerenciado acessou um workload HTTP no outro host, e os roteadores registraram pacotes IPsec. Um único endpoint privado do Nginx encaminhou tráfego aos workloads modernos, voltou aos originais e depois retornou aos modernos. Cada troca entregou a resposta do environment esperado em até três segundos após recarregar o Nginx. Esse tempo descreve as requisições sintéticas nessa topologia.
+
+1. Suba o environment de destino em hosts separados com o catálogo moderno. Mantenha em execução o environment original e seus serviços IPsec.
+2. Recrie a stack da aplicação no destino. Restaure o estado persistente separadamente e valide gravações, descoberta de serviços, tráfego entre hosts e verificações de saúde antes de direcionar clientes. Para dados em NFS compartilhado, use o [procedimento de recuperação de armazenamento](recovery.md#ensaio-com-armazenamento-nfs-compartilhado).
+3. Troque o destino no ingress durante a janela de mudança. Confira as respostas pelo mesmo endpoint dos clientes e monitore erros da aplicação e as duas redes. Mantenha a configuração de ingress anterior disponível até encerrar a janela de rollback.
+4. Se a validação falhar, aponte o ingress para o environment original e verifique pelo mesmo endpoint dos clientes. Se o destino já aceitou gravações, reconcilie os dados antes de devolver tráfego a um ambiente original com escrita habilitada.
+
+O teste usou um workload HTTP sem estado e a recarga controlada do ingress. Migração de workloads com estado, propagação de DNS e metas de disponibilidade exigem verificações específicas da aplicação.
+
 ## Identidade, engine e gates de cutover
 
 Preserve grants diretos até [migração de acesso](access-migration.md) explícita. Teste novo usuário sem acesso, readonly/member, administração local/OIDC e recuperação antes do login exclusivo. Confira versões exatas de agente/Docker, Compose, rede/LB/TLS/storage, logs/terminal e credenciais técnicas.
