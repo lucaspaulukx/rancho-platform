@@ -31,7 +31,7 @@ def no_store(cache_control):
     return 'no-store' in directives and 'public' not in directives
 
 
-def main(*, oidc_enabled=True):
+def main(*, oidc_enabled=True, catalog_project=None):
     with fetch('/console/login?oidc_ticket=synthetic-gateway-probe') as response:
         require('Login deep link serves the shell', response.status == 200)
         require('Login route has no referrer and forbids framing',
@@ -78,6 +78,18 @@ def main(*, oidc_enabled=True):
             require(path + ' authenticated response succeeds', status == 200)
             require(path + ' authenticated response forbids caching',
                     no_store(admin.response_metadata['cacheControl']))
+        if catalog_project:
+            require('Catalog probe uses a project ID', re.fullmatch(r'1a[0-9]+', catalog_project))
+            headers = {'X-Api-Project-Id': catalog_project}
+            for path in ('/v1-catalog/catalogs', '/v1-catalog/templates?rancherVersion=v1.6.30'):
+                status, result, _ = admin.request(path, extra_headers=headers)
+                require(path + ' returns a native collection',
+                        status == 200 and isinstance(result, dict) and isinstance(result.get('data'), list))
+                require(path + ' forbids caching', no_store(admin.response_metadata['cacheControl']))
+            for destination in ('http://', 'http:/', 'http:%2F%2F'):
+                path = '/v1/proxy/' + destination + 'localhost:8088/v1-catalog/templates'
+                status, _, _ = admin.request(path, extra_headers=headers)
+                require('A direct proxy request cannot acquire the native filter trust', status in (400, 403, 404))
     finally:
         if any(cookie.name == 'token' for cookie in admin.cookies):
             revoked, _, _ = admin.request('/v2-beta/token/current', method='DELETE')
@@ -89,5 +101,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--oidc-disabled', action='store_true',
                         help='Require the OIDC servlet to report disabled and reject the callback with 404.')
+    parser.add_argument('--catalog-project', metavar='PROJECT_ID',
+                        help='Verify native catalog forwarding in the owned project with a running catalog service.')
     args = parser.parse_args()
-    main(oidc_enabled=not args.oidc_disabled)
+    main(oidc_enabled=not args.oidc_disabled, catalog_project=args.catalog_project)
