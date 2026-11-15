@@ -1,4 +1,23 @@
 ARG BACKEND_JAVA17_IMAGE=rancho-backend-java17:local
+FROM golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 AS webhook
+ENV GO111MODULE=off GOPATH=/go CGO_ENABLED=0
+WORKDIR /go/src/github.com/rancher/webhook-service
+ADD --checksum=sha256:9beb6d093fee125f2f08bb50952a43caa640f8ca4ec4e7eca1499285257dcbff https://codeload.github.com/rancher/webhook-service/tar.gz/5d68737e9c5edafc70a4963ffca1466e0b95c708 /tmp/webhook.tar.gz
+ADD --checksum=sha256:952002b709e3f46a77a12afdedd6c8748126a959d3d82f066b66e4d472ae420d https://codeload.github.com/golang-jwt/jwt/tar.gz/7ceae619e739dc8a7bf577214aa8ebf26668e9db /tmp/jwt.tar.gz
+COPY modern-webhook-policy.patch webhook-modern-policy_test.go /tmp/
+RUN --network=none set -eu; \
+    tar -xzf /tmp/webhook.tar.gz --strip-components=1; \
+    mkdir -p vendor/github.com/golang-jwt/jwt/v5 /out/notices; \
+    tar -xzf /tmp/jwt.tar.gz --strip-components=1 -C vendor/github.com/golang-jwt/jwt/v5; \
+    git apply /tmp/modern-webhook-policy.patch; \
+    install -m644 /tmp/webhook-modern-policy_test.go service/modern_policy_test.go; \
+    go test -vet=off ./service -run '^TestModern'; \
+    go build -trimpath -buildvcs=false -ldflags '-X main.VERSION=v0.9.15' -o /out/webhook-service .; \
+    install -m644 LICENSE /out/notices/LICENSE; \
+    install -Dm644 /usr/local/go/LICENSE /out/notices/go/LICENSE; \
+    find vendor -type f \( -iname 'license*' -o -iname 'notice*' -o -iname 'copying*' \) \
+        -exec cp --parents '{}' /out/notices/ \;
+
 FROM scratch AS logging-jars
 ADD --checksum=sha256:5230217ccba7a9d31dda1dd878e5606037a7972282c7d3f8eac1efa80e9463d9 https://repo.maven.apache.org/maven2/ch/qos/logback/logback-classic/1.6.6/logback-classic-1.6.6.jar /logback-classic-1.6.6.jar
 ADD --checksum=sha256:5458415d5d58a97ab670632f9b2bdac2d6f7e0e11455b45dd4e64e90d12670ab https://repo.maven.apache.org/maven2/ch/qos/logback/logback-core/1.6.6/logback-core-1.6.6.jar /logback-core-1.6.6.jar
@@ -143,6 +162,8 @@ COPY --from=cattle /usr/share/cattle/env_vars /usr/share/cattle/env_vars
 COPY --from=cattle /usr/bin/rancher-* /usr/bin/docker-machine* /usr/bin/compose /usr/bin/websocket-proxy /usr/bin/
 COPY --from=cattle /lab/cattle/LICENSE /usr/share/doc/rancho-cattle/LICENSE
 COPY --from=cattle /usr/share/doc/community-websocket-proxy /usr/share/doc/community-websocket-proxy
+COPY --from=webhook /out/webhook-service /usr/bin/webhook-service
+COPY --from=webhook /out/notices/ /usr/share/doc/rancho-webhook-service/
 COPY modern-backend-entry.sh /usr/local/bin/rancho-entry
 ENV CATTLE_HOME=/var/lib/cattle CATTLE_DB_CATTLE_DATABASE=mysql DEFAULT_CATTLE_API_UI_INDEX=local
 ENV RANCHER_HOST_STREAM_PROXY_PROTOCOL=1 RANCHER_METRICS_PAYLOAD_PROXY_PROTOCOL=1 RANCHER_API_KEY_STREAM_PROXY_PROTOCOL=1

@@ -114,7 +114,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 | ADM03 | HA/pools | Monitor implementado; falta configuração/failover físico |
 | ADM04 | Drivers de máquinas/catálogos | CRUD implementado; falta provisionamento/reativação isolados |
 | INT01 | API keys | Gestão implementada; falta aceite técnico completo de escopo/expiração |
-| INT02 | Webhooks/receivers | Configuração implementada; faltam entrega local real/retries/negação |
+| INT02 | Webhooks/receivers | Opção no Compose moderno para escala de serviços. A entrega física aumentou um serviço Docker 29 de 1 para 2 réplicas e voltou para 1. Chaves inválidas, revogadas e de outro environment foram recusadas. Retentativas e entrega dos outros drivers seguem pendentes |
 | HELP01 | Sobre/capacidades/versão/atribuição | O console fixado exibiu no Chromium as versões do produto e da base Rancher, a marca Rancher, a licença Inter igual à do código-fonte e os rótulos de capacidades OIDC/RBAC. Falta conferir a configuração final e os valores das capacidades |
 
 ## Entrega e recuperação
