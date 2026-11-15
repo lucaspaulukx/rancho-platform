@@ -92,6 +92,8 @@ Public CycloneDX projections allow package identities/versions/hashes/licenses a
 
 The modern backend includes the Cattle license under `/usr/share/doc/rancho-cattle` and the WebSocket proxy's upstream and bundled notices under `/usr/share/doc/community-websocket-proxy`. Check those directories on the final runtime image during the dependency review.
 
+The console build includes the license texts from installed production dependencies in `dist/licenses/npm`. The shipped `/console/licenses/npm/index.json` lists the versions, license declarations and notice files. When a published package omits its license text, the build requires an explicitly reviewed notice for that version.
+
 ## Isolated fresh installation
 
 Use two previously built local Linux images. The rehearsal uses fresh owned volumes and a private bridge with no published ports. It checks the classic UI, the console proxy, the schema migration and idempotence after restarting the backend. The trial uses embedded MySQL and leaves OIDC and the backend modern redirect off.
