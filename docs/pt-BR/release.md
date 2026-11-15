@@ -185,6 +185,8 @@ docker run --rm -i --pull=never --network none --cap-drop ALL --cap-add NET_ADMI
   console/tests/legacy-host/smoke-modern-bootstrap.sh
 ```
 
+A interface clássica Ember exige que o serviço de catálogo esteja ativo durante o login. Use a configuração de catálogo Cattle com o Compose moderno quando disponibilizar o acesso clássico. No ensaio de navegador, desligar o catálogo retornou HTTP 500 em `/v1-catalog/catalogs` e o Ember voltou para a tela de login. Com o catálogo local pronto, o login e a lista de environments funcionaram e a sessão de teste pôde ser revogada.
+
 Prepare o catálogo no commit fixado do upstream, aplique o patch independente, faça commit apenas dos quatro templates modificados e crie um clone bare com a branch master. Defina `RANCHO_CATALOG_DIRECTORY` com o caminho absoluto desse clone no arquivo de ambiente do Compose. O override inicia a biblioteca local e o executor Compose. O gateway usa loopback por padrão. Para um host descartável remoto, use um endpoint HTTPS acessível com certificado confiável para o host descartável.
 
 ```sh
