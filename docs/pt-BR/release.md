@@ -37,6 +37,8 @@ python scripts/artifact_inventory.py scan --output migration-runs/artifact-inven
 
 `--backend-image` e `--console-image` selecionam imagens locais; export usa IDs imutáveis resolvidos. Scanner não tem rede, socket Docker, workspace ou capabilities. Lê só archives/manifests próprios e scratch, com limites de recursos. Ownership/caminhos protegem cleanup.
 
+Repita `--extra-image NOME=IMAGEM` para incluir cada imagem adicional do perfil selecionado. Por exemplo, use `--extra-image database=rancho-mariadb:local --extra-image restore=rancho-migration-restore:local` para incluir o banco e o importador. Use nomes únicos em minúsculas. No perfil moderno de workloads, inclua o bootstrap e as oito imagens de sistema do Cattle. O exemplo grava `runtime-database.cdx.json` e `runtime-restore.cdx.json`, com os IDs imutáveis correspondentes em `summary.json`.
+
 Projeções CycloneDX públicas permitem identidades/versões/hashes/licenças e relações, excluindo configuração de imagem, environment, caminhos privados e metadados desconhecidos. O CI offline verifica que referências ambíguas são rejeitadas antes que um arquivo filtrado oculte uma dependência de pacote. Nomes de pacotes ainda podem ser privados e exigem revisão. Runtime e lockfile de desenvolvimento são evidências distintas; JS incorporado e Go antigo podem ter detecção incompleta. Licenças desconhecidas são pendências, não aprovação. Não é scanner CVE nem certificação jurídica e não publica automaticamente.
 
 ## Instalação limpa isolada
