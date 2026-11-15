@@ -116,6 +116,18 @@ python console/tests/localization_acceptance.py --accessibility --release-images
 python console/tests/localization_acceptance.py --accessibility
 ```
 
+### Aceitação manual com teclado e leitor de tela
+
+Use as imagens candidatas em um laboratório descartável com dois environments nomeados, uma stack e um serviço com logs sintéticos, um administrador e um usuário sem acesso a nenhum environment. Use uma sessão de desktop dedicada para impedir que o leitor anuncie outros aplicativos ou contas. Registre os IDs das imagens do Console e do backend, o sistema operacional, as versões do navegador e do leitor, o idioma e o resultado de cada caso.
+
+1. Sem usar o mouse, entre na aplicação e vá do primeiro controle focável ao título principal pelo link de salto. Verifique se o leitor identifica as áreas de navegação, o título e o item de navegação atual, e se o foco continua visível.
+2. Em Stacks, abra o seletor de environment pelo teclado, filtre pelo nome e selecione o outro environment com as setas e Enter. Confira a seleção e a URL. Reabra o seletor e pressione Esc; confirme que o foco volta ao seletor.
+3. Expanda uma stack e abra o menu de ações do serviço. Verifique se o leitor anuncia o estado expandido e os nomes das ações. Abra Logs, confira o título e o botão de fechar do painel, e feche com Esc. Confirme que o foco volta ao controle da linha que abriu o painel.
+4. Em Grupos, abra o formulário de criação, verifique se o leitor anuncia o título e identifica o campo de nome, e use Tab e Shift+Tab no formulário. Cancele sem salvar e confira se o foco volta ao botão que abriu o formulário.
+5. Saia da aplicação. Entre com o usuário sem permissões e confirme que o leitor anuncia o título da página de acesso restrito e que o botão de sair é alcançável. Repita as verificações de navegação e diálogos no outro idioma coberto pela release.
+
+Registre os nomes, funções e estados anunciados, e o foco antes e depois de cada diálogo ou menu. O visualizador de fala do leitor pode registrar os anúncios na sessão dedicada. Guarde apenas observações sanitizadas, sem credenciais, tokens ou logs brutos. Marque os casos indisponíveis como bloqueados. O resultado do axe sozinho não conclui esse teste.
+
 ## Evidências e escopo
 
 Execute `python console/tests/gateway_security.py` com os containers locais do Rancher e do Nginx da console disponíveis na porta 18090. O teste usa uma sessão descartável de administrador e a revoga ao terminar. Verifica a política de cache e os cabeçalhos de segurança pelo Nginx, incluindo um callback OIDC inválido, sem precisar iniciar o provedor de identidade. Também verifica que scripts com hash mantêm o cache imutável.
