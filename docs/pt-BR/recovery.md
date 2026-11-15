@@ -22,6 +22,18 @@ python -m migration.engines --output migration-runs/cold-001
 
 Nomes são exemplos a substituir, não ordem para parar serviços alheios com nomes parecidos. Use diretório novo. A senha é pedida sem eco, mínimo20 caracteres, ou fornecida privadamente em `RANCHER_MIGRATION_BACKUP_PASSWORD`. Guarde-a fora do bundle.
 
+## Compose moderno com MariaDB
+
+Para o `compose.modern.yaml`, selecione os contêineres Rancho, console e MariaDB 10.11 do mesmo projeto Compose. Use os nomes exibidos por `docker compose ps`. A captura começa após a parada limpa da console e do Rancho e registra o inventário e os checksums das permissões antes de parar o MariaDB. O backup criptografa e autentica os três volumes locais nomeados. Na retomada, aguarda o MariaDB ficar saudável antes de iniciar os demais contêineres. Confira a console e os hosts de origem após a janela.
+
+```sh
+python -m migration.recovery plan --rancher rancho-modern-rancher-1 --console rancho-modern-console-1 --database rancho-modern-db-1
+python -m migration.recovery backup --rancher rancho-modern-rancher-1 --console rancho-modern-console-1 --database rancho-modern-db-1 --output migration-runs/modern-cold-001 --quiesce --include-images
+python -m migration.recovery rehearse-modern --output migration-runs/modern-cold-001 --admin-user admin --load-images
+```
+
+Antes do backup, verifique se há um administrador local disponível. O ensaio pede a senha desse administrador separadamente da senha do backup. Restaura em novos volumes, inicia as imagens registradas em uma bridge isolada do Docker 29 sem portas publicadas e valida a integridade do MariaDB, as contagens do inventário e os checksums de todas as tabelas Cattle antes de iniciar o Rancho. Em seguida, verifica o login do administrador local e a visibilidade dos environments pela console. A cópia isolada desativa o OIDC e a execução do catálogo. Faça backups próprios do catálogo, das montagens personalizadas, do armazenamento dos workloads e da configuração e dos dados do provedor de identidade. Planeje e teste a recuperação deles antes da troca.
+
 ## Captura fria e retomada
 
 `--quiesce` é obrigatório no backup: para somente os serviços selecionados/suportados, captura dados frios e tenta retomar os mesmos IDs previamente ativos em ordem inversa, inclusive após parada parcial. Não inicia baseline compartilhado nem remove volumes da origem. Comando start aprovado não prova HTTP/login; confira a recuperação dos serviços.

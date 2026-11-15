@@ -1,7 +1,7 @@
-"""Cold encrypted local-volume backup and file-level recovery rehearsal.
+"""Cold encrypted local-volume backup and isolated recovery rehearsal.
 
-No cutover, Docker socket inside helpers, published ports, or engine startup.
-All private inspect/configuration/manifests stay encrypted, never journaled.
+Rehearsals use no published ports or Docker socket inside helpers.
+Private inspect/configuration/manifests stay encrypted and out of journals.
 """
 import argparse
 import base64
@@ -17,6 +17,7 @@ import secrets
 import shutil
 import subprocess
 import threading
+import time
 
 from migration import crypto_stream
 from migration import images
@@ -29,6 +30,7 @@ DESTINATIONS = {
     'rancher': {'/var/lib/cattle', '/var/lib/mysql', '/var/log/mysql'},
     'keycloak': {'/opt/keycloak/data'},
     'console': {'/var/cache/console-runtime'},
+    'database': {'/var/lib/mysql'},
 }
 
 
@@ -37,26 +39,81 @@ def inspect(name, kind=None):
     return json.loads(run(args))[0]
 
 
+def source_environment(source):
+    return dict(item.split('=', 1) for item in source['Config'].get('Env', []) if '=' in item)
+
+
+def validate_modern_database(sources):
+    rancher, database = (sources[role] for role in ('rancher', 'database'))
+    project = rancher['Config'].get('Labels', {}).get('com.docker.compose.project')
+    for source, service in ((rancher, 'rancher'), (database, 'db'), (sources['console'], 'console')):
+        labels = source['Config'].get('Labels', {})
+        if not project or labels.get('com.docker.compose.project') != project or labels.get('com.docker.compose.service') != service:
+            raise MigrationError('Select Rancho, its console and MariaDB from the same modern Compose project.')
+    rancher_env, database_env = map(source_environment, (rancher, database))
+    credentials_match = all(database_env.get('MARIADB_' + key)
+                            and rancher_env.get('CATTLE_DB_CATTLE_' + rancher_key) == database_env['MARIADB_' + key]
+                            for key, rancher_key in (('USER', 'USERNAME'), ('PASSWORD', 'PASSWORD')))
+    if not credentials_match or database_env.get('MARIADB_DATABASE') != 'cattle' or rancher_env.get('CATTLE_DB_CATTLE_MYSQL_HOST') != 'db':
+        raise MigrationError('Modern Compose Rancher and MariaDB connection settings do not match.')
+    networks = database['NetworkSettings']['Networks']
+    if len(networks) != 1 or database['HostConfig'].get('PortBindings'):
+        raise MigrationError('The database must have one private network and no published ports.')
+    name, settings = next(iter(networks.items()))
+    network = inspect(settings['NetworkID'], 'network')
+    if (name not in rancher['NetworkSettings']['Networks'] or not network['Internal']
+            or 'db' not in (settings.get('Aliases') or [])
+            or set(network.get('Containers') or {}) - {rancher['Id'], database['Id']}):
+        raise MigrationError('Modern recovery requires a database network dedicated to the selected services.')
+
+
+class ComposeMariaDB(Database):
+    def query(self, sql):
+        query = ('export MYSQL_PWD="$MARIADB_PASSWORD"; '
+                 'exec mariadb --no-defaults --protocol=TCP --host=127.0.0.1 '
+                 '--user="$MARIADB_USER" --batch --skip-column-names -e "$1"')
+        return run(['exec', self.container, 'sh', '-ec', query, 'mariadb-recovery', sql]).decode().strip()
+
+
+def database_preflight(sources):
+    modern = 'database' in sources
+    db = ComposeMariaDB(sources['database']['Id']) if modern else Database(sources['rancher']['Id'])
+    health = preflight(db, check_tables=True)
+    if modern:
+        modern_supported = (re.match(r'^10\.11\.[0-9]+-MariaDB(?:[-+]|$)', health['databaseVersion'], re.I)
+                            and health['nonInnoDbTables'] == 0)
+        health['coldVolumeRecoverySupported'] = bool(modern_supported)
+    else:
+        health['coldVolumeRecoverySupported'] = health['offlineRehearsalSupported']
+    return health
+
+
 def select_sources(names):
     if len(set(names.values())) != len(names):
         raise MigrationError('Select distinct source containers.')
     sources = {role: inspect(identifier(name)) for role, name in names.items()}
+    modern = 'database' in sources
+    if modern:
+        if 'keycloak' in sources:
+            raise MigrationError('Back up the modern profile identity provider separately.')
+        validate_modern_database(sources)
     volumes = []
     for role, source in sources.items():
         if source['HostConfig'].get('Privileged'):
             raise MigrationError('Privileged source containers require a separate recovery design.')
-        environment = dict(item.split('=', 1) for item in source['Config'].get('Env', []) if '=' in item)
+        environment = source_environment(source)
         if role == 'keycloak' and (environment.get('KC_DB', 'dev-file') != 'dev-file'
                                    or any(arg.startswith('--db') for arg in source['Config'].get('Cmd') or [])):
             raise MigrationError('Only a dedicated Keycloak dev-file/H2 source is supported.')
-        if role == 'rancher' and (any(key.startswith('CATTLE_DB_') and (key, value) != ('CATTLE_DB_CATTLE_DATABASE', 'mysql')
+        if role == 'rancher' and not modern and (any(key.startswith('CATTLE_DB_') and (key, value) != ('CATTLE_DB_CATTLE_DATABASE', 'mysql')
                                       for key, value in environment.items())
                                  or any('db-' in arg for arg in source['Config'].get('Cmd') or [])):
             raise MigrationError('External/overridden Rancher database settings require a separate recovery design.')
+        allowed = {'/var/lib/cattle'} if modern and role == 'rancher' else DESTINATIONS[role]
         found = set()
         for mount in source['Mounts']:
             if mount['Type'] == 'volume':
-                if mount['Destination'] not in DESTINATIONS[role]:
+                if mount['Destination'] not in allowed:
                     raise MigrationError('Unrecognized source volume; no partial backup accepted.')
                 volume = inspect(mount['Name'], 'volume')
                 if volume['Driver'] != 'local' or volume.get('Options'):
@@ -67,7 +124,7 @@ def select_sources(names):
                 volumes.append({'role': role, 'name': mount['Name'], 'destination': mount['Destination']})
             elif mount['Type'] != 'bind' or mount.get('RW'):
                 raise MigrationError('Only named local volumes and read-only configuration files are supported.')
-        required = DESTINATIONS[role] - ({'/var/log/mysql'} if role == 'rancher' else set())
+        required = allowed - ({'/var/log/mysql'} if role == 'rancher' else set())
         if not required.issubset(found):
             raise MigrationError('Required source state volume missing.')
     running = run(['ps', '-q']).decode().split()
@@ -165,10 +222,10 @@ def restore_local_volume(image, name, archive, password, integrity, expected):
         raise MigrationError('Restored content/ownership/modes differ; engine startup prohibited.')
 
 
-def read_configuration(source):
+def read_configuration(source, *, skip=()):
     bindings = []
     for mount in source['Mounts']:
-        if mount['Type'] != 'bind':
+        if mount['Type'] != 'bind' or mount['Destination'] in skip:
             continue
         if ',' in mount['Source']:
             raise MigrationError('Unsupported bind source syntax.')
@@ -189,6 +246,18 @@ def require_stopped_cleanly(state):
         raise MigrationError('Source did not stop cleanly; reject the cold capture and inspect its health.')
 
 
+def wait_for_database(container):
+    deadline = time.monotonic() + 90
+    while time.monotonic() < deadline:
+        state = inspect(container)['State']
+        if not state['Running']:
+            break
+        if state.get('Health', {}).get('Status') == 'healthy':
+            return
+        time.sleep(2)
+    raise MigrationError('The source MariaDB container did not return to healthy status.')
+
+
 def backup(names, directory, password, *, quiesce=False, include_images=False):
     if not quiesce:
         raise MigrationError('Cold backup requires explicit --quiesce; use plan for read-only inspection.')
@@ -204,12 +273,13 @@ def backup(names, directory, password, *, quiesce=False, include_images=False):
     with helper(tar_image, ['tar', '--help']) as capabilities:
         if not all(flag in capabilities for flag in (b'--acls', b'--xattrs', b'--sparse')):
             raise MigrationError('Source image lacks required GNU tar support.')
-    health = preflight(Database(sources['rancher']['Id']), check_tables=True)
-    if not health['offlineRehearsalSupported']:
-        raise MigrationError('Unsupported database: require internal MySQL5.5/InnoDB.')
+    health = database_preflight(sources)
+    if not health['coldVolumeRecoverySupported']:
+        raise MigrationError('Cold recovery requires the selected MySQL 5.5 or MariaDB 10.11 profile with InnoDB.')
     metadata = {'format': 1, 'sources': sources, 'volumes': [], 'configuration': {}, 'databasePreflight': health}
     for role, source in sources.items():
-        metadata['configuration'][role] = read_configuration(source)
+        metadata['configuration'][role] = read_configuration(
+            source, skip=('/opt/rancho-catalog',) if role == 'rancher' and 'database' in sources else ())
     if include_images:
         selected_images = [source['Image'] for source in sources.values()] + [inspect(NODE, 'image')['Id']]
         required_space = sum(inspect(image, 'image')['Size'] for image in set(selected_images)) + 1024**3
@@ -221,8 +291,16 @@ def backup(names, directory, password, *, quiesce=False, include_images=False):
     stopped = []
     resume_failures = []
     try:
-        for role in ('console', 'rancher', 'keycloak'):
+        for role in ('console', 'rancher', 'keycloak', 'database'):
+            if role not in sources:
+                continue
             source = sources[role]
+            if role == 'database':
+                require_stopped_cleanly(inspect(sources['rancher']['Id'])['State'])
+                snapshot = database_preflight(sources)
+                if not snapshot['coldVolumeRecoverySupported']:
+                    raise MigrationError('MariaDB database preflight changed before capture.')
+                metadata['databasePreflight'] = snapshot
             if source['State']['Running']:
                 # Record before stopping: a timeout can still have stopped the source.
                 stopped.append(source['Id'])
@@ -255,6 +333,8 @@ def backup(names, directory, password, *, quiesce=False, include_images=False):
         for source_id in reversed(stopped):
             try:
                 run(['start', source_id])
+                if sources.get('database', {}).get('Id') == source_id:
+                    wait_for_database(source_id)
             except MigrationError:
                 resume_failures.append(source_id)
         journal(directory, 'source-resume', attempted=len(stopped), failed=len(resume_failures))
@@ -330,27 +410,43 @@ def rehearse_files(directory, password, *, load_images=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['plan', 'backup', 'rehearse-files'])
+    parser.add_argument('command', choices=['plan', 'backup', 'rehearse-files', 'rehearse-modern'])
     parser.add_argument('--rancher', default='rancher16-rbac-lab')
-    parser.add_argument('--keycloak', default='rancher16-keycloak-lab')
+    parser.add_argument('--keycloak', help='Optional dedicated Keycloak dev-file container for the legacy lab.')
     parser.add_argument('--console', default='rancher16-community-console')
+    parser.add_argument('--database', help='MariaDB db container from the same modern Compose project as --rancher.')
+    parser.add_argument('--admin-user', default='admin', help='Local administrator username for rehearse-modern.')
     parser.add_argument('--output', type=Path)
     parser.add_argument('--quiesce', action='store_true')
     parser.add_argument('--include-images', action='store_true', help='Encrypt immutable images before maintenance.')
     parser.add_argument('--load-images', action='store_true', help='Explicitly allow loading bundled missing images for rehearsal.')
     args = parser.parse_args()
     try:
-        names = {role: getattr(args, role) for role in DESTINATIONS}
+        names = {'rancher': args.rancher, 'console': args.console}
+        if args.database:
+            names['database'] = args.database
+        elif not args.keycloak:
+            names['keycloak'] = 'rancher16-keycloak-lab'
+        if args.keycloak:
+            names['keycloak'] = args.keycloak
         if args.command == 'plan':
             sources, volumes = select_sources(names)
             result = {'readOnly': True, 'selectedContainers': len(sources), 'localVolumes': len(volumes),
-                      'database': preflight(Database(sources['rancher']['Id']), check_tables=True),
+                      'database': database_preflight(sources),
                       'sourceWillBeStoppedOnlyWithQuiesce': True, 'engineRecoveryAccepted': False}
         else:
             if not args.output:
                 raise MigrationError('--output is required.')
             password = os.environ.get('RANCHER_MIGRATION_BACKUP_PASSWORD') or getpass.getpass('Recovery passphrase: ')
-            result = backup(names, args.output, password, quiesce=args.quiesce, include_images=args.include_images) if args.command == 'backup' else rehearse_files(args.output, password, load_images=args.load_images)
+            if args.command == 'backup':
+                result = backup(names, args.output, password, quiesce=args.quiesce, include_images=args.include_images)
+            elif args.command == 'rehearse-modern':
+                from migration.modern_recovery import rehearse
+
+                admin_password = os.environ.get('RANCHER_RECOVERY_ADMIN_PASSWORD') or getpass.getpass('Local administrator password: ')
+                result = rehearse(args.output, password, args.admin_user, admin_password, load_images=args.load_images)
+            else:
+                result = rehearse_files(args.output, password, load_images=args.load_images)
         print(json.dumps(result, indent=2))
     except MigrationError as error:
         print('Recovery refused/failed: ' + str(error), file=__import__('sys').stderr)

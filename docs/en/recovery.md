@@ -22,6 +22,18 @@ python -m migration.engines --output migration-runs/cold-001
 
 Names are examples to replace, not a request to stop similarly named unrelated services. Choose a new output directory. The backup passphrase is prompted without echo, minimum20 characters, or supplied privately through `RANCHER_MIGRATION_BACKUP_PASSWORD`. Keep it independently of the bundle.
 
+## Modern Compose with MariaDB
+
+For `compose.modern.yaml`, select the Rancho, console and MariaDB 10.11 containers from the same Compose project. Use the actual names from `docker compose ps`. Capture starts after the console and Rancho stop cleanly and takes the inventory and grant checksums before stopping MariaDB. It backs up the three named local volumes with authenticated encryption. It waits for MariaDB to become healthy when restarting the original containers. Verify the original console and hosts after the maintenance window.
+
+```sh
+python -m migration.recovery plan --rancher rancho-modern-rancher-1 --console rancho-modern-console-1 --database rancho-modern-db-1
+python -m migration.recovery backup --rancher rancho-modern-rancher-1 --console rancho-modern-console-1 --database rancho-modern-db-1 --output migration-runs/modern-cold-001 --quiesce --include-images
+python -m migration.recovery rehearse-modern --output migration-runs/modern-cold-001 --admin-user admin --load-images
+```
+
+Verify that a local administrator is available before taking the backup. The rehearsal asks for that administrator's password separately from the backup passphrase. It restores to new volumes, starts the recorded images on an isolated Docker 29 bridge with no published ports and verifies MariaDB integrity, inventory counts and every Cattle table checksum before booting Rancho. It then checks local administrator login and environment visibility through the console. The isolated copy disables OIDC and catalog execution. Store the catalog, any custom mounts, workload storage and identity-provider configuration and data using their own backups. Plan and test their recovery before any cutover.
+
 ## Cold capture and restart
 
 `--quiesce` is mandatory for backup: it stops only the selected supported services, captures cold data and attempts to restart the same previously active IDs in reverse order, including after partial stop failure. It never starts a shared baseline or removes source volumes. A successful start command does not prove HTTP/login health; verify service recovery.

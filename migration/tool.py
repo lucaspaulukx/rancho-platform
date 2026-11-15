@@ -34,9 +34,9 @@ def identifier(value):
     return value
 
 
-def run(args, data=None, timeout=180):
+def run(args, data=None, timeout=180, env=None):
     try:
-        result = subprocess.run(['docker', *args], input=data, capture_output=True, timeout=timeout)
+        result = subprocess.run(['docker', *args], input=data, capture_output=True, timeout=timeout, env=env)
     except (OSError, subprocess.TimeoutExpired):
         raise MigrationError('Docker unavailable or operation timed out; private diagnostics withheld.') from None
     if result.returncode:
