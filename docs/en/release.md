@@ -52,10 +52,27 @@ for file in "$archive" SHA256SUMS.txt; do
     --signer-workflow lucaspaulukx/rancho-platform/.github/workflows/runtime-provenance.yml \
     --source-ref refs/heads/main --source-digest "$commit" --deny-self-hosted-runners || exit
 done
-sha256sum -c SHA256SUMS.txt && docker image load -i "$archive"
+sha256sum -c SHA256SUMS.txt || exit
+docker image load -i "$archive" || exit
+expected_id=$(cat IMAGE-ID.txt) || exit
+actual_id=$(docker image inspect --format '{{.Id}}' "rancho-release-${component}:${commit}") || exit
+test "$actual_id" = "$expected_id"
 ```
 
-Use the loaded image IDs for release rehearsals and scans. This attestation signs exported archives for offline distribution. Registry publication and verification of OCI manifest digests require their own gate.
+After loading, compare the local ID with the ID from the verified checksum manifest in the same artifact directory. Use the loaded image IDs for release rehearsals and scans. This attestation signs exported archives for offline distribution. Registry publication and verification of OCI manifest digests require their own gate.
+
+On the server, set `RANCHO_BACKEND_IMAGE`, `RANCHO_CONSOLE_IMAGE` and `RANCHO_DATABASE_IMAGE` to the verified `rancho-release-COMPONENT:COMMIT` tags. When rehearsing a first-start import, set `RANCHO_MIGRATION_RESTORE_IMAGE` to the verified restore tag in the same Compose environment file. Keep the commit identical across components.
+
+On each isolated Cattle host, load and verify all eight network and system archives and the agent archive first. Then assign the aliases used by the patched catalog and the registration command. Run this on the target host daemon.
+
+```sh
+for component in ipsec-holder ipsec-router ipsec-cni network-manager metadata dns healthcheck scheduler; do
+  docker image tag "rancho-release-${component}:${commit}" "rancho-${component}:local" || exit
+done
+docker image tag "rancho-release-agent:${commit}" rancher/agent:v1.2.11
+```
+
+Keep each component’s archive, image ID and checksum manifest in its own directory. Retain copies alongside the matching source, package notices and corresponding sources before publishing runtime archives. Workflow artifacts expire after 14 days.
 
 ## Artifact inventory
 
