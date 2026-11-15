@@ -1,0 +1,370 @@
+diff --git a/drivers/framework.go b/drivers/framework.go
+index 3b47244..153384f 100644
+--- a/drivers/framework.go
++++ b/drivers/framework.go
+@@ -8,10 +8,10 @@ import (
+ 	"github.com/rancher/webhook-service/model"
+ )
+ 
+-//Drivers map
++// Drivers map
+ var Drivers map[string]WebhookDriver
+ 
+-//WebhookDriver interface for all drivers
++// WebhookDriver interface for all drivers
+ type WebhookDriver interface {
+ 	ValidatePayload(config interface{}, apiClient *client.RancherClient) (int, error)
+ 	Execute(config interface{}, apiClient *client.RancherClient, request *http.Request) (int, error)
+@@ -20,16 +20,13 @@ type WebhookDriver interface {
+ 	CustomizeSchema(schema *v1client.Schema) *v1client.Schema
+ }
+ 
+-//RegisterDrivers creates object of type driver for every request
++// RegisterDrivers creates object of type driver for every request
+ func RegisterDrivers() {
+ 	Drivers = map[string]WebhookDriver{}
+ 	Drivers["scaleService"] = &ScaleServiceDriver{}
+-	Drivers["serviceUpgrade"] = &ServiceUpgradeDriver{}
+-	Drivers["scaleHost"] = &ScaleHostDriver{}
+-	Drivers["forwardPost"] = &ForwardPostDriver{}
+ }
+ 
+-//GetDriver looks up the driver
++// GetDriver looks up the driver
+ func GetDriver(key string) WebhookDriver {
+ 	return Drivers[key]
+ }
+diff --git a/main.go b/main.go
+index 406a0cf..b399c52 100644
+--- a/main.go
++++ b/main.go
+@@ -4,6 +4,7 @@ import (
+ 	"fmt"
+ 	"net/http"
+ 	"os"
++	"time"
+ 
+ 	log "github.com/Sirupsen/logrus"
+ 	"github.com/rancher/webhook-service/drivers"
+@@ -65,5 +66,13 @@ func StartWebhook(c *cli.Context) {
+ 	}
+ 	router := service.NewRouter(rh)
+ 	log.Infof("Webhook service listening on 8085")
+-	log.Fatal(http.ListenAndServe(":8085", router))
++	server := &http.Server{
++		Addr:              "127.0.0.1:8085",
++		Handler:           http.MaxBytesHandler(router, 1<<20),
++		ReadHeaderTimeout: 5 * time.Second,
++		ReadTimeout:       15 * time.Second,
++		WriteTimeout:      45 * time.Second,
++		IdleTimeout:       60 * time.Second,
++	}
++	log.Fatal(server.ListenAndServe())
+ }
+diff --git a/service/client_factory.go b/service/client_factory.go
+index 009ea92..b37949e 100644
+--- a/service/client_factory.go
++++ b/service/client_factory.go
+@@ -15,6 +15,9 @@ type RancherClientFactory interface {
+ type ClientFactory struct{}
+ 
+ func (f *ClientFactory) GetClient(projectID string) (*client.RancherClient, error) {
++	if !projectIDPattern.MatchString(projectID) {
++		return nil, fmt.Errorf("Invalid project identifier")
++	}
+ 	config := config.GetConfig()
+ 	url := fmt.Sprintf("%s/projects/%s/schemas", config.CattleURL, projectID)
+ 	apiClient, err := client.NewRancherClient(&client.ClientOpts{
+diff --git a/service/construct_handler.go b/service/construct_handler.go
+index edde50b..14f2595 100644
+--- a/service/construct_handler.go
++++ b/service/construct_handler.go
+@@ -18,7 +18,7 @@ import (
+ )
+ 
+ func (rh *RouteHandler) ConstructPayload(w http.ResponseWriter, r *http.Request) (int, error) {
+-	if readonlyRoles[getRoles(r)] {
++	if !hasWriteRole(r) {
+ 		return http.StatusMethodNotAllowed, fmt.Errorf("user doesn't have the access to create webhook")
+ 	}
+ 	apiContext := api.GetApiContext(r)
+@@ -26,8 +26,11 @@ func (rh *RouteHandler) ConstructPayload(w http.ResponseWriter, r *http.Request)
+ 	wh := &model.Webhook{}
+ 	logrus.Infof("Construct Payload")
+ 	requestBytes, err := ioutil.ReadAll(r.Body)
++	if _, exceedsLimit := err.(*http.MaxBytesError); exceedsLimit {
++		return http.StatusRequestEntityTooLarge, fmt.Errorf("Receiver payload is too large")
++	}
+ 	if err != nil {
+-		return 500, err
++		return http.StatusBadRequest, fmt.Errorf("Receiver payload could not be read")
+ 	}
+ 
+ 	contentType := r.Header.Get("Content-Type")
+diff --git a/service/execute_handler.go b/service/execute_handler.go
+index 8d28a55..b369c7d 100644
+--- a/service/execute_handler.go
++++ b/service/execute_handler.go
+@@ -4,7 +4,7 @@ import (
+ 	"fmt"
+ 	"net/http"
+ 
+-	jwt "github.com/dgrijalva/jwt-go"
++	jwt "github.com/golang-jwt/jwt/v5"
+ 	"github.com/rancher/go-rancher/v2"
+ 	"github.com/rancher/webhook-service/drivers"
+ )
+@@ -38,56 +38,27 @@ func (rh *RouteHandler) Execute(w http.ResponseWriter, r *http.Request) (int, er
+ 
+ func (rh *RouteHandler) ExecuteWithJwt(jwtSigned string, request *http.Request) (int, error) {
+ 	token, err := jwt.Parse(jwtSigned, func(token *jwt.Token) (interface{}, error) {
+-		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
++		if token.Method != jwt.SigningMethodRS256 {
++			return nil, fmt.Errorf("Unexpected signing method")
+ 		}
+ 		return rh.PublicKey, nil
+-	})
+-
+-	if err != nil || !token.Valid {
+-		return 400, fmt.Errorf("Invalid token error: %v", err)
++	}, jwt.WithValidMethods([]string{"RS256"}))
++	if err != nil || token == nil || !token.Valid {
++		return http.StatusForbidden, fmt.Errorf("Invalid receiver token")
+ 	}
+-
+-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+-		driverID, ok := claims["driver"].(string)
+-		if !ok {
+-			return 400, fmt.Errorf("Driver not found after decode")
+-		}
+-
+-		driver := drivers.GetDriver(driverID)
+-		if driver == nil {
+-			return 400, fmt.Errorf("Driver %s is not registered", driverID)
+-		}
+-
+-		projectID, ok := claims["projectId"].(string)
+-		if !ok {
+-			return 400, fmt.Errorf("ProjectId not provided by server")
+-		}
+-
+-		uuid, ok := claims["uuid"].(string)
+-		if !ok {
+-			return 400, fmt.Errorf("Uuid not found after decode")
+-		}
+-
+-		apiClient, err := rh.ClientFactory.GetClient(projectID)
+-		if err != nil {
+-			return 500, err
+-		}
+-
+-		code, err := validateWebhook(uuid, apiClient)
+-		if err != nil {
+-			return code, err
+-		}
+-
+-		responseCode, err := driver.Execute(claims["config"], apiClient, request)
+-		if err != nil {
+-			return responseCode, fmt.Errorf("Error %v in executing driver for %s", err, driverID)
+-		}
++	claims, ok := token.Claims.(jwt.MapClaims)
++	if !ok {
++		return http.StatusForbidden, fmt.Errorf("Invalid receiver claims")
+ 	}
+-	return 200, nil
++	projectID, _ := claims["projectId"].(string)
++	uuid, _ := claims["uuid"].(string)
++	return rh.ExecuteWithKey(uuid, projectID, request)
+ }
+ 
+ func (rh *RouteHandler) ExecuteWithKey(uuid string, projectID string, request *http.Request) (int, error) {
++	if !receiverKeyPattern.MatchString(uuid) || !projectIDPattern.MatchString(projectID) {
++		return http.StatusBadRequest, fmt.Errorf("Invalid receiver selector")
++	}
+ 	apiClient, err := rh.ClientFactory.GetClient(projectID)
+ 	if err != nil {
+ 		return 500, err
+@@ -95,6 +66,7 @@ func (rh *RouteHandler) ExecuteWithKey(uuid string, projectID string, request *h
+ 
+ 	filters := make(map[string]interface{})
+ 	filters["key"] = uuid
++	filters["kind"] = "webhookReceiver"
+ 	goCollection, err := apiClient.GenericObject.List(&client.ListOpts{
+ 		Filters: filters,
+ 	})
+@@ -102,7 +74,7 @@ func (rh *RouteHandler) ExecuteWithKey(uuid string, projectID string, request *h
+ 		return 500, fmt.Errorf("Error %v filtering genericObjects by key", err)
+ 	}
+ 
+-	if len(goCollection.Data) == 0 {
++	if len(goCollection.Data) != 1 || goCollection.Data[0].Key != uuid || goCollection.Data[0].AccountId != projectID || goCollection.Data[0].Kind != "webhookReceiver" || goCollection.Data[0].Removed != "" {
+ 		return 403, fmt.Errorf("Requested webhook has been revoked/does not exist for this account")
+ 	}
+ 
+@@ -129,18 +101,3 @@ func (rh *RouteHandler) ExecuteWithKey(uuid string, projectID string, request *h
+ 
+ 	return 200, nil
+ }
+-
+-func validateWebhook(uuid string, apiClient *client.RancherClient) (int, error) {
+-	filters := make(map[string]interface{})
+-	filters["key"] = uuid
+-	webhookCollection, err := apiClient.GenericObject.List(&client.ListOpts{
+-		Filters: filters,
+-	})
+-	if err != nil {
+-		return 500, err
+-	}
+-	if len(webhookCollection.Data) > 0 {
+-		return 0, nil
+-	}
+-	return 403, fmt.Errorf("Requested webhook has been revoked")
+-}
+diff --git a/service/handlers.go b/service/handlers.go
+index d4b2ded..d579dc9 100644
+--- a/service/handlers.go
++++ b/service/handlers.go
+@@ -3,6 +3,8 @@ package service
+ import (
+ 	"fmt"
+ 	"net/http"
++	"regexp"
++	"strings"
+ 
+ 	"github.com/Sirupsen/logrus"
+ 	"github.com/gorilla/mux"
+@@ -18,7 +20,9 @@ const (
+ 	RoleAPIHeader = "X-API-Roles"
+ )
+ 
+-var readonlyRoles = map[string]bool{
++var projectIDPattern = regexp.MustCompile(`^1a[1-9][0-9]{0,18}$`)
++var receiverKeyPattern = regexp.MustCompile(`^[A-Za-z0-9_-]{1,128}$`)
++var readRoles = map[string]bool{
+ 	"readonly":      true,
+ 	"restricted":    true,
+ 	"v1-readonly":   true,
+@@ -41,8 +45,14 @@ func (rh *RouteHandler) ListWebhooks(w http.ResponseWriter, r *http.Request) (in
+ 	objs, err := apiClient.GenericObject.List(&client.ListOpts{
+ 		Filters: filters,
+ 	})
++	if err != nil {
++		return http.StatusBadGateway, fmt.Errorf("Could not list receivers")
++	}
+ 	response := []model.Webhook{}
+ 	for _, obj := range objs.Data {
++		if obj.AccountId != projectID || obj.Kind != "webhookReceiver" {
++			continue
++		}
+ 		webhook, err := rh.convertToWebhookGenericObject(obj)
+ 		if err != nil {
+ 			logrus.Warnf("Skipping webhook %s because: %v", obj.Id, err)
+@@ -61,7 +71,7 @@ func (rh *RouteHandler) ListWebhooks(w http.ResponseWriter, r *http.Request) (in
+ 			continue
+ 		}
+ 		// we will hide the url to prevent readonly and restricted users to access endpoint
+-		if readonlyRoles[getRoles(r)] {
++		if !hasWriteRole(r) {
+ 			respWebhook.URL = ""
+ 		}
+ 
+@@ -96,7 +106,7 @@ func (rh *RouteHandler) GetWebhook(w http.ResponseWriter, r *http.Request) (int,
+ 		return 500, err
+ 	}
+ 
+-	if obj == nil {
++	if obj == nil || obj.AccountId != projectID || obj.Kind != "webhookReceiver" {
+ 		return 404, fmt.Errorf("Webhook not found")
+ 	}
+ 
+@@ -116,7 +126,7 @@ func (rh *RouteHandler) GetWebhook(w http.ResponseWriter, r *http.Request) (int,
+ 		return 500, errors.Wrap(err, "Unable to create webhook response")
+ 	}
+ 	// we will hide the url to prevent readonly and restricted users to access endpoint
+-	if readonlyRoles[getRoles(r)] {
++	if !hasWriteRole(r) {
+ 		respWebhook.URL = ""
+ 	}
+ 
+@@ -125,7 +135,7 @@ func (rh *RouteHandler) GetWebhook(w http.ResponseWriter, r *http.Request) (int,
+ }
+ 
+ func (rh *RouteHandler) DeleteWebhook(w http.ResponseWriter, r *http.Request) (int, error) {
+-	if readonlyRoles[getRoles(r)] {
++	if !hasWriteRole(r) {
+ 		return http.StatusMethodNotAllowed, fmt.Errorf("user doesn't have the access to delete webhook")
+ 	}
+ 	vars := mux.Vars(r)
+@@ -145,7 +155,7 @@ func (rh *RouteHandler) DeleteWebhook(w http.ResponseWriter, r *http.Request) (i
+ 		return 500, err
+ 	}
+ 
+-	if obj == nil {
++	if obj == nil || obj.AccountId != projectID || obj.Kind != "webhookReceiver" {
+ 		return 404, fmt.Errorf("Webhook not found")
+ 	}
+ 
+@@ -158,9 +168,13 @@ func (rh *RouteHandler) DeleteWebhook(w http.ResponseWriter, r *http.Request) (i
+ }
+ 
+ func getProjectID(r *http.Request) (string, int, error) {
+-	projectID := r.URL.Query().Get("projectId")
+-	if projectID == "" {
+-		return "", 400, fmt.Errorf("projectId must be supplied as query parameter")
++	values := r.URL.Query()["projectId"]
++	if len(values) != 1 || !projectIDPattern.MatchString(values[0]) {
++		return "", http.StatusBadRequest, fmt.Errorf("Invalid project identifier")
++	}
++	projectID := values[0]
++	if projectID != r.Header.Get("X-API-Project-Id") || (!hasWriteRole(r) && !hasReadRole(r)) {
++		return "", http.StatusForbidden, fmt.Errorf("Receiver project access denied")
+ 	}
+ 
+ 	return projectID, 0, nil
+@@ -244,6 +258,21 @@ func (rh *RouteHandler) isUniqueName(webhookName string, projectID string, apiCl
+ 	return 200, nil
+ }
+ 
+-func getRoles(r *http.Request) string {
+-	return r.Header.Get(RoleAPIHeader)
++func hasWriteRole(r *http.Request) bool {
++	for _, role := range strings.Split(r.Header.Get(RoleAPIHeader), ",") {
++		switch strings.TrimSpace(role) {
++		case "admin", "v1-admin", "superadmin", "v1-superadmin", "owner", "v1-owner", "member", "v1-member":
++			return true
++		}
++	}
++	return false
++}
++
++func hasReadRole(r *http.Request) bool {
++	for _, role := range strings.Split(r.Header.Get(RoleAPIHeader), ",") {
++		if readRoles[strings.TrimSpace(role)] {
++			return true
++		}
++	}
++	return false
+ }
+diff --git a/service/routes.go b/service/routes.go
+index 5f998d5..76ec63e 100644
+--- a/service/routes.go
++++ b/service/routes.go
+@@ -18,7 +18,7 @@ func HandleError(s *v1client.Schemas, t func(http.ResponseWriter, *http.Request)
+ 	return api.ApiHandler(s, http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+ 		if code, err := t(rw, req); err != nil {
+ 			apiContext := api.GetApiContext(req)
+-			logrus.Errorf("Error in request: %v", err)
++			logrus.Errorf("Webhook request failed with status %d", code)
+ 			rw.Header().Add("Content-Type", "application/json")
+ 			rw.WriteHeader(code)
+ 			writeErr := apiContext.WriteResource(&model.ServerAPIError{
+@@ -27,7 +27,7 @@ func HandleError(s *v1client.Schemas, t func(http.ResponseWriter, *http.Request)
+ 				},
+ 				Code:    code,
+ 				Status:  "Server Error",
+-				Message: err.Error(),
++				Message: http.StatusText(code),
+ 			})
+ 			if writeErr != nil {
+ 				logrus.Errorf("Failed to write err: %v", err)
