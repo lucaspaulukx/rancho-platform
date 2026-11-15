@@ -4,7 +4,7 @@
 
 Choose a language for each document. Pending translations are explicit; this is not yet complete English documentation.
 
-Reviewed pairs: 16/16. Bilingual instruction/template files: 8.
+Reviewed pairs: 16/16. Bilingual instruction/template files: 9.
 
 | Document | Português (Brasil) | English |
 |---|---|---|
