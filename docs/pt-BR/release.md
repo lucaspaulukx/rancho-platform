@@ -74,6 +74,18 @@ docker image tag "rancho-release-agent:${commit}" rancher/agent:v1.2.11
 
 Guarde o arquivo de imagem, o ID e o manifesto de checksums de cada componente em um diretório próprio. Preserve cópias junto com o código-fonte correspondente e os avisos de licença antes de publicar as imagens. Os artefatos do workflow expiram após 14 dias.
 
+### Prepare downloads duráveis das imagens
+
+Baixe o artefato de fontes do CI em `source/` e cada artefato de runtime em uma pasta com o nome do componente, todos sob o mesmo diretório privado. Prepare uma cópia dos arquivos assinados em um novo diretório de saída:
+
+```sh
+python scripts/stage_release_assets.py --commit "$commit" --input ./candidate --output ./release-assets
+```
+
+O comando valida as atestações do workflow e do commit, confere os checksums e prepara nomes únicos para os arquivos do GitHub Releases. Ele não envia nada. Guarde os fontes e avisos das dependências separadamente e conclua as verificações de aceite antes de publicar.
+
+Para verificar um componente baixado, coloque seu arquivo `.docker.tar.gz` em uma pasta própria. Nessa pasta, renomeie `rancho-COMPONENT-SHA256SUMS.txt` para `SHA256SUMS.txt` e `rancho-COMPONENT-IMAGE-ID.txt` para `IMAGE-ID.txt`. Depois siga os passos de atestação, checksum e carregamento acima. O conteúdo dos checksums mantém os nomes originais. Para o ZIP de fontes, use `rancho-source-SHA256SUMS.txt` no comando de verificação.
+
 ## Inventário de artefatos
 
 A ferramenta offline usa Syft pinado e IDs locais das imagens. `plan` lê identidades/tamanhos escalares e hashes de manifests, sem exportar imagens ou reiniciar serviços. Scan é explícito e exige saída nova.
