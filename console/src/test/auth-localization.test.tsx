@@ -203,12 +203,14 @@ describe('Authentication localization without session side effects', () => {
   it('updates an existing no-access result without rechecking or translating the account identity', async () => {
     const user = userEvent.setup();
     mount(<NoAccess />);
+    expect(screen.getByRole('heading', { name: 'Seu espaço está quase pronto' })).toHaveFocus();
     await user.click(screen.getByRole('button', { name: 'Verificar acesso' }));
     expect(
       await screen.findByText('Seu acesso ainda está aguardando liberação.'),
     ).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'English fixture' }));
     expect(screen.getByRole('heading', { name: 'Your access' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'English fixture' })).toHaveFocus();
     expect(screen.getByText('Your access is still awaiting approval.')).toBeInTheDocument();
     expect(screen.getByText('Provide your account: fixture<user>.')).toBeInTheDocument();
     expect(fixture.refresh).toHaveBeenCalledTimes(1);
