@@ -12,5 +12,8 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY security-headers.conf /etc/nginx/snippets/console-security.conf
 COPY --from=build /app/dist /usr/share/nginx/html/console
 COPY retain-assets.sh /docker-entrypoint.d/20-console-assets.sh
-RUN chmod +x /docker-entrypoint.d/20-console-assets.sh
+COPY licenses/runtime/nginx-1.30.6-LICENSE.txt /usr/share/licenses/nginx/UPSTREAM-LICENSE.txt
+RUN --network=none chmod +x /docker-entrypoint.d/20-console-assets.sh \
+    && test "$(nginx -v 2>&1)" = 'nginx version: nginx/1.30.6' \
+    && echo '08845fe39e06b51dad7685c28140ab49577a86e947523e16b536a46caf89ad5c  /usr/share/licenses/nginx/UPSTREAM-LICENSE.txt' | sha256sum -c -
 EXPOSE 8080
