@@ -154,7 +154,14 @@ describe('Localized shared shell', () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: 'Environment: Desenvolvimento' }));
     const search = screen.getByRole('combobox', { name: 'Buscar environment' });
+    expect(search).not.toHaveAttribute('aria-activedescendant');
     await user.type(search, 'producao');
+    expect(search).not.toHaveAttribute('aria-activedescendant');
+    await user.keyboard('{ArrowDown}');
+    expect(search).toHaveAttribute(
+      'aria-activedescendant',
+      screen.getByRole('option', { name: /Produção/ }).id,
+    );
     act(() => changeLocale('en-US'));
     expect(screen.getByRole('dialog', { name: 'Select environment' })).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'Search environments' })).toBe(search);

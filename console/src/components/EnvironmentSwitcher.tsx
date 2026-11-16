@@ -28,6 +28,7 @@ export function EnvironmentSwitcher({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
+  const [navigatingOptions, setNavigatingOptions] = useState(false);
   const current = projects.find((project) => project.id === currentId);
   const choices = useMemo(
     () =>
@@ -52,6 +53,7 @@ export function EnvironmentSwitcher({
   function show() {
     setQuery('');
     setActive(0);
+    setNavigatingOptions(false);
     setOpen(true);
   }
   function choose(project: Project) {
@@ -145,17 +147,21 @@ export function EnvironmentSwitcher({
               aria-autocomplete="list"
               aria-controls={`${id}-list`}
               aria-activedescendant={
-                choices.length ? `${id}-option-${Math.min(active, choices.length - 1)}` : undefined
+                navigatingOptions && choices.length
+                  ? `${id}-option-${Math.min(active, choices.length - 1)}`
+                  : undefined
               }
               placeholder={t('shell.environment.placeholder')}
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);
                 setActive(0);
+                setNavigatingOptions(false);
               }}
               onKeyDown={(event) => {
                 if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
                   event.preventDefault();
+                  setNavigatingOptions(true);
                   setActive((index) =>
                     choices.length
                       ? (index + (event.key === 'ArrowDown' ? 1 : -1) + choices.length) %
