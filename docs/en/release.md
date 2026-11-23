@@ -61,6 +61,12 @@ python -m scripts.release_artifact_rehearsal --backend-image rancho-backend:loca
 
 For the [synthetic upgrade and backend rollback rehearsal](testing.md#original-engine-upgrade-and-rollback), pass the `images.backend` ID from the combined report as `--backend-image`. Compare it with `images.candidateBackend` in the engine report before grouping the evidence. The engine rehearsal requires the named local lab and a maintenance window for cold capture.
 
+For the modern MariaDB profile, add the two arguments below. The command pins all selected images and runs first-start import, repeated startup, rejection of a different backup, database rollback to Rancher 1.6.30, and the browser rollback. The source Rancher image must already be available locally. The modern profile uses loopback ports 18119 and 18091.
+
+```sh
+python -m scripts.release_artifact_rehearsal --backend-image rancho-backend-modern:local --previous-console-image rancho-console:previous --candidate-console-image rancho-console:local --modern-database-image rancho-mariadb:local --restore-image rancho-migration-restore:local
+```
+
 ## Experimental single-node installation
 
 For an existing Rancher installation, review [existing hosts and Docker versions](migration.md#existing-hosts-and-docker-versions) before selecting the modern Cattle catalog.
