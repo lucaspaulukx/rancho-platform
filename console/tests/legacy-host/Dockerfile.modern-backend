@@ -89,6 +89,7 @@ RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars --mount=fr
         code/iaas/agent-server/src/main/java/io/cattle/platform/agent/server/ping/impl/PingMonitorImpl.java \
         code/iaas/config-item/common/src/main/java/io/cattle/platform/configitem/version/impl/ConfigUpdatePublisher.java \
         code/iaas/config-item/common/src/main/java/io/cattle/platform/configitem/version/impl/ConfigItemStatusManagerImpl.java \
+        code/iaas/logic/src/main/java/io/cattle/platform/process/agent/AgentActivate.java \
         /tmp/modern-backend/ServletApplicationContext.java; \
     /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-app-config-0.5.0-SNAPSHOT.jar" \
         -C /tmp/single-node io/cattle/platform/app/AppConfig.class; \
@@ -103,6 +104,7 @@ RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars --mount=fr
         /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-iaas-agent-server-0.5.0-SNAPSHOT.jar" io/cattle/platform/agent/server/ping/impl/PingMonitorImpl*.class; \
         /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-config-item-common-0.5.0-SNAPSHOT.jar" io/cattle/platform/configitem/version/impl/ConfigUpdatePublisher*.class; \
         /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-config-item-common-0.5.0-SNAPSHOT.jar" io/cattle/platform/configitem/version/impl/ConfigItemStatusManagerImpl*.class; \
+        /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-iaas-logic-0.5.0-SNAPSHOT.jar" io/cattle/platform/process/agent/AgentActivate*.class; \
     ); \
     python3 /tmp/modern-backend/migrate-spring-annotations.py "$lib"; \
     rm "$lib"/spring-*-5.3.39.jar; \
