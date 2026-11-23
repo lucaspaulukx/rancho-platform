@@ -185,6 +185,8 @@ docker run --rm -i --pull=never --network none --cap-drop ALL --cap-add NET_ADMI
   console/tests/legacy-host/smoke-modern-bootstrap.sh
 ```
 
+The classic Ember UI requires a running catalog service during login. Use the Cattle catalog overlay with the modern Compose profile when providing classic access. During the browser rehearsal, disabling the catalog returned HTTP 500 on `/v1-catalog/catalogs` and Ember returned to the login screen. With the local catalog ready, login and the environment list worked and the test session could be revoked.
+
 Prepare the catalog at the pinned upstream commit, apply the standalone patch, commit the exact four changed templates and create a bare clone with a master branch. Set `RANCHO_CATALOG_DIRECTORY` to the absolute path of that clone in the Compose environment file. The catalog override starts the local library and Compose executor. The gateway is bound to loopback by default. For a remote disposable host use a reachable HTTPS endpoint with a certificate trusted by the disposable host.
 
 ```sh
