@@ -23,8 +23,11 @@ IDENTITY_FILES = ('keys.properties', 'cluster-id')
 
 
 def mysql(query=None, *, data=None):
+    # This one-shot helper connects only to the Compose database network.
+    # MariaDB 11.4+ clients otherwise require a verified TLS certificate by default.
     command = ['mariadb', '--host=db', '--user=cattle', '--batch',
-               '--skip-column-names', '--default-character-set=utf8mb4', 'cattle']
+               '--skip-ssl-verify-server-cert', '--skip-column-names',
+               '--default-character-set=utf8mb4', 'cattle']
     if query is not None:
         command.extend(['--execute', query])
     try:
