@@ -52,10 +52,27 @@ for file in "$archive" SHA256SUMS.txt; do
     --signer-workflow lucaspaulukx/rancho-platform/.github/workflows/runtime-provenance.yml \
     --source-ref refs/heads/main --source-digest "$commit" --deny-self-hosted-runners || exit
 done
-sha256sum -c SHA256SUMS.txt && docker image load -i "$archive"
+sha256sum -c SHA256SUMS.txt || exit
+docker image load -i "$archive" || exit
+expected_id=$(cat IMAGE-ID.txt) || exit
+actual_id=$(docker image inspect --format '{{.Id}}' "rancho-release-${component}:${commit}") || exit
+test "$actual_id" = "$expected_id"
 ```
 
-Use os IDs das imagens importadas nos ensaios e nas varreduras da release. Essa atestação assina os arquivos exportados para distribuição offline. A publicação em registry e a verificação dos digests dos manifests OCI exigem validação própria.
+Após importar, compare o ID local com o ID do manifesto de checksums verificado, no mesmo diretório do artefato. Use os IDs das imagens importadas nos ensaios e nas varreduras da release. Essa atestação assina os arquivos exportados para distribuição offline. A publicação em registry e a verificação dos digests dos manifests OCI exigem validação própria.
+
+No servidor, configure `RANCHO_BACKEND_IMAGE`, `RANCHO_CONSOLE_IMAGE` e `RANCHO_DATABASE_IMAGE` com as tags verificadas `rancho-release-COMPONENTE:COMMIT`. No ensaio de importação no primeiro início, configure `RANCHO_MIGRATION_RESTORE_IMAGE` com a tag verificada do importador no mesmo arquivo de ambiente do Compose. Use o mesmo commit para todos os componentes.
+
+Em cada host Cattle isolado, importe e verifique os oito arquivos de rede e sistema e o arquivo do agente. Depois, atribua as tags usadas pelo catálogo com o patch e pelo comando de registro. Execute no daemon do host de destino.
+
+```sh
+for component in ipsec-holder ipsec-router ipsec-cni network-manager metadata dns healthcheck scheduler; do
+  docker image tag "rancho-release-${component}:${commit}" "rancho-${component}:local" || exit
+done
+docker image tag "rancho-release-agent:${commit}" rancher/agent:v1.2.11
+```
+
+Guarde o arquivo de imagem, o ID e o manifesto de checksums de cada componente em um diretório próprio. Preserve cópias junto com o código-fonte correspondente e os avisos de licença antes de publicar as imagens. Os artefatos do workflow expiram após 14 dias.
 
 ## Inventário de artefatos
 
