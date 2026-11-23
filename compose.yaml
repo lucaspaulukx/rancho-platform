@@ -1,0 +1,63 @@
+name: rancher16-rbac-lab
+services:
+  rancher:
+    build: .
+    image: rancher16-local-rbac:dev
+    container_name: rancher16-rbac-lab
+    ports:
+      - "127.0.0.1:18080:8080"
+    volumes:
+      - rancher-state:/var/lib/cattle
+      - rancher-db:/var/lib/mysql
+    environment:
+      RANCHER_OIDC_ISSUER: http://localhost:18081/realms/rancher-lab
+      RANCHER_OIDC_CLIENT_ID: rancher16
+      RANCHER_OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      RANCHER_OIDC_CALLBACK: http://localhost:18080/oidc/callback
+      RANCHER_OIDC_BACKCHANNEL: http://keycloak:8080/realms/rancher-lab
+      RANCHER_LAB_ALLOW_HTTP: "true"
+      RANCHER_CUSTOMIZATION_ENABLED: ${RANCHER_CUSTOMIZATION_ENABLED:-true}
+      RANCHER_LOCAL_RBAC_ENABLED: ${RANCHER_LOCAL_RBAC_ENABLED:-true}
+      RANCHER_NO_ACCESS_VIEW_ENABLED: ${RANCHER_NO_ACCESS_VIEW_ENABLED:-true}
+      RANCHER_ENV_CREATION_ADMIN_ONLY: ${RANCHER_ENV_CREATION_ADMIN_ONLY:-true}
+      RANCHER_DISABLE_AUTO_ENVIRONMENT: ${RANCHER_DISABLE_AUTO_ENVIRONMENT:-true}
+      RANCHER_CATALOG_WRITE_GUARD_ENABLED: ${RANCHER_CATALOG_WRITE_GUARD_ENABLED:-true}
+      RANCHER_SESSION_ACCOUNT_GUARD_ENABLED: ${RANCHER_SESSION_ACCOUNT_GUARD_ENABLED:-true}
+      RANCHER_OIDC_ENABLED: ${RANCHER_OIDC_ENABLED:-true}
+      RANCHER_OIDC_LOGIN_PREFLIGHT_ENABLED: ${RANCHER_OIDC_LOGIN_PREFLIGHT_ENABLED:-false}
+      RANCHER_MODERN_UI_ENABLED: ${RANCHER_MODERN_UI_ENABLED:-false}
+      RANCHER_OIDC_ONLY: ${RANCHER_OIDC_ONLY:-false}
+      RANCHER_OIDC_AUTO_LOGIN: ${RANCHER_OIDC_AUTO_LOGIN:-false}
+    networks:
+      default:
+        ipv4_address: ${RANCHER_LAB_SERVER_IPV4:-172.21.0.4}
+    mem_limit: 2g
+    depends_on:
+      - keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.8@sha256:09a381c715ab0b111835b70f2905955274843a219c6f27efb348e4d9f4086858
+    container_name: rancher16-keycloak-lab
+    command: ["start-dev", "--import-realm"]
+    environment:
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      LAB_USER_PASSWORD: ${LAB_USER_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: labadmin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HOSTNAME: http://localhost:18081
+    ports:
+      - "127.0.0.1:18081:8080"
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+      - ./keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
+    mem_limit: 1g
+volumes:
+  rancher-db:
+    external: true
+    name: rancher16-rbac-lab-db
+  keycloak-data:
+  rancher-state:
+
+networks:
+  default:
+    external: true
+    name: ${RANCHER_LAB_NETWORK:-rancher16-rbac-lab_default}

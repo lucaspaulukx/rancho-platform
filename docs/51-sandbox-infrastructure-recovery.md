@@ -1,0 +1,33 @@
+# 51 — Reconexão da infraestrutura do sandbox
+
+Gate físico OPS06–08 depende de metadata/scheduler/healthcheck/IPsec saudáveis. Leitura em23/10 confirmou1s8/10/11/12 updating-active/unhealthy. metadata1i782 e dns1i784 estavam parados/exited1 e255; log selecionado de metadata apontava dial tcp172.21.0.3:8080 refused. Rancher atual172.21.0.4. Registro/agente original1h1 continua ativo.
+
+Sem alterar definição de serviços/grants/volumes, solicitada remoção nativa apenas dessas duas instâncias paradas, conferindo IDs/nome/accountId/hostId/state, para reconciliação do serviço. Relatório metadata-reconnection-results.json. Logs completos/env/tokens não publicados; diagnóstico extraiu apenas endpoint IP:porta e categorias fixas. Este documento deve registrar resultado da reconciliação antes de qualquer alegação de infra recuperada. Não contar estado ativo do host como saúde das stacks.
+
+Processo service.update de metadata1pi18361 terminou DONE após153 execuções. Próximo gate: conferir novas instâncias/estado/saúde/endereço e demais system services; só então repetir bateria de rede/saúde/sidecars. Não iniciar baseline original sobre DB compartilhado nem limpar volumes. Fixtures antigas continuam preservadas.
+
+
+Resultado parcial confirmado: metadata voltou active/healthy, novas instâncias1i922/1i923 running. Scheduler reconciliou e ficou active/initializing com nova instância1i925. Healthcheck e IPsec ainda updating-active/unhealthy ou initializing; recuperação completa e testes físicos ainda pendentes. Tentativa de remover healthcheck1i780 foi abortada por precondição de estado alterada; nenhum POST foi enviado nesse trecho. Não confundir aborto seguro de diagnóstico com alteração aplicada.
+
+
+Snapshot posterior: metadata, healthcheck e scheduler active/healthy, junto de cni-driver/network-manager. IPsec permanece degraded porque router1i785 ainda possui CATTLE_URL antigo; holder1i783 healthy e connectivity-check1i786 running. Reposição nativa do router deve aguardar estado stopped validado, sem executar exclusão forçada. O relatório infrastructure-readiness-results.json é snapshot, não indicador vitalício. IP efêmero do servidor é limitação do laboratório; endereço estável de agente/infra deve entrar no pacote reproduzível/rollback.
+
+A espera inicial do router não encontrou estado elegível no intervalo e terminou sem POST. Nova leitura confirmou stopped com action remove; POST nativo de substituição1i785 aceito, validando nome/host/environment. Aguardar instância substituta e seis serviços saudáveis antes do gate de rede.
+
+
+Verificação posterior: IPsec voltou active/healthy; a bateria physical_workload_integration.py --managed-network passou a precondição dos seis serviços saudáveis. Novo router1i929 usa endereço atual. Teste criou somente stack console-network UUID e seus server/client; o vínculo persistiu, mas os serviços ainda estavam activating e instância1i930 starting/sem host no snapshot. Ainda não há aceite de tráfego, DNS ou saúde física. Não iniciar outra fixture com baseline global até o finally limpar esse teste.
+
+
+Infraestrutura recuperada no gate inicial: os seis serviços passaram active/healthy. Bateria de rede repetida falhou por timeout na criação/alocação (serviços1s153/154; instância1i930 sem host); cleanup nativo removeu os serviços próprios. physical-network-test-results.json agora registra esta tentativa, não o aceite histórico anterior. Nenhum teste de tráfego foi considerado aprovado.
+
+Diagnóstico seguinte: scheduler com CATTLE_URL e CATTLE_CONFIG_URL atuais estabelece o event stream, mas registra Hit websocket pong timeout e reinicia a conexão/processo. Não houve401/403 no recorte de logs. Coleta sanitizada somente de erros/conexão, URLs/strings opacas redigidas; valores privados não publicados. Fonte correspondente do event-subscriber em references/rancher-compose-executor/vendor/github.com/rancher/event-subscriber/events/websocket_pings.go usa PingConfig padrão envio5s/check5s/MaxPongWait10s. Ainda falta demonstrar causa e correção do timeout; não aumentar timeout às cegas nem alegar problema apenas de capacidade: guest MemAvailable802340kB no snapshot.
+
+Próximo trabalho concreto: verificar transporte/heartbeat do event stream e configuração suportada do scheduler legado; repetir criação/alocação e rede, depois physical_healthcheck.py. O helper de saúde foi escrito, mas ainda não executado/aceito e não deve entrar nas contagens de testes físicos.
+
+Nova observação23/10: scheduler permaneceu conectado ocioso por mais de10min; timeouts reapareceram durante a alocação. Código oficial da versão0.8.6 conferido (references/rancher-scheduler, commit d9a8d0a5b624a47649df52c72e125f29d582f36f) usa100 workers com SkippingWorkerPool; não confundir com pool síncrono de um worker. HTTP autenticado de dentro do scheduler respondeu200 em0.009s. Backend confirmou alocação1i931 após duas tentativas, mas teste padrão180s terminou sem ambos containers running. Cleanup passou e consulta posterior não encontrou containers temporários console-network. Falha preservada em physical-network-default-budget-failure-2026-10-23.json.
+
+O harness agora permite observação explícita30–600s e registra orçamento/tempo em physical-network-timing.json. Execução diagnóstica480s não muda timeout de scheduler/Jetty, não corrige instabilidade e não substitui gate de latência/estabilidade. Atualizar resultado ao concluir.
+
+Resultado da observação480s:7 checks passaram — seis serviços prontos, vínculo persistido, ambos containers managed running com IPs distintos no host1h1, DNS nativo resolveu alias, HTTP devolveu conteúdo real, conta sem grant recebeu negação e cleanup nativo removeu os serviços. Alocação observada126.23s (155.33s incluindo validações posteriores/cleanup). Isso demonstra recuperação funcional nesta tentativa, sem provar que a instabilidade de heartbeat foi corrigida. Falha anterior preservada e nenhuma configuração de timeout foi alterada. Não chamar de operação estável/produção pronta.
+
+Observacao26/10 durante upgrades fisicos63: scheduler0.8.6 registrou8 linhas de pong timeout e8 de erro em15min no guest; coleta reteve apenas contagens e nao expos logs/credenciais. API e Docker levaram minutos para convergir em rollback/remocao, depois operacoes progrediram sem intervencao no workload. Isso mantem gate de estabilidade/latencia aberto mesmo quando a validacao funcional termina. Fonte correspondente usa Go1.9.7 em Dockerfile.dapper; nao atribuir a relogio sem monotonicidade sem prova do binario/runtime. Nao alterados heartbeat, scheduler nem timeout do servidor.

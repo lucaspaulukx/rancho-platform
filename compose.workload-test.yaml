@@ -1,0 +1,17 @@
+# Optional, disposable host for integration tests. Its Docker socket is isolated
+# from Docker Desktop; the main daemon and other projects are never mounted.
+services:
+  workload-test-host:
+    image: docker:20.10.24-dind@sha256:af96c680a7e1f853ebdd50c1e0577e5df4089b033102546dd6417419564df3b5
+    container_name: rancher16-workload-test-host
+    hostname: rancher16-workload-test-host
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    command: ["--host=unix:///var/run/docker.sock", "--storage-driver=vfs", "--default-cgroupns-mode=host"]
+    volumes:
+      - workload-test-docker:/var/lib/docker
+    mem_limit: 2g
+    cpus: 2
+volumes:
+  workload-test-docker:

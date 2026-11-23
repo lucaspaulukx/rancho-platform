@@ -1,0 +1,26 @@
+{{page-header currentPath="no-access"}}
+<main class="clearfix">
+  <section class="header clearfix">
+    <h1>Environments</h1>
+  </section>
+  <section>
+    <div class="banner bg-info">
+      <div class="banner-icon"><i class="icon icon-info"></i></div>
+      <div class="banner-message"><p>Seu usuário ainda não tem acesso a nenhum environment.</p></div>
+    </div>
+    <div class="text-center r-mt50 r-mb50">
+      <i class="icon icon-environment text-muted" style="font-size:48px" aria-hidden="true"></i>
+      <h2>Acesso aguardando liberação</h2>
+      <p class="text-muted">Peça a um administrador para incluir seu usuário em um grupo com as permissões necessárias.</p>
+      <p class="text-muted">Nenhum environment será criado automaticamente para sua conta.</p>
+      <div class="r-mt20">
+        <button type="button" class="btn btn-primary" disabled={{checking}} {{action "checkAccess"}}>
+          {{#if checking}}Verificando...{{else}}Verificar acesso{{/if}}
+        </button>
+        <button type="button" class="btn btn-link" {{action "logout"}}>Sair</button>
+      </div>
+      {{#if message}}<p class="text-muted r-mt20" role="status">{{message}}</p>{{/if}}
+    </div>
+  </section>
+</main>
+{{page-footer}}

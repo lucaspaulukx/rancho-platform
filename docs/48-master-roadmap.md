@@ -1,0 +1,121 @@
+# Roadmap mestre — Rancher Community Console
+
+Referência:26/10/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build595 testes/70 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
+
+## Resultado esperado
+
+Console independente para Docker/Cattle Rancher1.6.30: ambiente→stack→serviço→container operáveis na mesma tela, menus contextuais, drawers e logs/terminal/métricas mantendo contexto. Rancher e assinatura comunitária visíveis; tokens próprios próximos ao Rancher escuros, tema claro/sistema/customizável. Shell, navbar, sidebar, seletores, tabelas, formulários e estados comuns. Grupos administrados localmente, OIDC/Keycloak opcional/exclusivo/autologin e novos usuários sem acesso nem environment automático.
+
+Desenvolvimento não altera Ember. Toda função nova tem flag e comportamento off documentados; flag não concede permissão. Valores privados fora de caches/evidências. Recursos e schemas atuais revalidados antes de mutações; conflitos preservam rascunhos. Sandbox autorizado, sem pedir confirmação entre tarefas. Produção/dump real/publicação/remoção do clássico continuam fora desta execução.
+
+## Estados de trabalho
+
+**Aceito em recorte** significa fluxo e limites comprovados, não fase inteira concluída. **Parcial** tem código/alguns testes e gate aberto. **A executar** não está entregue. **Condicional** depende de infraestrutura/provedor/aplicação real compatível: pode ser desenvolvido com fixtures sintéticas, mas nunca marcado aceito sem prova equivalente.
+
+## F0/F1 — Fundação e experiência comum
+
+| ID | Entrega/telas | Estado atual | Critério final |
+|---|---|---|---|
+| UX01 | Shell/Brand/navbar/sidebar/environment selector; login e no-access | Aceito em recortes | Revalidar todas as rotas e temas no pacote final |
+| UX02 | Tabelas, filtros, seleção, menus, drawers, revisão/descartar | Aceito em recortes | Teclado completo, foco/retorno, erro parcial e contextos de todas as telas |
+| UX03 | Tokens Rancher Console/Inter, claro/escuro/sistema/custom | Aceito em recortes | Contraste e resolução efetiva de overrides em todas as rotas |
+| UX04 | Recuperação de chunks e abas de build anterior | Aceito37 | Teste de atualização e rollback com aba antiga e assets retidos |
+| UX05 | Acessibilidade manual/leitor de tela | A executar | Fluxos críticos sem mouse; nomes/ordem/foco e leitor de tela; registrar limites da ferramenta |
+| UX06 | Alto volume e performance | A executar | Fixtures20 environments e milhares de registros; latência/heap/render/buffers medidos, budgets definidos antes do teste |
+| CFG01 | Flags frontend/backend, fallback clássico | Parcial | Matriz de dependências/on/off e reversão sem alteração de dados |
+| CFG02 | Configuração versionada | Aceito53 no contrato/runtime/CLI | Legado→v1→retorno com defaults off, sem sobrescrita; rollback de artefato e banco em REL01/03 |
+
+## F2/F3 — Identidade e autorização
+
+| ID | Entrega/telas | Estado atual | Critério final |
+|---|---|---|---|
+| AUTH01 | Local/OIDC, callback, exclusivo/autologin, sem acesso | Aceito em recortes | Matriz final modos×sessão×retorno/deep link |
+| AUTH02 | Conta desativada/perfil global atual na sessão | Aceito42 | Regressão local/OIDC e credenciais técnicas; reset senha não revoga JWT |
+| AUTH03 | Expiração criptográfica real | API/rota local e OIDC aceitos54 | Sem perda simulada de cookie; encerramento de streams e sessão ociosa ainda OBS02/03 |
+| AUTH04 | Logout federado/IdP indisponível | Indisponibilidade aceita61; logout62 pendente | Logout Keycloak e Rancher coerentes, sem loops ou fallback local no exclusivo |
+| AUTH05 | Administrador OIDC e recuperação | Aceito60 | Promoção explícita, botão Keycloak, exclusivo e recuperação híbrida testados; fixture removida |
+| RBAC01 | Grupos locais/membros/grants e revisão409 | Aceito em recortes | Regressão concorrência/remoção/acesso direto+grupos, sem concessão implícita |
+| RBAC02 | Acesso efetivo/auditoria/Meu acesso | Aceito em recortes | Fonte direta/grupo e limites conhecidos sem inferência visual |
+| RBAC03 | Migração de acessos individuais para grupos | A executar | Plano/dry-run/diff/backup e rollback com20 envs sintéticos, sem perda de grants |
+| RBAC04 | Identidades externas dinâmicas | Parcial | Tratamento explícito do contrato necessário; não mover gestão de grupos para Keycloak |
+| RBAC05 | Contas técnicas e API keys | Parcial24 | Matriz escopo/expiração/revogação/owner e nenhum segredo reexposto |
+
+## F4/F5 — Environments e operação Docker/Cattle
+
+| ID | Entrega/telas | Estado atual | Critério final |
+|---|---|---|---|
+| ENV01 | Lista/seleção/resumo/criar/editar environments | Aceito em recortes | Matriz templates/bindings/privacidade e zero acesso inicial |
+| ENV02 | Templates de environment/infra | Parcial | Repetir bateria completa com origem catálogo/Compose, diferenças e efeitos reais |
+| OPS01 | Operação vertical e detalhes stack/serviço/container | Aceito12 | Tudo acessível no contexto, URL/filtros/expansões mantidos |
+| OPS02 | Lifecycle/lote/escala/imagem | Aceito em recortes | Matriz estados transitórios/erros parciais; efeito físico por recurso |
+| OPS03 | Compose criar/exportar/atualizar stack | Aceito15/34 | Completar opções avançadas, origem/segredos, validação nativa e efeito físico restante |
+| OPS04 | Links/aliases/serviços externos/LB | Parcial17/19 | DNS/HTTP de vínculo físico51 aprovado; targets/certificados, health e conflitos de portas restantes |
+| OPS05 | Portas/volumes criação e upgrade | Aceito21/29 | Matriz física mount/readOnly/tráfego, não apenas payload |
+| OPS06 | Healthcheck TCP/HTTP/quórum criação/upgrade | Configuração aceita38/39; HTTP/recreate físico52 aprovado | TCP/quórum multi-host e upgrade físico restantes |
+| OPS07 | Sidecars criação/upgrade/remoção | Configuração40/41, validação55 e físicos56/63 aceitos | Recorte de um host; estabilidade51, migração de dados e variantes finais ainda separados |
+| OPS08 | Afinidades criação/upgrade | Configuração43/44; host-label físico67 aceito | Upgrade físico de regras, container-affinity e global/multi-host |
+| OPS09 | Memória legível/reserva | Criação46/47 e upgrade/rollback físico58 aceitos | Matriz de demais recursos/OOM restante |
+| OPS10 | Capabilities/readOnly/privileged | Criação47 e reset/finish físico58 aceitos | Matriz de privilégios/dispositivos/securityOpt/ulimits conforme schema |
+| OPS11 | Recursos CPU/IO/limites avançados | Criação64, upgrade66 e reset físico70 aceitos | Demais limites avançados e matriz de compatibilidade/carga restantes |
+| OPS12 | Edição container avulso/recriação | Parcial | Separar campos mutáveis/imutáveis e rever efeito nativo sem prometer PUT impossível |
+| OPS13 | Detalhes/grafo/código/estatísticas por tipo | Parcial | Inventário09 confrontado rota/ação/campo por campo, sem lacunas ocultas |
+
+## F6 — Infraestrutura, dados, rede e catálogo
+
+| ID | Entrega/telas | Estado atual | Critério final |
+|---|---|---|---|
+| INF01 | Hosts/registro/labels/lifecycle | Parcial | Evacuação/desativação e dependências; comandos privados; sem tocar host corporativo |
+| INF02 | Registro cloud/driver | Condicional | Driver/lab sintético, credencial privada e cleanup sem custo/recurso residual |
+| INF03 | Rede/ipsec e políticas | Recorte11 aceito | Repetição física, conflitos, múltiplos hosts/regras adicionais |
+| INF04 | Balanceadores TCP/HTTP/TLS | Parcial | Tráfego real/backend saudável, certificado válido/erro, target/routing/portas |
+| DATA01 | Registry/secrets/certificados | Parcial | CRUD por contrato, permissões, uso real e segredo ausente de caches |
+| DATA02 | Volumes/mounts/pools | Parcial físico | Dependências/volume em uso/drivers, leitura/escrita e remoção segura |
+| DATA03 | Snapshots/backup targets/restore | A executar/condicional | Restore de fixture em destino isolado e checksum, sem tocar dados anteriores |
+| CAT01 | Templates/versão/lançamento/upgrade | Recortes aceitos | Clone/sincronização real, falha externa/credencial/ref inexistente, sem configuração fictícia |
+| CAT02 | Fontes globais e por environment | Aceito33/36/45 | Delegação/readonly backend; falta clone físico e refresh scoped |
+| CAT03 | Drivers de catálogo | A executar/condicional | Contrato/versionamento e execução isolada de driver compatível |
+
+## F7/F8 — Observabilidade, administração e integrações
+
+| ID | Entrega/telas | Estado atual | Critério final |
+|---|---|---|---|
+| OBS01 | Logs/terminal/métricas no contexto | Aceito em recortes | Regressão buffers/foco/resize/troca environment; dados reais |
+| OBS02 | Revogar streams abertos | Parcial | Remover grant/desativar conta/expirar JWT realmente; sockets fechados e backend nega novas sessões |
+| OBS03 | Soak no build final | A executar | Heap/buffers/CPU e reconnect medidos; soak histórico não vale automaticamente para build novo |
+| ADM01 | Contas locais/perfil/senha/lifecycle | Aceito42 | Fluxo parcial/concorrência, admin OIDC e contas técnicas em matriz final |
+| ADM02 | Auditoria/settings/processos/replay | Aceito25/27/28 | Regressão permissões, erros/privacidade e efeitos nativos |
+| ADM03 | HA/pools | Monitor aceito31 | Configuração/failover físico é gate distinto da visualização |
+| ADM04 | Drivers de máquinas/catálogos | CRUD recorte32 | Provisionamento/reativação e catálogo de drivers compatível |
+| INT01 | API keys | Aceito24 | Matriz técnica final e expiração |
+| INT02 | Webhooks/receivers | Configuração aceita30 | Entrega real para receptor local sintético, retries/negação, zero envio corporativo |
+| HELP01 | Sobre/capacidades/versões/identidade Rancher | Aceito26 | Attribution/licenças/versão do artefato e flags finais coerentes |
+
+## F10 — Entrega e recuperação
+
+| ID | Entrega | Estado | Critério final |
+|---|---|---|---|
+| REL01 | Migrations banco/config versionadas | A executar | Instalação limpa + atualização de base sintética + idempotência/checksums/rollback |
+| REL02 | Backup Rancher DB/estado e Keycloak | Parcial DB | Backup consistente completo e protegido; restaurar em volumes/containers próprios, login/grupos/workloads conferidos |
+| REL03 | Rollback de frontend/backend | Parcial | Imagem anterior e configuração/dados compatíveis; aba aberta continua ou recupera com clareza |
+| REL04 | Pacote reproduzível | Parcial | Bootstrap/restart de rede57 aceito; lockfiles/imagens/digests/licenças, instalação/upgrade/restore completos e matriz de compatibilidade restantes |
+| REL05 | Segurança final | A executar | Rotas/ações/scopes, CSRF/secret/cache/sessão/dependências/exposição revisados, riscos legados explícitos |
+| REL06 | Regressão/aceite de release local | A executar | Todos os gates obrigatórios aprovados no mesmo artefato, fixtures limpas e evidência rastreável |
+
+## Ordem de execução restante
+
+1. OPS09/10: upgrades de memória49 e segurança50 aceitos em configuração; concluir demais recursos no drawer atual, schema/snapshot, revisão e rollback/finish; depois CPU/dispositivos conforme contrato.
+2. OPS06/07/08: saúde/sidecars/afinidades físicos; rede51 e HTTP/recreate52 passaram; sidecar com compartilhamento56 passou e endereços estáveis57 foram validados. Sidecars63 e host-label67 aceitos; restam TCP/quorum, upgrade de afinidades, regras de container/global/multihost; manter gate de estabilidade do scheduler.
+3. OPS03/04/11/12/13 e ENV02: fechar inventário funcional Cattle e opções Compose/tipos especiais restantes.
+4. INF/DATA/CAT: rede/LB/TLS/armazenamento/clone/sincronização e drivers com fixtures isoladas.
+5. AUTH/RBAC/OBS: matriz real de expiração, IdP/logout, administrador OIDC, grants/streams e migração sintética.
+6. INT02/ADM03/04: eventos locais e gates administrativos operacionais ainda abertos.
+7. UX05/06 + CFG: teclado/a11y/escala e matriz global de flags sobre as telas finais.
+8. REL01–06: migração/backup completo/restore/rollback/pacote e bateria final. Voltar a qualquer task cujo teste falhar; não encerrar por contagem de testes.
+
+Cada item começa com contrato/plano, implementa sob flag inicialmente off, passa testes apropriados e integração real, limpa fixtures e atualiza este roadmap/status antes de habilitar. Não repetir aprovação humana para essas operações sandbox já autorizadas. Ausência de infraestrutura compatível deve virar pendência concreta com evidência; não substituir por mock e marcar100%.
+
+## Escopo opcional e conclusão
+
+VMs/Windows, Kubernetes/kubectl, Swarm e Mesos constam do inventário legado, mas F9 permanece condicional e desativado até necessidade e laboratório próprios. Não entram no percentual Cattle; a solução documenta a fronteira e conserva acesso clássico. Se migração desses domínios for exigida, terão roadmap/gates e denominador próprios.
+
+100% do escopo Docker/Cattle exige todos os gates obrigatórios acima, confronto completo do inventário09 e catálogo03, nenhum problema crítico/funcional aberto, evidência de efeitos reais, artefato final reproduzível e recuperação testada. Publicar em produção ou retirar o clássico é decisão posterior, não condição para terminar o desenvolvimento local. O dump real segue adiado; base de20 environments sintéticos será usada no ensaio.

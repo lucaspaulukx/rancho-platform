@@ -1,0 +1,14 @@
+services:
+  legacy-test-host:
+    build: ./console/tests/legacy-host
+    image: rancher16-legacy-test-host:dev
+    container_name: rancher16-legacy-test-host
+    volumes:
+      - legacy-test-state:/lab-data
+    tmpfs:
+      - /run:size=64m,mode=0700
+    mem_limit: 2300m
+    cpus: 2
+    # Software emulation: no privileged mode, host Docker socket, or host devices.
+volumes:
+  legacy-test-state:

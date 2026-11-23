@@ -1,0 +1,25 @@
+# Independent modern frontend. Does not replace or rebuild classic UI assets.
+services:
+  rancher:
+    environment:
+      RANCHER_OIDC_LOGIN_PREFLIGHT_ENABLED: ${RANCHER_OIDC_LOGIN_PREFLIGHT_ENABLED:-true}
+      RANCHER_OIDC_CALLBACK: http://localhost:18090/oidc/callback
+  console:
+    build: ./console
+    image: rancher16-community-console:dev
+    container_name: rancher16-community-console
+    ports:
+      - "127.0.0.1:18090:8080"
+    environment:
+      CONSOLE_ASSET_RETENTION: ${CONSOLE_ASSET_RETENTION:-true}
+    volumes:
+      - ./console/public/console-config.json:/usr/share/nginx/html/console/console-config.json:ro
+      - console-assets:/var/cache/console-runtime
+    depends_on:
+      - rancher
+    networks:
+      default:
+        ipv4_address: ${RANCHER_LAB_CONSOLE_IPV4:-172.21.0.6}
+    mem_limit: 256m
+volumes:
+  console-assets:

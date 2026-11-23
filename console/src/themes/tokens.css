@@ -1,0 +1,43 @@
+/* Generated from presets.json by scripts/themes.mjs. */
+:root {
+  --background: #f4f6f7;
+  --surface: #ffffff;
+  --elevated: #ffffff;
+  --text: #20313b;
+  --muted: #526570;
+  --border: #dce3e7;
+  --primary: #006c9b;
+  --focus: #006c9b;
+  --control-border: #71828c;
+  --primary-action: #0075a8;
+  --primary-foreground: #ffffff;
+  --primary-hover: #005c85;
+  --success: #15803d;
+  --warning: #92400e;
+  --danger: #b91c1c;
+  --info: #006c9b;
+  --navigation-accent-start: #0075a8;
+  --navigation-accent-end: #0075a8;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --background: #151b1f;
+  --surface: #1d262c;
+  --elevated: #243039;
+  --text: #f2f6f8;
+  --muted: #b3c1ca;
+  --border: #3c4b55;
+  --primary: #68c5ed;
+  --focus: #68c5ed;
+  --control-border: #81949f;
+  --primary-action: #0075a8;
+  --primary-foreground: #ffffff;
+  --primary-hover: #005c85;
+  --success: #65d393;
+  --warning: #f6c968;
+  --danger: #ff9298;
+  --info: #68c5ed;
+  --navigation-accent-start: #68c5ed;
+  --navigation-accent-end: #68c5ed;
+  color-scheme: dark;
+}

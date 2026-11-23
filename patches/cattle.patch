@@ -1,0 +1,1138 @@
+diff --git a/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java b/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java
+index 42b2a92..219b649 100644
+--- a/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java
++++ b/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java
+@@ -8,6 +8,7 @@ import io.cattle.platform.core.constants.CommonStatesConstants;
+ import io.cattle.platform.core.constants.ProjectConstants;
+ import io.cattle.platform.core.model.MachineDriver;
+ import io.cattle.platform.iaas.api.servlet.filter.ProxyPreFilter;
++import io.cattle.platform.iaas.api.auth.localrbac.CustomizationConfig;
+ import io.cattle.platform.object.ObjectManager;
+ import io.cattle.platform.object.meta.ObjectMetaDataManager;
+ import io.cattle.platform.object.util.DataAccessor;
+@@ -330,6 +331,15 @@ public class GenericWhitelistedProxy extends AbstractResponseGenerator implement
+         temp.setHeader(ProjectConstants.PROJECT_HEADER, projectHeader);
+         temp.setHeader(ProjectConstants.ROLES_HEADER, roleString);
+ 
++        // ProxyPreFilter presents GET to the API pipeline; authorize the real verb
++        // before forwarding catalog mutations, using the authenticated policy only.
++        String catalogPath = uri.getPath();
++        if (CustomizationConfig.CURRENT.enabled("CATALOG_WRITE_GUARD_ENABLED") &&
++                catalogPath != null && (catalogPath.equals("/v1-catalog") || catalogPath.startsWith("/v1-catalog/")) &&
++                !"GET".equals(method) && !"HEAD".equals(method)) {
++            authorize(method, new HashSet<String>(Arrays.asList("admin", "v1-admin", "superadmin", "v1-superadmin",
++                    "owner", "v1-owner", "member", "v1-member")), roles, null);
++        }
+         authorize(method, requiredRoles, roles, methodRoles);
+ 
+         if ("POST".equals(method) || "PUT".equals(method)) {
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java
+index 2cb2302..f00465f 100644
+--- a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java
+@@ -305,7 +305,7 @@ public abstract class AbstractTokenUtil implements TokenUtil {
+             Object hasLoggedIn = DataAccessor.fields(account).withKey(SecurityConstants.HAS_LOGGED_IN).get();
+             if (((hasLoggedIn == null || !((Boolean) hasLoggedIn)) &&
+                     !authDao.hasAccessToAnyProject(identities, false, null)) &&
+-                    (CREATE_PROJECT.get())) {
++                    (!io.cattle.platform.iaas.api.auth.localrbac.CustomizationConfig.CURRENT.enabled("DISABLE_AUTO_ENVIRONMENT") && CREATE_PROJECT.get())) {
+                 projectResourceManager.createProjectForUser(user);
+             }
+         } else {
+@@ -361,6 +361,8 @@ public abstract class AbstractTokenUtil implements TokenUtil {
+         jsonData.put(AbstractTokenUtil.USER_IDENTITY, user);
+         jsonData.put(AbstractTokenUtil.USER_TYPE, account.getKind());
+         jsonData.put("originalLogin", originalLogin);
++        jsonData.put("loginMethod", Boolean.TRUE.equals(ApiContext.getContext().getApiRequest()
++                .getAttribute("rancher.oidc.authenticated")) ? "oidc" : "local");
+ 
+         String accountId = (String) ApiContext.getContext().getIdFormatter().formatId(objectManager.getType(Account.class), account.getId());
+         Date expiry = new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRY_MILLIS.get());
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java
+index 17e52c0..73c7e21 100644
+--- a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java
+@@ -22,6 +22,7 @@ import io.cattle.platform.iaas.api.auth.SecurityConstants;
+ import io.cattle.platform.iaas.api.auth.dao.AuthDao;
+ import io.cattle.platform.iaas.api.auth.projects.Member;
+ import io.cattle.platform.iaas.api.auth.projects.ProjectLock;
++import io.cattle.platform.iaas.api.auth.localrbac.LocalGroupStore;
+ import io.cattle.platform.lock.LockCallback;
+ import io.cattle.platform.lock.LockManager;
+ import io.cattle.platform.object.ObjectManager;
+@@ -56,6 +57,9 @@ import com.netflix.config.DynamicStringListProperty;
+ 
+ public class AuthDaoImpl extends AbstractJooqDao implements AuthDao {
+ 
++    @Inject
++    LocalGroupStore localGroupStore;
++
+     private static final List<String> OWNER_ROLE_LIST = Arrays.asList("owner");
+     private static final DynamicStringListProperty SET_MEMBER_ROLES = ArchaiusUtil.getList("project.set.member.roles");
+ 
+@@ -150,19 +154,7 @@ public class AuthDaoImpl extends AbstractJooqDao implements AuthDao {
+             if (projectMembers == null || projectMembers.size() == 0) {
+                 return account.getKind();
+             } else {
+-                String role = null;
+-                for (ProjectMember projectMember : projectMembers) {
+-                    if (role == null) {
+-                        role = projectMember.getRole();
+-                    } else {
+-                        String newRole = projectMember.getRole();
+-
+-                        if (getRolePriority(newRole) < getRolePriority(role)) {
+-                            role = newRole;
+-                        }
+-                    }
+-                }
+-                return role;
++                return resolveProjectRole(projectMembers);
+             }
+         } else if (account != null){
+             return account.getKind();
+@@ -172,7 +164,17 @@ public class AuthDaoImpl extends AbstractJooqDao implements AuthDao {
+     }
+ 
+ 
+-    private int getRolePriority(String role) {
++    public static String resolveProjectRole(Iterable<? extends ProjectMember> members) {
++        String role = null;
++        for (ProjectMember member : members) {
++            if (role == null || getRolePriority(member.getRole()) < getRolePriority(role)) {
++                role = member.getRole();
++            }
++        }
++        return role;
++    }
++
++    private static int getRolePriority(String role) {
+         return ArchaiusUtil.getInt(SecurityConstants.ROLE_SETTING_BASE + role).get();
+     }
+ 
+@@ -381,6 +383,14 @@ public class AuthDaoImpl extends AbstractJooqDao implements AuthDao {
+         }
+         projects = new ArrayList<>();
+         projects.addAll(returnProjects.values());
++        for (ProjectMember grant : localGroupStore.grants(identities, null)) {
++            if (returnProjects.containsKey(grant.getProjectId())) { continue; }
++            Account project = getAccountById(grant.getProjectId());
++            if (project != null && ProjectConstants.TYPE.equals(project.getKind()) && project.getRemoved() == null) {
++                projects.add(project);
++                returnProjects.put(project.getId(), project);
++            }
++        }
+         return projects;
+     }
+ 
+@@ -408,7 +418,9 @@ public class AuthDaoImpl extends AbstractJooqDao implements AuthDao {
+         query.addFrom(PROJECT_MEMBER);
+         query.addConditions(allMembers);
+         query.setDistinct(true);
+-        return query.fetchInto(PROJECT_MEMBER);
++        List<ProjectMember> result = new ArrayList<ProjectMember>(query.fetchInto(PROJECT_MEMBER));
++        result.addAll(localGroupStore.grants(identities, projectId));
++        return result;
+     }
+ 
+     @Override
+@@ -443,6 +455,9 @@ public class AuthDaoImpl extends AbstractJooqDao implements AuthDao {
+         if (usingAccount != null && usingAccount.equals(projectId)) {
+             return false;
+         }
++        for (ProjectMember grant : localGroupStore.grants(identities, projectId)) {
++            if (roles.contains(grant.getRole())) { return true; }
++        }
+         Set<ProjectMemberRecord> projectMembers = new HashSet<>();
+         Condition allMembers = DSL.falseCondition();
+         for (Identity id : identities) {
+@@ -465,6 +480,7 @@ public class AuthDaoImpl extends AbstractJooqDao implements AuthDao {
+         if ((usingAccount != null && usingAccount.equals(projectId)) || isAdmin) {
+             return true;
+         }
++        if (!localGroupStore.grants(identities, projectId).isEmpty()) { return true; }
+         Set<ProjectMemberRecord> projectMembers = new HashSet<>();
+         Condition allMembers = DSL.falseCondition();
+         for (Identity id : identities) {
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java
+index 4308f2b..62d306c 100644
+--- a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java
+@@ -8,6 +8,7 @@ import io.cattle.platform.iaas.api.auth.dao.AuthDao;
+ import io.cattle.platform.iaas.api.auth.identity.Token;
+ import io.cattle.platform.iaas.api.auth.integration.interfaces.TokenCreator;
+ import io.cattle.platform.iaas.api.auth.integration.internal.rancher.RancherIdentityProvider;
++import io.cattle.platform.iaas.api.auth.localrbac.OidcSupport;
+ import io.cattle.platform.util.type.CollectionUtils;
+ import io.github.ibuildthecloud.gdapi.context.ApiContext;
+ import io.github.ibuildthecloud.gdapi.exception.ClientVisibleException;
+@@ -24,6 +25,9 @@ import org.apache.commons.lang3.ObjectUtils;
+ 
+ public class LocalAuthTokenCreator extends LocalAuthConfigurable implements TokenCreator {
+ 
++    @Inject
++    OidcSupport oidcSupport;
++
+     @Inject
+     AuthDao authDao;
+     @Inject
+@@ -46,7 +50,16 @@ public class LocalAuthTokenCreator extends LocalAuthConfigurable implements Toke
+             throw new ClientVisibleException(ResponseCodes.FORBIDDEN);
+         }
+ 
+-        Account account =authDao.getAccountByLogin(split[0], split[1], ApiContext.getContext().getTransformationService());
++        boolean oidcLogin = "oidc-ticket".equals(split[0]);
++        if (oidcSupport.only() && !oidcLogin) {
++            throw new ClientVisibleException(ResponseCodes.FORBIDDEN, "OidcOnly",
++                    "O login local esta desabilitado. Utilize o provedor OIDC.", null);
++        }
++        if (oidcLogin) { request.setAttribute("rancher.oidc.authenticated", Boolean.TRUE); }
++
++        Account account = oidcLogin
++                ? oidcSupport.consume(split[1], request.getServletContext().getRequest())
++                : authDao.getAccountByLogin(split[0], split[1], ApiContext.getContext().getTransformationService());
+ 
+         if (account == null){
+             throw new ClientVisibleException(ResponseCodes.UNAUTHORIZED);
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenUtils.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenUtils.java
+index 2bd493a..28ed48e 100644
+--- a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenUtils.java
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenUtils.java
+@@ -3,11 +3,40 @@ package io.cattle.platform.iaas.api.auth.integration.local;
+ import io.cattle.platform.core.constants.ProjectConstants;
+ import io.cattle.platform.core.model.Account;
+ import io.cattle.platform.iaas.api.auth.AbstractTokenUtil;
++import io.cattle.platform.iaas.api.auth.localrbac.OidcSupport;
++import io.github.ibuildthecloud.gdapi.exception.ClientVisibleException;
++import javax.inject.Inject;
+ 
+ import java.util.List;
+ 
+ public class LocalAuthTokenUtils extends AbstractTokenUtil {
+ 
++    @Inject
++    OidcSupport oidcSupport;
++
++    @Override
++    public Account getAccountFromJWT() {
++        Account account = super.getAccountFromJWT();
++        if (account != null && oidcSupport.only() && !"oidc".equals(getJsonData().get("loginMethod"))) {
++            throw new ClientVisibleException(401, "OidcOnly");
++        }
++        return account;
++    }
++
++    @Override
++    public io.cattle.platform.iaas.api.auth.identity.Token retrieveCurrentToken() {
++        io.cattle.platform.iaas.api.auth.identity.Token token = super.retrieveCurrentToken();
++        if (io.cattle.platform.iaas.api.auth.localrbac.CustomizationConfig.CURRENT.enabled("SESSION_ACCOUNT_GUARD_ENABLED") && token.getUserIdentity() != null) {
++            Account account = getAccountFromJWT();
++            if (account == null) { throw new ClientVisibleException(401, "AccountUnavailable"); }
++            token.setUserType(account.getKind());
++        }
++        if (oidcSupport.only() && token.getUserIdentity() != null && !"oidc".equals(getJsonData().get("loginMethod"))) {
++            throw new ClientVisibleException(401, "OidcOnly");
++        }
++        return token;
++    }
++
+     @Override
+     public String tokenType() {
+         return LocalAuthConstants.JWT;
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java
+index aec39a6..f2572fa 100644
+--- a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java
+@@ -148,6 +148,10 @@ public class ProjectResourceManager extends AbstractObjectResourceManager {
+     @SuppressWarnings("unchecked")
+     private Account createProject(String type, ApiRequest apiRequest) {
+         Policy policy = (Policy) ApiContext.getContext().getPolicy();
++        if (io.cattle.platform.iaas.api.auth.localrbac.CustomizationConfig.CURRENT.enabled("ENV_CREATION_ADMIN_ONLY") && !policy.isOption(Policy.AUTHORIZED_FOR_ALL_ACCOUNTS)) {
++            throw new ClientVisibleException(ResponseCodes.FORBIDDEN, "AdminRequired",
++                    "Somente administradores podem criar environments.", null);
++        }
+         Map<String, Object> project = CollectionUtils.toMap(apiRequest.getRequestObject());
+         if (authDao.getAccountById(policy.getAccountId()).getKind().equalsIgnoreCase(ProjectConstants.TYPE)) {
+             throw new ClientVisibleException(ResponseCodes.FORBIDDEN);
+diff --git a/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java b/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java
+index e017f43..7b7586b 100644
+--- a/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java
++++ b/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java
+@@ -26,6 +26,9 @@ import io.cattle.platform.iaas.api.auditing.ResourceIdInputFilter;
+ import io.cattle.platform.iaas.api.auditing.ResourceIdOutputFilter;
+ import io.cattle.platform.iaas.api.auth.AchaiusPolicyOptionsFactory;
+ import io.cattle.platform.iaas.api.auth.dao.impl.AuthDaoImpl;
++import io.cattle.platform.iaas.api.auth.localrbac.LocalGroupStore;
++import io.cattle.platform.iaas.api.auth.localrbac.LocalGroupManager;
++import io.cattle.platform.iaas.api.auth.localrbac.OidcSupport;
+ import io.cattle.platform.iaas.api.auth.dao.impl.AuthTokenDaoImpl;
+ import io.cattle.platform.iaas.api.auth.dynamic.DynamicSchemaAuthorizationProvider;
+ import io.cattle.platform.iaas.api.auth.identity.AccountOutputFilter;
+@@ -712,6 +715,22 @@ public class IaasApiConfig {
+         return new AuthDaoImpl();
+     }
+ 
++    @Bean
++    LocalGroupStore LocalGroupStore() { return new LocalGroupStore(); }
++
++    @Bean
++    LocalGroupManager LocalGroupManager() { return new LocalGroupManager(); }
++
++    @Bean
++    TypeSet LocalRbacTypes() {
++        TypeSet types = new TypeSet("LocalRbacTypes");
++        types.setTypeClasses(Arrays.<Class<?>>asList(io.cattle.platform.iaas.api.auth.localrbac.LocalGroup.class,io.cattle.platform.iaas.api.auth.localrbac.LocalGroupAudit.class,io.cattle.platform.iaas.api.auth.localrbac.LocalAccess.class));
++        return types;
++    }
++
++    @Bean
++    OidcSupport OidcSupport() { return new OidcSupport(); }
++
+     @Bean
+     BasicAuthImpl BasicAuthImpl() {
+         return new BasicAuthImpl();
+diff --git a/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties b/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties
+index 05685f7..0933524 100644
+--- a/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties
++++ b/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties
+@@ -48,7 +48,7 @@ default.services.domain=rancher.io
+ config.item.name.preload=reconcile,stack-reconcile,service-endpoints-update,host-endpoints-update
+ api.security.enabled=false
+ 
+-api.ignore.paths=/static,/ping,/healthcheck
++api.ignore.paths=/static,/ping,/healthcheck,/oidc
+ 
+ # 5 Minutes
+ api.show.removed.for.seconds=-300
+diff --git a/resources/content/schema/admin/admin-auth.json b/resources/content/schema/admin/admin-auth.json
+index 931a830..62ea426 100644
+--- a/resources/content/schema/admin/admin-auth.json
++++ b/resources/content/schema/admin/admin-auth.json
+@@ -1,5 +1,11 @@
+ {
+     "authorize" : {
++        "localGroup": "cr",
++        "localGroup\\..*": "cr",
++        "localGroupAudit": "r",
++        "localGroupAudit\\..*": "r",
++        "localAccessReport": "r",
++        "localAccessReport\\..*": "r",
+ 
+         ".*\\.data" : "r",
+         ".*\\.removeTime" : "r",
+diff --git a/resources/content/schema/user/user-auth.json b/resources/content/schema/user/user-auth.json
+index 209a46f..1bf6cf8 100644
+--- a/resources/content/schema/user/user-auth.json
++++ b/resources/content/schema/user/user-auth.json
+@@ -19,6 +19,14 @@
+         "account": "r",
+         "account.version": "r",
+ 
++        "localAccessReport": "r",
++        "localAccessReport.accountId": "r",
++        "localAccessReport.projectId": "r",
++        "localAccessReport.effectiveRole": "r",
++        "localAccessReport.complete": "r",
++        "localAccessReport.identityScope": "r",
++        "localAccessReport.sources": "r",
++
+         "portRange": "cru",
+ 
+         "apiKey" : "crud",
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CustomizationConfig.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CustomizationConfig.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CustomizationConfig.java
+@@ -0,0 +1,68 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import java.util.*;
++
++/** Server-owned, immutable configuration. Public output contains no credentials. */
++public final class CustomizationConfig {
++    public static final CustomizationConfig CURRENT = new CustomizationConfig(System.getenv());
++    private final Map<String,Boolean> requested = new LinkedHashMap<>();
++    private final Map<String,Boolean> effective = new LinkedHashMap<>();
++    private final boolean oidcConfigured;
++
++    public CustomizationConfig(Map<String,String> env) {
++        String[] names={"CUSTOMIZATION_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
++            "ENV_CREATION_ADMIN_ONLY","DISABLE_AUTO_ENVIRONMENT","CATALOG_WRITE_GUARD_ENABLED","SESSION_ACCOUNT_GUARD_ENABLED","OIDC_ENABLED","OIDC_LOGIN_PREFLIGHT_ENABLED","OIDC_ONLY","OIDC_AUTO_LOGIN","MODERN_UI_ENABLED"};
++        for (String name:names) {
++            boolean fallback=!(name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
++            String value=env.get("RANCHER_"+name);
++            if(value!=null && !value.equals("true") && !value.equals("false")) { throw new IllegalArgumentException("Invalid boolean: RANCHER_"+name); }
++            requested.put(name,value==null?fallback:Boolean.valueOf(value));
++        }
++        int configured=0;
++        for(String name:new String[]{"ISSUER","CLIENT_ID","CALLBACK"}) {
++            String value=env.get("RANCHER_OIDC_"+name);
++            if(value!=null && !value.trim().isEmpty()) { configured++; }
++        }
++        if(configured!=0 && configured!=3) { throw new IllegalArgumentException("Incomplete OIDC configuration"); }
++        oidcConfigured=configured==3;
++        String lab=env.get("RANCHER_LAB_ALLOW_HTTP");
++        if(lab!=null && !lab.equals("true") && !lab.equals("false")) { throw new IllegalArgumentException("Invalid boolean: RANCHER_LAB_ALLOW_HTTP"); }
++        if(oidcConfigured) {
++            for(String name:new String[]{"ISSUER","CALLBACK","BACKCHANNEL"}) {
++                String value=env.get("RANCHER_OIDC_"+name);
++                if(value==null || value.isEmpty()) { continue; }
++                try {
++                    java.net.URI uri=new java.net.URI(value);
++                    if(uri.getHost()==null || uri.getUserInfo()!=null || uri.getFragment()!=null || uri.getQuery()!=null ||
++                       !("https".equals(uri.getScheme()) || ("true".equals(lab) && "http".equals(uri.getScheme())))) {
++                        throw new IllegalArgumentException();
++                    }
++                } catch(Exception invalid) { throw new IllegalArgumentException("Invalid OIDC URL: RANCHER_OIDC_"+name); }
++            }
++        }
++        effective.putAll(requested);
++        boolean custom=requested.get("CUSTOMIZATION_ENABLED");
++        for(String name:new String[]{"LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","OIDC_ENABLED"}) {
++            effective.put(name,custom && requested.get(name));
++        }
++        effective.put("OIDC_ENABLED",effective.get("OIDC_ENABLED") && oidcConfigured);
++        effective.put("OIDC_LOGIN_PREFLIGHT_ENABLED",requested.get("OIDC_LOGIN_PREFLIGHT_ENABLED") && effective.get("OIDC_ENABLED"));
++        if((requested.get("OIDC_ONLY") || requested.get("OIDC_AUTO_LOGIN")) && !effective.get("OIDC_ENABLED")) {
++            throw new IllegalArgumentException("OIDC_ONLY/AUTO_LOGIN require effective OIDC");
++        }
++        if(requested.get("MODERN_UI_ENABLED")) { throw new IllegalArgumentException("Modern UI is not available in this build"); }
++    }
++    public boolean enabled(String name) { return Boolean.TRUE.equals(effective.get(name)); }
++    public Map<String,Object> publicConfig() {
++        Map<String,Object> result=new LinkedHashMap<>();
++        result.put("version",1);
++        result.put("requested",Collections.unmodifiableMap(requested));
++        result.put("effective",Collections.unmodifiableMap(effective));
++        Map<String,Boolean> available=new LinkedHashMap<>();
++        for(String key:requested.keySet()) { available.put(key,!key.equals("MODERN_UI_ENABLED")); }
++        available.put("OIDC_ENABLED",oidcConfigured);
++        available.put("OIDC_LOGIN_PREFLIGHT_ENABLED",oidcConfigured);
++        result.put("available",available);
++        return result;
++    }
++}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalAccess.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalAccess.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalAccess.java
+@@ -0,0 +1,29 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import io.github.ibuildthecloud.gdapi.annotation.Type;
++import java.util.List;
++import java.util.Map;
++
++@Type(name="localAccessReport", pluralName="localAccessReports")
++public class LocalAccess {
++    private final String accountId;
++    private final String projectId;
++    private final String effectiveRole;
++    private final boolean complete;
++    private final List<Map<String,Object>> sources;
++
++    public LocalAccess(String accountId,String projectId,String effectiveRole,boolean complete,List<Map<String,Object>> sources) {
++        this.accountId=accountId;
++        this.projectId=projectId;
++        this.effectiveRole=effectiveRole;
++        this.complete=complete;
++        this.sources=sources;
++    }
++    public String getId() { return accountId + ":" + projectId; }
++    public String getAccountId() { return accountId; }
++    public String getProjectId() { return projectId; }
++    public String getEffectiveRole() { return effectiveRole; }
++    public boolean isComplete() { return complete; }
++    public String getIdentityScope() { return "rancher_id"; }
++    public List<Map<String,Object>> getSources() { return sources; }
++}
+\ No newline at end of file
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroup.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroup.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroup.java
+@@ -0,0 +1,25 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import io.github.ibuildthecloud.gdapi.annotation.Type;
++import java.util.*;
++
++@Type(name="localGroup", pluralName="localGroups")
++public class LocalGroup {
++    private String id;
++    private String name;
++    private long revision;
++    private List<String> members = new ArrayList<>();
++    private Map<String,String> grants = new HashMap<>();
++    private boolean delete;
++    public String getId() { return id; }
++    public void setId(String value) { id=value; }
++    public String getName() { return name; }
++    public void setName(String value) { name=value; }
++    public long getRevision() { return revision; }
++    public void setRevision(long value) { revision=value; }
++    public List<String> getMembers() { return members; }
++    public void setMembers(List<String> value) { members=value; }
++    public Map<String,String> getGrants() { return grants; }
++    public void setGrants(Map<String,String> value) { grants=value; }
++    public boolean isDelete() { return delete; }
++}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroupAudit.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroupAudit.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroupAudit.java
+@@ -0,0 +1,32 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import io.github.ibuildthecloud.gdapi.annotation.Type;
++import java.util.Map;
++
++@Type(name="localGroupAudit", pluralName="localGroupAudits")
++public class LocalGroupAudit {
++    private final String id;
++    private final String actorId;
++    private final String groupId;
++    private final String operation;
++    private final String created;
++    private final Map<String,Object> before;
++    private final Map<String,Object> after;
++
++    public LocalGroupAudit(String id,String actorId,String groupId,String operation,String created,Map<String,Object> before,Map<String,Object> after) {
++        this.id=id;
++        this.actorId=actorId;
++        this.groupId=groupId;
++        this.operation=operation;
++        this.created=created;
++        this.before=before;
++        this.after=after;
++    }
++    public String getId() { return id; }
++    public String getActorId() { return actorId; }
++    public String getGroupId() { return groupId; }
++    public String getOperation() { return operation; }
++    public String getCreated() { return created; }
++    public Map<String,Object> getBefore() { return before; }
++    public Map<String,Object> getAfter() { return after; }
++}
+\ No newline at end of file
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroupManager.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroupManager.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroupManager.java
+@@ -0,0 +1,134 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import io.cattle.platform.api.auth.Policy;
++import io.cattle.platform.api.auth.Identity;
++import io.cattle.platform.core.model.Account;
++import io.cattle.platform.core.model.ProjectMember;
++import io.cattle.platform.iaas.api.auth.SecurityConstants;
++import io.cattle.platform.iaas.api.auth.dao.AuthDao;
++import io.cattle.platform.iaas.api.auth.dao.impl.AuthDaoImpl;
++import io.cattle.platform.util.type.CollectionUtils;
++import io.github.ibuildthecloud.gdapi.context.ApiContext;
++import io.github.ibuildthecloud.gdapi.exception.ClientVisibleException;
++import io.github.ibuildthecloud.gdapi.factory.SchemaFactory;
++import io.github.ibuildthecloud.gdapi.model.ListOptions;
++import io.github.ibuildthecloud.gdapi.request.ApiRequest;
++import io.github.ibuildthecloud.gdapi.request.resource.impl.AbstractNoOpResourceManager;
++import java.util.*;
++import javax.inject.Inject;
++
++public class LocalGroupManager extends AbstractNoOpResourceManager {
++    @Inject LocalGroupStore localGroupStore;
++    @Inject AuthDao authDao;
++    public Class<?>[] getTypeClasses() { return new Class<?>[]{LocalGroup.class,LocalGroupAudit.class,LocalAccess.class}; }
++    private Policy policy() {
++        if (!CustomizationConfig.CURRENT.enabled("LOCAL_RBAC_ENABLED")) { throw new ClientVisibleException(404,"FeatureDisabled"); }
++        Policy p=(Policy)ApiContext.getContext().getPolicy();
++        if (!SecurityConstants.SECURITY.get() || p == null || p.getAuthenticatedAsAccountId() < 1) { throw new ClientVisibleException(403,"AuthenticationRequired"); }
++        return p;
++    }
++    private Policy admin() {
++        Policy p=policy();
++        if (!p.isOption(Policy.AUTHORIZED_FOR_ALL_ACCOUNTS)) { throw new ClientVisibleException(403,"AdminRequired"); }
++        return p;
++    }
++    protected Object listInternal(SchemaFactory factory,String type,Map<Object,Object> criteria,ListOptions options) {
++        if ("localAccessReport".equals(type)) {
++            Policy p=policy();
++            boolean administrative=p.isOption(Policy.AUTHORIZED_FOR_ALL_ACCOUNTS);
++            ApiRequest request = ApiContext.getContext().getApiRequest();
++            String targetAccount = parameter(request,"targetAccount");
++            long accountId = "self".equals(targetAccount) ? p.getAuthenticatedAsAccountId() : parseId(targetAccount);
++            long projectId = parseId(parameter(request,"targetEnvironment"));
++            if (!administrative && (accountId != p.getAuthenticatedAsAccountId() || !authDao.hasAccessToProject(projectId,null,false,p.getIdentities()))) { throw new ClientVisibleException(403,"AccessReportRestricted"); }
++            Account account = authDao.getAccountById(accountId);
++            Account project = authDao.getAccountById(projectId);
++            if (account == null || !("user".equals(account.getKind()) || "admin".equals(account.getKind())) || project == null || !"project".equals(project.getKind())) { throw new ClientVisibleException(404,"AccountOrEnvironmentNotFound"); }
++            if (!administrative && (account.getRemoved() != null || project.getRemoved() != null)) { throw new ClientVisibleException(403,"AccessReportRestricted"); }
++            boolean complete = account.getExternalIdType() == null || Arrays.asList("rancher_id","oidc_subject").contains(account.getExternalIdType());
++            boolean active = "active".equals(account.getState());
++            boolean globalAdmin = active && "admin".equals(account.getKind());
++            Set<Identity> identities = Collections.singleton(new Identity("rancher_id",String.valueOf(accountId)));
++            List<Map<String,Object>> sources = new ArrayList<>();
++            if (active) {
++                for (ProjectMember member : authDao.getActiveProjectMembers(projectId)) {
++                    if (!"rancher_id".equals(member.getExternalIdType()) || !String.valueOf(accountId).equals(member.getExternalId())) { continue; }
++                    Map<String,Object> source = new LinkedHashMap<>();
++                    source.put("kind","direct");
++                    source.put("memberId",String.valueOf(member.getId()));
++                    source.put("role",member.getRole());
++                    sources.add(source);
++                }
++                sources.addAll(localGroupStore.grantSources(accountId,projectId));
++            }
++            if (globalAdmin) {
++                Map<String,Object> source = new LinkedHashMap<>();
++                source.put("kind","globalAdmin");
++                source.put("role","owner");
++                sources.add(source);
++            }
++            String role = !active ? null : globalAdmin ? "owner" : complete ? AuthDaoImpl.resolveProjectRole(authDao.getProjectMembersByIdentity(projectId,identities)) : null;
++            return Collections.singletonList(new LocalAccess(String.valueOf(accountId),String.valueOf(projectId),role,complete || globalAdmin,sources));
++        }
++        admin();
++        if ("localGroupAudit".equals(type)) {
++            ApiRequest request = ApiContext.getContext().getApiRequest();
++            String before = parameter(request,"before");
++            String group = parameter(request,"groupId");
++            if (group != null) {
++                String parsed = ApiContext.getContext().getIdFormatter().parseId(group);
++                if (parsed != null) { group=parsed; }
++                if (!group.matches("[a-f0-9-]{36}")) { throw new ClientVisibleException(422,"InvalidGroupId"); }
++            }
++            Long cursor = before == null ? null : parseId(before);
++            if (cursor != null && cursor < 1) { throw new ClientVisibleException(422,"InvalidCursor"); }
++            return localGroupStore.audit(cursor,group);
++        }
++        return localGroupStore.list();
++    }
++    protected Object createInternal(String type,ApiRequest request) {
++        Policy p=admin();
++        if (!"localGroup".equals(type)) { throw new ClientVisibleException(405,"ReadOnlyResource"); }
++        Map<String,Object> body=CollectionUtils.toMap(request.getRequestObject());
++        String id=(String)body.get("id");
++        if (id!=null) {
++            String parsed=ApiContext.getContext().getIdFormatter().parseId(id);
++            if (parsed!=null) { id=parsed; }
++        }
++        String name=(String)body.get("name");
++        if (name==null || name.trim().isEmpty() || name.length()>128) { throw new ClientVisibleException(422,"InvalidGroupName"); }
++        if (id!=null && !id.matches("[a-f0-9-]{36}")) { throw new ClientVisibleException(422,"InvalidGroupId"); }
++        List<Long> users=new ArrayList<>();
++        for (Object value : body.get("members") instanceof List ? (List<?>)body.get("members") : Collections.emptyList()) {
++            long user=parseId(value);
++            Account a=authDao.getAccountById(user);
++            if (a==null || !("user".equals(a.getKind()) || "admin".equals(a.getKind())) || !"active".equals(a.getState()) || a.getRemoved()!=null) { throw new ClientVisibleException(422,"InvalidGroupMember"); }
++            if (!users.contains(user)) { users.add(user); }
++        }
++        Map<Long,String> grants=new HashMap<>();
++        for (Map.Entry<Object,Object> entry : CollectionUtils.toMap(body.get("grants")).entrySet()) {
++            long project=parseId(entry.getKey());
++            Account a=authDao.getAccountById(project);
++            String role=String.valueOf(entry.getValue());
++            if (a==null || !"project".equals(a.getKind()) || a.getRemoved()!=null || !Arrays.asList("owner","member","readonly","restricted").contains(role)) { throw new ClientVisibleException(422,"InvalidGroupGrant"); }
++            grants.put(project,role);
++        }
++        long revision=body.get("revision") instanceof Number ? ((Number)body.get("revision")).longValue() : 0;
++        return localGroupStore.save(id,name.trim(),revision,users,grants,p.getAccountId(),Boolean.TRUE.equals(body.get("delete")));
++    }
++    private String parameter(ApiRequest request,String name) {
++        Object value=request.getRequestParams().get(name);
++        if (value instanceof String[]) {
++            String[] values=(String[])value;
++            return values.length == 0 ? null : values[0];
++        }
++        return value == null ? null : String.valueOf(value);
++    }
++    private long parseId(Object value) {
++        try {
++            String text=String.valueOf(value);
++            String parsed=ApiContext.getContext().getIdFormatter().parseId(text);
++            return Long.parseLong(parsed==null?text:parsed);
++        } catch (RuntimeException e) { throw new ClientVisibleException(422,"InvalidId"); }
++    }
++}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroupStore.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroupStore.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalGroupStore.java
+@@ -0,0 +1,180 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import io.cattle.platform.api.auth.Identity;
++import io.cattle.platform.core.model.ProjectMember;
++import io.cattle.platform.core.model.tables.records.ProjectMemberRecord;
++import io.cattle.platform.db.jooq.dao.impl.AbstractJooqDao;
++import io.github.ibuildthecloud.gdapi.exception.ClientVisibleException;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import java.sql.*;
++import java.util.*;
++import javax.annotation.PostConstruct;
++
++/** Local groups are evaluated from the database, never from cached token claims. */
++public class LocalGroupStore extends AbstractJooqDao {
++    @PostConstruct
++    public void init() {
++        create().execute("CREATE TABLE IF NOT EXISTS local_rbac_group (id VARCHAR(36) PRIMARY KEY, name VARCHAR(128) NOT NULL UNIQUE, revision BIGINT NOT NULL DEFAULT 1) ENGINE=InnoDB");
++        create().execute("CREATE TABLE IF NOT EXISTS local_rbac_member (group_id VARCHAR(36) NOT NULL, account_id BIGINT NOT NULL, PRIMARY KEY(group_id,account_id), KEY(account_id)) ENGINE=InnoDB");
++        create().execute("CREATE TABLE IF NOT EXISTS local_rbac_grant (group_id VARCHAR(36) NOT NULL, project_id BIGINT NOT NULL, role VARCHAR(16) NOT NULL, PRIMARY KEY(group_id,project_id)) ENGINE=InnoDB");
++        create().execute("CREATE TABLE IF NOT EXISTS local_rbac_audit (id BIGINT AUTO_INCREMENT PRIMARY KEY, actor BIGINT NOT NULL, group_id VARCHAR(36) NOT NULL, operation VARCHAR(16) NOT NULL, created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB");
++        create().execute("CREATE TABLE IF NOT EXISTS local_rbac_audit_detail (id BIGINT AUTO_INCREMENT PRIMARY KEY, actor BIGINT NOT NULL, group_id VARCHAR(36) NOT NULL, operation VARCHAR(16) NOT NULL, before_snapshot MEDIUMTEXT NULL, after_snapshot MEDIUMTEXT NULL, created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, KEY(group_id,id)) ENGINE=InnoDB");
++        create().execute("CREATE TABLE IF NOT EXISTS local_rbac_oidc_user (identity_hash VARCHAR(64) PRIMARY KEY, account_id BIGINT NOT NULL UNIQUE) ENGINE=InnoDB");
++    }
++
++    public List<ProjectMember> grants(Set<Identity> identities, Long projectId) {
++        if (!CustomizationConfig.CURRENT.enabled("LOCAL_RBAC_ENABLED")) { return Collections.emptyList(); }
++        Set<Long> accounts = new HashSet<>();
++        for (Identity identity : identities) {
++            // rancher_id identities in policies are internal numeric IDs.
++            if ("rancher_id".equals(identity.getExternalIdType())) {
++                try { accounts.add(Long.valueOf(identity.getExternalId())); } catch (NumberFormatException ignored) { }
++            }
++        }
++        List<ProjectMember> result = new ArrayList<>();
++        for (Long account : accounts) {
++            for (org.jooq.Record row : create().fetch("SELECT g.project_id,g.role FROM local_rbac_grant g JOIN local_rbac_member m ON m.group_id=g.group_id JOIN local_rbac_group r ON r.id=g.group_id JOIN account a ON a.id=m.account_id WHERE a.removed IS NULL AND a.state='active' AND m.account_id=?" + (projectId == null ? "" : " AND g.project_id=?"), projectId == null ? new Object[]{account} : new Object[]{account,projectId})) {
++                ProjectMemberRecord member = new ProjectMemberRecord();
++                member.setProjectId(((Number)row.getValue("project_id")).longValue());
++                member.setRole((String)row.getValue("role"));
++                result.add(member);
++            }
++        }
++        return result;
++    }
++
++    public List<LocalGroup> list() {
++        List<LocalGroup> groups = new ArrayList<>();
++        for (org.jooq.Record row : create().fetch("SELECT * FROM local_rbac_group ORDER BY name")) {
++            LocalGroup group = new LocalGroup();
++            group.setId((String)row.getValue("id"));
++            group.setName((String)row.getValue("name"));
++            group.setRevision(((Number)row.getValue("revision")).longValue());
++            List<String> users = new ArrayList<>();
++            for (org.jooq.Record member : create().fetch("SELECT account_id FROM local_rbac_member WHERE group_id=? ORDER BY account_id",group.getId())) {
++                users.add(String.valueOf(member.getValue("account_id")));
++            }
++            group.setMembers(users);
++            Map<String,String> grants = new TreeMap<>();
++            for (org.jooq.Record grant : create().fetch("SELECT project_id,role FROM local_rbac_grant WHERE group_id=?",group.getId())) {
++                grants.put(String.valueOf(grant.getValue("project_id")),(String)grant.getValue("role"));
++            }
++            group.setGrants(grants);
++            groups.add(group);
++        }
++        return groups;
++    }
++
++    public LocalGroup save(String id, String name, long revision, List<Long> users, Map<Long,String> grants, long actor, boolean delete) {
++        boolean fresh = id == null;
++        if (fresh) { id = UUID.randomUUID().toString(); }
++        Connection c = getConfiguration().connectionProvider().acquire();
++        try {
++            c.setAutoCommit(false);
++            Map<String,Object> before = snapshot(c,id,true);
++            if (fresh) {
++                execute(c,"INSERT INTO local_rbac_group(id,name) VALUES(?,?)",id,name);
++            } else {
++                int changed = execute(c,"UPDATE local_rbac_group SET name=?,revision=revision+1 WHERE id=? AND revision=?",name,id,revision);
++                if (changed != 1) { throw new ClientVisibleException(409,"GroupChanged","Recarregue o grupo antes de salvar.",null); }
++            }
++            execute(c,"DELETE FROM local_rbac_member WHERE group_id=?",id);
++            execute(c,"DELETE FROM local_rbac_grant WHERE group_id=?",id);
++            if (delete) {
++                execute(c,"DELETE FROM local_rbac_group WHERE id=?",id);
++            } else {
++                for (Long user : users) { execute(c,"INSERT INTO local_rbac_member(group_id,account_id) VALUES(?,?)",id,user); }
++                for (Map.Entry<Long,String> grant : grants.entrySet()) { execute(c,"INSERT INTO local_rbac_grant(group_id,project_id,role) VALUES(?,?,?)",id,grant.getKey(),grant.getValue()); }
++            }
++            execute(c,"INSERT INTO local_rbac_audit(actor,group_id,operation) VALUES(?,?,?)",actor,id,delete ? "delete" : fresh ? "create" : "update");
++            ObjectMapper mapper = new ObjectMapper();
++            Map<String,Object> after = snapshot(c,id,false);
++            execute(c,"INSERT INTO local_rbac_audit_detail(actor,group_id,operation,before_snapshot,after_snapshot) VALUES(?,?,?,?,?)",actor,id,delete ? "delete" : fresh ? "create" : "update",before == null ? null : mapper.writeValueAsString(before),after == null ? null : mapper.writeValueAsString(after));
++            c.commit();
++        } catch (Exception e) {
++            try { c.rollback(); } catch (SQLException ignored) { }
++            if (e instanceof ClientVisibleException) { throw (ClientVisibleException)e; }
++            if (e instanceof SQLException && "23000".equals(((SQLException)e).getSQLState())) { throw new ClientVisibleException(409,"DuplicateGroup"); }
++            throw new IllegalStateException("Failed to save local group",e);
++        } finally {
++            try { c.setAutoCommit(true); } catch (SQLException ignored) { }
++            getConfiguration().connectionProvider().release(c);
++        }
++        if (delete) { return new LocalGroup(); }
++        for (LocalGroup group : list()) { if (group.getId().equals(id)) { return group; } }
++        throw new IllegalStateException("Saved group missing");
++    }
++
++    private int execute(Connection c,String sql,Object... args) throws SQLException {
++        try (PreparedStatement s = c.prepareStatement(sql)) {
++            for (int i=0;i<args.length;i++) { s.setObject(i+1,args[i]); }
++            return s.executeUpdate();
++        }
++    }
++
++    private Map<String,Object> snapshot(Connection connection,String id,boolean lock) throws SQLException {
++        Map<String,Object> result = new LinkedHashMap<>();
++        try (PreparedStatement statement = connection.prepareStatement("SELECT name,revision FROM local_rbac_group WHERE id=?" + (lock ? " FOR UPDATE" : ""))) {
++            statement.setString(1,id);
++            try (ResultSet row = statement.executeQuery()) {
++                if (!row.next()) { return null; }
++                result.put("id",id);
++                result.put("name",row.getString("name"));
++                result.put("revision",row.getLong("revision"));
++            }
++        }
++        List<String> members = new ArrayList<>();
++        try (PreparedStatement statement = connection.prepareStatement("SELECT account_id FROM local_rbac_member WHERE group_id=? ORDER BY account_id")) {
++            statement.setString(1,id);
++            try (ResultSet rows = statement.executeQuery()) {
++                while (rows.next()) { members.add(rows.getString(1)); }
++            }
++        }
++        Map<String,String> grants = new TreeMap<>();
++        try (PreparedStatement statement = connection.prepareStatement("SELECT project_id,role FROM local_rbac_grant WHERE group_id=? ORDER BY project_id")) {
++            statement.setString(1,id);
++            try (ResultSet rows = statement.executeQuery()) {
++                while (rows.next()) { grants.put(rows.getString(1),rows.getString(2)); }
++            }
++        }
++        result.put("members",members);
++        result.put("grants",grants);
++        return result;
++    }
++
++    public List<Map<String,Object>> grantSources(long account,long project) {
++        List<Map<String,Object>> result = new ArrayList<>();
++        if (!CustomizationConfig.CURRENT.enabled("LOCAL_RBAC_ENABLED")) { return result; }
++        for (org.jooq.Record row : create().fetch("SELECT r.id,r.name,g.role FROM local_rbac_group r JOIN local_rbac_member m ON m.group_id=r.id JOIN local_rbac_grant g ON g.group_id=r.id JOIN account a ON a.id=m.account_id WHERE a.removed IS NULL AND a.state='active' AND m.account_id=? AND g.project_id=? ORDER BY r.name,r.id",account,project)) {
++            Map<String,Object> source = new LinkedHashMap<>();
++            source.put("kind","group");
++            source.put("groupId",row.getValue("id"));
++            source.put("name",row.getValue("name"));
++            source.put("role",row.getValue("role"));
++            result.add(source);
++        }
++        return result;
++    }
++
++    public List<LocalGroupAudit> audit(Long before,String groupId) {
++        List<LocalGroupAudit> result = new ArrayList<>();
++        ObjectMapper mapper = new ObjectMapper();
++        for (org.jooq.Record row : create().fetch("SELECT * FROM local_rbac_audit_detail WHERE id<?" + (groupId == null ? "" : " AND group_id=?") + " ORDER BY id DESC LIMIT 100",groupId == null ? new Object[]{before == null ? Long.MAX_VALUE : before} : new Object[]{before == null ? Long.MAX_VALUE : before,groupId})) {
++            try {
++                String previous = (String)row.getValue("before_snapshot");
++                String next = (String)row.getValue("after_snapshot");
++                result.add(new LocalGroupAudit(String.valueOf(row.getValue("id")),String.valueOf(row.getValue("actor")),(String)row.getValue("group_id"),(String)row.getValue("operation"),((java.sql.Timestamp)row.getValue("created")).toInstant().toString(),previous == null ? null : mapper.readValue(previous,Map.class),next == null ? null : mapper.readValue(next,Map.class)));
++            } catch (java.io.IOException error) { throw new IllegalStateException("Invalid stored group audit",error); }
++        }
++        return result;
++    }
++
++    public Long oidcAccount(String hash) {
++        org.jooq.Record r = create().fetchOne("SELECT account_id FROM local_rbac_oidc_user WHERE identity_hash=?",hash);
++        return r == null ? null : ((Number)r.getValue("account_id")).longValue();
++    }
++
++    public void linkOidc(String hash, long account) {
++        create().execute("INSERT INTO local_rbac_oidc_user(identity_hash,account_id) VALUES(?,?)",hash,account);
++    }
++}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcReadiness.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcReadiness.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcReadiness.java
+@@ -0,0 +1,29 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import java.util.concurrent.Callable;
++import java.util.concurrent.TimeUnit;
++import java.util.concurrent.atomic.AtomicBoolean;
++import java.util.function.LongSupplier;
++
++/** Short, bounded availability probe; never caches authentication data. */
++public final class OidcReadiness {
++    private final long ttl;
++    private final LongSupplier clock;
++    private final AtomicBoolean running = new AtomicBoolean();
++    private volatile long validUntil = Long.MIN_VALUE;
++    private volatile boolean ready;
++    public OidcReadiness(long ttl) { this(ttl, () -> TimeUnit.NANOSECONDS.toMillis(System.nanoTime())); }
++    public OidcReadiness(long ttl, LongSupplier clock) { this.ttl = ttl; this.clock = clock; }
++    public boolean check(Callable<Boolean> probe) {
++        if (clock.getAsLong() < validUntil) { return ready; }
++        if (!running.compareAndSet(false, true)) { return false; }
++        try {
++            if (clock.getAsLong() < validUntil) { return ready; }
++            try { ready = Boolean.TRUE.equals(probe.call()); }
++            catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); ready = false; }
++            catch (Exception unavailable) { ready = false; }
++            validUntil = clock.getAsLong() + ttl;
++            return ready;
++        } finally { running.set(false); }
++    }
++}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcServlet.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcServlet.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcServlet.java
+@@ -0,0 +1,41 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import java.io.IOException;
++import javax.servlet.http.*;
++import org.springframework.web.context.support.WebApplicationContextUtils;
++
++public class OidcServlet extends HttpServlet {
++    protected void doGet(HttpServletRequest request,HttpServletResponse response) throws IOException {
++        response.setHeader("Cache-Control","no-store");
++        response.setHeader("Referrer-Policy","no-referrer");
++        response.setHeader("X-Content-Type-Options","nosniff");
++        OidcSupport oidc=WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext()).getBean(OidcSupport.class);
++        try {
++            String path=request.getPathInfo();
++            if ("/config".equals(path)) {
++                response.setContentType("application/json");
++                new com.fasterxml.jackson.databind.ObjectMapper().writeValue(response.getWriter(),CustomizationConfig.CURRENT.publicConfig());
++            } else if ("/status".equals(path)) {
++                response.setContentType("application/json"); response.getWriter().write("{\"enabled\":"+oidc.enabled()+",\"only\":"+oidc.only()+",\"autoLogin\":"+oidc.autoLogin()+",\"preflight\":"+oidc.loginPreflightEnabled()+"}");
++            } else if ("/readiness".equals(path)) {
++                boolean ready=oidc.loginReady();
++                response.setStatus(ready ? 200 : 503);
++                response.setContentType("application/json");
++                response.getWriter().write("{\"ready\":"+ready+",\"checked\":"+(oidc.enabled() && oidc.loginPreflightEnabled())+"}");
++            } else if ("/login".equals(path)) { oidc.login(request,response);
++            } else if ("/callback".equals(path) && oidc.enabled()) { oidc.callback(request,response);
++            } else { response.sendError(404); }
++        } catch (Exception e) {
++            // Never include authorization codes, tokens or client secrets in logs/errors.
++            StackTraceElement at=e.getStackTrace().length==0?null:e.getStackTrace()[0];
++            getServletContext().log("OIDC failure: "+e.getClass().getSimpleName()+" at "+at);
++            String failedPath=request.getPathInfo(),accept=request.getHeader("Accept");
++            if (oidc.loginPreflightEnabled() && ("/login".equals(failedPath) || "/callback".equals(failedPath)) &&
++                    accept!=null && accept.toLowerCase(java.util.Locale.ROOT).contains("text/html")) {
++                response.sendRedirect("/login?oidc_error=failed");
++                return;
++            }
++            response.sendError(401,"Falha na autenticacao OIDC. Inicie o login novamente.");
++        }
++    }
++}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcSupport.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcSupport.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcSupport.java
+@@ -0,0 +1,157 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.nimbusds.jose.JWSAlgorithm;
++import com.nimbusds.jose.crypto.RSASSAVerifier;
++import com.nimbusds.jose.jwk.*;
++import com.nimbusds.jwt.*;
++import io.cattle.platform.core.model.Account;
++import io.cattle.platform.iaas.api.auth.dao.AuthDao;
++import io.cattle.platform.object.ObjectManager;
++import io.cattle.platform.object.process.ObjectProcessManager;
++import io.cattle.platform.object.process.StandardProcess;
++import io.github.ibuildthecloud.gdapi.exception.ClientVisibleException;
++import java.io.*;
++import java.net.*;
++import java.nio.charset.StandardCharsets;
++import java.security.*;
++import java.util.*;
++import java.util.concurrent.ConcurrentHashMap;
++import javax.inject.Inject;
++import javax.servlet.http.*;
++
++/** OIDC authenticates only. All environment grants remain local to Rancher. */
++public class OidcSupport {
++    @Inject LocalGroupStore localGroupStore;
++    @Inject AuthDao authDao;
++    @Inject ObjectManager objectManager;
++    @Inject ObjectProcessManager objectProcessManager;
++    private final ObjectMapper mapper=new ObjectMapper();
++    private final SecureRandom random=new SecureRandom();
++    private final Map<String,Flow> flows=new ConcurrentHashMap<>();
++    private final Map<String,Ticket> tickets=new ConcurrentHashMap<>();
++    private final String issuer=System.getenv("RANCHER_OIDC_ISSUER");
++    private final String client=System.getenv("RANCHER_OIDC_CLIENT_ID");
++    private final String secret=System.getenv("RANCHER_OIDC_CLIENT_SECRET");
++    private final String callback=System.getenv("RANCHER_OIDC_CALLBACK");
++    private final String backchannel=System.getenv("RANCHER_OIDC_BACKCHANNEL");
++    private volatile Map<String,Object> metadata;
++    private final OidcReadiness readiness=new OidcReadiness(1000);
++
++    @javax.annotation.PostConstruct
++    public void validateConfiguration() { CustomizationConfig.CURRENT.publicConfig(); }
++    public boolean enabled() { return CustomizationConfig.CURRENT.enabled("OIDC_ENABLED"); }
++    public boolean only() { return CustomizationConfig.CURRENT.enabled("OIDC_ONLY"); }
++    public boolean autoLogin() { return CustomizationConfig.CURRENT.enabled("OIDC_AUTO_LOGIN"); }
++    public boolean loginPreflightEnabled() { return CustomizationConfig.CURRENT.enabled("OIDC_LOGIN_PREFLIGHT_ENABLED"); }
++    public boolean loginReady() {
++        if (!enabled()) { return false; }
++        if (!loginPreflightEnabled()) { return true; }
++        return readiness.check(() -> {
++            Map<String,Object> fresh=json(issuer+"/.well-known/openid-configuration",null);
++            if (!issuer.equals(fresh.get("issuer")) || !(fresh.get("authorization_endpoint") instanceof String)) { return false; }
++            URI authorization=new URI((String)fresh.get("authorization_endpoint"));
++            if (authorization.getHost()==null || authorization.getUserInfo()!=null || authorization.getFragment()!=null) { return false; }
++            endpoint((String)fresh.get("authorization_endpoint"));
++            metadata=fresh;
++            return true;
++        });
++    }
++    private String randomString() { byte[] b=new byte[32]; random.nextBytes(b); return Base64.getUrlEncoder().withoutPadding().encodeToString(b); }
++    private String enc(String s) throws Exception { return URLEncoder.encode(s,"UTF-8"); }
++    private String hash(String s) throws Exception { return Base64.getUrlEncoder().withoutPadding().encodeToString(MessageDigest.getInstance("SHA-256").digest(s.getBytes(StandardCharsets.UTF_8))); }
++    private static class Flow { String browser,nonce,verifier; long expires; }
++    private static class Ticket { String browser,subject,name,identity; long expires; }
++
++    private void cleanup() {
++        long now=System.currentTimeMillis();
++        flows.entrySet().removeIf(e -> e.getValue().expires<now);
++        tickets.entrySet().removeIf(e -> e.getValue().expires<now);
++        if (flows.size()+tickets.size()>1000) { throw new ClientVisibleException(503,"TooManyLoginFlows"); }
++    }
++    private String browser(HttpServletRequest r) {
++        if (r.getCookies()!=null) { for (Cookie c:r.getCookies()) { if ("rancher_oidc_browser".equals(c.getName())) { return c.getValue(); } } }
++        return null;
++    }
++    private URL endpoint(String value) throws Exception {
++        URI uri=new URI(value);
++        if (!"https".equals(uri.getScheme()) && !("true".equals(System.getenv("RANCHER_LAB_ALLOW_HTTP")) && "http".equals(uri.getScheme()))) { throw new IllegalArgumentException("OIDC requires HTTPS"); }
++        if (backchannel!=null && value.startsWith(issuer+"/")) { value=backchannel+value.substring(issuer.length()); }
++        return new URL(value);
++    }
++    private Map<String,Object> json(String url,String form) throws Exception {
++        HttpURLConnection c=(HttpURLConnection)endpoint(url).openConnection();
++        c.setConnectTimeout(5000); c.setReadTimeout(10000); c.setInstanceFollowRedirects(false);
++        c.setRequestProperty("Accept","application/json");
++        try {
++            if (form!=null) {
++                c.setRequestMethod("POST"); c.setDoOutput(true); c.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
++                try(OutputStream out=c.getOutputStream()) { out.write(form.getBytes(StandardCharsets.UTF_8)); }
++            }
++            if (c.getResponseCode()!=200) { throw new IOException("OIDC endpoint rejected request"); }
++            try(InputStream in=c.getInputStream()) { return mapper.readValue(in,Map.class); }
++        } finally { c.disconnect(); }
++    }
++    private synchronized Map<String,Object> metadata() throws Exception {
++        if (metadata==null) {
++            Map<String,Object> m=json(issuer+"/.well-known/openid-configuration",null);
++            if (!issuer.equals(m.get("issuer"))) { throw new IllegalArgumentException("Invalid discovery issuer"); }
++            metadata=m;
++        }
++        return metadata;
++    }
++    public void login(HttpServletRequest r,HttpServletResponse response) throws Exception {
++        if (!enabled()) { response.sendError(404); return; }
++        cleanup();
++        Flow f=new Flow(); f.browser=randomString(); f.nonce=randomString(); f.verifier=randomString(); f.expires=System.currentTimeMillis()+300000;
++        String state=randomString(); flows.put(state,f);
++        response.addHeader("Set-Cookie","rancher_oidc_browser="+f.browser+"; Path=/; HttpOnly; SameSite=Lax; Max-Age=300"+(callback.startsWith("https:")?"; Secure":""));
++        String auth=(String)metadata().get("authorization_endpoint");
++        endpoint(auth); // validate scheme before redirect
++        response.sendRedirect(auth+"?response_type=code&scope=openid%20profile%20email&client_id="+enc(client)+"&redirect_uri="+enc(callback)+"&state="+enc(state)+"&nonce="+enc(f.nonce)+"&code_challenge_method=S256&code_challenge="+enc(hash(f.verifier)));
++    }
++    public void callback(HttpServletRequest r,HttpServletResponse response) throws Exception {
++        cleanup();
++        String state=r.getParameter("state");
++        Flow f=state==null?null:flows.remove(state);
++        if (f==null || f.expires<System.currentTimeMillis() || !f.browser.equals(browser(r)) || r.getParameter("code")==null) { throw new ClientVisibleException(401,"InvalidOidcState"); }
++        Map<String,Object> m=metadata();
++        String form="grant_type=authorization_code&client_id="+enc(client)+"&redirect_uri="+enc(callback)+"&code="+enc(r.getParameter("code"))+"&code_verifier="+enc(f.verifier);
++        if (secret!=null && !secret.isEmpty()) { form+="&client_secret="+enc(secret); }
++        Map<String,Object> tokens=json((String)m.get("token_endpoint"),form);
++        SignedJWT jwt=SignedJWT.parse((String)tokens.get("id_token"));
++        if (!JWSAlgorithm.RS256.equals(jwt.getHeader().getAlgorithm())) { throw new IllegalArgumentException("Unsupported ID token algorithm"); }
++        JWKSet keys=JWKSet.parse(mapper.writeValueAsString(json((String)m.get("jwks_uri"),null)));
++        JWK key=keys.getKeyByKeyId(jwt.getHeader().getKeyID());
++        if (!(key instanceof RSAKey) || !jwt.verify(new RSASSAVerifier(((RSAKey)key).toRSAPublicKey()))) { throw new IllegalArgumentException("Invalid token signature"); }
++        JWTClaimsSet claims=jwt.getJWTClaimsSet();
++        long now=System.currentTimeMillis();
++        if (!issuer.equals(claims.getIssuer()) || !claims.getAudience().contains(client) || claims.getSubject()==null || claims.getSubject().isEmpty() || claims.getExpirationTime()==null || claims.getExpirationTime().getTime()<=now || claims.getIssueTime()==null || claims.getIssueTime().getTime()>now+30000 || !f.nonce.equals(claims.getStringClaim("nonce")) || (claims.getNotBeforeTime()!=null && claims.getNotBeforeTime().getTime()>now+30000) || (claims.getAudience().size()>1 && !client.equals(claims.getStringClaim("azp")))) { throw new IllegalArgumentException("Invalid token claims"); }
++        Ticket t=new Ticket(); t.browser=f.browser; t.subject=claims.getSubject(); t.identity=hash(issuer+"\n"+t.subject); t.name=claims.getStringClaim("preferred_username");
++        if (t.name==null || t.name.isEmpty()) { t.name=t.subject; }
++        t.expires=now+30000;
++        String ticket=randomString(); tickets.put(ticket,t);
++        response.sendRedirect("/login?oidc_ticket="+enc(ticket));
++    }
++    public synchronized Account consume(String ticket,HttpServletRequest r) {
++        Ticket t=tickets.remove(ticket);
++        if (t==null || t.expires<System.currentTimeMillis() || !t.browser.equals(browser(r))) { throw new ClientVisibleException(401,"InvalidOidcTicket"); }
++        Long accountId=localGroupStore.oidcAccount(t.identity);
++        if (accountId==null) {
++            // No email matching, admin promotion, password credential or environment provisioning.
++            Account account=authDao.createAccount(t.name,"user",t.identity,"oidc_subject");
++            objectProcessManager.executeStandardProcess(StandardProcess.CREATE,account,null);
++            account=objectManager.reload(account);
++            if ("inactive".equals(account.getState())) {
++                objectProcessManager.executeStandardProcess(StandardProcess.ACTIVATE,account,null);
++                account=objectManager.reload(account);
++            }
++            if (!"active".equals(account.getState())) { throw new ClientVisibleException(503,"AccountProvisioning"); }
++            localGroupStore.linkOidc(t.identity,account.getId());
++            return account;
++        }
++        Account account=authDao.getAccountById(accountId);
++        if (account==null || !"active".equals(account.getState()) || account.getRemoved()!=null) { throw new ClientVisibleException(401,"InactiveAccount"); }
++        return account;
++    }
++}
+diff --git a/resources/content/schema/base/localAccessReport.json b/resources/content/schema/base/localAccessReport.json
+new file mode 100644
+--- /dev/null
++++ b/resources/content/schema/base/localAccessReport.json
+@@ -0,0 +1,13 @@
++{
++  "collectionMethods": ["GET"],
++  "resourceMethods": [],
++  "resourceFields": {
++    "id": {"type": "string"},
++    "accountId": {"type": "string"},
++    "projectId": {"type": "string"},
++    "effectiveRole": {"type": "string", "nullable": true},
++    "complete": {"type": "boolean"},
++    "identityScope": {"type": "string"},
++    "sources": {"type": "array[json]"}
++  }
++}
+\ No newline at end of file
+diff --git a/resources/content/schema/base/localGroup.json b/resources/content/schema/base/localGroup.json
+new file mode 100644
+--- /dev/null
++++ b/resources/content/schema/base/localGroup.json
+@@ -0,0 +1,12 @@
++{
++  "collectionMethods": ["GET", "POST"],
++  "resourceMethods": [],
++  "resourceFields": {
++    "id": {"type": "string", "create": true},
++    "name": {"type": "string", "create": true},
++    "revision": {"type": "int", "create": true},
++    "members": {"type": "array[string]", "create": true},
++    "grants": {"type": "map[string]", "create": true},
++    "delete": {"type": "boolean", "create": true}
++  }
++}
+diff --git a/resources/content/schema/base/localGroupAudit.json b/resources/content/schema/base/localGroupAudit.json
+new file mode 100644
+--- /dev/null
++++ b/resources/content/schema/base/localGroupAudit.json
+@@ -0,0 +1,13 @@
++{
++  "collectionMethods": ["GET"],
++  "resourceMethods": [],
++  "resourceFields": {
++    "id": {"type": "string"},
++    "actorId": {"type": "string"},
++    "groupId": {"type": "string"},
++    "operation": {"type": "string"},
++    "created": {"type": "string"},
++    "before": {"type": "map[json]"},
++    "after": {"type": "map[json]"}
++  }
++}
+\ No newline at end of file
