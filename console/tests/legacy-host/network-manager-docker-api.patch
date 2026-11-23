@@ -1,0 +1,10 @@
+--- a/events/client.go
++++ b/events/client.go
+@@ -12 +12 @@
+-	defaultAPIVersion = "1.18"
++	defaultAPIVersion = "1.40"
+--- a/package/start.sh
++++ b/package/start.sh
+@@ -10 +10 @@
+-export DOCKER_API_VERSION=1.22
++export DOCKER_API_VERSION="${DOCKER_API_VERSION:-1.40}"
