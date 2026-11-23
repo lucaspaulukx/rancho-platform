@@ -90,6 +90,12 @@ The localization harness injects a synthetic cross-origin pagination link on the
 
 Run the owned-browser localization test with `--accessibility` and the console development dependencies installed. It runs axe on Groups, Users, API Keys, Settings, Audit and Environments at 390 and 1440 px in dark and light themes. The gate reports rule IDs and counts. Review the separate manual-check entries and exercise critical workflows with a keyboard and screen reader before release.
 
+For release evidence, pass the backend and console IDs from the release report. The test verifies the running lab images before creating a session and checks that both containers were preserved after the run.
+
+```sh
+python console/tests/localization_acceptance.py --accessibility --release-images BACKEND_SHA256_ID CONSOLE_SHA256_ID
+```
+
 ```sh
 python console/tests/localization_acceptance.py --accessibility
 ```

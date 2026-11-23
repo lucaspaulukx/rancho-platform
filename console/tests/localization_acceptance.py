@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import time
 import traceback
@@ -19,6 +20,21 @@ import ws_revocation as lab
 ROOT = lab.ROOT
 REPORT = ROOT / 'console/localization-results.json'
 ORIGIN = 'http://localhost:18090'
+RELEASE_CONTAINERS = ('rancher16-rbac-lab', 'rancher16-community-console')
+
+
+def release_snapshot(expected_images):
+    result = subprocess.run(
+        ['docker', 'container', 'inspect', '--format', '{{.Id}} {{.Image}} {{.State.Running}}',
+         *RELEASE_CONTAINERS],
+        capture_output=True, text=True, check=True, timeout=15,
+    )
+    rows = [line.split() for line in result.stdout.splitlines()]
+    if (len(rows) != len(expected_images) or any(
+            len(row) != 3 or not re.fullmatch(r'[a-f0-9]{64}', row[0])
+            or row[1:] != [expected, 'true'] for row, expected in zip(rows, expected_images))):
+        raise RuntimeError('Running lab containers do not match the pinned release images')
+    return [row[0] for row in rows]
 
 
 def config_digest():
@@ -31,7 +47,7 @@ def config_digest():
         return hashlib.sha256(content).hexdigest()
 
 
-def main(*, accessibility=False):
+def main(*, accessibility=False, release_images=None):
     if REPORT.exists():
         archive = ROOT / 'migration-runs'
         archive.mkdir(exist_ok=True)
@@ -39,11 +55,16 @@ def main(*, accessibility=False):
     admin = None
     before = None
     browser_started = False
+    release_before = None
     result = {
         'status': 'failed', 'cleanupComplete': False, 'controlSessionRevoked': False,
         'scope': 'localhost18090, UI-OPS-LAB; ten-locale preview, read-only browser',
     }
     try:
+        if release_images:
+            result['stage'] = 'verify-release-images'
+            release_before = release_snapshot(release_images)
+            result['releaseImages'] = dict(zip(('backend', 'console'), release_images))
         result['stage'] = 'owned-session'
         admin = lab.session()
         assert admin.api('projects/1a12')['name'] == 'UI-OPS-LAB'
@@ -102,6 +123,13 @@ def main(*, accessibility=False):
                 cleanup_errors.append({'stage': 'session', 'errorType': type(error).__name__})
         if browser_started and not result.get('browser', {}).get('browserClosed'):
             cleanup_errors.append({'stage': 'browser', 'errorType': 'ClosureNotConfirmed'})
+        if release_before is not None:
+            try:
+                result['releaseContainersPreserved'] = release_snapshot(release_images) == release_before
+                if not result['releaseContainersPreserved']:
+                    raise RuntimeError('Release containers changed during browser acceptance')
+            except Exception as error:
+                cleanup_errors.append({'stage': 'release-images', 'errorType': type(error).__name__})
         result['cleanupComplete'] = not cleanup_errors and (admin is None or result['controlSessionRevoked'])
         if cleanup_errors:
             result['cleanupErrors'] = cleanup_errors
@@ -115,4 +143,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--accessibility', action='store_true',
                         help='Also scan six routes with axe at desktop and mobile widths in both themes.')
-    raise SystemExit(main(accessibility=parser.parse_args().accessibility))
+    parser.add_argument('--release-images', nargs=2, metavar=('BACKEND_ID', 'CONSOLE_ID'),
+                        help='Require immutable image IDs of the running lab before and after the test.')
+    args = parser.parse_args()
+    if args.release_images and not all(re.fullmatch(r'sha256:[a-f0-9]{64}', image) for image in args.release_images):
+        parser.error('--release-images requires two immutable sha256 image IDs')
+    raise SystemExit(main(accessibility=args.accessibility, release_images=args.release_images))

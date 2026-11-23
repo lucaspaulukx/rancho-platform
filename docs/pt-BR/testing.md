@@ -90,6 +90,12 @@ O teste de localização injeta um link sintético de paginação de outra orige
 
 Execute o teste de localização no navegador com `--accessibility` e as dependências de desenvolvimento do console instaladas. Ele usa axe em Grupos, Usuários, Chaves de API, Configurações, Auditoria e Ambientes a 390 e 1440 px nos temas escuro e claro. O teste reporta identificadores de regras e contagens. Revise as verificações manuais indicadas no relatório e exercite os fluxos críticos com teclado e leitor de tela antes da release.
 
+Para gerar evidência de release, passe os IDs do backend e do console registrados no relatório de release. O teste confere as imagens em execução antes de criar a sessão e verifica se os dois containers foram preservados ao terminar.
+
+```sh
+python console/tests/localization_acceptance.py --accessibility --release-images BACKEND_SHA256_ID CONSOLE_SHA256_ID
+```
+
 ```sh
 python console/tests/localization_acceptance.py --accessibility
 ```
