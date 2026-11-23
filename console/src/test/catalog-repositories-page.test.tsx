@@ -7,6 +7,7 @@ import { CatalogRepositories } from '../pages/CatalogRepositories';
 import { api } from '../api';
 import type { Locale } from '../i18n/locales';
 import { I18nProvider } from '../i18n/provider';
+import { frFR } from '../i18n/catalogs/fr-FR';
 const state = vi.hoisted(() => ({ admin: true, enabled: true }));
 vi.mock('../state', () => ({
   useApp: () => ({
@@ -47,7 +48,7 @@ function mount() {
         policy={{
           enabled: true,
           defaultLocale: locale,
-          availableLocales: ['pt-BR', 'en-US'],
+          availableLocales: ['pt-BR', 'en-US', 'fr-FR'],
           selectable: false,
           detectBrowser: false,
           preview: true,
@@ -112,6 +113,8 @@ describe('Editor administrativo de repositórios', () => {
     await screen.findByText('library');
     await user.click(screen.getByRole('button', { name: 'Configurar repositórios' }));
     const branch = await screen.findByLabelText('Branch do repositório 1');
+    expect(branch).toHaveAttribute('dir', 'ltr');
+    expect(screen.getByLabelText('URL do repositório 1')).toHaveAttribute('dir', 'ltr');
     await user.clear(branch);
     await user.type(branch, 'feature..invalid');
     await user.click(screen.getByRole('button', { name: 'Revisar repositórios' }));
@@ -120,9 +123,15 @@ describe('Editor administrativo de repositórios', () => {
 
     showLocale('en-US');
     expect(screen.getByText('Invalid branch. Use a Git reference name.')).toBeInTheDocument();
+    showLocale('fr-FR');
+    expect(
+      await screen.findByText(frFR['catalogRepositories.validation.branch']),
+    ).toBeInTheDocument();
     expect(api).toHaveBeenCalledTimes(4);
     expect(vi.mocked(api).mock.calls.every(([, , method]) => method === undefined)).toBe(true);
-    await user.click(screen.getByRole('button', { name: 'Cancel' }));
-    expect(screen.getByLabelText('Repository branch 1')).toHaveValue('feature..invalid');
+    await user.click(screen.getByRole('button', { name: frFR['ui.cancel'] }));
+    expect(
+      screen.getByLabelText(frFR['catalogRepositories.branchLabel'].replace('{index}', '1')),
+    ).toHaveValue('feature..invalid');
   });
 });

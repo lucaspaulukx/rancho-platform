@@ -69,6 +69,8 @@ describe('Registered locale catalog gate', () => {
       'auth',
       'bindingsEditor',
       'bulkOperation',
+      'catalogPage',
+      'catalogRepositories',
       'common',
       'composeEditor',
       'composeValidation',
@@ -78,6 +80,7 @@ describe('Registered locale catalog gate', () => {
       'devices',
       'environmentEditor',
       'engineMonitoring',
+      'environmentCatalogs',
       'groups',
       'healthCheckEditor',
       'healthCheckValidation',
@@ -138,6 +141,7 @@ describe('Registered locale catalog gate', () => {
     for (const locale of previewLocales) {
       const catalog = previewCatalogs[locale]!;
       expect(Object.keys(catalog).sort()).toEqual(previewScope.sort());
+      expect(catalog['catalogPage.defaultSuffix']).toMatch(/^ · /);
       expect(catalog['groups.inactive']).toMatch(/^ · /);
       expect(catalog['resourcePanel.editPrefix']).toMatch(/ $/);
       expect(catalog['resourcePanel.scalePrefix']).toMatch(/ $/);

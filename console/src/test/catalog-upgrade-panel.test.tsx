@@ -7,6 +7,7 @@ import { CatalogUpgrade, QuestionField } from '../pages/Catalog';
 import type { Resource } from '../api';
 import type { Locale } from '../i18n/locales';
 import { I18nProvider } from '../i18n/provider';
+import { faIR } from '../i18n/catalogs/fa-IR';
 
 const backend = vi.hoisted(() => ({
   stack: {} as Resource,
@@ -114,7 +115,7 @@ function mount() {
         policy={{
           enabled: true,
           defaultLocale: locale,
-          availableLocales: ['pt-BR', 'en-US'],
+          availableLocales: ['pt-BR', 'en-US', 'fa-IR'],
           selectable: false,
           detectBrowser: false,
           preview: true,
@@ -226,7 +227,12 @@ describe('Painel de upgrade do catálogo', () => {
     expect(screen.getByText('Réplicas está fora dos limites permitidos.')).toBeInTheDocument();
     showLocale('en-US');
     expect(screen.getByText('Réplicas is outside the allowed range.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Réplicas *')).toHaveValue(8);
+    showLocale('fa-IR');
+    expect(
+      await screen.findByText(faIR['catalogPage.validation.range'].replace('{label}', 'Réplicas')),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Réplicas *')).toBe(input);
+    expect(input).toHaveValue(8);
     expect(backend.posts).toHaveLength(0);
     router.dispose();
     client.clear();

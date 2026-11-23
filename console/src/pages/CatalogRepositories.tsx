@@ -272,6 +272,7 @@ function RepositoryScope() {
                   id={id}
                   aria-describedby={description}
                   type={revealed ? 'text' : 'password'}
+                  dir="ltr"
                   autoComplete="off"
                   spellCheck={false}
                   value={row.url}
@@ -288,6 +289,7 @@ function RepositoryScope() {
                   id={id}
                   aria-describedby={description}
                   value={row.branch}
+                  dir="ltr"
                   autoComplete="off"
                   onChange={(e) => change(row.key, 'branch', e.target.value)}
                 />
