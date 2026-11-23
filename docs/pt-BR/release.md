@@ -67,6 +67,8 @@ Para o perfil moderno com MariaDB, acrescente os dois argumentos abaixo. O coman
 python -m scripts.release_artifact_rehearsal --backend-image rancho-backend-modern:local --previous-console-image rancho-console:previous --candidate-console-image rancho-console:local --modern-database-image rancho-mariadb:local --restore-image rancho-migration-restore:local
 ```
 
+O auxiliar de restauração no primeiro início usa uma base fixada de Python 3.13 com Alpine e instala wheels binárias. O Trivy 0.74.0 com a base de avisos de 13 de novembro de 2026 reportou 2 ocorrências críticas e 81 altas por pacote e aviso na imagem anterior, baseada em Debian, e zero ocorrências dessas severidades na imagem Alpine. O cliente MariaDB se conecta a `db` na rede privada do Compose e aceita o certificado autoassinado padrão desse banco. Mantenha o auxiliar na rede interna de banco definida em `compose.migrate.yaml`.
+
 ## Instalação experimental de nó único
 
 Para uma instalação Rancher existente, consulte [hosts existentes e versões do Docker](migration.md#hosts-existentes-e-versões-do-docker) antes de escolher o catálogo Cattle moderno.
