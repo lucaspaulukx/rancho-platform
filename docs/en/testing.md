@@ -72,6 +72,14 @@ Add `--classic-browser` with Playwright Chromium installed to check Ember login 
 
 ## Native and browser acceptance
 
+Run unit tests, locale checks and the console build without the Docker lab. For browser checks that use local login, start Rancher and the console. Add Keycloak for OIDC checks. The legacy Docker host is only needed for tests that execute workloads or open physical streams. Start it explicitly from the repository root when those tests require it.
+
+```sh
+docker compose -f compose.yaml -f compose.console.yaml -f compose.legacy-host.yaml up -d --no-deps legacy-test-host
+```
+
+Stop the guest after its tests finish with `python console/tests/legacy_guest.py shutdown`. The guest has a 2,300 MiB limit and keeps its disk in the named volume.
+
 Run `python console/tests/standalone_metadata_readback.py` with Playwright Chromium and the isolated legacy guest online. It creates one standalone container, edits its name and description through Operations, checks its native and physical identity, and removes the fixture.
 
 Run `python tests/flag_integration.py --browser --release-images BACKEND_SHA256_ID CONSOLE_SHA256_ID` in the named loopback lab during a local maintenance window. The test recreates the Rancher backend with exclusive OIDC, automatic login and local groups disabled. It verifies browser login and failure paths, then restores the hybrid configuration and verifies group access and the original backend environment. Use the immutable image IDs from the release report.
