@@ -30,3 +30,13 @@ Implementado o recorte de serviços Docker nativos: ação contextual nas stacks
 Seletor usa Field e tokens compartilhados; troca de réplica preserva o socket. CSV inclui somente a réplica selecionada com containerId e unidades. Fechamento/contexto/revogação abortam requisições e conexão;1008 não reconecta automaticamente. Flag aditiva continua off quando ausente e depende dos módulos previstos. Não alterado frontend original.
 
 Build Linux passou639 testes/73 arquivos, TypeScript e Vite. Inclui testes de mistura/escopo/limites de séries, dependências de configuração, menu contextual e lifecycle do painel. Teste físico do menu com três réplicas, CSV, temas, mobile e retirada real de grant ainda pendente. Flag pública permanece ausente/off até esse gate; teste pode ativá-la somente no próprio contexto do navegador, sem substituir descriptors, dados ou endpoints. OPS13 permanece aberto.
+
+## Aceite físico do recorte — 05/11/2026
+
+`python console/tests/host_stream_matrix.py grant-local --service-metrics --service-scale 3 --payload-transport --console-proxy --scheduler-relay --service-browser` passou. Três réplicas físicas próprias foram alocadas; relay85 removido antes dos streams. O navegador headless abriu o menu real da stack e o drawer sem navegar; somente a configuração de feature flag foi sobrescrita no contexto privado, sem substituir descriptors, respostas de métricas ou endpoints.
+
+Dez checks passaram: abertura contextual, descriptor/socket negociados reais, seleção das três réplicas na mesma conexão, CSV somente da seleção, contraste claro e escuro de opções >=4.5, seletor dentro de390px, retirada real de grant fechando socket1008, ausência de reconexão automática e zero erros JavaScript. Um descriptor no-store, um socket pelo18090, token de URL1859 caracteres e um payload inicial10616 caracteres. Essa medição pertence à conexão real observada; valores dos tokens não são persistidos.
+
+Os quatro probes de logs/exec/métricas de container/serviço também encerraram1008, novos handshakes401 e zero dados posteriores; controles positivos, revogação de identidades temporárias e cleanup exato passaram. Relatório local ignorado: `console/host-stream-grant-local-service-proxy-payload-real-service-browser-relay-setup-scale3-on-results.json`.
+
+Este aceite cobre serviço Docker nativo e três réplicas no laboratório, não todos os tipos de serviço,64 réplicas, screen reader manual, soak, CNI nativo ou a compatibilidade414 do cliente clássico. Flag pública permanece off por padrão; o operador pode configurar modules.serviceMetrics=true com as dependências previstas. OPS13 permanece parcial.

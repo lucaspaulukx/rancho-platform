@@ -23,3 +23,9 @@ O primeiro envio preserva a sequência local na main, pois o destino estava vazi
 Conferir que `git rev-parse HEAD` corresponde à referência remota de main e que os commits esperados estão no GitHub. Não enviar todas as refs, artefatos de laboratório ou backups do diretório .git. Registrar resultado no handoff somente depois da confirmação remota. A existência do código no GitHub não comprova build remoto, deploy ou prontidão produtiva.
 
 Ativar os hooks após clonar: `git config core.hooksPath .githooks`. Pre-commit confere índice/patches locais; pre-push confere histórico alcançável. Hooks não são proteção de branch no GitHub nem auditoria completa.
+
+## Importação confirmada
+
+Primeiro push concluído em05/11/2026: main local e remota apontaram para96f1fc540154fec71221cfb610335e3e61695d29, com24 commits (21 existentes +3 commits preparados para a importação). Origin configurado para o destino canônico; working tree limpo ao conferir. Visibilidade privada preservada. Antes do envio passaram os gates de índice, patches upstream e histórico de24 commits/814 objetos; cinco testes do scanner também aprovados. Nenhum dump, segredo local, dependência instalada, relatório de sessão ou clone de consulta foi enviado.
+
+A próxima entrega usa a branch test/service-metrics-acceptance para registrar o teste físico aprovado do recorte84. Main não recebe merge automático; revisão do PR é independente da importação. Não há alegação de CI remoto, deploy ou release por causa desse push.

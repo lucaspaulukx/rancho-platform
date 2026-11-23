@@ -4,7 +4,7 @@ Destino Git autorizado: https://github.com/lucaspaulukx/rancho-platform, inicial
 
 83: lease320s/quatro transportes/três réplicas e teto30s aprovados com controles/cleanup; HTTP continuou200 no prazo do socket, distinguindo prazo da conexão de expiração da chave. Comparações off pessoal/compartilhada no mesmo artefato reproduziram falha legada, com limpeza completa. Runtime local API-key on/teto86400s; default distribuído false. Alocação usou relay temporário85, removido antes dos streams; estabilidade CNI nativa continua aberta.
 
-84 implementou métricas contextuais por réplica, sem agregação inventada; Linux639 testes/73 arquivos + TypeScript/Vite passaram. Flag pública ausente/off e teste físico do menu real ainda em execução. Não declarar OPS13 concluído. Checkpoints seguintes são históricos; seus pendentes já resolvidos não prevalecem sobre este resumo.
+84 implementou métricas contextuais por réplica, sem agregação inventada; Linux639 testes/73 arquivos + TypeScript/Vite passaram. Teste físico do menu real passou10 checks em três réplicas: CSV, seleção na mesma conexão, contraste claro/escuro, mobile e revogação1008 sem reconexão; quatro transportes com novos401/zero dados, controles e cleanup. Flag pública continua ausente/off, habilitável explicitamente pela configuração. Não declarar OPS13 completo: demais tipos/gráficos, escala e acessibilidade manual continuam no roadmap. Checkpoints seguintes são históricos; seus pendentes já resolvidos não prevalecem sobre este resumo.
 
 ## Checkpoint85 — diagnóstico de scheduler e estado83 (05/11/2026)
 
