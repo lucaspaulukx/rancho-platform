@@ -10,7 +10,7 @@ import { formatResourceDate } from '../resource-format';
 const policy: LocalizationPolicy = {
   enabled: true,
   defaultLocale: 'pt-BR',
-  availableLocales: ['pt-BR', 'en-US'],
+  availableLocales: ['pt-BR', 'en-US', 'fr-FR'],
   selectable: true,
   detectBrowser: false,
   preview: true,
@@ -31,6 +31,7 @@ function Details() {
   return (
     <>
       <button onClick={() => setLocale('en-US')}>English</button>
+      <button onClick={() => setLocale('fr-FR')}>Français</button>
       <ResourceDetails resource={resource} />
     </>
   );
@@ -56,8 +57,15 @@ it('changes details labels and regional formats while keeping the open sanitized
   expect(screen.getByRole('tab', { name: 'Configuration', selected: true })).toBeInTheDocument();
   expect(screen.getByLabelText('Sanitized configuration')).toBe(configuration);
   expect(configuration.textContent).toBe(nativeText);
-  await user.click(screen.getByRole('tab', { name: 'Summary' }));
+  await user.click(screen.getByRole('button', { name: 'Français' }));
+  expect(await screen.findByLabelText('Configuration expurgée')).toBe(configuration);
+  expect(screen.getByRole('tab', { name: 'Configuration', selected: true })).toBeInTheDocument();
+  expect(configuration.textContent).toBe(nativeText);
+  await user.click(screen.getByRole('tab', { name: 'Résumé' }));
   expect(screen.getByText('Serviço existente')).toBeInTheDocument();
+  expect(screen.getByText(formatResourceDate(resource.created, 'fr-FR'))).toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'English' }));
+  expect(screen.getByRole('tab', { name: 'Summary', selected: true })).toBeInTheDocument();
   expect(screen.getByText('Expired')).toBeInTheDocument();
   expect(screen.getByText(formatResourceDate(resource.created, 'en-US'))).toBeInTheDocument();
 });
