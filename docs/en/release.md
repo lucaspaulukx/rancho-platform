@@ -37,7 +37,25 @@ gh attestation verify "rancho-platform-${commit}-source.zip" \
   --source-ref refs/heads/main --source-digest "$commit" --deny-self-hosted-runners
 ```
 
-This workflow attests the source archive. Runtime images require separate attestations tied to their OCI manifest digests. The workflow stores the ZIP and checksum as CI artifacts for release preparation.
+This workflow stores the signed source ZIP and checksum as CI artifacts for release preparation.
+
+## Verify a runtime image archive
+
+The manually dispatched `Runtime image provenance` workflow builds the 13 Linux amd64 images for the modern profile. Each job retains a Docker-loadable archive, the local image ID and a checksum manifest. The workflow attests both the archive and the checksum manifest. Download the artifact for the component and commit you plan to validate.
+
+```sh
+component=console
+archive="rancho-${component}-${commit}.docker.tar.gz"
+for file in "$archive" SHA256SUMS.txt; do
+  gh attestation verify "$file" \
+    --repo lucaspaulukx/rancho-platform \
+    --signer-workflow lucaspaulukx/rancho-platform/.github/workflows/runtime-provenance.yml \
+    --source-ref refs/heads/main --source-digest "$commit" --deny-self-hosted-runners || exit
+done
+sha256sum -c SHA256SUMS.txt && docker image load -i "$archive"
+```
+
+Use the loaded image IDs for release rehearsals and scans. This attestation signs exported archives for offline distribution. Registry publication and verification of OCI manifest digests require their own gate.
 
 ## Artifact inventory
 
