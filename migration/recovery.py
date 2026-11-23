@@ -19,6 +19,7 @@ import subprocess
 import threading
 
 from migration import crypto_stream
+from migration import images
 from migration.tool import Database, MigrationError, identifier, preflight, run, write_new
 
 NODE = 'node:24-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f'
@@ -159,7 +160,12 @@ def journal(directory, stage, **public):
         out.write(json.dumps(event, sort_keys=True) + '\n')
 
 
-def backup(names, directory, password, *, quiesce=False):
+def require_stopped_cleanly(state):
+    if state.get('Running') or state.get('OOMKilled') or state.get('ExitCode') not in (0, 143):
+        raise MigrationError('Source did not stop cleanly; reject the cold capture and inspect its health.')
+
+
+def backup(names, directory, password, *, quiesce=False, include_images=False):
     if not quiesce:
         raise MigrationError('Cold backup requires explicit --quiesce; use plan for read-only inspection.')
     if len(password) < 20:
@@ -180,6 +186,14 @@ def backup(names, directory, password, *, quiesce=False):
     metadata = {'format': 1, 'sources': sources, 'volumes': [], 'configuration': {}, 'databasePreflight': health}
     for role, source in sources.items():
         metadata['configuration'][role] = read_configuration(source)
+    if include_images:
+        selected_images = [source['Image'] for source in sources.values()] + [inspect(NODE, 'image')['Id']]
+        required_space = sum(inspect(image, 'image')['Size'] for image in set(selected_images)) + 1024**3
+        if shutil.disk_usage(directory).free < required_space:
+            raise MigrationError('Destination lacks estimated image export capacity plus1GiB reserve.')
+        # Immutable image export takes place BEFORE maintenance, reducing service downtime.
+        metadata['images'] = images.save(directory / 'images.tar.enc', selected_images, password)
+        journal(directory, 'immutable-images-encrypted', imageCount=len(set(selected_images)))
     stopped = []
     resume_failures = []
     try:
@@ -189,6 +203,8 @@ def backup(names, directory, password, *, quiesce=False):
                 # Record before stopping: a timeout can still have stopped the source.
                 stopped.append(source['Id'])
                 run(['stop', '--time', '120', source['Id']], timeout=150)
+        for source in sources.values():
+            require_stopped_cleanly(inspect(source['Id'])['State'])
         # Recheck against a concurrent external restart before each capture too.
         journal(directory, 'sources-quiesced', sourceCount=len(stopped))
         for index, volume in enumerate(volumes):
@@ -214,7 +230,7 @@ def backup(names, directory, password, *, quiesce=False):
         with (directory / 'metadata.enc').open('xb') as destination:
             crypto_stream.encrypt(private, destination, password)
         write_new(directory / 'bundle.json', json.dumps({'format': 1, 'volumeCount': len(volumes),
-                  'imagesIncluded': False, 'engineRecoveryAccepted': False, 'completeMigrationAccepted': False}).encode())
+                  'imagesIncluded': include_images, 'engineRecoveryAccepted': False, 'completeMigrationAccepted': False}).encode())
         journal(directory, 'cold-backup-complete')
     except BaseException:
         journal(directory, 'cold-backup-failed', completeMigrationAccepted=False)
@@ -240,6 +256,8 @@ def read_metadata(directory, password):
     volumes = metadata.get('volumes', [])
     if metadata.get('format') != 1 or not 1 <= len(volumes) <= 8:
         raise MigrationError('Unsupported recovery metadata.')
+    if metadata.get('images'):
+        images.verify(directory, metadata['images'], password)
     archives = set()
     for volume in volumes:
         filename = volume['archive']
@@ -252,9 +270,14 @@ def read_metadata(directory, password):
     return metadata
 
 
-def rehearse_files(directory, password):
+@contextmanager
+def restored_volumes(directory, password, *, load_images=False):
     directory = Path(directory)
     metadata = read_metadata(directory, password)  # Verify ALL files before allocating anything.
+    if load_images:
+        if not metadata.get('images'):
+            raise MigrationError('Bundle does not include immutable images.')
+        images.load_missing(directory, metadata['images'], password)
     image = metadata['sources']['rancher']['Image']
     if not re.fullmatch(r'sha256:[a-f0-9]{64}', image):
         raise MigrationError('Invalid immutable image identifier.')
@@ -276,6 +299,7 @@ def rehearse_files(directory, password):
             if manifest(name) != volume['manifest']:
                 raise MigrationError('Restored content/ownership/modes differ; engine startup prohibited.')
             journal(directory, 'file-restore-verified', index=index)
+        yield metadata, owned
     except BaseException:
         journal(directory, 'file-rehearsal-failed', completeMigrationAccepted=False)
         raise
@@ -285,7 +309,12 @@ def rehearse_files(directory, password):
                 raise MigrationError('Recovery volume ownership changed; refusing removal.')
             run(['volume', 'rm', name])
         journal(directory, 'file-rehearsal-cleanup', volumes=len(owned))
-    return {'fileRecoveryAccepted': True, 'volumes': len(owned), 'engineRecoveryAccepted': False,
+
+
+def rehearse_files(directory, password, *, load_images=False):
+    with restored_volumes(directory, password, load_images=load_images) as (_, owned):
+        count = len(owned)
+    return {'fileRecoveryAccepted': True, 'volumes': count, 'engineRecoveryAccepted': False,
             'completeMigrationAccepted': False}
 
 
@@ -297,6 +326,8 @@ def main():
     parser.add_argument('--console', default='rancher16-community-console')
     parser.add_argument('--output', type=Path)
     parser.add_argument('--quiesce', action='store_true')
+    parser.add_argument('--include-images', action='store_true', help='Encrypt immutable images before maintenance.')
+    parser.add_argument('--load-images', action='store_true', help='Explicitly allow loading bundled missing images for rehearsal.')
     args = parser.parse_args()
     try:
         names = {role: getattr(args, role) for role in DESTINATIONS}
@@ -309,7 +340,7 @@ def main():
             if not args.output:
                 raise MigrationError('--output is required.')
             password = os.environ.get('RANCHER_MIGRATION_BACKUP_PASSWORD') or getpass.getpass('Recovery passphrase: ')
-            result = backup(names, args.output, password, quiesce=args.quiesce) if args.command == 'backup' else rehearse_files(args.output, password)
+            result = backup(names, args.output, password, quiesce=args.quiesce, include_images=args.include_images) if args.command == 'backup' else rehearse_files(args.output, password, load_images=args.load_images)
         print(json.dumps(result, indent=2))
     except MigrationError as error:
         print('Recovery refused/failed: ' + str(error), file=__import__('sys').stderr)

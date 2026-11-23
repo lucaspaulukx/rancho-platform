@@ -1,3 +1,7 @@
+# Checkpoint — engines recuperados (05/11/2026)
+
+Recuperação76 passou36 testes Python,5 volumes,4 imagens criptografadas e15 checks reais: admin Rancher/Keycloak restaurados, OIDC-PKCE, novo usuário sem acesso/environment, inventário7envs e checksums de grants preservados. Engines em namespace loopback sem egress/portas/storage da origem.3 containers/5 volumes próprios removidos; origem com IDs e HTTP preservados. Import de imagem scratch própria provou perda/recuperação sem remover imagens da aplicação. Ainda não é migração original20envs+upgrade/rollback de engine nem aceite integral48. Próximo: versionamento runtime de schema/migração de grants e gates operacionais abertos.
+
 # Checkpoint — recuperação de arquivos (05/11/2026)
 
 Backup frio76 passou nos5 volumes Rancher/MySQL/logs/Keycloak/cache e configuração criptografada. Restauração em volumes próprios comparou conteúdo, UID/GID e modos, cleanup e IDs de origem preservados.29 testes Python. Engines não iniciados nas cópias, senha do ensaio descartada; não é backup operacional nem aceite de migração. Próximo: engines/login isolados, imagens e demais gates48. Frontend605/71 não mudou.
