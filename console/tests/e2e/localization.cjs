@@ -100,7 +100,7 @@ async function main() {
   await closeContext(disabled);
 
   result.stage = 'public-login-drafts';
-  const publicContext = await context({ extraLocales: ['fr-FR', 'de-DE', 'ja-JP', 'zh-Hans'] });
+  const publicContext = await context({ extraLocales: ['fr-FR', 'de-DE', 'ja-JP', 'zh-Hans', 'hu-HU', 'ru-RU', 'uk-UA', 'fa-IR'] });
   const publicPage = await page(publicContext);
   await publicPage.goto(loginUrl, { waitUntil: 'domcontentloaded' });
   const publicSelector = publicPage.getByRole('combobox', { name: 'Idioma', exact: true });
@@ -139,6 +139,10 @@ async function main() {
     ['de-DE', 'Auf Ihre Umgebung zugreifen', 'Sprache', 'Vorschau · Übersetzungen unvollständig'],
     ['ja-JP', '環境にアクセス', '言語', 'プレビュー · 一部未翻訳'],
     ['zh-Hans', '访问您的环境', '语言', '预览 · 翻译尚未完成'],
+    ['hu-HU', 'Hozzáférés a környezetéhez', 'Nyelv', 'Előnézet · hiányos fordítások'],
+    ['ru-RU', 'Войдите в свою среду', 'Язык', 'Предварительная версия · перевод неполный'],
+    ['uk-UA', 'Отримайте доступ до свого середовища', 'Мова', 'Попередня версія · переклад неповний'],
+    ['fa-IR', 'به محیط خود دسترسی پیدا کنید', 'زبان', 'پیش‌نمایش · ترجمه‌ها کامل نیستند'],
   ]) {
     await publicPage.locator('.language-selector select').selectOption(locale);
     await publicPage.getByRole('heading', { name: title, exact: true }).waitFor();
@@ -146,6 +150,7 @@ async function main() {
       await insideViewport(publicPage.getByRole('combobox', { name: label, exact: true })) &&
       await publicPage.getByText(notice, { exact: true }).isVisible() &&
       await publicPage.locator('html').getAttribute('lang') === locale &&
+      await publicPage.locator('html').getAttribute('dir') === (locale === 'fa-IR' ? 'rtl' : 'ltr') &&
       await username.inputValue() === 'localization-draft-only' &&
       await password.inputValue() === 'not-a-real-password' && publicPage.url() === loginUrl);
   }
