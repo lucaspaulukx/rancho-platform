@@ -48,6 +48,9 @@ for artifact in bcpkix-jdk15on-1.54 bcprov-jdk15on-1.54; do
     rm "$LIB/$artifact.jar"
 done
 install -m 0644 /lab/runtime-jars/bouncycastle/*.jar "$LIB/"
+# The upgraded Nimbus runtime uses its own shaded JSON parser.
+test -f "$LIB/json-smart-1.3.1.jar"
+rm "$LIB/json-smart-1.3.1.jar"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$ROOT/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java" >> /lab/sources
