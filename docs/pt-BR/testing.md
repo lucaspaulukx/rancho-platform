@@ -120,6 +120,8 @@ python console/tests/localization_acceptance.py --accessibility
 
 Execute `python console/tests/gateway_security.py` com os containers locais do Rancher e do Nginx da console disponíveis na porta 18090. O teste usa uma sessão descartável de administrador e a revoga ao terminar. Verifica a política de cache e os cabeçalhos de segurança pelo Nginx, incluindo um callback OIDC inválido, sem precisar iniciar o provedor de identidade. Também verifica que scripts com hash mantêm o cache imutável.
 
+Com o serviço de catálogo em execução, use `--catalog-project ID_DO_ENVIRONMENT` em um environment próprio do laboratório. O teste lê o catálogo nativo e os templates pelo Nginx e verifica que requisições diretas ao proxy genérico não recebem a permissão de encaminhamento interno.
+
 Para o perfil padrão do Compose com OIDC desativado, adicione `--oidc-disabled`. O teste verifica o modo efetivo pelo gateway e espera HTTP 404 do callback desativado. Com OIDC ativo, espera HTTP 401 para o callback inválido. Use a suíte de autorização abaixo para verificar o login com um provedor de identidade.
 
 Execute `python console/tests/gateway_authorization.py` com o mesmo gateway local e o Keycloak em execução. O teste exige os fixtures RBAC-DEV/RBAC-PROD e usa três sessões descartáveis. Verifica escopo de projeto, bloqueio de escrita para leitores, reutilização de tickets OIDC, ausência de campos de credenciais na configuração OIDC pública e requisições de outra origem com cookie de sessão. Se houver um proxy reverso à frente do Nginx, verifique que ele preserva o cabeçalho Host público usado na comparação de origem.
