@@ -148,8 +148,10 @@ it('retranslates the native CPU validation message without changing the draft', 
   fireEvent.click(screen.getByRole('button', { name: 'Français' }));
   expect(await screen.findByRole('textbox', { name: 'Poids du CPU' })).toBe(input);
   expect(input).toHaveValue('1e3');
-  expect(input.validationMessage).toBe(
-    'Saisissez un entier sans fraction ni notation exponentielle.',
+  await waitFor(() =>
+    expect(input.validationMessage).toBe(
+      'Saisissez un entier sans fraction ni notation exponentielle.',
+    ),
   );
   expect(change).toHaveBeenCalledExactlyOnceWith('1e3');
   fireEvent.change(input, { target: { value: '256' } });
