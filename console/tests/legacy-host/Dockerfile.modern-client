@@ -1,0 +1,3 @@
+FROM docker:29.9.2-cli@sha256:5e6baf67325a79f64ed3bed6863954d5e05d0f3d4e57cbdb14809346814bbfdb AS docker-cli
+FROM rancher/agent:v1.2.11@sha256:0fba3fb10108f7821596dc5ad4bfa30e93426d034cd3471f6ccd3afb5f87a963
+COPY --from=docker-cli /usr/local/bin/docker /usr/bin/docker
