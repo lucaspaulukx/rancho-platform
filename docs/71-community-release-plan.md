@@ -23,3 +23,7 @@ Data: 04/11/2026. Esta etapa passa a preceder os gates restantes do roadmap48.
 ## Critérios de aceite
 
 Build/testes de frontend; inspeção visual desktop/mobile; ausência de material de referência privado nos arquivos versionados e commits; bootstrap e patches conferidos; preflight que não modifica origem; restauração e rollback em laboratório; documentação que distingue ensaio de liberação para produção. Publicação remota será uma etapa posterior.
+
+## Repositório autorizado — 05/11/2026
+
+Nome escolhido: Rancho Platform. Destino autorizado pelo mantenedor: https://github.com/lucaspaulukx/rancho-platform. Importar o histórico comunitário existente e registrar entregas posteriores em commits por mudança. A autorização inclui o primeiro push; não exige trocar a visibilidade privada encontrada no destino, nem representa autorização para publicar releases ou encerrar gates pendentes. Ver86 para fluxo de branches e gates de conteúdo.
