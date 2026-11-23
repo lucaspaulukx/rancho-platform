@@ -174,6 +174,8 @@ The modern bootstrap smoke also verified the persistent agent image, not just th
 
 The isolated two-host rehearsal passed on Docker 29.9.2 guests with the Ubuntu 6.8 kernel. Both hosts joined a fresh environment provisioned from the patched catalog. A managed container on one guest returned an HTTP fixture response to a managed container on the other guest, and the IPsec routers reported installed associations with nonzero packet counters. This run used the legacy IPsec router image and the modern-client agent. A separate Ubuntu 24.04 build probe for the IPsec binary and strongSwan reported zero high or critical findings. Integration of that replacement and the remaining legacy network components are still open.
 
+The isolated two-host environment also accepted the rebuilt IPsec router prototype through the Cattle service upgrade API. A new pair of workloads exchanged HTTP across the two guests, with nonzero XFRM packet counters on each router. The corresponding optional build in `Dockerfile.modern-ipsec-router` uses the packaged Ubuntu strongSwan and removes shell tracing from the startup script. Upstream Go tests passed and the packaged image reported zero high or critical findings. The router is a sidecar replacement. The network holder, CNI driver and connectivity checker still use their catalog images.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.
