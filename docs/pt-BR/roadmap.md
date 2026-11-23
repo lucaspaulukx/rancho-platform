@@ -148,6 +148,10 @@ O perfil de nó único agora usa Ubuntu 24.04. O scan anterior do Debian 13 cont
 
 Uma VM Linux descartável com Docker 29.9.2, cgroups v2 e os pacotes experimentais de agente e API de host registrou um host e executou um container Alpine em modo de rede host. As ações nativas de parar, iniciar e reiniciar passaram. Os WebSockets nativos entregaram logs, saída de comando e métricas do container. Um serviço de stack usando rede host e volume nomeado ficou saudável, foi desativado e reativado. Rede gerenciada, persistência de armazenamento e aceite ampliado de stacks seguem em aberto.
 
+O backend moderno de nó único registrou um host com Docker 29.9.2 após correções na ativação do agente e na entrega dos arquivos de bootstrap. Em rede host, passaram a criação e o ciclo de vida de containers, a desativação e reativação de um serviço de stack e a leitura dos dados de um volume nomeado por um segundo container. Com o proxy embutido e o agente conectado, logs, terminal e métricas nativos passaram. A criação em rede gerenciada falhou porque a rede gerenciada ainda precisava ser provisionada na fixture. O provisionamento pelo catálogo de infraestrutura e o DNS de serviços seguem pendentes.
+
+Um backup lógico de MySQL 5.5 foi restaurado em um MariaDB 10.11 isolado. O novo backend aplicou a migração do schema e preservou a contagem de serviços após reiniciar. Esse backup tinha zero instâncias, hosts e volumes ativos. O ensaio com banco externo cobre o schema do Rancher. As tabelas de permissões do MySQL de origem ficam com o engine original.
+
 ## Ordem e domínios opcionais
 
 Conclua contratos/efeitos nativos de workloads, depois infraestrutura/dados/catálogo/integrações. Feche identidade técnica/streams e migração segura de grants, seguido de acessibilidade/performance e regressão final de configuração/recuperação/release. Gate falho retorna à implementação; não aumente timeouts ou esconda limites para obter aprovação.
