@@ -197,6 +197,9 @@ async function main() {
     ['users', 'Users'],
     ['api-keys', 'API keys'],
     ['settings', 'Server settings'],
+    ['hosts', 'Hosts'],
+    ['catalog', 'Catalog'],
+    ['webhooks', 'Webhooks'],
   ]) {
     await workspace.goto(origin + '/console/' + route + '?env=1a12');
     await workspace.getByRole('heading', { name: title, exact: true }).waitFor();

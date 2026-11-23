@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/provider';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useBlocker, useSearchParams } from 'react-router-dom';
@@ -47,11 +48,30 @@ import { EnvironmentCatalogs } from '../components/EnvironmentCatalogs';
 import { environmentRepositoryMetadata } from '../environment-catalogs';
 import { useEnvironmentCatalogAccess } from '../hooks/useEnvironmentCatalogAccess';
 
+type CatalogPageErrorKey =
+  | 'catalogPage.upgradeUnavailable'
+  | 'catalogPage.readStackFailed'
+  | 'catalogPage.launchUnavailable'
+  | 'catalogPage.upgradePermission'
+  | 'catalogPage.stackChanged'
+  | 'catalogPage.upgradeState'
+  | 'catalogPage.versionRevalidation'
+  | 'catalogPage.versionChanged'
+  | 'catalogPage.createPermission'
+  | 'catalogPage.confirmImpact'
+  | 'catalogPage.reviewConfiguration';
+class CatalogPageError extends Error {
+  constructor(readonly key: CatalogPageErrorKey) {
+    super(key);
+  }
+}
 export function CatalogPage() {
   const app = useApp();
   return <CatalogContext key={`${app.identity}-${app.project?.id}`} />;
 }
 function CatalogContext() {
+  const { t } = useI18n();
+
   const app = useApp();
   const repositoryAccess = useEnvironmentCatalogAccess();
   const [params, setParams] = useSearchParams();
@@ -84,8 +104,8 @@ function CatalogContext() {
   if (!app.project)
     return (
       <Empty
-        title="Selecione um environment"
-        description="Escolha o environment no qual deseja consultar o catálogo."
+        title={t('catalogPage.selectEnvironment')}
+        description={t('catalogPage.selectEnvironmentDescription')}
       />
     );
   if (query.isPending) return <Loading />;
@@ -100,36 +120,31 @@ function CatalogContext() {
   return (
     <>
       <PageHeader
-        title="Catálogo"
+        title={t('catalogPage.title')}
         eyebrow={app.project.name}
-        description="Escolha uma aplicação, revise a versão e configure sua stack."
+        description={t('catalogPage.description')}
         action={
           <>
             {repositoryAccess.allowed && (
-              <Button onClick={() => setRepositories(true)}>Fontes do environment</Button>
+              <Button onClick={() => setRepositories(true)}>{t('catalogPage.sources')}</Button>
             )}
             <Button busy={query.isFetching} onClick={() => void query.refetch()}>
               <RefreshCw size={16} />
-              Atualizar listagem
+              {t('catalogPage.refresh')}
             </Button>
           </>
         }
       />
-      {!cattle && (
-        <Alert tone="info">
-          O lançamento de templates nesta console está disponível para environments Cattle. Você
-          pode consultar as versões e seus arquivos.
-        </Alert>
-      )}
+      {!cattle && <Alert tone="info">{t('catalogPage.cattleInfo')}</Alert>}
       <div className="catalog-filters">
-        <Field label="Catálogo">
+        <Field label={t('catalogPage.title')}>
           {(id) => (
             <select
               id={id}
               value={source}
               onChange={(event) => filter('catalog', event.target.value)}
             >
-              <option value="">Todos os catálogos</option>
+              <option value="">{t('catalogPage.allCatalogs')}</option>
               {query.data.catalogs.map((catalog) => (
                 <option key={catalog.id} value={catalog.id}>
                   {catalog.name || catalog.id}
@@ -138,14 +153,14 @@ function CatalogContext() {
             </select>
           )}
         </Field>
-        <Field label="Categoria">
+        <Field label={t('catalogPage.category')}>
           {(id) => (
             <select
               id={id}
               value={category}
               onChange={(event) => filter('category', event.target.value)}
             >
-              <option value="">Todas as categorias</option>
+              <option value="">{t('catalogPage.allCategories')}</option>
               {categoryOptions.map((value) => (
                 <option key={value} value={value}>
                   {value}
@@ -160,7 +175,7 @@ function CatalogContext() {
             checked={includeInfra}
             onChange={(event) => filter('infra', event.target.checked ? 'true' : '')}
           />
-          Incluir templates de infraestrutura
+          {t('catalogPage.includeInfra')}
         </label>
       </div>
       <DataTable
@@ -169,12 +184,12 @@ function CatalogContext() {
         searchText={(template) =>
           `${template.name || ''} ${template.id} ${template.description || ''} ${categories(template).join(' ')}`
         }
-        emptyTitle="Nenhum template disponível"
-        emptyDescription="Confira os filtros e a disponibilidade dos catálogos neste environment."
+        emptyTitle={t('catalogPage.empty')}
+        emptyDescription={t('catalogPage.emptyDescription')}
         columns={[
           {
             key: 'name',
-            label: 'Aplicação',
+            label: t('catalogPage.application'),
             sortValue: (template) => template.name || template.id,
             render: (template) => (
               <button className="catalog-title" onClick={() => setOpened(template)}>
@@ -188,13 +203,13 @@ function CatalogContext() {
           },
           {
             key: 'catalog',
-            label: 'Catálogo',
+            label: t('catalogPage.title'),
             sortValue: (template) => template.catalogId || '',
             render: (template) => template.catalogId || '—',
           },
           {
             key: 'categories',
-            label: 'Categorias',
+            label: t('catalogPage.categories'),
             render: (template) => (
               <div className="badge-row">
                 {categories(template).map((value) => (
@@ -205,13 +220,15 @@ function CatalogContext() {
           },
           {
             key: 'version',
-            label: 'Versão padrão',
+            label: t('catalogPage.defaultVersion'),
             render: (template) => template.defaultVersion || '—',
           },
           {
             key: 'open',
-            label: 'Configuração',
-            render: (template) => <Button onClick={() => setOpened(template)}>Ver versões</Button>,
+            label: t('catalogPage.configuration'),
+            render: (template) => (
+              <Button onClick={() => setOpened(template)}>{t('catalogPage.versions')}</Button>
+            ),
           },
         ]}
       />
@@ -248,6 +265,9 @@ export function CatalogUpgrade({
   onClose: () => void;
   onUpdated: (resource: Resource) => void;
 }) {
+  const { t } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof CatalogPageError ? t(error.key) : error.message;
   const app = useApp(),
     scope = useActionScope();
   const [current, setCurrent] = useState<Resource | null>(null);
@@ -261,12 +281,14 @@ export function CatalogUpgrade({
       .then((resource) => {
         scope.resource(resource, stack);
         if (!catalogReference(resource.externalId) || !resource.actions?.upgrade)
-          throw new Error('A atualização pelo catálogo não está disponível neste estado.');
+          throw new CatalogPageError('catalogPage.upgradeUnavailable');
         if (active) setCurrent(resource);
       })
       .catch((caught) => {
         if (active)
-          setError(caught instanceof Error ? caught : new Error('Não foi possível ler a stack.'));
+          setError(
+            caught instanceof Error ? caught : new CatalogPageError('catalogPage.readStackFailed'),
+          );
       });
     return () => {
       active = false;
@@ -291,14 +313,17 @@ export function CatalogUpgrade({
     <Modal
       open
       drawer
-      title={`Atualizar stack · ${stack.name || stack.id}`}
+      title={t('catalogPage.upgradeTitle', { name: stack.name || stack.id })}
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      footer={<Button onClick={onClose}>Fechar</Button>}
+      footer={<Button onClick={onClose}>{t('catalogPage.close')}</Button>}
     >
       {error ? (
-        <ErrorState error={error} retry={() => setAttempt((value) => value + 1)} />
+        <ErrorState
+          error={new Error(errorText(error))}
+          retry={() => setAttempt((value) => value + 1)}
+        />
       ) : (
         <Loading />
       )}
@@ -318,6 +343,8 @@ function CatalogLaunch({
   onCreated: (resource: Resource) => void;
   upgradeStack?: Resource;
 }) {
+  const { t } = useI18n();
+
   const app = useApp();
   const schemas = useSchemas(true);
   const [selected, setSelected] = useState('');
@@ -379,17 +406,20 @@ function CatalogLaunch({
         drawer
         title={
           upgradeStack
-            ? `Atualizar stack · ${upgradeStack.name || upgradeStack.id}`
+            ? t('catalogPage.upgradeTitle', { name: upgradeStack.name || upgradeStack.id })
             : detail.data?.name || template.name || template.id
         }
-        description={`Environment: ${app.project?.name} · ${detail.data?.description || 'Versões e configuração da aplicação.'}`}
+        description={t('catalogPage.environmentDescription', {
+          name: app.project?.name || '',
+          description: detail.data?.description || t('catalogPage.defaultDescription'),
+        })}
         onOpenChange={(open) => {
           if (!open) close();
         }}
         footer={
           <>
             <Button onClick={close} disabled={pending}>
-              Fechar
+              {t('catalogPage.close')}
             </Button>
             {allowed && (
               <Button
@@ -399,7 +429,7 @@ function CatalogLaunch({
                 busy={pending}
                 disabled={!ready}
               >
-                {upgradeStack ? 'Atualizar stack' : 'Criar stack'}
+                {upgradeStack ? t('catalogPage.upgrade') : t('catalogPage.create')}
               </Button>
             )}
           </>
@@ -411,19 +441,20 @@ function CatalogLaunch({
           <ErrorState error={detail.error || schemas.error} />
         ) : !url ? (
           <Empty
-            title="Nenhuma versão disponível"
-            description="O catálogo não retornou uma versão compatível com esta instância."
+            title={t('catalogPage.noVersion')}
+            description={t('catalogPage.noVersionDescription')}
           />
         ) : (
           <>
             {upgradeStack && (
               <Alert>
-                Stack existente: {upgradeStack.name || upgradeStack.id} · referência atual:{' '}
-                {currentVersion}. Revise a versão, os parâmetros e os arquivos antes de enviar. A
-                atualização pode recriar serviços e containers.
+                {t('catalogPage.existingStack', {
+                  name: upgradeStack.name || upgradeStack.id,
+                  version: currentVersion || '',
+                })}
               </Alert>
             )}
-            <Field label="Versão do template">
+            <Field label={t('catalogPage.templateVersion')}>
               {(id) => (
                 <select
                   id={id}
@@ -434,18 +465,13 @@ function CatalogLaunch({
                   {Object.keys(links).map((value) => (
                     <option key={value} value={value}>
                       {value}
-                      {value === detail.data?.defaultVersion ? ' · padrão' : ''}
+                      {value === detail.data?.defaultVersion ? t('catalogPage.defaultSuffix') : ''}
                     </option>
                   ))}
                 </select>
               )}
             </Field>
-            {!allowed && (
-              <Alert tone="info">
-                Você pode consultar os arquivos. O lançamento não está disponível para sua conta ou
-                para este tipo de environment.
-              </Alert>
-            )}
+            {!allowed && <Alert tone="info">{t('catalogPage.launchInfo')}</Alert>}
             {version.isPending ? (
               <Loading />
             ) : version.error ? (
@@ -479,8 +505,8 @@ function CatalogLaunch({
         onOpenChange={(open) => {
           if (!open) setDiscard(null);
         }}
-        title="Descartar configuração?"
-        description="Os parâmetros preenchidos ainda não foram salvos."
+        title={t('catalogPage.discardTitle')}
+        description={t('catalogPage.discardDescription')}
         onConfirm={() => {
           if (discard === 'close') onClose();
           else if (discard) setSelected(discard.version);
@@ -491,8 +517,8 @@ function CatalogLaunch({
       {pending ? (
         <Modal
           open={blocker.state === 'blocked'}
-          title="Criação em andamento"
-          description="Aguarde a resposta do Rancher antes de trocar de contexto."
+          title={t('catalogPage.creating')}
+          description={t('catalogPage.wait')}
           onOpenChange={(open) => {
             if (!open && blocker.state === 'blocked') blocker.reset();
           }}
@@ -502,7 +528,7 @@ function CatalogLaunch({
                 if (blocker.state === 'blocked') blocker.reset();
               }}
             >
-              Permanecer nesta tela
+              {t('catalogPage.stay')}
             </Button>
           }
         >
@@ -511,8 +537,8 @@ function CatalogLaunch({
       ) : (
         <Confirm
           open={blocker.state === 'blocked'}
-          title="Sair sem salvar?"
-          description="Os parâmetros do template serão descartados."
+          title={t('catalogPage.leave')}
+          description={t('catalogPage.leaveDescription')}
           onOpenChange={(open) => {
             if (!open && blocker.state === 'blocked') blocker.reset();
           }}
@@ -535,13 +561,15 @@ interface FormProps {
   upgradeStack?: Resource;
 }
 function CatalogVersionForm(props: FormProps) {
+  const { t } = useI18n();
+
   const app = useApp();
   let questions: CatalogQuestion[] = [];
   let invalid = '';
   try {
     questions = catalogQuestions(props.version);
   } catch (error) {
-    invalid = error instanceof Error ? error.message : 'O template é inválido.';
+    invalid = error instanceof Error ? error.message : t('catalogPage.invalidTemplate');
   }
   const query = useQuery({
     queryKey: useDataKey('catalog-references', props.version.id),
@@ -606,6 +634,9 @@ function CatalogParameters({
   onCreated,
   upgradeStack,
 }: FormProps & { questions: CatalogQuestion[]; references: CatalogReferences }) {
+  const { t } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof CatalogPageError ? t(error.key) : error.message;
   const app = useApp();
   const scope = useActionScope();
   const client = useQueryClient();
@@ -626,7 +657,7 @@ function CatalogParameters({
   const [description, setDescription] = useState('');
   const [start, setStart] = useState(true);
   const [acceptedImpact, setAcceptedImpact] = useState(false);
-  const [validation, setValidation] = useState('');
+  const [validation, setValidation] = useState<Error | null>(null);
   const dirty =
     (!!upgradeStack && acceptedImpact) ||
     name !== (upgradeStack?.name || defaultName) ||
@@ -637,7 +668,7 @@ function CatalogParameters({
   const mutation = useMutation({
     gcTime: 0,
     mutationFn: async (payload: Record<string, unknown>) => {
-      if (!schema?.links.collection) throw new Error('O lançamento não está disponível.');
+      if (!schema?.links.collection) throw new CatalogPageError('catalogPage.launchUnavailable');
       const signal = scope.signal();
       const current = await api<Schema>(
         `projects/${app.project!.id}/schemas/stack`,
@@ -651,14 +682,13 @@ function CatalogParameters({
           !canManageResource(current) ||
           current.resourceActions?.upgrade?.input !== 'stackUpgrade'
         )
-          throw new Error('Sua permissão de atualizar não está mais disponível.');
+          throw new CatalogPageError('catalogPage.upgradePermission');
         const fresh = await api<Resource>(upgradeStack.links.self, undefined, undefined, signal);
         scope.resource(fresh, upgradeStack);
         if (catalogStackSnapshot(fresh) !== catalogStackSnapshot(upgradeStack))
-          throw new Error('A stack foi alterada por outro cliente. Feche e reabra o painel.');
-        if (!fresh.actions?.upgrade)
-          throw new Error('A atualização não está disponível neste estado.');
-        if (!version.links.self) throw new Error('A versão não pode ser revalidada.');
+          throw new CatalogPageError('catalogPage.stackChanged');
+        if (!fresh.actions?.upgrade) throw new CatalogPageError('catalogPage.upgradeState');
+        if (!version.links.self) throw new CatalogPageError('catalogPage.versionRevalidation');
         const release = await api<CatalogVersion>(
           catalogPath(version.links.self),
           undefined,
@@ -673,11 +703,11 @@ function CatalogParameters({
           JSON.stringify([release.files, release.questions]) !==
             JSON.stringify([version.files, version.questions])
         )
-          throw new Error('A versão do catálogo mudou. Reabra o painel para revisar.');
+          throw new CatalogPageError('catalogPage.versionChanged');
         return api<Resource>(fresh.actions.upgrade, payload, 'POST', signal);
       }
       if (!current.collectionMethods?.includes('POST'))
-        throw new Error('Sua permissão de criação não está mais disponível.');
+        throw new CatalogPageError('catalogPage.createPermission');
       return api<Resource>(current.links.collection, payload, 'POST', signal);
     },
     onSuccess: (resource) => {
@@ -685,11 +715,7 @@ function CatalogParameters({
       void client.invalidateQueries({
         queryKey: ['data', app.identity, 'project', app.project!.id],
       });
-      toast(
-        upgradeStack
-          ? 'Atualização recebida. Acompanhe a stack e seus serviços na operação.'
-          : 'Stack criada. Acompanhe os serviços e seus estados na operação.',
-      );
+      toast(upgradeStack ? t('catalogPage.updated') : t('catalogPage.created'));
       onCreated(resource);
     },
   });
@@ -718,32 +744,26 @@ function CatalogParameters({
   }, [dirty, mutation.isPending]);
   function submit(event: FormEvent) {
     event.preventDefault();
-    setValidation('');
+    setValidation(null);
     try {
-      if (upgradeStack && !acceptedImpact)
-        throw new Error('Confirme o impacto da atualização antes de enviar.');
+      if (upgradeStack && !acceptedImpact) throw new CatalogPageError('catalogPage.confirmImpact');
       mutation.mutate(
         upgradeStack
           ? prepareCatalogUpgrade(upgradeStack, template, version, answers, references)
           : prepareCatalogStack(template, version, name, description, answers, start, references),
       );
     } catch (error) {
-      setValidation(error instanceof Error ? error.message : 'Revise a configuração.');
+      setValidation(
+        error instanceof Error ? error : new CatalogPageError('catalogPage.reviewConfiguration'),
+      );
     }
   }
   return (
     <form id="catalog-launch-form" onSubmit={submit}>
       <fieldset disabled={mutation.isPending} className="catalog-parameters">
-        {upgradeStack && (
-          <Alert tone="warning">
-            O upgrade nativo pode iniciar serviços que estão parados, além de recriar containers e
-            alterar recursos definidos pelo template. Confira os parâmetros e a escala antes de
-            autorizar. Alterar um parâmetro de escala do template não garante mudar a escala
-            efetiva: confira e ajuste os serviços na operação antes do upgrade.
-          </Alert>
-        )}
-        <h3>Configuração da stack</h3>
-        <Field label="Nome da stack *">
+        {upgradeStack && <Alert tone="warning">{t('catalogPage.impactWarning')}</Alert>}
+        <h3>{t('catalogPage.stackConfiguration')}</h3>
+        <Field label={t('catalogPage.stackName')}>
           {(id) => (
             <input
               id={id}
@@ -756,7 +776,7 @@ function CatalogParameters({
           )}
         </Field>
         {!upgradeStack && (
-          <Field label="Descrição">
+          <Field label={t('catalogPage.fieldDescription')}>
             {(id) => (
               <textarea
                 id={id}
@@ -767,7 +787,7 @@ function CatalogParameters({
             )}
           </Field>
         )}
-        {questions.length > 0 && <h3>Parâmetros da aplicação</h3>}
+        {questions.length > 0 && <h3>{t('catalogPage.parameters')}</h3>}
         {questions.map((question) => (
           <QuestionField
             key={question.variable}
@@ -786,7 +806,7 @@ function CatalogParameters({
               checked={acceptedImpact}
               onChange={(event) => setAcceptedImpact(event.target.checked)}
             />
-            Autorizo recriar containers e iniciar serviços conforme esta configuração
+            {t('catalogPage.authorize')}
           </label>
         )}
         {!upgradeStack && (
@@ -796,18 +816,20 @@ function CatalogParameters({
               checked={start}
               onChange={(event) => setStart(event.target.checked)}
             />
-            Iniciar serviços após criar a stack
+            {t('catalogPage.startServices')}
           </label>
         )}
         {!upgradeStack && (
           <p className="muted">
-            {start
-              ? 'O Rancher poderá criar containers e recursos descritos pelo template.'
-              : 'A stack será criada sem iniciar seus serviços. Você poderá iniciá-los pela operação.'}
+            {start ? t('catalogPage.startHint') : t('catalogPage.stoppedHint')}
           </p>
         )}
       </fieldset>
-      {(validation || mutation.error) && <Alert>{validation || mutation.error?.message}</Alert>}
+      {(validation || mutation.error) && (
+        <Alert>
+          {validation ? errorText(validation) : mutation.error ? errorText(mutation.error) : ''}
+        </Alert>
+      )}
     </form>
   );
 }
@@ -822,6 +844,8 @@ export function QuestionField({
   choices?: CatalogChoice[];
   onChange: (value: unknown) => void;
 }) {
+  const { t } = useI18n();
+
   const secret =
     ['password', 'masked'].includes(question.type) ||
     sensitiveField(question.variable) ||
@@ -850,7 +874,7 @@ export function QuestionField({
               value={String(value ?? '')}
               onChange={(event) => onChange(event.target.value)}
             >
-              <option value="">Selecionar…</option>
+              <option value="">{t('catalogPage.select')}</option>
               {(choices || question.options?.map((value) => ({ value, label: value })) || []).map(
                 (choice) => (
                   <option key={choice.value} value={choice.value}>
@@ -864,7 +888,7 @@ export function QuestionField({
           return (
             <div>
               <Button type="button" variant="ghost" onClick={() => setRevealed((value) => !value)}>
-                {revealed ? 'Ocultar conteúdo' : 'Mostrar para editar'}
+                {revealed ? t('catalogPage.hide') : t('catalogPage.show')}
               </Button>
               {revealed ? (
                 <textarea
@@ -880,7 +904,7 @@ export function QuestionField({
                   type="password"
                   readOnly
                   value={value ? '••••••••' : ''}
-                  placeholder="Conteúdo oculto"
+                  placeholder={t('catalogPage.hidden')}
                   aria-describedby={description}
                 />
               )}
@@ -916,15 +940,15 @@ export function QuestionField({
   );
 }
 function CatalogFiles({ files }: { files: Record<string, string> }) {
+  const { t } = useI18n();
+
   const [tab, setTab] = useState(0);
   const names = Object.keys(files || {}).filter((name) => typeof files[name] === 'string');
   if (!names.length) return null;
   return (
     <section className="catalog-files">
-      <h3>Arquivos do template</h3>
-      <p className="muted">
-        Conteúdo original da versão selecionada. Os parâmetros serão processados pelo Rancher.
-      </p>
+      <h3>{t('catalogPage.files')}</h3>
+      <p className="muted">{t('catalogPage.filesDescription')}</p>
       <div className="catalog-file-tabs">
         <Tabs
           labels={names}
@@ -932,7 +956,7 @@ function CatalogFiles({ files }: { files: Record<string, string> }) {
           onChange={setTab}
           idPrefix="catalog-file"
           panelId="catalog-file-content"
-          label="Arquivos da versão"
+          label={t('catalogPage.versionFiles')}
         />
       </div>
       <pre

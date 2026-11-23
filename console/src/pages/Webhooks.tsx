@@ -3,6 +3,7 @@ import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, Eye, EyeOff, Plus, RefreshCw } from 'lucide-react';
 import { api, allPages, ApiError, type Resource, type Schema, type Collection } from '../api';
+import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import { useRequestScope } from '../hooks/useRequestScope';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
@@ -36,21 +37,33 @@ import {
 } from '../components/ui';
 import { ActionMenu } from '../components/ActionMenu';
 import { SelectorRows } from '../components/SelectorRows';
-const names: Record<string, string> = {
-  scaleService: 'Escala de serviço',
-  serviceUpgrade: 'Atualização de serviços',
-  scaleHost: 'Escala de hosts',
-  forwardPost: 'Encaminhamento HTTP',
-};
+class WebhookPageError extends Error {
+  constructor(
+    readonly key:
+      | 'webhooksPage.invalidContracts'
+      | 'webhooksPage.invalidPagination'
+      | 'webhooksPage.invalidList'
+      | 'webhooksPage.permissionDenied'
+      | 'webhooksPage.receiverUnavailable'
+      | 'webhooksPage.disabled'
+      | 'webhooksPage.deleteUnavailable'
+      | 'webhooksPage.receiverChanged'
+      | 'webhooksPage.urlUnavailable'
+      | 'webhooksPage.reviewFields'
+      | 'webhooksPage.httpError'
+      | 'webhooksPage.requestFailed',
+    readonly params?: { status: number },
+  ) {
+    super(key);
+  }
+}
 async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
   try {
     return await api<T>(path, body, method, signal);
   } catch (e) {
-    throw new Error(
-      e instanceof ApiError
-        ? `Operação de webhook indisponível (HTTP ${e.status}).`
-        : 'Não foi possível concluir a operação de webhook.',
-    );
+    throw e instanceof ApiError
+      ? new WebhookPageError('webhooksPage.httpError', { status: e.status })
+      : new WebhookPageError('webhooksPage.requestFailed');
   }
 }
 async function contracts(project: string, signal?: AbortSignal) {
@@ -60,7 +73,7 @@ async function contracts(project: string, signal?: AbortSignal) {
     undefined,
     signal,
   );
-  if (!Array.isArray(rows.data)) throw new Error('Contrato de webhooks inválido.');
+  if (!Array.isArray(rows.data)) throw new WebhookPageError('webhooksPage.invalidContracts');
   return Object.fromEntries(rows.data.map((v) => [v.id, v]));
 }
 async function access(project: string, signal?: AbortSignal) {
@@ -73,17 +86,32 @@ async function access(project: string, signal?: AbortSignal) {
   return rows.data?.[0];
 }
 export function Webhooks() {
+  const { t } = useI18n();
   const app = useApp();
   return app.project ? (
     <WebhookScope key={app.identity + ':' + app.project.id} project={app.project.id} />
   ) : (
     <Empty
-      title="Selecione um environment"
-      description="Os webhooks pertencem ao environment selecionado."
+      title={t('webhooksPage.selectEnvironment')}
+      description={t('webhooksPage.environmentDescription')}
     />
   );
 }
 function WebhookScope({ project }: { project: string }) {
+  const { t } = useI18n();
+  function errorText(error: Error) {
+    if (!(error instanceof WebhookPageError)) return error.message;
+    return error.key === 'webhooksPage.httpError'
+      ? t(error.key, { status: error.params!.status })
+      : t(error.key);
+  }
+  const names: Record<string, string> = {
+    scaleService: t('webhooksPage.scaleService'),
+    serviceUpgrade: t('webhooksPage.serviceUpgrade'),
+    scaleHost: t('webhooksPage.scaleHost'),
+    forwardPost: t('webhooksPage.forwardPost'),
+  };
+
   const app = useApp(),
     client = useQueryClient(),
     toast = useToast(),
@@ -94,7 +122,7 @@ function WebhookScope({ project }: { project: string }) {
     [review, setReview] = useState(false),
     [discard, setDiscard] = useState(false),
     [remove, setRemove] = useState<ReceiverMetadata | null>(null),
-    [error, setError] = useState(''),
+    [error, setError] = useState<Error | null>(null),
     [opening, setOpening] = useState<string | null>(null);
   const [secret, setSecret] = useState<{ id: string; url: string } | null>(null),
     [revealed, setRevealed] = useState(false);
@@ -124,10 +152,10 @@ function WebhookScope({ project }: { project: string }) {
       const seen = new Set<string>();
       while (next) {
         if (seen.has(next) || seen.size >= 100)
-          throw new Error('A coleção é muito grande ou retornou paginação inválida.');
+          throw new WebhookPageError('webhooksPage.invalidPagination');
         seen.add(next);
         const page = await request<Collection<Resource>>(next, undefined, undefined, signal);
-        if (!Array.isArray(page.data)) throw new Error('Lista de webhooks inválida.');
+        if (!Array.isArray(page.data)) throw new WebhookPageError('webhooksPage.invalidList');
         result.push(...page.data.map(receiverMetadata));
         next = webhookNext(page.pagination?.next, project);
       }
@@ -172,20 +200,19 @@ function WebhookScope({ project }: { project: string }) {
     setDraft(newWebhookDraft());
     setDirty(false);
     setReview(false);
-    setError('');
+    setError(null);
     write.reset();
   }
   async function freshPermission(signal: AbortSignal) {
     const [s, r] = await Promise.all([contracts(project, signal), access(project, signal)]);
     scope.assertCurrent();
-    if (!webhookWriter(r, project))
-      throw new Error('Seu acesso não permite gerenciar webhooks neste environment.');
+    if (!webhookWriter(r, project)) throw new WebhookPageError('webhooksPage.permissionDenied');
     return s;
   }
   async function open(row: ReceiverMetadata, clone = false) {
     if (opening) return;
     setOpening(row.id);
-    setError('');
+    setError(null);
     try {
       const signal = scope.signal();
       await freshPermission(signal);
@@ -196,7 +223,8 @@ function WebhookScope({ project }: { project: string }) {
         signal,
       );
       scope.assertCurrent();
-      if (receiverMetadata(value).id !== row.id) throw new Error('Receiver indisponível.');
+      if (receiverMetadata(value).id !== row.id)
+        throw new WebhookPageError('webhooksPage.receiverUnavailable');
       if (clone) {
         setDraft(cloneReceiver(value));
         setEditor(true);
@@ -206,7 +234,7 @@ function WebhookScope({ project }: { project: string }) {
         setRevealed(false);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Receiver indisponível.');
+      setError(e instanceof Error ? e : new WebhookPageError('webhooksPage.receiverUnavailable'));
     } finally {
       setOpening(null);
     }
@@ -215,12 +243,12 @@ function WebhookScope({ project }: { project: string }) {
     retry: false,
     gcTime: 0,
     mutationFn: async () => {
-      if (!app.config.modules.webhooks) throw new Error('O módulo de webhooks está desativado.');
+      if (!app.config.modules.webhooks) throw new WebhookPageError('webhooksPage.disabled');
       const signal = scope.signal(),
         current = await freshPermission(signal);
       if (remove) {
         if (!current.receiver?.resourceMethods?.includes('DELETE'))
-          throw new Error('A exclusão não está disponível.');
+          throw new WebhookPageError('webhooksPage.deleteUnavailable');
         const value = receiverMetadata(
           await request<Resource>(webhookPath(project, remove.id), undefined, undefined, signal),
         );
@@ -231,7 +259,7 @@ function WebhookScope({ project }: { project: string }) {
           value.driver !== remove.driver ||
           value.target !== remove.target
         )
-          throw new Error('O receiver mudou. Atualize e revise novamente.');
+          throw new WebhookPageError('webhooksPage.receiverChanged');
         await request<unknown>(webhookPath(project, value.id), undefined, 'DELETE', signal);
         scope.assertCurrent();
         return;
@@ -262,9 +290,7 @@ function WebhookScope({ project }: { project: string }) {
         setSecret(receiverSecret(value, project));
         setRevealed(false);
       } catch {
-        setError(
-          'O webhook foi criado. A URL não foi exibida; consulte-a novamente pelo menu do receiver.',
-        );
+        setError(new WebhookPageError('webhooksPage.urlUnavailable'));
       }
     },
     onSuccess: () => {
@@ -273,7 +299,7 @@ function WebhookScope({ project }: { project: string }) {
       void client.invalidateQueries({
         queryKey: ['data', app.identity, 'project', project, 'webhooks'],
       });
-      toast('Operação de webhook concluída. Nenhum evento foi enviado.');
+      toast(t('webhooksPage.completed'));
     },
     onError: () => setReview(false),
   });
@@ -294,10 +320,10 @@ function WebhookScope({ project }: { project: string }) {
               <option key={v} value={v}>
                 {(
                   {
-                    up: 'Aumentar',
-                    down: 'Reduzir',
-                    leastRecent: 'Menos recente',
-                    mostRecent: 'Mais recente',
+                    up: t('webhooksPage.up'),
+                    down: t('webhooksPage.down'),
+                    leastRecent: t('webhooksPage.leastRecent'),
+                    mostRecent: t('webhooksPage.mostRecent'),
                   } as Record<string, string>
                 )[v] || v}
               </option>
@@ -324,8 +350,8 @@ function WebhookScope({ project }: { project: string }) {
   return (
     <>
       <PageHeader
-        title="Webhooks"
-        description="Webhooks por environment. Criar, consultar ou excluir não dispara o evento."
+        title={t('webhooksPage.title')}
+        description={t('webhooksPage.description')}
         action={
           <>
             <Button
@@ -336,7 +362,7 @@ function WebhookScope({ project }: { project: string }) {
               disabled={list.isFetching}
             >
               <RefreshCw size={16} />
-              Atualizar
+              {t('webhooksPage.refresh')}
             </Button>
             {writer && webhookCreateAllowed(schema.data?.receiver) && (
               <Button
@@ -347,64 +373,72 @@ function WebhookScope({ project }: { project: string }) {
                 }}
               >
                 <Plus size={16} />
-                Criar webhook
+                {t('webhooksPage.createAction')}
               </Button>
             )}
           </>
         }
       />
-      <Alert tone="info">
-        A URL de invocação contém uma credencial. Ela é consultada separadamente e fica protegida.
-        Esta tela não envia eventos de teste nem abre a URL automaticamente.
-      </Alert>
+      <Alert tone="info">{t('webhooksPage.privacyNotice')}</Alert>
       {!authorization.isPending && !writer && (
-        <Alert tone="info">
-          Seu perfil pode consultar os metadados disponíveis. Criação, clonagem, exclusão e URL
-          exigem acesso de gerenciamento comprovado.
-        </Alert>
+        <Alert tone="info">{t('webhooksPage.permissionNotice')}</Alert>
       )}
-      {authorization.error && (
-        <Alert>
-          Não foi possível confirmar o acesso de gerenciamento. Atualize para tentar novamente.
-        </Alert>
-      )}
-      {error && <Alert>{error}</Alert>}
+      {authorization.error && <Alert>{t('webhooksPage.accessFailed')}</Alert>}
+      {error && <Alert>{errorText(error)}</Alert>}
       {list.isPending || schema.isPending ? (
         <Loading />
       ) : list.error || schema.error ? (
-        <ErrorState
-          error={list.error || schema.error}
-          retry={() => {
-            void list.refetch();
-            void schema.refetch();
-          }}
-        />
+        (list.error || schema.error) instanceof WebhookPageError ? (
+          <div className="error-state">
+            <Alert>{errorText((list.error || schema.error)!)}</Alert>
+            <Button
+              onClick={() => {
+                void list.refetch();
+                void schema.refetch();
+              }}
+            >
+              {t('webhooksPage.retry')}
+            </Button>
+          </div>
+        ) : (
+          <ErrorState
+            error={list.error || schema.error}
+            retry={() => {
+              void list.refetch();
+              void schema.refetch();
+            }}
+          />
+        )
       ) : (
         <DataTable
           rows={list.data || []}
           rowKey={(v) => v.id}
           searchText={(v) => `${v.name} ${v.driver} ${v.target}`}
           columns={[
-            { key: 'name', label: 'Nome', render: (v) => v.name },
-            { key: 'driver', label: 'Função', render: (v) => names[v.driver] || v.driver },
+            { key: 'name', label: t('webhooksPage.name'), render: (v) => v.name },
+            {
+              key: 'driver',
+              label: t('webhooksPage.function'),
+              render: (v) => names[v.driver] || v.driver,
+            },
             {
               key: 'target',
-              label: 'Alvo',
+              label: t('webhooksPage.target'),
               render: (v) => services.data?.find((s) => s.id === v.target)?.name || v.target,
             },
-            { key: 'state', label: 'Estado', render: (v) => v.state || '—' },
+            { key: 'state', label: t('webhooksPage.state'), render: (v) => v.state || '—' },
             {
               key: 'actions',
-              label: 'Ações',
+              label: t('webhooksPage.actions'),
               render: (v) => (
                 <ActionMenu
-                  label={`Ações do webhook ${v.name}`}
+                  label={t('webhooksPage.actionsLabel', { name: v.name })}
                   actions={
                     writer
                       ? [
                           {
                             id: 'url',
-                            label: 'Consultar URL protegida',
+                            label: t('webhooksPage.protectedUrl'),
                             disabled: pending,
                             onSelect: () => void open(v),
                           },
@@ -413,7 +447,7 @@ function WebhookScope({ project }: { project: string }) {
                             ? [
                                 {
                                   id: 'clone',
-                                  label: 'Clonar configuração',
+                                  label: t('webhooksPage.clone'),
                                   disabled: pending,
                                   onSelect: () => void open(v, true),
                                 },
@@ -423,7 +457,7 @@ function WebhookScope({ project }: { project: string }) {
                             ? [
                                 {
                                   id: 'remove',
-                                  label: 'Excluir webhook',
+                                  label: t('webhooksPage.delete'),
                                   danger: true,
                                   disabled: pending,
                                   onSelect: () => {
@@ -448,12 +482,12 @@ function WebhookScope({ project }: { project: string }) {
         onOpenChange={(open) => {
           if (!open) close();
         }}
-        title="Criar webhook"
-        description={`Environment: ${app.project?.name || project}`}
+        title={t('webhooksPage.create')}
+        description={t('webhooksPage.environment', { name: app.project?.name || project })}
         footer={
           <>
             <Button onClick={close} disabled={write.isPending}>
-              Cancelar
+              {t('webhooksPage.cancel')}
             </Button>
             <Button
               variant="primary"
@@ -461,21 +495,23 @@ function WebhookScope({ project }: { project: string }) {
               onClick={() => {
                 try {
                   prepareWebhook(draft, schema.data || {}, project, services.data || []);
-                  setError('');
+                  setError(null);
                   setReview(true);
                 } catch (e) {
-                  setError(e instanceof Error ? e.message : 'Revise os campos.');
+                  setError(
+                    e instanceof Error ? e : new WebhookPageError('webhooksPage.reviewFields'),
+                  );
                 }
               }}
             >
-              Revisar webhook
+              {t('webhooksPage.review')}
             </Button>
           </>
         }
       >
         <fieldset disabled={write.isPending} className="form-fieldset">
-          <legend>Configuração e destino</legend>
-          <Field label="Nome do webhook">
+          <legend>{t('webhooksPage.configuration')}</legend>
+          <Field label={t('webhooksPage.webhookName')}>
             {(id) => (
               <input
                 id={id}
@@ -485,7 +521,7 @@ function WebhookScope({ project }: { project: string }) {
               />
             )}
           </Field>
-          <Field label="Função do webhook">
+          <Field label={t('webhooksPage.webhookFunction')}>
             {(id) => (
               <select
                 id={id}
@@ -510,14 +546,14 @@ function WebhookScope({ project }: { project: string }) {
             )}
           </Field>
           {draft.driver === 'scaleService' ? (
-            <Field label="Serviço de destino">
+            <Field label={t('webhooksPage.targetService')}>
               {(id) => (
                 <select
                   id={id}
                   value={draft.serviceId}
                   onChange={(e) => change({ serviceId: e.target.value })}
                 >
-                  <option value="">Selecionar…</option>
+                  <option value="">{t('webhooksPage.select')}</option>
                   {services.data?.map((v) => (
                     <option key={v.id} value={v.id}>
                       {v.name || v.id} · {v.id}
@@ -530,33 +566,41 @@ function WebhookScope({ project }: { project: string }) {
             <SelectorRows
               rows={draft.selectors}
               onChange={(selectors) => change({ selectors })}
-              label={draft.driver === 'scaleHost' ? 'Labels dos hosts' : 'Labels dos serviços'}
+              label={
+                draft.driver === 'scaleHost'
+                  ? t('webhooksPage.hostLabels')
+                  : t('webhooksPage.serviceLabels')
+              }
             />
           )}
           {draft.driver === 'serviceUpgrade' ? (
             <>
-              <Field label="Tag da imagem">
+              <Field label={t('webhooksPage.imageTag')}>
                 {(id) => (
                   <input
                     id={id}
                     value={draft.tag}
                     onChange={(e) => change({ tag: e.target.value })}
-                    placeholder="Ex.: release"
+                    placeholder={t('webhooksPage.tagPlaceholder')}
                   />
                 )}
               </Field>
               <div className="form-grid">
-                {selectField('Formato do evento', 'payloadFormat', options?.payloadFormat.options)}
                 {selectField(
-                  'Tipo de endereço da imagem',
+                  t('webhooksPage.payloadFormat'),
+                  'payloadFormat',
+                  options?.payloadFormat.options,
+                )}
+                {selectField(
+                  t('webhooksPage.addressType'),
                   'addressType',
                   options?.addressType.options,
                 )}
-                {numberField('Containers por lote', 'batchSize')}
-                {numberField('Intervalo entre lotes (segundos)', 'intervalSeconds')}
+                {numberField(t('webhooksPage.batchSize'), 'batchSize')}
+                {numberField(t('webhooksPage.interval'), 'intervalSeconds')}
               </div>
               <CheckboxField
-                label="Iniciar novos containers antes de parar os atuais"
+                label={t('webhooksPage.startFirst')}
                 checked={draft.startFirst}
                 onChange={(e) => change({ startFirst: e.target.checked })}
               />
@@ -564,15 +608,15 @@ function WebhookScope({ project }: { project: string }) {
           ) : (
             <>
               <div className="form-grid">
-                {selectField('Ação da escala', 'action', options?.action.options)}
-                {numberField('Quantidade por evento', 'amount')}
-                {numberField('Mínimo de instâncias', 'min')}
-                {numberField('Máximo de instâncias', 'max')}
+                {selectField(t('webhooksPage.scaleAction'), 'action', options?.action.options)}
+                {numberField(t('webhooksPage.amount'), 'amount')}
+                {numberField(t('webhooksPage.minimum'), 'min')}
+                {numberField(t('webhooksPage.maximum'), 'max')}
               </div>
               {draft.driver === 'scaleHost' &&
                 draft.action === 'down' &&
                 selectField(
-                  'Host a remover primeiro',
+                  t('webhooksPage.deleteOrder'),
                   'deleteOption',
                   options?.deleteOption.options,
                 )}
@@ -581,22 +625,15 @@ function WebhookScope({ project }: { project: string }) {
           {draft.driver === 'scaleHost' && (
             <Alert tone="warning">
               {draft.action === 'up'
-                ? 'Aumentar hosts usa os hosts correspondentes como modelo para provisionar novas máquinas pelo driver configurado.'
-                : 'Reduzir hosts pode remover máquinas correspondentes às labels e interromper seus workloads. Revise o seletor e a ordem de remoção.'}
+                ? t('webhooksPage.scaleUpWarning')
+                : t('webhooksPage.scaleDownWarning')}
             </Alert>
           )}
           {draft.driver === 'serviceUpgrade' && (
-            <Alert tone="info">
-              Somente eventos de publicação da tag informada serão usados para atualizar os serviços
-              correspondentes às labels. O intervalo deste driver é informado em segundos.
-            </Alert>
+            <Alert tone="info">{t('webhooksPage.upgradeNotice')}</Alert>
           )}
-          <Alert tone="warning">
-            Ao receber um evento válido, o webhook poderá alterar workloads ou hosts. Revise o alvo,
-            os limites e quem terá acesso à URL. O Rancher executa o driver; criar o receiver não
-            comprova a entrega futura de eventos.
-          </Alert>
-          {(error || write.error) && <Alert>{error || write.error?.message}</Alert>}
+          <Alert tone="warning">{t('webhooksPage.operationWarning')}</Alert>
+          {(error || write.error) && <Alert>{errorText((error || write.error)!)}</Alert>}
         </fieldset>
       </Modal>
       <Confirm
@@ -604,8 +641,29 @@ function WebhookScope({ project }: { project: string }) {
         onOpenChange={(open) => {
           if (!write.isPending) setReview(open);
         }}
-        title="Criar webhook?"
-        description={`${draft.name}. Função: ${names[draft.driver]}. Alvo: ${draft.driver === 'scaleService' ? `${services.data?.find((v) => v.id === draft.serviceId)?.name || draft.serviceId} (${draft.serviceId})` : draft.selectors.map((v) => `${v.key}=${v.value}`).join(', ')}. ${draft.driver === 'serviceUpgrade' ? `Tag ${draft.tag}, lote ${draft.batchSize}, intervalo ${draft.intervalSeconds}s.` : `${draft.action === 'up' ? 'Aumentar' : 'Reduzir'} ${draft.amount} por evento; mínimo ${draft.min}, máximo ${draft.max}.`} Um evento futuro poderá executar esta operação no environment ${app.project?.name || project}. Nenhum evento será enviado ao criar.`}
+        title={t('webhooksPage.createTitle')}
+        description={t('webhooksPage.createDescription', {
+          name: draft.name,
+          driver: names[draft.driver],
+          target:
+            draft.driver === 'scaleService'
+              ? `${services.data?.find((v) => v.id === draft.serviceId)?.name || draft.serviceId} (${draft.serviceId})`
+              : draft.selectors.map((v) => `${v.key}=${v.value}`).join(', '),
+          operation:
+            draft.driver === 'serviceUpgrade'
+              ? t('webhooksPage.upgradeReview', {
+                  tag: draft.tag,
+                  batch: draft.batchSize,
+                  interval: draft.intervalSeconds,
+                })
+              : t('webhooksPage.scaleReview', {
+                  action: draft.action === 'up' ? t('webhooksPage.up') : t('webhooksPage.down'),
+                  amount: draft.amount,
+                  min: draft.min,
+                  max: draft.max,
+                }),
+          environment: app.project?.name || project,
+        })}
         busy={write.isPending}
         onConfirm={() => write.mutate()}
       />
@@ -614,12 +672,12 @@ function WebhookScope({ project }: { project: string }) {
         onOpenChange={(open) => {
           if (!open && !write.isPending) setRemove(null);
         }}
-        title="Excluir webhook?"
-        description={`${remove?.name || ''}. Integrações que usam esta URL deixarão de funcionar. Excluir o receiver não desfaz eventos já executados.`}
+        title={t('webhooksPage.deleteTitle')}
+        description={t('webhooksPage.deleteDescription', { name: remove?.name || '' })}
         busy={write.isPending}
         onConfirm={() => write.mutate()}
       >
-        {write.error && <Alert>{write.error.message}</Alert>}
+        {write.error && <Alert>{errorText(write.error)}</Alert>}
       </Confirm>
       <Modal
         open={!!secret}
@@ -629,10 +687,10 @@ function WebhookScope({ project }: { project: string }) {
             setRevealed(false);
           }
         }}
-        title="URL protegida do webhook"
-        description="Quem possui esta URL pode disparar a operação. Compartilhe somente com a integração autorizada."
+        title={t('webhooksPage.urlTitle')}
+        description={t('webhooksPage.urlDescription')}
       >
-        <Field label="URL de invocação">
+        <Field label={t('webhooksPage.invokeUrl')}>
           {(id) => (
             <input
               id={id}
@@ -646,29 +704,29 @@ function WebhookScope({ project }: { project: string }) {
         <div className="row-actions about-links">
           <Button onClick={() => setRevealed((v) => !v)}>
             {revealed ? <EyeOff size={16} /> : <Eye size={16} />}{' '}
-            {revealed ? 'Ocultar URL' : 'Mostrar URL'}
+            {revealed ? t('webhooksPage.hideUrl') : t('webhooksPage.showUrl')}
           </Button>
           <Button
             onClick={async () => {
               if (secret)
                 try {
                   await navigator.clipboard.writeText(secret.url);
-                  toast('URL copiada.');
+                  toast(t('webhooksPage.copied'));
                 } catch {
-                  toast('Não foi possível copiar a URL.');
+                  toast(t('webhooksPage.copyFailed'));
                 }
             }}
           >
             <Copy size={16} />
-            Copiar URL
+            {t('webhooksPage.copy')}
           </Button>
         </div>
       </Modal>
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar webhook não salvo?"
-        description="As alterações ainda não foram enviadas."
+        title={t('webhooksPage.discardTitle')}
+        description={t('webhooksPage.discardDescription')}
         onConfirm={() => {
           setDiscard(false);
           clear();
@@ -679,8 +737,8 @@ function WebhookScope({ project }: { project: string }) {
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Mudar de contexto?"
-        description="Há um webhook não salvo ou uma operação em andamento."
+        title={t('webhooksPage.contextTitle')}
+        description={t('webhooksPage.contextDescription')}
         busy={write.isPending}
         onConfirm={() => {
           if (!write.isPending && blocker.state === 'blocked') {
