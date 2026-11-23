@@ -11,7 +11,7 @@ import (
 // Bounded, one-peer lab transport experiment. Carries bytes unchanged and records only counts.
 func relayWindow(source string, seconds int) {
 	peer := net.ParseIP(source).To4()
-	if peer == nil || peer[0] != 10 || peer[1] != 42 || source == "10.42.0.1" || seconds < 30 || seconds > 120 {
+	if peer == nil || peer[0] != 10 || peer[1] != 42 || source == "10.42.0.1" || seconds != 120 {
 		fmt.Println("FIXTURE_STATUS:relayReady=0")
 		return
 	}

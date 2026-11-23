@@ -4,7 +4,7 @@ Rancho is an independent React/TypeScript console and local-groups/OIDC backend 
 
 ## Status
 
-The latest frontend validation passed647 tests in74 files plus TypeScript/Vite. Contextual stack/service/container operations, local groups, OIDC and shared responsive components are implemented in tested slices. Complete parity, long-running security checks, migration/restore and release acceptance remain open. See [master roadmap](docs/48-master-roadmap.md) and [community release plan](docs/71-community-release-plan.md).
+The latest frontend validation passed654 tests in75 files plus TypeScript/Vite. Contextual stack/service/container operations, local groups, OIDC and shared responsive components are implemented in tested slices. Complete parity, long-running security checks, migration/restore and release acceptance remain open. See [master roadmap](docs/48-master-roadmap.md) and [community release plan](docs/71-community-release-plan.md).
 
 ## Get the sources
 
