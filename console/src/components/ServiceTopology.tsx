@@ -15,10 +15,20 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { allPages, type Resource, type Schema } from '../api';
+import { ptTopology } from '../i18n/domains/topology';
+import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import { Alert, Badge, Button, Empty, ErrorState, Field, Loading, Modal } from './ui';
 
 type ServiceNode = Node<{ label: string; state: string; stack: string }, 'service'>;
+class TopologyError extends Error {
+  constructor(
+    readonly key: 'topology.limit' | 'topology.wrongEnvironment' | 'topology.duplicateServices',
+  ) {
+    super(ptTopology[key]);
+  }
+}
+
 export function serviceTopology(
   services: Resource[],
   mappings: Resource[],
@@ -26,17 +36,14 @@ export function serviceTopology(
   environment: string,
   direction: 'LR' | 'TB' = 'LR',
 ) {
-  if (services.length > 500 || mappings.length > 2000)
-    throw new Error(
-      'A topologia excede o limite de 500 serviços ou 2.000 vínculos. Use a operação em lista.',
-    );
+  if (services.length > 500 || mappings.length > 2000) throw new TopologyError('topology.limit');
   if ([...services, ...mappings, ...stacks].some((resource) => resource.accountId !== environment))
-    throw new Error('A topologia contém recursos de outro environment.');
+    throw new TopologyError('topology.wrongEnvironment');
   const visible = services.filter(
     (service) => !service.removed && !['removed', 'purged'].includes(service.state || ''),
   );
   if (new Set(visible.map((service) => service.id)).size !== visible.length)
-    throw new Error('O inventário contém serviços duplicados.');
+    throw new TopologyError('topology.duplicateServices');
   const ids = new Set(visible.map((service) => service.id));
   const edges: Edge[] = [];
   let unresolved = 0;
@@ -92,11 +99,12 @@ function ServiceGraphNode({
   sourcePosition = Position.Right,
   targetPosition = Position.Left,
 }: NodeProps<ServiceNode>) {
+  const { t } = useI18n();
   return (
     <div className="service-graph-node">
       <Handle type="target" position={targetPosition} />
       <strong title={data.label}>{data.label}</strong>
-      <span title={data.stack}>{data.stack || 'Sem stack'}</span>
+      <span title={data.stack}>{data.stack || t('topology.noStack')}</span>
       <Badge state={data.state}>{data.state}</Badge>
       <Handle type="source" position={sourcePosition} />
     </div>
@@ -104,17 +112,22 @@ function ServiceGraphNode({
 }
 const nodeTypes = { service: ServiceGraphNode };
 function Graph({ model }: { model: ReturnType<typeof serviceTopology> }) {
+  const { t } = useI18n();
   const [nodes, setNodes, onNodesChange] = useNodesState(model.nodes);
   useEffect(() => setNodes(model.nodes), [model.nodes, setNodes]);
+  const edges = useMemo(
+    () =>
+      model.edges.map((edge) => ({
+        ...edge,
+        ariaLabel: t('topology.link', { source: edge.source, target: edge.target }),
+      })),
+    [model.edges, t],
+  );
   return (
-    <div
-      className="service-topology"
-      role="region"
-      aria-label="Topologia de serviços do environment"
-    >
+    <div className="service-topology" role="region" aria-label={t('topology.region')}>
       <ReactFlow
         nodes={nodes}
-        edges={model.edges}
+        edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         fitView
@@ -122,10 +135,12 @@ function Graph({ model }: { model: ReturnType<typeof serviceTopology> }) {
         minZoom={0.15}
         maxZoom={2}
         ariaLabelConfig={{
-          'controls.ariaLabel': 'Controles da topologia',
-          'controls.zoomIn.ariaLabel': 'Ampliar topologia',
-          'controls.zoomOut.ariaLabel': 'Reduzir topologia',
-          'controls.fitView.ariaLabel': 'Enquadrar topologia',
+          'controls.ariaLabel': t('topology.controls'),
+          'controls.zoomIn.ariaLabel': t('topology.zoomIn'),
+          'controls.zoomOut.ariaLabel': t('topology.zoomOut'),
+          'controls.fitView.ariaLabel': t('topology.fitView'),
+          'node.a11yDescription.default': t('topology.nodeKeyboard'),
+          'node.a11yDescription.ariaLiveMessage': ({ x, y }) => t('topology.nodeMoved', { x, y }),
         }}
         nodesConnectable={false}
         edgesFocusable={false}
@@ -150,6 +165,7 @@ export default function ServiceTopology({
   onClose: () => void;
 }) {
   const app = useApp();
+  const { t } = useI18n();
   const [scope, setScope] = useState('');
   const [compact, setCompact] = useState(() => matchMedia('(max-width: 600px)').matches);
   useEffect(() => {
@@ -184,38 +200,39 @@ export default function ServiceTopology({
       return { error };
     }
   }, [services, stacks, query.data, app.project?.id, scope, compact]);
+  const error = query.error || graph.error;
   return (
     <Modal
       open
       drawer
-      title="Topologia de serviços"
+      title={t('topology.title')}
       description={app.project?.name}
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      footer={<Button onClick={onClose}>Fechar</Button>}
+      footer={<Button onClick={onClose}>{t('topology.close')}</Button>}
     >
       {!available ? (
         <Empty
-          title="Topologia indisponível"
-          description="O servidor não disponibiliza a coleção de vínculos neste contexto."
+          title={t('topology.unavailableTitle')}
+          description={t('topology.unavailableDescription')}
         />
       ) : !services.length ? (
-        <Empty
-          title="Nenhum serviço"
-          description="Este environment não tem serviços disponíveis."
-        />
+        <Empty title={t('topology.emptyTitle')} description={t('topology.emptyDescription')} />
       ) : query.isPending ? (
         <Loading />
-      ) : query.error || graph.error ? (
-        <ErrorState error={query.error || graph.error} retry={() => void query.refetch()} />
+      ) : error ? (
+        <ErrorState
+          error={error instanceof TopologyError ? new Error(t(error.key)) : error}
+          retry={() => void query.refetch()}
+        />
       ) : (
         graph.model && (
           <>
-            <Field label="Stack">
+            <Field label={t('topology.stack')}>
               {(id) => (
                 <select id={id} value={scope} onChange={(event) => setScope(event.target.value)}>
-                  <option value="">Todas as stacks</option>
+                  <option value="">{t('topology.allStacks')}</option>
                   {stacks.map((stack) => (
                     <option key={stack.id} value={stack.id}>
                       {stack.name || stack.id}
@@ -225,12 +242,14 @@ export default function ServiceTopology({
               )}
             </Field>
             <p className="muted">
-              {graph.model.nodes.length} serviços · {graph.model.edges.length} vínculos nativos
+              {t('topology.summary', {
+                services: graph.model.nodes.length,
+                links: graph.model.edges.length,
+              })}
             </p>
             {!!graph.model.unresolved && (
               <Alert tone="warning">
-                {graph.model.unresolved} vínculos apontam para serviços fora deste inventário. A
-                topologia está incompleta.
+                {t('topology.unresolved', { count: graph.model.unresolved })}
               </Alert>
             )}
             <Graph key={`${scope}:${compact}`} model={graph.model} />

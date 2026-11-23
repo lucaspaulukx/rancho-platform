@@ -209,9 +209,9 @@ describe('Structured device creation integration', () => {
   it('rejects loss of the fresh devices type before native POST and retains the draft', async () => {
     const user = userEvent.setup();
     renderCreator('en-US');
-    await user.type(screen.getByLabelText('Nome'), 'device-fixture');
-    await user.type(screen.getByLabelText('Imagem *'), 'alpine:3.20');
-    await user.click(screen.getByText(/Configuração avançada/));
+    await user.type(screen.getByLabelText('Name'), 'device-fixture');
+    await user.type(screen.getByLabelText('Image *'), 'alpine:3.20');
+    await user.click(screen.getByText(/Advanced configuration/));
     await user.click(screen.getByRole('button', { name: 'Add device' }));
     await user.type(screen.getByLabelText('Host path 1'), '/dev/null');
     await user.type(screen.getByLabelText('Container path 1'), '/dev/fixture');
@@ -233,7 +233,7 @@ describe('Structured device creation integration', () => {
     expect(backend.posts).toEqual([]);
     expect(screen.getByLabelText('Host path 1')).toHaveValue('/dev/null');
     expect(screen.getByLabelText('Container path 1')).toHaveValue('/dev/fixture');
-    expect(screen.getByLabelText('Nome')).toHaveValue('device-fixture');
+    expect(screen.getByLabelText('Name')).toHaveValue('device-fixture');
   });
 
   it('keeps device validation errors as keys so inline and submit feedback follow a language change', async () => {

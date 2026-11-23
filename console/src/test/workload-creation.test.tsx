@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 import type { Schema, SchemaField } from '../api';
 import { validateWorkloadCreation, workloadSections } from '../workload-creation';
 import { SchemaForm } from '../components/SchemaForm';
+import { I18nProvider, useI18n } from '../i18n/provider';
+import type { LocalizationPolicy } from '../i18n/policy';
 const field: SchemaField = { type: 'string', create: true };
 const launch: Schema = {
   id: 'launchConfig',
@@ -29,6 +31,42 @@ const service: Schema = {
   },
 };
 describe('Criação de workloads organizada', () => {
+  it('preserves schema fields and native payload while changing the form language', async () => {
+    const policy: LocalizationPolicy = {
+      enabled: true,
+      defaultLocale: 'pt-BR',
+      availableLocales: ['pt-BR', 'en-US'],
+      selectable: true,
+      detectBrowser: false,
+      preview: true,
+    };
+    function LanguageButton() {
+      const { setLocale } = useI18n();
+      return <button onClick={() => setLocale('en-US')}>English</button>;
+    }
+    const onSubmit = vi.fn();
+    const schema = {
+      ...service,
+      resourceFields: {
+        name: field,
+        description: { ...field, label: 'Native label' },
+      },
+    };
+    const user = userEvent.setup();
+    render(
+      <I18nProvider policy={policy}>
+        <LanguageButton />
+        <SchemaForm id="locale-test-form" schema={schema} schemas={{}} onSubmit={onSubmit} />
+      </I18nProvider>,
+    );
+    await user.type(screen.getByLabelText('Nome'), 'fixture');
+    await user.type(screen.getByLabelText('Native label'), 'Conteúdo original');
+    await user.click(screen.getByRole('button', { name: 'English' }));
+    expect(screen.getByLabelText('Name')).toHaveValue('fixture');
+    expect(screen.getByLabelText('Native label')).toHaveValue('Conteúdo original');
+    fireEvent.submit(document.getElementById('locale-test-form')!);
+    expect(onSubmit).toHaveBeenCalledWith({ name: 'fixture', description: 'Conteúdo original' });
+  });
   it('cada campo aparece exatamente uma vez; desconhecidos obrigatórios ficam visíveis e opcionais avançados', () => {
     const entries: [string, SchemaField][] = [
       ['name', field],
