@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { ConsoleConfig, ThemeMode } from './config';
 
 interface ThemeState {
@@ -46,8 +53,15 @@ export function ThemeProvider({
     return () => media.removeEventListener('change', update);
   }, []);
   const dark = mode === 'dark' || (mode === 'system' && systemDark);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
+    root.dataset.themeSwitching = 'true';
+    let settledFrame = 0;
+    const paintFrame = requestAnimationFrame(() => {
+      settledFrame = requestAnimationFrame(() => {
+        delete root.dataset.themeSwitching;
+      });
+    });
     root.dataset.theme = dark ? 'dark' : 'light';
     root.dataset.density = dense ? 'compact' : 'comfortable';
     root.dataset.customCheckboxes = String(config.modules.customCheckboxes === true);
@@ -56,6 +70,9 @@ export function ThemeProvider({
     for (const [token, value] of Object.entries(overrides))
       root.style.setProperty(`--${token}`, value);
     return () => {
+      cancelAnimationFrame(paintFrame);
+      cancelAnimationFrame(settledFrame);
+      delete root.dataset.themeSwitching;
       delete root.dataset.customCheckboxes;
       for (const token of applied) root.style.removeProperty(`--${token}`);
     };
