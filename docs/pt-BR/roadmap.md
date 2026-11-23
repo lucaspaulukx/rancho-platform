@@ -21,7 +21,7 @@ Estados descrevem capacidades mantidas e aceites restantes, não diário de exec
 | UX04 | Recuperação de chunks/abas antigas e retenção de assets | Abas antigas carregaram os chunks originais durante upgrade e rollback isolados do frontend. Um novo documento carregou a imagem restaurada. Falta o aceite final no artefato e na topologia de release |
 | UX05 | Acessibilidade manual/leitor de tela | O candidato fixado passou em 24 verificações axe, cobrindo seis rotas administrativas em duas larguras e nos dois temas. Falta o aceite manual de teclado e leitor de tela nos fluxos críticos |
 | UX06 | Alto volume/performance | Limites gzip no build e benchmark sintético de inventário no navegador disponíveis. Latência, heap e renderização medidos em 20 ambientes com 2.000 containers cada. A paginação opcional limita a lista plana de Containers a 50 linhas renderizadas e preserva a busca e a seleção no inventário completo. A árvore de workloads reutiliza um índice de containers por serviço durante a montagem. A paginação opcional limita Stacks e Serviços expandidos a 100 linhas de recursos e até dois cabeçalhos de contexto, preservando a árvore. Um teste sintético de dois minutos verificou atualizações periódicas e recuperação automática. Faltam medir a latência do backend real sob carga e definir os critérios finais de release |
-| CFG01 | Flags frontend/backend e fallback clássico | O CI de código-fonte verifica 64 combinações. O par Docker fixado passou pela ativação, desativação e reativação da customização nos mesmos volumes de banco, com fallback clássico, registro de migração intacto e recuperação do proxy. Falta a matriz completa em execução, incluindo OIDC exclusivo |
+| CFG01 | Flags frontend/backend e fallback clássico | O CI de código-fonte verifica 64 combinações. O par Docker fixado passou pela ativação, desativação e reativação da customização nos mesmos volumes de banco, com fallback clássico, registro de migração intacto e recuperação do proxy. Cópias restauradas separadas validaram as políticas híbrida e de OIDC exclusivo. Falta cobrir as demais interações entre flags em execução |
 | CFG02 | Configuração versionada | Contrato/CLI implementados; rollback de artefato/dados pertence ao aceite de release |
 
 ## Idiomas da interface e paridade com o Rancher original
@@ -56,7 +56,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 
 | ID | Capacidade | Estado e gate restante |
 |---|---|---|
-| AUTH01 | Local/OIDC, callback, exclusivo/autologin/sem-acesso | Implementado; falta matriz final de modos/sessões/deep links |
+| AUTH01 | Local/OIDC, callback, exclusivo/autologin/sem-acesso | Em duas restaurações do mesmo backup, o modo híbrido aceitou a senha do administrador local e o exclusivo a recusou. A cópia exclusiva anunciou entrada automática e validou o login pelo Keycloak, a ausência de acesso no primeiro login e a revogação da sessão. Faltam a navegação no navegador e a matriz final de sessões e links diretos |
 | AUTH02 | Conta/perfil global atuais | Implementado; falta regressão técnica final; reset de senha não revoga JWT sozinho |
 | AUTH03 | Expiração criptográfica | HTTP local/OIDC e streams UI validados em recortes; faltam caminhos técnicos/ociosidade/carga completos |
 | AUTH04 | Logout federado/falha do IdP | Recortes implementados; manter regressão sem loops/fallback local no exclusivo |

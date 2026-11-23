@@ -21,7 +21,7 @@ Statuses below describe maintained capabilities and remaining acceptance, not an
 | UX04 | Old-tab/chunk recovery and retained assets | Old tabs fetched their original lazy chunks during an isolated frontend upgrade and rollback. A fresh document loaded the restored image. Final release artifact and topology acceptance remain |
 | UX05 | Manual accessibility/screen reader | The pinned candidate passed 24 axe checks across six administrative routes, two widths and both themes. Manual keyboard and screen-reader acceptance of critical workflows remains |
 | UX06 | High volume/performance | Build gzip budgets and a synthetic browser inventory benchmark are in place. Measured latency, heap and rendering across 20 environments with 2,000 containers each. Optional client pagination bounds the flat Containers view to 50 rendered rows while preserving full inventory search and selection. The workload tree reuses an index of containers by service during projection. Optional pagination bounds expanded Stacks and Services to 100 logical rows plus up to two parent headings while retaining the nested workspace. A two-minute synthetic inventory soak verified polling and automatic recovery. Real backend latency under load and final release thresholds remain |
-| CFG01 | Frontend/backend flags and classic fallback | Source CI checks 64 configuration combinations. The pinned Docker pair passed customization on/off/on using the same database volumes, with classic fallback, unchanged migration record and console proxy recovery. The full runtime matrix, including exclusive OIDC, remains |
+| CFG01 | Frontend/backend flags and classic fallback | Source CI checks 64 configuration combinations. The pinned Docker pair passed customization on/off/on on the same database volumes, with classic fallback, an unchanged migration record and console proxy recovery. Separate restored copies verified the hybrid and exclusive OIDC policies. Runtime coverage for other flag interactions remains |
 | CFG02 | Versioned configuration | Implemented contract/CLI; artifact/data rollback belongs to release acceptance |
 
 ## Interface languages and original Rancher parity
@@ -56,7 +56,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 
 | ID | Capability | State and remaining gate |
 |---|---|---|
-| AUTH01 | Local/OIDC, callback, exclusive/autologin/no-access | Implemented; final mode/session/deep-link matrix remains |
+| AUTH01 | Local/OIDC, callback, exclusive/autologin/no-access | On two restores of the same backup, hybrid mode accepted the local administrator password and exclusive mode rejected it. The exclusive copy advertised automatic login and completed Keycloak sign-in, first-login access denial and session revocation. Browser navigation and the final session/deep-link matrix remain |
 | AUTH02 | Current account/global profile | Implemented; final technical-credential regression remains; password reset does not itself revoke JWTs |
 | AUTH03 | Cryptographic expiry | Local/OIDC HTTP and UI-stream slices validated; technical/idle/load completeness remains |
 | AUTH04 | Federated logout and IdP failure | Implemented slices; retain no-loop/no-local-fallback regression in exclusive mode |
