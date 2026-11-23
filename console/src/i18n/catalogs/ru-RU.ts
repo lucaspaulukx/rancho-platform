@@ -1662,4 +1662,140 @@ export const ruRU = {
   'accessDiagnostics.event': 'Событие {id}',
   'accessDiagnostics.scopeMismatch':
     'Результат диагностики не соответствует выбранным учётной записи и среде.',
+  'users.profile': 'Редактировать профиль учётной записи',
+  'users.password': 'Сбросить локальный пароль',
+  'users.activate': 'Активировать учётную запись',
+  'users.deactivate': 'Деактивировать учётную запись',
+  'users.deactivateReason':
+    'Войдите под другой учётной записью администратора, чтобы деактивировать свою.',
+  'users.remove': 'Удалить учётную запись',
+  'users.removeReason':
+    'Перед удалением деактивируйте учётную запись. Для удаления собственной учётной записи войдите под другой учётной записью администратора.',
+  'users.notFound': 'Пользователь не найден',
+  'users.notFoundDescription': 'Эта учётная запись недоступна в данном экземпляре.',
+  'users.title': 'Пользователи',
+  'users.detailDescription': 'Учётная запись Rancher и членство в локальных группах.',
+  'users.description': 'Просматривайте учётные записи и управляйте доступом команд через группы.',
+  'users.eyebrow': 'УПРАВЛЕНИЕ ДОСТУПОМ',
+  'users.back': 'Назад',
+  'users.create': 'Создать локальную учётную запись',
+  'users.accountData': 'Сведения об учётной записи',
+  'users.effectiveAccess': 'Фактический доступ',
+  'users.identification': 'Идентификация',
+  'users.globalRole': 'Глобальная роль',
+  'users.administrator': 'Администратор',
+  'users.user': 'Пользователь',
+  'users.name': 'Имя',
+  'users.notProvided': 'Не указано',
+  'users.localGroups': 'Локальные группы',
+  'users.managementDisabled': 'Управление отключено',
+  'users.adminNotice':
+    'У этой учётной записи есть глобальные права администратора. Членство в группах не ограничивает эти права.',
+  'users.membership': 'Членство в группах',
+  'users.groupsDisabled': 'Управление группами отключено в этой консоли или на сервере.',
+  'users.emptyGroups': 'Нет локальных групп',
+  'users.emptyGroupsDescription': 'Создайте группу, чтобы настроить доступ команды.',
+  'users.group': 'Группа',
+  'users.participation': 'Членство',
+  'users.member': 'Участник',
+  'users.notMember': 'Не состоит в группе',
+  'users.environments': 'Среды',
+  'users.management': 'Управление',
+  'users.editGroup': 'Изменить группу',
+  'users.grants': 'Разрешения групп',
+  'users.grantsDescription':
+    'Связи ниже показывают разрешения каждой группы. Rancher также учитывает прямые разрешения и глобальные права.',
+  'users.state': 'Состояние',
+  'users.disabled': 'Отключено',
+  'users.details': 'Сведения',
+  'users.actions': 'Действия',
+  'users.accountActions': 'Действия для учётной записи {account}',
+  'users.open': 'Открыть {account}',
+  'localAccountPanel.create': 'Создать локальную учётную запись',
+  'localAccountPanel.profile': 'Редактировать профиль учётной записи',
+  'localAccountPanel.password': 'Сбросить локальный пароль',
+  'localAccountPanel.activate': 'Активировать учётную запись',
+  'localAccountPanel.deactivate': 'Деактивировать учётную запись',
+  'localAccountPanel.remove': 'Удалить учётную запись',
+  'localAccountPanel.createDescription':
+    'Учётная запись создаётся без доступа к средам. После создания предоставьте доступ через группы.',
+  'localAccountPanel.cancel': 'Отмена',
+  'localAccountPanel.reviewOperation': 'Проверить операцию',
+  'localAccountPanel.reviewChanges': 'Проверить изменения',
+  'localAccountPanel.name': 'Имя учётной записи',
+  'localAccountPanel.description': 'Описание учётной записи',
+  'localAccountPanel.kind': 'Глобальная роль учётной записи',
+  'localAccountPanel.user': 'Пользователь',
+  'localAccountPanel.admin': 'Администратор',
+  'localAccountPanel.confirmAdmin':
+    'Подтверждаю предоставление глобальных прав администратора Rancher',
+  'localAccountPanel.adminDescription':
+    'Администраторы имеют доступ ко всем средам и настройкам независимо от членства в группах.',
+  'localAccountPanel.login': 'Локальное имя для входа',
+  'localAccountPanel.newPassword': 'Новый локальный пароль',
+  'localAccountPanel.confirmPassword': 'Подтвердите локальный пароль',
+  'localAccountPanel.passwordNotice':
+    'Изменение затрагивает только локальные учётные данные. Смена пароля не отзывает ранее выданные сеансы JWT. Чтобы заблокировать использование учётной записи, деактивируйте её. Паролями Keycloak управляет поставщик удостоверений.',
+  'localAccountPanel.deactivateNotice':
+    'Учётная запись больше не сможет пройти аутентификацию. Следующая проверка её сеанса завершится отказом. Текущие группы и разрешения сохранятся.',
+  'localAccountPanel.removeNotice':
+    'Учётная запись должна быть неактивна. Rancher выполняет логическое удаление. Этот экран не удаляет учётную запись безвозвратно и не удаляет данные сред.',
+  'localAccountPanel.activateNotice':
+    'Учётная запись снова сможет пройти аутентификацию и может восстановить существующий прямой доступ и доступ через группы.',
+  'localAccountPanel.reviewTitle': 'Применить изменение учётной записи?',
+  'localAccountPanel.newAccount': 'новая учётная запись',
+  'localAccountPanel.abandon': 'Прервать незавершённую регистрацию?',
+  'localAccountPanel.discard': 'Отменить изменения учётной записи?',
+  'localAccountPanel.unsent': 'Изменения ещё не отправлены.',
+  'localAccountPanel.leave': 'Выйти, пока изменение не завершено?',
+  'localAccountPanel.incomplete':
+    'Учётная запись уже создана, но настройка её учётных данных могла не завершиться.',
+  'localAccountPanel.success':
+    'Rancher получил запрос на операцию. Отслеживайте состояние учётной записи.',
+  'localAccountPanel.accountDescription':
+    'Учётная запись {account}. Глобальные права не зависят от групп.',
+  'localAccountPanel.pending':
+    'Учётная запись {account} уже создана. Завершите настройку учётных данных в этой форме. При повторной отправке будет использована та же запись.',
+  'localAccountPanel.reviewAdmin':
+    '{operation}: {account}. Роль администратора предоставляет глобальный доступ. Учётные данные скрыты при проверке.',
+  'localAccountPanel.reviewDescription':
+    '{operation}: {account}. Учётные данные скрыты при проверке.',
+  'localAccountPanel.pendingDiscard':
+    'Учётная запись {account} уже существует. Закрытие формы не удалит её, а настройка учётных данных могла не завершиться. Проверьте учётную запись перед новой регистрацией.',
+  'localAccountPanel.error.operation': 'Не удалось выполнить операцию с учётной записью.',
+  'localAccountPanel.error.list': 'Не удалось запросить данные для управления учётными записями.',
+  'localAccountPanel.error.unavailable': 'Управление учётными записями недоступно.',
+  'localAccountPanel.error.permission': 'Ваши права администратора изменились.',
+  'localAccountPanel.error.passwordMismatch': 'Пароли не совпадают.',
+  'localAccountPanel.error.confirmPrivilege':
+    'Подтвердите предоставление глобальных прав администратора.',
+  'localAccountPanel.error.duplicateLogin':
+    'Учётные данные с таким именем для входа уже существуют.',
+  'localAccountPanel.error.notCreated': 'Учётная запись не создана.',
+  'localAccountPanel.error.reopen': 'Откройте панель учётной записи заново.',
+  'localAccountPanel.error.credentialCount':
+    'У этой учётной записи должно быть ровно одно действующее локальное средство входа. Учётными данными OIDC управляет поставщик удостоверений.',
+  'localAccountPanel.error.credential': 'Недопустимые учётные данные.',
+  'localAccountPanel.error.changedOperation': 'Операция изменилась. Откройте панель заново.',
+  'localAccountPanel.error.http': 'Операция с учётной записью не завершена (HTTP {status}).',
+  'localAccountPanel.validation.accountUnavailable':
+    'Эта учётная запись недоступна для управления пользователями.',
+  'localAccountPanel.validation.invalidAccount': 'Недопустимая учётная запись.',
+  'localAccountPanel.validation.accountChanged':
+    'Учётная запись изменилась. Откройте панель заново.',
+  'localAccountPanel.validation.selfAdministration':
+    'Чтобы изменить свои права или деактивировать свою учётную запись, войдите под другой учётной записью администратора.',
+  'localAccountPanel.validation.lastAdmin': 'Оставьте хотя бы одного администратора активным.',
+  'localAccountPanel.validation.deactivateFirst': 'Перед удалением деактивируйте учётную запись.',
+  'localAccountPanel.validation.actionUnavailable': 'Операция недоступна в текущем состоянии.',
+  'localAccountPanel.validation.accountContract': 'Контракт учётной записи недоступен.',
+  'localAccountPanel.validation.invalidProfile': 'Укажите допустимые имя и роль.',
+  'localAccountPanel.validation.fieldsChanged':
+    'Поля учётной записи изменились. Откройте панель заново.',
+  'localAccountPanel.validation.credentialUnavailable': 'Создание учётных данных недоступно.',
+  'localAccountPanel.validation.passwordContract': 'Контракт защиты пароля недоступен.',
+  'localAccountPanel.validation.loginPassword':
+    'Укажите имя для входа без пробелов и двоеточий и введите пароль.',
+  'localAccountPanel.validation.credentialChanged': 'Контракт учётных данных изменился.',
+  'localAccountPanel.validation.newPassword': 'Введите новый локальный пароль.',
 } as const;

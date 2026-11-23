@@ -25,7 +25,7 @@ import { LocalAccountPanel, type AccountSelection } from '../components/LocalAcc
 import { sessionAccountId } from '../local-accounts';
 
 export function Users() {
-  const { t } = useI18n();
+  const { formats, t } = useI18n();
   const app = useApp();
   const client = useQueryClient();
   const { id } = useParams();
@@ -136,7 +136,11 @@ export function Users() {
               </div>
               <div>
                 <dt>{t('users.localGroups')}</dt>
-                <dd>{groupsEnabled ? memberships.length : t('users.managementDisabled')}</dd>
+                <dd>
+                  {groupsEnabled
+                    ? formats.number(memberships.length)
+                    : t('users.managementDisabled')}
+                </dd>
               </div>
             </dl>
             {user.kind === 'admin' && <Alert tone="info">{t('users.adminNotice')}</Alert>}
@@ -182,7 +186,7 @@ export function Users() {
                   {
                     key: 'grants',
                     label: t('users.environments'),
-                    render: (group) => Object.keys(group.grants).length,
+                    render: (group) => formats.number(Object.keys(group.grants).length),
                   },
                   {
                     key: 'edit',
@@ -263,7 +267,9 @@ export function Users() {
               label: t('users.localGroups'),
               render: (user) =>
                 groupsEnabled
-                  ? groups.filter((group) => group.members.includes(rawId(user.id))).length
+                  ? formats.number(
+                      groups.filter((group) => group.members.includes(rawId(user.id))).length,
+                    )
                   : t('users.disabled'),
             },
             {

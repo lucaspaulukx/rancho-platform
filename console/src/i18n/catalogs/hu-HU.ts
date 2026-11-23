@@ -1,4 +1,141 @@
 export const huHU = {
+  'users.profile': 'Fiókprofil szerkesztése',
+  'users.password': 'Helyi jelszó visszaállítása',
+  'users.activate': 'Fiók aktiválása',
+  'users.deactivate': 'Fiók deaktiválása',
+  'users.deactivateReason': 'A fiókja deaktiválásához használjon másik rendszergazdai fiókot.',
+  'users.remove': 'Fiók törlése',
+  'users.removeReason':
+    'Törlés előtt deaktiválja a fiókot. Saját fiókja törléséhez használjon másik rendszergazdai fiókot.',
+  'users.notFound': 'A felhasználó nem található',
+  'users.notFoundDescription': 'Ez a fiók nem érhető el ebben a példányban.',
+  'users.title': 'Felhasználók',
+  'users.detailDescription': 'Rancher-fiók és helyi csoporttagság.',
+  'users.description':
+    'Tekintse meg a fiókokat, és kezelje a csapat hozzáférését csoportokon keresztül.',
+  'users.eyebrow': 'HOZZÁFÉRÉS-VEZÉRLÉS',
+  'users.back': 'Vissza',
+  'users.create': 'Helyi fiók létrehozása',
+  'users.accountData': 'Fiók részletei',
+  'users.effectiveAccess': 'Tényleges hozzáférés',
+  'users.identification': 'Azonosítás',
+  'users.globalRole': 'Globális szerepkör',
+  'users.administrator': 'Rendszergazda',
+  'users.user': 'Felhasználó',
+  'users.name': 'Név',
+  'users.notProvided': 'Nincs megadva',
+  'users.localGroups': 'Helyi csoportok',
+  'users.managementDisabled': 'Kezelés kikapcsolva',
+  'users.adminNotice':
+    'Ez a fiók globális rendszergazdai jogosultságokkal rendelkezik. A csoporttagság nem korlátozza ezeket a jogosultságokat.',
+  'users.membership': 'Csoporttagság',
+  'users.groupsDisabled': 'A csoportkezelés ki van kapcsolva ebben a konzolban vagy a kiszolgálón.',
+  'users.emptyGroups': 'Nincsenek helyi csoportok',
+  'users.emptyGroupsDescription': 'Hozzon létre csoportot a csapat hozzáférésének kezeléséhez.',
+  'users.group': 'Csoport',
+  'users.participation': 'Tagság',
+  'users.member': 'Tag',
+  'users.notMember': 'Nem tag',
+  'users.environments': 'Környezetek',
+  'users.management': 'Kezelés',
+  'users.editGroup': 'Csoport szerkesztése',
+  'users.grants': 'Csoporton keresztül megadott jogosultságok',
+  'users.grantsDescription':
+    'Az alábbi hozzárendelések mutatják, milyen jogosultságokat adnak az egyes csoportok. A Rancher a közvetlen és a globális jogosultságokat is figyelembe veszi.',
+  'users.state': 'Állapot',
+  'users.disabled': 'Kikapcsolva',
+  'users.details': 'Részletek',
+  'users.actions': 'Műveletek',
+  'users.accountActions': 'A(z) {account} fiókműveletei',
+  'users.open': 'A(z) {account} megnyitása',
+
+  'localAccountPanel.create': 'Helyi fiók létrehozása',
+  'localAccountPanel.profile': 'Fiókprofil szerkesztése',
+  'localAccountPanel.password': 'Helyi jelszó visszaállítása',
+  'localAccountPanel.activate': 'Fiók aktiválása',
+  'localAccountPanel.deactivate': 'Fiók deaktiválása',
+  'localAccountPanel.remove': 'Fiók törlése',
+  'localAccountPanel.createDescription':
+    'A fiók környezeti hozzáférés nélkül jön létre. Létrehozás után csoportokon keresztül adhat hozzáférést.',
+  'localAccountPanel.cancel': 'Mégse',
+  'localAccountPanel.reviewOperation': 'Művelet ellenőrzése',
+  'localAccountPanel.reviewChanges': 'Módosítások ellenőrzése',
+  'localAccountPanel.name': 'Fiók neve',
+  'localAccountPanel.description': 'Fiók leírása',
+  'localAccountPanel.kind': 'A fiók globális szerepköre',
+  'localAccountPanel.user': 'Felhasználó',
+  'localAccountPanel.admin': 'Rendszergazda',
+  'localAccountPanel.confirmAdmin':
+    'Megerősítem a globális Rancher-rendszergazdai jogosultság megadását',
+  'localAccountPanel.adminDescription':
+    'A rendszergazdák a csoportoktól függetlenül minden környezethez és beállításhoz hozzáférnek.',
+  'localAccountPanel.login': 'Helyi bejelentkezési név',
+  'localAccountPanel.newPassword': 'Új helyi jelszó',
+  'localAccountPanel.confirmPassword': 'Helyi jelszó megerősítése',
+  'localAccountPanel.passwordNotice':
+    'A módosítás csak a helyi hitelesítő adatokat érinti. A jelszó módosítása nem vonja vissza a korábban kiadott JWT-munkameneteket. A használat letiltásához deaktiválja a fiókot. A Keycloak-jelszavakat az identitásszolgáltató kezeli.',
+  'localAccountPanel.deactivateNotice':
+    'A fiók többé nem hitelesíthető, és a következő munkamenet-ellenőrzését a rendszer elutasítja. A meglévő csoporttagságok és hozzáférések megmaradnak.',
+  'localAccountPanel.removeNotice':
+    'A fióknak inaktívnak kell lennie. A Rancher logikai törlést végez. Ez a képernyő nem törli véglegesen a fiókot vagy a környezet adatait.',
+  'localAccountPanel.activateNotice':
+    'A fiók ismét hitelesíthető, és visszakaphatja meglévő közvetlen és csoporton keresztüli hozzáféréseit.',
+  'localAccountPanel.reviewTitle': 'Alkalmazza a fiók módosítását?',
+  'localAccountPanel.newAccount': 'új fiók',
+  'localAccountPanel.abandon': 'Megszakítja a befejezetlen regisztrációt?',
+  'localAccountPanel.discard': 'Elveti a fiók módosításait?',
+  'localAccountPanel.unsent': 'A módosítások még nincsenek beküldve.',
+  'localAccountPanel.leave': 'Kilép függőben lévő módosítással?',
+  'localAccountPanel.incomplete':
+    'A fiók már létrejött, de a hitelesítő adatai hiányosak lehetnek.',
+  'localAccountPanel.success': 'A Rancher fogadta a műveletet. Kövesse a fiók állapotát.',
+  'localAccountPanel.accountDescription':
+    'Fiók: {account}. A globális jogosultságok függetlenek a csoportoktól.',
+  'localAccountPanel.pending':
+    'A(z) {account} fiók már létrejött. Ezen az űrlapon egészítse ki a hitelesítő adatokat. Az ismételt beküldés ugyanezt a fiókot használja.',
+  'localAccountPanel.reviewAdmin':
+    '{operation}: {account}. A rendszergazdai szerepkör globális hozzáférést biztosít. A hitelesítő adatok az ellenőrzés során védve maradnak.',
+  'localAccountPanel.reviewDescription':
+    '{operation}: {account}. A hitelesítő adatok az ellenőrzés során védve maradnak.',
+  'localAccountPanel.pendingDiscard':
+    'A(z) {account} fiók már létezik. A panel bezárása nem törli a fiókot, és a hitelesítő adatai hiányosak lehetnek. Új regisztráció előtt ellenőrizze a fiókot.',
+  'localAccountPanel.error.operation': 'A fiókműveletet nem sikerült befejezni.',
+  'localAccountPanel.error.list': 'A fiókkezelési adatok lekérdezése sikertelen.',
+  'localAccountPanel.error.unavailable': 'A fiókkezelés nem érhető el.',
+  'localAccountPanel.error.permission': 'A rendszergazdai jogosultsága megváltozott.',
+  'localAccountPanel.error.passwordMismatch': 'A jelszavak nem egyeznek.',
+  'localAccountPanel.error.confirmPrivilege': 'Erősítse meg a globális rendszergazdai hozzáférést.',
+  'localAccountPanel.error.duplicateLogin':
+    'Ezzel a bejelentkezési névvel már léteznek hitelesítő adatok.',
+  'localAccountPanel.error.notCreated': 'A fiók nem jött létre.',
+  'localAccountPanel.error.reopen': 'Nyissa meg újra a fiókpanelt.',
+  'localAccountPanel.error.credentialCount':
+    'Ehhez a fiókhoz nem pontosan egy aktív helyi hitelesítő bejegyzés tartozik. Az OIDC-hitelesítő adatokat az identitásszolgáltató kezeli.',
+  'localAccountPanel.error.credential': 'Érvénytelen hitelesítő adatok.',
+  'localAccountPanel.error.changedOperation': 'A művelet megváltozott. Nyissa meg újra a panelt.',
+  'localAccountPanel.error.http': 'A fiókművelet nem fejeződött be (HTTP {status}).',
+  'localAccountPanel.validation.accountUnavailable':
+    'Ez a fiók nem érhető el a felhasználókezeléshez.',
+  'localAccountPanel.validation.invalidAccount': 'Érvénytelen fiók.',
+  'localAccountPanel.validation.accountChanged': 'A fiók megváltozott. Nyissa meg újra a panelt.',
+  'localAccountPanel.validation.selfAdministration':
+    'A saját jogosultságai módosításához vagy fiókja deaktiválásához használjon másik rendszergazdai fiókot.',
+  'localAccountPanel.validation.lastAdmin': 'Legalább egy rendszergazdai fiók maradjon aktív.',
+  'localAccountPanel.validation.deactivateFirst': 'Törlés előtt deaktiválja a fiókot.',
+  'localAccountPanel.validation.actionUnavailable':
+    'Ez a művelet az aktuális állapotban nem érhető el.',
+  'localAccountPanel.validation.accountContract': 'A fiókszerződés nem érhető el.',
+  'localAccountPanel.validation.invalidProfile': 'Adjon meg érvényes nevet és szerepkört.',
+  'localAccountPanel.validation.fieldsChanged':
+    'A fiókmezők megváltoztak. Nyissa meg újra a panelt.',
+  'localAccountPanel.validation.credentialUnavailable':
+    'A hitelesítő adatok létrehozása nem érhető el.',
+  'localAccountPanel.validation.passwordContract': 'A jelszóvédelmi szerződés nem érhető el.',
+  'localAccountPanel.validation.loginPassword':
+    'Adjon meg szóköz és kettőspont nélküli bejelentkezési nevet, valamint egy jelszót.',
+  'localAccountPanel.validation.credentialChanged': 'A hitelesítő adatok szerződése megváltozott.',
+  'localAccountPanel.validation.newPassword': 'Adja meg az új helyi jelszót.',
+
   'accessDiagnostics.description':
     'A Rancher kiszolgáló által kiszámított jogosultságok és szerepkör.',
   'accessDiagnostics.environment': 'Környezet',

@@ -1,4 +1,147 @@
 export const deDE = {
+  'users.profile': 'Kontoprofil bearbeiten',
+  'users.password': 'Lokales Passwort zurücksetzen',
+  'users.activate': 'Konto aktivieren',
+  'users.deactivate': 'Konto deaktivieren',
+  'users.deactivateReason': 'Lassen Sie Ihr Konto von einem anderen Administrator deaktivieren.',
+  'users.remove': 'Konto löschen',
+  'users.removeReason':
+    'Deaktivieren Sie das Konto vor dem Löschen. Lassen Sie Ihr eigenes Konto von einem anderen Administrator löschen.',
+  'users.notFound': 'Benutzer nicht gefunden',
+  'users.notFoundDescription': 'Dieses Konto ist in dieser Instanz nicht verfügbar.',
+  'users.title': 'Benutzer',
+  'users.detailDescription': 'Rancher-Konto und Mitgliedschaft in lokalen Gruppen.',
+  'users.description': 'Zeigen Sie Ihre Konten an und verwalten Sie den Teamzugriff über Gruppen.',
+  'users.eyebrow': 'ZUGRIFFSKONTROLLE',
+  'users.back': 'Zurück',
+  'users.create': 'Lokales Konto erstellen',
+  'users.accountData': 'Kontodetails',
+  'users.effectiveAccess': 'Effektiver Zugriff',
+  'users.identification': 'Identifikation',
+  'users.globalRole': 'Globale Rolle',
+  'users.administrator': 'Administrator',
+  'users.user': 'Benutzer',
+  'users.name': 'Name',
+  'users.notProvided': 'Nicht angegeben',
+  'users.localGroups': 'Lokale Gruppen',
+  'users.managementDisabled': 'Verwaltung deaktiviert',
+  'users.adminNotice':
+    'Dieses Konto hat globale Administratorrechte. Gruppenmitgliedschaften schränken diese Rechte nicht ein.',
+  'users.membership': 'Gruppenmitgliedschaft',
+  'users.groupsDisabled':
+    'Die Gruppenverwaltung ist in dieser Konsole oder auf dem Server deaktiviert.',
+  'users.emptyGroups': 'Keine lokalen Gruppen',
+  'users.emptyGroupsDescription': 'Erstellen Sie eine Gruppe, um den Teamzugriff zu organisieren.',
+  'users.group': 'Gruppe',
+  'users.participation': 'Mitgliedschaft',
+  'users.member': 'Mitglied',
+  'users.notMember': 'Kein Mitglied',
+  'users.environments': 'Umgebungen',
+  'users.management': 'Verwaltung',
+  'users.editGroup': 'Gruppe bearbeiten',
+  'users.grants': 'Gruppenberechtigungen',
+  'users.grantsDescription':
+    'Die folgenden Zuordnungen zeigen, welche Berechtigungen jede Gruppe gewährt. Rancher berücksichtigt auch direkte Berechtigungen und globale Rechte.',
+  'users.state': 'Status',
+  'users.disabled': 'Deaktiviert',
+  'users.details': 'Details',
+  'users.actions': 'Aktionen',
+  'users.accountActions': 'Kontoaktionen für {account}',
+  'users.open': '{account} öffnen',
+
+  'localAccountPanel.create': 'Lokales Konto erstellen',
+  'localAccountPanel.profile': 'Kontoprofil bearbeiten',
+  'localAccountPanel.password': 'Lokales Passwort zurücksetzen',
+  'localAccountPanel.activate': 'Konto aktivieren',
+  'localAccountPanel.deactivate': 'Konto deaktivieren',
+  'localAccountPanel.remove': 'Konto löschen',
+  'localAccountPanel.createDescription':
+    'Das Konto wird ohne Umgebungszugriff erstellt. Gewähren Sie nach dem Erstellen Zugriff über Gruppen.',
+  'localAccountPanel.cancel': 'Abbrechen',
+  'localAccountPanel.reviewOperation': 'Vorgang prüfen',
+  'localAccountPanel.reviewChanges': 'Änderungen prüfen',
+  'localAccountPanel.name': 'Kontoname',
+  'localAccountPanel.description': 'Kontobeschreibung',
+  'localAccountPanel.kind': 'Globale Kontorolle',
+  'localAccountPanel.user': 'Benutzer',
+  'localAccountPanel.admin': 'Administrator',
+  'localAccountPanel.confirmAdmin':
+    'Ich bestätige die Vergabe globaler Administratorrechte in Rancher',
+  'localAccountPanel.adminDescription':
+    'Administratoren können unabhängig von Gruppen auf alle Umgebungen und Einstellungen zugreifen.',
+  'localAccountPanel.login': 'Lokaler Anmeldename',
+  'localAccountPanel.newPassword': 'Neues lokales Passwort',
+  'localAccountPanel.confirmPassword': 'Lokales Passwort bestätigen',
+  'localAccountPanel.passwordNotice':
+    'Diese Änderung betrifft nur die lokalen Anmeldedaten. Eine Passwortänderung widerruft bereits ausgestellte JWT-Sitzungen nicht. Deaktivieren Sie das Konto, um seine Nutzung zu sperren. Keycloak-Passwörter werden vom Anbieter verwaltet.',
+  'localAccountPanel.deactivateNotice':
+    'Das Konto kann sich nicht mehr authentifizieren. Die nächste Sitzungsprüfung wird abgelehnt. Bestehende Gruppenmitgliedschaften und Zugriffsrechte bleiben erhalten.',
+  'localAccountPanel.removeNotice':
+    'Das Konto muss inaktiv sein. Rancher löscht das Konto logisch. Über diese Ansicht wird das Konto nicht endgültig gelöscht und es werden keine Umgebungsdaten gelöscht.',
+  'localAccountPanel.activateNotice':
+    'Das Konto kann sich wieder authentifizieren und möglicherweise bestehende direkte sowie gruppenbasierte Zugriffsrechte zurückerlangen.',
+  'localAccountPanel.reviewTitle': 'Kontoänderung anwenden?',
+  'localAccountPanel.newAccount': 'neues Konto',
+  'localAccountPanel.abandon': 'Unvollständige Registrierung abbrechen?',
+  'localAccountPanel.discard': 'Kontoänderungen verwerfen?',
+  'localAccountPanel.unsent': 'Die Änderungen wurden noch nicht übermittelt.',
+  'localAccountPanel.leave': 'Mit ausstehender Änderung verlassen?',
+  'localAccountPanel.incomplete':
+    'Das Konto wurde bereits erstellt. Seine Anmeldedaten sind möglicherweise unvollständig.',
+  'localAccountPanel.success':
+    'Rancher hat den Vorgang entgegengenommen. Verfolgen Sie den Kontostatus.',
+  'localAccountPanel.accountDescription':
+    'Konto {account}. Globale Rechte sind unabhängig von Gruppen.',
+  'localAccountPanel.pending':
+    'Das Konto {account} wurde bereits erstellt. Vervollständigen Sie die Anmeldedaten in diesem Formular. Beim erneuten Übermitteln wird dieses Konto wiederverwendet.',
+  'localAccountPanel.reviewAdmin':
+    '{operation}: {account}. Die Administratorrolle gewährt globalen Zugriff. Die Anmeldedaten bleiben bei dieser Prüfung geschützt.',
+  'localAccountPanel.reviewDescription':
+    '{operation}: {account}. Die Anmeldedaten bleiben bei dieser Prüfung geschützt.',
+  'localAccountPanel.pendingDiscard':
+    'Das Konto {account} existiert bereits. Beim Schließen wird es nicht gelöscht. Seine Anmeldedaten sind möglicherweise unvollständig. Prüfen Sie das Konto, bevor Sie eine weitere Registrierung erstellen.',
+  'localAccountPanel.error.operation': 'Der Kontovorgang konnte nicht abgeschlossen werden.',
+  'localAccountPanel.error.list': 'Die Kontoverwaltung konnte nicht abgefragt werden.',
+  'localAccountPanel.error.unavailable': 'Die Kontoverwaltung ist nicht verfügbar.',
+  'localAccountPanel.error.permission': 'Ihre Administratorberechtigung hat sich geändert.',
+  'localAccountPanel.error.passwordMismatch': 'Die Passwörter stimmen nicht überein.',
+  'localAccountPanel.error.confirmPrivilege': 'Bestätigen Sie den globalen Administratorzugriff.',
+  'localAccountPanel.error.duplicateLogin':
+    'Für diesen Anmeldenamen sind bereits Anmeldedaten vorhanden.',
+  'localAccountPanel.error.notCreated': 'Das Konto wurde nicht erstellt.',
+  'localAccountPanel.error.reopen': 'Öffnen Sie das Konto-Panel erneut.',
+  'localAccountPanel.error.credentialCount':
+    'Für dieses Konto gibt es nicht genau einen aktiven lokalen Anmeldedatensatz. OIDC-Anmeldedaten werden vom Anbieter verwaltet.',
+  'localAccountPanel.error.credential': 'Ungültige Anmeldedaten.',
+  'localAccountPanel.error.changedOperation':
+    'Der Vorgang hat sich geändert. Öffnen Sie das Panel erneut.',
+  'localAccountPanel.error.http': 'Kontovorgang nicht abgeschlossen (HTTP {status}).',
+  'localAccountPanel.validation.accountUnavailable':
+    'Dieses Konto ist für die Benutzerverwaltung nicht verfügbar.',
+  'localAccountPanel.validation.invalidAccount': 'Ungültiges Konto.',
+  'localAccountPanel.validation.accountChanged':
+    'Das Konto wurde geändert. Öffnen Sie das Panel erneut.',
+  'localAccountPanel.validation.selfAdministration':
+    'Verwenden Sie ein anderes Administratorkonto, um Ihre Rechte zu ändern oder Ihr Konto zu deaktivieren.',
+  'localAccountPanel.validation.lastAdmin': 'Lassen Sie mindestens einen Administrator aktiv.',
+  'localAccountPanel.validation.deactivateFirst': 'Deaktivieren Sie das Konto vor dem Löschen.',
+  'localAccountPanel.validation.actionUnavailable':
+    'Dieser Vorgang ist im aktuellen Zustand nicht verfügbar.',
+  'localAccountPanel.validation.accountContract': 'Der Kontovertrag ist nicht verfügbar.',
+  'localAccountPanel.validation.invalidProfile':
+    'Geben Sie einen gültigen Namen und eine gültige Rolle ein.',
+  'localAccountPanel.validation.fieldsChanged':
+    'Die Kontofelder haben sich geändert. Öffnen Sie das Panel erneut.',
+  'localAccountPanel.validation.credentialUnavailable':
+    'Anmeldedaten können nicht erstellt werden.',
+  'localAccountPanel.validation.passwordContract':
+    'Der Vertrag für den Passwortschutz ist nicht verfügbar.',
+  'localAccountPanel.validation.loginPassword':
+    'Geben Sie einen Anmeldenamen ohne Leerzeichen oder Doppelpunkte und ein Passwort ein.',
+  'localAccountPanel.validation.credentialChanged':
+    'Der Vertrag für die Anmeldedaten hat sich geändert.',
+  'localAccountPanel.validation.newPassword': 'Geben Sie das neue lokale Passwort ein.',
+
   'accessDiagnostics.description': 'Vom Rancher-Backend ermittelte Berechtigungen und Rolle.',
   'accessDiagnostics.environment': 'Umgebung',
   'accessDiagnostics.noEnvironment': 'Keine Umgebung',
