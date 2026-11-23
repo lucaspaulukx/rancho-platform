@@ -40,7 +40,7 @@ def main():
     browser_started = False
     result = {
         'status': 'failed', 'cleanupComplete': False, 'controlSessionRevoked': False,
-        'scope': 'localhost18090, UI-OPS-LAB; pt-BR/en-US preview, read-only browser',
+        'scope': 'localhost18090, UI-OPS-LAB; ten-locale preview, read-only browser',
     }
     try:
         result['stage'] = 'owned-session'

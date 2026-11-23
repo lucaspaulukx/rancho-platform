@@ -140,9 +140,9 @@ describe('Typed message catalogs', () => {
     const french = createTranslator('fr-FR');
     expect(french.t('common.cancel')).toBe('Annuler');
     expect(french.resolvedLocale('selection.count')).toBe('fr-FR');
-    expect(french.resolvedLocale('shell.nav.stacks.title')).toBe('en-US');
-    expect(french.t('shell.nav.stacks.title')).toBe(
-      createTranslator('en-US').t('shell.nav.stacks.title'),
+    expect(french.resolvedLocale('resourceCreator.kind.service')).toBe('en-US');
+    expect(french.t('resourceCreator.kind.service')).toBe(
+      createTranslator('en-US').t('resourceCreator.kind.service'),
     );
   });
   it('supports language-specific plural forms and requires an other form', () => {
