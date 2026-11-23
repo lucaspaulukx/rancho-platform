@@ -2292,7 +2292,7 @@ input[type='checkbox']:focus-visible {
   overflow: hidden;
   background: var(--background);
   color: var(--text);
-  border-right: 1px solid var(--border);
+  border-inline-end: 1px solid var(--border);
   padding: 48px 60px;
   display: flex;
   flex-direction: column;
@@ -2300,7 +2300,7 @@ input[type='checkbox']:focus-visible {
 .auth-story:before {
   content: '';
   position: absolute;
-  right: -300px;
+  inset-inline-end: -300px;
   top: 22%;
   width: 650px;
   height: 650px;
@@ -2333,6 +2333,9 @@ input[type='checkbox']:focus-visible {
   letter-spacing: -2.5px;
   font-weight: 500;
   margin-bottom: 24px;
+}
+:root[dir='rtl'] .auth-story h2 {
+  letter-spacing: normal;
 }
 .auth-story-content > p:not(.eyebrow) {
   color: var(--muted);

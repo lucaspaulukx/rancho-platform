@@ -161,6 +161,7 @@ export function Login() {
                         <input
                           id={id}
                           name="username"
+                          dir="auto"
                           autoComplete="username"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}

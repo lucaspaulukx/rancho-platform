@@ -154,6 +154,22 @@ async function main() {
       await username.inputValue() === 'localization-draft-only' &&
       await password.inputValue() === 'not-a-real-password' && publicPage.url() === loginUrl);
   }
+  await publicPage.setViewportSize({ width: 1440, height: 1000 });
+  const rtlAuth = await publicPage.locator('.auth-layout').evaluate((layout) => {
+    const story = layout.querySelector('.auth-story');
+    const panel = layout.querySelector('.auth-panel');
+    const username = layout.querySelector('input[name="username"]');
+    return getComputedStyle(story).borderLeftWidth === '1px' &&
+      story.getBoundingClientRect().left >= panel.getBoundingClientRect().right - 1 &&
+      getComputedStyle(username).direction === 'ltr';
+  });
+  check('Persian desktop login mirrors the panels and keeps a Latin username left-to-right', rtlAuth);
+  await publicPage.locator('.language-selector select').selectOption('pt-BR');
+  await publicPage.getByRole('heading', { name: 'Acesse seu ambiente', exact: true }).waitFor();
+  check('returning to Portuguese restores the login direction and retains both drafts',
+    await publicPage.locator('html').getAttribute('dir') === 'ltr' &&
+    await username.inputValue() === 'localization-draft-only' &&
+    await password.inputValue() === 'not-a-real-password');
   await closeContext(publicContext);
 
   result.stage = 'authenticated-shell';
