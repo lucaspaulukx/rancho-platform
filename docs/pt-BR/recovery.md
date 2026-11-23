@@ -36,6 +36,12 @@ Autentique todos os arquivos/hashes vinculados antes de alocar destinos. Restaur
 
 Recuperação de arquivos não inicia engines nem comprova login. Configuração criptografada e imagens correspondentes são necessárias; export isolado de realm não recupera o IdP completo. Retenha cópia protegida fora do host e confira se o operador consegue descriptografá-la.
 
+Use o ensaio de workload com volume nomeado para verificar se um serviço novo consegue iniciar e ler os dados recuperados de outro volume. O teste cria um workload sintético, para a escrita de forma limpa, criptografa o volume original e o restaura em um volume novo. O workload confere o checksum ao iniciar. A ferramenta compara hashes de arquivos, IDs de proprietário, permissões e destinos de links simbólicos, confirma que o volume original está intacto e remove os recursos temporários. Carregue as imagens fixadas do Rancher original e do Node usadas acima e a imagem local `alpine:3.20`. O ensaio roda diretamente no Docker com a rede desabilitada. A recuperação pelo scheduler do Rancher e os drivers de volume compartilhado exigem testes próprios.
+
+```sh
+python -m migration.test_workload_volume_recovery_lab
+```
+
 ## Ensaio de engine e identidade
 
 `migration.engines` inicia cópias restauradas Rancher/IdP em um namespace loopback-only, sem egress externo, portas publicadas, storage da origem ou socket Docker. Helpers usam somente esse namespace. Ajustes de hostname/IP/callback devem ficar na cópia; não mude a origem para aprovar o ensaio.
