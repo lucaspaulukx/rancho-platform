@@ -9,6 +9,7 @@ import { useApp } from '../state';
 import { useSchemas } from '../hooks/useSchemas';
 import { useActionScope } from '../hooks/useActionScope';
 import {
+  ServiceLinkValidationError,
   activeServiceLinks,
   assertServiceLinksUnchanged,
   canEditServiceLinks,
@@ -67,7 +68,9 @@ export default function ServiceLinksPanel({
 }) {
   const { t } = useI18n();
   const errorText = (error: Error) =>
-    error instanceof ServiceEditorError ? t(error.key) : error.message;
+    error instanceof ServiceEditorError || error instanceof ServiceLinkValidationError
+      ? t(error.key)
+      : error.message;
   const app = useApp();
   const scope = useActionScope();
   const schemas = useSchemas(true);
@@ -133,7 +136,7 @@ export default function ServiceLinksPanel({
   try {
     if (data) original = editableServiceLinks(data.mappings, data.services, scope.environment!);
   } catch (caught) {
-    unsupported = caught instanceof Error ? caught.message : t('serviceEditors.unsupported');
+    unsupported = caught instanceof Error ? errorText(caught) : t('serviceEditors.unsupported');
   }
   const rows = draft || original;
   const allowed =

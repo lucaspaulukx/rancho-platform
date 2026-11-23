@@ -1,4 +1,21 @@
 export const enServiceUpgradeForm = {
+  'serviceUpgradeForm.validation.contract': 'The upgrade contract is unavailable.',
+  'serviceUpgradeForm.validation.sidecarContract': 'The sidecar contract is unavailable.',
+  'serviceUpgradeForm.validation.image': 'Enter a valid image without spaces.',
+  'serviceUpgradeForm.validation.batch': 'Batch size must be an integer of at least 1.',
+  'serviceUpgradeForm.validation.interval': 'The interval must be an integer of at least 100 ms.',
+  'serviceUpgradeForm.validation.order': 'Review the upgrade order.',
+  'serviceUpgradeForm.validation.differentImage': 'Choose a different image from the current one.',
+  'serviceUpgradeForm.validation.health': 'Review the health check.',
+  'serviceUpgradeForm.validation.healthContract': 'The health check contract is unavailable.',
+  'serviceUpgradeForm.validation.ulimitContract': 'The process limits contract is unavailable.',
+  'serviceUpgradeForm.validation.securityContract': 'Review the security contract.',
+  'serviceUpgradeForm.validation.memory':
+    'Enter a limit and reservation. Use zero to remove an explicit value.',
+  'serviceUpgradeForm.validation.cpuContract': 'The CPU and I/O contract is unavailable.',
+  'serviceUpgradeForm.validation.schedulingContract': 'The scheduling contract is unavailable.',
+  'serviceUpgradeForm.validation.sidecarUpgradeContract':
+    'The sidecar upgrade contract is unavailable.',
   'serviceUpgradeForm.review': 'Review the upgrade.',
   'serviceUpgradeForm.limitsNotice':
     'Changing limits replaces service containers. An empty list removes explicit limits and inherits Docker defaults.',
@@ -35,6 +52,23 @@ export const enServiceUpgradeForm = {
 } as const;
 
 export const ptServiceUpgradeForm = {
+  'serviceUpgradeForm.validation.contract': 'O contrato de atualização não está disponível.',
+  'serviceUpgradeForm.validation.sidecarContract': 'O contrato dos sidecars não está disponível.',
+  'serviceUpgradeForm.validation.image': 'Informe uma imagem válida, sem espaços.',
+  'serviceUpgradeForm.validation.batch': 'O lote deve ser um inteiro de pelo menos 1.',
+  'serviceUpgradeForm.validation.interval': 'O intervalo deve ser um inteiro de pelo menos 100 ms.',
+  'serviceUpgradeForm.validation.order': 'Revise a ordem de atualização.',
+  'serviceUpgradeForm.validation.differentImage': 'Escolha uma imagem diferente da atual.',
+  'serviceUpgradeForm.validation.health': 'Revise a verificação de saúde.',
+  'serviceUpgradeForm.validation.healthContract': 'Contrato da verificação de saúde indisponível.',
+  'serviceUpgradeForm.validation.ulimitContract': 'Contrato de limites de processo indisponível.',
+  'serviceUpgradeForm.validation.securityContract': 'Revise o contrato de segurança.',
+  'serviceUpgradeForm.validation.memory':
+    'Informe limite e reserva; use zero para retirar o valor explícito.',
+  'serviceUpgradeForm.validation.cpuContract': 'Contrato de CPU e I/O indisponível.',
+  'serviceUpgradeForm.validation.schedulingContract': 'Contrato de agendamento indisponível.',
+  'serviceUpgradeForm.validation.sidecarUpgradeContract':
+    'Contrato de atualização dos sidecars indisponível.',
   'serviceUpgradeForm.review': 'Revise a atualização.',
   'serviceUpgradeForm.limitsNotice':
     'Alterar limites substitui os containers do serviço. Uma lista vazia retira os limites explícitos e passa a herdar o Docker.',

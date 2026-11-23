@@ -58,6 +58,8 @@ O editor de templates de environment traduz controles e mensagens de revisão e 
 
 A criação de stacks, a escala de serviços, os vínculos de serviços e o diálogo Sobre usam o idioma compartilhado. Documentos Compose, identificadores de serviços, valores enviados e flags de capacidade mantêm a representação nativa.
 
+Validadores de Compose, templates de environment, vínculos de serviços e upgrades de serviços expõem erros tipados. Seus painéis exibem o erro no idioma ativo e preservam o rascunho. Chamadores existentes dos validadores continuam recebendo as mensagens originais em português.
+
 Hosts, templates de catálogo e webhooks também usam o idioma compartilhado. Comandos de registro de hosts e valores de secrets permanecem nativos e mascarados até serem revelados explicitamente; trocar o idioma altera rótulos sem solicitar registro nem copiar um secret. Nomes de templates, conteúdo de parâmetros e identificadores de drivers de webhooks mantêm os valores nativos. Erros de helpers ainda não extraídos permanecem inalterados.
 
 Use schemas/action links atuais, sem inventar rotas ou supor igualdade entre schemas globais e do environment. Releia recurso, escopo e contrato relevante antes da mutação. Preserve configuração desconhecida e campos não selecionados; não transforme valores incompatíveis em defaults vazios silenciosamente.

@@ -13,6 +13,7 @@ import {
   composeStackPermission,
   composeStackTarget,
   prepareComposeUpgrade,
+  StackComposeUpgradeValidationError,
   type ComposeTexts,
 } from '../stack-compose-upgrade';
 import { ComposeEditor } from './ComposeEditor';
@@ -59,6 +60,7 @@ export default function StackComposeUpgradePanel(props: Props) {
 function ComposeScope({ resource, onClose, onSaved }: Props) {
   const { t } = useI18n();
   function errorText(error: Error) {
+    if (error instanceof StackComposeUpgradeValidationError) return t(error.key);
     if (!(error instanceof ComposePanelError)) return error.message;
     const [key, params] = error.detail;
     return key === 'stackComposeUpgradePanel.httpError' ? t(key, params) : t(key);
@@ -207,7 +209,8 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
         {loading ? (
           <Loading />
         ) : error ? (
-          error instanceof ComposePanelError ? (
+          error instanceof ComposePanelError ||
+          error instanceof StackComposeUpgradeValidationError ? (
             <div className="error-state">
               <Alert>{errorText(error)}</Alert>
               <Button onClick={() => setAttempt((v) => v + 1)}>{t('ui.retry')}</Button>

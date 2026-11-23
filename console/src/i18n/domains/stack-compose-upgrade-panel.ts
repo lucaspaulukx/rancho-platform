@@ -28,6 +28,28 @@ export const enStackComposeUpgradePanel = {
   'stackComposeUpgradePanel.requestFailed': 'The Compose operation could not be completed.',
   'stackComposeUpgradePanel.httpError':
     'Compose operation not completed (HTTP {status}). Review the file or check the stack processes.',
+  'stackComposeUpgradePanel.validation.stackUnavailable':
+    'The stack is unavailable in this environment or state.',
+  'stackComposeUpgradePanel.validation.noSource':
+    'This stack has no Compose source. Use the service editors.',
+  'stackComposeUpgradePanel.validation.actionUnavailable': 'The stack action is unavailable.',
+  'stackComposeUpgradePanel.validation.invalidTarget': 'Invalid stack action target.',
+  'stackComposeUpgradePanel.validation.invalidExport': 'Invalid Compose export.',
+  'stackComposeUpgradePanel.validation.exportTooLarge':
+    'The export exceeds the limit of 512 KiB per file.',
+  'stackComposeUpgradePanel.validation.confirmImpact': 'Confirm the impact of upgrading the stack.',
+  'stackComposeUpgradePanel.validation.contractUnavailable':
+    'The stack upgrade contract is unavailable.',
+  'stackComposeUpgradePanel.validation.stackChanged':
+    'The stack or its services changed. Reopen the editor.',
+  'stackComposeUpgradePanel.validation.changeRequired': 'Change a Compose file before submitting.',
+  'stackComposeUpgradePanel.validation.fieldDenied': 'The Compose field is not allowed.',
+  'stackComposeUpgradePanel.validation.invalidFiles':
+    'Review the Compose files and the 512 KiB UTF-8 limit.',
+  'stackComposeUpgradePanel.validation.preserveParameters':
+    'The current parameters cannot be preserved under this contract.',
+  'stackComposeUpgradePanel.validation.invalidParameter':
+    'A stack parameter is outside the contract.',
 } as const;
 
 export const ptStackComposeUpgradePanel = {
@@ -61,4 +83,27 @@ export const ptStackComposeUpgradePanel = {
   'stackComposeUpgradePanel.requestFailed': 'Não foi possível concluir a operação Compose.',
   'stackComposeUpgradePanel.httpError':
     'Operação Compose não concluída (HTTP {status}). Revise o arquivo ou consulte os processos da stack.',
+  'stackComposeUpgradePanel.validation.stackUnavailable':
+    'Stack indisponível neste environment ou estado.',
+  'stackComposeUpgradePanel.validation.noSource':
+    'Esta stack não tem Compose de origem. Use os editores dos serviços.',
+  'stackComposeUpgradePanel.validation.actionUnavailable': 'Ação da stack indisponível.',
+  'stackComposeUpgradePanel.validation.invalidTarget': 'Destino de ação da stack inválido.',
+  'stackComposeUpgradePanel.validation.invalidExport': 'Exportação Compose inválida.',
+  'stackComposeUpgradePanel.validation.exportTooLarge':
+    'A exportação excede o limite de 512 KiB por arquivo.',
+  'stackComposeUpgradePanel.validation.confirmImpact':
+    'Confirme o impacto da atualização da stack.',
+  'stackComposeUpgradePanel.validation.contractUnavailable':
+    'Contrato de atualização de stack indisponível.',
+  'stackComposeUpgradePanel.validation.stackChanged':
+    'A stack ou os serviços mudaram. Reabra o editor.',
+  'stackComposeUpgradePanel.validation.changeRequired':
+    'Altere um arquivo Compose antes de enviar.',
+  'stackComposeUpgradePanel.validation.fieldDenied': 'Campo Compose não permitido.',
+  'stackComposeUpgradePanel.validation.invalidFiles':
+    'Revise os arquivos Compose e o limite de 512 KiB UTF-8.',
+  'stackComposeUpgradePanel.validation.preserveParameters':
+    'Os parâmetros atuais não podem ser preservados com este contrato.',
+  'stackComposeUpgradePanel.validation.invalidParameter': 'Parâmetro da stack fora do contrato.',
 } as const;

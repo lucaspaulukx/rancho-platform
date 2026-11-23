@@ -48,6 +48,7 @@ import { enEnvironmentTemplates, ptEnvironmentTemplates } from './domains/enviro
 import { enAboutPage, ptAboutPage } from './domains/about-page';
 import { enComposeEditor, ptComposeEditor } from './domains/compose-editor';
 import { enServiceEditors, ptServiceEditors } from './domains/service-editors';
+import { enComposeValidation, ptComposeValidation } from './domains/compose-validation';
 import {
   enStackComposeUpgradePanel,
   ptStackComposeUpgradePanel,
@@ -106,6 +107,7 @@ export const englishMessages = {
   ...enAboutPage,
   ...enComposeEditor,
   ...enServiceEditors,
+  ...enComposeValidation,
   ...enStackComposeUpgradePanel,
   ...enResourcePanel,
   ...enResourceStream,
@@ -192,6 +194,7 @@ export const portugueseMessages = {
   ...ptAboutPage,
   ...ptComposeEditor,
   ...ptServiceEditors,
+  ...ptComposeValidation,
   ...ptStackComposeUpgradePanel,
   ...ptResourcePanel,
   ...ptResourceStream,

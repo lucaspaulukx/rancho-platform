@@ -18,7 +18,11 @@ import {
   Loading,
   Modal,
 } from './ui';
-import { environmentTemplateMetadata, prepareEnvironmentTemplate } from './EnvironmentEditor';
+import {
+  EnvironmentTemplateValidationError,
+  environmentTemplateMetadata,
+  prepareEnvironmentTemplate,
+} from './EnvironmentEditor';
 import {
   catalogDefaults,
   catalogPath,
@@ -68,6 +72,10 @@ function failure() {
 
 export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onClose: () => void }) {
   const { t, formats } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof EnvironmentTemplateError || error instanceof EnvironmentTemplateValidationError
+      ? t(error.key)
+      : error.message;
   const app = useApp();
   const client = useQueryClient();
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -274,9 +282,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
             <RefreshCw size={16} />
           </Button>
         </div>
-        {error && !draft && (
-          <Alert>{error instanceof EnvironmentTemplateError ? t(error.key) : error.message}</Alert>
-        )}
+        {error && !draft && <Alert>{errorText(error)}</Alert>}
         {reading && <Loading label={t('environmentTemplates.opening')} />}
         {query.isPending ? (
           <Loading />
@@ -400,11 +406,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
             </>
           }
         >
-          {error && (
-            <Alert>
-              {error instanceof EnvironmentTemplateError ? t(error.key) : error.message}
-            </Alert>
-          )}
+          {error && <Alert>{errorText(error)}</Alert>}
           <form
             id="environment-template-form"
             onSubmit={(event) => {

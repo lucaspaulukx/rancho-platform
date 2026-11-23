@@ -1,3 +1,4 @@
+import { ptEnvironmentTemplates } from '../i18n/domains/environment-templates';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { allPages, type Resource, type Schema } from '../api';
@@ -53,6 +54,16 @@ export function EnvironmentResources({ project }: { project: Resource }) {
   );
 }
 
+type EnvironmentTemplateValidationKey = Extract<
+  keyof typeof ptEnvironmentTemplates,
+  `environmentTemplates.validation.${string}`
+>;
+export class EnvironmentTemplateValidationError extends Error {
+  constructor(readonly key: EnvironmentTemplateValidationKey) {
+    super(ptEnvironmentTemplates[key]);
+  }
+}
+
 export function prepareEnvironmentTemplate(
   name: string,
   description: string,
@@ -60,28 +71,30 @@ export function prepareEnvironmentTemplate(
   isPublic?: boolean,
 ) {
   if (!name.trim() || name.trim().length > 255)
-    throw new Error('Informe um nome de template com ate 255 caracteres.');
+    throw new EnvironmentTemplateValidationError('environmentTemplates.validation.name');
   if (description.length > 1024)
-    throw new Error('A descricao do template deve ter ate 1024 caracteres.');
+    throw new EnvironmentTemplateValidationError('environmentTemplates.validation.description');
   if (!Array.isArray(stacks) || stacks.length > 100)
-    throw new Error('O template deve conter no maximo 100 stacks.');
+    throw new EnvironmentTemplateValidationError('environmentTemplates.validation.stackCount');
   const names = new Set<string>();
   for (const stack of stacks) {
     if (!stack || typeof stack !== 'object' || Array.isArray(stack))
-      throw new Error('Uma stack do template e invalida.');
+      throw new EnvironmentTemplateValidationError('environmentTemplates.validation.invalidStack');
     const stackName = typeof stack.name === 'string' ? stack.name.trim() : '';
     if (stackName && names.has(stackName))
-      throw new Error('Os nomes das stacks devem ser unicos no template.');
+      throw new EnvironmentTemplateValidationError(
+        'environmentTemplates.validation.duplicateStack',
+      );
     if (stackName) names.add(stackName);
     const catalog = typeof stack.templateId === 'string' && !!stack.templateId.trim();
     const compose = typeof stack.dockerCompose === 'string' && !!stack.dockerCompose.trim();
     if (!catalog && !compose)
-      throw new Error('Cada stack precisa de um template do catalogo ou Docker Compose.');
+      throw new EnvironmentTemplateValidationError('environmentTemplates.validation.stackSource');
     if (
       stack.answers !== undefined &&
       (!stack.answers || typeof stack.answers !== 'object' || Array.isArray(stack.answers))
     )
-      throw new Error('As respostas de uma stack sao invalidas.');
+      throw new EnvironmentTemplateValidationError('environmentTemplates.validation.answers');
   }
   return {
     name: name.trim(),

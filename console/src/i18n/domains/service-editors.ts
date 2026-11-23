@@ -1,4 +1,20 @@
 export const ptServiceEditors = {
+  'serviceEditors.linkError.environment': 'O serviço não pertence ao environment.',
+  'serviceEditors.linkError.foreign': 'Há vínculos de outro environment.',
+  'serviceEditors.linkError.changed':
+    'Os vínculos foram alterados por outro cliente. Feche e reabra o painel.',
+  'serviceEditors.linkError.advanced':
+    'Há vínculos avançados, transitórios ou destinos indisponíveis. Use o formulário nativo para preservar essa configuração.',
+  'serviceEditors.linkError.unavailable':
+    'A alteração de vínculos não está disponível neste contexto.',
+  'serviceEditors.linkError.limit': 'Edite até 100 vínculos por operação.',
+  'serviceEditors.linkError.contract': 'O contrato de vínculos mudou. Reabra o painel.',
+  'serviceEditors.linkError.stack': 'A stack do serviço não está disponível para esta operação.',
+  'serviceEditors.linkError.target':
+    'Escolha um serviço de aplicação disponível neste environment, diferente da origem.',
+  'serviceEditors.linkError.alias':
+    'Alias inválido. Use letras, números, hífen, ponto ou sublinhado.',
+  'serviceEditors.linkError.duplicate': 'Não repita destinos ou aliases na lista.',
   'serviceEditors.unsupported': 'Não é possível editar estes vínculos.',
   'serviceEditors.reopen': 'Reabra o editor de vínculos.',
   'serviceEditors.contract': 'Contrato de vínculos indisponível.',
@@ -47,6 +63,21 @@ export const ptServiceEditors = {
 } as const;
 
 export const enServiceEditors = {
+  'serviceEditors.linkError.environment': 'The service does not belong to the environment.',
+  'serviceEditors.linkError.foreign': 'Some links belong to another environment.',
+  'serviceEditors.linkError.changed':
+    'Another client changed the links. Close and reopen the panel.',
+  'serviceEditors.linkError.advanced':
+    'Some links are advanced, transitional or point to unavailable targets. Use the native form to preserve this configuration.',
+  'serviceEditors.linkError.unavailable': 'Editing links is unavailable in this context.',
+  'serviceEditors.linkError.limit': 'Edit up to 100 links per operation.',
+  'serviceEditors.linkError.contract': 'The link contract changed. Reopen the panel.',
+  'serviceEditors.linkError.stack': 'The service stack is unavailable for this operation.',
+  'serviceEditors.linkError.target':
+    'Choose an available application service in this environment that differs from the source.',
+  'serviceEditors.linkError.alias':
+    'Invalid alias. Use letters, numbers, hyphens, periods or underscores.',
+  'serviceEditors.linkError.duplicate': 'Do not repeat targets or aliases in the list.',
   'serviceEditors.unsupported': 'These links cannot be edited.',
   'serviceEditors.reopen': 'Reopen the links editor.',
   'serviceEditors.contract': 'The service link contract is unavailable.',

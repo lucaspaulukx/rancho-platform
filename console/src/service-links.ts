@@ -1,5 +1,15 @@
+import { ptServiceEditors } from './i18n/domains/service-editors';
 import type { Resource, Schema } from './api';
 import { canManageResource } from './hooks/useSchemas';
+type ServiceLinkErrorKey = Extract<
+  keyof typeof ptServiceEditors,
+  `serviceEditors.linkError.${string}`
+>;
+export class ServiceLinkValidationError extends Error {
+  constructor(readonly key: ServiceLinkErrorKey) {
+    super(ptServiceEditors[key]);
+  }
+}
 export interface ServiceLinkDraft {
   key: number;
   serviceId: string;
@@ -17,13 +27,14 @@ export function canEditServiceLinks(resource: Resource, schema?: Schema, enabled
   );
 }
 export function activeServiceLinks(mappings: Resource[], source: Resource, environment: string) {
-  if (source.accountId !== environment) throw new Error('O serviço não pertence ao environment.');
+  if (source.accountId !== environment)
+    throw new ServiceLinkValidationError('serviceEditors.linkError.environment');
   const rows = mappings.filter(
     (v) =>
       v.serviceId === source.id && !v.removed && !['removed', 'purged'].includes(v.state || ''),
   );
   if (rows.some((v) => v.accountId !== environment))
-    throw new Error('Há vínculos de outro environment.');
+    throw new ServiceLinkValidationError('serviceEditors.linkError.foreign');
   return rows;
 }
 export function serviceLinksSnapshot(rows: Resource[]) {
@@ -43,7 +54,7 @@ export function serviceLinksSnapshot(rows: Resource[]) {
 }
 export function assertServiceLinksUnchanged(before: Resource[], after: Resource[]) {
   if (serviceLinksSnapshot(before) !== serviceLinksSnapshot(after))
-    throw new Error('Os vínculos foram alterados por outro cliente. Feche e reabra o painel.');
+    throw new ServiceLinkValidationError('serviceEditors.linkError.changed');
 }
 export function editableServiceLinks(rows: Resource[], services: Resource[], environment: string) {
   if (
@@ -63,9 +74,7 @@ export function editableServiceLinks(rows: Resource[], services: Resource[], env
         ),
     )
   )
-    throw new Error(
-      'Há vínculos avançados, transitórios ou destinos indisponíveis. Use o formulário nativo para preservar essa configuração.',
-    );
+    throw new ServiceLinkValidationError('serviceEditors.linkError.advanced');
   return rows.map((v, index) => ({
     key: index,
     serviceId: String(v.consumedServiceId),
@@ -82,16 +91,16 @@ export function prepareServiceLinks(
   environment: string,
 ) {
   if (!canEditServiceLinks(source, schema, true) || source.accountId !== environment)
-    throw new Error('A alteração de vínculos não está disponível neste contexto.');
-  if (rows.length > 100) throw new Error('Edite até 100 vínculos por operação.');
+    throw new ServiceLinkValidationError('serviceEditors.linkError.unavailable');
+  if (rows.length > 100) throw new ServiceLinkValidationError('serviceEditors.linkError.limit');
   if (!linkSchema.resourceFields.serviceId?.create || !linkSchema.resourceFields.name?.create)
-    throw new Error('O contrato de vínculos mudou. Reabra o painel.');
+    throw new ServiceLinkValidationError('serviceEditors.linkError.contract');
   if (
     !stacks.some(
       (s) => s.id === source.stackId && s.accountId === environment && !s.removed && !s.system,
     )
   )
-    throw new Error('A stack do serviço não está disponível para esta operação.');
+    throw new ServiceLinkValidationError('serviceEditors.linkError.stack');
   const targets = new Set<string>();
   const aliases = new Set<string>();
   return {
@@ -108,19 +117,17 @@ export function prepareServiceLinks(
           (s) => s.id === service.stackId && s.accountId === environment && !s.removed && !s.system,
         )
       )
-        throw new Error(
-          'Escolha um serviço de aplicação disponível neste environment, diferente da origem.',
-        );
+        throw new ServiceLinkValidationError('serviceEditors.linkError.target');
       const name = row.name.trim();
       const field = linkSchema.resourceFields.name;
       if (
         name.length > (field.maxLength ?? 255) ||
         (name && !new RegExp(`^[${field.validChars || 'a-zA-Z0-9-._'}]+$`).test(name))
       )
-        throw new Error('Alias inválido. Use letras, números, hífen, ponto ou sublinhado.');
+        throw new ServiceLinkValidationError('serviceEditors.linkError.alias');
       const alias = (name || service.name || service.id).toLocaleLowerCase();
       if (targets.has(service.id) || aliases.has(alias))
-        throw new Error('Não repita destinos ou aliases na lista.');
+        throw new ServiceLinkValidationError('serviceEditors.linkError.duplicate');
       targets.add(service.id);
       aliases.add(alias);
       return { serviceId: service.id, ...(name ? { name } : {}) };
