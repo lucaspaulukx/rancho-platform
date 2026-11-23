@@ -26,6 +26,14 @@ Rancho oferece uma console independente React/TypeScript para Rancher 1.6 Docker
 
 Páginas são renderizadas no shell comum. Ações contextuais abrem drawers compartilhados, evitando trocar de página para operar a mesma stack. Parâmetros da URL preservam environment, visão e filtros. Flag de UI controla apresentação, nunca acesso ao backend.
 
+## Limite da localização
+
+A base comum em `console/src/i18n/` inventaria os dez locales originais de produção e os metadados RTL do persa, normaliza identificadores legados/do navegador e negocia somente uma lista explícita de idiomas disponíveis. Ela não lê preferências do navegador nem habilita seletor sozinha. Chinês tradicional e variantes com script incompatível não são convertidos silenciosamente para chinês simplificado. Helpers nativos de `Intl` fornecem números, datas, tempo relativo, categorias de plural e ordenação numérica por locale. `formatResourceDate` aceita locale opcional; consumidores existentes mantêm pt-BR.
+
+O domínio inicial de mensagens tem sete chaves comuns com catálogos pt-BR/en-US, parâmetros tipados e validação estrutural em runtime. Chaves desconhecidas, plurais malformados e parâmetros alterados falham sem reproduzir os dados enviados. Mensagens ausentes resolvem explicitamente para en-US e usam gramática/formatação inglesa; `resolvedLocale` informa esse fallback. `translatedKeys` conta somente este domínio pequeno, nunca a cobertura da aplicação. Mensagens são strings simples para texto/atributos React: não enviar para `dangerouslySetInnerHTML` nem executar seu conteúdo. Erros nativos, nomes de recursos, comandos e logs não são chaves de tradução.
+
+Provider de locale, política/flags administrativas, persistência de preferência, seletor, extração completa de strings e catálogos revisados seguem no roadmap. Importar a base não habilita locale de produção; a interface atual continua fixa em pt-BR. Inventário não é lista de traduções concluídas e metadado de direção não implementa estilos RTL. Testes de domínio validam a base, sem comprovar tradução de todas as rotas ou aceite de troca pelo navegador.
+
 ## Dados e mutações
 
 Use schemas/action links atuais, sem inventar rotas ou supor igualdade entre schemas globais e do environment. Releia recurso, escopo e contrato relevante antes da mutação. Preserve configuração desconhecida e campos não selecionados; não transforme valores incompatíveis em defaults vazios silenciosamente.

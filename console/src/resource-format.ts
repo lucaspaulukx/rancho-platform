@@ -1,3 +1,5 @@
+import { defaultLocale, localeFormats, type Locale } from './i18n/locales';
+
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 export function resourceDate(value: unknown): number | undefined {
   if (typeof value !== 'string') return undefined;
@@ -15,13 +17,9 @@ export function resourceDate(value: unknown): number | undefined {
       : Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : undefined;
 }
-export function formatResourceDate(value: unknown) {
+export function formatResourceDate(value: unknown, locale: Locale = defaultLocale) {
   const timestamp = resourceDate(value);
-  return timestamp === undefined
-    ? '—'
-    : new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(
-        timestamp,
-      );
+  return timestamp === undefined ? '—' : localeFormats(locale).date(timestamp);
 }
 export function certificateValidity(value: unknown, now = Date.now()) {
   const expires = resourceDate(value);

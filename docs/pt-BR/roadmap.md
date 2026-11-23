@@ -43,7 +43,7 @@ O console novo tem textos fixos em pt-BR, inclusive validações e rótulos aces
 
 | ID | Capacidade | Estado e gate restante |
 |---|---|---|
-| I18N01 | Infraestrutura comum de locale, mensagens e formatação | Pendente; chaves/parâmetros tipados, normalização de locale, fallback explícito, plurais e números/datas/tempo relativo/ordenação regionais; sem substituir texto no DOM nem traduzir identificadores da API |
+| I18N01 | Infraestrutura comum de locale, mensagens e formatação | Parcial; inventário de dez locales, domínio comum inicial/parâmetros tipados, fallback explícito, plurais e formatação/ordenação Intl nativa implementados com checks unitários/de tipos; faltam provider e adoção pela interface completa; sem substituir texto no DOM nem traduzir identificadores da API |
 | I18N02 | Configuração e seletor compartilhado de idioma | Pendente; contrato opt-in/default/off, política administrativa de idiomas/padrão/seleção, escolha nos layouts público e autenticado, persistência segura e negociação com idioma do navegador; troca preserva environment, rota, rascunhos e propriedade dos streams |
 | I18N03 | Extração completa pt-BR/en-US | Pendente; shell, login/sem-acesso/recuperação, todas as páginas, menus, tabelas, drawers, diálogos, confirmações, toasts, validadores e rótulos acessíveis; preservar comandos técnicos e conteúdo nativo/dos usuários |
 | I18N04 | Outros oito idiomas de produção | Pendente; catálogos completos de-DE/fr-FR/hu-HU/ja-JP/fa-IR/ru-RU/uk-UA/zh-Hans, consistência de parâmetros/plurais e revisão linguística; nunca anunciar catálogo com fallback inglês como tradução concluída |
