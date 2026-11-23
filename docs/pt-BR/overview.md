@@ -2,9 +2,22 @@
 
 [Português (Brasil)](overview.md) | [English](../../README.md)
 
-Console moderna independente e extensões opcionais de grupos locais/OIDC para Rancher1.6 Docker/Cattle. Preserve identidade Rancher e autorização do backend, operando stacks, serviços e containers no mesmo workspace contextual.
+[![Validação do console](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)
+[![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-2563eb)](../../LICENSE)
+[![Alfa comunitária](https://img.shields.io/badge/status-alfa%20comunit%C3%A1ria-9a5b00)](https://github.com/lucaspaulukx/rancho-platform/releases)
 
-A versão alfa comunitária é destinada à avaliação em laboratório isolado. O Rancho é independente do Rancher e usa o engine legado do Rancher 1.6. Veja capacidades e aceites restantes no [roadmap](roadmap.md).
+Opere stacks, serviços e containers do Rancher 1.6 Docker/Cattle em uma só tela, com logs, terminal e métricas no contexto do workload.
+
+[Releases](https://github.com/lucaspaulukx/rancho-platform/releases) · [Migração](migration.md) · [Roadmap](roadmap.md) · [Contribuição](contributing.md) · [Segurança](security.md)
+
+> [!IMPORTANT]
+> O Rancho é um projeto comunitário independente que usa o engine legado do Rancher 1.6. Use a versão alfa em laboratório isolado, com dados sintéticos ou uma cópia isolada. O aceite de produção segue em aberto.
+
+## Funcionalidades
+
+- **Operação de workloads** · Inspecione stacks e containers, abra streams e execute as ações disponíveis no Rancher sem sair da tela.
+- **Gestão de acesso** · Conceda permissões por ambiente com grupos locais e, opcionalmente, entre com um provedor OIDC como o Keycloak.
+- **Ensaio de migração** · Verifique o banco de origem, faça backup e ensaie restauração e rollback em isolamento. [Guia de migração](migration.md)
 
 ## Documentação
 
@@ -12,14 +25,20 @@ Escolha idioma por guia: [English](../en/README.md) · [Português (Brasil)](REA
 
 Comece por [arquitetura](architecture.md), [contribuição](contributing.md), [configuração](configuration.md), [testes](testing.md) e [migração](migration.md). O reporte está em [segurança](security.md).
 
-## Build
-
-Para verificar o frontend, instale Git e Node 24. O laboratório de backend também requer Python 3.10+, Docker em modo Linux e PowerShell 7.
+## Início rápido
 
 ```sh
 git clone https://github.com/lucaspaulukx/rancho-platform.git
 cd rancho-platform
 git switch --detach v0.1.0-alpha.1
+```
+
+<details>
+<summary>Compilar e testar o frontend</summary>
+
+Para verificar o frontend, instale Git e Node 24. O laboratório de backend também requer Python 3.10+, Docker em modo Linux e PowerShell 7.
+
+```sh
 cd console
 npm ci
 npm test
@@ -28,7 +47,9 @@ npm run build
 
 Fontes oficiais são pinados em `upstream.json`; mudanças ficam em `patches/`. Checkouts ignorados são entradas geradas de build, não repositórios de consulta incorporados. Ember original não é necessário ao build do frontend.
 
-## Laboratório local opcional
+</details>
+
+## Execute o laboratório local
 
 ```powershell
 ./Start-Lab.ps1 -PlanOnly
