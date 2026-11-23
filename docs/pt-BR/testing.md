@@ -74,6 +74,14 @@ O helper de transporte do scheduler é diagnóstico limitado para a rede gerenci
 
 `physical_sidecar_device_upgrades.py` executa separadamente a estratégia nativa com uma réplica no host legado isolado. Confere os dois containers durante upgrade, reversão, conclusão e remoção do mapeamento. Verifica a configuração exata do Docker e a leitura de dispositivos de caractere depois que o relay temporário de alocação é removido. Na fixture, o Rancher substituiu os dois containers durante os upgrades e a reversão e preservou o mapeamento principal. O teste também confere a limpeza exata e a rejeição da sessão revogada. O escopo cobre as permissões solicitadas e a leitura dos aliases em um host.
 
+### Upgrade e rollback do frontend
+
+Use duas referências distintas de imagens do console já disponíveis localmente. O teste cria um proxy próprio na porta de loopback 18091 e troca anterior → candidata → anterior em um volume próprio de assets. Deixe a porta livre. Usa a configuração versionada, respostas sintéticas da API e contextos novos do Chromium. Confere os chunks carregados sob demanda nas duas trocas, o ponto de entrada restaurado em abas novas, a política de cache e a limpeza. Rollback de backend e banco exige ensaios separados.
+
+```sh
+python console/tests/frontend_rollback.py --previous-image rancho-console:previous --candidate-image rancho-console:candidate
+```
+
 ### Inventário em alto volume
 
 Com o console compilado em localhost:18090 e o Chromium do Playwright disponível, rode este comando na raiz do repositório.

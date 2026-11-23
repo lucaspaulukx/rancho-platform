@@ -74,6 +74,14 @@ The scheduler transport helper is a bounded diagnostic for the legacy managed-ne
 
 `physical_sidecar_device_upgrades.py` separately runs the native strategy with one replica on the isolated legacy host. It checks both containers through upgrade, rollback, finish and reset. It verifies exact Docker device configuration and character-device reads after the bounded allocation relay is removed. In this fixture, Rancher replaced both containers during upgrades and rollback while preserving the primary mapping. It also checks exact cleanup and rejection of the revoked session. The test covers the requested device permissions and alias reads on one host.
 
+### Frontend upgrade and rollback
+
+Run with two distinct, already-local console image references. The harness starts an owned proxy on loopback port 18091 and switches previous → candidate → previous on a private asset volume. Leave the port free. It uses the checked-in console configuration, synthetic API responses and fresh Chromium contexts. It checks lazy chunk requests across both swaps, the restored entry for new tabs, cache policy and cleanup. Backend and database rollback require separate rehearsals.
+
+```sh
+python console/tests/frontend_rollback.py --previous-image rancho-console:previous --candidate-image rancho-console:candidate
+```
+
 ### High-volume inventory
 
 With the built console serving on localhost:18090 and Playwright Chromium available, run this command from the repository root.
