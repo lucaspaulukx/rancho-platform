@@ -1,9 +1,11 @@
 // Runs against the built local console with synthetic, read-only API responses.
 // Set UX06_BASELINE=1 to measure the unpaginated path, including in older builds.
+// Set UX06_SOAK_SECONDS=60–900 to run only the visible-tab polling soak.
 const assert = require('node:assert/strict');
 const os = require('node:os');
 const path = require('node:path');
 const { createRequire } = require('node:module');
+const { setTimeout: sleep } = require('node:timers/promises');
 
 const origin = 'http://localhost:18090';
 const viewport = { width: 1440, height: 1000 };
@@ -14,6 +16,8 @@ const renderedPageSize = 50;
 const groupedPageSize = 100;
 const counts = { stacks: 20, services: 200, containers: 2000 };
 const coldRuns = 3;
+const refreshTimeoutMs = 22_000; // Inventory polls every 15 seconds.
+const soakFailureMessage = 'UX06 synthetic inventory read failure';
 const round = (number) => Math.round(number * 100) / 100;
 const projectId = (index) => `1a${9000 + index}`;
 const projectName = (index) => `UX06 environment ${String(index).padStart(2, '0')}`;
@@ -289,9 +293,175 @@ async function checkGrouped(page, first, pagination, apiRequests, requests) {
   };
 }
 
+async function checkSoak(context, page, requests, readFailure, seconds) {
+  const expand = page.getByRole('button', { name: 'Expandir tudo', exact: true });
+  const next = page.getByRole('button', { name: 'Próxima página', exact: true });
+  const search = page.getByRole('searchbox', { name: 'Buscar na operação' });
+  const ready = page
+    .getByRole('button', { name: 'Atualizar', exact: true })
+    .and(page.locator(':enabled'));
+  const resourceRows = page.locator('main .operation-row');
+  const totalPages = Math.ceil(
+    Object.values(counts).reduce((sum, count) => sum + count, 0) / groupedPageSize,
+  );
+  const pageStatus = (number) =>
+    page.getByText(`Página ${number} de ${totalPages}`, { exact: true });
+  const environments = projects.slice(0, 2);
+  const measurements = [];
+  let interactionCycles = 0;
+  let completedPolls = 0;
+  let maxResourceRows = 0;
+
+  async function switchEnvironment(index) {
+    await page.locator('.environment-trigger').click();
+    await page
+      .locator('.environment-options')
+      .getByRole('option', { name: projectName(index + 1) })
+      .click();
+    await page
+      .locator('main .operation-row.stack .resource-name-button bdi')
+      .filter({ hasText: new RegExp(`^${rowId(environments[index].id, 'stacks', 0)}$`) })
+      .waitFor();
+    await ready.waitFor();
+  }
+
+  async function checkRows(id, min, max) {
+    const names = await resourceRows.evaluateAll((rows) =>
+      rows.map((row) => row.querySelector('.resource-name-button bdi')?.textContent),
+    );
+    assert.ok(names.length >= min && names.length <= max);
+    assert.ok(names.every((name) => name?.startsWith(`ux06-${id}-`)));
+    maxResourceRows = Math.max(maxResourceRows, names.length);
+  }
+
+  async function interact(id) {
+    await expand.click();
+    await pageStatus(1).waitFor();
+    await checkRows(id, groupedPageSize, groupedPageSize);
+    await next.click();
+    await pageStatus(2).waitFor();
+    await checkRows(id, groupedPageSize, groupedPageSize + 2);
+    const last = rowName(id, counts.containers - 1);
+    await search.fill(last);
+    await waitForRows(page, last, 1);
+    await checkRows(id, 3, 3);
+    await search.clear();
+    await pageStatus(1).waitFor();
+    await checkRows(id, groupedPageSize, groupedPageSize);
+    interactionCycles += 1;
+  }
+
+  async function observePoll(id) {
+    const start = requests.length;
+    const lastPage = `${origin}/v2-beta/projects/${id}/containers?limit=${pageSize}&marker=${counts.containers - pageSize}`;
+    // No UI interaction occurs in this window. Wait for the final successful page,
+    // then verify all three collections and the completed refresh in the UI.
+    await page.waitForResponse((response) => response.url() === lastPage && response.ok(), {
+      timeout: Math.min(refreshTimeoutMs, Math.max(1, deadline - performance.now())),
+    });
+    await ready.waitFor();
+    const cycle = requests.slice(start);
+    assert.ok(cycle.every((entry) => entry.scope === id));
+    checkCursors(cycle, id);
+    await pageStatus(1).waitFor();
+    await checkRows(id, groupedPageSize, groupedPageSize);
+    completedPolls += 1;
+  }
+
+  stage = 'soak warmup';
+  assert.equal(await page.evaluate(() => document.visibilityState), 'visible');
+  await page.evaluate(() => {
+    window.ux06.checkScope = true;
+  });
+  await switchEnvironment(1);
+  checkCursors(requests, environments[1].id);
+  await switchEnvironment(0);
+  await expand.click();
+  await pageStatus(1).waitFor();
+
+  const session = await context.newCDPSession(page);
+  await session.send('Performance.enable');
+  async function sample() {
+    const heapBytes = await heap(session);
+    const { metrics } = await session.send('Performance.getMetrics');
+    const taskSeconds = metrics.find(({ name }) => name === 'TaskDuration')?.value;
+    assert.ok(Number.isFinite(taskSeconds) && taskSeconds >= 0);
+    return {
+      elapsedMs: round(performance.now() - started),
+      postGcHeapBytes: heapBytes,
+      taskSeconds,
+    };
+  }
+  const started = performance.now();
+  const deadline = started + seconds * 1000;
+  try {
+    measurements.push(await sample());
+    const first = environments[0].id;
+    stage = 'soak grouped interaction';
+    await interact(first);
+
+    stage = 'soak transient polling failure';
+    readFailure.scope = first;
+    readFailure.remaining = 2; // Exhaust the app's single automatic query retry.
+    const error = page
+      .locator('main .error-state')
+      .getByRole('alert')
+      .filter({ hasText: soakFailureMessage });
+    await error.waitFor({ timeout: refreshTimeoutMs });
+    assert.equal(readFailure.remaining, 0);
+
+    stage = 'soak automatic recovery';
+    await observePoll(first);
+    assert.equal(await error.count(), 0);
+    measurements.push(await sample());
+
+    let environment = 0;
+    do {
+      stage = 'soak grouped interaction';
+      environment = 1 - environment;
+      const { id } = environments[environment];
+      await switchEnvironment(environment);
+      await interact(id);
+      stage = 'soak periodic refresh';
+      await observePoll(id);
+      measurements.push(await sample());
+    } while (deadline - performance.now() >= refreshTimeoutMs);
+    await sleep(Math.max(0, deadline - performance.now()));
+
+    stage = 'soak final measurements';
+    await checkRows(environments[environment].id, groupedPageSize, groupedPageSize);
+    const final = await sample();
+    measurements.push(final);
+    const initial = measurements[0];
+    const { staleFrames } = await page.evaluate(() => window.ux06);
+    assert.equal(staleFrames, 0);
+    assert.ok(completedPolls >= 2);
+    assert.ok(final.taskSeconds > initial.taskSeconds);
+    return {
+      requestedSeconds: seconds,
+      measuredSeconds: round(final.elapsedMs / 1000),
+      environmentsExercised: environments.length,
+      interactionCycles,
+      completedPolls,
+      syntheticReadFailures: 2,
+      automaticRecovery: true,
+      maxResourceRows,
+      mainThreadTaskMs: round((final.taskSeconds - initial.taskSeconds) * 1000),
+      postGcHeapDeltaBytes: final.postGcHeapBytes - initial.postGcHeapBytes,
+      samples: measurements.map(({ elapsedMs, postGcHeapBytes, taskSeconds }) => ({
+        elapsedMs: round(elapsedMs - initial.elapsedMs),
+        postGcHeapBytes,
+        mainThreadTaskMs: round((taskSeconds - initial.taskSeconds) * 1000),
+      })),
+    };
+  } finally {
+    await session.detach();
+  }
+}
+
 async function run(
   browser,
-  { pagination, grouped, sweep = false, smoke = false, size = viewport },
+  { pagination, grouped, sweep = false, smoke = false, soakSeconds, size = viewport },
 ) {
   const context = await browser.newContext({
     viewport: size,
@@ -301,6 +471,7 @@ async function run(
   });
   const requests = [];
   const apiRequests = [];
+  const readFailure = { scope: null, remaining: 0 };
   let blocked = 0;
   let assetFailures = 0;
   let pageErrors = 0;
@@ -321,6 +492,15 @@ async function run(
       if (url.origin === origin && request.method() === 'GET') {
         if (entry) {
           apiRequests.push(url.pathname + url.search);
+          if (
+            readFailure.remaining > 0 &&
+            entry.scope === readFailure.scope &&
+            entry.collection === 'containers' &&
+            entry.cursor === counts.containers - pageSize
+          ) {
+            readFailure.remaining -= 1;
+            return route.fulfill({ status: 503, json: { message: soakFailureMessage } });
+          }
           if (entry.collection) requests.push(entry);
           return route.fulfill({ contentType: 'application/json', body: entry.body });
         }
@@ -342,7 +522,7 @@ async function run(
       blocked += 1;
       return route.abort();
     });
-    if (grouped !== undefined) {
+    if (grouped !== undefined && !soakSeconds) {
       // Exercise the background-tab polling policy while measuring local page changes.
       await context.addInitScript(() => {
         Object.defineProperty(document, 'visibilityState', { get: () => 'hidden' });
@@ -398,7 +578,9 @@ async function run(
       checkCursors(requests, first);
       assert.equal(requests.length, 23);
       const assetEntry = await page.locator('script[type="module"][src]').getAttribute('src');
-      const result = await checkGrouped(page, first, grouped, apiRequests, requests);
+      const result = soakSeconds
+        ? await checkSoak(context, page, requests, readFailure, soakSeconds)
+        : await checkGrouped(page, first, grouped, apiRequests, requests);
       checkNetwork();
       return { assetEntry, ...result };
     }
@@ -576,6 +758,14 @@ async function run(
 }
 
 (async () => {
+  const duration = process.env.UX06_SOAK_SECONDS;
+  const soakSeconds = duration === undefined ? undefined : Number(duration);
+  const pagination = process.env.UX06_BASELINE !== '1';
+  if (duration !== undefined) {
+    stage = 'validate UX06_SOAK_SECONDS (60–900 integer, grouped pagination required)';
+    assert.ok(/^\d+$/.test(duration) && soakSeconds >= 60 && soakSeconds <= 900 && pagination);
+  }
+  stage = 'launch Chromium';
   const modules = process.env.PLAYWRIGHT_MODULES;
   const { chromium } = modules
     ? createRequire(path.resolve(modules, 'package.json'))('playwright')
@@ -585,7 +775,26 @@ async function run(
     executablePath: process.env.CHROMIUM_EXECUTABLE,
   });
   try {
-    const pagination = process.env.UX06_BASELINE !== '1';
+    const evidence = {
+      scope: 'Built localhost console, synthetic read-only API, browser measurements only',
+      platform: {
+        os: os.platform(),
+        architecture: os.arch(),
+        chromium: browser.version(),
+        viewport,
+      },
+      fixture: { environments: projectCount, perEnvironment: counts, apiPageSize: pageSize },
+    };
+    if (soakSeconds) {
+      const { assetEntry, ...soak } = await run(browser, {
+        pagination,
+        grouped: true,
+        soakSeconds,
+      });
+      assert.match(assetEntry, /^\/console\/assets\/[A-Za-z0-9_.-]+\.js$/);
+      console.log(JSON.stringify({ status: 'passed', assetEntry, ...evidence, soak }, null, 2));
+      return;
+    }
     const samples = [];
     for (let index = 0; index < coldRuns; index += 1)
       samples.push(await run(browser, { pagination, sweep: index === 0 }));
@@ -615,14 +824,7 @@ async function run(
         {
           status: 'passed',
           assetEntry: samples[0].assetEntry,
-          scope: 'Built localhost console, synthetic read-only API, browser measurements only',
-          platform: {
-            os: os.platform(),
-            architecture: os.arch(),
-            chromium: browser.version(),
-            viewport,
-          },
-          fixture: { environments: projectCount, perEnvironment: counts, apiPageSize: pageSize },
+          ...evidence,
           workloadInventoryPagination: pagination,
           checks: {
             allEnvironmentsSelectable: true,
