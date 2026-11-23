@@ -695,7 +695,9 @@ function ComposeExport({ resource, onClose }: { resource: Resource; onClose: () 
                   {t('resourcePanel.download')}
                 </Button>
               </div>
-              <pre className="configuration-viewer">{String(resource[key])}</pre>
+              <pre dir="ltr" className="configuration-viewer">
+                {String(resource[key])}
+              </pre>
             </div>
           ),
       )}

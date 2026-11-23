@@ -2058,16 +2058,19 @@ input[type='checkbox']:focus-visible {
   color: var(--text);
   background: color-mix(in srgb, var(--text) 6%, transparent);
 }
+:root[dir='rtl'] .tree-toggle[aria-expanded='false'] svg {
+  transform: scaleX(-1);
+}
 .operation-service.nested {
-  margin-left: 25px;
-  border-left: 1px solid var(--border);
+  margin-inline-start: 25px;
+  border-inline-start: 1px solid var(--border);
 }
 .operation-service + .operation-service {
   border-top: 1px solid var(--border);
 }
 .operation-containers {
-  margin-left: 50px;
-  border-left: 1px solid var(--border);
+  margin-inline-start: 50px;
+  border-inline-start: 1px solid var(--border);
 }
 .operation-containers .operation-row {
   border-top: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
@@ -2132,14 +2135,14 @@ input[type='checkbox']:focus-visible {
     margin-left: 0;
   }
   .operation-service.nested {
-    margin-left: 10px;
+    margin-inline-start: 10px;
   }
   .operation-expand-row {
     padding-inline: 8px;
     gap: 4px;
   }
   .operation-containers {
-    margin-left: 26px;
+    margin-inline-start: 26px;
   }
   .operation-row {
     padding: 14px 10px;

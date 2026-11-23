@@ -667,10 +667,14 @@ function OperationRow({
       </span>
       <div className="operation-resource-name">
         <button className="resource-name-button" onClick={() => onOpen(resource)}>
-          {resource.name || resource.id}
+          <bdi>{resource.name || resource.id}</bdi>
         </button>
         <span className="muted" title={imageName(resource)}>
-          {kind === 'stack' ? resource.description || resource.id : imageName(resource)}
+          {kind === 'stack' ? (
+            <bdi>{resource.description || resource.id}</bdi>
+          ) : (
+            <bdi dir="ltr">{imageName(resource)}</bdi>
+          )}
         </span>
         {extra}
       </div>

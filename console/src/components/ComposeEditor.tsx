@@ -33,6 +33,7 @@ export function ComposeEditor({
         <Field label={label} hint={t('composeEditor.hint')}>
           {(id, descriptionId) => (
             <textarea
+              dir="ltr"
               id={id}
               aria-describedby={descriptionId}
               className="compose-source"
