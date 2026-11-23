@@ -4,7 +4,7 @@
 
 Escolha o idioma de cada documento. Traduções pendentes são indicadas; não representam documentação integral em inglês.
 
-Pares revisados: 16/16. Arquivos de instrução/template bilingues: 8.
+Pares revisados: 16/16. Arquivos de instrução/template bilingues: 9.
 
 | Documento | Português (Brasil) | English |
 |---|---|---|
