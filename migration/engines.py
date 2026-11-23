@@ -61,6 +61,8 @@ def rehearse_engines(directory, password, credentials, *, target_image=None, ori
         return container_id
 
     with restored_volumes(directory, password) as (metadata, volumes):
+        if 'database' in metadata['sources']:
+            raise MigrationError('Use the modern Compose recovery workflow for a MariaDB backup.')
         try:
             # Only lo exists; this forwarder satisfies the already registered callback18090.
             # No host socket, published port, egress interface, or source storage.
