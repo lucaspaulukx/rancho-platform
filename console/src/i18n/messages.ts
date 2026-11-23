@@ -16,6 +16,9 @@ import { enSchemaForm, ptSchemaForm } from './domains/schema-form';
 import { enWorkloadControls, ptWorkloadControls } from './domains/workload-controls';
 import { enHealthCheckEditor, ptHealthCheckEditor } from './domains/health-check-editor';
 import { enResourceLimits, ptResourceLimits } from './domains/resource-limits';
+import { enResourceValidation, ptResourceValidation } from './domains/resource-validation';
+import { enSchedulingEditor, ptSchedulingEditor } from './domains/scheduling-editor';
+import { enBindingsEditor, ptBindingsEditor } from './domains/bindings-editor';
 
 // Initial shared domain only. These catalogs do not represent full interface coverage.
 export const englishMessages = {
@@ -36,6 +39,9 @@ export const englishMessages = {
   ...enWorkloadControls,
   ...enHealthCheckEditor,
   ...enResourceLimits,
+  ...enResourceValidation,
+  ...enSchedulingEditor,
+  ...enBindingsEditor,
   'common.cancel': 'Cancel',
   'common.close': 'Close',
   'common.save': 'Save',
@@ -87,6 +93,9 @@ export const portugueseMessages = {
   ...ptWorkloadControls,
   ...ptHealthCheckEditor,
   ...ptResourceLimits,
+  ...ptResourceValidation,
+  ...ptSchedulingEditor,
+  ...ptBindingsEditor,
   'common.cancel': 'Cancelar',
   'common.close': 'Fechar',
   'common.save': 'Salvar',

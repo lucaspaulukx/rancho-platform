@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { ResourceValidationError } from '../resource-validation';
 import { useI18n } from '../i18n/provider';
 import { memoryBytes, memoryUnits } from '../workload-resources';
 import { Field } from './ui';
@@ -14,7 +15,13 @@ export function MemoryEditor({
   const { t } = useI18n();
   const [unit, setUnit] = useState<keyof typeof memoryUnits>('Bytes');
   const [text, setText] = useState(String(value ?? ''));
-  const [error, setError] = useState('');
+  const [failure, setFailure] = useState<Error | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+  const error =
+    failure instanceof ResourceValidationError ? t(failure.key) : failure?.message || '';
+  useEffect(() => {
+    input.current?.setCustomValidity(error);
+  }, [error]);
   return (
     <fieldset className="nested-fields">
       <legend>{label}</legend>
@@ -25,6 +32,7 @@ export function MemoryEditor({
       >
         {(id, description) => (
           <input
+            ref={input}
             id={id}
             aria-describedby={description}
             inputMode="decimal"
@@ -33,12 +41,12 @@ export function MemoryEditor({
               setText(e.target.value);
               try {
                 const bytes = memoryBytes(e.target.value, unit);
-                setError('');
+                setFailure(null);
                 e.target.setCustomValidity('');
                 onChange(bytes);
               } catch (error) {
                 const message = (error as Error).message;
-                setError(message);
+                setFailure(error as Error);
                 e.target.setCustomValidity(message);
                 onChange(e.target.value);
               }

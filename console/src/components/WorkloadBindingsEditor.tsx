@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import { useI18n } from '../i18n/provider';
 import {
   decodeBinding,
   encodeBinding,
@@ -16,6 +17,7 @@ export function WorkloadBindingsEditor({
   value: unknown;
   onChange: (value: string[]) => void;
 }) {
+  const { t } = useI18n();
   const valid =
     value === undefined ||
     value === null ||
@@ -37,30 +39,33 @@ export function WorkloadBindingsEditor({
       ),
     );
   }
-  const title = kind === 'ports' ? 'Portas publicadas' : 'Volumes';
+  const title =
+    kind === 'ports' ? t('bindingsEditor.portsTitle') : t('bindingsEditor.volumesTitle');
   return (
     <fieldset className="nested-fields">
       <legend>{title}</legend>
       {!valid ? (
-        <Alert>
-          Formato recebido não suportado. Use o formulário nativo para preservar a configuração.
-        </Alert>
+        <Alert>{t('bindingsEditor.unsupported')}</Alert>
       ) : (
         <>
           <p className="muted">
-            {kind === 'ports'
-              ? 'Defina porta do container e, opcionalmente, porta e IP no host. A publicação será aplicada pelo Rancher.'
-              : 'Monte um volume nomeado, caminho do host ou volume anônimo em um destino absoluto do container.'}
+            {kind === 'ports' ? t('bindingsEditor.portsHint') : t('bindingsEditor.volumesHint')}
           </p>
           {rows.map((row, index) => (
             <section className="compose-editor" key={row.key}>
               <div className="compose-editor-heading">
                 <strong>
-                  {kind === 'ports' ? 'Porta' : 'Volume'} {index + 1}
+                  {kind === 'ports'
+                    ? t('bindingsEditor.portRow', { index: index + 1 })
+                    : t('bindingsEditor.volumeRow', { index: index + 1 })}
                 </strong>
                 <Button
                   type="button"
-                  aria-label={`Remover ${kind === 'ports' ? 'porta' : 'volume'} ${index + 1}`}
+                  aria-label={
+                    kind === 'ports'
+                      ? t('bindingsEditor.removePort', { index: index + 1 })
+                      : t('bindingsEditor.removeVolume', { index: index + 1 })
+                  }
                   onClick={() => change(rows.filter((v) => v.key !== row.key))}
                 >
                   <Trash2 size={16} />
@@ -68,15 +73,13 @@ export function WorkloadBindingsEditor({
               </div>
               {row.kind === 'native' ? (
                 <>
-                  <Alert tone="info">
-                    Entrada nativa preservada. Edições nas outras linhas não convertem este valor.
-                  </Alert>
+                  <Alert tone="info">{t('bindingsEditor.native')}</Alert>
                   <code className="binding-native">{row.original}</code>
                 </>
               ) : row.kind === 'ports' ? (
                 <>
                   <div className="form-grid">
-                    <Field label={`Porta do container ${index + 1}`}>
+                    <Field label={t('bindingsEditor.containerPort', { index: index + 1 })}>
                       {(id) => (
                         <input
                           id={id}
@@ -88,8 +91,8 @@ export function WorkloadBindingsEditor({
                       )}
                     </Field>
                     <Field
-                      label={`Porta no host ${index + 1}`}
-                      hint="Opcional; segue a atribuição nativa do Rancher."
+                      label={t('bindingsEditor.hostPort', { index: index + 1 })}
+                      hint={t('bindingsEditor.hostPortHint')}
                     >
                       {(id) => (
                         <input
@@ -100,7 +103,7 @@ export function WorkloadBindingsEditor({
                         />
                       )}
                     </Field>
-                    <Field label={`Protocolo da porta ${index + 1}`}>
+                    <Field label={t('bindingsEditor.protocol', { index: index + 1 })}>
                       {(id) => (
                         <select
                           id={id}
@@ -113,8 +116,8 @@ export function WorkloadBindingsEditor({
                       )}
                     </Field>
                     <Field
-                      label={`IP de publicação ${index + 1}`}
-                      hint="Opcional. Exige porta no host; aceita IPv4 ou IPv6 sem colchetes."
+                      label={t('bindingsEditor.ip', { index: index + 1 })}
+                      hint={t('bindingsEditor.ipHint')}
                     >
                       {(id) => (
                         <input
@@ -130,8 +133,8 @@ export function WorkloadBindingsEditor({
               ) : (
                 <>
                   <Field
-                    label={`Origem do volume ${index + 1}`}
-                    hint="Nome do volume, caminho absoluto no host ou vazio para volume anônimo."
+                    label={t('bindingsEditor.source', { index: index + 1 })}
+                    hint={t('bindingsEditor.sourceHint')}
                   >
                     {(id) => (
                       <input
@@ -144,8 +147,8 @@ export function WorkloadBindingsEditor({
                   </Field>
                   <div className="form-grid">
                     <Field
-                      label={`Destino do volume ${index + 1}`}
-                      hint="Caminho absoluto no container, como /data."
+                      label={t('bindingsEditor.target', { index: index + 1 })}
+                      hint={t('bindingsEditor.targetHint')}
                     >
                       {(id) => (
                         <input
@@ -157,15 +160,15 @@ export function WorkloadBindingsEditor({
                         />
                       )}
                     </Field>
-                    <Field label={`Acesso do volume ${index + 1}`}>
+                    <Field label={t('bindingsEditor.access', { index: index + 1 })}>
                       {(id) => (
                         <select
                           id={id}
                           value={row.mode}
                           onChange={(e) => update(row.key, { mode: e.target.value })}
                         >
-                          <option value="rw">Leitura e escrita</option>
-                          <option value="ro">Somente leitura</option>
+                          <option value="rw">{t('bindingsEditor.readWrite')}</option>
+                          <option value="ro">{t('bindingsEditor.readOnly')}</option>
                         </select>
                       )}
                     </Field>
@@ -196,7 +199,7 @@ export function WorkloadBindingsEditor({
             }}
           >
             <Plus size={16} />
-            Adicionar {kind === 'ports' ? 'porta' : 'volume'}
+            {kind === 'ports' ? t('bindingsEditor.addPort') : t('bindingsEditor.addVolume')}
           </Button>
         </>
       )}

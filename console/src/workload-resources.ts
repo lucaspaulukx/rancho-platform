@@ -1,16 +1,17 @@
+import { ResourceValidationError } from './resource-validation';
 import type { Schema } from './api';
 import { isCpuField, validateCpuResource } from './cpu-resources';
 export const memoryUnits = { Bytes: 1, MiB: 1048576, GiB: 1073741824 } as const;
 export function memoryBytes(text: string, unit: keyof typeof memoryUnits) {
   if (text.trim() === '') return undefined;
   if (!/^\d+(?:\.\d+)?$/.test(text))
-    throw new Error('Informe memória não negativa, sem notação exponencial.');
-  if (text.length > 100) throw new Error('Memória fora dos limites.');
+    throw new ResourceValidationError('resourceValidation.memoryFormat');
+  if (text.length > 100) throw new ResourceValidationError('resourceValidation.memoryRange');
   const parts = text.split('.'),
     denominator = 10n ** BigInt(parts[1]?.length || 0);
   const numerator = BigInt(parts.join('')) * BigInt(memoryUnits[unit]);
   if (numerator % denominator !== 0n || numerator / denominator > BigInt(Number.MAX_SAFE_INTEGER))
-    throw new Error('A memória precisa representar bytes inteiros dentro do limite seguro.');
+    throw new ResourceValidationError('resourceValidation.memoryBytes');
   return Number(numerator / denominator);
 }
 export function validateWorkloadResources(
@@ -19,7 +20,7 @@ export function validateWorkloadResources(
   schemas: Record<string, Schema>,
   depth = 0,
 ) {
-  if (depth > 12) throw new Error('A configuração tem níveis demais.');
+  if (depth > 12) throw new ResourceValidationError('resourceValidation.depth');
   for (const key of ['memory', 'memoryReservation']) {
     const value = values[key];
     if (
@@ -28,10 +29,10 @@ export function validateWorkloadResources(
       value !== '' &&
       (!Number.isSafeInteger(value) || Number(value) < 0)
     )
-      throw new Error('Memória e reserva precisam ser bytes inteiros não negativos.');
+      throw new ResourceValidationError('resourceValidation.memoryValues');
   }
   if (Number(values.memory) > 0 && Number(values.memoryReservation) > Number(values.memory))
-    throw new Error('A reserva de memória não pode exceder o limite.');
+    throw new ResourceValidationError('resourceValidation.memoryReservation');
   for (const [name, value] of Object.entries(values)) {
     if (isCpuField(name) && schema.resourceFields[name]) validateCpuResource(name, value);
     const field = schema.resourceFields[name],
