@@ -43,7 +43,7 @@ python -m migration.test_workload_volume_recovery_lab
 ```
 
 
-A separate isolated Linux VM rehearsal used Docker 29.9.2 and the modern Rancher agent. After the Cattle service was deactivated and Docker confirmed there were no writers, the rehearsal authenticated and decrypted the local volume archive. Cattle created a new container for the same service. It read the restored data with the original checksum, owner, mode and symlink. Switching back to the original volume contents and reactivating the service passed the same checks. This exercise used a host-network service and a local Docker volume. Host or Docker Engine rollback and shared volume drivers still require separate acceptance.
+A separate isolated Linux VM rehearsal used Docker 29.9.2 and the modern Rancher agent. After the Cattle service was deactivated and Docker confirmed there were no writers, the rehearsal authenticated and decrypted the local volume archive. Cattle created a new container for the same service. It read the restored data with the original checksum, owner, mode and symlink. Switching back to the original volume contents and reactivating the service passed the same checks. This exercise used a host-network service and a local Docker volume. See the separate [cold VM and database rollback rehearsal](migration.md#cold-rollback-of-the-vm-and-database). Shared volume drivers still require their own recovery test.
 
 ## Engine and identity rehearsal
 

@@ -43,7 +43,7 @@ python -m migration.test_workload_volume_recovery_lab
 ```
 
 
-Um ensaio separado em uma VM Linux isolada usou Docker 29.9.2 e o agente moderno do Rancher. Depois de desativar o serviço no Cattle e confirmar no Docker que nenhum container escrevia no volume, o ensaio autenticou e descriptografou o backup do volume local. O Cattle criou outro container para o mesmo serviço. Ele leu os dados restaurados com o checksum, proprietário, permissões e link simbólico originais. O retorno aos dados originais do volume, seguido de reativação do serviço, passou pelas mesmas verificações. O ensaio usou um serviço no modo de rede host e um volume local do Docker. A reversão da VM ou do Docker Engine e os drivers de volumes compartilhados ainda exigem ensaios próprios.
+Um ensaio separado em uma VM Linux isolada usou Docker 29.9.2 e o agente moderno do Rancher. Depois de desativar o serviço no Cattle e confirmar no Docker que nenhum container escrevia no volume, o ensaio autenticou e descriptografou o backup do volume local. O Cattle criou outro container para o mesmo serviço. Ele leu os dados restaurados com o checksum, proprietário, permissões e link simbólico originais. O retorno aos dados originais do volume, seguido de reativação do serviço, passou pelas mesmas verificações. O ensaio usou um serviço no modo de rede host e um volume local do Docker. Consulte o [ensaio de rollback a frio da VM e do banco](migration.md#rollback-a-frio-da-vm-e-do-banco). Drivers de volumes compartilhados ainda exigem teste de recuperação próprio.
 
 ## Ensaio de engine e identidade
 
