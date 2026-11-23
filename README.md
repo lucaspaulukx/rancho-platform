@@ -58,6 +58,8 @@ Official sources are pinned in `upstream.json`; changes live in `patches/`. Igno
 
 Review the plan and [migration/recovery boundaries](docs/en/migration.md) first. Existing credentials/realm are preserved; generated credentials remain in ignored `.env`. Do not connect a disposable lab to production data or agents.
 
+For a fresh disposable lab, run `python tests/integration.py` to initialize local authentication and create the sample RBAC fixtures. Sign in to the console as `labadmin` using `RANCHER_ADMIN_PASSWORD` from your local `.env`.
+
 - Modern console: http://localhost:18090/console/
 - Classic Rancher: http://localhost:18080/
 - Local Keycloak: http://localhost:18081/
