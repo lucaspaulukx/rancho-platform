@@ -175,7 +175,7 @@ function AuditScope() {
               },
             ]}
           />
-          <div className="row-actions audit-pagination" aria-label={t('auditPage.pagination')}>
+          <nav className="row-actions audit-pagination" aria-label={t('auditPage.pagination')}>
             <Button
               disabled={!history.length || query.isFetching}
               onClick={() => setHistory((v) => v.slice(0, -1))}
@@ -191,7 +191,7 @@ function AuditScope() {
             >
               {t('auditPage.more')}
             </Button>
-          </div>
+          </nav>
         </>
       )}
       <Modal

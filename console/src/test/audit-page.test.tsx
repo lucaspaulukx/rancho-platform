@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider, useI18n } from '../i18n/provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -84,7 +84,8 @@ describe('Tela de auditoria', () => {
     ).not.toContain('synthetic-private');
     await user.click(screen.getByRole('button', { name: 'Fechar diálogo' }));
     expect(api).toHaveBeenCalledTimes(1);
-    await user.click(screen.getByRole('button', { name: 'Mais eventos' }));
+    const pagination = screen.getByRole('navigation', { name: 'Paginação da auditoria' });
+    await user.click(within(pagination).getByRole('button', { name: 'Mais eventos' }));
     await screen.findByRole('button', { name: 'Detalhes do evento 1al2' });
     expect(screen.getByText('Página 2')).toBeInTheDocument();
     expect(api).toHaveBeenLastCalledWith(
