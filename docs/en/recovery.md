@@ -24,11 +24,13 @@ Names are examples to replace, not a request to stop similarly named unrelated s
 
 ## Modern Compose with MariaDB
 
+The current backend service is named `rancho`, producing `rancho-modern-rancho-1` with the default project name. The recovery CLI prefers `--rancho` and still accepts `--rancher`; backups from the earlier service name remain readable. Preserve the same Compose project name and named volumes when upgrading. Stop the old Compose project with `docker compose -f compose.modern.yaml down` before switching revisions, then start the new revision. Never add `--volumes` or `-v` to that command. Take and verify a backup first. The new backend also retains the old internal DNS alias for previously built Console images.
+
 For `compose.modern.yaml`, select the Rancho, console and MariaDB 10.11 containers from the same Compose project. Use the actual names from `docker compose ps`. Capture starts after the console and Rancho stop cleanly and takes the inventory and grant checksums before stopping MariaDB. It backs up the three named local volumes with authenticated encryption. It waits for MariaDB to become healthy when restarting the original containers. Verify the original console and hosts after the maintenance window.
 
 ```sh
-python -m migration.recovery plan --rancher rancho-modern-rancher-1 --console rancho-modern-console-1 --database rancho-modern-db-1
-python -m migration.recovery backup --rancher rancho-modern-rancher-1 --console rancho-modern-console-1 --database rancho-modern-db-1 --output migration-runs/modern-cold-001 --quiesce --include-images
+python -m migration.recovery plan --rancho rancho-modern-rancho-1 --console rancho-modern-console-1 --database rancho-modern-db-1
+python -m migration.recovery backup --rancho rancho-modern-rancho-1 --console rancho-modern-console-1 --database rancho-modern-db-1 --output migration-runs/modern-cold-001 --quiesce --include-images
 python -m migration.recovery rehearse-modern --output migration-runs/modern-cold-001 --admin-user admin --load-images
 ```
 

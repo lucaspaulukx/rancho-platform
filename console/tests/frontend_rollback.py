@@ -102,7 +102,8 @@ class ProxyFixture:
         config = (ROOT / 'console/public/console-config.json').resolve(strict=True)
         docker(
             'run', '-d', '--pull=never', '--name', self.name, '--label', LABEL + '=' + self.owner,
-            '--add-host', 'rancher:127.0.0.1', '-p', '127.0.0.1:18091:8080',
+            '--add-host', 'rancho:127.0.0.1', '--add-host', 'rancher:127.0.0.1',
+            '-p', '127.0.0.1:18091:8080',
             '-e', 'CONSOLE_ASSET_RETENTION=true',
             '--mount', 'type=volume,source=' + self.volume + ',target=/var/cache/console-runtime',
             '--mount', 'type=bind,source=' + str(config) +

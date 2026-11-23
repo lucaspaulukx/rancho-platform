@@ -37,6 +37,7 @@ services:
       RANCHER_OIDC_AUTO_LOGIN: ${RANCHER_OIDC_AUTO_LOGIN:-false}
     networks:
       default:
+        aliases: [rancho]
         ipv4_address: ${RANCHER_LAB_SERVER_IPV4:-172.21.0.4}
     mem_limit: 2g
 

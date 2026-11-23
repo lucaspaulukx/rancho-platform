@@ -1,5 +1,5 @@
 services:
-  rancher:
+  rancho:
     environment:
       CATTLE_CATALOG_EXECUTE: "true"
       CATTLE_CATALOG_URL: library=file:///opt/rancho-catalog

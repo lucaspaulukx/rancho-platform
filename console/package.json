@@ -1,5 +1,5 @@
 {
-  "name": "rancher-community-console",
+  "name": "rancho-console",
   "version": "0.1.0",
   "private": true,
   "type": "module",

@@ -46,16 +46,16 @@ def source_environment(source):
 def validate_modern_database(sources):
     rancher, database = (sources[role] for role in ('rancher', 'database'))
     project = rancher['Config'].get('Labels', {}).get('com.docker.compose.project')
-    for source, service in ((rancher, 'rancher'), (database, 'db'), (sources['console'], 'console')):
+    for source, services in ((rancher, ('rancho', 'rancher')), (database, ('db',)), (sources['console'], ('console',))):
         labels = source['Config'].get('Labels', {})
-        if not project or labels.get('com.docker.compose.project') != project or labels.get('com.docker.compose.service') != service:
+        if not project or labels.get('com.docker.compose.project') != project or labels.get('com.docker.compose.service') not in services:
             raise MigrationError('Select Rancho, its console and MariaDB from the same modern Compose project.')
     rancher_env, database_env = map(source_environment, (rancher, database))
     credentials_match = all(database_env.get('MARIADB_' + key)
                             and rancher_env.get('CATTLE_DB_CATTLE_' + rancher_key) == database_env['MARIADB_' + key]
                             for key, rancher_key in (('USER', 'USERNAME'), ('PASSWORD', 'PASSWORD')))
     if not credentials_match or database_env.get('MARIADB_DATABASE') != 'cattle' or rancher_env.get('CATTLE_DB_CATTLE_MYSQL_HOST') != 'db':
-        raise MigrationError('Modern Compose Rancher and MariaDB connection settings do not match.')
+            raise MigrationError('Modern Compose Rancho and MariaDB connection settings do not match.')
     networks = database['NetworkSettings']['Networks']
     if len(networks) != 1 or database['HostConfig'].get('PortBindings'):
         raise MigrationError('The database must have one private network and no published ports.')
@@ -142,7 +142,7 @@ def select_sources(names):
 @contextmanager
 def helper(image, arguments, *, mounts=(), data=None, output=None, writer=None, timeout=900):
     """Helpers have no network or Docker logs; always remove by exact owned ID/name."""
-    name = 'rancher-recovery-helper-' + secrets.token_hex(8)
+    name = 'rancho-recovery-helper-' + secrets.token_hex(8)
     label = secrets.token_hex(16)
     args = ['docker', 'run', '--rm', '--name', name, '--label', OWNER + '=' + label,
             '--log-driver', 'none', '--network', 'none', '--memory', '512m', '-i']
@@ -383,7 +383,7 @@ def restored_volumes(directory, password, *, load_images=False):
     owned = []
     try:
         for index, volume in enumerate(metadata['volumes']):
-            name = 'rancher-recovery-copy-' + secrets.token_hex(12)
+            name = 'rancho-recovery-copy-' + secrets.token_hex(12)
             run(['volume', 'create', '--label', OWNER + '=' + label, name])
             owned.append(name)
             restore_local_volume(image, name, directory / volume['archive'], password,
@@ -411,10 +411,11 @@ def rehearse_files(directory, password, *, load_images=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', choices=['plan', 'backup', 'rehearse-files', 'rehearse-modern'])
-    parser.add_argument('--rancher', default='rancher16-rbac-lab')
+    parser.add_argument('--rancho', '--rancher', dest='rancher', default='rancher16-rbac-lab',
+                        help='Backend container; --rancher remains accepted for existing backup commands.')
     parser.add_argument('--keycloak', help='Optional dedicated Keycloak dev-file container for the legacy lab.')
     parser.add_argument('--console', default='rancher16-community-console')
-    parser.add_argument('--database', help='MariaDB db container from the same modern Compose project as --rancher.')
+    parser.add_argument('--database', help='MariaDB db container from the same modern Compose project as --rancho.')
     parser.add_argument('--admin-user', default='admin', help='Local administrator username for rehearse-modern.')
     parser.add_argument('--output', type=Path)
     parser.add_argument('--quiesce', action='store_true')

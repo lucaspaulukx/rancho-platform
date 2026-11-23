@@ -41,7 +41,14 @@ class RecoveryTests(unittest.TestCase):
             'database': compose('db', ('MARIADB_DATABASE=cattle', 'MARIADB_USER=cattle', 'MARIADB_PASSWORD=fixture')),
         }
         with patch.object(recovery, 'inspect', return_value={'Internal': True, 'Containers': {'rancher': {}, 'db': {}}}):
-            recovery.validate_modern_database(sources)
+            for service in ('rancher', 'rancho'):
+                with self.subTest(service=service):
+                    sources['rancher']['Config']['Labels']['com.docker.compose.service'] = service
+                    recovery.validate_modern_database(sources)
+            sources['rancher']['Config']['Labels']['com.docker.compose.service'] = 'unrelated'
+            with self.assertRaisesRegex(MigrationError, 'same modern Compose project'):
+                recovery.validate_modern_database(sources)
+            sources['rancher']['Config']['Labels']['com.docker.compose.service'] = 'rancho'
         with patch.object(recovery, 'inspect', return_value={'Internal': True, 'Containers': {'unrelated': {}}}):
             with self.assertRaisesRegex(MigrationError, 'network dedicated'):
                 recovery.validate_modern_database(sources)
