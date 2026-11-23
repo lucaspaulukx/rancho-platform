@@ -25,6 +25,20 @@ O lock upstream fixa commits oficiais. Faça build desses fontes e patches expor
 
 CI de fontes/console usa permissão readonly, actions pinadas e nenhum secret de laboratório. Confere fonte e histórico, contratos dos scanners, contratos de migração offline, instalação por lock, formatação, testes frontend e TypeScript/Vite. O aceite de backend físico, HA e migração de ponta a ponta é separado. A documentação de release exige todos os pares ativos pt-BR/inglês revisados, atuais e ligados.
 
+## Verificar um pacote de código-fonte
+
+O workflow `Source release provenance`, iniciado manualmente na `main`, empacota o commit selecionado e assina o digest do ZIP. Baixe o artefato do workflow e atribua a `commit` o hash completo do commit da release. Verifique o checksum e a atestação do GitHub.
+
+```sh
+sha256sum -c SHA256SUMS.txt
+gh attestation verify "rancho-platform-${commit}-source.zip" \
+  --repo lucaspaulukx/rancho-platform \
+  --signer-workflow lucaspaulukx/rancho-platform/.github/workflows/source-provenance.yml \
+  --source-ref refs/heads/main --source-digest "$commit" --deny-self-hosted-runners
+```
+
+O workflow atesta o ZIP do código-fonte. As imagens de runtime exigem atestações próprias vinculadas aos digests de seus manifests OCI. O workflow armazena o ZIP e o checksum como artefatos de CI para preparar a release.
+
 ## Inventário de artefatos
 
 A ferramenta offline usa Syft pinado e IDs locais das imagens. `plan` lê identidades/tamanhos escalares e hashes de manifests, sem exportar imagens ou reiniciar serviços. Scan é explícito e exige saída nova.
