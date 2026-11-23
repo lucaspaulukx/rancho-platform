@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Activity, Download, Pause, Play, RefreshCw } from 'lucide-react';
-import { api, type Resource } from '../api';
+import { api, type Collection, type Resource } from '../api';
 import {
   appendMetricPoint,
   metricPoint,
@@ -8,12 +8,19 @@ import {
   metricResourceAllowed,
   metricsLink,
   parseMetricsFrame,
+  scopedServiceMetricLink,
+  serviceMetricMembership,
+  serviceMetricsEnabled,
+  serviceMetricTargets,
+  ServiceMetricHistory,
+  ServiceMetricsError,
   type MetricCounters,
   type MetricPoint,
+  type ServiceMetricTarget,
 } from '../metrics';
 import { metricsConnection, type MetricsAccess } from '../streams';
 import { useApp } from '../state';
-import { Alert, Badge, Button, Empty, Modal } from './ui';
+import { Alert, Badge, Button, Empty, Field, Modal } from './ui';
 
 const display = (value?: number) =>
   value === undefined
@@ -26,18 +33,28 @@ interface MetricsProps {
 export function ResourceMetrics(props: MetricsProps) {
   const app = useApp();
   return (
-    <MetricsSession key={`${app.identity}:${app.project?.id}:${props.resource.id}`} {...props} />
+    <MetricsSession
+      key={`${app.identity}:${app.project?.id}:${props.resource.type}:${props.resource.id}`}
+      {...props}
+    />
   );
 }
 function MetricsSession({ resource, onClose }: MetricsProps) {
   const app = useApp();
-  const [points, setPoints] = useState<MetricPoint[]>([]);
+  const [individualPoints, setPoints] = useState<MetricPoint[]>([]);
+  const [targets, setTargets] = useState<ServiceMetricTarget[]>([]);
+  const [targetId, setTargetId] = useState('');
+  const [series, setSeries] = useState(() => new Map<string, MetricPoint[]>());
   const [paused, setPaused] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<'connecting' | 'live' | 'closed' | 'stale'>('connecting');
   const [error, setError] = useState('');
   const received = useRef(0);
-  const enabled = app.config.modules.observability && app.config.modules.metrics;
+  const service = resource.type === 'service';
+  const enabled =
+    app.config.modules.observability &&
+    app.config.modules.metrics &&
+    (!service || serviceMetricsEnabled(app.config.modules));
   const usePayload =
     app.config.modules.metricsPayloadTransport === true &&
     app.server?.effective?.METRICS_PAYLOAD_TRANSPORT_ENABLED === true;
@@ -49,38 +66,76 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
       return;
     }
     const controller = new AbortController();
+    const environment = app.project.id;
     let disposed = false,
+      ended = false,
+      checking = false,
       socket: WebSocket | undefined,
       previous: MetricCounters | undefined;
     let heartbeat: ReturnType<typeof setInterval> | undefined;
     let pendingPayload: string | undefined;
+    let history: ServiceMetricHistory | undefined;
     setStatus('connecting');
     setError('');
     received.current = 0;
-    const denied = () => {
-      if (!disposed) {
-        setError(
-          'As métricas foram encerradas porque o recurso ou a permissão não está mais disponível.',
-        );
+    if (service) {
+      setTargets([]);
+      setSeries(new Map());
+    }
+    const denied = (
+      message = 'As métricas foram encerradas porque o recurso ou a permissão não está mais disponível.',
+    ) => {
+      if (!disposed && !ended) {
+        setError(message);
         setStatus('closed');
         socket?.close();
       }
     };
+    const readTargets = async (current: Resource) => {
+      const page = await api<Collection<Resource>>(
+        scopedServiceMetricLink(current, environment, 'instances'),
+        undefined,
+        undefined,
+        AbortSignal.any([controller.signal, AbortSignal.timeout(10_000)]),
+      );
+      if (!Array.isArray(page.data) || page.pagination?.partial)
+        throw new ServiceMetricsError('A lista de containers do serviço está incompleta.');
+      if (page.pagination?.next)
+        throw new ServiceMetricsError('O painel suporta até 64 containers por serviço.');
+      return serviceMetricTargets(current, page.data, environment);
+    };
     async function connect() {
       try {
+        const resourcePath = service
+          ? scopedServiceMetricLink(resource, environment, 'self')
+          : resource.links.self;
         const current = await api<Resource>(
-          resource.links.self,
+          resourcePath,
           undefined,
           undefined,
           AbortSignal.any([controller.signal, AbortSignal.timeout(20_000)]),
         );
         if (
-          !metricResourceAllowed(current, resource, app.project?.id) ||
+          !metricResourceAllowed(current, resource, environment, service) ||
           !['active', 'running', 'reconnecting', 'updating-active'].includes(current.state || '')
         )
           throw new Error('Unavailable');
+        let membership: string | undefined;
+        if (service) {
+          const currentTargets = await readTargets(current);
+          if (disposed) return;
+          if (!currentTargets.length)
+            throw new ServiceMetricsError(
+              'Não há containers em execução para medir neste serviço.',
+            );
+          membership = serviceMetricMembership(currentTargets);
+          history = new ServiceMetricHistory(currentTargets);
+          setTargets(currentTargets);
+        }
         const access = await api<MetricsAccess>(
-          metricsLink(current)!,
+          service
+            ? scopedServiceMetricLink(current, environment, 'containerStats')
+            : metricsLink(current)!,
           undefined,
           undefined,
           AbortSignal.any([controller.signal, AbortSignal.timeout(20_000)]),
@@ -93,7 +148,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
         socket.onopen = () => {
           const payload = pendingPayload;
           pendingPayload = undefined;
-          if (disposed) {
+          if (disposed || ended) {
             socket?.close();
             return;
           }
@@ -107,8 +162,18 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
           }
         };
         socket.onmessage = (event) => {
-          if (disposed || typeof event.data !== 'string') return;
+          if (disposed || ended || typeof event.data !== 'string') return;
           try {
+            if (service) {
+              const changed = history?.read(event.data);
+              if (history && changed?.size) {
+                const updates = [...changed].map((id) => [id, history!.pointsFor(id)] as const);
+                received.current = Date.now();
+                setStatus('live');
+                setSeries((value) => new Map([...value, ...updates]));
+              }
+              return;
+            }
             for (const counters of parseMetricsFrame(event.data, current)) {
               const point = metricPoint(counters, previous);
               if (!point) continue;
@@ -127,6 +192,8 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
           if (!disposed) setError('A conexão de métricas falhou. Tente conectar novamente.');
         };
         socket.onclose = (event) => {
+          ended = true;
+          controller.abort();
           pendingPayload = undefined;
           if (heartbeat) clearInterval(heartbeat);
           if (!disposed) {
@@ -138,29 +205,48 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
           }
         };
         heartbeat = setInterval(() => {
+          if (checking || disposed || ended) return;
+          checking = true;
           if (!received.current || Date.now() - received.current > 30_000) setStatus('stale');
           void api<Resource>(
-            resource.links.self,
+            resourcePath,
             undefined,
             undefined,
             AbortSignal.any([controller.signal, AbortSignal.timeout(10_000)]),
           )
-            .then((value) => {
+            .then(async (value) => {
+              if (disposed || ended) return;
               if (
-                !metricResourceAllowed(value, current, app.project?.id) ||
+                !metricResourceAllowed(value, current, environment, service) ||
                 !['active', 'running', 'reconnecting', 'updating-active'].includes(
                   value.state || '',
                 )
-              )
+              ) {
                 denied();
+                return;
+              }
+              if (service) {
+                const updated = await readTargets(value);
+                if (disposed || ended) return;
+                if (serviceMetricMembership(updated) !== membership) {
+                  denied('Os containers do serviço mudaram. Reconecte para atualizar as métricas.');
+                  return;
+                }
+                setTargets(updated);
+              }
             })
-            .catch(denied);
+            .catch(() => denied())
+            .finally(() => {
+              checking = false;
+            });
         }, 15_000);
-      } catch {
+      } catch (error) {
         pendingPayload = undefined;
         if (!disposed) {
           setError(
-            'Não foi possível obter métricas deste recurso. Confira seu estado, a conectividade do agente e suas permissões.',
+            error instanceof ServiceMetricsError
+              ? error.message
+              : 'Não foi possível obter métricas deste recurso. Confira seu estado, a conectividade do agente e suas permissões.',
           );
           setStatus('closed');
         }
@@ -174,7 +260,9 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
       if (heartbeat) clearInterval(heartbeat);
       socket?.close();
     };
-  }, [resource.id, app.identity, app.project?.id, enabled, usePayload, paused, attempt]);
+  }, [resource.id, app.identity, app.project?.id, enabled, usePayload, paused, attempt, service]);
+  const target = targets.find((item) => item.id === targetId) || targets[0];
+  const points = service ? (target && series.get(target.id)) || [] : individualPoints;
   const latest = points.at(-1);
   function download() {
     const fields = [
@@ -188,13 +276,14 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
       'writeKiBs',
     ] as const;
     const rows = [
-      fields.join(','),
+      [...(target ? ['containerId'] : []), ...fields].join(','),
       ...points.map((point) =>
-        fields
-          .map((field) =>
+        [
+          ...(target ? [target.id] : []),
+          ...fields.map((field) =>
             field === 'ts' ? new Date(point.ts).toISOString() : (point[field] ?? ''),
-          )
-          .join(','),
+          ),
+        ].join(','),
       ),
     ];
     const url = URL.createObjectURL(
@@ -202,7 +291,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
     );
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${resource.id}-metricas.csv`;
+    link.download = `${resource.id}${target ? `-${target.id}` : ''}-metricas.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -268,6 +357,27 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
             </div>
           </div>
           {error && <Alert>{error}</Alert>}
+          {service && !!targets.length && (
+            <Field
+              label="Container do serviço"
+              hint={`${series.size} de ${targets.length} com amostras nesta conexão. O CSV exporta o container selecionado.`}
+            >
+              {(id, descriptionId) => (
+                <select
+                  id={id}
+                  aria-describedby={descriptionId}
+                  value={target?.id || ''}
+                  onChange={(event) => setTargetId(event.target.value)}
+                >
+                  {targets.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </Field>
+          )}
           {status === 'stale' && !paused && (
             <Alert tone="warning">
               O agente não enviou novas amostras recentemente. Os últimos valores continuam visíveis

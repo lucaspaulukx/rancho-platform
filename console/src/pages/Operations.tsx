@@ -22,6 +22,7 @@ import { useSchemas, canManageResource } from '../hooks/useSchemas';
 import { useWorkloadInventory } from './Workloads';
 import { workloadTree, type ServiceNode } from '../workload-tree';
 import { imageName, stackContents } from '../workloads';
+import { serviceMetricsEnabled } from '../metrics';
 import {
   Badge,
   Button,
@@ -217,6 +218,7 @@ export function OperationsPage({
                 environment: app.project!.id,
                 observability: app.config.modules.observability,
                 metrics: app.config.modules.metrics,
+                serviceMetrics: serviceMetricsEnabled(app.config.modules),
                 containers,
                 containerWritable: canManageResource(schemas.data?.container),
                 createService: !!schemas.data?.service?.collectionMethods?.includes('POST'),

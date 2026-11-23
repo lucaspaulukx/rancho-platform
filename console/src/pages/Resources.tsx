@@ -44,7 +44,7 @@ const EnvironmentTemplates = lazy(() =>
     default: module.EnvironmentTemplates,
   })),
 );
-import { metricsLink } from '../metrics';
+import { metricsLink, serviceMetricsEnabled } from '../metrics';
 const ResourceMetrics = lazy(() =>
   import('../components/ResourceMetrics').then((module) => ({ default: module.ResourceMetrics })),
 );
@@ -341,7 +341,7 @@ function ResourceContext({ item }: { item: NavItem }) {
             <div className="resource-actions">
               {app.config.modules.observability &&
                 app.config.modules.metrics &&
-                metricsLink(resource) && (
+                metricsLink(resource, serviceMetricsEnabled(app.config.modules)) && (
                   <Button onClick={() => setStream('metrics')}>Métricas</Button>
                 )}
               {Object.keys(resource.actions || {})

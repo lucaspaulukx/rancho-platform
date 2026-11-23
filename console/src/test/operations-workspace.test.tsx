@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useEffect } from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,6 +16,7 @@ const fixture = vi.hoisted(() => ({
       contextActions: true,
       observability: true,
       metrics: true,
+      serviceMetrics: false,
       bulkActions: true,
     },
   },
@@ -57,7 +58,7 @@ vi.mock('../pages/Workloads', () => ({
           accountId: 'p1',
           stackId: 'st1',
           name: 'web',
-          links: {},
+          links: { instances: '/instances', containerStats: '/containerstats' },
           state: 'active',
           actions: { restart: 'restart' },
         },
@@ -116,11 +117,11 @@ vi.mock('../components/ResourcePanel', () => ({
     selection,
     onClose,
   }: {
-    selection: { resource: Resource; action?: string };
+    selection: { resource: Resource; action?: string; mode?: string };
     onClose: () => void;
   }) => (
     <div role="dialog" aria-label="Operação do recurso">
-      {selection.action}
+      {selection.action || selection.mode}
       <button onClick={onClose}>Fechar painel</button>
     </div>
   ),
@@ -132,7 +133,23 @@ function mount() {
   render(<RouterProvider router={router} />);
   return router;
 }
+afterEach(() => {
+  fixture.config.modules.serviceMetrics = false;
+  fixture.readonly = false;
+});
 describe('Workspace unificado', () => {
+  it('oferece métricas no menu do serviço com flag ativa, inclusive para leitura, sem trocar a rota', async () => {
+    fixture.config.modules.serviceMetrics = true;
+    fixture.readonly = true;
+    const router = mount();
+    await userEvent.click(screen.getByRole('button', { name: 'Ações de web' }));
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Métricas' }));
+    expect(screen.getByRole('dialog', { name: 'Operação do recurso' })).toHaveTextContent(
+      'metrics',
+    );
+    expect(router.state.location.search).toBe('?env=p1');
+    router.dispose();
+  });
   it('abre logs pelo menu do serviço e troca container sem mudar URL ou perder a lista', async () => {
     const router = mount();
     await userEvent.click(screen.getByRole('button', { name: 'Ações de web' }));

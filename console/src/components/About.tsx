@@ -60,6 +60,7 @@ const moduleLabels: Record<ModuleName, string> = {
   observability: 'Logs e terminal',
   metrics: 'Métricas',
   metricsPayloadTransport: 'Transporte negociado de métricas grandes',
+  serviceMetrics: 'Métricas de containers no contexto do serviço',
   admin: 'Administração geral',
   api: 'Integrações adicionais',
   apiKeys: 'Chaves de API',

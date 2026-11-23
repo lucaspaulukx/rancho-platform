@@ -53,6 +53,7 @@ export function operationCommands(
     environment: string;
     observability: boolean;
     metrics: boolean;
+    serviceMetrics?: boolean;
     containers: Resource[];
     containerWritable: boolean;
     createService: boolean;
@@ -86,7 +87,7 @@ export function operationCommands(
           reason: execute ? undefined : 'Nenhum container com terminal disponível neste recurso.',
         });
     }
-    if (options.metrics && metricsLink(resource))
+    if (options.metrics && metricsLink(resource, options.serviceMetrics))
       commands.push({ id: 'metrics', label: 'Métricas', kind: 'metrics' });
   }
   if (writable && schema?.resourceMethods?.includes('PUT'))
