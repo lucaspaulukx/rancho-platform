@@ -3030,6 +3030,9 @@ input[type='checkbox']:focus-visible {
   flex-basis: 100%;
   font-size: 11px;
 }
+.language-status:empty {
+  position: absolute;
+}
 .auth-panel-top:has(.language-selector) {
   flex-wrap: wrap;
   gap: 12px;

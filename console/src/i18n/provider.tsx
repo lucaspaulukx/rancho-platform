@@ -51,6 +51,7 @@ const defaultState = {
   ...builtIn[defaultLocale],
   policy: defaultPolicy,
   preview: false,
+  catalogFailed: false,
   direction: localeDirection(defaultLocale),
   formats: localeFormats(defaultLocale),
   setLocale: (_locale: Locale) => {},
@@ -108,7 +109,9 @@ export function I18nProvider({
   }, [key, identity, policy]);
   const [applied, setApplied] = useState(() => builtIn[defaultLocale]);
   const [attempt, retryCatalog] = useState(0);
+  const [failedCatalog, setFailedCatalog] = useState<Locale | null>(null);
   useEffect(() => {
+    setFailedCatalog(null);
     if (!isPreviewLocale(requestedLocale)) {
       setApplied(builtIn[requestedLocale]);
       return;
@@ -121,7 +124,7 @@ export function I18nProvider({
           if (current) setApplied(translator);
         },
         () => {
-          // Keep the visible language if the bundle failed. Selecting it again retries.
+          if (current) setFailedCatalog(requestedLocale);
         },
       );
     return () => {
@@ -151,6 +154,7 @@ export function I18nProvider({
       ...translator,
       policy,
       preview: policy.enabled && policy.preview,
+      catalogFailed: failedCatalog === requestedLocale && locale !== requestedLocale,
       direction,
       formats: localeFormats(locale),
       setLocale(next: Locale) {
@@ -165,7 +169,7 @@ export function I18nProvider({
         }
       },
     }),
-    [translator, locale, policy, direction, key, requestedLocale],
+    [translator, locale, policy, direction, key, requestedLocale, failedCatalog],
   );
   return <I18nContext value={value}>{children}</I18nContext>;
 }
