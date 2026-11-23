@@ -17,6 +17,8 @@ Operate Rancher 1.6 Docker/Cattle stacks, services and containers in one workspa
 
 ![Rancho Console showing stacks and services in one workspace](docs/images/migration-after.png)
 
+Migration evidence captured before the Rancho branding refresh; the current logo is shown above.
+
 [See the migration before and after](docs/en/migration-evidence.md)
 
 ## Image security progress
@@ -50,7 +52,7 @@ Start with [architecture](docs/en/architecture.md), [contributing](CONTRIBUTING.
 ```sh
 git clone https://github.com/lucaspaulukx/rancho-platform.git
 cd rancho-platform
-git switch --detach v0.1.0-beta.1
+git switch --detach v0.1.0
 ```
 
 <details>

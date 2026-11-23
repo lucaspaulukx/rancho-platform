@@ -13,11 +13,33 @@ REGISTRY = 'ghcr.io/lucaspaulukx/rancho-platform'
 VERSION = re.compile(r'0\.[0-9]+\.[0-9]+(?:-(?:alpha|beta|rc)\.[0-9]+)?')
 SHA = re.compile(r'[0-9a-f]{40}')
 DIGEST = re.compile(r'sha256:[0-9a-f]{64}')
+PROMOTION_ONLY = {
+    'README.md', '.github/workflows/registry-publish.yml',
+    'scripts/publish_registry_image.py', 'tests/test_publish_registry_image.py',
+}
 
 
 def checked(args, timeout=300):
     result = subprocess.run(args, check=True, capture_output=True, timeout=timeout)
     return result.stdout
+
+
+def verify_candidate(commit, checkout=None):
+    if not SHA.fullmatch(commit):
+        raise ValueError('A full candidate commit is required')
+    root = Path(checkout) if checkout is not None else Path(__file__).resolve().parents[1]
+
+    def git(*args):
+        return subprocess.run(['git', *args], cwd=root, check=True,
+                              capture_output=True, timeout=30).stdout
+
+    head = git('rev-parse', 'HEAD').decode().strip()
+    git('merge-base', '--is-ancestor', commit, head)
+    changed = git('diff', '--name-only', '-z', commit, head).decode().split('\0')
+    if any(name and not (name.startswith('docs/') or name in PROMOTION_ONLY)
+           for name in changed):
+        raise ValueError('Runtime inputs changed after candidate acceptance; rebuild and retest')
+    return head
 
 
 def verified_archive(directory, commit, component, version, *, verifier=verify_attestation):
@@ -47,6 +69,7 @@ def metadata(reference):
 
 
 def promote(directory, commit, component, version, output):
+    publisher_commit = verify_candidate(commit)
     archive, expected, archive_sha = verified_archive(directory, commit, component, version)
     output = Path(output)
     if output.exists() or output.is_symlink():
@@ -80,6 +103,7 @@ def promote(directory, commit, component, version, output):
         'registryImageId': published['Id'], 'tag': tag, 'digest': digest,
         'reference': reference, 'reusedExistingTag': reused,
         'registryReadbackPassed': True,
+        'publisherCommit': publisher_commit, 'runtimeInputsUnchanged': True,
     }
     with output.open('x', encoding='utf-8', newline='\n') as stream:
         json.dump(report, stream, indent=2)
