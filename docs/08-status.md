@@ -1,3 +1,9 @@
+## Checkpoint90 — criação primária/sidecar e documentação comunitária (05/11/2026)
+
+Formulário real criou serviço/sidecar com nofile1024/2048 e128/256. Dois containers no host1h1; payload/API/Docker/processo confirmados, zero JS, relay removido antes do inspect e cleanup completo com recursos anteriores preservados. Fecha a lacuna de criação física de87 nesse recorte; não amplia para outros rlimits/CNI/multi-host. Sem mudança de frontend: último gate Linux654/75+TypeScript/Vite continua a referência.
+
+Mantenedor solicitou documentação integral em pt-BR/inglês, seleção por idioma no README e por documento, guia de boas práticas/PR e orientações/skills para assistentes de IA. Acrescentar gate de cobertura/links e revisão das traduções ao roadmap; preservar histórico/comandos/evidências e não tratar resumo como tradução completa. Repositório continua privado; nenhuma mudança de visibilidade ou release está autorizada nesta etapa.
+
 ## Checkpoint88/89 — upgrade de limites e CI (05/11/2026)
 
 Upgrade contextual de ulimits entregue sob flag independente workloadUlimitUpgrades, ausente=false. Gate Linux654 testes/75 arquivos + TypeScript/Vite. Browser10 checks: revisão, upgrade/rollback/finish/reset, sem navegação/JS; negação após retirada de grant e cleanup aprovados. Prova física separada em serviço próprio confirmou1024/2048 e restauração da herança no rollback/reset, com cinco janelas diagnósticas120s removidas antes dos inspects. Configurações/containers/volumes anteriores e sessão própria preservados/limpos conforme escopo. Ver88; OPS11/CNI/multi-host/rlimits restantes continuam abertos.
