@@ -44,6 +44,7 @@ import { enResourceMetrics, ptResourceMetrics } from './domains/resource-metrics
 import { enSelectorRows, ptSelectorRows } from './domains/selector-rows';
 import { enRegistryCredentials, ptRegistryCredentials } from './domains/registry-credentials';
 import { enBalancerRulesPanel, ptBalancerRulesPanel } from './domains/balancer-rules-panel';
+import { enEnvironmentTemplates, ptEnvironmentTemplates } from './domains/environment-templates';
 import {
   enStackComposeUpgradePanel,
   ptStackComposeUpgradePanel,
@@ -98,6 +99,7 @@ export const englishMessages = {
   ...enSelectorRows,
   ...enRegistryCredentials,
   ...enBalancerRulesPanel,
+  ...enEnvironmentTemplates,
   ...enStackComposeUpgradePanel,
   ...enResourcePanel,
   ...enResourceStream,
@@ -180,6 +182,7 @@ export const portugueseMessages = {
   ...ptSelectorRows,
   ...ptRegistryCredentials,
   ...ptBalancerRulesPanel,
+  ...ptEnvironmentTemplates,
   ...ptStackComposeUpgradePanel,
   ...ptResourcePanel,
   ...ptResourceStream,

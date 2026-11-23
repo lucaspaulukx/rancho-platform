@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/provider';
 import { useEffect, useRef, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -45,13 +46,28 @@ function revision(value: Resource) {
     value.externalId,
   ]);
 }
+class EnvironmentTemplateError extends Error {
+  constructor(
+    readonly key:
+      | 'environmentTemplates.error.failed'
+      | 'environmentTemplates.error.scope'
+      | 'environmentTemplates.error.permission'
+      | 'environmentTemplates.error.edit'
+      | 'environmentTemplates.error.changed'
+      | 'environmentTemplates.error.fields'
+      | 'environmentTemplates.error.remove'
+      | 'environmentTemplates.error.version'
+      | 'environmentTemplates.error.review',
+  ) {
+    super(key);
+  }
+}
 function failure() {
-  return new Error(
-    'Nao foi possivel concluir a operacao. Confira suas permissoes e recarregue os templates.',
-  );
+  return new EnvironmentTemplateError('environmentTemplates.error.failed');
 }
 
 export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onClose: () => void }) {
+  const { t, formats } = useI18n();
   const app = useApp();
   const client = useQueryClient();
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -76,7 +92,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
   }, []);
   function requireScope() {
     if (!mounted.current || currentScope.current !== scope)
-      throw new Error('O contexto mudou. Reabra os templates antes de continuar.');
+      throw new EnvironmentTemplateError('environmentTemplates.error.scope');
   }
   const key = ['data', app.identity, 'environment-templates-management'];
   const query = useQuery<Resource[]>({
@@ -134,23 +150,21 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
           ? current.resourceMethods?.includes('PUT')
           : current.collectionMethods?.includes('POST'))
       )
-        throw new Error('A permissao de salvar este template nao esta mais disponivel.');
+        throw new EnvironmentTemplateError('environmentTemplates.error.permission');
       let target = current.links.collection;
       if (draft.original) {
         const latest = await api<Resource>(`${target}/${encodeURIComponent(draft.original.id)}`);
         requireScope();
         if (latest.removed || latest.state !== 'active' || latest.id !== draft.original.id)
-          throw new Error('Este template nao esta mais disponivel para edicao.');
+          throw new EnvironmentTemplateError('environmentTemplates.error.edit');
         if (revision(latest) !== revision(draft.original))
-          throw new Error(
-            'O template foi alterado por outra operacao. Feche e abra novamente antes de salvar.',
-          );
+          throw new EnvironmentTemplateError('environmentTemplates.error.changed');
         target = latest.links.self;
       }
       const mode = editing ? 'update' : 'create';
       for (const name of ['name', 'description', 'stacks'])
         if (!current.resourceFields[name]?.[mode])
-          throw new Error('Os campos deste template nao estao disponiveis para alteracao.');
+          throw new EnvironmentTemplateError('environmentTemplates.error.fields');
       const body = prepareEnvironmentTemplate(
         draft.name,
         draft.description,
@@ -187,7 +201,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
         !current.resourceActions?.remove ||
         !latest.actions?.remove
       )
-        throw new Error('A acao nativa de remover nao esta mais disponivel.');
+        throw new EnvironmentTemplateError('environmentTemplates.error.remove');
       try {
         await api(latest.actions.remove, {});
       } catch {
@@ -235,13 +249,13 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
       <Modal
         open
         drawer
-        title="Templates de environment"
+        title={t('environmentTemplates.title')}
         onOpenChange={(value) => {
           if (!value && !pending && !draft) onClose();
         }}
         footer={
           <Button disabled={pending || !!draft} onClick={onClose}>
-            Fechar
+            {t('environmentTemplates.close')}
           </Button>
         }
       >
@@ -249,27 +263,29 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
           {schema.collectionMethods?.includes('POST') && (
             <Button disabled={pending} onClick={() => void open()}>
               <Plus size={16} />
-              Criar template
+              {t('environmentTemplates.create')}
             </Button>
           )}
           <Button
-            aria-label="Atualizar templates"
+            aria-label={t('environmentTemplates.refresh')}
             disabled={pending}
             onClick={() => void query.refetch()}
           >
             <RefreshCw size={16} />
           </Button>
         </div>
-        {error && !draft && <Alert>{error.message}</Alert>}
-        {reading && <Loading label="Abrindo template…" />}
+        {error && !draft && (
+          <Alert>{error instanceof EnvironmentTemplateError ? t(error.key) : error.message}</Alert>
+        )}
+        {reading && <Loading label={t('environmentTemplates.opening')} />}
         {query.isPending ? (
           <Loading />
         ) : query.error ? (
           <ErrorState error={query.error} retry={() => void query.refetch()} />
         ) : !schema.collectionMethods?.includes('GET') ? (
           <Empty
-            title="Templates indisponiveis"
-            description="A API nao disponibilizou templates para esta conta."
+            title={t('environmentTemplates.unavailable')}
+            description={t('environmentTemplates.unavailableDescription')}
           />
         ) : (
           <DataTable
@@ -279,33 +295,39 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
             columns={[
               {
                 key: 'name',
-                label: 'Nome',
+                label: t('environmentTemplates.name'),
                 sortValue: (value) => value.name || value.id,
                 render: (value) => value.name || value.id,
               },
               {
                 key: 'state',
-                label: 'Estado',
+                label: t('environmentTemplates.state'),
                 render: (value) => <Badge state={value.state}>{value.state}</Badge>,
               },
               {
                 key: 'stacks',
-                label: 'Stacks',
-                render: (value) => (Array.isArray(value.stacks) ? value.stacks.length : 0),
+                label: t('environmentTemplates.stacks'),
+                render: (value) =>
+                  formats.number(Array.isArray(value.stacks) ? value.stacks.length : 0),
               },
               {
                 key: 'access',
-                label: 'Visibilidade',
-                render: (value) => (value.isPublic ? 'Publico' : 'Privado'),
+                label: t('environmentTemplates.visibility'),
+                render: (value) =>
+                  value.isPublic
+                    ? t('environmentTemplates.public')
+                    : t('environmentTemplates.private'),
               },
               {
                 key: 'actions',
-                label: 'Acoes',
+                label: t('environmentTemplates.actions'),
                 render: (value) => (
                   <div className="page-actions">
                     <Button
-                      aria-label={`Abrir template ${value.name || value.id}`}
-                      title="Abrir template"
+                      aria-label={t('environmentTemplates.openLabel', {
+                        name: value.name || value.id,
+                      })}
+                      title={t('environmentTemplates.open')}
                       disabled={pending}
                       onClick={() => void open(value)}
                     >
@@ -313,8 +335,10 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
                     </Button>
                     {schema.collectionMethods?.includes('POST') && (
                       <Button
-                        aria-label={`Copiar template ${value.name || value.id}`}
-                        title="Copiar template"
+                        aria-label={t('environmentTemplates.copyLabel', {
+                          name: value.name || value.id,
+                        })}
+                        title={t('environmentTemplates.copy')}
                         disabled={pending}
                         onClick={() => void open(value, true)}
                       >
@@ -324,8 +348,10 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
                     {schema.resourceActions?.remove && (
                       <Button
                         variant="danger"
-                        aria-label={`Remover template ${value.name || value.id}`}
-                        title="Remover template"
+                        aria-label={t('environmentTemplates.removeLabel', {
+                          name: value.name || value.id,
+                        })}
+                        title={t('environmentTemplates.remove')}
                         disabled={pending}
                         onClick={() => {
                           setError(null);
@@ -348,8 +374,10 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
           drawer
           title={
             draft.original
-              ? `Template · ${draft.original.name || draft.original.id}`
-              : 'Novo template de environment'
+              ? t('environmentTemplates.editorTitle', {
+                  name: draft.original.name || draft.original.id,
+                })
+              : t('environmentTemplates.new')
           }
           onOpenChange={(value) => {
             if (!value) closeDraft();
@@ -357,7 +385,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
           footer={
             <>
               <Button disabled={pending} onClick={closeDraft}>
-                Cancelar
+                {t('environmentTemplates.cancel')}
               </Button>
               {writable && (
                 <Button
@@ -366,13 +394,17 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
                   form="environment-template-form"
                   busy={save.isPending}
                 >
-                  Salvar template
+                  {t('environmentTemplates.save')}
                 </Button>
               )}
             </>
           }
         >
-          {error && <Alert>{error.message}</Alert>}
+          {error && (
+            <Alert>
+              {error instanceof EnvironmentTemplateError ? t(error.key) : error.message}
+            </Alert>
+          )}
           <form
             id="environment-template-form"
             onSubmit={(event) => {
@@ -388,7 +420,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
               disabled={pending || !writable}
               style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
             >
-              <Field label="Nome do template *">
+              <Field label={t('environmentTemplates.templateName')}>
                 {(id) => (
                   <input
                     id={id}
@@ -399,7 +431,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
                   />
                 )}
               </Field>
-              <Field label="Descricao do template">
+              <Field label={t('environmentTemplates.description')}>
                 {(id) => (
                   <textarea
                     id={id}
@@ -410,7 +442,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
                 )}
               </Field>
               {schema.resourceFields.isPublic?.[draft.original ? 'update' : 'create'] && (
-                <Field label="Visibilidade do template">
+                <Field label={t('environmentTemplates.templateVisibility')}>
                   {(id) => (
                     <label className="checkbox-field">
                       <input
@@ -419,12 +451,12 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
                         checked={draft.isPublic}
                         onChange={(event) => update({ isPublic: event.target.checked })}
                       />
-                      Publico para outras contas
+                      {t('environmentTemplates.publicAccounts')}
                     </label>
                   )}
                 </Field>
               )}
-              <h3>Stacks de infraestrutura</h3>
+              <h3>{t('environmentTemplates.infrastructureStacks')}</h3>
               {draft.stacks.map((stack, index) => (
                 <TemplateStack
                   key={stackKeys[index]}
@@ -455,7 +487,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
                 }}
               >
                 <Plus size={16} />
-                Adicionar stack Compose
+                {t('environmentTemplates.addCompose')}
               </Button>
               {app.config?.modules.catalog && (
                 <Button
@@ -464,7 +496,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
                   onClick={() => setCatalogOpen(true)}
                 >
                   <Plus size={16} />
-                  Adicionar stack do catalogo
+                  {t('environmentTemplates.addCatalog')}
                 </Button>
               )}
             </fieldset>
@@ -487,8 +519,8 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
         onOpenChange={(value) => {
           if (!pending) setPublishing(value);
         }}
-        title="Publicar template?"
-        description="Outras contas poderao ler as stacks, respostas e arquivos Compose deste template. Confirme que nao ha credenciais ou dados privados."
+        title={t('environmentTemplates.publish')}
+        description={t('environmentTemplates.publishDescription')}
         busy={save.isPending}
         onConfirm={() => {
           if (!pending) {
@@ -502,8 +534,10 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
         onOpenChange={(value) => {
           if (!value && !pending) setRemoving(null);
         }}
-        title="Remover template?"
-        description={`Remover ${removing?.name || removing?.id || ''} pela acao nativa do Rancher?`}
+        title={t('environmentTemplates.removeTitle')}
+        description={t('environmentTemplates.removeDescription', {
+          name: removing?.name || removing?.id || '',
+        })}
         busy={remove.isPending}
         onConfirm={() => {
           if (!pending) remove.mutate();
@@ -517,8 +551,8 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
             if (blocker.state === 'blocked') blocker.reset();
           }
         }}
-        title="Descartar alteracoes?"
-        description="As alteracoes ainda nao salvas neste template serao descartadas."
+        title={t('environmentTemplates.discard')}
+        description={t('environmentTemplates.discardDescription')}
         busy={pending}
         onConfirm={() => {
           if (pending) return;
@@ -540,6 +574,7 @@ function CatalogStackPicker({
   onClose: () => void;
   onAdd: (stack: Stack) => void;
 }) {
+  const { t } = useI18n();
   const app = useApp();
   const [templateId, setTemplateId] = useState('');
   const [selectedVersion, setSelectedVersion] = useState('');
@@ -589,7 +624,8 @@ function CatalogStackPicker({
         headers,
       );
       catalogQuestions(value);
-      if (value.templateId !== templateId) throw new Error('A versao pertence a outro template.');
+      if (value.templateId !== templateId)
+        throw new EnvironmentTemplateError('environmentTemplates.error.version');
       return value;
     },
     enabled: !!url,
@@ -613,38 +649,44 @@ function CatalogStackPicker({
         answers: prepared.environment,
       });
     } catch (value) {
-      setError(value instanceof Error ? value : new Error('Revise a configuracao da stack.'));
+      setError(
+        value instanceof Error
+          ? value
+          : new EnvironmentTemplateError('environmentTemplates.error.review'),
+      );
     }
   }
   return (
     <Modal
       open
       drawer
-      title="Stack de infraestrutura do catalogo"
+      title={t('environmentTemplates.catalogStack')}
       onOpenChange={(value) => {
         if (!value) onClose();
       }}
       footer={
         <>
-          <Button onClick={onClose}>Cancelar</Button>
+          <Button onClick={onClose}>{t('environmentTemplates.cancel')}</Button>
           <Button
             variant="primary"
             onClick={submit}
             disabled={!version.data || version.isFetching || unsupported}
           >
-            Adicionar stack
+            {t('environmentTemplates.addStack')}
           </Button>
         </>
       }
     >
-      {error && <Alert>{error.message}</Alert>}
+      {error && (
+        <Alert>{error instanceof EnvironmentTemplateError ? t(error.key) : error.message}</Alert>
+      )}
       {templates.isPending ? (
         <Loading />
       ) : templates.error ? (
         <ErrorState error={templates.error} retry={() => void templates.refetch()} />
       ) : (
         <>
-          <Field label="Template de infraestrutura">
+          <Field label={t('environmentTemplates.infraTemplate')}>
             {(id) => (
               <select
                 id={id}
@@ -662,7 +704,7 @@ function CatalogStackPicker({
                   );
                 }}
               >
-                <option value="">Selecionar…</option>
+                <option value="">{t('environmentTemplates.select')}</option>
                 {templates.data.map((value) => (
                   <option key={value.id} value={value.id}>
                     {value.name || value.id}
@@ -675,7 +717,7 @@ function CatalogStackPicker({
           {detail.error && <ErrorState error={detail.error} retry={() => void detail.refetch()} />}
           {detail.data && (
             <>
-              <Field label="Versao da infraestrutura">
+              <Field label={t('environmentTemplates.infraVersion')}>
                 {(id) => (
                   <select
                     id={id}
@@ -694,7 +736,7 @@ function CatalogStackPicker({
                   </select>
                 )}
               </Field>
-              <Field label="Nome da stack do catalogo *">
+              <Field label={t('environmentTemplates.catalogStackName')}>
                 {(id) => (
                   <input
                     id={id}
@@ -706,13 +748,17 @@ function CatalogStackPicker({
               </Field>
               {version.isFetching && <Loading />}
               {version.error && (
-                <ErrorState error={version.error} retry={() => void version.refetch()} />
+                <ErrorState
+                  error={
+                    version.error instanceof EnvironmentTemplateError
+                      ? new Error(t(version.error.key))
+                      : version.error
+                  }
+                  retry={() => void version.refetch()}
+                />
               )}
               {unsupported ? (
-                <Alert tone="warning">
-                  Esta versao exige referencias de servico, certificado ou secret do environment
-                  futuro. Preserve os bindings existentes ou escolha outra versao.
-                </Alert>
+                <Alert tone="warning">{t('environmentTemplates.unsupported')}</Alert>
               ) : (
                 questions.map((question) => (
                   <QuestionField
@@ -772,6 +818,7 @@ function TemplateStack({
   onChange: (value: Stack) => void;
   onRemove: () => void;
 }) {
+  const { t } = useI18n();
   function field(name: string, label: string, multiline = false) {
     return (
       <Field label={label}>
@@ -799,7 +846,7 @@ function TemplateStack({
   }
   return (
     <section
-      aria-label={`Stack ${index + 1}`}
+      aria-label={t('environmentTemplates.stackIndex', { index: index + 1 })}
       style={{
         borderTop: '1px solid var(--border)',
         paddingTop: 16,
@@ -808,24 +855,24 @@ function TemplateStack({
       }}
     >
       <div className="page-actions">
-        <h4>Stack {index + 1}</h4>
+        <h4>{t('environmentTemplates.stackIndex', { index: index + 1 })}</h4>
         <Button
           type="button"
           variant="danger"
-          title="Remover stack do template"
-          aria-label={`Remover stack ${index + 1}`}
+          title={t('environmentTemplates.removeStack')}
+          aria-label={t('environmentTemplates.removeStackLabel', { index: index + 1 })}
           onClick={onRemove}
         >
           <Trash2 size={16} />
         </Button>
       </div>
-      {field('name', `Nome da stack ${index + 1}`)}
+      {field('name', t('environmentTemplates.stackName', { index: index + 1 }))}
       {typeof stack.templateId === 'string' && stack.templateId && (
         <>
-          <Field label="Template do catalogo">
+          <Field label={t('environmentTemplates.catalogTemplate')}>
             {(id) => <input id={id} readOnly value={stack.templateId as string} />}
           </Field>
-          <Field label="Versao do catalogo">
+          <Field label={t('environmentTemplates.catalogVersion')}>
             {(id) => (
               <input
                 id={id}
@@ -833,7 +880,7 @@ function TemplateStack({
                 value={
                   typeof stack.templateVersionId === 'string' && stack.templateVersionId
                     ? stack.templateVersionId
-                    : 'Versao padrao do catalogo'
+                    : t('environmentTemplates.defaultVersion')
                 }
               />
             )}
@@ -841,11 +888,15 @@ function TemplateStack({
         </>
       )}
       {(!stack.templateId || stack.dockerCompose !== undefined) &&
-        field('dockerCompose', `Docker Compose da stack ${index + 1}`, true)}
+        field('dockerCompose', t('environmentTemplates.dockerCompose', { index: index + 1 }), true)}
       {(!stack.templateId || stack.rancherCompose !== undefined) &&
-        field('rancherCompose', `Rancher Compose da stack ${index + 1}`, true)}
+        field(
+          'rancherCompose',
+          t('environmentTemplates.rancherCompose', { index: index + 1 }),
+          true,
+        )}
       {!!stack.binding && typeof stack.binding === 'object' && (
-        <Field label="Bindings nativos">
+        <Field label={t('environmentTemplates.bindings')}>
           {(id) => (
             <input id={id} readOnly value={Object.keys(stack.binding as object).join(', ')} />
           )}
@@ -856,7 +907,7 @@ function TemplateStack({
             typeof value === 'boolean' ? (
               <CheckboxField
                 key={name}
-                label={`Parametro ${name} da stack ${index + 1}`}
+                label={t('environmentTemplates.parameter', { name, index: index + 1 })}
                 checked={value}
                 onChange={(event) =>
                   onChange({
@@ -866,7 +917,10 @@ function TemplateStack({
                 }
               />
             ) : (
-              <Field key={name} label={`Parametro ${name} da stack ${index + 1}`}>
+              <Field
+                key={name}
+                label={t('environmentTemplates.parameter', { name, index: index + 1 })}
+              >
                 {(id) =>
                   typeof value === 'number' ? (
                     <NumericTemplateAnswer
@@ -880,7 +934,7 @@ function TemplateStack({
                       }
                     />
                   ) : value !== null && typeof value === 'object' ? (
-                    <input id={id} readOnly value="Valor composto preservado" />
+                    <input id={id} readOnly value={t('environmentTemplates.compound')} />
                   ) : (
                     <input
                       id={id}

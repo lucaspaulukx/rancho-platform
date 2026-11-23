@@ -54,6 +54,8 @@ Listas de recursos e workloads, ações de recursos, edição de environments, r
 
 Rótulos e mensagens de revisão da atualização de serviços seguem o idioma ativo. Rótulos, números exibidos e horários dos gráficos de métricas usam esse idioma, preservando a série selecionada e o formato do CSV.
 
+O editor de templates de environment traduz controles e mensagens de revisão e preserva o conteúdo Compose, os identificadores de catálogo e as respostas na forma original. O formulário de schema exibe erros tipados de validação do payload no idioma ativo. Chamadores que leem diretamente a mensagem do erro continuam recebendo o texto original em português.
+
 Hosts, templates de catálogo e webhooks também usam o idioma compartilhado. Comandos de registro de hosts e valores de secrets permanecem nativos e mascarados até serem revelados explicitamente; trocar o idioma altera rótulos sem solicitar registro nem copiar um secret. Nomes de templates, conteúdo de parâmetros e identificadores de drivers de webhooks mantêm os valores nativos. Erros de helpers ainda não extraídos permanecem inalterados.
 
 Use schemas/action links atuais, sem inventar rotas ou supor igualdade entre schemas globais e do environment. Releia recurso, escopo e contrato relevante antes da mutação. Preserve configuração desconhecida e campos não selecionados; não transforme valores incompatíveis em defaults vazios silenciosamente.

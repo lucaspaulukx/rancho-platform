@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { I18nProvider, useI18n } from '../i18n/provider';
 import { CapabilityEditor } from '../components/CapabilityEditor';
 import { MemoryEditor } from '../components/MemoryEditor';
+import { SchemaForm } from '../components/SchemaForm';
 
 function Editor() {
   const { setLocale } = useI18n();
@@ -23,6 +24,52 @@ function Editor() {
     </>
   );
 }
+
+it('retranslates an existing schema validation error without sending the draft', () => {
+  const submit = vi.fn();
+  function Form() {
+    const { setLocale } = useI18n();
+    return (
+      <>
+        <button onClick={() => setLocale('en-US')}>English</button>
+        <SchemaForm
+          id="localized-validation"
+          schema={{
+            id: 'fixture',
+            pluralName: 'fixtures',
+            links: {},
+            resourceFields: { name: { type: 'string', create: true, minLength: 5 } },
+          }}
+          schemas={{}}
+          onSubmit={submit}
+        />
+      </>
+    );
+  }
+  const { container } = render(
+    <I18nProvider
+      policy={{
+        enabled: true,
+        defaultLocale: 'pt-BR',
+        availableLocales: ['pt-BR', 'en-US'],
+        selectable: true,
+        detectBrowser: false,
+        preview: true,
+      }}
+    >
+      <Form />
+    </I18nProvider>,
+  );
+  const name = screen.getByRole('textbox', { name: 'Nome' });
+  fireEvent.change(name, { target: { value: 'abc' } });
+  fireEvent.submit(container.querySelector('form')!);
+  expect(screen.getByText(/Nome precisa ter pelo menos 5 caracteres/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'English' }));
+  expect(screen.getByText(/Name.*at least 5 characters/)).toBeInTheDocument();
+  expect(screen.getByRole('textbox', { name: 'Name' })).toBe(name);
+  expect(name).toHaveValue('abc');
+  expect(submit).not.toHaveBeenCalled();
+});
 
 it('preserves a selected native capability and its control when switching locale', async () => {
   const user = userEvent.setup();

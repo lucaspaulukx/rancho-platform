@@ -173,6 +173,20 @@ export const enSchemaForm = {
   'schemaForm.sidecar': 'Sidecar {index}',
   'schemaForm.removeSidecar': 'Remove sidecar {index}',
   'schemaForm.addSidecar': 'Add sidecar',
+  'schemaForm.validation.depth':
+    'The configuration has too many levels. Review the advanced fields.',
+  'schemaForm.validation.required': 'Fill in {field}.',
+  'schemaForm.validation.notNullable': '{field} cannot be removed.',
+  'schemaForm.validation.integer': '{field} must be an integer.',
+  'schemaForm.validation.enum': 'Choose a valid option for {field}.',
+  'schemaForm.validation.minLength': '{field} must have at least {limit} characters.',
+  'schemaForm.validation.maxLength': '{field} accepts up to {limit} characters.',
+  'schemaForm.validation.invalidCharacters': '{field} contains characters Rancher does not allow.',
+  'schemaForm.validation.range': '{field} is outside the allowed range.',
+  'schemaForm.validation.boolean': '{field} must be true or false.',
+  'schemaForm.validation.integerArray': '{field} must contain only integers.',
+  'schemaForm.validation.object': 'Review {field}.',
+  'schemaForm.validation.items': 'Review the items in {field}.',
 } as const;
 
 export const ptSchemaForm = {
@@ -353,4 +367,18 @@ export const ptSchemaForm = {
   'schemaForm.sidecar': 'Sidecar {index}',
   'schemaForm.removeSidecar': 'Remover sidecar {index}',
   'schemaForm.addSidecar': 'Adicionar sidecar',
+  'schemaForm.validation.depth': 'A configuração tem níveis demais. Revise os campos avançados.',
+  'schemaForm.validation.required': 'Preencha {field}.',
+  'schemaForm.validation.notNullable': '{field} não pode ser removido.',
+  'schemaForm.validation.integer': '{field} precisa ser um número inteiro.',
+  'schemaForm.validation.enum': 'Escolha uma opção válida em {field}.',
+  'schemaForm.validation.minLength': '{field} precisa ter pelo menos {limit} caracteres.',
+  'schemaForm.validation.maxLength': '{field} aceita até {limit} caracteres.',
+  'schemaForm.validation.invalidCharacters':
+    '{field} contém caracteres não permitidos pelo Rancher.',
+  'schemaForm.validation.range': '{field} está fora dos limites permitidos.',
+  'schemaForm.validation.boolean': '{field} precisa ser verdadeiro ou falso.',
+  'schemaForm.validation.integerArray': '{field} precisa conter apenas números inteiros.',
+  'schemaForm.validation.object': 'Revise {field}.',
+  'schemaForm.validation.items': 'Revise os itens de {field}.',
 } as const satisfies Record<keyof typeof enSchemaForm, string>;
