@@ -1,0 +1,26 @@
+FROM golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 AS build
+ENV GO111MODULE=off GOPATH=/go CGO_ENABLED=0
+WORKDIR /go/src/github.com/rancher/ipsec
+ADD --checksum=sha256:1b053f47e355e36507f49a36a2301042784a5ab7edf484aa995f362b8c3cd118 https://codeload.github.com/rancher/ipsec/tar.gz/73e81487820098891a3752158b441f223fb311d3 /tmp/ipsec.tar.gz
+COPY ipsec-router-startup.patch /tmp/
+RUN --network=none tar -xzf /tmp/ipsec.tar.gz --strip-components=1 && \
+    git apply --unidiff-zero /tmp/ipsec-router-startup.patch && \
+    go test -vet=off ./... && \
+    go build -trimpath -buildvcs=false -ldflags="-X main.VERSION=v0.1.9" -o /out/rancher-ipsec . && \
+    /out/rancher-ipsec --version && \
+    mkdir -p /out/licenses && \
+    find . -type f \( -iname '*license*' -o -iname 'notice*' -o -iname 'copying*' -o -iname 'patents*' \) \
+        -exec cp --parents '{}' /out/licenses/ \;
+
+FROM ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca17dcecaf5
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates curl iproute2 iptables libstrongswan-standard-plugins \
+        strongswan-charon strongswan-swanctl && rm -rf /var/lib/apt/lists/* && \
+    ln -s /usr/lib/ipsec/charon /usr/local/sbin/charon
+COPY --from=build /out/rancher-ipsec /usr/bin/
+COPY --from=build /out/licenses/ /usr/share/doc/rancho-ipsec/
+COPY --from=build /go/src/github.com/rancher/ipsec/package/charon.conf /etc/strongswan.d/rancho-charon.conf
+COPY --from=build --chmod=0755 /go/src/github.com/rancher/ipsec/package/start-ipsec.sh /usr/bin/
+COPY --chmod=0755 modern-metadata-entry.sh /rancher-entrypoint.sh
+ENTRYPOINT ["/rancher-entrypoint.sh"]
+CMD ["start-ipsec.sh"]
