@@ -13,6 +13,7 @@ import {
 import { loadConfig, type ConsoleConfig, type ServerConfig } from './config';
 import { ErrorState, Loading } from './components/ui';
 import { ThemeProvider } from './theme';
+import { I18nProvider } from './i18n/provider';
 
 interface AppState {
   config: ConsoleConfig;
@@ -156,9 +157,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   return (
     <AppContext value={value}>
-      <ThemeProvider config={value.config} identity={identity}>
-        {children}
-      </ThemeProvider>
+      <I18nProvider policy={value.config.localization} identity={identity}>
+        <ThemeProvider config={value.config} identity={identity}>
+          {children}
+        </ThemeProvider>
+      </I18nProvider>
     </AppContext>
   );
 }

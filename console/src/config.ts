@@ -1,4 +1,5 @@
 import { checkThemeContrast, type ThemeOverrides } from './themes/contrast';
+import { normalizeLocalizationPolicy, type LocalizationPolicy } from './i18n/policy';
 export const moduleNames = [
   'groups',
   'users',
@@ -68,6 +69,7 @@ export interface ConsoleConfig {
   themeSelectable: boolean;
   customTheme: ThemeOverrides;
   modules: Record<ModuleName, boolean>;
+  localization?: LocalizationPolicy;
 }
 export interface ServerConfig {
   version: number;
@@ -121,7 +123,12 @@ export function validateConfig(value: unknown): ConsoleConfig {
         : supplied[name],
     ]),
   );
-  const c = { ...source, schemaVersion: 1, modules } as unknown as ConsoleConfig;
+  const c = {
+    ...source,
+    schemaVersion: 1,
+    modules,
+    localization: normalizeLocalizationPolicy(source.localization),
+  } as unknown as ConsoleConfig;
   for (const key of ['enabled', 'branding', 'themeSelectable'] as const) {
     if (typeof c[key] !== 'boolean') throw new Error(`Configuração inválida: ${key}.`);
   }

@@ -1,6 +1,7 @@
 import { Component, type ReactNode } from 'react';
 import { useRouteError } from 'react-router-dom';
 import { Button, Empty } from './ui';
+import { useI18n } from '../i18n/provider';
 
 export function isModuleLoadError(error: unknown) {
   return (
@@ -11,19 +12,14 @@ export function isModuleLoadError(error: unknown) {
   );
 }
 export function PageRecovery({ error }: { error: unknown }) {
+  const { t } = useI18n();
   return (
     <Empty
-      title={
-        isModuleLoadError(error)
-          ? 'Não foi possível carregar esta página'
-          : 'Não foi possível abrir esta página'
-      }
+      title={isModuleLoadError(error) ? t('recovery.moduleTitle') : t('recovery.renderTitle')}
       description={
-        isModuleLoadError(error)
-          ? 'A console pode ter sido atualizada ou a conexão foi interrompida. Recarregue para buscar a versão atual. Alterações não salvas nesta aba podem ser perdidas.'
-          : 'Ocorreu uma falha na interface. Você pode acessar outra seção ou recarregar esta página. Alterações não salvas nesta aba podem ser perdidas.'
+        isModuleLoadError(error) ? t('recovery.moduleDescription') : t('recovery.renderDescription')
       }
-      action={<Button onClick={() => window.location.reload()}>Recarregar console</Button>}
+      action={<Button onClick={() => window.location.reload()}>{t('recovery.reload')}</Button>}
     />
   );
 }

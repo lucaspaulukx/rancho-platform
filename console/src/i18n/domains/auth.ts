@@ -1,0 +1,98 @@
+/** Authentication UI messages; external IdP/native error content is not translated here. */
+export const enAuth = {
+  'auth.entryFailed': 'Your authentication could not be completed. Start a new sign-in.',
+  'auth.providerUnavailable': 'The sign-in provider could not be reached. Try again.',
+  'auth.ticketRejected': 'The sign-in expired or was refused. Start a new authentication.',
+  'auth.completingLogin': 'Completing your sign-in…',
+  'auth.welcome': 'WELCOME TO THE CONSOLE',
+  'auth.loginTitle': 'Access your environment',
+  'auth.loginDescription': 'Sign in with your account to manage the resources you can access.',
+  'auth.providerLogoutWarning':
+    'You signed out of this console. Sign-out from the identity provider could not be confirmed.',
+  'auth.serverLogoutWarning':
+    'The session was removed from this browser, but its termination on the server could not be confirmed.',
+  'auth.methodsUnavailable': 'The sign-in methods could not be verified.',
+  'auth.retry': 'Try again',
+  'auth.checkingAccess': 'Checking access…',
+  'auth.keycloakLogin': 'Sign in with Keycloak',
+  'auth.localAlternative': 'or use your local account',
+  'auth.username': 'Username',
+  'auth.password': 'Password',
+  'auth.localLogin': 'Sign in with a local account',
+  'auth.localRejected': 'Sign-in could not be completed. Check your credentials and try again.',
+  'auth.pendingStill': 'Your access is still awaiting approval.',
+  'auth.accessCheckFailed': 'Access could not be verified. Try again.',
+  'auth.accessTitle': 'Your access',
+  'auth.accessDescription':
+    'Your account is authenticated. The environments you can access still need to be defined.',
+  'auth.pendingEyebrow': 'ACCESS PENDING',
+  'auth.pendingTitle': 'Your workspace is almost ready',
+  'auth.pendingDescription':
+    'An administrator needs to add your account to a group with permission to access the environments. No environment will be created automatically.',
+  'auth.contactAdmin': 'Contact your administrator',
+  'auth.accountHint': 'Provide your account: {account}.',
+  'auth.groupAccess': 'Receive access through your group',
+  'auth.groupAccessDescription': 'Permissions are defined and managed in Rancher.',
+  'auth.returnConsole': 'Return to your console',
+  'auth.returnConsoleDescription': 'After approval, check again to load your environments.',
+  'auth.checkAccess': 'Check access',
+  'auth.signOut': 'Sign out',
+  'auth.moduleDisabled': 'Module disabled',
+  'auth.accessRestricted': 'Access restricted',
+  'auth.notFound': 'Page not found',
+  'auth.moduleDisabledDescription': 'This module is disabled in the console configuration.',
+  'auth.accessRestrictedDescription': 'Your account does not have permission to access this area.',
+  'auth.notFoundDescription':
+    'The address may have changed or may not be available in this console.',
+  'auth.backHome': 'Back to home',
+} as const;
+
+export const ptAuth = {
+  'auth.entryFailed': 'Não foi possível concluir sua autenticação. Inicie um novo login.',
+  'auth.providerUnavailable': 'Não foi possível acessar o provedor de login. Tente novamente.',
+  'auth.ticketRejected': 'O login expirou ou foi recusado. Inicie uma nova autenticação.',
+  'auth.completingLogin': 'Concluindo seu login…',
+  'auth.welcome': 'BEM-VINDO À CONSOLE',
+  'auth.loginTitle': 'Acesse seu ambiente',
+  'auth.loginDescription':
+    'Entre com sua conta para gerenciar os recursos aos quais você tem acesso.',
+  'auth.providerLogoutWarning':
+    'Você saiu desta console. Não foi possível confirmar a saída do provedor de login.',
+  'auth.serverLogoutWarning':
+    'A sessão foi removida deste navegador, mas não foi possível confirmar o encerramento no servidor.',
+  'auth.methodsUnavailable': 'Não foi possível verificar os métodos de login.',
+  'auth.retry': 'Tentar novamente',
+  'auth.checkingAccess': 'Verificando acesso…',
+  'auth.keycloakLogin': 'Entrar com Keycloak',
+  'auth.localAlternative': 'ou use sua conta local',
+  'auth.username': 'Usuário',
+  'auth.password': 'Senha',
+  'auth.localLogin': 'Entrar com conta local',
+  'auth.localRejected':
+    'Não foi possível concluir o login. Confira suas credenciais e tente novamente.',
+  'auth.pendingStill': 'Seu acesso ainda está aguardando liberação.',
+  'auth.accessCheckFailed': 'Não foi possível verificar o acesso. Tente novamente.',
+  'auth.accessTitle': 'Seu acesso',
+  'auth.accessDescription':
+    'Sua conta está autenticada. Falta definir quais ambientes você poderá acessar.',
+  'auth.pendingEyebrow': 'ACESSO PENDENTE',
+  'auth.pendingTitle': 'Seu espaço está quase pronto',
+  'auth.pendingDescription':
+    'Um administrador precisa incluir sua conta em um grupo com permissão para os environments. Nenhum ambiente será criado automaticamente.',
+  'auth.contactAdmin': 'Fale com seu administrador',
+  'auth.accountHint': 'Informe sua conta: {account}.',
+  'auth.groupAccess': 'Receba acesso pelo seu grupo',
+  'auth.groupAccessDescription': 'As permissões são definidas e gerenciadas no Rancher.',
+  'auth.returnConsole': 'Volte para sua console',
+  'auth.returnConsoleDescription':
+    'Depois da liberação, verifique novamente para carregar seus ambientes.',
+  'auth.checkAccess': 'Verificar acesso',
+  'auth.signOut': 'Sair da conta',
+  'auth.moduleDisabled': 'Módulo desativado',
+  'auth.accessRestricted': 'Acesso restrito',
+  'auth.notFound': 'Página não encontrada',
+  'auth.moduleDisabledDescription': 'Este módulo está desativado na configuração da console.',
+  'auth.accessRestrictedDescription': 'Sua conta não tem permissão para acessar esta área.',
+  'auth.notFoundDescription': 'O endereço pode ter mudado ou não estar disponível nesta console.',
+  'auth.backHome': 'Voltar ao início',
+} as const satisfies Record<keyof typeof enAuth, string>;

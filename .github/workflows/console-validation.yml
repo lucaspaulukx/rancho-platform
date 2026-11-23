@@ -45,7 +45,10 @@ jobs:
       - name: Check formatting
         working-directory: console
         run: npm run format:check
-      - name: Run console tests
+      - name: Check registered translation catalogs
+        working-directory: console
+        run: npm run check:locales
+      - name: Run console component and contract tests
         working-directory: console
         run: npm test
       - name: Check TypeScript and build console

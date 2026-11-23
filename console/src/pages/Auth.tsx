@@ -7,9 +7,11 @@ import { acceptToken, api, oidcLogin, policy, type Token } from '../api';
 import { useApp } from '../state';
 import { AuthLayout } from '../layouts';
 import { Alert, Button, Empty, Field, Loading, PageHeader } from '../components/ui';
+import { useI18n } from '../i18n/provider';
 
 export function Login() {
   const app = useApp();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const [username, setUsername] = useState('');
@@ -20,13 +22,13 @@ export function Login() {
   const [entryError, setEntryError] = useState(
     () => new URLSearchParams(window.location.search).get('oidc_error') === 'failed',
   );
-  const [ticketError, setTicketError] = useState('');
+  const [ticketError, setTicketError] = useState(false);
   const [logoutWarning] = useState(
     () => sessionStorage.getItem('rancher.oidc.logoutWarning') || '',
   );
-  const [oidcError, setOidcError] = useState(
-    entryError ? 'Não foi possível concluir sua autenticação. Inicie um novo login.' : '',
-  );
+  const [oidcError, setOidcError] = useState<
+    'auth.entryFailed' | 'auth.providerUnavailable' | null
+  >(entryError ? 'auth.entryFailed' : null);
   const [oidcPending, setOidcPending] = useState(false);
   const oidcRequest = useRef<AbortController | null>(null);
   const consuming = useRef(false);
@@ -58,8 +60,8 @@ export function Login() {
     oidcRequest.current = request;
     setTicket(null);
     setEntryError(false);
-    setTicketError('');
-    setOidcError('');
+    setTicketError(false);
+    setOidcError(null);
     setOidcPending(true);
     try {
       await oidcLogin(settings.data?.preflight === true, request.signal);
@@ -69,7 +71,7 @@ export function Login() {
         oidcRequest.current === request &&
         !(error instanceof DOMException && error.name === 'AbortError')
       )
-        setOidcError('Não foi possível acessar o provedor de login. Tente novamente.');
+        setOidcError('auth.providerUnavailable');
     } finally {
       if (!request.signal.aborted && oidcRequest.current === request) setOidcPending(false);
     }
@@ -80,9 +82,7 @@ export function Login() {
     history.replaceState({}, '', window.location.pathname);
     void api<Token>('token', { code: `oidc-ticket:${ticket}` })
       .then(finish)
-      .catch(() =>
-        setTicketError('O login expirou ou foi recusado. Inicie uma nova autenticação.'),
-      );
+      .catch(() => setTicketError(true));
   }, [ticket]);
   useEffect(() => {
     if (!settings.data?.autoLogin || ticket || app.authenticated || ticketError || entryError)
@@ -106,13 +106,13 @@ export function Login() {
     oidcRequest.current?.abort();
     oidcRequest.current = null;
     setOidcPending(false);
-    setOidcError('');
+    setOidcError(null);
     local.mutate();
   }
   return (
     <AuthLayout>
       {ticket && !ticketError ? (
-        <Loading label="Concluindo seu login…" />
+        <Loading label={t('auth.completingLogin')} />
       ) : (
         <>
           <div
@@ -121,49 +121,42 @@ export function Login() {
           >
             <LockKeyhole size={24} />
           </div>
-          <p className="eyebrow">BEM-VINDO À CONSOLE</p>
-          <h1>Acesse seu ambiente</h1>
-          <p className="page-description">
-            Entre com sua conta para gerenciar os recursos aos quais você tem acesso.
-          </p>
+          <p className="eyebrow">{t('auth.welcome')}</p>
+          <h1>{t('auth.loginTitle')}</h1>
+          <p className="page-description">{t('auth.loginDescription')}</p>
           {logoutWarning === 'provider' &&
             new URLSearchParams(window.location.search).get('oidc_logout') !== 'returned' && (
-              <Alert tone="warning">
-                Você saiu desta console. Não foi possível confirmar a saída do provedor de login.
-              </Alert>
+              <Alert tone="warning">{t('auth.providerLogoutWarning')}</Alert>
             )}
           {logoutWarning === 'server' && (
-            <Alert tone="warning">
-              A sessão foi removida deste navegador, mas não foi possível confirmar o encerramento
-              no servidor.
-            </Alert>
+            <Alert tone="warning">{t('auth.serverLogoutWarning')}</Alert>
           )}
-          {ticketError && <Alert>{ticketError}</Alert>}
-          {oidcError && <Alert>{oidcError}</Alert>}
+          {ticketError && <Alert>{t('auth.ticketRejected')}</Alert>}
+          {oidcError && <Alert>{t(oidcError)}</Alert>}
           {settings.error && (
             <Alert>
-              Não foi possível verificar os métodos de login.{' '}
-              <button onClick={() => void settings.refetch()}>Tentar novamente</button>
+              {t('auth.methodsUnavailable')}{' '}
+              <button onClick={() => void settings.refetch()}>{t('auth.retry')}</button>
             </Alert>
           )}
           {settings.isPending ? (
-            <Loading label="Verificando acesso…" />
+            <Loading label={t('auth.checkingAccess')} />
           ) : (
             <>
               {settings.data?.enabled && (
                 <Button variant="primary" busy={oidcPending} onClick={() => void beginOidc()}>
                   <ShieldCheck size={18} />
-                  Entrar com Keycloak
+                  {t('auth.keycloakLogin')}
                   <ArrowRight size={17} />
                 </Button>
               )}
               {settings.data && !settings.data.only && (
                 <>
                   {settings.data.enabled && (
-                    <div className="auth-divider">ou use sua conta local</div>
+                    <div className="auth-divider">{t('auth.localAlternative')}</div>
                   )}
                   <form onSubmit={submit}>
-                    <Field label="Usuário">
+                    <Field label={t('auth.username')}>
                       {(id) => (
                         <input
                           id={id}
@@ -175,7 +168,7 @@ export function Login() {
                         />
                       )}
                     </Field>
-                    <Field label="Senha">
+                    <Field label={t('auth.password')}>
                       {(id) => (
                         <input
                           id={id}
@@ -188,13 +181,13 @@ export function Login() {
                         />
                       )}
                     </Field>
-                    {local.error && <Alert>{local.error.message}</Alert>}
+                    {local.error && <Alert>{t('auth.localRejected')}</Alert>}
                     <Button
                       variant={settings.data.enabled ? 'secondary' : 'primary'}
                       type="submit"
                       busy={local.isPending}
                     >
-                      Entrar com conta local
+                      {t('auth.localLogin')}
                       <ArrowRight size={17} />
                     </Button>
                   </form>
@@ -210,76 +203,75 @@ export function Login() {
 export function NoAccess() {
   const { pending: loggingOut, signOut } = useLogout();
   const app = useApp();
+  const { t } = useI18n();
   const [checking, setChecking] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState<'auth.pendingStill' | 'auth.accessCheckFailed' | null>(
+    null,
+  );
   if (app.projects.length) return <Navigate to="/" replace />;
   async function check() {
     setChecking(true);
-    setMessage('');
+    setMessage(null);
     try {
       await app.refresh();
-      setMessage('Seu acesso ainda está aguardando liberação.');
+      setMessage('auth.pendingStill');
     } catch {
-      setMessage('Não foi possível verificar o acesso. Tente novamente.');
+      setMessage('auth.accessCheckFailed');
     } finally {
       setChecking(false);
     }
   }
   return (
     <>
-      <PageHeader
-        title="Seu acesso"
-        description="Sua conta está autenticada. Falta definir quais ambientes você poderá acessar."
-      />
+      <PageHeader title={t('auth.accessTitle')} description={t('auth.accessDescription')} />
       <section className="panel pending-card">
         <div className="empty-icon">
           <ShieldCheck size={32} />
         </div>
-        <p className="eyebrow">ACESSO PENDENTE</p>
-        <h2>Seu espaço está quase pronto</h2>
-        <p>
-          Um administrador precisa incluir sua conta em um grupo com permissão para os environments.
-          Nenhum ambiente será criado automaticamente.
-        </p>
+        <p className="eyebrow">{t('auth.pendingEyebrow')}</p>
+        <h2>{t('auth.pendingTitle')}</h2>
+        <p>{t('auth.pendingDescription')}</p>
         <div className="pending-steps">
           <div className="pending-step">
             <span>1</span>
             <div>
-              <strong>Fale com seu administrador</strong>
+              <strong>{t('auth.contactAdmin')}</strong>
               <p>
-                Informe sua conta:{' '}
-                {app.token.userIdentity?.login || app.token.userIdentity?.name || app.identity}.
+                {t('auth.accountHint', {
+                  account:
+                    app.token.userIdentity?.login || app.token.userIdentity?.name || app.identity,
+                })}
               </p>
             </div>
           </div>
           <div className="pending-step">
             <span>2</span>
             <div>
-              <strong>Receba acesso pelo seu grupo</strong>
-              <p>As permissões são definidas e gerenciadas no Rancher.</p>
+              <strong>{t('auth.groupAccess')}</strong>
+              <p>{t('auth.groupAccessDescription')}</p>
             </div>
           </div>
           <div className="pending-step">
             <span>3</span>
             <div>
-              <strong>Volte para sua console</strong>
-              <p>Depois da liberação, verifique novamente para carregar seus ambientes.</p>
+              <strong>{t('auth.returnConsole')}</strong>
+              <p>{t('auth.returnConsoleDescription')}</p>
             </div>
           </div>
         </div>
         {message && (
           <div style={{ marginBottom: 20 }}>
-            <Alert tone="info">{message}</Alert>
+            <Alert tone="info">{t(message)}</Alert>
           </div>
         )}
         <div className="pending-actions">
           <Button variant="primary" onClick={() => void check()} busy={checking}>
             <RefreshCw size={16} />
-            Verificar acesso
+            {t('auth.checkAccess')}
           </Button>
           <Button onClick={() => void signOut()} busy={loggingOut}>
             <LogOut size={16} />
-            Sair da conta
+            {t('auth.signOut')}
           </Button>
         </div>
       </section>
@@ -293,21 +285,22 @@ export function Missing({
   forbidden?: boolean;
   disabled?: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <Empty
-      title={
-        disabled ? 'Módulo desativado' : forbidden ? 'Acesso restrito' : 'Página não encontrada'
-      }
+      title={t(
+        disabled ? 'auth.moduleDisabled' : forbidden ? 'auth.accessRestricted' : 'auth.notFound',
+      )}
       description={
         disabled
-          ? 'Este módulo está desativado na configuração da console.'
+          ? t('auth.moduleDisabledDescription')
           : forbidden
-            ? 'Sua conta não tem permissão para acessar esta área.'
-            : 'O endereço pode ter mudado ou não estar disponível nesta console.'
+            ? t('auth.accessRestrictedDescription')
+            : t('auth.notFoundDescription')
       }
       action={
         <a className="button secondary" href="/console/">
-          Voltar ao início
+          {t('auth.backHome')}
         </a>
       }
     />

@@ -33,6 +33,23 @@ O destino precisa ser novo. Revise o diff antes de selecioná-lo para deploy. A 
 
 Use `moduleNames` e os rótulos de Sobre como inventário exato. Cada função verifica dependências e entradas de rota/ação. Alterar módulo visual não muda permissões nativas, grants existentes ou workloads armazenados.
 
+## Política de idiomas da interface
+
+O objeto raiz opcional `localization` é aditivo na schemaVersion1. Ausente, preserva pt-BR e esconde o seletor; normalizar nunca reescreve a origem. Desativá-lo restaura pt-BR sem apagar preferências salvas. Esta é política de apresentação, não grant de environment ou ajuste OIDC, e não altera o idioma do IdP externo.
+
+| Campo | Default e comportamento |
+|---|---|
+| `localization.enabled` | `false`; off fixa a interface em pt-BR |
+| `localization.defaultLocale` | `pt-BR`; locale canônico do inventário do roadmap, obrigatório na lista disponível |
+| `localization.availableLocales` | `["pt-BR"]`; lista não vazia, sem duplicatas, limitada aos dez locales conhecidos |
+| `localization.selectable` | `false`; política bloqueada impõe o padrão administrativo e ignora escolhas salvas/do navegador |
+| `localization.detectBrowser` | `false`; quando selecionável, negocia idiomas permitidos do navegador após preferências salvas |
+| `localization.preview` | `false`; atualmente obrigatório para configurar locale não pt-BR, pois extração/revisão completas seguem pendentes |
+
+Para prévia inglesa isolada, acrescente um objeto `localization` à configuração completa existente com `enabled`, `selectable` e `preview` true, `defaultLocale` pt-BR e `availableLocales` contendo pt-BR/en-US. Valide antes do deploy. Campos desconhecidos, switches não booleanos, locales não canônicos, duplicatas e padrão fora da lista são recusados. O aviso de prévia permanece visível mesmo com idioma bloqueado; o seletor exige ao menos dois locales selecionáveis. Prévia não representa tradução concluída nem aceite de release. Os outros idiomas de catálogo atualmente usam fallback inglês nas chaves registradas, e páginas não extraídas mantêm o texto original.
+
+Preferências contêm apenas versão e locale, na chave de navegador `rancho.console.locale.*` por conta. A escolha salva da conta precede a escolha anônima do login, depois idiomas permitidos do navegador e o padrão configurado. Escolher antes do login pode fornecer o idioma inicial de uma conta sem preferência própria. Falha no armazenamento mantém a escolha utilizável em memória; reconfiguração não relacionada preserva uma escolha explícita ainda permitida. Trocas de identidade, bloqueio/remoção/off da política e mudanças entre abas reaplicam a política. Credenciais, rascunhos de workload e dados API não entram nessa preferência. Trocar locale atualiza contexto e lang/direção do documento sem remontar o shell nem mudar environment/rota.
+
 ## Política de backend
 
 Variáveis Compose configuram o backend; `/oidc/config` expõe capacidades solicitadas/efetivas/disponíveis. Confira a capacidade efetiva, não apenas o valor de uma variável. Switch mestre e compatibilidade do artefato/proxy podem tornar uma solicitação inefetiva.

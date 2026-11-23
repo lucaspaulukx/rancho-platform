@@ -9,6 +9,7 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { AppProvider, useApp } from './state';
+import { useI18n } from './i18n/provider';
 import { AppShell, AuthLayout } from './layouts';
 import { Empty, Loading, ToastProvider } from './components/ui';
 import { PageErrorBoundary, RouteRecovery } from './components/PageErrorBoundary';
@@ -60,16 +61,17 @@ const client = new QueryClient({
 });
 function RuntimeGate() {
   const app = useApp();
+  const { t } = useI18n();
   return app.config.enabled ? (
     <Outlet />
   ) : (
     <AuthLayout>
       <Empty
-        title="Console desativada"
-        description="Esta console está desativada na configuração da instância."
+        title={t('runtime.disabledTitle')}
+        description={t('runtime.disabledDescription')}
         action={
           <a className="button primary" href={app.config.classicUrl}>
-            Abrir Rancher clássico
+            {t('runtime.classic')}
           </a>
         }
       />

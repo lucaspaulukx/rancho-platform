@@ -12,6 +12,7 @@ Execute em checkout limpo, sem importar credenciais do laboratório. O frontend 
 ```sh
 cd console
 npm ci
+npm run check:locales
 npm test
 npm run build
 npm run format:check
@@ -49,7 +50,7 @@ Use host/guest Docker dedicado e compatível com a geração legada. Harnesses f
 
 Cada teste define alegação e budget, usa recursos próprios, exerce controles positivos/negativos, preserva dados/configuração anteriores e confere cleanup. Execute uma fixture com baseline global/canal serial do guest por vez. Cleanup incompleto é falha mesmo se a asserção principal passou. Preserve relatórios sanitizados de falhas; não edite relatório para obter sucesso.
 
-Entrypoints mantidos incluem `physical_ulimits.py`, `ulimit_upgrade_acceptance.py`, `physical_ulimit_upgrades.py`, `service_sidecar_ulimit_creation.py` e `host_stream_matrix.py`. Leia CLI/implementação antes do uso. Testes browser criam contextos próprios e não devem operar a aba ativa do usuário, registrar storage privado ou capturar credenciais.
+Entrypoints mantidos incluem `physical_ulimits.py`, `ulimit_upgrade_acceptance.py`, `physical_ulimit_upgrades.py`, `service_sidecar_ulimit_creation.py`, `host_stream_matrix.py` e `localization_acceptance.py`. Leia CLI/implementação antes do uso. Testes browser criam contextos próprios e não devem operar a aba ativa do usuário, registrar storage privado ou capturar credenciais. O harness de localização exige o laboratório local nomeado, sobrescreve apenas a resposta de configuração do seu navegador, usa GET/HEAD no browser e revoga a própria sessão de controle. Verifica a prévia pt-BR/en-US implementada, diálogos abertos, mobile e temas; não comprova tradução completa, RTL ou troca com streams reais de host.
 
 O helper de transporte do scheduler é diagnóstico limitado para a rede gerenciada legada. Confere ownership/IP/MAC, instala regra temporária para peer/destino exatos e remove antes das asserções de stream/inspect. Teste aprovado com esse helper não prova estabilidade CNI nativa. Não afrouxe timeouts do produto para disfarçar falha de alocação.
 

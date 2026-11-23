@@ -176,7 +176,8 @@ describe('Typed message catalogs', () => {
     expect(translator.t('environment.selected', { name: '<script>{count}</script>' })).toBe(
       'Environment: <script>{count}</script>',
     );
-    expect(Object.keys(englishMessages)).toHaveLength(7);
+    expect(validateCatalog(englishMessages)).toEqual(englishMessages);
+    expect(Object.keys(portugueseMessages).sort()).toEqual(Object.keys(englishMessages).sort());
   });
   it('rejects missing/extra/nonfinite parameters at the runtime boundary without echoing them', () => {
     const translator = createTranslator('en-US');
