@@ -1,4 +1,12 @@
 export const zhHans = {
+  'operations.stackMetric': '堆栈',
+  'operations.serviceMetric': '服务',
+  'operations.containerMetric': '容器',
+  'operations.totals': '环境资源总数 · 每 15 秒刷新一次',
+  'operations.visibleStacks': '显示 {count} 个堆栈',
+  'operations.visibleServices': '显示 {count} 个服务',
+  'operations.visibleContainers': '{count} 个匹配的容器',
+  'operations.hiddenSystem': ' · 已隐藏 {count} 个基础设施堆栈',
   'operations.stacks': '堆栈',
   'operations.services': '服务',
   'operations.containers': '容器',

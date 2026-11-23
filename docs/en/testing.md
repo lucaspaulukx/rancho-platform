@@ -50,6 +50,14 @@ python -m unittest migration.test_tool migration.test_crypto_stream migration.te
 
 The last command runs contract tests. Commands named `*_lab`, bootstrap integration and physical harnesses are separate operational actions; inspect their preconditions and ownership before running them. Do not mistake a unit-test name for a harmless database rehearsal.
 
+### Isolated rehearsal with 20 environments
+
+Run this on the named local Rancher lab with an owned synthetic database. The harness makes an encrypted backup, restores a copy without network or source volume mounts, and prepares an original-schema fixture with 20 environments in the copy. It checks restore consistency, schema application, idempotence, rollback and cleanup. This rehearsal verifies the database path. Engine boot and federated login have separate acceptance tests.
+
+```sh
+python -m migration.test_original_rehearsal
+```
+
 ## Native and browser acceptance
 
 Use a dedicated legacy-compatible Docker host/guest. The physical harnesses in `console/tests/` are intentionally constrained to a named sandbox, expected environment/host and explicit ownership. They are not generic production diagnostics or automatically portable to an arbitrary fresh installation. Review the script and provision the required fixture before invoking it.

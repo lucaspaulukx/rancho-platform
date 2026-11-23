@@ -1,4 +1,12 @@
 export const jaJP = {
+  'operations.stackMetric': 'スタック',
+  'operations.serviceMetric': 'サービス',
+  'operations.containerMetric': 'コンテナ',
+  'operations.totals': '環境全体の件数 · 15秒ごとに更新',
+  'operations.visibleStacks': '表示中のスタック：{count} 件',
+  'operations.visibleServices': '表示中のサービス：{count} 件',
+  'operations.visibleContainers': '条件に一致するコンテナ：{count} 件',
+  'operations.hiddenSystem': ' · 非表示のインフラストラクチャスタック：{count} 件',
   'operations.stacks': 'スタック',
   'operations.services': 'サービス',
   'operations.containers': 'コンテナ',

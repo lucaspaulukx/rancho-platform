@@ -1,4 +1,12 @@
 export const ruRU = {
+  'operations.stackMetric': 'стеки',
+  'operations.serviceMetric': 'сервисы',
+  'operations.containerMetric': 'контейнеры',
+  'operations.totals': 'Итоги по окружению · обновление каждые 15 с',
+  'operations.visibleStacks': 'Видимые стеки · {count}',
+  'operations.visibleServices': 'Видимые сервисы · {count}',
+  'operations.visibleContainers': 'Подходящие контейнеры · {count}',
+  'operations.hiddenSystem': ' · Скрытые стеки инфраструктуры: {count}',
   'operations.stacks': 'Стеки',
   'operations.services': 'Сервисы',
   'operations.containers': 'Контейнеры',

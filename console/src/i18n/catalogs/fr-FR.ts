@@ -1,4 +1,12 @@
 export const frFR = {
+  'operations.stackMetric': 'stacks',
+  'operations.serviceMetric': 'services',
+  'operations.containerMetric': 'conteneurs',
+  'operations.totals': 'Totaux de l’environnement · actualisés toutes les 15 s',
+  'operations.visibleStacks': 'Stacks visibles · {count}',
+  'operations.visibleServices': 'Services visibles · {count}',
+  'operations.visibleContainers': 'Conteneurs correspondants · {count}',
+  'operations.hiddenSystem': ' · Stacks d’infrastructure masquées : {count}',
   'operations.stacks': 'Stacks',
   'operations.services': 'Services',
   'operations.containers': 'Conteneurs',

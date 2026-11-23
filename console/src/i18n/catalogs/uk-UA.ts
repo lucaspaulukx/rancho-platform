@@ -1,4 +1,12 @@
 export const ukUA = {
+  'operations.stackMetric': 'стеки',
+  'operations.serviceMetric': 'сервіси',
+  'operations.containerMetric': 'контейнери',
+  'operations.totals': 'Підсумки середовища · оновлення кожні 15 с',
+  'operations.visibleStacks': 'Видимі стеки · {count}',
+  'operations.visibleServices': 'Видимі сервіси · {count}',
+  'operations.visibleContainers': 'Відповідні контейнери · {count}',
+  'operations.hiddenSystem': ' · Приховані стеки інфраструктури: {count}',
   'operations.stacks': 'Стеки',
   'operations.services': 'Сервіси',
   'operations.containers': 'Контейнери',
