@@ -298,7 +298,10 @@ describe('Workspace unificado', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Ações de web' }));
     await userEvent.click(screen.getByRole('menuitem', { name: 'Ver logs' }));
     expect(screen.getByRole('dialog', { name: 'Logs de web-1' })).toBeInTheDocument();
-    await userEvent.selectOptions(screen.getByLabelText('Container'), 'c2');
+    const selector = screen.getByLabelText('Container');
+    const second = within(selector).getByRole('option', { name: 'web-2 · Em execução' });
+    expect(second).toHaveValue('c2');
+    await userEvent.selectOptions(selector, second);
     expect(screen.getByRole('dialog', { name: 'Logs de web-2' })).toBeInTheDocument();
     expect(fixture.unmounted).toContain('c1');
     await userEvent.click(screen.getByRole('button', { name: 'Fechar logs' }));

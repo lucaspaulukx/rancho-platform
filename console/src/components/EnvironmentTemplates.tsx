@@ -27,6 +27,7 @@ import {
   catalogDefaults,
   catalogPath,
   catalogQuestions,
+  localizedCatalogError,
   prepareCatalogStack,
   type CatalogTemplate,
   type CatalogVersion,
@@ -680,7 +681,11 @@ function CatalogStackPicker({
       }
     >
       {error && (
-        <Alert>{error instanceof EnvironmentTemplateError ? t(error.key) : error.message}</Alert>
+        <Alert>
+          {error instanceof EnvironmentTemplateError
+            ? t(error.key)
+            : localizedCatalogError(error, t).message}
+        </Alert>
       )}
       {templates.isPending ? (
         <Loading />
@@ -716,7 +721,12 @@ function CatalogStackPicker({
             )}
           </Field>
           {detail.isFetching && <Loading />}
-          {detail.error && <ErrorState error={detail.error} retry={() => void detail.refetch()} />}
+          {detail.error && (
+            <ErrorState
+              error={localizedCatalogError(detail.error, t)}
+              retry={() => void detail.refetch()}
+            />
+          )}
           {detail.data && (
             <>
               <Field label={t('environmentTemplates.infraVersion')}>
@@ -754,7 +764,7 @@ function CatalogStackPicker({
                   error={
                     version.error instanceof EnvironmentTemplateError
                       ? new Error(t(version.error.key))
-                      : version.error
+                      : localizedCatalogError(version.error, t)
                   }
                   retry={() => void version.refetch()}
                 />

@@ -9,7 +9,9 @@ import {
   catalogDefaults,
   catalogPath,
   catalogQuestions,
+  CatalogValidationError,
   categories,
+  localizedCatalogError,
   prepareCatalogStack,
   type CatalogChoice,
   type CatalogQuestion,
@@ -362,20 +364,29 @@ function CatalogLaunch({
   });
   const links = detail.data?.versionLinks || {};
   const currentVersion = upgradeStack && catalogReference(upgradeStack.externalId)?.versionId;
-  const currentChoice =
-    currentVersion &&
-    Object.keys(links).find(
-      (key) =>
-        decodeURIComponent(catalogPath(links[key]).split('?')[0].split('/').pop() || '') ===
-        currentVersion,
-    );
+  let currentChoice: string | undefined;
+  let selectionError: CatalogValidationError | undefined;
+  if (currentVersion) {
+    try {
+      currentChoice = Object.keys(links).find(
+        (key) =>
+          decodeURIComponent(catalogPath(links[key]).split('?')[0].split('/').pop() || '') ===
+          currentVersion,
+      );
+    } catch (error) {
+      selectionError =
+        error instanceof CatalogValidationError
+          ? error
+          : new CatalogValidationError({ key: 'catalogPage.validation.route' });
+    }
+  }
   const selectedVersion =
     selected ||
     currentChoice ||
     (detail.data?.defaultVersion && links[detail.data.defaultVersion]
       ? detail.data.defaultVersion
       : Object.keys(links)[0] || '');
-  const url = links[selectedVersion];
+  const url = selectionError ? undefined : links[selectedVersion];
   const version = useQuery({
     queryKey: useDataKey('catalog-version', url),
     queryFn: ({ signal }) =>
@@ -437,8 +448,10 @@ function CatalogLaunch({
       >
         {detail.isPending || schemas.isPending ? (
           <Loading />
-        ) : detail.error || schemas.error ? (
-          <ErrorState error={detail.error || schemas.error} />
+        ) : detail.error || schemas.error || selectionError ? (
+          <ErrorState
+            error={localizedCatalogError(detail.error || schemas.error || selectionError, t)}
+          />
         ) : !url ? (
           <Empty
             title={t('catalogPage.noVersion')}
@@ -475,7 +488,10 @@ function CatalogLaunch({
             {version.isPending ? (
               <Loading />
             ) : version.error ? (
-              <ErrorState error={version.error} retry={() => void version.refetch()} />
+              <ErrorState
+                error={localizedCatalogError(version.error, t)}
+                retry={() => void version.refetch()}
+              />
             ) : (
               version.data &&
               detail.data && (
@@ -569,7 +585,10 @@ function CatalogVersionForm(props: FormProps) {
   try {
     questions = catalogQuestions(props.version);
   } catch (error) {
-    invalid = error instanceof Error ? error.message : t('catalogPage.invalidTemplate');
+    invalid =
+      error instanceof Error
+        ? localizedCatalogError(error, t).message
+        : t('catalogPage.invalidTemplate');
   }
   const query = useQuery({
     queryKey: useDataKey('catalog-references', props.version.id),
@@ -636,7 +655,7 @@ function CatalogParameters({
 }: FormProps & { questions: CatalogQuestion[]; references: CatalogReferences }) {
   const { t } = useI18n();
   const errorText = (error: Error) =>
-    error instanceof CatalogPageError ? t(error.key) : error.message;
+    error instanceof CatalogPageError ? t(error.key) : localizedCatalogError(error, t).message;
   const app = useApp();
   const scope = useActionScope();
   const client = useQueryClient();

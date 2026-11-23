@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import contract from './fixtures/webhook-schema.json';
 import { Webhooks } from '../pages/Webhooks';
+import { I18nProvider, useI18n } from '../i18n/provider';
 import { api, type Resource } from '../api';
 const backend = vi.hoisted(() => ({
   readonly: false,
@@ -74,12 +75,32 @@ vi.mock('../api', async () => ({
     throw new Error('Unexpected webhook request');
   }),
 }));
-function mount() {
+function SwitchLanguage() {
+  const { setLocale } = useI18n();
+  return <button onClick={() => setLocale('en-US')}>English</button>;
+}
+function mount(localized = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } }),
     router = createMemoryRouter([{ path: '/', element: <Webhooks /> }]);
   render(
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
+      <I18nProvider
+        policy={
+          localized
+            ? {
+                enabled: true,
+                defaultLocale: 'pt-BR',
+                availableLocales: ['pt-BR', 'en-US'],
+                selectable: true,
+                detectBrowser: false,
+                preview: true,
+              }
+            : undefined
+        }
+      >
+        {localized && <SwitchLanguage />}
+        <RouterProvider router={router} />
+      </I18nProvider>
     </QueryClientProvider>,
   );
   return client;
@@ -107,6 +128,7 @@ async function review() {
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.removeItem('rancho.console.locale.anonymous');
   backend.readonly = false;
   backend.revoked = false;
   backend.records = [];
@@ -203,6 +225,28 @@ describe('Tela de webhooks', () => {
     await user.type(screen.getByLabelText('Label 2: chave'), 'fixture');
     await user.click(screen.getByRole('button', { name: 'Revisar webhook' }));
     await screen.findAllByText('Revise labels válidas, sem repetição de chaves.');
+    expect(backend.posts).toHaveLength(0);
+  });
+  it('traduz validação numérica com o rascunho aberto sem reenviar', async () => {
+    mount(true);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Criar webhook' }));
+    await user.type(screen.getByLabelText('Nome do webhook'), 'fixture');
+    await user.selectOptions(screen.getByLabelText('Serviço de destino'), '1s1');
+    const amount = screen.getByLabelText('Quantidade por evento');
+    await user.clear(amount);
+    await user.type(amount, '1.5');
+    await user.click(screen.getByRole('button', { name: 'Revisar webhook' }));
+    expect(
+      await screen.findAllByText('Quantidade por evento deve ser um inteiro positivo.'),
+    ).not.toHaveLength(0);
+
+    const requests = vi.mocked(api).mock.calls.length;
+    fireEvent.click(screen.getByText('English'));
+    expect(screen.getAllByText('Amount per event must be a positive integer.')).not.toHaveLength(0);
+    expect(screen.getByLabelText('Amount per event')).toBe(amount);
+    expect(amount).toHaveValue('1.5');
+    expect(vi.mocked(api)).toHaveBeenCalledTimes(requests);
     expect(backend.posts).toHaveLength(0);
   });
   it('fechamento de rascunho exige descarte e reload é protegido', async () => {

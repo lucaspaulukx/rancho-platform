@@ -1,6 +1,7 @@
 import type { Resource } from './api';
 import {
   catalogDefaults,
+  CatalogValidationError,
   prepareCatalogStack,
   type CatalogQuestion,
   type CatalogReferences,
@@ -67,7 +68,7 @@ export function prepareCatalogUpgrade(
 ) {
   const source = catalogReference(stack.externalId);
   if (stack.type !== 'stack' || !source || source.templateId !== template.id)
-    throw new Error('Esta versão pertence a outro catálogo ou template.');
+    throw new CatalogValidationError({ key: 'catalogPage.validation.upgradeOrigin' });
   const creation = prepareCatalogStack(
     template,
     version,
