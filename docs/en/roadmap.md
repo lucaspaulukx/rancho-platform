@@ -172,6 +172,8 @@ In the same isolated guest, moving the scheduler from Cattle-managed networking 
 
 The modern bootstrap smoke also verified the persistent agent image, not just the registration container. The Cattle registration script selects the standard agent tag. In the disposable Docker daemon, tagging the modern image as `rancher/agent:v1.2.11` made the persistent agent use that same image ID. Restarting it preserved the registered host, and a new container reached running state on that host. Upgrade and private-CA registration remain open.
 
+The isolated two-host rehearsal passed on Docker 29.9.2 guests with the Ubuntu 6.8 kernel. Both hosts joined a fresh environment provisioned from the patched catalog. A managed container on one guest returned an HTTP fixture response to a managed container on the other guest, and the IPsec routers reported installed associations with nonzero packet counters. This run used the legacy IPsec router image and the modern-client agent. A separate Ubuntu 24.04 build probe for the IPsec binary and strongSwan reported zero high or critical findings. Integration of that replacement and the remaining legacy network components are still open.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.
