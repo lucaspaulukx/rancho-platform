@@ -96,7 +96,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 | INF03 | Network/IPsec/policy | Partial; physical conflicts/multiple hosts/additional rules remain |
 | INF04 | TCP/HTTP/TLS load balancers | Partial; real traffic, certificate/error, target/routing/port matrix remains |
 | DATA01 | Registries/secrets/certificates | Partial; complete CRUD/permission/real-use/privacy matrix remains |
-| DATA02 | Volumes/mounts/pools | Partial native coverage; in-use dependencies/drivers/safe removal remain |
+| DATA02 | Volumes/mounts/pools | Encrypted recovery of a named local volume passed with a replacement workload, matching content, owner IDs, modes and symlink targets. In-use dependencies, shared drivers and safe removal remain |
 | DATA03 | Snapshot/backup target/restore | Planned/conditional; isolated destination and checksum proof required |
 | CAT01 | Template/version/launch/upgrade | Implemented slices; real clone/sync, remote failure/ref/credential matrix remains |
 | CAT02 | Global/environment sources | CRUD/delegation implemented; physical scoped refresh/clone remains |
