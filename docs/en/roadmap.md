@@ -123,10 +123,10 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 |---|---|---|
 | REL01 | Versioned DB/config migrations | Additive/runtime and synthetic original-engine upgrade validated; isolated fresh boot verified schema and idempotent restart with local images. Final package and federated bootstrap acceptance remain |
 | REL02 | Full Rancher/IdP backup and recovery | Encrypted database, state and image recovery tested in isolated rehearsals. A cold capture and loopback-only Rancher and Keycloak restore verified local and federated login, preserved inventory and grant counts, and zero environment access on first federated login. Workload, storage and final topology acceptance remains |
-| REL03 | Frontend/backend rollback | An isolated frontend image rollback verified old tabs, a compatible shared configuration and immutable asset retention. Matching backend and data restoration and classic-client acceptance remain |
+| REL03 | Frontend/backend rollback | An isolated frontend image rollback verified old tabs, compatible configuration and immutable asset retention. A separate synthetic 20-environment upgrade and rollback restored the original backend and database, verified classic asset delivery and preserved the running lab. Classic browser interaction and final topology acceptance remain |
 | REL04 | Reproducible distribution | Pins/lockfiles/source CI/inventory available; isolated fresh-install rehearsal verified classic UI and the separate console. Final upgrade, licenses, provenance and security review remain |
 | REL05 | Final security | Pending unified route/action/scope/CSRF/secret/cache/dependency/legacy-risk acceptance |
-| REL06 | Local release acceptance | Docker rehearsal passed fresh installation and frontend rollback using the same candidate image ID, with cleanup verified. Remaining mandatory gates still need evidence on one release artifact. |
+| REL06 | Local release acceptance | Docker rehearsal passed fresh installation and frontend rollback using the same candidate console image ID, with cleanup verified. A separate synthetic upgrade and backend/database rollback passed using the backend ID from that same candidate pair. Remaining mandatory gates still need evidence on one release artifact |
 
 ## Execution order and optional domains
 

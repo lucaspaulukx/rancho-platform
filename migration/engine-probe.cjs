@@ -28,7 +28,8 @@ async function request(url, { jar = 'native', body, form = false, headers = {}, 
   }
   const text = await response.text();
   let data; try { data = JSON.parse(text); } catch { data = text; }
-  return { status: response.status, data, location: response.headers.get('location') };
+  return { status: response.status, data, location: response.headers.get('location'),
+    contentType: response.headers.get('content-type') };
 }
 function checkEndpoint(url) {
   if (url.protocol !== 'http:' || url.hostname !== 'localhost' || !['8080', '18081', '18090'].includes(url.port))
@@ -56,6 +57,18 @@ async function main() {
   await ready('http://localhost:8080/ping');
   await ready('http://localhost:18081/realms/master/.well-known/openid-configuration');
   checks.push('isolated engines ready');
+  stage = 'classic-client-assets';
+  const classicBase = 'http://localhost:8080';
+  const classic = await request(classicBase + '/index.html');
+  check('classic entry document served', classic.status === 200 && classic.contentType?.includes('text/html')
+    && typeof classic.data === 'string');
+  for (const name of ['vendor', 'ui']) {
+    const path = classic.data.match(new RegExp('src="(/assets/' + name + '-[a-f0-9]+[.]js)"'))?.[1];
+    check('classic ' + name + ' bundle referenced', !!path);
+    const asset = await request(classicBase + path);
+    check('classic ' + name + ' bundle served', asset.status === 200
+      && asset.contentType?.includes('javascript') && typeof asset.data === 'string' && asset.data.length > 0);
+  }
   stage = 'restored-local-administrator';
   const native = await request('http://localhost:8080/v2-beta/token', {
     body: { code: config.rancherUsername + ':' + config.rancherPassword } });

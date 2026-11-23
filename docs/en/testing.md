@@ -60,10 +60,10 @@ python -m migration.test_original_rehearsal
 
 ### Original engine upgrade and rollback
 
-Run the following only on the named synthetic lab during a maintenance window. It briefly stops the local Rancher, Keycloak and console for a consistent cold capture and restarts them before testing the restored copy. The isolated copy starts Rancher 1.6.30 with 20 environments, upgrades to the locally built schema-validation image, checks the migration record after restart and verifies that a checksum mismatch blocks startup. The rollback starts the original image on a fresh copy of the corresponding original snapshot and verifies that the custom tables are absent. Check the source container IDs and HTTP readiness after the rehearsal. This covers the isolated engine and database path. Workload, external storage and final topology acceptance run separately.
+Run the following only on the named synthetic lab during a maintenance window. It briefly stops the local Rancher, Keycloak and console for a consistent cold capture and restarts them before testing the restored copy. The isolated copy starts Rancher 1.6.30 with 20 environments, upgrades to the selected local backend image, checks the migration record after restart and verifies that a checksum mismatch blocks startup. The rollback starts the original image on a fresh copy of the corresponding original snapshot and verifies that the custom tables are absent. The recovery probe checks the classic entry document and both JavaScript bundles, administrator login and environment inventory. Record both image IDs, source container preservation and HTTP readiness from the report. This covers the isolated engine and database path and basic classic asset delivery. Classic browser interaction, workload, external storage and final topology acceptance run separately.
 
 ```sh
-python -m migration.test_original_engine_lab --quiesce
+python -m migration.test_original_engine_lab --quiesce --backend-image my-backend:candidate
 ```
 
 ## Native and browser acceptance
