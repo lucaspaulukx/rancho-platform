@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
 import { lazy, Suspense, useRef, useState } from 'react';
 import { Link, useBlocker } from 'react-router-dom';
@@ -639,7 +640,7 @@ function ResourcePanelContext({
                 ) : (
                   mutation.error &&
                   !(mutation.error instanceof ResourcePanelError) && (
-                    <Alert>{mutation.error.message}</Alert>
+                    <Alert>{requestErrorText(mutation.error, t)}</Alert>
                   )
                 )}
               </>

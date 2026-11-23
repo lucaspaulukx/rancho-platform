@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useI18n } from '../i18n/provider';
 import { resourceStateLabel } from '../i18n/resource-state';
@@ -145,7 +146,7 @@ export function ErrorState({ error, retry }: { error: unknown; retry?: () => voi
   const { t } = useI18n();
   return (
     <div className="error-state">
-      <Alert>{error instanceof Error ? error.message : t('ui.loadFailed')}</Alert>
+      <Alert>{error instanceof Error ? requestErrorText(error, t) : t('ui.loadFailed')}</Alert>
       {retry && <Button onClick={retry}>{t('ui.retry')}</Button>}
     </div>
   );

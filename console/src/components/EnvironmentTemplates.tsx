@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useI18n } from '../i18n/provider';
 import { useEffect, useRef, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
@@ -76,7 +77,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
   const errorText = (error: Error) =>
     error instanceof EnvironmentTemplateError || error instanceof EnvironmentTemplateValidationError
       ? t(error.key)
-      : error.message;
+      : requestErrorText(error, t);
   const app = useApp();
   const client = useQueryClient();
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -684,7 +685,7 @@ function CatalogStackPicker({
         <Alert>
           {error instanceof EnvironmentTemplateError
             ? t(error.key)
-            : localizedCatalogError(error, t).message}
+            : requestErrorText(localizedCatalogError(error, t), t)}
         </Alert>
       )}
       {templates.isPending ? (

@@ -60,6 +60,8 @@ Entrypoints mantidos incluem `physical_ulimits.py`, `ulimit_upgrade_acceptance.p
 
 O helper de transporte do scheduler é diagnóstico limitado para a rede gerenciada legada. Confere ownership/IP/MAC, instala regra temporária para peer/destino exatos e remove antes das asserções de stream/inspect. Teste aprovado com esse helper não prova estabilidade CNI nativa. Não afrouxe timeouts do produto para disfarçar falha de alocação.
 
+O teste de localização injeta um link sintético de paginação de outra origem na página de Hosts. Ele confere se o link continua bloqueado e se a mensagem visível muda de idioma sem revelar o endereço.
+
 ### Verificações automatizadas de acessibilidade
 
 Execute o teste de localização no navegador com `--accessibility` e as dependências de desenvolvimento do console instaladas. Ele usa axe em Grupos, Usuários, Chaves de API, Configurações, Auditoria e Ambientes a 390 e 1440 px nos temas escuro e claro. O teste reporta identificadores de regras e contagens. Revise as verificações manuais indicadas no relatório e exercite os fluxos críticos com teclado e leitor de tela antes da release.

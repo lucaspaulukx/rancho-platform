@@ -446,6 +446,23 @@ async function main() {
     await registryEditor.getByLabel(/^Registry address(?: \*)?$/).inputValue() === 'ftp://registry.invalid' &&
     await registryEditor.getByLabel('Name', { exact: true }).inputValue() === 'synthetic-registry' &&
     registryPage.url() === registryUrl);
+  result.stage = 'rejected-pagination';
+  const failedInventory = await page(authenticated);
+  await failedInventory.route(origin + '/v2-beta/projects/1a12/hosts?limit=100', (route) =>
+    route.fulfill({ json: { data: [], pagination: {
+      next: 'https://outside.invalid/v2-beta/projects?marker=synthetic-private-pagination',
+    } } }),
+  );
+  const hostsUrl = origin + '/console/hosts?env=1a12';
+  await failedInventory.goto(hostsUrl);
+  const inventoryAlert = failedInventory.locator('main .error-state').getByRole('alert');
+  await inventoryAlert.getByText('The server returned a disallowed API address.', { exact: true }).waitFor();
+  await failedInventory.locator('.language-selector select').selectOption('pt-BR');
+  await inventoryAlert.getByText('O servidor retornou um endereço de API não permitido.', { exact: true }).waitFor();
+  check('blocked pagination remains local and updates its visible error in place',
+    failedInventory.url() === hostsUrl &&
+    !(await inventoryAlert.textContent()).includes('synthetic-private-pagination') &&
+    result.blockedRequests === 0);
   if (axe) {
     result.stage = 'accessibility-results';
     check('axe checks for six routes in both themes on mobile and desktop',

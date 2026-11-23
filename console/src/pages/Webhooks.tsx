@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useEffect, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -106,7 +107,7 @@ function WebhookScope({ project }: { project: string }) {
       const { failure } = error;
       return 'label' in failure ? t(failure.key, { label: t(failure.label) }) : t(failure.key);
     }
-    if (!(error instanceof WebhookPageError)) return error.message;
+    if (!(error instanceof WebhookPageError)) return requestErrorText(error, t);
     return error.key === 'webhooksPage.httpError'
       ? t(error.key, { status: error.params!.status })
       : t(error.key);

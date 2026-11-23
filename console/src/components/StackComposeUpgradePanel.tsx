@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useEffect, useRef, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -61,7 +62,7 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
   const { t } = useI18n();
   function errorText(error: Error) {
     if (error instanceof StackComposeUpgradeValidationError) return t(error.key);
-    if (!(error instanceof ComposePanelError)) return error.message;
+    if (!(error instanceof ComposePanelError)) return requestErrorText(error, t);
     const [key, params] = error.detail;
     return key === 'stackComposeUpgradePanel.httpError' ? t(key, params) : t(key);
   }

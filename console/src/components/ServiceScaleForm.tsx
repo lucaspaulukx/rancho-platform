@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useI18n } from '../i18n/provider';
 import { useState, type FormEvent } from 'react';
 import type { Resource, Schema } from '../api';
@@ -21,7 +22,7 @@ export function ServiceScaleForm({
 }) {
   const { t, formats } = useI18n();
   const errorText = (error: Error) =>
-    error instanceof ServiceScaleValidationError ? t(error.key) : error.message;
+    error instanceof ServiceScaleValidationError ? t(error.key) : requestErrorText(error, t);
   const [value, setValue] = useState(String(resource.scale));
   const [zero, setZero] = useState(false);
   const [validation, setValidation] = useState<Error | null>(null);

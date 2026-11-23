@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useI18n } from '../i18n/provider';
 import { resourceStateLabel } from '../i18n/resource-state';
 import { ptSchemaForm } from '../i18n/domains/schema-form';
@@ -127,7 +128,7 @@ function ResourceContext({ item }: { item: NavItem }) {
       ? t('resourcesPage.saveFailed', { status: error.status })
       : error instanceof ResourcePageError || error instanceof DataValidationError
         ? t(error.key)
-        : error.message;
+        : requestErrorText(error, t);
   const app = useApp();
   const client = useQueryClient();
   const toast = useToast();
@@ -810,7 +811,7 @@ function RelatedCollection({ name, url }: { name: string; url: string }) {
   const { t } = useI18n();
   const label = useResourceLabels();
   const errorText = (error: Error) =>
-    error instanceof ResourcePageError ? t(error.key) : error.message;
+    error instanceof ResourcePageError ? t(error.key) : requestErrorText(error, t);
   const [open, setOpen] = useState(false);
   const query = useQuery({
     queryKey: useDataKey('related', url),

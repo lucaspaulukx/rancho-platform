@@ -1,3 +1,4 @@
+import { ConsoleRequestError } from '../request-errors';
 import { useEffect, useRef } from 'react';
 /** A generation boundary for account-global or environment-scoped private operations. */
 export function useRequestScope(key: string) {
@@ -15,7 +16,7 @@ export function useRequestScope(key: string) {
   }, [snapshot]);
   function assertCurrent() {
     if (current.current !== snapshot || !snapshot.alive || snapshot.controller.signal.aborted)
-      throw new Error('O contexto mudou. Reabra o painel antes de continuar.');
+      throw new ConsoleRequestError('requestError.scopeChanged');
   }
   return {
     assertCurrent,

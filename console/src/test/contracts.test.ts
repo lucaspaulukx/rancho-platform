@@ -60,6 +60,16 @@ describe('Transporte e paginação', () => {
     expect(await allPages('projects', controller.signal)).toEqual([{ id: 1 }, { id: 2 }]);
     expect(fetcher.mock.calls[1][1].signal).toBe(controller.signal);
   });
+  it('trata uma coleção JSON nula como resposta inválida', async () => {
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response('null'));
+    try {
+      await expect(allPages('projects')).rejects.toMatchObject({
+        key: 'requestError.invalidCollection',
+      });
+    } finally {
+      fetcher.mockRestore();
+    }
+  });
   it('recusa ciclos de paginação', async () => {
     vi.stubGlobal(
       'fetch',

@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
 import { useEffect, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
@@ -69,7 +70,7 @@ export default function BalancerRulesPanel({
       const { failure } = error;
       return 'name' in failure ? t(failure.key, { name: failure.name }) : t(failure.key);
     }
-    return error.message;
+    return requestErrorText(error, t);
   }
   const app = useApp(),
     scope = useActionScope(),

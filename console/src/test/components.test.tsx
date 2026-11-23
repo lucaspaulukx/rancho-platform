@@ -2,13 +2,14 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { Button, CheckboxField, DataTable, Modal, Tabs } from '../components/ui';
+import { Button, CheckboxField, DataTable, ErrorState, Modal, Tabs } from '../components/ui';
 import { useSidebarPreference } from '../hooks/useSidebarPreference';
 import { ThemeProvider, useTheme } from '../theme';
 import config from '../../public/console-config.json';
 import { validateConfig } from '../config';
 import { SchemaForm } from '../components/SchemaForm';
-import type { Schema } from '../api';
+import { allPages, type Schema } from '../api';
+import { I18nProvider, useI18n } from '../i18n/provider';
 import { SecretField } from '../components/SecretField';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -17,6 +18,55 @@ import { BulkOperation } from '../components/BulkOperation';
 vi.mock('../state', () => ({
   useApp: () => ({ identity: 'fixture', project: { id: 'p1', name: 'Operações' } }),
 }));
+
+it('translates a rejected pagination link in place without exposing or following it', async () => {
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+    new Response(
+      JSON.stringify({
+        data: [],
+        pagination: { next: 'https://outside.invalid/v2-beta/projects?marker=synthetic-private' },
+      }),
+    ),
+  );
+  const storageKey = 'rancho.console.locale.anonymous';
+  localStorage.removeItem(storageKey);
+  try {
+    const error = await allPages('projects').catch((caught: unknown) => caught);
+    function Page() {
+      const { setLocale } = useI18n();
+      return (
+        <>
+          <button onClick={() => setLocale('en-US')}>English</button>
+          <ErrorState error={error} />
+        </>
+      );
+    }
+    render(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          preview: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: true,
+          detectBrowser: false,
+        }}
+      >
+        <Page />
+      </I18nProvider>,
+    );
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent('O servidor retornou um endereço de API não permitido.');
+    await userEvent.click(screen.getByRole('button', { name: 'English' }));
+    expect(screen.getByRole('alert')).toBe(alert);
+    expect(alert).toHaveTextContent('The server returned a disallowed API address.');
+    expect(alert).not.toHaveTextContent('synthetic-private');
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  } finally {
+    fetcher.mockRestore();
+    localStorage.removeItem(storageKey);
+  }
+});
 
 describe('Checkbox compartilhada', () => {
   it('legenda clica, Space alterna, descrição é associada e disabled impede mudança', async () => {

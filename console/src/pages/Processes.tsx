@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { lazy, Suspense, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type Resource, type Schema } from '../api';
@@ -85,7 +86,7 @@ function ProcessViews() {
 function ProcessesScope({ active }: { active: boolean }) {
   const { t, locale } = useI18n();
   const errorText = (error: Error) =>
-    error instanceof ProcessError ? t(error.key) : error.message;
+    error instanceof ProcessError ? t(error.key) : requestErrorText(error, t);
   const app = useApp(),
     client = useQueryClient(),
     toast = useToast(),

@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -62,7 +63,7 @@ function RepositoryScope() {
       error instanceof CatalogRepositoryValidationError
     )
       return t(error.key);
-    if (!(error instanceof CatalogRepositoryError)) return error.message;
+    if (!(error instanceof CatalogRepositoryError)) return requestErrorText(error, t);
     return error.key === 'catalogRepositories.httpError'
       ? t(error.key, { status: error.params!.status })
       : t(error.key);

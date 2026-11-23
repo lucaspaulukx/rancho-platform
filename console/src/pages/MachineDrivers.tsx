@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { ActionMenu, type MenuAction } from '../components/ActionMenu';
 import { useState } from 'react';
 import { useBlocker } from 'react-router-dom';
@@ -66,7 +67,7 @@ function DriverScope() {
         : t(error.key)
       : error instanceof DriverValidationError
         ? t(error.key)
-        : error.message;
+        : requestErrorText(error, t);
   async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
     try {
       return await api<T>(path, body, method, signal);

@@ -1,3 +1,4 @@
+import { requestErrorText } from '../request-errors';
 import { useI18n } from '../i18n/provider';
 import { useState } from 'react';
 import { useBlocker } from 'react-router-dom';
@@ -70,7 +71,7 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
       return error.status === undefined
         ? t(error.key)
         : t('environmentCatalogs.error.http', { status: error.status });
-    return error.message;
+    return requestErrorText(error, t);
   }
   const app = useApp(),
     scope = useActionScope(),
