@@ -8,7 +8,7 @@ import time
 from migration.recovery import ComposeMariaDB, OWNER, inspect, journal, restored_volumes, source_environment
 from migration.tool import MigrationError, preflight, run
 
-ALIASES = {'database': 'db', 'rancher': 'rancher', 'console': 'console'}
+ALIASES = {'database': 'db', 'rancher': 'rancho', 'console': 'console'}
 ENV_PREFIXES = {'database': ('MARIADB_', 'MYSQL_'), 'rancher': ('CATTLE_', 'RANCHER_'), 'console': ('CONSOLE_',)}
 IPV4_GATEWAY_MODE = 'com.docker.network.bridge.gateway_mode_ipv4'
 
@@ -78,6 +78,8 @@ def rehearse(directory, password, username, admin_password, *, load_images=False
                                        RANCHER_OIDC_AUTO_LOGIN='false')
                 args = ['create', '--pull', 'never', '--log-driver', 'none', '--label', OWNER + '=' + label,
                         '--network', network, '--network-alias', alias, '--name', network + '-' + alias]
+                if role == 'rancher':
+                    args.extend(('--network-alias', 'rancher'))
                 for key in environment:
                     if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', key):
                         raise MigrationError('Invalid recovered environment variable name.')

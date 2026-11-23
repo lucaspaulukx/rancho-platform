@@ -26,7 +26,7 @@ services:
           create_host_path: false
     secrets: [migration_passphrase]
 
-  rancher:
+  rancho:
     environment:
       CATTLE_CATALOG_EXECUTE: "false"
       RANCHER_OIDC_ENABLED: "false"

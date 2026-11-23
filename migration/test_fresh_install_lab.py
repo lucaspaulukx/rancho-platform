@@ -176,7 +176,8 @@ def rehearse(backend, console, *, configuration_reversal=False):
         def create_backend(suffix, enabled):
             name = prefix + suffix
             identity = create(
-                "container", name, "--name", name, *common, "--network-alias", "rancher",
+                "container", name, "--name", name, *common, "--network-alias", "rancho",
+                "--network-alias", "rancher",
                 "--memory", "2g", *mounts,
                 "--env", "DEFAULT_CATTLE_CATALOG_EXECUTE=false", "--env", "CATTLE_CATALOG_EXECUTE=false",
                 "--env", f"RANCHER_CUSTOMIZATION_ENABLED={str(enabled).lower()}",

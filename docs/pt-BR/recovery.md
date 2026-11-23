@@ -24,11 +24,13 @@ Nomes são exemplos a substituir, não ordem para parar serviços alheios com no
 
 ## Compose moderno com MariaDB
 
+O serviço atual do backend chama-se `rancho`, gerando `rancho-modern-rancho-1` com o nome padrão do projeto. O CLI de recuperação prioriza `--rancho` e continua aceitando `--rancher`; backups do nome anterior do serviço permanecem legíveis. Preserve o mesmo nome de projeto Compose e os volumes nomeados na atualização. Pare o projeto Compose antigo com `docker compose -f compose.modern.yaml down` antes de trocar a revisão e então inicie a nova revisão. Nunca acrescente `--volumes` ou `-v` a esse comando. Faça e verifique um backup antes. O novo backend também mantém o alias DNS interno anterior para imagens do Console já compiladas.
+
 Para o `compose.modern.yaml`, selecione os contêineres Rancho, console e MariaDB 10.11 do mesmo projeto Compose. Use os nomes exibidos por `docker compose ps`. A captura começa após a parada limpa da console e do Rancho e registra o inventário e os checksums das permissões antes de parar o MariaDB. O backup criptografa e autentica os três volumes locais nomeados. Na retomada, aguarda o MariaDB ficar saudável antes de iniciar os demais contêineres. Confira a console e os hosts de origem após a janela.
 
 ```sh
-python -m migration.recovery plan --rancher rancho-modern-rancher-1 --console rancho-modern-console-1 --database rancho-modern-db-1
-python -m migration.recovery backup --rancher rancho-modern-rancher-1 --console rancho-modern-console-1 --database rancho-modern-db-1 --output migration-runs/modern-cold-001 --quiesce --include-images
+python -m migration.recovery plan --rancho rancho-modern-rancho-1 --console rancho-modern-console-1 --database rancho-modern-db-1
+python -m migration.recovery backup --rancho rancho-modern-rancho-1 --console rancho-modern-console-1 --database rancho-modern-db-1 --output migration-runs/modern-cold-001 --quiesce --include-images
 python -m migration.recovery rehearse-modern --output migration-runs/modern-cold-001 --admin-user admin --load-images
 ```
 
