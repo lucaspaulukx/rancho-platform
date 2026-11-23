@@ -1,0 +1,49 @@
+services:
+  db:
+    command: ["--event-scheduler=OFF"]
+
+  restore-backup:
+    build:
+      context: .
+      dockerfile: migration/Dockerfile.restore
+    image: rancho-migration-restore:local
+    environment:
+      MYSQL_PWD: ${RANCHO_DB_PASSWORD:?Set RANCHO_DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [database]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - state:/restore-state
+      - type: bind
+        source: ${RANCHO_MIGRATION_BACKUP_DIRECTORY:?Set the sealed backup directory}
+        target: /backup
+        read_only: true
+        bind:
+          create_host_path: false
+    secrets: [migration_passphrase]
+
+  rancher:
+    environment:
+      CATTLE_CATALOG_EXECUTE: "false"
+      RANCHER_OIDC_ENABLED: "false"
+      RANCHER_OIDC_ONLY: "false"
+      RANCHER_OIDC_AUTO_LOGIN: "false"
+    depends_on:
+      restore-backup:
+        condition: service_completed_successfully
+
+  console:
+    networks: [app, ingress]
+
+networks:
+  app:
+    internal: true
+  ingress:
+
+secrets:
+  migration_passphrase:
+    file: ${RANCHO_MIGRATION_PASSPHRASE_FILE:?Set the private passphrase file}

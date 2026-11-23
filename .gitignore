@@ -21,6 +21,7 @@ evidence/
 test-results.json
 *.jpg
 *.png
+!docs/images/*.png
 backups/
 migration-runs/
 *.sql
