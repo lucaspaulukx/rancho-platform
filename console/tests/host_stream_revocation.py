@@ -85,7 +85,7 @@ class Probe:
             except Exception: self.process.kill(); self.process.wait()
 
 
-def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, console_proxy=False, service_scale=1, payload_transport=False, frontend_probe=False, audit_probe=False):
+def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, console_proxy=False, service_scale=1, payload_transport=False, frontend_probe=False, audit_probe=False, scheduler_relay=False, service_browser=False):
     assert isinstance(hold_seconds, int) and 0 <= hold_seconds <= 600
     assert not STATE.exists(), 'Recover previous owned host stream fixture before repeating.'
     assert isinstance(service_scale, int) and 1 <= service_scale <= 5 and (service_scale == 1 or service_metrics)
@@ -96,6 +96,8 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
     identity = None
     stack = service = None
     probes = {}
+    relay_window = None
+    service_browser_probe = None
     audit_records = []
     audit_enabled = bool(control.request('/oidc/config')[1]['effective'].get('AUDIT_CREDENTIAL_REDACTION_ENABLED')) if audit_probe else False
     controls = []
@@ -142,13 +144,13 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
         assert code in (200, 201, 202) and isinstance(value, dict) and value.get('url') and value.get('token')
         if audit_probe and mode in ('logs','exec') and not result.get('auditCredentials'):
             audit_records.append(audit_credentials.capture(session,mode,audit_before,value,audit_enabled))
-        result.setdefault('accessTokenChars', {})[mode] = len(value['token'])
+        result.setdefault('accessTokenChars' if session is watched else 'controlAccessTokenChars', {})[mode] = len(value['token'])
         negotiated = value.get('payload') is not None
         if negotiated:
             assert payload_transport and isinstance(value['payload'], str) and len(value['payload']) <= 16*1024*1024
             result.setdefault('metadataResponses', {})[mode] = session.response_metadata
             assert 'no-store' in {v.strip().lower() for v in session.response_metadata['cacheControl'].split(',')}
-            result.setdefault('negotiatedPayloadChars', {})[mode] = len(value['payload'])
+            result.setdefault('negotiatedPayloadChars' if session is watched else 'controlNegotiatedPayloadChars', {})[mode] = len(value['payload'])
         if runtime_guard and getattr(session,'technical_stream',False):
             def technical_decode(raw): return json.loads(base64.urlsafe_b64decode(raw.split('.')[1]+'==='))
             outer = technical_decode(value.get('payload') or value['token'])
@@ -164,6 +166,7 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
                     result['apiKeyBindingChecked'] = True
                     compact = technical_decode(source['rancherStreamProof'])
                     result.setdefault('originalLeaseSeconds',[]).append(int(compact['exp'])-int(compact['iat']))
+                    result.setdefault('watchedApiKeyLeaseSeconds',[]).append(int(compact['exp'])-int(compact['iat']))
         if runtime_guard and not getattr(session,'technical_stream',False):
             def decode(raw): return json.loads(base64.urlsafe_b64decode(raw.split('.')[1] + '==='))
             outer = decode(value['payload'] if negotiated else value['token'])
@@ -202,7 +205,13 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
         host = control.api(BASE + 'hosts/1h1')
         assert host['state'] == 'active' and host['agentState'] == 'active'
         save()
+        if scheduler_relay:
+            from scheduler_relay_window import RelayAllocationWindow
+            stage('temporary-scheduler-relay-setup')
+            relay_window = RelayAllocationWindow(control,'rancher.console.stream-fixture',marker)
+            relay_window.start()
         stage('own-workload-allocation')
+        allocation_started = time.monotonic()
         stack = control.api(BASE + 'stacks', {'name': marker, 'description': marker})
         record['stack'] = stack['id']; save()
         command = 'printf "%s\\n" ' + shlex.quote(marker + '-before') + ' > /tmp/stream-guard-marker; while true; do cat /tmp/stream-guard-marker; sleep 1; done'
@@ -212,7 +221,7 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
                                                      'command': ['/bin/sh', '-c', command], 'labels': {'rancher.console.stream-fixture': marker}}})
         record['service'] = service['id']; save()
         instance = None
-        for attempt in range(240):
+        while time.monotonic() - allocation_started < (90 if scheduler_relay else 240):
             discovered = rows('services/' + service['id'] + '/instances')
             discovered_ids = sorted({*record.get('instances',[]),*(v['id'] for v in discovered)})
             if discovered_ids != record.get('instances',[]):
@@ -224,6 +233,15 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
         assert instance and instance['hostId'] == '1h1' and re.fullmatch(r'[a-f0-9]{64}', instance['externalId'])
         record['instance'] = instance['id']; record['instances'] = sorted({*record.get('instances',[]),*(v['id'] for v in running)}); save()
         print('PASS: own physical stream-emitter running on existing host1h1.', flush=True)
+        if relay_window:
+            result['allocationElapsedSeconds'] = round(time.monotonic()-allocation_started,2)
+            stage('remove-relay-before-streams')
+            relay_result = relay_window.finish()
+            result['allocationRelay'] = relay_result
+            assert relay_result['allocationRelayAccepted'] and relay_result['filesCleaned'] and relay_result['ruleRemoved']
+            assert {value[:12] for value in relay_result['runningDockerIds']} == {value['externalId'][:12] for value in running}
+            result['relayRemovedBeforeStreams'] = True
+
         stage('identity-setup')
         identity = identity_factory(control) if identity_factory else None
         watched = identity['session'] if identity else shared.session()
@@ -264,6 +282,12 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
             browser_result = json.loads(browser.stdout)
             result['browserTransport'] = browser_result
             assert browser.returncode == 0 and browser_result.get('status') == 'passed'
+        if service_browser:
+            assert identity and not getattr(watched,'technical_stream',False) and service_metrics and service_scale==3 and payload_transport and console_proxy
+            from browser_service_metrics import BrowserServiceMetrics
+            stage('real-service-metrics-browser-ready')
+            service_browser_probe=BrowserServiceMetrics(ROOT,watched,marker,service,running)
+            result['serviceBrowserReady']=service_browser_probe.ready()
         if hold_seconds:
             assert runtime_guard and hold_seconds > max(result['originalLeaseSeconds']) + 2
             stage('hold-past-original-proof-expiry')
@@ -318,6 +342,9 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
         result['revocationEnforced'] = result['protectedHttpAfterRevocation'] in (identity.get('protectedExpectedStatus',(401,403,404)) if identity else (401,403,404)) and all(
             value['freshControlHealthy'] and value['newHandshake'] in (401, 403, 404) and value['closed'] and value['closeCode'] == 1008 and value['after'] == 0
             for value in result['streams'].values())
+        if service_browser_probe:
+            result['serviceBrowser']=service_browser_probe.finish()
+            assert result['serviceBrowser']['status']=='passed' and result['serviceBrowser']['browserClosed']
         result['status'] = 'passed' if result['revocationEnforced'] else 'failed'
         result['stage'] = 'measured'
     except Exception as error:
@@ -327,6 +354,20 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
         result['probeHttpStatus'] = getattr(error, 'http_status', None)
         # No exception message: native errors may contain payloads or private URLs.
     finally:
+        if service_browser_probe:
+            try:
+                service_browser_probe.close()
+            except Exception as error:
+                result['browserCleanupErrorType']=type(error).__name__
+                result['status']='failed'
+            if 'serviceBrowser' not in result and service_browser_probe.last:
+                result['serviceBrowser']=service_browser_probe.last
+        if relay_window:
+            try:
+                result['allocationRelay'] = relay_window.finish()
+                if not result['allocationRelay']['filesCleaned'] or not result['allocationRelay']['ruleRemoved']:
+                    result['status']='failed'
+            except Exception as error:result['relayCleanupErrorType']=type(error).__name__;result['status']='failed'
         print('CLEANUP: own streams and workload', flush=True)
         for probe in [*probes.values(), *controls]:
             probe.close()

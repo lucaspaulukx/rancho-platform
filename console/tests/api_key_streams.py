@@ -84,14 +84,15 @@ if __name__=='__main__':
     parser.add_argument('--stale-cookie',action='store_true')
     parser.add_argument('--hold-seconds',type=int,default=0)
     parser.add_argument('--service-scale',type=int,default=1)
+    parser.add_argument('--scheduler-relay',action='store_true')
     args=parser.parse_args()
     assert args.scope=='personal' or args.event=='key'
     expect_legacy=args.mode=='off'
-    suffix=('-'+args.event if args.event!='key' else '')+('-oidc' if args.oidc else '')+('-stale-cookie' if args.stale_cookie else '')+('-lease' if args.hold_seconds else '')+('-payload-scale'+str(args.service_scale) if args.service_scale>1 else '')
+    suffix=('-'+args.event if args.event!='key' else '')+('-oidc' if args.oidc else '')+('-stale-cookie' if args.stale_cookie else '')+('-lease' if args.hold_seconds else '')+('-payload-scale'+str(args.service_scale) if args.service_scale>1 else '')+('-relay-setup' if args.scheduler_relay else '')
     probe.REPORT=probe.ROOT / ('console/api-key-stream-'+args.scope+suffix+('-baseline' if expect_legacy else '-on')+'-results.json')
     if probe.REPORT.exists():
         (probe.ROOT / 'migration-runs' / ('api-key-stream-'+args.scope+suffix+'-'+str(time.time_ns())+'-results.json')).write_bytes(probe.REPORT.read_bytes())
-    status=probe.main(identity_factory=factory(args.scope=='shared',args.event,oidc=args.oidc,stale_cookie=args.stale_cookie),console_proxy=True,hold_seconds=args.hold_seconds,service_metrics=args.service_scale>1,payload_transport=args.service_scale>1,service_scale=args.service_scale)
+    status=probe.main(identity_factory=factory(args.scope=='shared',args.event,oidc=args.oidc,stale_cookie=args.stale_cookie),console_proxy=True,hold_seconds=args.hold_seconds,service_metrics=args.service_scale>1,payload_transport=args.service_scale>1,service_scale=args.service_scale,scheduler_relay=args.scheduler_relay)
     result=json.loads(probe.REPORT.read_text(encoding='utf-8'))
     reproduced=result.get('cleanupComplete') and result.get('identityFixtureCleaned') and result.get('protectedHttpAfterRevocation') in (401,403,404) and len(result.get('streams',{}))==(4 if args.service_scale>1 else 3) and all(
         v.get('newHandshake')==101 and not v.get('closed') and v.get('after',0)>0 and v.get('freshControlHealthy') for v in result.get('streams',{}).values())
