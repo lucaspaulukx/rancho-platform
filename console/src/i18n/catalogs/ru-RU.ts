@@ -87,6 +87,7 @@ export const ruRU = {
   'requestError.paginationCycle': 'API вернул цикл разбиения на страницы.',
   'requestError.paginationLimit': 'Коллекция слишком велика. Уточните фильтры.',
   'requestError.invalidCollection': 'API вернул недопустимую коллекцию.',
+  'requestError.failed': 'Не удалось выполнить запрос.',
 
   'bulkOperation.title': 'Массовое действие — {action}',
   'bulkOperation.resources': {

@@ -6,6 +6,7 @@ export const jaJP = {
   'requestError.paginationCycle': 'API がページネーションのループを返しました。',
   'requestError.paginationLimit': 'コレクションが大きすぎます。フィルターで絞り込んでください。',
   'requestError.invalidCollection': 'API が無効なコレクションを返しました。',
+  'requestError.failed': 'リクエストを完了できませんでした。',
 
   'details.field.id': 'ID',
   'details.field.name': '名前',

@@ -2323,6 +2323,7 @@ export const frFR = {
   'requestError.paginationCycle': 'L’API a renvoyé une boucle de pagination.',
   'requestError.paginationLimit': 'La collection est trop volumineuse. Affinez les filtres.',
   'requestError.invalidCollection': 'L’API a renvoyé une collection non valide.',
+  'requestError.failed': 'La demande n’a pas pu aboutir.',
 
   'resourceCreator.kind.stack': 'Stack',
   'resourceCreator.kind.service': 'Service',
