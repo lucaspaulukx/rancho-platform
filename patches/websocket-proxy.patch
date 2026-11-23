@@ -1031,7 +1031,7 @@ diff --git a/proxy/host_stream_guard_test.go b/proxy/host_stream_guard_test.go
 new file mode 100644
 --- /dev/null
 +++ b/proxy/host_stream_guard_test.go
-@@ -0,0 +1,554 @@
+@@ -0,0 +1,560 @@
 +package proxy
 +
 +import (
@@ -1245,8 +1245,12 @@ new file mode 100644
 +}
 +
 +func streamTestClaims() map[string]interface{} {
-+	return map[string]interface{}{"exp": time.Now().Unix() + 120, "iat": time.Now().Unix(), "hostUuid": "fixture",
-+		"rancherStream": map[string]interface{}{"v": 1, "path": "/v1/echo", "hostId": "1", "projectId": "2", "mode": "ui", "tokenId": "3", "userId": "4", "userKind": "user", "role": "member", "sessionHash": strings.Repeat("a", 64), "uiExp": time.Now().Unix() + 3600}}
++	return streamTestClaimsAt(time.Now().Unix())
++}
++
++func streamTestClaimsAt(now int64) map[string]interface{} {
++	return map[string]interface{}{"exp": now + 120, "iat": now, "hostUuid": "fixture",
++		"rancherStream": map[string]interface{}{"v": 1, "path": "/v1/echo", "hostId": "1", "projectId": "2", "mode": "ui", "tokenId": "3", "userId": "4", "userKind": "user", "role": "member", "sessionHash": strings.Repeat("a", 64), "uiExp": now + 3600}}
 +}
 +func streamTestToken(t *testing.T, claims map[string]interface{}) *jwt.Token {
 +	t.Helper()
@@ -1313,8 +1317,10 @@ new file mode 100644
 +}
 +func TestHostStreamCompactProof(t *testing.T) {
 +	g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(`{"allowed":true}`)) })
-+	compact := streamTestToken(t, streamTestClaims())
-+	claims := streamTestClaims()
++	// The compact and full proofs describe one session, even across a clock tick.
++	now := time.Now().Unix()
++	compact := streamTestToken(t, streamTestClaimsAt(now))
++	claims := streamTestClaimsAt(now)
 +	claims["containerIds"] = strings.Repeat("x", 200000)
 +	claims["rancherStreamProof"] = compact.Raw
 +	proof, err := g.proof(streamTestToken(t, claims), "/v1/echo")
@@ -1325,9 +1331,9 @@ new file mode 100644
 +	if _, err = g.proof(streamTestToken(t, claims), "/v1/echo"); err == nil {
 +		t.Fatal("mismatched compact scope accepted")
 +	}
-+	nested := streamTestClaims()
++	nested := streamTestClaimsAt(now)
 +	nested["rancherStreamProof"] = compact.Raw
-+	claims = streamTestClaims()
++	claims = streamTestClaimsAt(now)
 +	claims["rancherStreamProof"] = streamTestToken(t, nested).Raw
 +	if _, err = g.proof(streamTestToken(t, claims), "/v1/echo"); err == nil {
 +		t.Fatal("nested proof accepted")
