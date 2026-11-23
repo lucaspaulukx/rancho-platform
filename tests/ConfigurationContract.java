@@ -70,6 +70,13 @@ public class ConfigurationContract {
         check(new CustomizationConfig(schema).enabled("SCHEMA_MIGRATIONS_ENABLED"));
         schema.put("RANCHER_CUSTOMIZATION_ENABLED","false");check(!new CustomizationConfig(schema).enabled("SCHEMA_MIGRATIONS_ENABLED"));
         schema=base();schema.put("RANCHER_SCHEMA_MIGRATIONS_ENABLED","yes");rejects(schema);
+        check(!new CustomizationConfig(base()).enabled("AUDIT_CREDENTIAL_REDACTION_ENABLED"));
+        for(int bits=0;bits<4;bits++) {
+            Map<String,String> audit=base();audit.put("RANCHER_AUDIT_CREDENTIAL_REDACTION_ENABLED",String.valueOf((bits&1)!=0));
+            audit.put("RANCHER_CUSTOMIZATION_ENABLED",String.valueOf((bits&2)!=0));
+            check(new CustomizationConfig(audit).enabled("AUDIT_CREDENTIAL_REDACTION_ENABLED")==((bits&3)==3));
+        }
+        invalid=base();invalid.put("RANCHER_AUDIT_CREDENTIAL_REDACTION_ENABLED","yes");rejects(invalid);
         check(!new CustomizationConfig(base()).enabled("HOST_STREAM_SESSION_GUARD_ENABLED"));
         Map<String,String> hostStreams=base();hostStreams.put("RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED","true");
         rejects(hostStreams);

@@ -14,6 +14,7 @@ printf '%s\n' "$ROOT/code/implementation/host-stats/src/main/java/io/cattle/plat
 for file in StatsAccess StatsPayloadTransport ContainerStatsLinkHandler HostStatsLinkHandler; do
     printf '%s\n' "$ROOT/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/$file.java" >> /lab/sources
 done
+printf '%s\n' "$ROOT/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditServiceImpl.java" "$ROOT/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditCredentialRedactor.java" "$ROOT/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditLogOutPutFilter.java" >> /lab/sources
 /usr/lib/jvm/zulu-8-amd64/bin/javac -encoding UTF-8 -source 8 -target 8 -cp "$WAR/WEB-INF/lib/*:$WAR/WEB-INF/jetty/*" -d /lab/classes @/lab/sources
 cd /lab/classes
 mkdir -p io/cattle/platform/iaas/api/auth/localrbac/migrations
@@ -24,6 +25,7 @@ cp /lab/schema/001-local-groups.sql io/cattle/platform/iaas/api/auth/localrbac/m
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-host-api-0.5.0-SNAPSHOT.jar" io/cattle/platform/host/service/impl/HostApiServiceImpl*.class
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-host-stats-0.5.0-SNAPSHOT.jar" io/cattle/platform/host/stats/api
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-docker-machine-0.5.0-SNAPSHOT.jar" io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher*.class
+/usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-framework-auditing-0.5.0-SNAPSHOT.jar" io/cattle/platform/iaas/api/auditing
 cd "$APP/src/main/resources"
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-app-config-0.5.0-SNAPSHOT.jar" META-INF/cattle/iaas-api/defaults.properties META-INF/cattle/api-server/defaults.properties
 cd "$ROOT/resources/content"

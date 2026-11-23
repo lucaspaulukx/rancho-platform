@@ -5,6 +5,7 @@ import { Modal, Tabs, Alert } from './ui';
 import { useState } from 'react';
 import { version } from '../../package.json';
 const labels: Record<string, string> = {
+  AUDIT_CREDENTIAL_REDACTION_ENABLED: 'Proteção de credenciais na auditoria',
   CUSTOMIZATION_ENABLED: 'Customização da instância',
   SCHEMA_MIGRATIONS_ENABLED: 'Versionamento das tabelas da comunidade',
   LOCAL_RBAC_ENABLED: 'Grupos e RBAC local',

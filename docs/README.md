@@ -145,3 +145,5 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 - [Inventário de dependências e licenças por artefato](80-artifact-dependency-inventory.md).
 
 - [Negociação de métricas grandes e conexões ociosas](81-metrics-payload-transport.md).
+
+- [Proteção de credenciais na auditoria](82-audit-credential-redaction.md).

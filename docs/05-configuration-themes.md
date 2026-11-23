@@ -1,6 +1,14 @@
+# Configuração82 — proteção de credenciais na auditoria
+
+`RANCHER_AUDIT_CREDENTIAL_REDACTION_ENABLED=false` na base, dependente de customização. Quando ligada, retira credenciais estruturadas de novos corpos requestObject/responseObject e protege a projeção da API auditLog, inclusive de registros antigos, com no-store/no-referrer. Preserva ator/ação/status. Recriar somente backend para mudar; Sobre informa estado solicitado/efetivo. Não reescreve histórico nem saneia backups; off reexpõe registros antigos. Aceite físico e ativação moderna são registrados em[82](82-audit-credential-redaction.md).
+
+# Configuração81 — métricas grandes
+
+`RANCHER_METRICS_PAYLOAD_TRANSPORT_ENABLED` é false na base/Java e true no compose moderno; requer protocolo dedicado1 no proxy. `modules.metricsPayloadTransport` é true na configuração pública moderna, ausência/false mantém fluxo anterior. Header só é enviado quando frontend e backend estão habilitados; resposta legada continua aceita. Ver[81](81-metrics-payload-transport.md).
+
 # Configuração79 — sessões dos streams de host
 
-`RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED=false` no backend/base. Exige customização efetiva, imagem com protocolo1 e proxy real compatível. Recriação do backend é necessária para mudar a flag. Off mantém protocolo legado; on exige prova vinculada à sessão e revalida logs/terminal/métricas continuamente. Não revoga API keys nem altera grants. Ainda em validação física e não habilitada por padrão. Ver[79](79-host-stream-session-guard.md). A página Sobre mostra solicitado/efetivo/disponível;1008 informa perda de acesso sem reconexão automática.
+`RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED=false` no backend/base. Exige customização efetiva, imagem com protocolo1 e proxy real compatível. Recriação do backend é necessária para mudar a flag. Off mantém protocolo legado; on exige prova vinculada à sessão e revalida logs/terminal/métricas continuamente. Não revoga API keys nem altera grants. Aceite físico81 pelo proxy concluído; compose moderno habilita por default substituível false, base continua false. Ver[79](79-host-stream-session-guard.md). A página Sobre mostra solicitado/efetivo/disponível;1008 informa perda de acesso sem reconexão automática.
 
 # 05 — Configuração, flags e temas
 
