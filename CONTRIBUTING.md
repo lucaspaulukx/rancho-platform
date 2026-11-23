@@ -18,3 +18,5 @@ The canonical repository is https://github.com/lucaspaulukx/rancho-platform. Pre
 Before committing, stage explicit paths and run `python scripts/check_repository.py`. Before pushing, also run `python scripts/check_public_history.py`; this checks reachable history against configured sensitive values and retired identities, and complements a full secret audit. Record which relevant tests passed and which gates remain open. Features awaiting physical acceptance stay disabled. See [repository workflow](docs/86-repository-workflow.md).
 
 Enable the repository hooks once per checkout with `git config core.hooksPath .githooks`. The pre-commit hook checks staged contents and local backend patches; pre-push checks reachable history. Hooks complement review and can be bypassed by Git, so they are not an authorization boundary.
+
+The source/console workflow checks publication content/history, scanner tests, locked installation, formatting, frontend tests and TypeScript/Vite on GitHub. It has no lab credentials and does not run physical or migration acceptance; document those separately in the PR. See [CI validation](docs/89-pull-request-validation.md).
