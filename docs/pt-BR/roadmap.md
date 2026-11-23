@@ -107,7 +107,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 | ID | Capacidade | Estado e gate restante |
 |---|---|---|
 | OBS01 | Logs/terminal/métricas contextuais | Recortes reais implementados; falta regressão final foco/resize/buffer/environment |
-| OBS02 | Revogar streams abertos | UI/API keys pessoais e compartilhadas de host validadas em recortes; faltam caminhos técnicos e regressão final |
+| OBS02 | Revogar streams abertos | No Docker 29.9.2 através do gateway do Compose moderno, a revogação da sessão de administrador fechou os streams de logs, terminal, métricas do container e métricas do serviço. Uma segunda sessão recebeu dados nos quatro transportes. A cobertura de chaves de API pessoais e compartilhadas é parcial. Repita os casos de desativação e expiração de usuários locais e OIDC e os casos com chaves de API nos artefatos finais. |
 | OBS03 | Soak do build final | Testes nativos de seis minutos verificaram a reconexão do host e cinco streams concorrentes no navegador com uma imagem do console e um host legado. Logs, terminal e métricas de host, container e serviço rodaram juntos com histórico CSV limitado e limpeza confirmada. As métricas de serviço foram ativadas no navegador de teste. Falta o aceite com flags servidas e topologia final |
 | ADM01 | Contas locais/perfil/senha/lifecycle | Implementado; falta matriz final concorrência/admin OIDC/técnicos |
 | ADM02 | Auditoria/settings/processos/replay | Recortes implementados; falta regressão final permissão/privacidade/erro/efeito nativo |
