@@ -137,3 +137,5 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 - [Backup frio completo e ensaio de recuperação](76-complete-recovery-plan.md).
 
 - [Schema runtime e upgrade/rollback original20](77-runtime-schema-migration.md).
+
+- [Plano de migração de acessos diretos para grupos](78-direct-grants-to-groups.md).
