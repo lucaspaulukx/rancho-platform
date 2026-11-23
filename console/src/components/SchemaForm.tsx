@@ -156,7 +156,7 @@ export function schemaPayloadValidationMessage(
   if (key === 'schemaForm.validation.depth') return t(key);
   const field = label?.(name) ?? fieldLabel(name, t);
   if (key === 'schemaForm.validation.minLength' || key === 'schemaForm.validation.maxLength')
-    return t(key, { field, limit: String(limit) });
+    return t(key, { field, limit });
   return t(key, { field });
 }
 
@@ -440,7 +440,7 @@ function EditorField({
   ulimitEditors?: boolean;
   deviceEditors?: boolean;
 }) {
-  const { locale, t } = useI18n();
+  const { formats, locale, t } = useI18n();
   const key = fieldLabelKey(name);
   const defaultLabel = key ? t(key) : humanizeFieldName(name);
   const label = field.label || defaultLabel;
@@ -602,7 +602,7 @@ function EditorField({
                       {t('schemaForm.otherOptions', {
                         label: defaultLabel.toLocaleLowerCase(locale),
                       })}{' '}
-                      <span>{advanced.length}</span>
+                      <span>{formats.number(advanced.length)}</span>
                     </summary>
                     <div>{advanced.map(renderNested)}</div>
                   </details>

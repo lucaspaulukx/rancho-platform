@@ -1,7 +1,6 @@
 import { requestErrorText } from '../request-errors';
 import { useI18n } from '../i18n/provider';
 import { resourceStateLabel } from '../i18n/resource-state';
-import { ptSchemaForm } from '../i18n/domains/schema-form';
 import { localizedNavigation } from '../navigation';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
 import { lazy, Suspense, useEffect, useState } from 'react';
@@ -82,17 +81,7 @@ class ResourceSaveError extends Error {
 }
 function useResourceLabels() {
   const { t } = useI18n();
-  return (name: string) => {
-    const exact = `schemaForm.label.${name}`;
-    const lower = `schemaForm.label.${name.toLowerCase()}`;
-    type Key = Extract<keyof typeof ptSchemaForm, `schemaForm.label.${string}`>;
-    const key = Object.hasOwn(ptSchemaForm, exact)
-      ? (exact as Key)
-      : Object.hasOwn(ptSchemaForm, lower)
-        ? (lower as Key)
-        : undefined;
-    return key ? t(key) : fieldLabel(name);
-  };
+  return (name: string) => fieldLabel(name, t);
 }
 export function ResourcePage({ item }: { item: NavItem }) {
   const app = useApp();

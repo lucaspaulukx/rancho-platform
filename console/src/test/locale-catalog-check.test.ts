@@ -88,6 +88,7 @@ describe('Registered locale catalog gate', () => {
       'resourceValidation',
       'runtime',
       'schedulingEditor',
+      'schemaForm',
       'selectorRows',
       'serviceEditors',
       'serviceUpgradeForm',
@@ -128,6 +129,14 @@ describe('Registered locale catalog gate', () => {
     expect(report.previewCatalogKeyCounts).toEqual(
       Object.fromEntries(previewLocales.map((locale) => [locale, previewScope.length])),
     );
+    expect(report.missingPreviewKeysByLocale).toEqual(
+      Object.fromEntries(
+        previewLocales.map((locale) => [
+          locale,
+          report.registeredEnglishKeys - previewScope.length,
+        ]),
+      ),
+    );
     expect(report.pendingCatalogLocales).toEqual([
       'de-DE',
       'fr-FR',
@@ -141,6 +150,28 @@ describe('Registered locale catalog gate', () => {
     expect(report.interfaceCoverage).toBe('not-measured');
     expect(report.allRoutesTranslated).toBe(false);
     expect(report.failures).toEqual([]);
+  });
+  it('tracks complete registered catalogs without treating them as complete interface coverage', () => {
+    const catalogs = { ...previewCatalogs, 'fr-FR': englishMessages };
+    const report = checkRegisteredCatalogs({
+      ...inputs,
+      previewCatalogs: catalogs,
+      previewSources: previewSourceSnapshot(englishMessages, catalogs),
+    });
+    expect(report.status).toBe('passed');
+    expect(report.missingPreviewKeysByLocale['fr-FR']).toBe(0);
+    expect(report.pendingCatalogLocales).not.toContain('fr-FR');
+    expect(report.allRoutesTranslated).toBe(false);
+  });
+  it('rejects a missing preview catalog even when its source fingerprint is also removed', () => {
+    const { 'fr-FR': _missing, ...catalogs } = previewCatalogs;
+    const report = checkRegisteredCatalogs({
+      ...inputs,
+      previewCatalogs: catalogs,
+      previewSources: previewSourceSnapshot(englishMessages, catalogs),
+    });
+    expect(report.failures).toEqual(['missing-preview-locale']);
+    expect(report.missingPreviewKeysByLocale['fr-FR']).toBe(report.registeredEnglishKeys);
   });
   it('reports invalid preview structure without exposing submitted content', () => {
     const report = checkRegisteredCatalogs({

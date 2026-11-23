@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Resource, Schema } from '../api';
-import { operationCommands, operationContainers } from '../operation-actions';
+import { operationActionLabel, operationCommands, operationContainers } from '../operation-actions';
+import { createTranslator } from '../i18n/messages';
 const stack: Resource = {
   id: 's1',
   type: 'stack',
@@ -43,6 +44,12 @@ const options = {
   restartServices: 2,
 };
 describe('Ações na hierarquia operacional', () => {
+  it('uses the active locale for known schema actions outside the Operations catalog', () => {
+    const { t } = createTranslator('en-US');
+    expect(operationActionLabel(t, 'restorefrombackup')).toBe('Restore from backup');
+    expect(operationActionLabel(t, 'customAction')).toBe('Custom Action');
+  });
+
   it('resolve containers por IDs e não inclui homônimos de outros environments', () => {
     const inventory = {
       stacks: [stack],

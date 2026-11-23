@@ -15,7 +15,7 @@ const defaultTranslator = createTranslator('pt-BR').t;
 
 export function operationActionLabel(t: OperationTranslator, action: string) {
   const key = `operations.action.${action}`;
-  return Object.hasOwn(enOperations, key) ? t(key as ActionMessageKey) : fieldLabel(action);
+  return Object.hasOwn(enOperations, key) ? t(key as ActionMessageKey) : fieldLabel(action, t);
 }
 
 export function operationContainers(

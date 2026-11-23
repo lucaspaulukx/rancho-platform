@@ -18,6 +18,7 @@ const inventoryCodes = [
   'zh-Hans',
 ];
 const checkedLocales = ['en-US', 'pt-BR'];
+const previewLocales = inventoryCodes.filter((code) => !checkedLocales.includes(code));
 const sourceFile = resolve(root, 'src/i18n/preview-sources.json');
 
 function ordered(value) {
@@ -84,7 +85,7 @@ export function checkRegisteredCatalogs({
   const previews = isRecord(previewCatalogs) ? Object.entries(previewCatalogs) : [];
   if (!isRecord(previewCatalogs)) failures.add('invalid-preview-registry');
   for (const [locale, catalog] of previews) {
-    if (!inventoryCodes.includes(locale) || checkedLocales.includes(locale)) {
+    if (!previewLocales.includes(locale)) {
       failures.add('invalid-preview-locale');
       continue;
     }
@@ -96,6 +97,8 @@ export function checkRegisteredCatalogs({
       failures.add('invalid-preview-message-structure');
     }
   }
+  if (previewLocales.some((locale) => !Object.hasOwn(previewCatalogs ?? {}, locale)))
+    failures.add('missing-preview-locale');
   try {
     const expected = previewSourceSnapshot(englishMessages, previewCatalogs);
     if (JSON.stringify(ordered(previewSources)) !== JSON.stringify(ordered(expected)))
@@ -109,6 +112,12 @@ export function checkRegisteredCatalogs({
     inventoryCodes.some((code) => !locales.includes(code))
   )
     failures.add('invalid-original-locale-inventory');
+  const missingPreviewKeysByLocale = Object.fromEntries(
+    previewLocales.map((locale) => [
+      locale,
+      Math.max(0, englishKeys.length - (previewCatalogKeyCounts[locale] ?? 0)),
+    ]),
+  );
   return {
     status: failures.size ? 'failed' : 'passed',
     scope: 'registered-message-domain-only',
@@ -116,7 +125,10 @@ export function checkRegisteredCatalogs({
     registeredPortugueseKeys: portugueseKeys.length,
     checkedCatalogLocales: checkedLocales,
     previewCatalogKeyCounts,
-    pendingCatalogLocales: inventoryCodes.filter((code) => !checkedLocales.includes(code)),
+    missingPreviewKeysByLocale,
+    pendingCatalogLocales: previewLocales.filter(
+      (locale) => missingPreviewKeysByLocale[locale] > 0,
+    ),
     interfaceCoverage: 'not-measured',
     allRoutesTranslated: false,
     failures: [...failures],
