@@ -4,6 +4,14 @@ ROOT=/lab/cattle
 AUTH=$ROOT/code/iaas/auth-logic/src/main/java
 APP=$ROOT/code/packaging/app-config
 WAR=/usr/share/cattle/war
+LIB="$WAR/WEB-INF/lib"
+# Replace the matching runtime family together so the classpath has one version per artifact.
+for artifact in jackson-annotations-2.5.3 jackson-core-2.5.3 jackson-databind-2.5.3 \
+    jackson-module-jaxb-annotations-2.5.3 jackson-jaxrs-json-provider-2.1.2; do
+    test -f "$LIB/$artifact.jar"
+    rm "$LIB/$artifact.jar"
+done
+install -m 0644 /lab/jackson/*.jar "$LIB/"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/dao/impl/AuthDaoImpl.java" "$AUTH/io/cattle/platform/iaas/api/auth/projects/ProjectResourceManager.java" "$AUTH/io/cattle/platform/iaas/api/auth/integration/local/LocalAuthTokenCreator.java" "$APP/src/main/java/io/cattle/platform/app/IaasApiConfig.java" "$APP/src/main/java/io/cattle/platform/app/ApiServerConfig.java" >> /lab/sources
