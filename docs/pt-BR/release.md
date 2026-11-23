@@ -39,6 +39,14 @@ python scripts/artifact_inventory.py scan --output migration-runs/artifact-inven
 
 Projeções CycloneDX públicas permitem identidades/versões/hashes/licenças e relações, excluindo configuração de imagem, environment, caminhos privados e metadados desconhecidos. Nomes de pacotes ainda podem ser privados e exigem revisão. Runtime e lockfile de desenvolvimento são evidências distintas; JS incorporado e Go antigo podem ter detecção incompleta. Licenças desconhecidas são pendências, não aprovação. Não é scanner CVE nem certificação jurídica e não publica automaticamente.
 
+## Instalação limpa isolada
+
+Use duas imagens Linux locais já compiladas. O ensaio usa volumes próprios novos e uma rede privada sem portas publicadas. Verifica a UI clássica, o proxy do console, a migração de schema e a idempotência após reiniciar o backend. O teste usa MySQL embutido com OIDC e redirecionamento moderno do backend desligados.
+
+```sh
+python -m migration.test_fresh_install_lab --backend-image rancho-backend:local --console-image rancho-console:local
+```
+
 ## Aceite final
 
 Use um candidato identificado para autenticação/RBAC/streams, operação contextual, acessibilidade/performance, compatibilidade clássica, instalação nova, upgrade e recuperação/rollback completos. Registre limites/topologias. Configure canal privado de segurança antes de abrir o projeto. Mantenha [migração](migration.md) e [recuperação](recovery.md) vinculadas ao artefato; testes sintéticos não garantem migração universal.

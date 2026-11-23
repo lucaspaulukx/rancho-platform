@@ -121,10 +121,10 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 
 | ID | Capability | State and remaining gate |
 |---|---|---|
-| REL01 | Versioned DB/config migrations | Additive/runtime and synthetic original-engine upgrade validated; complete fresh-package acceptance remains |
+| REL01 | Versioned DB/config migrations | Additive/runtime and synthetic original-engine upgrade validated; isolated fresh boot verified schema and idempotent restart with local images. Final package and federated bootstrap acceptance remain |
 | REL02 | Full Rancher/IdP backup and recovery | Encrypted DB/state/image/isolated-login slices validated; workload/storage/topology completeness remains |
 | REL03 | Frontend/backend rollback | An isolated frontend image rollback verified old tabs, a compatible shared configuration and immutable asset retention. Matching backend and data restoration and classic-client acceptance remain |
-| REL04 | Reproducible distribution | Pins/lockfiles/source CI/inventory available; final bootstrap/install/upgrade/licenses/provenance/security review remains |
+| REL04 | Reproducible distribution | Pins/lockfiles/source CI/inventory available; isolated fresh-install rehearsal verified classic UI and the separate console. Final upgrade, licenses, provenance and security review remain |
 | REL05 | Final security | Pending unified route/action/scope/CSRF/secret/cache/dependency/legacy-risk acceptance |
 | REL06 | Local release acceptance | Pending mandatory gates on one artifact, exact cleanup and reproducible evidence |
 

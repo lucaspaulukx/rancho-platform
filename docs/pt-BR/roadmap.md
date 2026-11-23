@@ -121,10 +121,10 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 
 | ID | Capacidade | Estado e gate restante |
 |---|---|---|
-| REL01 | Migrações versionadas de banco/config | Schema aditivo/runtime e engine original sintético validados; falta aceite completo de pacote fresco |
+| REL01 | Migrações versionadas de banco/config | Schema aditivo/runtime e engine original sintético validados; boot isolado com imagens locais verificou schema e reinício idempotente. Faltam o aceite do pacote final e o bootstrap federado |
 | REL02 | Backup/recuperação Rancher/IdP completos | DB/estado/imagens/login isolado criptografados validados em recortes; faltam workloads/storage/topologias completos |
 | REL03 | Rollback frontend/backend | Rollback isolado da imagem do frontend verificou abas antigas, uma configuração compartilhada compatível e retenção de assets imutáveis. Faltam restauração correspondente de backend e dados e aceite do cliente clássico |
-| REL04 | Distribuição reproduzível | Pins/lockfiles/CI/inventário disponíveis; faltam bootstrap/install/upgrade/licenças/proveniência/segurança finais |
+| REL04 | Distribuição reproduzível | Pins/lockfiles/CI/inventário disponíveis; ensaio de instalação limpa isolado verificou UI clássica e console separado. Faltam upgrade, licenças, proveniência e revisão de segurança finais |
 | REL05 | Segurança final | Pendente aceite unificado rotas/ações/escopos/CSRF/secrets/cache/dependências/risco legado |
 | REL06 | Aceite local de release | Pendentes gates obrigatórios no mesmo artefato, cleanup exato e evidência reproduzível |
 
