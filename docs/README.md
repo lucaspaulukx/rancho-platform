@@ -139,3 +139,5 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 - [Schema runtime e upgrade/rollback original20](77-runtime-schema-migration.md).
 
 - [Plano de migração de acessos diretos para grupos](78-direct-grants-to-groups.md).
+
+- [Guarda de sessões dos streams de host](79-host-stream-session-guard.md).
