@@ -56,7 +56,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 
 | ID | Capability | State and remaining gate |
 |---|---|---|
-| AUTH01 | Local/OIDC, callback, exclusive/autologin/no-access | Two restores of the same backup verified hybrid and exclusive login policies. On the pinned browser pair, Chromium verified real Keycloak login, automatic navigation, callback without manual refresh, no-access reload, logout, invalid ticket handling and recovery from an interrupted redirect or simulated IdP outage. Mode rollback restored the local login and group grants. The remaining session and deep-link combinations still need coverage |
+| AUTH01 | Local/OIDC, callback, exclusive/autologin/no-access | Two restores of the same backup verified hybrid and exclusive login policies. Chromium verified Keycloak login, automatic navigation, callback without manual refresh, no-access reload, logout, invalid tickets and interrupted provider redirects. Mode rollback restored local login and group grants. A local console build returned a reader to the requested Stacks path, environment and fragment after real Keycloak login. The remaining session and deep-link combinations still need coverage |
 | AUTH02 | Current account/global profile | Implemented; final technical-credential regression remains; password reset does not itself revoke JWTs |
 | AUTH03 | Cryptographic expiry | Local/OIDC HTTP and UI-stream slices validated; technical/idle/load completeness remains |
 | AUTH04 | Federated logout and IdP failure | Implemented slices; retain no-loop/no-local-fallback regression in exclusive mode |
