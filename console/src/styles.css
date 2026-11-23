@@ -1086,6 +1086,11 @@ tbody tr:hover {
   border-radius: 5px;
   white-space: nowrap;
 }
+.badge > bdi {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
 .badge.positive {
   color: color-mix(in srgb, var(--success) 65%, var(--text));
   background: color-mix(in srgb, var(--success) 8%, transparent);
@@ -2054,6 +2059,9 @@ input[type='checkbox']:focus-visible {
   flex-direction: column;
   align-items: flex-start;
   gap: 5px;
+}
+.operation-state > .badge {
+  max-inline-size: 100%;
 }
 .operation-state small {
   font-size: 10px;

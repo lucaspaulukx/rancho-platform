@@ -183,6 +183,21 @@ async function checkOperationLayout(page) {
   await page.setViewportSize({ ...mobileViewport, width: 320 });
   await checkText(heading);
   await checkText(stackContext('service'));
+
+  await page.locator('.language-selector select').selectOption('fr-FR');
+  const longState = page
+    .locator('.operation-row.service .operation-state .badge bdi')
+    .filter({ hasText: 'Retour à la version précédente en cours' })
+    .first();
+  await checkText(longState);
+  assert.ok(
+    await longState.evaluate((label) => {
+      const badge = label.closest('.badge').getBoundingClientRect();
+      const column = label.closest('.operation-state').getBoundingClientRect();
+      return badge.left >= column.left - 1 && badge.right <= column.right + 1;
+    }),
+    'a long translated state fits within its column',
+  );
 }
 
 async function paint(page) {
@@ -575,6 +590,11 @@ async function run(
             json.data[0].name = entry.collection === 'stacks' ? longStackName : longEnvironmentName;
             return route.fulfill({ json });
           }
+          if (layout && entry.collection === 'services') {
+            const json = JSON.parse(entry.body);
+            json.data[0].state = 'rolling-back';
+            return route.fulfill({ json });
+          }
           return route.fulfill({ contentType: 'application/json', body: entry.body });
         }
         if (url.pathname === '/console/console-config.json') {
@@ -586,7 +606,7 @@ async function run(
             config.localization = {
               enabled: true,
               defaultLocale: 'pt-BR',
-              availableLocales: ['pt-BR', 'en-US', 'fa-IR'],
+              availableLocales: ['pt-BR', 'en-US', 'fa-IR', 'fr-FR'],
               selectable: true,
               detectBrowser: false,
               preview: true,

@@ -104,6 +104,8 @@ Defina `PLAYWRIGHT_MODULES` e `CHROMIUM_EXECUTABLE` se o Playwright ou o Chromiu
 
 Defina `UX06_LAYOUT_ONLY=1` para rodar somente as verificações de layout estreito e RTL. Elas exercitam nomes longos de environment e stack nas abas Serviços e Containers e conferem o alinhamento da barra da árvore e do total de métricas em persa.
 
+O teste de layout também verifica um rótulo longo de estado em francês a 320 px.
+
 Defina `UX06_SOAK_SECONDS` como um inteiro de 60 a 900 para executar somente o soak de inventário. Em uma aba visível do Chromium, o teste verifica atualizações periódicas e recuperação automática após duas falhas sintéticas de leitura. O relatório inclui heap após coleta de lixo, tempo de trabalho do renderer, escopo e contagem de linhas.
 
 ### Soak de métricas nativas do host
