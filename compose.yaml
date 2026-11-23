@@ -43,7 +43,7 @@ services:
     depends_on:
       - keycloak
   keycloak:
-    image: quay.io/keycloak/keycloak:26.0.8@sha256:09a381c715ab0b111835b70f2905955274843a219c6f27efb348e4d9f4086858
+    image: quay.io/keycloak/keycloak:26.8.2@sha256:c68e286cacd87b942ac1939a0a1481461109d6acd3a57dc496969a319a76bbf0
     container_name: rancher16-keycloak-lab
     command: ["start-dev", "--import-realm"]
     environment:
@@ -52,6 +52,8 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: labadmin
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_HOSTNAME: http://localhost:18081
+      KC_DB_USERNAME: sa
+      KC_DB_PASSWORD: password
     ports:
       - "127.0.0.1:18081:8080"
     volumes:
