@@ -5,6 +5,7 @@ import { allPages, api, type Resource, type Schema } from '../api';
 import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import {
+  NetworkPolicyValidationError,
   policyChanges,
   policyDraft,
   policyScopes,
@@ -258,7 +259,8 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
           </>
         )}
         {save.error &&
-          (save.error instanceof NetworkPolicyPageError ? (
+          (save.error instanceof NetworkPolicyPageError ||
+          save.error instanceof NetworkPolicyValidationError ? (
             <Alert>{t(save.error.key)}</Alert>
           ) : (
             <ErrorState error={save.error} />

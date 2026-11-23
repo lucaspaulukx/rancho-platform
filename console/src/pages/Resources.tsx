@@ -32,6 +32,7 @@ import { ResourceDetails } from '../components/ResourceDetails';
 import { WorkloadChildren, WorkloadList } from './Workloads';
 import { isUserAction } from '../resource-actions';
 import {
+  DataValidationError,
   dataEditorSchema,
   dataResourceMetadata,
   isDataKind,
@@ -123,7 +124,7 @@ function ResourceContext({ item }: { item: NavItem }) {
   const errorText = (error: Error) =>
     error instanceof ResourceSaveError
       ? t('resourcesPage.saveFailed', { status: error.status })
-      : error instanceof ResourcePageError
+      : error instanceof ResourcePageError || error instanceof DataValidationError
         ? t(error.key)
         : error.message;
   const app = useApp();

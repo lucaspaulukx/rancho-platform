@@ -1,4 +1,22 @@
 import type { Resource, Schema } from './api';
+import { ptBalancerRulesPanel } from './i18n/domains/balancer-rules-panel';
+
+type BalancerRuleValidationKey = Extract<
+  keyof typeof ptBalancerRulesPanel,
+  `balancerRulesPanel.validation.${string}`
+>;
+type NamedBalancerRuleValidationKey =
+  'balancerRulesPanel.validation.unknownField' | 'balancerRulesPanel.validation.schemaUnavailable';
+type BalancerRuleFailure =
+  | { key: Exclude<BalancerRuleValidationKey, NamedBalancerRuleValidationKey> }
+  | { key: NamedBalancerRuleValidationKey; name: string };
+
+export class BalancerRuleValidationError extends Error {
+  constructor(readonly failure: BalancerRuleFailure) {
+    const message = ptBalancerRulesPanel[failure.key];
+    super('name' in failure ? message.replace('{name}', () => failure.name) : message);
+  }
+}
 
 export interface BalancerRuleDraft {
   key: number;
@@ -14,7 +32,7 @@ export interface BalancerRuleDraft {
 type ObjectValue = Record<string, unknown>;
 const object = (value: unknown): ObjectValue => {
   if (!value || typeof value !== 'object' || Array.isArray(value))
-    throw new Error('Configuração do balanceador indisponível.');
+    throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.configuration' });
   return value as ObjectValue;
 };
 export function canEditBalancer(resource: Resource, schema?: Schema, enabled = false) {
@@ -56,7 +74,7 @@ export function assertBalancerUnchanged(before: Resource, after: Resource) {
     before.type !== after.type ||
     balancerSnapshot(before) !== balancerSnapshot(after)
   )
-    throw new Error('O balanceador foi alterado por outro cliente. Feche e reabra o painel.');
+    throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.changed' });
 }
 interface Binding {
   port: number;
@@ -69,12 +87,17 @@ function bindings(launch: ObjectValue) {
   for (const access of ['public', 'internal'] as const) {
     const values = launch[access === 'public' ? 'ports' : 'expose'] ?? [];
     if (!Array.isArray(values))
-      throw new Error('Formato de portas não suportado. Use a edição nativa.');
+      throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.portFormat' });
     for (const value of values) {
-      if (typeof value !== 'string') throw new Error('Binding de porta inválido.');
+      if (typeof value !== 'string')
+        throw new BalancerRuleValidationError({
+          key: 'balancerRulesPanel.validation.invalidBinding',
+        });
       const match = /^(?:(\[[0-9a-fA-F:.]+\]|[0-9.]+):)?(\d+):(\d+)\/(tcp|udp)$/.exec(value);
       if (!match || match[2] !== match[3] || (access === 'internal' && match[1]))
-        throw new Error('Este binding exige a edição nativa. Nenhuma porta será convertida.');
+        throw new BalancerRuleValidationError({
+          key: 'balancerRulesPanel.validation.nativeBinding',
+        });
       result.push({ port: port(match[2]), protocol: match[4], access, ip: match[1] || '' });
     }
   }
@@ -87,7 +110,7 @@ function port(value: string) {
     Number(value) < 1 ||
     Number(value) > 65535
   )
-    throw new Error('Informe portas inteiras entre 1 e 65535.');
+    throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.port' });
   return Number(value);
 }
 export function editableBalancerRules(source: Resource): BalancerRuleDraft[] {
@@ -95,7 +118,7 @@ export function editableBalancerRules(source: Resource): BalancerRuleDraft[] {
     launch = object(source.launchConfig);
   const rules = config.portRules ?? [];
   if (!Array.isArray(rules) || rules.length > 100)
-    throw new Error('Este balanceador exige a edição nativa.');
+    throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.native' });
   const ports = bindings(launch);
   const used = new Set<Binding>();
   const rows = rules.map((value, key): BalancerRuleDraft => {
@@ -107,15 +130,13 @@ export function editableBalancerRules(source: Resource): BalancerRuleDraft[] {
         (k) => rule[k] !== undefined && rule[k] !== null && rule[k] !== '',
       )
     )
-      throw new Error(
-        'Há regras avançadas. Use a edição nativa para preservar todos os protocolos e destinos.',
-      );
+      throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.advanced' });
     if (rule.protocol === 'tcp' && (rule.hostname || rule.path))
-      throw new Error('Regra TCP avançada: use a edição nativa.');
+      throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.advancedTcp' });
     const sourcePort = port(String(rule.sourcePort));
     const found = ports.filter((v) => v.port === sourcePort && v.protocol === 'tcp');
     if (found.length !== 1)
-      throw new Error('Listener ambíguo ou sem binding. Use a edição nativa.');
+      throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.listener' });
     used.add(found[0]);
     return {
       key,
@@ -130,7 +151,7 @@ export function editableBalancerRules(source: Resource): BalancerRuleDraft[] {
     };
   });
   if (ports.some((v) => !used.has(v)))
-    throw new Error('Há portas sem regra correspondente. Use a edição nativa.');
+    throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.unmatchedPorts' });
   return rows;
 }
 // Known immutable fields are server metadata. Unknown fields block the edit instead of being discarded.
@@ -141,15 +162,18 @@ function nativeObject(
   depth = 0,
 ): ObjectValue {
   if (!schema || depth > 12)
-    throw new Error('Contrato incompleto. Reabra o painel ou use a edição nativa.');
+    throw new BalancerRuleValidationError({
+      key: 'balancerRulesPanel.validation.incompleteContract',
+    });
   const result: ObjectValue = {};
   for (const [name, entry] of Object.entries(value)) {
     if (['type', 'links', 'actions', 'id'].includes(name) || entry === undefined) continue;
     const field = schema.resourceFields[name];
     if (!field)
-      throw new Error(
-        `Campo não reconhecido: ${name}. Use a edição nativa para preservar a configuração.`,
-      );
+      throw new BalancerRuleValidationError({
+        key: 'balancerRulesPanel.validation.unknownField',
+        name,
+      });
     if (!field.create) continue;
     const array = /^array\[(.+)\]$/.exec(field.type)?.[1];
     if (entry === null) result[name] = null;
@@ -166,7 +190,10 @@ function nativeObject(
       !field.type.startsWith('map[') &&
       !['json', 'object'].includes(field.type)
     )
-      throw new Error(`Schema indisponível: ${name}.`);
+      throw new BalancerRuleValidationError({
+        key: 'balancerRulesPanel.validation.schemaUnavailable',
+        name,
+      });
     else result[name] = structuredClone(entry);
   }
   return result;
@@ -183,7 +210,7 @@ export function prepareBalancerRules(
     source.accountId !== environment ||
     !canEditBalancer(source, schemas.loadBalancerService, true)
   )
-    throw new Error('A alteração do balanceador não está disponível neste contexto.');
+    throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.unavailable' });
   const eligibleStack = (id: unknown) =>
     stacks.some(
       (s) =>
@@ -194,9 +221,12 @@ export function prepareBalancerRules(
         s.state === 'active',
     );
   if (!eligibleStack(source.stackId))
-    throw new Error('A stack do balanceador não está disponível.');
+    throw new BalancerRuleValidationError({
+      key: 'balancerRulesPanel.validation.stackUnavailable',
+    });
   const original = editableBalancerRules(source);
-  if (!rows.length || rows.length > 100) throw new Error('Mantenha entre 1 e 100 regras.');
+  if (!rows.length || rows.length > 100)
+    throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.ruleCount' });
   for (const key of [
     'protocol',
     'sourcePort',
@@ -207,13 +237,13 @@ export function prepareBalancerRules(
     'priority',
   ])
     if (!schemas.portRule?.resourceFields[key]?.create)
-      throw new Error('O contrato de regras mudou. Reabra o painel.');
+      throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.ruleContract' });
   if (
     !schemas.lbConfig?.resourceFields.portRules?.create ||
     !schemas.launchConfig?.resourceFields.ports?.create ||
     !schemas.launchConfig?.resourceFields.expose?.create
   )
-    throw new Error('Contrato de portas indisponível.');
+    throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.portContract' });
   const config = object(source.lbConfig),
     launch = object(source.launchConfig);
   const oldRules = (config.portRules || []) as ObjectValue[];
@@ -226,18 +256,22 @@ export function prepareBalancerRules(
     exposed = new Set<string>();
   const rules = rows.map((row, index) => {
     if (!Number.isSafeInteger(row.key) || row.key < 0 || keys.has(row.key))
-      throw new Error('Identificador de regra duplicado ou inválido.');
+      throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.ruleKey' });
     keys.add(row.key);
     if (!['http', 'tcp'].includes(row.protocol) || !['public', 'internal'].includes(row.access))
-      throw new Error('Protocolo ou acesso inválido.');
+      throw new BalancerRuleValidationError({
+        key: 'balancerRulesPanel.validation.protocolAccess',
+      });
     const previous = original.find((v) => v.key === row.key);
     if (row.sourceIp !== (previous?.sourceIp || ''))
-      throw new Error('O IP de publicação existente deve ser preservado.');
+      throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.preservedIp' });
     const src = port(row.sourcePort),
       target = port(row.targetPort);
     const ruleFields = schemas.portRule.resourceFields;
     if (ruleFields.protocol.options && !ruleFields.protocol.options.includes(row.protocol))
-      throw new Error('O protocolo não está mais disponível no contrato atual.');
+      throw new BalancerRuleValidationError({
+        key: 'balancerRulesPanel.validation.protocolContract',
+      });
     for (const [name, value] of [
       ['sourcePort', src],
       ['targetPort', target],
@@ -247,7 +281,7 @@ export function prepareBalancerRules(
         (field.min !== undefined && value < field.min) ||
         (field.max !== undefined && value > field.max)
       )
-        throw new Error('A porta está fora dos limites do contrato atual.');
+        throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.portLimits' });
     }
 
     const service = services.find((v) => v.id === row.serviceId);
@@ -260,7 +294,7 @@ export function prepareBalancerRules(
       service.id === source.id ||
       !eligibleStack(service.stackId)
     )
-      throw new Error('Escolha um serviço de aplicação disponível neste environment.');
+      throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.target' });
     const hostname = row.hostname.trim(),
       path = row.path.trim();
     if (
@@ -271,17 +305,20 @@ export function prepareBalancerRules(
       path.length > 2048 ||
       (path && !path.startsWith('/'))
     )
-      throw new Error('Revise hostname e caminho HTTP. O caminho deve começar com /.');
+      throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.hostnamePath' });
     const listener = JSON.stringify([
       row.protocol,
       row.access,
       row.access === 'public' ? row.sourceIp : '',
     ]);
     if (listeners.has(src) && listeners.get(src) !== listener)
-      throw new Error('Regras na mesma porta precisam usar o mesmo protocolo, acesso e IP.');
+      throw new BalancerRuleValidationError({ key: 'balancerRulesPanel.validation.portConflict' });
     listeners.set(src, listener);
     const route = JSON.stringify([src, hostname.toLowerCase(), path]);
-    if (routes.has(route)) throw new Error('Não repita a mesma rota de entrada.');
+    if (routes.has(route))
+      throw new BalancerRuleValidationError({
+        key: 'balancerRulesPanel.validation.routeDuplicate',
+      });
     routes.add(route);
     const binding = `${src}:${src}/tcp`;
     if (row.access === 'public') published.add((row.sourceIp ? row.sourceIp + ':' : '') + binding);

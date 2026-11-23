@@ -1,4 +1,16 @@
 import type { Resource, Schema } from './api';
+import { ptNetworkPoliciesPage } from './i18n/domains/network-policies-page';
+
+type PolicyValidationKey = Extract<
+  keyof typeof ptNetworkPoliciesPage,
+  `networkPoliciesPage.validation.${string}`
+>;
+
+export class NetworkPolicyValidationError extends Error {
+  constructor(readonly key: PolicyValidationKey) {
+    super(ptNetworkPoliciesPage[key]);
+  }
+}
 
 export const policyScopes = ['linked', 'service', 'stack'] as const;
 export type PolicyScope = (typeof policyScopes)[number];
@@ -87,14 +99,14 @@ export function preparePolicy(
     current.state !== 'active' ||
     !current.links.self
   )
-    throw new Error('A rede não está disponível neste environment.');
+    throw new NetworkPolicyValidationError('networkPoliciesPage.validation.networkUnavailable');
   if (
     schema.id !== 'network' ||
     !schema.resourceMethods?.includes('PUT') ||
     !schema.resourceFields.policy?.update ||
     !schema.resourceFields.defaultPolicyAction?.update
   )
-    throw new Error('Sua permissão de alterar políticas não está mais disponível.');
+    throw new NetworkPolicyValidationError('networkPoliciesPage.validation.permissionChanged');
   if (
     !managers.some(
       (value) =>
@@ -105,16 +117,16 @@ export function preparePolicy(
         value.healthState === 'healthy',
     )
   )
-    throw new Error('O gerenciador de políticas precisa estar ativo e saudável.');
+    throw new NetworkPolicyValidationError('networkPoliciesPage.validation.managerUnavailable');
   if (!policyDraft(current))
-    throw new Error('Esta rede contém regras avançadas que devem ser preservadas.');
+    throw new NetworkPolicyValidationError('networkPoliciesPage.validation.advancedRules');
   if (policySnapshot(original) !== policySnapshot(current))
-    throw new Error('As políticas mudaram. Reabra o painel antes de salvar.');
+    throw new NetworkPolicyValidationError('networkPoliciesPage.validation.rulesChanged');
   if (
     !action(draft.defaultPolicyAction) ||
     policyScopes.some((scope) => !action(draft.within[scope]))
   )
-    throw new Error('Selecione permitir ou bloquear para cada regra.');
+    throw new NetworkPolicyValidationError('networkPoliciesPage.validation.action');
   return {
     defaultPolicyAction: draft.defaultPolicyAction,
     policy: policyScopes.map((within) => ({

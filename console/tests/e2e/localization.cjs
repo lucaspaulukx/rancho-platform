@@ -395,6 +395,27 @@ async function main() {
     simulatedFailures === 1 && recoveryPage.url() === recoveryUrl &&
     await recoveryPage.locator('html').getAttribute('lang') === 'fa-IR');
   await closeContext(recoveryContext);
+  result.stage = 'registry-validation';
+  const registryPage = await page(authenticated);
+  const registryUrl = origin + '/console/registries?env=1a12';
+  await registryPage.goto(registryUrl);
+  await registryPage.locator('.language-selector select').selectOption('pt-BR');
+  await registryPage.locator('main .page-actions').getByRole('button', { name: /^Criar / }).click();
+  const registryEditor = registryPage.getByRole('dialog');
+  const registryName = registryEditor.getByLabel('Nome', { exact: true });
+  const registryAddress = registryEditor.getByLabel(/^Endereço do registry(?: \*)?$/);
+  await registryName.fill('synthetic-registry');
+  await registryAddress.fill('ftp://registry.invalid');
+  await registryEditor.getByRole('button', { name: 'Salvar', exact: true }).click();
+  await registryEditor.getByText('Informe um endereço HTTP ou HTTPS para o registry.', { exact: true }).waitFor();
+  const localePeer = await page(authenticated);
+  await localePeer.goto(registryUrl);
+  await localePeer.locator('.language-selector select').selectOption('en-US');
+  await registryEditor.getByText('Enter an HTTP or HTTPS registry address.', { exact: true }).waitFor();
+  check('registry validation translates with the dialog open and retains the address draft',
+    await registryEditor.getByLabel(/^Registry address(?: \*)?$/).inputValue() === 'ftp://registry.invalid' &&
+    await registryEditor.getByLabel('Name', { exact: true }).inputValue() === 'synthetic-registry' &&
+    registryPage.url() === registryUrl);
   check('no browser HTTP mutations or external navigation', result.blockedRequests === 0);
   check('no JavaScript errors', result.pageErrors === 0);
   result.status = 'passed';

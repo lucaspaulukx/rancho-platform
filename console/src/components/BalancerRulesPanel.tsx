@@ -12,6 +12,7 @@ import {
   canEditBalancer,
   editableBalancerRules,
   prepareBalancerRules,
+  BalancerRuleValidationError,
   type BalancerRuleDraft,
 } from '../balancer-rules';
 import {
@@ -62,8 +63,14 @@ export default function BalancerRulesPanel({
   onSaved: (value: Resource) => void;
 }) {
   const { t } = useI18n();
-  const errorText = (error: Error) =>
-    error instanceof BalancerPanelError ? t(error.key) : error.message;
+  function errorText(error: Error) {
+    if (error instanceof BalancerPanelError) return t(error.key);
+    if (error instanceof BalancerRuleValidationError) {
+      const { failure } = error;
+      return 'name' in failure ? t(failure.key, { name: failure.name }) : t(failure.key);
+    }
+    return error.message;
+  }
   const app = useApp(),
     scope = useActionScope(),
     client = useQueryClient(),
@@ -123,7 +130,7 @@ export default function BalancerRulesPanel({
   try {
     if (data) original = editableBalancerRules(data.source);
   } catch (e) {
-    unsupported = e instanceof Error ? e.message : t('balancerRulesPanel.unsupported');
+    unsupported = e instanceof Error ? errorText(e) : t('balancerRulesPanel.unsupported');
   }
   const rows = draft || original;
   const allowed =
