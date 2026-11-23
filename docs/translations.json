@@ -88,8 +88,8 @@
         "pt-BR": "docs/pt-BR/migration.md",
         "en": "docs/en/migration.md"
       },
-      "reviewedSourceSha256": "bd6dd1c781145cbfe276458e131c8ae01095b5fb5aabc3b5bf9aced538aa43f4",
-      "reviewedTranslationSha256": "006231b45002d788765fa32ad0c49f0b1a4d13998034aa35d5f908f0b910f29f"
+      "reviewedSourceSha256": "2a0f67e0379933fc8973e55a12788c0604dedd8f336d230f6d8b523fea419503",
+      "reviewedTranslationSha256": "aec106e0d3907f66eabc67a06ff4fdf1473b43afb45ebf5daee6fb330f5fcdff"
     },
     {
       "source": "docs/pt-BR/recovery.md",
