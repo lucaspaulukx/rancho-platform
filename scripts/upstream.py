@@ -23,7 +23,7 @@ def export_patch(folder):
         if not item:
             continue
         source = folder / item
-        if source.suffix not in {'.java', '.json', '.properties', '.xml'}:
+        if source.suffix not in {'.java', '.json', '.properties', '.xml', '.go'}:
             raise RuntimeError('Unexpected untracked file; review upstream checkout before export.')
         lines = source.read_text(encoding='utf-8').splitlines(keepends=True)
         content += f'diff --git a/{item} b/{item}\nnew file mode 100644\n'.encode()

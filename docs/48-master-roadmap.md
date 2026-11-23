@@ -141,3 +141,8 @@ Atualização78: planner consistente só leitura,13 testes incluindo50×20 sem e
 Atualização78 API:35 checks de coexistência/cutover/rollback nativos passaram com matrix60,5 fontes apenas grupo, negação readonly405/admin404 com controles positivos, revogação na sessão e stale revision409. Owner direto preservado e origem intacta; somente laboratório fixo. Não há apply público nem CAS de lista nativa/aceite concorrente. OBS02 logs/exec/métricas segue prioridade de segurança aberta.
 
 Atualização79 baseline: host1h1 retomado sem novo registro; falha real em logs/exec/métricas após revogar sessão UI (HTTP401, novosWS101, sockets abertos e dados/entrada posteriores). Controles saudáveis e cleanup preservou configs/volumes. Guarda Go ainda não implementada. Fonte proxyv0.23.12 compila/testa com Go1.27.3 isolado; prioridade corrigir em flag independente antes do aceite.
+
+## Checkpoint79 — implementação em validação (05/11/2026)
+
+Guarda opcional de logs/exec/métricas implementada em patches Cattle+proxy Go pinados; defaultfalse, prova compacta RS256, revalidação de sessão/conta/role/escopo, renovação privada e encerramento1008. Java143 configuração+26 regras+12 readiness+31 logout+10 writer; testes Go upstream/novos e race, frontend608/71+TypeScript e build Linux aprovados. Pacote limpo do índice clona/aplica/checka os dois upstreams e compila sem artefatos privados; testes Go não usam egress. Console nova publicada somente no laboratório. Backend de laboratório recebeu artefato novo com proteção off, sem alteração de schema. Matriz física on/off e identidades ainda em validação: primeiro off sofreu churn autônomo do scheduler1i956; guardar evidência e não afirmar aceite. OBS02, carga e demais gates48 permanecem abertos. Ver79 para detalhes/limites.
+

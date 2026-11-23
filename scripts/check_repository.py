@@ -22,7 +22,7 @@ def main():
             raise RuntimeError('Review symlinks explicitly before adding them to the public package.')
         if stage != b'0':
             raise RuntimeError('Resolve index conflicts before committing.')
-        if path.startswith(('cattle/', 'ui/', 'rancher/', 'references/', 'migration-runs/', 'backups/', 'evidence/')) or '/node_modules/' in path or path.endswith(('.dump', '.dpapi', '.enc', '.log')) or Path(path).name == '.env' or (path.endswith('.sql') and not path.startswith('migration/sql/')):
+        if path.startswith(('cattle/', 'websocket-proxy/', 'ui/', 'rancher/', 'references/', 'migration-runs/', 'backups/', 'evidence/')) or '/node_modules/' in path or path.endswith(('.dump', '.dpapi', '.enc', '.log')) or Path(path).name == '.env' or (path.endswith('.sql') and not path.startswith('migration/sql/')):
             raise RuntimeError('Private/generated artifact found in index; path withheld.')
         blobs[blob] = path
     values = []

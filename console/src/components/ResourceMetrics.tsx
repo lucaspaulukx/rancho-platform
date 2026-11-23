@@ -105,9 +105,15 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
         socket.onerror = () => {
           if (!disposed) setError('A conexão de métricas falhou. Tente conectar novamente.');
         };
-        socket.onclose = () => {
+        socket.onclose = (event) => {
           if (heartbeat) clearInterval(heartbeat);
-          if (!disposed) setStatus('closed');
+          if (!disposed) {
+            setStatus('closed');
+            if (event?.code === 1008)
+              setError(
+                'As métricas foram encerradas porque sua sessão ou permissão não está mais disponível.',
+              );
+          }
         };
         heartbeat = setInterval(() => {
           if (!received.current || Date.now() - received.current > 30_000) setStatus('stale');

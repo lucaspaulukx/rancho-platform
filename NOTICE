@@ -4,7 +4,9 @@ Independent community extension for Rancher 1.6 Docker/Cattle.
 This project is not an official Rancher release or an endorsement by its maintainers.
 
 Backend patches target the Apache-2.0-licensed rancher/cattle source at the
-commit recorded in upstream.json. Original upstream notices remain in that source.
+commit recorded in upstream.json. The host stream proxy patch targets the
+Apache-2.0-licensed rancher/websocket-proxy source pinned in the same file.
+Original upstream notices and vendored dependency licenses remain in those sources.
 The legacy UI extension derives from rancher/ui, whose license is preserved
 in legacy-ui/LICENSE. Rancher names, symbols and wordmarks identify the
 upstream product; their inclusion does not transfer trademark rights.

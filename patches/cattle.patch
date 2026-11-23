@@ -270,6 +270,56 @@ index aec39a6..f2572fa 100644
          Map<String, Object> project = CollectionUtils.toMap(apiRequest.getRequestObject());
          if (authDao.getAccountById(policy.getAccountId()).getKind().equalsIgnoreCase(ProjectConstants.TYPE)) {
              throw new ClientVisibleException(ResponseCodes.FORBIDDEN);
+diff --git a/code/implementation/docker/machine/src/main/java/io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher.java b/code/implementation/docker/machine/src/main/java/io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher.java
+index 2d075e3..a611fa1 100644
+--- a/code/implementation/docker/machine/src/main/java/io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher.java
++++ b/code/implementation/docker/machine/src/main/java/io/cattle/platform/docker/machine/launch/WebsocketProxyLauncher.java
+@@ -101,6 +101,8 @@ public class WebsocketProxyLauncher extends GenericServiceLauncher {
+         env.clear();
+         String cattleProxyAddress = "localhost:" + getProxiedPort();
+ 
++        if (io.cattle.platform.iaas.api.auth.localrbac.CustomizationConfig.CURRENT.enabled("HOST_STREAM_SESSION_GUARD_ENABLED")) { env.put("PROXY_HOST_STREAM_GUARD_KEY",io.cattle.platform.iaas.api.auth.localrbac.UiHostStreamSessionGuard.proxyKey()); }
++        env.put("PROXY_HOST_STREAM_SESSION_GUARD_ENABLED", String.valueOf(io.cattle.platform.iaas.api.auth.localrbac.CustomizationConfig.CURRENT.enabled("HOST_STREAM_SESSION_GUARD_ENABLED")));
+         env.put("PATH", System.getenv("PATH"));
+         env.put("PROXY_LISTEN_ADDRESS", ":" + getProxyPort());
+         env.put("PROXY_TLS_LISTEN_ADDRESS", ":" + getProxyPort());
+diff --git a/code/implementation/host-api/pom.xml b/code/implementation/host-api/pom.xml
+index 9899e69..42678fb 100644
+--- a/code/implementation/host-api/pom.xml
++++ b/code/implementation/host-api/pom.xml
+@@ -9,6 +9,11 @@
+         <relativePath>../../parent/pom.xml</relativePath>
+     </parent>
+     <dependencies>
++        <dependency>
++            <groupId>io.cattle</groupId>
++            <artifactId>cattle-iaas-auth-logic</artifactId>
++            <version>${project.version}</version>
++        </dependency>
+         <dependency>
+             <groupId>io.cattle</groupId>
+             <artifactId>cattle-iaas-logic-common</artifactId>
+diff --git a/code/implementation/host-api/src/main/java/io/cattle/platform/host/service/impl/HostApiServiceImpl.java b/code/implementation/host-api/src/main/java/io/cattle/platform/host/service/impl/HostApiServiceImpl.java
+index 0972b21..b88af50 100644
+--- a/code/implementation/host-api/src/main/java/io/cattle/platform/host/service/impl/HostApiServiceImpl.java
++++ b/code/implementation/host-api/src/main/java/io/cattle/platform/host/service/impl/HostApiServiceImpl.java
+@@ -39,6 +39,7 @@ public class HostApiServiceImpl implements HostApiService {
+     ObjectManager objectManager;
+     TokenService tokenService;
+     HostApiRSAKeyProvider keyProvider;
++    @Inject io.cattle.platform.iaas.api.auth.localrbac.UiHostStreamSessionGuard uiStreamGuard;
+ 
+     @Override
+     public HostApiAccess getAccess(ApiRequest request, Long hostId, Map<String, Object> data, String... resourcePathSegments) {
+@@ -52,7 +53,7 @@ public class HostApiServiceImpl implements HostApiService {
+             return null;
+         }
+ 
+-        String token = getToken(host, data, expiration);
++        String token = getToken(host, uiStreamGuard.data(request, host, data, resourcePathSegments), expiration);
+         if (token == null) {
+             return null;
+         }
 diff --git a/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java b/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
 index 40fe2eb..b7c2c10 100644
 --- a/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
@@ -284,7 +334,7 @@ index 40fe2eb..b7c2c10 100644
          return handler;
      }
 diff --git a/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java b/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java
-index e017f43..7b7586b 100644
+index e017f43..78462b3 100644
 --- a/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java
 +++ b/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java
 @@ -26,6 +26,9 @@ import io.cattle.platform.iaas.api.auditing.ResourceIdInputFilter;
@@ -297,10 +347,13 @@ index e017f43..7b7586b 100644
  import io.cattle.platform.iaas.api.auth.dao.impl.AuthTokenDaoImpl;
  import io.cattle.platform.iaas.api.auth.dynamic.DynamicSchemaAuthorizationProvider;
  import io.cattle.platform.iaas.api.auth.identity.AccountOutputFilter;
-@@ -712,6 +715,22 @@ public class IaasApiConfig {
+@@ -712,6 +715,25 @@ public class IaasApiConfig {
          return new AuthDaoImpl();
      }
  
++    @Bean
++    io.cattle.platform.iaas.api.auth.localrbac.UiHostStreamSessionGuard UiHostStreamSessionGuard() { return new io.cattle.platform.iaas.api.auth.localrbac.UiHostStreamSessionGuard(); }
++
 +    @Bean
 +    LocalGroupStore LocalGroupStore() { return new LocalGroupStore(); }
 +
@@ -512,7 +565,7 @@ diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth
 new file mode 100644
 --- /dev/null
 +++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CustomizationConfig.java
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,74 @@
 +package io.cattle.platform.iaas.api.auth.localrbac;
 +
 +import java.util.*;
@@ -523,12 +576,13 @@ new file mode 100644
 +    private final Map<String,Boolean> requested = new LinkedHashMap<>();
 +    private final Map<String,Boolean> effective = new LinkedHashMap<>();
 +    private final boolean oidcConfigured;
++    private final boolean streamProxyConfigured;
 +
 +    public CustomizationConfig(Map<String,String> env) {
-+        String[] names={"CUSTOMIZATION_ENABLED","SCHEMA_MIGRATIONS_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
++        String[] names={"CUSTOMIZATION_ENABLED","SCHEMA_MIGRATIONS_ENABLED","HOST_STREAM_SESSION_GUARD_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
 +            "ENV_CREATION_ADMIN_ONLY","DISABLE_AUTO_ENVIRONMENT","CATALOG_WRITE_GUARD_ENABLED","SESSION_ACCOUNT_GUARD_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED","OIDC_LOGIN_PREFLIGHT_ENABLED","OIDC_FEDERATED_LOGOUT_ENABLED","OIDC_ONLY","OIDC_AUTO_LOGIN","MODERN_UI_ENABLED"};
 +        for (String name:names) {
-+            boolean fallback=!(name.equals("SCHEMA_MIGRATIONS_ENABLED") || name.equals("OIDC_FEDERATED_LOGOUT_ENABLED") || name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
++            boolean fallback=!(name.equals("HOST_STREAM_SESSION_GUARD_ENABLED") || name.equals("SCHEMA_MIGRATIONS_ENABLED") || name.equals("OIDC_FEDERATED_LOGOUT_ENABLED") || name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
 +            String value=env.get("RANCHER_"+name);
 +            if(value!=null && !value.equals("true") && !value.equals("false")) { throw new IllegalArgumentException("Invalid boolean: RANCHER_"+name); }
 +            requested.put(name,value==null?fallback:Boolean.valueOf(value));
@@ -557,7 +611,9 @@ new file mode 100644
 +        }
 +        effective.putAll(requested);
 +        boolean custom=requested.get("CUSTOMIZATION_ENABLED");
-+        for(String name:new String[]{"SCHEMA_MIGRATIONS_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED"}) {
++        streamProxyConfigured="1".equals(env.get("RANCHER_HOST_STREAM_PROXY_PROTOCOL"));
++        if(custom && requested.get("HOST_STREAM_SESSION_GUARD_ENABLED") && !streamProxyConfigured) { throw new IllegalArgumentException("Host stream guard requires a compatible proxy build"); }
++        for(String name:new String[]{"SCHEMA_MIGRATIONS_ENABLED","HOST_STREAM_SESSION_GUARD_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED"}) {
 +            effective.put(name,custom && requested.get(name));
 +        }
 +        effective.put("OIDC_ENABLED",effective.get("OIDC_ENABLED") && oidcConfigured);
@@ -576,6 +632,7 @@ new file mode 100644
 +        result.put("effective",Collections.unmodifiableMap(effective));
 +        Map<String,Boolean> available=new LinkedHashMap<>();
 +        for(String key:requested.keySet()) { available.put(key,!key.equals("MODERN_UI_ENABLED")); }
++        available.put("HOST_STREAM_SESSION_GUARD_ENABLED",streamProxyConfigured);
 +        available.put("OIDC_ENABLED",oidcConfigured);
 +        available.put("OIDC_FEDERATED_LOGOUT_ENABLED",oidcConfigured);
 +        available.put("OIDC_LOGIN_PREFLIGHT_ENABLED",oidcConfigured);
@@ -664,6 +721,65 @@ new file mode 100644
 +                } catch (Exception unavailable) { return false; }
 +            }
 +        });
++    }
++}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/HostStreamGuardServlet.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/HostStreamGuardServlet.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/HostStreamGuardServlet.java
+@@ -0,0 +1,54 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import java.io.ByteArrayOutputStream;
++import java.io.IOException;
++import java.util.Map;
++import javax.servlet.http.*;
++import org.springframework.web.context.support.WebApplicationContextUtils;
++
++/** Stateless read-only proof check, independent of OIDC and browser CSRF cookies. */
++public class HostStreamGuardServlet extends HttpServlet {
++    @Override
++    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
++        response.setHeader("Cache-Control", "no-store");
++        response.setHeader("Referrer-Policy", "no-referrer");
++        response.setHeader("X-Content-Type-Options", "nosniff");
++        response.setContentType("application/json");
++        boolean allowed = false;
++        if (!CustomizationConfig.CURRENT.enabled("HOST_STREAM_SESSION_GUARD_ENABLED")) {
++            response.setStatus(404); response.getWriter().write("{}"); return;
++        }
++        if (!UiHostStreamSessionGuard.trustedProxy(request.getHeader("X-Rancher-Stream-Guard"))) {
++            response.setStatus(403); response.getWriter().write("{\"allowed\":false}"); return;
++        }
++        try {
++            if (!"/check".equals(request.getPathInfo()) || request.getContentType() == null ||
++                !request.getContentType().toLowerCase(java.util.Locale.ROOT).startsWith("application/json")) {
++                response.setStatus(400); response.getWriter().write("{}"); return;
++            }
++            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
++            byte[] block = new byte[4096];
++            int next;
++            java.io.InputStream input = request.getInputStream();
++            while ((next = input.read(block)) != -1) {
++                if (bytes.size()+next > 70000) { response.setStatus(413); response.getWriter().write("{}"); return; }
++                bytes.write(block,0,next);
++            }
++            Map<?,?> body = new com.fasterxml.jackson.databind.ObjectMapper().readValue(bytes.toByteArray(), Map.class);
++            UiHostStreamSessionGuard guard = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext()).getBean(UiHostStreamSessionGuard.class);
++            if (body.get("token") instanceof String && body.get("path") instanceof String) {
++                Map<String,Object> result = guard.check((String)body.get("token"),(String)body.get("path"),Boolean.TRUE.equals(body.get("renew")));
++                allowed = Boolean.TRUE.equals(result.get("allowed"));
++                response.setStatus(allowed ? 200 : 403);
++                new com.fasterxml.jackson.databind.ObjectMapper().writeValue(response.getWriter(),result);
++                return;
++            }
++        } catch (Exception unavailable) { allowed = false; }
++        response.setStatus(allowed ? 200 : 403);
++        response.getWriter().write(allowed ? "{\"allowed\":true}" : "{\"allowed\":false}");
++    }
++    @Override
++    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
++        response.setHeader("Cache-Control", "no-store"); response.setStatus(404);
 +    }
 +}
 diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalAccess.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalAccess.java
@@ -1488,6 +1604,231 @@ new file mode 100644
 +            closed = true;
 +            delegate.close();
 +        }
++    }
++}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/UiHostStreamSessionGuard.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/UiHostStreamSessionGuard.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/UiHostStreamSessionGuard.java
+@@ -0,0 +1,220 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import io.cattle.platform.api.auth.Identity;
++import io.cattle.platform.api.auth.Policy;
++import io.cattle.platform.api.utils.ApiUtils;
++import io.cattle.platform.core.dao.AccountDao;
++import io.cattle.platform.core.model.Account;
++import io.cattle.platform.core.model.AuthToken;
++import io.cattle.platform.core.model.Host;
++import io.cattle.platform.iaas.api.auth.SecurityConstants;
++import io.cattle.platform.iaas.api.auth.dao.AuthDao;
++import io.cattle.platform.iaas.api.auth.dao.AuthTokenDao;
++import io.cattle.platform.iaas.api.auth.dao.impl.AuthDaoImpl;
++import io.cattle.platform.iaas.api.auth.integration.local.LocalAuthConstants;
++import io.cattle.platform.object.ObjectManager;
++import io.cattle.platform.token.TokenService;
++import io.github.ibuildthecloud.gdapi.exception.ClientVisibleException;
++import io.github.ibuildthecloud.gdapi.request.ApiRequest;
++import java.io.ByteArrayOutputStream;
++import java.net.HttpURLConnection;
++import java.net.URL;
++import java.nio.charset.StandardCharsets;
++import java.util.*;
++import javax.inject.Inject;
++
++/** Session IDs are references, never credentials. Every proof is server-signed. */
++public class UiHostStreamSessionGuard {
++    public static final String CLAIM = "rancherStream";
++    private static final String PROXY_KEY = newProxyKey();
++    @Inject AuthTokenDao authTokenDao;
++    @Inject AuthDao authDao;
++    @Inject AccountDao accountDao;
++    @Inject ObjectManager objectManager;
++    @Inject TokenService tokenService;
++    private long proxyCheckedAt;
++    private boolean proxyReady;
++
++    public boolean enabled() { return CustomizationConfig.CURRENT.enabled("HOST_STREAM_SESSION_GUARD_ENABLED"); }
++
++    public Map<String,Object> data(ApiRequest request, Host host, Map<String,Object> input, String... segments) {
++        if (!enabled()) { return input; }
++        if (!compatibleProxy()) { throw new ClientVisibleException(503, "StreamGuardUnavailable"); }
++        Policy policy = ApiUtils.getPolicy();
++        if (!SecurityConstants.SECURITY.get() || policy == null || policy.getAuthenticatedAsAccountId() < 1) {
++            throw new ClientVisibleException(403, "StreamAuthenticationRequired");
++        }
++        String path = path(segments);
++        Map<String,Object> binding = new LinkedHashMap<>();
++        binding.put("v", 1);
++        binding.put("path", path);
++        binding.put("hostId", String.valueOf(host.getId()));
++        binding.put("projectId", String.valueOf(host.getAccountId()));
++        Object value = request.getAttribute(LocalAuthConstants.JWT);
++        String key = value instanceof String ? ((String)value).trim() : null;
++        if (key == null && request.getServletContext().getRequest().getCookies() != null) {
++            for (javax.servlet.http.Cookie cookie : request.getServletContext().getRequest().getCookies()) {
++                if ("token".equals(cookie.getName())) { key = cookie.getValue(); break; }
++            }
++        }
++        // AUTH_TYPE is set by ApiAuthenticator only for the selected successful lookup.
++        // A supplied Basic header alone is not evidence of API-key authentication.
++        Object authType = request.getAttribute(io.cattle.platform.core.constants.AccountConstants.AUTH_TYPE);
++        boolean technical = "BasicAuth".equals(authType) &&
++            !(key != null && !key.trim().isEmpty());
++        if (technical) {
++            binding.put("mode", "technical");
++        } else {
++            if (key == null || key.trim().isEmpty()) { throw new ClientVisibleException(401, "StreamSessionRequired"); }
++            if (key.regionMatches(true, 0, "Bearer ", 0, 7)) { key = key.substring(7).trim(); }
++            AuthToken token = authTokenDao.getTokenByKey(key);
++            long userId = policy.getAuthenticatedAsAccountId();
++            if (token == null || token.getAuthenticatedAsAccountId() == null || token.getAuthenticatedAsAccountId() != userId ||
++                !SecurityConstants.AUTH_PROVIDER.get().equals(token.getProvider())) { throw new ClientVisibleException(401, "StreamSessionInvalid"); }
++            Account user = authDao.getAccountById(userId);
++            Account project = authDao.getAccountById(host.getAccountId());
++            if (!active(user) || !active(project) || !"project".equals(project.getKind()) ||
++                !("admin".equals(user.getKind()) || "user".equals(user.getKind()))) { throw new ClientVisibleException(403, "StreamSessionInvalid"); }
++            if (!"admin".equals(user.getKind()) && user.getExternalIdType() != null &&
++                !Arrays.asList("rancher_id", "oidc_subject").contains(user.getExternalIdType())) {
++                throw new ClientVisibleException(403, "StreamIdentityNotSupported");
++            }
++            Map<String,Object> claims;
++            try { claims = tokenService.getJsonPayload(token.getValue(), true); }
++            catch (Exception invalid) { throw new ClientVisibleException(401, "StreamSessionInvalid"); }
++            Object expires = claims == null ? null : claims.get("exp");
++            if (!(expires instanceof Number) || token.getExpires() == null) { throw new ClientVisibleException(401, "StreamSessionInvalid"); }
++            long expiration = Math.min(((Number)expires).longValue(), token.getExpires().getTime() / 1000);
++            String role = "admin".equals(user.getKind()) ? "owner" : role(userId, host.getAccountId());
++            if (!allowedRole(role) || expiration <= System.currentTimeMillis() / 1000) { throw new ClientVisibleException(403, "StreamSessionInvalid"); }
++            binding.put("mode", "ui");
++            binding.put("tokenId", String.valueOf(token.getId()));
++            binding.put("sessionHash", fingerprint(key));
++            binding.put("userId", String.valueOf(userId));
++            binding.put("userKind", user.getKind());
++            binding.put("role", role);
++            binding.put("uiExp", expiration);
++        }
++        Map<String,Object> output = new HashMap<>(input);
++        output.put(CLAIM, binding);
++        if ("ui".equals(binding.get("mode"))) {
++            Map<String,Object> compact = new HashMap<>();
++            compact.put(CLAIM, binding);
++            output.put("rancherStreamProof", tokenService.generateToken(compact, lease(binding)));
++        }
++        return output;
++    }
++
++    public boolean allowed(String proof, String requestPath) {
++        if (!enabled() || proof == null || proof.length() > 65536 || requestPath == null) { return false; }
++        try {
++            com.nimbusds.jwt.SignedJWT signed = com.nimbusds.jwt.SignedJWT.parse(proof);
++            if (!com.nimbusds.jose.JWSAlgorithm.RS256.equals(signed.getHeader().getAlgorithm())) { return false; }
++            Map<String,Object> claims = tokenService.getJsonPayload(proof, false);
++            if (claims == null || !(claims.get("exp") instanceof Number) || ((Number)claims.get("exp")).longValue() <= System.currentTimeMillis()/1000 ||
++                !(claims.get(CLAIM) instanceof Map)) { return false; }
++            Map<?,?> binding = (Map<?,?>)claims.get(CLAIM);
++            if (!(binding.get("v") instanceof Number) || ((Number)binding.get("v")).intValue() != 1 ||
++                !"ui".equals(binding.get("mode")) || !requestPath.equals(binding.get("path")) ||
++                !(binding.get("uiExp") instanceof Number) || ((Number)binding.get("uiExp")).longValue() <= System.currentTimeMillis()/1000) { return false; }
++            Long tokenId = id(binding.get("tokenId")), userId = id(binding.get("userId")), projectId = id(binding.get("projectId")), hostId = id(binding.get("hostId"));
++            if (tokenId == null || userId == null || projectId == null || hostId == null) { return false; }
++            AuthToken loaded = objectManager.loadResource(AuthToken.class, tokenId);
++            AuthToken current = loaded == null ? null : authTokenDao.getTokenByKey(loaded.getKey());
++            if (current == null || !tokenId.equals(current.getId()) || !userId.equals(current.getAuthenticatedAsAccountId()) ||
++                !(binding.get("sessionHash") instanceof String) || !((String)binding.get("sessionHash")).matches("[a-f0-9]{64}") ||
++                !java.security.MessageDigest.isEqual(fingerprint(current.getKey()).getBytes(StandardCharsets.UTF_8), ((String)binding.get("sessionHash")).getBytes(StandardCharsets.UTF_8)) ||
++                !SecurityConstants.AUTH_PROVIDER.get().equals(current.getProvider()) || tokenService.getJsonPayload(current.getValue(), true) == null) { return false; }
++            Account user = authDao.getAccountById(userId), project = authDao.getAccountById(projectId);
++            Host host = objectManager.loadResource(Host.class, hostId);
++            if (!active(user) || !active(project) || !"project".equals(project.getKind()) ||
++                !user.getKind().equals(binding.get("userKind")) || host == null || host.getRemoved() != null ||
++                !projectId.equals(host.getAccountId()) || !Arrays.asList("active", "reconnecting", "updating-active").contains(host.getState())) { return false; }
++            String currentRole = "admin".equals(user.getKind()) ? "owner" : role(userId, projectId);
++            return allowedRole(currentRole) && currentRole.equals(binding.get("role"));
++        } catch (Exception invalid) { return false; }
++    }
++
++    private boolean active(Account account) { return account != null && accountDao.isActiveAccount(account); }
++    private static String newProxyKey() {
++        byte[] bytes = new byte[32]; new java.security.SecureRandom().nextBytes(bytes);
++        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
++    }
++    public static String proxyKey() { return PROXY_KEY; }
++    public static boolean trustedProxy(String value) {
++        return value != null && value.length() <= 256 && java.security.MessageDigest.isEqual(PROXY_KEY.getBytes(StandardCharsets.UTF_8),value.getBytes(StandardCharsets.UTF_8));
++    }
++    public static String fingerprint(String key) {
++        try {
++            StringBuilder result = new StringBuilder();
++            for (byte value : java.security.MessageDigest.getInstance("SHA-256").digest(key.getBytes(StandardCharsets.UTF_8))) { result.append(String.format(Locale.ROOT,"%02x",value & 255)); }
++            return result.toString();
++        } catch (java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
++    }
++    public Map<String,Object> check(String proof,String path,boolean renew) {
++        Map<String,Object> result = new LinkedHashMap<>();
++        boolean valid = allowed(proof,path);
++        result.put("allowed", valid);
++        if (valid && renew) {
++            try {
++                Map<String,Object> claims = tokenService.getJsonPayload(proof,false);
++                Map<?,?> binding = (Map<?,?>)claims.get(CLAIM);
++                Map<String,Object> compact = new HashMap<>();
++                compact.put(CLAIM,binding);
++                result.put("renewed",tokenService.generateToken(compact,lease(binding)));
++            } catch (Exception invalid) { result.clear(); result.put("allowed",false); }
++        }
++        return result;
++    }
++    private Date lease(Map<?,?> binding) {
++        long ttl = io.cattle.platform.archaius.util.ArchaiusUtil.getLong("jwt.default.expiration.seconds").get();
++        if (ttl <= 0) { throw new IllegalStateException("Invalid stream lease"); }
++        return new Date(Math.min(((Number)binding.get("uiExp")).longValue()*1000,
++            System.currentTimeMillis()+Math.min(ttl,3600)*1000));
++    }
++    private String role(long user, long project) {
++        return AuthDaoImpl.resolveProjectRole(authDao.getProjectMembersByIdentity(project,
++            Collections.singleton(new Identity("rancher_id", String.valueOf(user)))));
++    }
++    private static boolean allowedRole(String role) { return Arrays.asList("owner", "member", "restricted", "readonly").contains(role); }
++    public static Long id(Object value) {
++        if (!(value instanceof String) || !((String)value).matches("[1-9][0-9]{0,18}")) { return null; }
++        try { return Long.valueOf((String)value); } catch (NumberFormatException invalid) { return null; }
++    }
++    public static String path(String... segments) {
++        StringBuilder result = new StringBuilder();
++        if (segments != null) for (String segment : segments) {
++            if (segment == null || segment.isEmpty()) { continue; }
++            if (segment.charAt(0) != '/') { result.append('/'); }
++            result.append(segment);
++        }
++        String value = result.toString();
++        if (value.isEmpty() || value.length() > 4096 || value.contains("?") || value.contains("#") || value.contains("\\") ||
++            value.contains("//") || java.util.regex.Pattern.compile("[\\x00-\\x20\\x7f]").matcher(value).find()) { throw new ClientVisibleException(422, "StreamPathInvalid"); }
++        return value;
++    }
++    private synchronized boolean compatibleProxy() {
++        long now = System.currentTimeMillis();
++        if (now >= proxyCheckedAt && now - proxyCheckedAt < 1000) { return proxyReady; }
++        proxyReady = false;
++        HttpURLConnection connection = null;
++        try {
++            String port = System.getenv("CATTLE_HTTP_PORT");
++            if (port == null) { port = System.getProperty("cattle.http.port", "8080"); }
++            int number = Integer.parseInt(port);
++            if (number < 1 || number > 65535) { return false; }
++            connection = (HttpURLConnection)new URL("http://127.0.0.1:"+number+"/community/host-stream-guard").openConnection();
++            connection.setConnectTimeout(250); connection.setReadTimeout(500); connection.setInstanceFollowRedirects(false);
++            if (connection.getResponseCode() != 200) { return false; }
++            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
++            try (java.io.InputStream input = connection.getInputStream()) {
++                int next;
++                while ((next = input.read()) != -1) { if (bytes.size() >= 1024) { return false; } bytes.write(next); }
++            }
++            Map<?,?> state = new com.fasterxml.jackson.databind.ObjectMapper().readValue(new String(bytes.toByteArray(),StandardCharsets.UTF_8), Map.class);
++            proxyReady = Boolean.TRUE.equals(state.get("enabled")) && Integer.valueOf(1).equals(state.get("protocol"));
++        } catch (Exception unavailable) { proxyReady = false; }
++        finally { proxyCheckedAt = now; if (connection != null) { connection.disconnect(); } }
++        return proxyReady;
 +    }
 +}
 diff --git a/resources/content/schema/base/localAccessReport.json b/resources/content/schema/base/localAccessReport.json

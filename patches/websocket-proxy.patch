@@ -1,0 +1,1266 @@
+diff --git a/backend/backend.go b/backend/backend.go
+index 9fabd61..16a658c 100644
+--- a/backend/backend.go
++++ b/backend/backend.go
+@@ -18,15 +18,13 @@ type Handler interface {
+ }
+ 
+ func ConnectToProxy(proxyURL string, handlers map[string]Handler) error {
+-	log.WithFields(log.Fields{"url": proxyURL}).Info("Connecting to proxy.")
++	log.Info("Connecting to proxy.")
+ 
+ 	dialer := &websocket.Dialer{}
+ 	headers := http.Header{}
+ 	ws, _, err := dialer.Dial(proxyURL, headers)
+ 	if err != nil {
+-		log.WithFields(log.Fields{
+-			"error": err,
+-		}).Error("Failed to connect to proxy.")
++		log.Error("Failed to connect to proxy.")
+ 		return err
+ 	}
+ 
+diff --git a/backend/backend_test.go b/backend/backend_test.go
+index a21efb3..ebc5812 100644
+--- a/backend/backend_test.go
++++ b/backend/backend_test.go
+@@ -3,9 +3,11 @@ package backend
+ import (
+ 	"fmt"
+ 	"io"
++	"net"
+ 	"net/http"
+ 	"os"
+ 	"testing"
++	"time"
+ 
+ 	log "github.com/Sirupsen/logrus"
+ 	"github.com/gorilla/websocket"
+@@ -27,6 +29,20 @@ func TestMain(m *testing.M) {
+ 		Config:        c,
+ 	}
+ 	go ps.StartProxy()
++	ready := false
++	deadline := time.Now().Add(3 * time.Second)
++	for time.Now().Before(deadline) {
++		connection, err := net.DialTimeout("tcp", "127.0.0.1:2223", 100*time.Millisecond)
++		if err == nil {
++			connection.Close()
++			ready = true
++			break
++		}
++		time.Sleep(10 * time.Millisecond)
++	}
++	if !ready {
++		panic("test proxy did not become ready")
++	}
+ 
+ 	os.Exit(m.Run())
+ }
+diff --git a/proxy/apiinterceptor/filters/auth/rancher_token_validate_filter.go b/proxy/apiinterceptor/filters/auth/rancher_token_validate_filter.go
+index 9bd4012..3e7ff8f 100644
+--- a/proxy/apiinterceptor/filters/auth/rancher_token_validate_filter.go
++++ b/proxy/apiinterceptor/filters/auth/rancher_token_validate_filter.go
+@@ -59,7 +59,6 @@ func (f *TokenValidationFilter) ProcessFilter(filter model.FilterData, input mod
+ 
+ 	envid := input.EnvID
+ 
+-	log.Debugf("Request => %v", input)
+ 
+ 	var cookie, authHeader []string
+ 	if input.Headers["Cookie"] == nil && input.Headers["Authorization"] == nil {
+@@ -120,8 +119,6 @@ func (f *TokenValidationFilter) ProcessFilter(filter model.FilterData, input mod
+ 
+ 	//check if the token value is empty or not
+ 	if tokenValue != "" || len(authHeader) >= 1 {
+-		log.Debugf("token:" + tokenValue)
+-		log.Debugf("envid:" + envid)
+ 
+ 		projectID, accountID, kind, name := "", "", "", ""
+ 		var err error
+@@ -174,7 +171,6 @@ func (f *TokenValidationFilter) ProcessFilter(filter model.FilterData, input mod
+ 		output.Headers = headerBody
+ 		output.Status = http.StatusOK
+ 
+-		log.Debugf("Response <= %v", output)
+ 	}
+ 
+ 	return output, nil
+@@ -221,7 +217,6 @@ func getAccountAndProject(host string, envid string, token string, authHeaders [
+ 		return "Forbidden", "Forbidden", "Forbidden", "Forbidden", err
+ 
+ 	}
+-	log.Debugf("projectid: %v, userid: %v, kind %v, name %v", projectid, userid, kind, name)
+ 
+ 	return projectid, userid, kind, name, nil
+ }
+diff --git a/proxy/apiinterceptor/filters/http/generic_http_filter.go b/proxy/apiinterceptor/filters/http/generic_http_filter.go
+index 5cf3de0..7a18614 100644
+--- a/proxy/apiinterceptor/filters/http/generic_http_filter.go
++++ b/proxy/apiinterceptor/filters/http/generic_http_filter.go
+@@ -41,7 +41,7 @@ func (f *GenericHTTPFilter) ProcessFilter(filter model.FilterData, input model.A
+ 		return output, err
+ 	}
+ 
+-	log.Debugf("Request => %s", bodyContent)
++	log.Debugf("Interceptor request: %d bytes", len(bodyContent))
+ 
+ 	req, err := http.NewRequest("POST", filter.Endpoint, bytes.NewBuffer(bodyContent))
+ 	if err != nil {
+@@ -78,7 +78,7 @@ func (f *GenericHTTPFilter) ProcessFilter(filter model.FilterData, input model.A
+ 		return output, err
+ 	}
+ 
+-	log.Debugf("Response <= %s", byteContent)
++	log.Debugf("Interceptor response: %d bytes", len(byteContent))
+ 
+ 	json.Unmarshal(byteContent, &output)
+ 	output.Status = resp.StatusCode
+diff --git a/proxy/backend_handler.go b/proxy/backend_handler.go
+index 24dce5b..b3cffba 100644
+--- a/proxy/backend_handler.go
++++ b/proxy/backend_handler.go
+@@ -35,21 +35,21 @@ func (h *BackendHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+ }
+ 
+ func (h *BackendHandler) auth(req *http.Request) (string, bool) {
+-	token, tokenParam, err := parseToken(req, h.parsedPublicKey)
++	token, _, err := parseToken(req, h.parsedPublicKey)
+ 	if err != nil {
+-		log.Warnf("Error parsing backend token: %v. Failing auth. Token parameter: %v", err, tokenParam)
++		log.Warn("Invalid backend token")
+ 		return "", false
+ 	}
+ 
+ 	reportedUUID, found := token.Claims["reportedUuid"]
+ 	if !found {
+-		log.Warnf("Token did not have a reportedUuid. Failing auth. Token parameter: %v", tokenParam)
++		log.Warn("Backend token missing reportedUuid")
+ 		return "", false
+ 	}
+ 
+ 	hostKey, ok := reportedUUID.(string)
+ 	if !ok || hostKey == "" {
+-		log.Warnf("Token's reported uuid claim %v could not be parsed as a string. Token parameter: %v", reportedUUID, tokenParam)
++		log.Warn("Invalid reportedUuid type")
+ 		return "", false
+ 	}
+ 
+diff --git a/proxy/backend_http_writer.go b/proxy/backend_http_writer.go
+index caa39de..3b8fccd 100644
+--- a/proxy/backend_http_writer.go
++++ b/proxy/backend_http_writer.go
+@@ -77,7 +77,7 @@ func (b *BackendHTTPWriter) writeMessage(message *common.HTTPMessage) error {
+ 		return err
+ 	}
+ 
+-	logrus.Debugf("BACKEND WRITE %s,%s: %s", b.hostKey, b.msgKey, data)
++	logrus.Debugf("BACKEND WRITE %s,%s: %d bytes", b.hostKey, b.msgKey, len(data))
+ 	return b.backend.send(b.hostKey, b.msgKey, string(data))
+ }
+ 
+diff --git a/proxy/config.go b/proxy/config.go
+index 86cba1f..2bfc69a 100644
+--- a/proxy/config.go
++++ b/proxy/config.go
+@@ -22,28 +22,32 @@ import (
+ )
+ 
+ type Config struct {
+-	PublicKey                interface{}
+-	ListenAddr               string
+-	CattleAddr               string
+-	ParentPid                int
+-	ProxyProtoHTTPSPorts     map[int]bool
+-	CattleAccessKey          string
+-	CattleSecretKey          string
+-	TLSListenAddr            string
+-	MasterFile               string
+-	APIInterceptorConfigFile string
++	HostStreamSessionGuardEnabled bool
++	hostStreamGuardKey            string
++	PublicKey                     interface{}
++	ListenAddr                    string
++	CattleAddr                    string
++	ParentPid                     int
++	ProxyProtoHTTPSPorts          map[int]bool
++	CattleAccessKey               string
++	CattleSecretKey               string
++	TLSListenAddr                 string
++	MasterFile                    string
++	APIInterceptorConfigFile      string
+ }
+ 
+ func GetConfig() (*Config, error) {
+ 	c := &Config{
+-		CattleAccessKey: os.Getenv("CATTLE_ACCESS_KEY"),
+-		CattleSecretKey: os.Getenv("CATTLE_SECRET_KEY"),
++		hostStreamGuardKey: os.Getenv("PROXY_HOST_STREAM_GUARD_KEY"),
++		CattleAccessKey:    os.Getenv("CATTLE_ACCESS_KEY"),
++		CattleSecretKey:    os.Getenv("CATTLE_SECRET_KEY"),
+ 	}
+ 	var keyFile string
+ 	var keyContents string
+ 	var proxyProtoHTTPSPorts string
+ 	var apiInterceptorConfigFile string
+ 
++	flag.BoolVar(&c.HostStreamSessionGuardEnabled, "host-stream-session-guard-enabled", false, "Revalidate bound UI host streams.")
+ 	flag.StringVar(&c.MasterFile, "master-file", "", "Location of the file containing the master address.")
+ 	flag.StringVar(&keyFile, "jwt-public-key-file", "", "Location of the public-key used to validate JWTs.")
+ 	flag.StringVar(&keyContents, "jwt-public-key-contents", "", "An alternative to jwt-public-key-file. The contents of the key.")
+diff --git a/proxy/frontend_handler.go b/proxy/frontend_handler.go
+index 8355aec..ab2a0e5 100644
+--- a/proxy/frontend_handler.go
++++ b/proxy/frontend_handler.go
+@@ -18,18 +18,24 @@ const wsProto string = "Sec-Websocket-Protocol"
+ const wsProtoBinary string = "binary"
+ 
+ type FrontendHandler struct {
++	guard           *hostStreamGuard
+ 	backend         backendProxy
+ 	parsedPublicKey interface{}
+ }
+ 
+ func (h *FrontendHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+-	_, hostKey, authErr := h.auth(req)
++	token, hostKey, authErr := h.auth(req)
+ 	if authErr != nil {
+ 		log.Infof("Frontend auth failed: %v", authErr)
+ 		http.Error(rw, "Failed authentication", 401)
+ 		return
+ 	}
+ 
++	proof, guardErr := h.guard.proof(token, req.URL.Path)
++	if guardErr != nil || !h.guard.allowed(proof) {
++		http.Error(rw, "Failed authentication", 401)
++		return
++	}
+ 	binary := strings.EqualFold(req.Header.Get(wsProto), wsProtoBinary)
+ 	respHeaders := make(http.Header)
+ 	if binary {
+@@ -45,6 +51,8 @@ func (h *FrontendHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+ 		return
+ 	}
+ 	defer closeConnection(ws)
++	stopWatch := h.guard.watch([]*hostStreamProof{proof}, func() { closeHostStream(ws) })
++	defer stopWatch()
+ 
+ 	msgKey, respChannel, err := h.backend.initializeClient(hostKey)
+ 	if err != nil {
+@@ -64,6 +72,10 @@ func (h *FrontendHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+ 			}
+ 			switch message.Type {
+ 			case common.Body:
++				if !h.guard.allowed(proof) {
++					closeHostStream(ws)
++					return
++				}
+ 				var data []byte
+ 				var e error
+ 				msgType := 1
+@@ -100,6 +112,10 @@ func (h *FrontendHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+ 		if err != nil {
+ 			return
+ 		}
++		if !h.guard.allowed(proof) {
++			closeHostStream(ws)
++			return
++		}
+ 		var data string
+ 		if binary {
+ 			data = base64.StdEncoding.EncodeToString(msg)
+@@ -120,11 +136,11 @@ func (h *FrontendHandler) auth(req *http.Request) (*jwt.Token, string, error) {
+ 		if tokenParam == "" {
+ 			return nil, "", noAuthError{err: err.Error()}
+ 		}
+-		return nil, "", fmt.Errorf("Error parsing token: %v. Token parameter: %v", err, tokenParam)
++		return nil, "", fmt.Errorf("Error parsing stream token")
+ 	}
+ 
+ 	if !token.Valid {
+-		return nil, "", fmt.Errorf("Token not valid. Token parameter: %v", tokenParam)
++		return nil, "", fmt.Errorf("Stream token not valid")
+ 	}
+ 
+ 	hostUUID, found := token.Claims["hostUuid"]
+diff --git a/proxy/frontend_http_handler.go b/proxy/frontend_http_handler.go
+index 8950fba..7a5e2a3 100644
+--- a/proxy/frontend_http_handler.go
++++ b/proxy/frontend_http_handler.go
+@@ -22,7 +22,7 @@ type FrontendHTTPHandler struct {
+ 
+ func (h *FrontendHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+ 	if err := h.serveHTTP(rw, req); err != nil {
+-		log.Errorf("Failed to handle %s %s: %v", req.Method, req.URL.String(), err)
++		log.Errorf("Failed to handle backend HTTP request (%s)", req.Method)
+ 		rw.WriteHeader(500)
+ 		rw.Write([]byte(err.Error()))
+ 	}
+diff --git a/proxy/integration_test.go b/proxy/integration_test.go
+index 089658e..8a2b736 100644
+--- a/proxy/integration_test.go
++++ b/proxy/integration_test.go
+@@ -39,6 +39,20 @@ func TestMain(m *testing.M) {
+ 		Config:             c,
+ 	}
+ 	go ps.StartProxy()
++	deadline := time.Now().Add(3 * time.Second)
++	ready := false
++	for time.Now().Before(deadline) {
++		connection, err := net.DialTimeout("tcp", "127.0.0.1:1111", 100*time.Millisecond)
++		if err == nil {
++			connection.Close()
++			ready = true
++			break
++		}
++		time.Sleep(10 * time.Millisecond)
++	}
++	if !ready {
++		panic("test proxy did not become ready")
++	}
+ 
+ 	handlers := make(map[string]backend.Handler)
+ 	handlers["/v1/echo"] = &echoHandler{}
+@@ -71,7 +85,22 @@ func TestMain(m *testing.M) {
+ 	})
+ 	go http.ListenAndServe("127.0.0.1:3333", router)
+ 
+-	time.Sleep(50 * time.Millisecond) // Give front and back a chance to initialize
++	for _, host := range []string{"1", "2"} {
++		deadline := time.Now().Add(3 * time.Second)
++		ready := false
++		for time.Now().Before(deadline) {
++			ws, _, err := websocket.DefaultDialer.Dial("ws://127.0.0.1:1111/v1/echo?token="+testutils.CreateToken(host, privateKey), nil)
++			if err == nil {
++				ws.Close()
++				ready = true
++				break
++			}
++			time.Sleep(10 * time.Millisecond)
++		}
++		if !ready {
++			panic("test backend did not become ready")
++		}
++	}
+ 
+ 	os.Exit(m.Run())
+ }
+diff --git a/proxy/proxy.go b/proxy/proxy.go
+index 2bb6d93..4d52f2c 100644
+--- a/proxy/proxy.go
++++ b/proxy/proxy.go
+@@ -37,6 +37,10 @@ type Starter struct {
+ }
+ 
+ func (s *Starter) StartProxy() error {
++	streamGuard, guardError := newHostStreamGuard(s.Config.HostStreamSessionGuardEnabled, s.Config.CattleAddr, s.Config.hostStreamGuardKey, s.Config.PublicKey)
++	if guardError != nil {
++		return guardError
++	}
+ 	switcher := NewSwitcher(s.Config)
+ 
+ 	backendMultiplexers := make(map[string]*multiplexer)
+@@ -46,11 +50,13 @@ func (s *Starter) StartProxy() error {
+ 	}
+ 
+ 	frontendHandler := switcher.Wrap(&FrontendHandler{
++		guard:           streamGuard,
+ 		backend:         bpm,
+ 		parsedPublicKey: s.Config.PublicKey,
+ 	})
+ 
+ 	statsHandler := switcher.Wrap(&StatsHandler{
++		guard:           streamGuard,
+ 		backend:         bpm,
+ 		parsedPublicKey: s.Config.PublicKey,
+ 	})
+@@ -76,6 +82,11 @@ func (s *Starter) StartProxy() error {
+ 
+ 	router := mux.NewRouter()
+ 
++	router.HandleFunc("/community/host-stream-guard", func(w http.ResponseWriter, r *http.Request) {
++		w.Header().Set("Cache-Control", "no-store")
++		w.Header().Set("Content-Type", "application/json")
++		fmt.Fprintf(w, `{"protocol":1,"enabled":%t}`, s.Config.HostStreamSessionGuardEnabled)
++	}).Methods("GET")
+ 	router.HandleFunc("/version", k8s.Version)
+ 	router.HandleFunc("/swaggerapi/api/v1", k8s.Swagger)
+ 
+diff --git a/proxy/stats_handler.go b/proxy/stats_handler.go
+index c86b697..ed9dd9a 100644
+--- a/proxy/stats_handler.go
++++ b/proxy/stats_handler.go
+@@ -3,6 +3,7 @@ package proxy
+ import (
+ 	"fmt"
+ 	"net/http"
++	"net/url"
+ 	"strings"
+ 	"sync"
+ 	"time"
+@@ -15,11 +16,13 @@ import (
+ )
+ 
+ type StatsHandler struct {
++	guard           *hostStreamGuard
+ 	backend         backendProxy
+ 	parsedPublicKey interface{}
+ }
+ 
+ type statsInfo struct {
++	proof       *hostStreamProof
+ 	hostKey     string
+ 	url         string
+ 	msgKey      string
+@@ -60,31 +63,61 @@ func (h *StatsHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+ 		return
+ 	}
+ 
+-	upgrader := websocket.Upgrader{
+-		CheckOrigin: func(r *http.Request) bool { return true },
++	payload, _ := authToken.Claims["payload"].(bool)
++	var negotiation *hostStreamProof
++	var statsInfoStructs []*statsInfo
++	if multiHost || payload {
++		negotiation, err = h.guard.expiryProof(authToken)
++	} else {
++		statsInfoStructs, err = h.parseStatsInfo(req, tokenString, false)
+ 	}
++	if err != nil {
++		http.Error(rw, "Failed authentication", 401)
++		return
++	}
++	upgrader := websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
+ 	ws, err := upgrader.Upgrade(rw, req, nil)
+ 	if err != nil {
+-		http.Error(rw, "Failed to upgrade connection.", 500)
+ 		return
+ 	}
+-
+-	if ok, _ := authToken.Claims["payload"].(bool); ok {
++	defer closeConnection(ws)
++	stopNegotiation := h.guard.watch([]*hostStreamProof{negotiation}, func() { closeHostStream(ws) })
++	if !multiHost && !payload {
++		stopNegotiation()
++	}
++	defer stopNegotiation()
++	if payload {
+ 		ws.SetReadDeadline(time.Now().Add(30 * time.Second))
+-		_, content, err := ws.ReadMessage()
+-		if err != nil {
+-			http.Error(rw, "Failed to read payload", 500)
++		if h.guard != nil {
++			ws.SetReadLimit(16 * 1024 * 1024)
++		}
++		_, content, readErr := ws.ReadMessage()
++		if readErr != nil {
+ 			return
+ 		}
+ 		tokenString = string(content)
+ 	}
+-
+-	statsInfoStructs, err := h.parseStatsInfo(req, tokenString, multiHost)
+-	if err != nil {
+-		log.Error("Failed to read statsinfo", err)
+-		http.Error(rw, "Failed to read payload targets", 500)
+-		return
++	if multiHost || payload {
++		if !h.guard.allowed(negotiation) {
++			closeHostStream(ws)
++			return
++		}
++		statsInfoStructs, err = h.parseStatsInfo(req, tokenString, multiHost)
++		if err != nil {
++			closeHostStream(ws)
++			return
++		}
++		stopNegotiation()
++		if h.guard != nil {
++			ws.SetReadDeadline(time.Time{})
++		}
++	}
++	proofs := make([]*hostStreamProof, 0, len(statsInfoStructs))
++	for _, target := range statsInfoStructs {
++		proofs = append(proofs, target.proof)
+ 	}
++	stopWatch := h.guard.watch(proofs, func() { closeHostStream(ws) })
++	defer stopWatch()
+ 
+ 	var mutex sync.Mutex
+ 	var countMutex sync.Mutex
+@@ -114,6 +147,10 @@ func (h *StatsHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+ 				}
+ 				switch message.Type {
+ 				case common.Body:
++					if !h.guard.allowed(s.proof) {
++						closeHostStream(ws)
++						return
++					}
+ 					mutex.Lock()
+ 					ws.SetWriteDeadline(time.Now().Add(10 * time.Second))
+ 					if err := ws.WriteMessage(1, []byte(message.Body)); err != nil {
+@@ -126,8 +163,12 @@ func (h *StatsHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+ 					doneCounter--
+ 					countMutex.Unlock()
+ 				}
+-				if errStatus && doneCounter == 0 {
++				countMutex.Lock()
++				finished := doneCounter == 0
++				countMutex.Unlock()
++				if errStatus && finished {
+ 					closeConnection(ws)
++					return
+ 				}
+ 			}
+ 		}(statsInfoStruct)
+@@ -173,7 +214,7 @@ func (h *StatsHandler) parseStatsInfo(req *http.Request, tokenString string, mul
+ 	if multiHost {
+ 		projectsOrServices, err := getProjectOrService(token)
+ 		if err != nil {
+-			return nil, fmt.Errorf("Error getting project or service info from token %v", token)
++			return nil, fmt.Errorf("Invalid project or service info")
+ 		}
+ 		for _, projectOrService := range projectsOrServices {
+ 			data := projectOrService
+@@ -184,7 +225,7 @@ func (h *StatsHandler) parseStatsInfo(req *http.Request, tokenString string, mul
+ 			innerJwtToken, err := parseRequestToken(innerTokenString, h.parsedPublicKey)
+ 			if err != nil {
+ 
+-				return nil, fmt.Errorf("Error getting inner token: %v. Inner token parameter: %v", err, innerTokenString)
++				return nil, fmt.Errorf("Invalid inner token")
+ 			}
+ 			hostUUID, found := h.extractHostUUID(innerJwtToken)
+ 			if !found {
+@@ -192,17 +233,35 @@ func (h *StatsHandler) parseStatsInfo(req *http.Request, tokenString string, mul
+ 			}
+ 			urlString, ok := data["url"]
+ 			if !ok {
+-				return nil, fmt.Errorf("Could't find url field in inner token %v", data)
++				return nil, fmt.Errorf("Missing inner token URL")
++			}
++			target, parseErr := url.Parse(urlString)
++			if parseErr != nil {
++				return nil, fmt.Errorf("Invalid target URL")
++			}
++			if h.guard != nil && (target.RawQuery != "" || target.Fragment != "" || target.User != nil) {
++				return nil, fmt.Errorf("Invalid target URL")
++			}
++			proof, proofErr := h.guard.proof(innerJwtToken, target.Path)
++			if proofErr != nil || !h.guard.allowed(proof) {
++				return nil, fmt.Errorf("Invalid target session")
+ 			}
+ 			urlString = urlString + "?token=" + innerTokenString
+-			statsInfoStructs = append(statsInfoStructs, &statsInfo{hostKey: hostUUID, url: urlString})
++			statsInfoStructs = append(statsInfoStructs, &statsInfo{hostKey: hostUUID, url: urlString, proof: proof})
+ 		}
+ 	} else {
+ 		hostUUID, found := h.extractHostUUID(token)
+ 		if !found {
+ 			return nil, fmt.Errorf("could not find host uuid")
+ 		}
+-		statsInfoStructs = append(statsInfoStructs, &statsInfo{hostKey: hostUUID, url: req.URL.String()})
++		proof, proofErr := h.guard.proof(token, req.URL.Path)
++		if proofErr != nil || !h.guard.allowed(proof) {
++			return nil, fmt.Errorf("Invalid target session")
++		}
++		statsInfoStructs = append(statsInfoStructs, &statsInfo{hostKey: hostUUID, url: req.URL.String(), proof: proof})
++	}
++	if h.guard != nil && len(statsInfoStructs) == 0 {
++		return nil, fmt.Errorf("No metrics targets")
+ 	}
+ 	return statsInfoStructs, nil
+ }
+diff --git a/proxy/host_stream_guard.go b/proxy/host_stream_guard.go
+new file mode 100644
+--- /dev/null
++++ b/proxy/host_stream_guard.go
+@@ -0,0 +1,353 @@
++package proxy
++
++import (
++	"bytes"
++	"context"
++	"crypto/sha256"
++	"encoding/hex"
++	"encoding/json"
++	"errors"
++	"io"
++	"math"
++	"net"
++	"net/http"
++	"net/url"
++	"strconv"
++	"strings"
++	"sync"
++	"time"
++
++	jwt "github.com/dgrijalva/jwt-go"
++	"github.com/gorilla/websocket"
++)
++
++const streamCheckBudget = 750 * time.Millisecond
++
++type hostStreamProof struct {
++	mu                          sync.Mutex
++	raw, path, mode, key        string
++	expires, uiExpires, renewAt int64
++}
++
++type streamDecision struct {
++	done    chan struct{}
++	checked time.Time
++	allowed bool
++}
++
++// One shared, bounded cache for a proxy process. Keys never contain credentials.
++type hostStreamGuard struct {
++	endpoint  string
++	client    *http.Client
++	mu        sync.Mutex
++	decisions map[string]*streamDecision
++	slots     chan struct{}
++	ttl       time.Duration
++	secret    string
++	publicKey interface{}
++}
++
++func newHostStreamGuard(enabled bool, address, secret string, publicKey interface{}) (*hostStreamGuard, error) {
++	if !enabled {
++		return nil, nil
++	}
++	if len(secret) < 32 || len(secret) > 256 {
++		return nil, errors.New("Host stream verification key missing")
++	}
++	endpoint, err := url.Parse("http://" + address + "/host-stream-session/check")
++	if err != nil || endpoint.User != nil || endpoint.RawQuery != "" || endpoint.Fragment != "" || endpoint.Port() == "" {
++		return nil, errors.New("Invalid host stream verification address")
++	}
++	host := endpoint.Hostname()
++	ip := net.ParseIP(host)
++	if host != "localhost" && (ip == nil || !ip.IsLoopback()) {
++		return nil, errors.New("Host stream verification requires a loopback Cattle address")
++	}
++	return &hostStreamGuard{endpoint: endpoint.String(), secret: secret, publicKey: publicKey,
++		client: &http.Client{Timeout: streamCheckBudget,
++			CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse },
++			Transport: &http.Transport{Proxy: nil, MaxIdleConns: 8, MaxIdleConnsPerHost: 8,
++				IdleConnTimeout: 30 * time.Second,
++				DialContext:     (&net.Dialer{Timeout: 250 * time.Millisecond, KeepAlive: 30 * time.Second}).DialContext}},
++		decisions: make(map[string]*streamDecision), slots: make(chan struct{}, 8), ttl: 250 * time.Millisecond}, nil
++}
++
++func streamSeconds(value interface{}) (int64, bool) {
++	switch number := value.(type) {
++	case float64:
++		if math.IsNaN(number) || math.IsInf(number, 0) || number != math.Trunc(number) || number <= 0 || number > 1e12 {
++			return 0, false
++		}
++		return int64(number), true
++	case int64:
++		return number, number > 0
++	case int:
++		return int64(number), number > 0
++	}
++	return 0, false
++}
++
++func streamID(value interface{}) (string, bool) {
++	text, ok := value.(string)
++	if !ok || len(text) == 0 || len(text) > 19 || text[0] == '0' {
++		return "", false
++	}
++	for _, char := range text {
++		if char < '0' || char > '9' {
++			return "", false
++		}
++	}
++	number, err := strconv.ParseInt(text, 10, 64)
++	return text, err == nil && number > 0
++}
++
++func streamEnvelope(token *jwt.Token) (int64, bool) {
++	if token == nil || !token.Valid || token.Method == nil || token.Method.Alg() != "RS256" || len(token.Raw) == 0 || len(token.Raw) > 16*1024*1024 {
++		return 0, false
++	}
++	expires, ok := streamSeconds(token.Claims["exp"])
++	return expires, ok && expires > time.Now().Unix()
++}
++
++func (g *hostStreamGuard) proof(token *jwt.Token, path string) (*hostStreamProof, error) {
++	if g == nil {
++		return nil, nil
++	}
++	expires, valid := streamEnvelope(token)
++	if !valid {
++		return nil, errors.New("Invalid stream envelope")
++	}
++	binding, ok := token.Claims["rancherStream"].(map[string]interface{})
++	if !ok {
++		return nil, errors.New("Stream session reference required")
++	}
++	version, valid := streamSeconds(binding["v"])
++	signedPath, pathOK := binding["path"].(string)
++	if !valid || version != 1 || !pathOK || path != signedPath || len(path) == 0 || len(path) > 4096 {
++		return nil, errors.New("Invalid stream scope")
++	}
++	host, hostOK := streamID(binding["hostId"])
++	project, projectOK := streamID(binding["projectId"])
++	mode, _ := binding["mode"].(string)
++	if !hostOK || !projectOK || (mode != "ui" && mode != "technical") {
++		return nil, errors.New("Invalid stream mode or target")
++	}
++	result := &hostStreamProof{raw: token.Raw, path: path, mode: mode, expires: expires}
++	if mode == "technical" {
++		return result, nil
++	}
++	session, sessionOK := streamID(binding["tokenId"])
++	user, userOK := streamID(binding["userId"])
++	kind, _ := binding["userKind"].(string)
++	role, _ := binding["role"].(string)
++	fingerprint, _ := binding["sessionHash"].(string)
++	hashBytes, hashErr := hex.DecodeString(fingerprint)
++	uiExpires, expiryOK := streamSeconds(binding["uiExp"])
++	if !sessionOK || !userOK || !expiryOK || hashErr != nil || len(hashBytes) != 32 || len(fingerprint) != 64 ||
++		fingerprint != strings.ToLower(fingerprint) || uiExpires <= time.Now().Unix() ||
++		(kind != "user" && kind != "admin") || (role != "owner" && role != "member" && role != "restricted" && role != "readonly") {
++		return nil, errors.New("Invalid UI session reference")
++	}
++	result.uiExpires = uiExpires
++	margin := int64(30)
++	if issued, valid := streamSeconds(token.Claims["iat"]); valid && issued < expires {
++		margin = (expires - issued) / 10
++		if margin < 1 {
++			margin = 1
++		}
++		if margin > 30 {
++			margin = 30
++		}
++	}
++	result.renewAt = expires - margin
++	sum := sha256.Sum256([]byte(strings.Join([]string{session, fingerprint, user, kind, project, role, host, strconv.FormatInt(uiExpires, 10)}, "/")))
++	result.key = hex.EncodeToString(sum[:])
++	if raw, present := token.Claims["rancherStreamProof"]; present {
++		compact, ok := raw.(string)
++		if !ok || len(compact) == 0 || len(compact) > 65536 {
++			return nil, errors.New("Invalid compact proof")
++		}
++		inner, err := jwt.Parse(compact, func(_ *jwt.Token) (interface{}, error) { return g.publicKey, nil })
++		if err != nil || inner == nil {
++			return nil, errors.New("Invalid compact signature")
++		}
++		if _, nested := inner.Claims["rancherStreamProof"]; nested {
++			return nil, errors.New("Nested compact proof")
++		}
++		next, err := g.proof(inner, path)
++		if err != nil || next.mode != "ui" || next.key != result.key {
++			return nil, errors.New("Compact scope mismatch")
++		}
++		return next, nil
++	}
++	if len(result.raw) > 65536 {
++		return nil, errors.New("Compact proof required")
++	}
++	return result, nil
++}
++
++func (g *hostStreamGuard) expiryProof(token *jwt.Token) (*hostStreamProof, error) {
++	if g == nil {
++		return nil, nil
++	}
++	expires, valid := streamEnvelope(token)
++	if !valid {
++		return nil, errors.New("Invalid metrics envelope")
++	}
++	return &hostStreamProof{mode: "envelope", expires: expires}, nil
++}
++
++func (g *hostStreamGuard) allowed(proof *hostStreamProof) bool {
++	if g == nil {
++		return true
++	}
++	if proof == nil {
++		return false
++	}
++	proof.mu.Lock()
++	defer proof.mu.Unlock()
++	if proof.mode == "technical" {
++		return true
++	} // Legacy technical stream lifetime is a separate gate.
++	if proof.expires <= time.Now().Unix() {
++		return false
++	}
++	if proof.mode == "envelope" {
++		return true
++	}
++	if proof.mode != "ui" || proof.uiExpires <= time.Now().Unix() {
++		return false
++	}
++	// A trusted proxy renews only a still-valid proof for an existing socket.
++	// No expired JWT is accepted, and the browser never receives this renewal.
++	if time.Now().Unix() >= proof.renewAt && proof.expires < proof.uiExpires {
++		valid, renewed := g.verify(proof, true)
++		if !valid || len(renewed) == 0 || len(renewed) > 65536 {
++			return false
++		}
++		token, err := jwt.Parse(renewed, func(_ *jwt.Token) (interface{}, error) { return g.publicKey, nil })
++		if err != nil {
++			return false
++		}
++		next, err := g.proof(token, proof.path)
++		if err != nil || next.key != proof.key || next.expires <= proof.expires {
++			return false
++		}
++		proof.raw, proof.expires, proof.renewAt = next.raw, next.expires, next.renewAt
++		return true
++	}
++	now := time.Now()
++	g.mu.Lock()
++	if entry, found := g.decisions[proof.key]; found {
++		if entry.checked.IsZero() {
++			done := entry.done
++			g.mu.Unlock()
++			timer := time.NewTimer(streamCheckBudget)
++			defer timer.Stop()
++			select {
++			case <-done:
++				return entry.allowed
++			case <-timer.C:
++				return false
++			}
++		}
++		if now.Sub(entry.checked) < g.ttl {
++			valid := entry.allowed
++			g.mu.Unlock()
++			return valid
++		}
++		delete(g.decisions, proof.key)
++	}
++	if len(g.decisions) >= 4096 {
++		for key, entry := range g.decisions {
++			if !entry.checked.IsZero() && now.Sub(entry.checked) >= g.ttl {
++				delete(g.decisions, key)
++			}
++		}
++		if len(g.decisions) >= 4096 {
++			g.mu.Unlock()
++			return false
++		}
++	}
++	entry := &streamDecision{done: make(chan struct{})}
++	g.decisions[proof.key] = entry
++	g.mu.Unlock()
++	valid, _ := g.verify(proof, false)
++	g.mu.Lock()
++	entry.allowed = valid
++	entry.checked = time.Now()
++	close(entry.done)
++	g.mu.Unlock()
++	return valid
++}
++
++func (g *hostStreamGuard) verify(proof *hostStreamProof, renew bool) (bool, string) {
++	ctx, cancel := context.WithTimeout(context.Background(), streamCheckBudget)
++	defer cancel()
++	select {
++	case g.slots <- struct{}{}:
++		defer func() { <-g.slots }()
++	case <-ctx.Done():
++		return false, ""
++	}
++	body, err := json.Marshal(map[string]interface{}{"token": proof.raw, "path": proof.path, "renew": renew})
++	if err != nil {
++		return false, ""
++	}
++	request, err := http.NewRequestWithContext(ctx, "POST", g.endpoint, bytes.NewReader(body))
++	if err != nil {
++		return false, ""
++	}
++	request.Header.Set("Content-Type", "application/json")
++	request.Header.Set("Accept", "application/json")
++	request.Header.Set("X-Rancher-Stream-Guard", g.secret)
++	response, err := g.client.Do(request)
++	if err != nil {
++		return false, ""
++	}
++	defer response.Body.Close()
++	if response.StatusCode != http.StatusOK {
++		return false, ""
++	}
++	payload, err := io.ReadAll(io.LimitReader(response.Body, 70001))
++	if err != nil || len(payload) > 70000 {
++		return false, ""
++	}
++	var result struct {
++		Allowed bool   `json:"allowed"`
++		Renewed string `json:"renewed"`
++	}
++	return json.Unmarshal(payload, &result) == nil && result.Allowed, result.Renewed
++}
++
++func closeHostStream(ws *websocket.Conn) {
++	ws.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "Access no longer available"), time.Now().Add(time.Second))
++	ws.Close()
++}
++
++// Idle sockets must close too; stopping the watcher is idempotent and never blocks cleanup.
++func (g *hostStreamGuard) watch(proofs []*hostStreamProof, denied func()) func() {
++	if g == nil {
++		return func() {}
++	}
++	done := make(chan struct{})
++	var once sync.Once
++	go func() {
++		ticker := time.NewTicker(time.Second)
++		defer ticker.Stop()
++		for {
++			select {
++			case <-done:
++				return
++			case <-ticker.C:
++				for _, proof := range proofs {
++					if !g.allowed(proof) {
++						denied()
++						return
++					}
++				}
++			}
++		}
++	}()
++	return func() { once.Do(func() { close(done) }) }
++}
+diff --git a/proxy/host_stream_guard_test.go b/proxy/host_stream_guard_test.go
+new file mode 100644
+--- /dev/null
++++ b/proxy/host_stream_guard_test.go
+@@ -0,0 +1,331 @@
++package proxy
++
++import (
++	"encoding/json"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"sync"
++	"sync/atomic"
++	"testing"
++	"time"
++
++	"github.com/gorilla/websocket"
++	"github.com/rancher/websocket-proxy/common"
++
++	jwt "github.com/dgrijalva/jwt-go"
++	"github.com/rancher/websocket-proxy/testutils"
++)
++
++type streamTestBackend struct {
++	data        chan common.Message
++	initialized int32
++	sent        int32
++}
++
++func (b *streamTestBackend) initializeClient(string) (string, <-chan common.Message, error) {
++	atomic.AddInt32(&b.initialized, 1)
++	return "fixture", b.data, nil
++}
++func (b *streamTestBackend) connect(string, string, string) error { return nil }
++func (b *streamTestBackend) send(string, string, string) error {
++	atomic.AddInt32(&b.sent, 1)
++	return nil
++}
++func (b *streamTestBackend) closeConnection(string, string) error { return nil }
++func (b *streamTestBackend) hasBackend(string) bool               { return true }
++
++func TestHostStreamHandlers(t *testing.T) {
++	for _, mode := range []string{"idle", "output", "input", "metrics"} {
++		t.Run(mode, func(t *testing.T) {
++			var denied int32
++			g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) {
++				json.NewEncoder(w).Encode(map[string]bool{"allowed": atomic.LoadInt32(&denied) == 0})
++			})
++			b := &streamTestBackend{data: make(chan common.Message, 4)}
++			defer close(b.data)
++			var handler http.Handler = &FrontendHandler{guard: g, backend: b, parsedPublicKey: testutils.ParseTestPublicKey()}
++			if mode == "metrics" {
++				handler = &StatsHandler{guard: g, backend: b, parsedPublicKey: testutils.ParseTestPublicKey()}
++			}
++			server := httptest.NewServer(handler)
++			defer server.Close()
++			token := streamTestToken(t, streamTestClaims())
++			target := "ws" + strings.TrimPrefix(server.URL, "http") + "/v1/echo?token=" + token.Raw
++			ws, _, err := websocket.DefaultDialer.Dial(target, nil)
++			if err != nil {
++				t.Fatal("valid handshake failed")
++			}
++			defer ws.Close()
++			b.data <- common.Message{Type: common.Body, Body: "before"}
++			ws.SetReadDeadline(time.Now().Add(3 * time.Second))
++			if _, body, err := ws.ReadMessage(); err != nil || string(body) != "before" {
++				t.Fatal("control frame not forwarded")
++			}
++			atomic.StoreInt32(&denied, 1)
++			time.Sleep(300 * time.Millisecond)
++			if mode == "input" {
++				if err := ws.WriteMessage(1, []byte("after")); err != nil {
++					t.Fatal(err)
++				}
++			}
++			if mode == "output" || mode == "metrics" {
++				b.data <- common.Message{Type: common.Body, Body: "after"}
++			}
++			_, _, err = ws.ReadMessage()
++			if err == nil || !strings.Contains(err.Error(), "1008") {
++				t.Fatal("revoked stream did not close with policy violation")
++			}
++			if atomic.LoadInt32(&b.sent) != 0 {
++				t.Fatal("revoked terminal input forwarded")
++			}
++			next, response, err := websocket.DefaultDialer.Dial(target, nil)
++			if next != nil {
++				next.Close()
++				t.Fatal("revoked handshake upgraded")
++			}
++			if err == nil || response == nil || response.StatusCode != 401 || atomic.LoadInt32(&b.initialized) != 1 {
++				t.Fatal("revoked handshake reached backend")
++			}
++		})
++	}
++}
++
++func TestHostStreamMultiMetricsRejectsAllBeforeBackend(t *testing.T) {
++	g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(`{"allowed":true}`)) })
++	b := &streamTestBackend{data: make(chan common.Message)}
++	h := &StatsHandler{guard: g, backend: b, parsedPublicKey: testutils.ParseTestPublicKey()}
++	good := streamTestToken(t, streamTestClaims()).Raw
++	badClaims := streamTestClaims()
++	delete(badClaims, "rancherStream")
++	bad := streamTestToken(t, badClaims).Raw
++	claims := map[string]interface{}{"exp": time.Now().Unix() + 60, "project": []map[string]string{{"url": "/v1/echo", "token": good}, {"url": "/v1/echo", "token": bad}}}
++	token := streamTestToken(t, claims)
++	request := httptest.NewRequest("GET", "http://localhost/v1/hoststats/project", nil)
++	if _, err := h.parseStatsInfo(request, token.Raw, true); err == nil || atomic.LoadInt32(&b.initialized) != 0 {
++		t.Fatal("mixed batch accepted or backend opened before all proofs validated")
++	}
++	claims["project"] = []map[string]string{{"url": "/v1/wrong", "token": good}}
++	if _, err := h.parseStatsInfo(request, streamTestToken(t, claims).Raw, true); err == nil {
++		t.Fatal("inner URL binding bypass")
++	}
++}
++
++func streamTestClaims() map[string]interface{} {
++	return map[string]interface{}{"exp": time.Now().Unix() + 120, "iat": time.Now().Unix(), "hostUuid": "fixture",
++		"rancherStream": map[string]interface{}{"v": 1, "path": "/v1/echo", "hostId": "1", "projectId": "2", "mode": "ui", "tokenId": "3", "userId": "4", "userKind": "user", "role": "member", "sessionHash": strings.Repeat("a", 64), "uiExp": time.Now().Unix() + 3600}}
++}
++func streamTestToken(t *testing.T, claims map[string]interface{}) *jwt.Token {
++	t.Helper()
++	signer := jwt.New(jwt.SigningMethodRS256)
++	signer.Claims = claims
++	raw, err := signer.SignedString(testutils.ParseTestPrivateKey())
++	if err != nil {
++		t.Fatal(err)
++	}
++	token, err := jwt.Parse(raw, func(_ *jwt.Token) (interface{}, error) { return testutils.ParseTestPublicKey(), nil })
++	if err != nil {
++		t.Fatal(err)
++	}
++	return token
++}
++func streamTestGuard(t *testing.T, handler http.HandlerFunc) *hostStreamGuard {
++	t.Helper()
++	server := httptest.NewServer(handler)
++	t.Cleanup(server.Close)
++	g, err := newHostStreamGuard(true, strings.TrimPrefix(server.URL, "http://"), strings.Repeat("s", 43), testutils.ParseTestPublicKey())
++	if err != nil {
++		t.Fatal(err)
++	}
++	return g
++}
++func TestHostStreamProofScope(t *testing.T) {
++	g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(`{"allowed":true}`)) })
++	for _, name := range []string{"valid", "path", "unbound", "version", "mode", "role", "id", "hash", "expired-ui", "expired-envelope", "algorithm"} {
++		t.Run(name, func(t *testing.T) {
++			claims := streamTestClaims()
++			binding := claims["rancherStream"].(map[string]interface{})
++			path := "/v1/echo"
++			switch name {
++			case "path":
++				path = "/v1/other"
++			case "unbound":
++				delete(claims, "rancherStream")
++			case "version":
++				binding["v"] = 2
++			case "mode":
++				binding["mode"] = "unknown"
++			case "role":
++				binding["role"] = "admin"
++			case "id":
++				binding["tokenId"] = "03"
++			case "hash":
++				binding["sessionHash"] = strings.Repeat("A", 64)
++			case "expired-ui":
++				binding["uiExp"] = time.Now().Unix() - 1
++			}
++			token := streamTestToken(t, claims)
++			if name == "expired-envelope" {
++				token.Claims["exp"] = float64(time.Now().Unix() - 1)
++			}
++			if name == "algorithm" {
++				token.Method = jwt.SigningMethodHS256
++			}
++			_, err := g.proof(token, path)
++			if (err == nil) != (name == "valid") {
++				t.Fatal("scope validation mismatch")
++			}
++		})
++	}
++}
++func TestHostStreamCompactProof(t *testing.T) {
++	g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(`{"allowed":true}`)) })
++	compact := streamTestToken(t, streamTestClaims())
++	claims := streamTestClaims()
++	claims["containerIds"] = strings.Repeat("x", 200000)
++	claims["rancherStreamProof"] = compact.Raw
++	proof, err := g.proof(streamTestToken(t, claims), "/v1/echo")
++	if err != nil || proof.raw != compact.Raw || len(proof.raw) > 65536 {
++		t.Fatal("large host payload was not compacted")
++	}
++	claims["rancherStream"].(map[string]interface{})["projectId"] = "99"
++	if _, err = g.proof(streamTestToken(t, claims), "/v1/echo"); err == nil {
++		t.Fatal("mismatched compact scope accepted")
++	}
++	nested := streamTestClaims()
++	nested["rancherStreamProof"] = compact.Raw
++	claims = streamTestClaims()
++	claims["rancherStreamProof"] = streamTestToken(t, nested).Raw
++	if _, err = g.proof(streamTestToken(t, claims), "/v1/echo"); err == nil {
++		t.Fatal("nested proof accepted")
++	}
++}
++func TestHostStreamCallbackAndRevocation(t *testing.T) {
++	var calls int32
++	var denied int32
++	g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) {
++		atomic.AddInt32(&calls, 1)
++		if r.Method != "POST" || r.URL.Path != "/host-stream-session/check" || r.Header.Get("X-Rancher-Stream-Guard") != strings.Repeat("s", 43) {
++			t.Error("untrusted callback")
++		}
++		var body map[string]interface{}
++		if json.NewDecoder(r.Body).Decode(&body) != nil || body["path"] != "/v1/echo" {
++			t.Error("invalid callback")
++		}
++		json.NewEncoder(w).Encode(map[string]bool{"allowed": atomic.LoadInt32(&denied) == 0})
++	})
++	token := streamTestToken(t, streamTestClaims())
++	var workers sync.WaitGroup
++	for i := 0; i < 40; i++ {
++		workers.Add(1)
++		go func() {
++			defer workers.Done()
++			p, err := g.proof(token, "/v1/echo")
++			if err != nil || !g.allowed(p) {
++				t.Error("valid reference denied")
++			}
++		}()
++	}
++	workers.Wait()
++	if atomic.LoadInt32(&calls) != 1 {
++		t.Fatal("parallel requests not coalesced")
++	}
++	atomic.StoreInt32(&denied, 1)
++	time.Sleep(300 * time.Millisecond)
++	p, _ := g.proof(streamTestToken(t, streamTestClaims()), "/v1/echo")
++	if g.allowed(p) {
++		t.Fatal("revoked reference accepted")
++	}
++}
++func TestHostStreamCallbackFailures(t *testing.T) {
++	for _, name := range []string{"denied", "redirect", "bad-json", "oversize", "timeout"} {
++		t.Run(name, func(t *testing.T) {
++			g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) {
++				switch name {
++				case "denied":
++					w.WriteHeader(403)
++				case "redirect":
++					http.Redirect(w, r, "/other", 302)
++				case "bad-json":
++					w.Write([]byte("broken"))
++				case "oversize":
++					w.Write([]byte(strings.Repeat(" ", 70001) + `{"allowed":true}`))
++				case "timeout":
++					time.Sleep(900 * time.Millisecond)
++					w.Write([]byte(`{"allowed":true}`))
++				}
++			})
++			p, _ := g.proof(streamTestToken(t, streamTestClaims()), "/v1/echo")
++			start := time.Now()
++			if g.allowed(p) {
++				t.Fatal("failure allowed access")
++			}
++			if time.Since(start) > 850*time.Millisecond {
++				t.Fatal("verification budget exceeded")
++			}
++		})
++	}
++}
++func TestHostStreamRenewal(t *testing.T) {
++	for _, mismatch := range []bool{false, true} {
++		t.Run(map[bool]string{false: "valid", true: "changed-scope"}[mismatch], func(t *testing.T) {
++			next := streamTestClaims()
++			if mismatch {
++				next["rancherStream"].(map[string]interface{})["userId"] = "99"
++			}
++			renewed := streamTestToken(t, next).Raw
++			g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) {
++				var body map[string]interface{}
++				json.NewDecoder(r.Body).Decode(&body)
++				if body["renew"] != true {
++					t.Error("renewal not requested")
++				}
++				json.NewEncoder(w).Encode(map[string]interface{}{"allowed": true, "renewed": renewed})
++			})
++			claims := streamTestClaims()
++			claims["exp"] = time.Now().Unix() + 2
++			claims["iat"] = time.Now().Unix() - 30
++			p, _ := g.proof(streamTestToken(t, claims), "/v1/echo")
++			if g.allowed(p) == mismatch {
++				t.Fatal("incorrect renewal decision")
++			}
++			p.expires = time.Now().Unix() - 1
++			if g.allowed(p) {
++				t.Fatal("expired proof renewed")
++			}
++		})
++	}
++}
++func TestHostStreamIdleWatchAndLegacy(t *testing.T) {
++	g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(`{"allowed":false}`)) })
++	p, _ := g.proof(streamTestToken(t, streamTestClaims()), "/v1/echo")
++	closed := make(chan struct{})
++	stop := g.watch([]*hostStreamProof{p}, func() { close(closed) })
++	defer stop()
++	select {
++	case <-closed:
++	case <-time.After(2 * time.Second):
++		t.Fatal("idle revocation not observed")
++	}
++	stop()
++	var off *hostStreamGuard
++	if proof, err := off.proof(nil, ""); err != nil || !off.allowed(proof) {
++		t.Fatal("disabled guard changed legacy behavior")
++	}
++	if g.allowed(nil) {
++		t.Fatal("nil reference allowed")
++	}
++}
++func TestHostStreamConfiguration(t *testing.T) {
++	for _, address := range []string{"example.com:8081", "127.0.0.1", "127.0.0.1:8081?x=1", "user@127.0.0.1:8081", "172.21.0.4:8081"} {
++		if _, err := newHostStreamGuard(true, address, strings.Repeat("s", 43), nil); err == nil {
++			t.Fatal("unsafe callback address")
++		}
++	}
++	if _, err := newHostStreamGuard(true, "127.0.0.1:8081", "short", nil); err == nil {
++		t.Fatal("missing key accepted")
++	}
++	if g, err := newHostStreamGuard(false, "invalid", "", nil); err != nil || g != nil {
++		t.Fatal("off configuration failed")
++	}
++}
