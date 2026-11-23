@@ -498,4 +498,44 @@ export const faIR = {
   'resourceMetrics.cpuNote': '۱۰۰٪ معادل یک هسته است.',
   'resourceMetrics.cpuNoteReported': '۱۰۰٪ معادل یک هسته است · تعداد هسته‌های گزارش‌شده: {cores}.',
   'resourceMetrics.caption': '۵ دقیقهٔ آخر این اتصال · حداکثر ۳۰۰ نمونه · {status}',
+
+  'bulkOperation.title': '{action} گروهی',
+  'bulkOperation.resources': { one: '{count} منبع', other: '{count} منبع' },
+  'bulkOperation.description': 'محیط: {name} · {resources}',
+  'bulkOperation.confirm': { one: 'تأیید {count} عملیات', other: 'تأیید {count} عملیات' },
+  'bulkOperation.closeResults': 'بستن نتایج',
+  'bulkOperation.warning':
+    'عملیات برای تک‌تک منابع فهرست‌شده اعمال می‌شود. اگر خطایی رخ دهد، عملیات‌هایی که Rancher قبلاً دریافت کرده است لغو نمی‌شوند. پیش از تأیید، منابع هدف را بررسی کنید.',
+  'bulkOperation.restartHint':
+    'سرویس‌ها در دسته‌های تک‌کانتینری و با فاصلهٔ ۲ ثانیه میان دسته‌ها دوباره راه‌اندازی می‌شوند. ارسال درخواست برای هر منبع جداگانه پیگیری می‌شود. وضعیت نهایی را در نمای عملیات بررسی کنید.',
+  'bulkOperation.removeWarning':
+    'در فرایند چرخهٔ عمر Rancher، حذف ممکن است باعث توقف کانتینرها و حذف منابع وابسته شود. بازگردانی خودکار وجود ندارد.',
+  'bulkOperation.confirmEnvironment': 'نام محیط را تأیید کنید',
+  'bulkOperation.sending': 'در حال ارسال درخواست‌های عملیات',
+  'bulkOperation.finished': 'ارسال پایان یافت',
+  'bulkOperation.progress':
+    '{status} · {received} پاسخ از {total} پاسخ دریافت شد. وضعیت نهایی را در نمای عملیات پیگیری کنید.',
+  'bulkOperation.resource': 'منبع',
+  'bulkOperation.result': 'نتیجه',
+  'bulkOperation.status.accepted': 'دریافت شد',
+  'bulkOperation.status.failed': 'ناموفق',
+  'bulkOperation.status.unknown': 'بررسی وضعیت',
+  'bulkOperation.queued': 'در انتظار ارسال',
+  'bulkOperation.pending': 'در انتظار تأیید',
+  'bulkOperation.runningTitle': 'عملیات در حال انجام است',
+  'bulkOperation.runningDescription':
+    'پیش از تغییر نما یا محیط، منتظر بمانید تا ارسال درخواست‌های این دسته پایان یابد.',
+  'bulkOperation.stay': 'ماندن در همین نما',
+  'bulkOperation.message.startFailed': 'شروع عملیات گروهی ممکن نبود.',
+  'bulkOperation.message.invalidSelection': 'برای انجام عملیات، بین ۱ تا ۱۰۰ منبع انتخاب کنید.',
+  'bulkOperation.message.duplicateResources': 'این دسته شامل منابع تکراری است.',
+  'bulkOperation.message.mixedRemoval': 'برای حذف گروهی، منابع باید از یک نوع باشند.',
+  'bulkOperation.message.wrongEnvironment': 'این منبع به محیط این دسته تعلق ندارد.',
+  'bulkOperation.message.actionUnavailable':
+    'این اقدام دیگر در دسترس نیست. وضعیت و مجوزهای خود را بررسی کنید.',
+  'bulkOperation.message.accepted': 'Rancher درخواست را دریافت کرد. وضعیت منبع را پیگیری کنید.',
+  'bulkOperation.message.unknown':
+    'دریافت پاسخ تأیید نشد. پیش از تلاش دوباره، وضعیت را بررسی کنید.',
+  'bulkOperation.message.timeout': 'دریافت اطلاعات منبع در مهلت مقرر ممکن نبود.',
+  'bulkOperation.message.failed': 'اعمال عملیات ممکن نبود.',
 } as const;

@@ -199,6 +199,51 @@ export const huHU = {
     '100% egy processzormagnak felel meg · jelentett magok száma: {cores}.',
   'resourceMetrics.caption': 'A kapcsolat utolsó 5 perce · legfeljebb 300 minta · {status}',
 
+  'bulkOperation.title': 'Tömeges művelet: {action}',
+  'bulkOperation.resources': { one: '{count} erőforrás', other: '{count} erőforrás' },
+  'bulkOperation.description': 'Környezet: {name} · {resources}',
+  'bulkOperation.confirm': {
+    one: '{count} művelet megerősítése',
+    other: '{count} művelet megerősítése',
+  },
+  'bulkOperation.closeResults': 'Eredmények bezárása',
+  'bulkOperation.warning':
+    'A művelet a listában szereplő összes erőforrásra vonatkozik. Egy hiba nem vonja vissza a Rancher által már fogadott műveleteket. Megerősítés előtt ellenőrizze az érintett erőforrásokat.',
+  'bulkOperation.restartHint':
+    'A szolgáltatások újraindítása egyenként 1 konténerből álló kötegekben történik, a kötegek között 2 másodperces szünettel. A küldés erőforrásonként követhető. A végső állapotot a műveleti nézetben ellenőrizze.',
+  'bulkOperation.removeWarning':
+    'Az eltávolítás során a Rancher az erőforrások életciklusának részeként leállíthat konténereket és eltávolíthat függő erőforrásokat. A művelet nem vonható vissza automatikusan.',
+  'bulkOperation.confirmEnvironment': 'Erősítse meg a környezet nevét',
+  'bulkOperation.sending': 'Műveletek küldése',
+  'bulkOperation.finished': 'A küldés befejeződött',
+  'bulkOperation.progress':
+    '{status} · {received} válasz érkezett a várt {total} válaszból. A végső állapot a műveleti nézetben követhető.',
+  'bulkOperation.resource': 'Erőforrás',
+  'bulkOperation.result': 'Eredmény',
+  'bulkOperation.status.accepted': 'Fogadva',
+  'bulkOperation.status.failed': 'Sikertelen',
+  'bulkOperation.status.unknown': 'Állapot ellenőrzése',
+  'bulkOperation.queued': 'Küldésre vár',
+  'bulkOperation.pending': 'Megerősítésre vár',
+  'bulkOperation.runningTitle': 'Művelet folyamatban',
+  'bulkOperation.runningDescription':
+    'Várja meg a köteg küldésének végét, mielőtt nézetet vagy környezetet vált.',
+  'bulkOperation.stay': 'Maradok ebben a nézetben',
+  'bulkOperation.message.startFailed': 'A köteg indítása nem sikerült.',
+  'bulkOperation.message.invalidSelection': 'A művelethez válasszon ki 1–100 erőforrást.',
+  'bulkOperation.message.duplicateResources': 'A kötegben ismétlődő erőforrások vannak.',
+  'bulkOperation.message.mixedRemoval':
+    'Tömeges eltávolításhoz azonos típusú erőforrásokat kell kiválasztani.',
+  'bulkOperation.message.wrongEnvironment': 'Az erőforrás nem a köteg környezetéhez tartozik.',
+  'bulkOperation.message.actionUnavailable':
+    'A művelet már nem érhető el. Ellenőrizze az állapotot és a jogosultságait.',
+  'bulkOperation.message.accepted':
+    'A Rancher fogadta a műveletet. Kövesse az erőforrás állapotát.',
+  'bulkOperation.message.unknown':
+    'Nem érkezett megerősített válasz. Ellenőrizze az állapotot, mielőtt újra próbálkozik.',
+  'bulkOperation.message.timeout': 'Az erőforrás lekérdezése nem fejeződött be időben.',
+  'bulkOperation.message.failed': 'A műveletet nem sikerült alkalmazni.',
+
   'operations.selectEnvironment': 'Válasszon környezetet',
   'operations.selectEnvironmentHint':
     'Az erőforrások kezeléséhez válasszon a felső sávban egy környezetet, amelyhez van hozzáférése.',

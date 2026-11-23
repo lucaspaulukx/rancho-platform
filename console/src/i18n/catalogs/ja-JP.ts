@@ -499,4 +499,45 @@ export const jaJP = {
   'resourceMetrics.cpuNote': '100% は 1 コア分に相当します。',
   'resourceMetrics.cpuNoteReported': '100% は 1 コア分に相当します · 報告されたコア数：{cores}。',
   'resourceMetrics.caption': 'この接続の直近 5 分間 · 最大 300 サンプル · {status}',
+
+  'bulkOperation.title': '一括{action}',
+  'bulkOperation.resources': { other: 'リソース {count} 件' },
+  'bulkOperation.description': '環境：{name} · {resources}',
+  'bulkOperation.confirm': { other: '{count} 件の操作を確定' },
+  'bulkOperation.closeResults': '結果を閉じる',
+  'bulkOperation.warning':
+    '一覧にある各リソースに操作を適用します。失敗しても、Rancher が受け付けた操作は取り消されません。確定する前に対象を確認してください。',
+  'bulkOperation.restartHint':
+    'サービスはコンテナ 1 個ずつ、2 秒間隔で再起動します。送信状況はリソースごとに追跡されます。最終状態は操作画面で確認してください。',
+  'bulkOperation.removeWarning':
+    'Rancher のライフサイクル処理の一環として、削除によりコンテナが停止し、依存リソースが削除される場合があります。自動で元に戻すことはできません。',
+  'bulkOperation.confirmEnvironment': '環境名を確認',
+  'bulkOperation.sending': '操作を送信中',
+  'bulkOperation.finished': '送信終了',
+  'bulkOperation.progress':
+    '{status} · {total} 件中 {received} 件の応答を受信。最終状態は操作画面で確認してください。',
+  'bulkOperation.resource': 'リソース',
+  'bulkOperation.result': '結果',
+  'bulkOperation.status.accepted': '受け付け済み',
+  'bulkOperation.status.failed': '失敗',
+  'bulkOperation.status.unknown': '状態を確認',
+  'bulkOperation.queued': '送信待ち',
+  'bulkOperation.pending': '確定待ち',
+  'bulkOperation.runningTitle': '操作を実行中',
+  'bulkOperation.runningDescription':
+    '画面や環境を切り替える前に、一括操作の送信が終わるまでお待ちください。',
+  'bulkOperation.stay': 'この画面に留まる',
+  'bulkOperation.message.startFailed': '一括操作を開始できませんでした。',
+  'bulkOperation.message.invalidSelection':
+    '操作の対象として 1～100 件のリソースを選択してください。',
+  'bulkOperation.message.duplicateResources': '一括操作の対象に重複したリソースがあります。',
+  'bulkOperation.message.mixedRemoval': '一括削除の対象は同じ種類のリソースに限られます。',
+  'bulkOperation.message.wrongEnvironment': 'このリソースは一括操作の対象環境に属していません。',
+  'bulkOperation.message.actionUnavailable':
+    'この操作は現在実行できません。状態と権限を確認してください。',
+  'bulkOperation.message.accepted': 'Rancher が受け付けました。リソースの状態を確認してください。',
+  'bulkOperation.message.unknown':
+    '応答を確認できませんでした。再試行する前に状態を確認してください。',
+  'bulkOperation.message.timeout': '制限時間内にリソースの情報を取得できませんでした。',
+  'bulkOperation.message.failed': '操作を適用できませんでした。',
 } as const;
