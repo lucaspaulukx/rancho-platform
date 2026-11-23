@@ -1,4 +1,73 @@
 export const ruRU = {
+  'resourceMetrics.disabled': 'Метрики отключены',
+  'resourceMetrics.enable': 'Включите модуль метрик в настройках консоли.',
+  'resourceMetrics.paused': 'На паузе',
+  'resourceMetrics.live': 'В реальном времени',
+  'resourceMetrics.stale': 'Нет новых измерений',
+  'resourceMetrics.closed': 'Соединение закрыто',
+  'resourceMetrics.connecting': 'Подключение…',
+  'resourceMetrics.resume': 'Возобновить',
+  'resourceMetrics.pause': 'Приостановить',
+  'resourceMetrics.reconnect': 'Переподключить поток метрик',
+  'resourceMetrics.container': 'Контейнер сервиса',
+  'resourceMetrics.awaiting': 'ожидание измерений',
+  'resourceMetrics.cpu': 'ЦП',
+  'resourceMetrics.cpuUsage': 'Загрузка ЦП',
+  'resourceMetrics.memory': 'Память',
+  'resourceMetrics.memoryUsed': 'Использовано памяти',
+  'resourceMetrics.noMemoryLimit': 'Агент не сообщил лимит памяти.',
+  'resourceMetrics.network': 'Сеть',
+  'resourceMetrics.received': 'Получено',
+  'resourceMetrics.sent': 'Отправлено',
+  'resourceMetrics.networkNote':
+    'Скорость рассчитывается между измерениями для одних и тех же интерфейсов.',
+  'resourceMetrics.disk': 'Диск',
+  'resourceMetrics.read': 'Чтение',
+  'resourceMetrics.write': 'Запись',
+  'resourceMetrics.diskNote': 'Отсутствующие счётчики помечаются как недоступные.',
+  'resourceMetrics.unavailableCounter': 'Счётчик недоступен',
+  'resourceMetrics.waitingAgent': 'Ожидание данных от агента…',
+  'resourceMetrics.close': 'Закрыть',
+  'resourceMetrics.csv': 'CSV',
+  'resourceMetrics.staleWarning':
+    'Агент давно не присылал новых измерений. Последние значения по-прежнему отображаются с отметками времени.',
+  'resourceMetrics.history':
+    'История хранится, пока эта панель открыта. Разрешения проверяются каждые 15 секунд.',
+  'resourceMetrics.wrongEnvironment': 'Ресурс не относится к выбранной среде.',
+  'resourceMetrics.resourceDenied':
+    'Сбор метрик остановлен, поскольку ресурс или разрешение больше недоступны.',
+  'resourceMetrics.serviceUnavailable': 'Сервер не предоставляет метрики для этого сервиса.',
+  'resourceMetrics.serviceLinkMismatch': 'Адрес метрик не относится к выбранному сервису.',
+  'resourceMetrics.serviceEnvironmentMismatch': 'Сервис не относится к выбранной среде.',
+  'resourceMetrics.serviceContainerMismatch':
+    'Список контейнеров не соответствует выбранному сервису.',
+  'resourceMetrics.serviceContainerConflict':
+    'В списке контейнеров есть противоречивые идентификаторы.',
+  'resourceMetrics.incomplete': 'Список контейнеров сервиса неполон.',
+  'resourceMetrics.targetLimit': 'Панель поддерживает до 64 контейнеров на сервис.',
+  'resourceMetrics.noTargets': 'В этом сервисе нет запущенных контейнеров для сбора метрик.',
+  'resourceMetrics.negotiation': 'Не удалось согласовать параметры соединения для сбора метрик.',
+  'resourceMetrics.invalidSample': 'Сервер отправил недопустимое измерение.',
+  'resourceMetrics.connectionFailed':
+    'Соединение для сбора метрик прервалось. Попробуйте подключиться снова.',
+  'resourceMetrics.sessionDenied':
+    'Сбор метрик остановлен, поскольку ваш сеанс или разрешение больше недоступны.',
+  'resourceMetrics.membershipChanged':
+    'Состав контейнеров сервиса изменился. Подключитесь снова, чтобы обновить метрики.',
+  'resourceMetrics.failed':
+    'Не удалось получить метрики для этого ресурса. Проверьте его состояние, связь с агентом и свои разрешения.',
+  'resourceMetrics.title': 'Метрики · {name}',
+  'resourceMetrics.description': 'Среда: {name} · измерения Rancher в реальном времени',
+  'resourceMetrics.containerHint':
+    'В этом соединении получены измерения для {sampled} из {total} контейнеров. В CSV экспортируются данные выбранного контейнера.',
+  'resourceMetrics.lastSample': 'последнее измерение в {time}',
+  'resourceMetrics.memoryLimit': 'Лимит по данным агента: {limit} MiB.',
+  'resourceMetrics.chartLabel': '{title}: измерения за период',
+  'resourceMetrics.cpuNote': '100% соответствует одному ядру.',
+  'resourceMetrics.cpuNoteReported':
+    '100% соответствует одному ядру · ядер по данным агента: {cores}.',
+  'resourceMetrics.caption': 'Последние 5 минут этого соединения · до 300 измерений · {status}',
+
   'workloadStreams.logs': 'Журналы ресурса',
   'workloadStreams.terminal': 'Терминал ресурса',
   'workloadStreams.emptyTitle': 'Нет доступных контейнеров',

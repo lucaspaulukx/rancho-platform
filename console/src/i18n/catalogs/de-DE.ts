@@ -41,6 +41,77 @@ export const deDE = {
     'Der Puffer ist auf die letzten 2.000 Zeilen und 512 KB begrenzt. Suche und Download verwenden nur die in diesem Fenster empfangenen Inhalte.',
   'resourceStream.logLabel': 'Container-Logs',
 
+  'resourceMetrics.disabled': 'Metriken deaktiviert',
+  'resourceMetrics.enable': 'Aktivieren Sie das Metrikmodul in der Konsolenkonfiguration.',
+  'resourceMetrics.paused': 'Angehalten',
+  'resourceMetrics.live': 'Live',
+  'resourceMetrics.stale': 'Keine neuen Messwerte',
+  'resourceMetrics.closed': 'Verbindung geschlossen',
+  'resourceMetrics.connecting': 'Verbindung wird hergestellt…',
+  'resourceMetrics.resume': 'Fortsetzen',
+  'resourceMetrics.pause': 'Anhalten',
+  'resourceMetrics.reconnect': 'Metrikverbindung erneut herstellen',
+  'resourceMetrics.container': 'Container des Dienstes',
+  'resourceMetrics.awaiting': 'Warten auf Messwerte',
+  'resourceMetrics.cpu': 'CPU',
+  'resourceMetrics.cpuUsage': 'CPU-Auslastung',
+  'resourceMetrics.memory': 'Arbeitsspeicher',
+  'resourceMetrics.memoryUsed': 'Belegter Arbeitsspeicher',
+  'resourceMetrics.noMemoryLimit': 'Der Agent hat kein Arbeitsspeicherlimit gemeldet.',
+  'resourceMetrics.network': 'Netzwerk',
+  'resourceMetrics.received': 'Empfangen',
+  'resourceMetrics.sent': 'Gesendet',
+  'resourceMetrics.networkNote':
+    'Die Raten werden anhand aufeinanderfolgender Messwerte derselben Schnittstellen berechnet.',
+  'resourceMetrics.disk': 'Datenträger',
+  'resourceMetrics.read': 'Lesen',
+  'resourceMetrics.write': 'Schreiben',
+  'resourceMetrics.diskNote': 'Fehlende Zähler werden als nicht verfügbar angezeigt.',
+  'resourceMetrics.unavailableCounter': 'Zähler nicht verfügbar',
+  'resourceMetrics.waitingAgent': 'Warten auf Daten vom Agenten…',
+  'resourceMetrics.close': 'Schließen',
+  'resourceMetrics.csv': 'CSV',
+  'resourceMetrics.staleWarning':
+    'Der Agent hat in letzter Zeit keine neuen Messwerte gesendet. Die letzten Werte bleiben mit ihren Zeitstempeln sichtbar.',
+  'resourceMetrics.history':
+    'Der Verlauf bleibt erhalten, solange dieses Fenster geöffnet ist. Die Berechtigungen werden alle 15 Sekunden erneut geprüft.',
+  'resourceMetrics.wrongEnvironment': 'Die Ressource gehört nicht zur ausgewählten Umgebung.',
+  'resourceMetrics.resourceDenied':
+    'Die Metrikerfassung wurde beendet, weil die Ressource nicht mehr verfügbar ist oder die Berechtigung fehlt.',
+  'resourceMetrics.serviceUnavailable':
+    'Der Server stellt für diesen Dienst keine Metriken bereit.',
+  'resourceMetrics.serviceLinkMismatch': 'Die Metrikadresse gehört nicht zum ausgewählten Dienst.',
+  'resourceMetrics.serviceEnvironmentMismatch':
+    'Der Dienst gehört nicht zur ausgewählten Umgebung.',
+  'resourceMetrics.serviceContainerMismatch':
+    'Die Containerliste stimmt nicht mit dem ausgewählten Dienst überein.',
+  'resourceMetrics.serviceContainerConflict':
+    'Die Containerliste enthält widersprüchliche Identitäten.',
+  'resourceMetrics.incomplete': 'Die Containerliste des Dienstes ist unvollständig.',
+  'resourceMetrics.targetLimit': 'Dieses Fenster unterstützt bis zu 64 Container pro Dienst.',
+  'resourceMetrics.noTargets':
+    'In diesem Dienst gibt es keine laufenden Container, für die Metriken erfasst werden können.',
+  'resourceMetrics.negotiation': 'Die Metrikverbindung konnte nicht ausgehandelt werden.',
+  'resourceMetrics.invalidSample': 'Der Server hat einen ungültigen Messwert gesendet.',
+  'resourceMetrics.connectionFailed':
+    'Die Metrikverbindung ist fehlgeschlagen. Versuchen Sie, die Verbindung erneut herzustellen.',
+  'resourceMetrics.sessionDenied':
+    'Die Metrikerfassung wurde beendet, weil Ihre Sitzung nicht mehr verfügbar ist oder Ihnen die Berechtigung fehlt.',
+  'resourceMetrics.membershipChanged':
+    'Die Container des Dienstes haben sich geändert. Stellen Sie die Verbindung erneut her, um die Metriken zu aktualisieren.',
+  'resourceMetrics.failed':
+    'Die Metriken für diese Ressource konnten nicht abgerufen werden. Prüfen Sie den Zustand der Ressource, die Verbindung zum Agenten und Ihre Berechtigungen.',
+  'resourceMetrics.title': 'Metriken · {name}',
+  'resourceMetrics.description': 'Umgebung: {name} · Live-Messwerte von Rancher',
+  'resourceMetrics.containerHint':
+    'Für {sampled} von {total} Containern liegen in dieser Verbindung Messwerte vor. Der CSV-Export enthält die Messwerte des ausgewählten Containers.',
+  'resourceMetrics.lastSample': 'Letzter Messwert um {time}',
+  'resourceMetrics.memoryLimit': 'Gemeldetes Limit: {limit} MiB.',
+  'resourceMetrics.chartLabel': '{title}: Messwerte im Zeitverlauf',
+  'resourceMetrics.cpuNote': '100 % entsprechen einem Kern.',
+  'resourceMetrics.cpuNoteReported': '100 % entsprechen einem Kern · {cores} Kerne gemeldet.',
+  'resourceMetrics.caption': 'Letzte 5 Minuten dieser Verbindung · bis zu 300 Messwerte · {status}',
+
   'operations.stackMetric': 'Stacks',
   'operations.serviceMetric': 'Dienste',
   'operations.containerMetric': 'Container',

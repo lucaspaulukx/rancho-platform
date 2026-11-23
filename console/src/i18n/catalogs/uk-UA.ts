@@ -1,4 +1,72 @@
 export const ukUA = {
+  'resourceMetrics.disabled': 'Метрики вимкнено',
+  'resourceMetrics.enable': 'Увімкніть модуль метрик у налаштуваннях консолі.',
+  'resourceMetrics.paused': 'Призупинено',
+  'resourceMetrics.live': 'У реальному часі',
+  'resourceMetrics.stale': 'Немає нових вимірювань',
+  'resourceMetrics.closed': 'З’єднання закрито',
+  'resourceMetrics.connecting': 'Підключення…',
+  'resourceMetrics.resume': 'Відновити',
+  'resourceMetrics.pause': 'Призупинити',
+  'resourceMetrics.reconnect': 'Перепідключити потік метрик',
+  'resourceMetrics.container': 'Контейнер сервісу',
+  'resourceMetrics.awaiting': 'очікування вимірювань',
+  'resourceMetrics.cpu': 'ЦП',
+  'resourceMetrics.cpuUsage': 'Завантаження ЦП',
+  'resourceMetrics.memory': 'Пам’ять',
+  'resourceMetrics.memoryUsed': 'Використано пам’яті',
+  'resourceMetrics.noMemoryLimit': 'Агент не повідомив ліміт пам’яті.',
+  'resourceMetrics.network': 'Мережа',
+  'resourceMetrics.received': 'Отримано',
+  'resourceMetrics.sent': 'Надіслано',
+  'resourceMetrics.networkNote':
+    'Швидкість розраховується між вимірюваннями для тих самих інтерфейсів.',
+  'resourceMetrics.disk': 'Диск',
+  'resourceMetrics.read': 'Читання',
+  'resourceMetrics.write': 'Запис',
+  'resourceMetrics.diskNote': 'Відсутні лічильники позначаються як недоступні.',
+  'resourceMetrics.unavailableCounter': 'Лічильник недоступний',
+  'resourceMetrics.waitingAgent': 'Очікування даних від агента…',
+  'resourceMetrics.close': 'Закрити',
+  'resourceMetrics.csv': 'CSV',
+  'resourceMetrics.staleWarning':
+    'Агент давно не надсилав нових вимірювань. Останні значення досі відображаються з позначками часу.',
+  'resourceMetrics.history':
+    'Історія зберігається, поки ця панель відкрита. Дозволи перевіряються кожні 15 секунд.',
+  'resourceMetrics.wrongEnvironment': 'Ресурс не належить до вибраного середовища.',
+  'resourceMetrics.resourceDenied':
+    'Збирання метрик зупинено, оскільки ресурс або дозвіл більше недоступні.',
+  'resourceMetrics.serviceUnavailable': 'Сервер не надає метрик для цього сервісу.',
+  'resourceMetrics.serviceLinkMismatch': 'Адреса метрик не належить до вибраного сервісу.',
+  'resourceMetrics.serviceEnvironmentMismatch': 'Сервіс не належить до вибраного середовища.',
+  'resourceMetrics.serviceContainerMismatch': 'Список контейнерів не відповідає вибраному сервісу.',
+  'resourceMetrics.serviceContainerConflict':
+    'Список контейнерів містить суперечливі ідентифікатори.',
+  'resourceMetrics.incomplete': 'Список контейнерів сервісу неповний.',
+  'resourceMetrics.targetLimit': 'Панель підтримує до 64 контейнерів на сервіс.',
+  'resourceMetrics.noTargets': 'У цьому сервісі немає запущених контейнерів для збирання метрик.',
+  'resourceMetrics.negotiation': 'Не вдалося узгодити параметри з’єднання для збирання метрик.',
+  'resourceMetrics.invalidSample': 'Сервер надіслав недійсне вимірювання.',
+  'resourceMetrics.connectionFailed':
+    'З’єднання для збирання метрик перервано. Спробуйте підключитися знову.',
+  'resourceMetrics.sessionDenied':
+    'Збирання метрик зупинено, оскільки ваш сеанс або дозвіл більше недоступні.',
+  'resourceMetrics.membershipChanged':
+    'Склад контейнерів сервісу змінився. Підключіться знову, щоб оновити метрики.',
+  'resourceMetrics.failed':
+    'Не вдалося отримати метрики для цього ресурсу. Перевірте його стан, зв’язок з агентом і свої дозволи.',
+  'resourceMetrics.title': 'Метрики · {name}',
+  'resourceMetrics.description': 'Середовище: {name} · вимірювання Rancher у реальному часі',
+  'resourceMetrics.containerHint':
+    'У цьому з’єднанні отримано вимірювання для {sampled} із {total} контейнерів. У CSV експортуються дані вибраного контейнера.',
+  'resourceMetrics.lastSample': 'останнє вимірювання о {time}',
+  'resourceMetrics.memoryLimit': 'Ліміт за даними агента: {limit} MiB.',
+  'resourceMetrics.chartLabel': '{title}: вимірювання за період',
+  'resourceMetrics.cpuNote': '100% відповідає одному ядру.',
+  'resourceMetrics.cpuNoteReported':
+    '100% відповідає одному ядру · ядер за даними агента: {cores}.',
+  'resourceMetrics.caption': 'Останні 5 хвилин цього з’єднання · до 300 вимірювань · {status}',
+
   'workloadStreams.logs': 'Журнали ресурсу',
   'workloadStreams.terminal': 'Термінал ресурсу',
   'workloadStreams.emptyTitle': 'Немає доступних контейнерів',

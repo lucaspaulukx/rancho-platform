@@ -39,6 +39,77 @@ export const huHU = {
     'A puffer legfeljebb az utolsó 2000 sort és 512 KB-ot tárol. A keresés és a letöltés csak az ezen a panelen fogadott tartalomra vonatkozik.',
   'resourceStream.logLabel': 'A konténer naplói',
 
+  'resourceMetrics.disabled': 'Metrikák kikapcsolva',
+  'resourceMetrics.enable': 'Kapcsolja be a metrikamodult a konzol beállításaiban.',
+  'resourceMetrics.paused': 'Szüneteltetve',
+  'resourceMetrics.live': 'Élő',
+  'resourceMetrics.stale': 'Nincsenek új minták',
+  'resourceMetrics.closed': 'Kapcsolat lezárva',
+  'resourceMetrics.connecting': 'Kapcsolódás…',
+  'resourceMetrics.resume': 'Folytatás',
+  'resourceMetrics.pause': 'Szüneteltetés',
+  'resourceMetrics.reconnect': 'Újracsatlakozás a metrikákhoz',
+  'resourceMetrics.container': 'A szolgáltatás konténere',
+  'resourceMetrics.awaiting': 'várakozás a mintákra',
+  'resourceMetrics.cpu': 'CPU',
+  'resourceMetrics.cpuUsage': 'CPU-használat',
+  'resourceMetrics.memory': 'Memória',
+  'resourceMetrics.memoryUsed': 'Felhasznált memória',
+  'resourceMetrics.noMemoryLimit': 'Az ügynök nem jelentett memóriakorlátot.',
+  'resourceMetrics.network': 'Hálózat',
+  'resourceMetrics.received': 'Fogadott',
+  'resourceMetrics.sent': 'Küldött',
+  'resourceMetrics.networkNote':
+    'Az adatátviteli sebesség az azonos interfészekről vett egymást követő minták alapján számítódik.',
+  'resourceMetrics.disk': 'Lemez',
+  'resourceMetrics.read': 'Olvasás',
+  'resourceMetrics.write': 'Írás',
+  'resourceMetrics.diskNote': 'A hiányzó számlálók nem elérhetőként jelennek meg.',
+  'resourceMetrics.unavailableCounter': 'A számláló nem érhető el',
+  'resourceMetrics.waitingAgent': 'Várakozás az ügynök adataira…',
+  'resourceMetrics.close': 'Bezárás',
+  'resourceMetrics.csv': 'CSV',
+  'resourceMetrics.staleWarning':
+    'Az ügynök egy ideje nem küldött új mintákat. Az utolsó értékek az időbélyegükkel együtt láthatók maradnak.',
+  'resourceMetrics.history':
+    'Az előzmények addig maradnak meg, amíg a panel nyitva van. A jogosultságokat a rendszer 15 másodpercenként újra ellenőrzi.',
+  'resourceMetrics.wrongEnvironment': 'Az erőforrás nem a kiválasztott környezethez tartozik.',
+  'resourceMetrics.resourceDenied':
+    'A metrikák gyűjtése leállt, mert az erőforrás vagy a szükséges jogosultság már nem érhető el.',
+  'resourceMetrics.serviceUnavailable':
+    'A kiszolgáló nem szolgáltat metrikákat ehhez a szolgáltatáshoz.',
+  'resourceMetrics.serviceLinkMismatch':
+    'A metrikák címe nem a kiválasztott szolgáltatáshoz tartozik.',
+  'resourceMetrics.serviceEnvironmentMismatch':
+    'A szolgáltatás nem a kiválasztott környezethez tartozik.',
+  'resourceMetrics.serviceContainerMismatch':
+    'A konténerek listája nem egyezik a kiválasztott szolgáltatás konténereivel.',
+  'resourceMetrics.serviceContainerConflict': 'A konténerek listája ütköző azonosítókat tartalmaz.',
+  'resourceMetrics.incomplete': 'A szolgáltatás konténereinek listája hiányos.',
+  'resourceMetrics.targetLimit': 'A panel szolgáltatásonként legfeljebb 64 konténert támogat.',
+  'resourceMetrics.noTargets':
+    'Ebben a szolgáltatásban nincs futó konténer, amelyről metrikákat lehetne gyűjteni.',
+  'resourceMetrics.negotiation': 'Nem sikerült egyeztetni a metrikakapcsolatot.',
+  'resourceMetrics.invalidSample': 'A kiszolgáló érvénytelen metrikamintát küldött.',
+  'resourceMetrics.connectionFailed': 'A metrikakapcsolat meghiúsult. Próbáljon újracsatlakozni.',
+  'resourceMetrics.sessionDenied':
+    'A metrikák gyűjtése leállt, mert a munkamenete már nem érhető el, vagy nincs meg a szükséges jogosultsága.',
+  'resourceMetrics.membershipChanged':
+    'A szolgáltatás konténerei megváltoztak. A metrikák frissítéséhez csatlakozzon újra.',
+  'resourceMetrics.failed':
+    'Az erőforrás metrikáit nem sikerült lekérni. Ellenőrizze az erőforrás állapotát, az ügynök elérhetőségét és a jogosultságait.',
+  'resourceMetrics.title': 'Metrikák · {name}',
+  'resourceMetrics.description': 'Környezet: {name} · élő minták a Ranchertől',
+  'resourceMetrics.containerHint':
+    'Ebben a kapcsolatban {total} konténerből {sampled} konténerhez érkezett minta. A CSV-export a kiválasztott konténer adatait tartalmazza.',
+  'resourceMetrics.lastSample': 'utolsó minta ekkor: {time}',
+  'resourceMetrics.memoryLimit': 'Jelentett korlát: {limit} MiB.',
+  'resourceMetrics.chartLabel': '{title}: a minták időbeli alakulása',
+  'resourceMetrics.cpuNote': '100% egy processzormagnak felel meg.',
+  'resourceMetrics.cpuNoteReported':
+    '100% egy processzormagnak felel meg · jelentett magok száma: {cores}.',
+  'resourceMetrics.caption': 'A kapcsolat utolsó 5 perce · legfeljebb 300 minta · {status}',
+
   'operations.stackMetric': 'stack',
   'operations.serviceMetric': 'szolgáltatás',
   'operations.containerMetric': 'konténer',
