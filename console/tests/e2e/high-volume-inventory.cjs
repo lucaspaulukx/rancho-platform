@@ -128,6 +128,26 @@ async function checkScope(page, id, count) {
   return names;
 }
 
+async function checkInventoryLocales(page) {
+  const summary = page.locator('.workload-context > .muted');
+  const language = page.locator('.language-selector select');
+  for (const [locale, expected, direction] of [
+    ['pt-BR', '20 stacks · 200 serviços · 2.000 containers', 'ltr'],
+    ['fr-FR', '20 stacks · 200 services · 2\u202f000 conteneurs', 'ltr'],
+    ['fa-IR', '۲۰ پشته · ۲۰۰ سرویس · ۲٬۰۰۰ کانتینر', 'rtl'],
+  ]) {
+    await language.selectOption(locale);
+    await page.waitForFunction(
+      ({ expected, direction }) =>
+        document.documentElement.dir === direction &&
+        document.querySelector('.workload-context > .muted')?.textContent === expected,
+      { expected, direction },
+    );
+    assert.ok(await summary.isVisible());
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+  }
+}
+
 async function checkOperationLayout(page) {
   const heading = page.getByRole('heading', { name: longEnvironmentName, exact: true });
   const checkText = async (locator) => {
@@ -581,6 +601,7 @@ async function run(
     sweep = false,
     smoke = false,
     layout = false,
+    inventoryLocales = false,
     soakSeconds,
     size = viewport,
   },
@@ -642,7 +663,7 @@ async function run(
           const config = await response.json();
           config.workloadInventoryPagination = pagination;
           config.workloadTreePagination = grouped === true;
-          if (layout) {
+          if (layout || inventoryLocales) {
             config.modules.observability = true;
             config.localization = {
               enabled: true,
@@ -653,6 +674,7 @@ async function run(
               preview: true,
             };
           }
+          if (inventoryLocales) config.modules.contextActions = false;
           return route.fulfill({ response, json: config });
         }
         if (
@@ -710,6 +732,15 @@ async function run(
         assetFailures += 1;
     });
     const first = projects[0].id;
+    if (inventoryLocales) {
+      stage = 'localized inventory with context actions disabled';
+      await page.goto(`${origin}/console/containers?env=${first}`, {
+        waitUntil: 'domcontentloaded',
+      });
+      await checkInventoryLocales(page);
+      checkNetwork();
+      return { localizedSummary: true, locales: ['pt-BR', 'fr-FR', 'fa-IR'], viewport: size };
+    }
     if (grouped !== undefined) {
       stage = 'initial grouped inventory';
       await page.goto(`${origin}/console/containers?env=${first}&view=stacks`, {
@@ -951,7 +982,12 @@ async function run(
         layout: true,
         size: mobileViewport,
       });
-      console.log(JSON.stringify({ status: 'passed', ...evidence, smoke }, null, 2));
+      const inventoryLocales = await run(browser, {
+        pagination: true,
+        inventoryLocales: true,
+        size: { ...mobileViewport, width: 320 },
+      });
+      console.log(JSON.stringify({ status: 'passed', ...evidence, smoke, inventoryLocales }, null, 2));
       return;
     }
     const samples = [];
