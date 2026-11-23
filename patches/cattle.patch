@@ -661,6 +661,28 @@ index e017f43..78462b3 100644
      @Bean
      BasicAuthImpl BasicAuthImpl() {
          return new BasicAuthImpl();
+diff --git a/code/packaging/app-config/src/main/java/io/cattle/platform/app/SystemConfig.java b/code/packaging/app-config/src/main/java/io/cattle/platform/app/SystemConfig.java
+index 5e47de6..cc8b480 100644
+--- a/code/packaging/app-config/src/main/java/io/cattle/platform/app/SystemConfig.java
++++ b/code/packaging/app-config/src/main/java/io/cattle/platform/app/SystemConfig.java
+@@ -5,7 +5,6 @@ import io.cattle.platform.datasource.JMXDataSourceFactoryImpl;
+ import io.cattle.platform.db.jooq.logging.LoggerListener;
+ import io.cattle.platform.extension.impl.ExtensionManagerImpl;
+ import io.cattle.platform.json.JacksonJsonMapper;
+-import io.cattle.platform.liquibase.JarInJarServiceLocator;
+ import io.cattle.platform.liquibase.Loader;
+ import io.cattle.platform.spring.resource.SpringConfigurableExecutorService;
+ import io.cattle.platform.spring.resource.SpringResourceLoader;
+@@ -51,9 +50,6 @@ public class SystemConfig {
+ 
+     @Bean
+     Loader liquibaseCore(DataSourceFactory factory) {
+-        JarInJarServiceLocator locator = new JarInJarServiceLocator();
+-        locator.init();
+-
+         Loader loader = new Loader();
+         loader.setDataSourceFactory(factory);
+         loader.setChangeLog("classpath:db/changelog.xml");
 diff --git a/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties b/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties
 index 05685f7..36a8c16 100644
 --- a/code/packaging/app-config/src/main/resources/META-INF/cattle/api-server/defaults.properties
