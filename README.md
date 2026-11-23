@@ -20,10 +20,12 @@ Trivy 0.74.0 scans of the initial lab images and subsequent candidates on Novemb
 | Image | Initial critical / high | Candidate critical / high |
 |---|---:|---:|
 | Backend on the legacy base | 30 / 88 | 5 / 22 |
+| Experimental single-node backend on Ubuntu 24.04 | — | 0 / 0 |
 | Console gateway | 3 / 73 | 0 / 0 |
 | Optional Keycloak | 8 / 101 | 0 / 6 |
+| Experimental Docker host bootstrap agent | — | 0 / 27 |
 
-These counts describe the images scanned and depend on the advisory database. The legacy backend base has reached end of support. The experimental single-node backend on Ubuntu 24.04 reports **0 critical / 0 high** in its scan. The [roadmap](docs/en/roadmap.md#beta-image-security-gate) tracks the remaining findings, the experimental backend and the beta acceptance gates.
+The initial column shows earlier scans of the corresponding components. Counts depend on the advisory database. The legacy backend base has reached end of support. The separately scanned legacy Cattle system images each reported 27 to 29 high findings. The host agent and Cattle system image findings remain beta release gates. See the [security roadmap](docs/en/roadmap.md#beta-image-security-gate).
 
 ## Features
 
