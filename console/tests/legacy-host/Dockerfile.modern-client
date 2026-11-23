@@ -1,3 +1,13 @@
 FROM docker:29.9.2-cli@sha256:5e6baf67325a79f64ed3bed6863954d5e05d0f3d4e57cbdb14809346814bbfdb AS docker-cli
+FROM golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 AS share-mnt
+ENV GO111MODULE=off GOPATH=/go
+WORKDIR /go/src/github.com/rancher/share-mnt
+ADD --checksum=sha256:ab2addff1c7599aadffa59a6af8aadac969771924804d7685fc902a7ef1f3b1d https://codeload.github.com/rancher/share-mnt/tar.gz/dbb36e45d0e31cc02629ddef58fdc505f3d35516 /tmp/share-mnt.tar.gz
+COPY share-mnt-cgroup-v2.patch /tmp/share-mnt.patch
+RUN --network=none tar -xzf /tmp/share-mnt.tar.gz --strip-components=1 && \
+    git apply /tmp/share-mnt.patch && \
+    CGO_ENABLED=0 go build -trimpath -o /out/share-mnt .
 FROM rancher/agent:v1.2.11@sha256:0fba3fb10108f7821596dc5ad4bfa30e93426d034cd3471f6ccd3afb5f87a963
 COPY --from=docker-cli /usr/local/bin/docker /usr/bin/docker
+COPY --from=share-mnt /out/share-mnt /usr/bin/share-mnt
+COPY --from=share-mnt /go/src/github.com/rancher/share-mnt/LICENSE /usr/share/doc/rancho-share-mnt/LICENSE
