@@ -92,6 +92,8 @@ export function checkRegisteredCatalogs({
     try {
       const keys = Object.keys(validateCatalog(catalog));
       if (!keys.length) failures.add('empty-preview-catalog');
+      if (englishKeys.some((key) => !Object.hasOwn(catalog, key)))
+        failures.add('incomplete-preview-catalog');
       previewCatalogKeyCounts[locale] = keys.length;
     } catch {
       failures.add('invalid-preview-message-structure');

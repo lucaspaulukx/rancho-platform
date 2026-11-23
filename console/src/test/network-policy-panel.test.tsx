@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { NetworkPolicies } from '../components/NetworkPolicies';
 import { I18nProvider } from '../i18n/provider';
+import { faIR } from '../i18n/catalogs/fa-IR';
 import type { Locale } from '../i18n/locales';
 
 const context = vi.hoisted(() => ({
@@ -76,7 +77,7 @@ function fixture(manager = false, revoked = false) {
         policy={{
           enabled: true,
           defaultLocale,
-          availableLocales: ['pt-BR', 'en-US'],
+          availableLocales: ['pt-BR', 'en-US', 'fa-IR'],
           selectable: false,
           detectBrowser: false,
           preview: true,
@@ -131,6 +132,11 @@ describe('Painel de políticas nativas', () => {
       'You no longer have permission to change network policies.',
     );
     expect(screen.getByLabelText('Other communication')).toBe(field);
+    changeLocale('fa-IR');
+    expect(await screen.findByLabelText(faIR['networkPoliciesPage.defaultScope'])).toBe(field);
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      faIR['networkPoliciesPage.validation.permissionChanged'],
+    );
     expect(field).toHaveValue('deny');
     expect(screen.getByRole('heading', { name: /ipsec/ })).toBeInTheDocument();
     expect(writes).toEqual([]);
