@@ -33,8 +33,8 @@ beforeEach(() => {
 describe('Sobre e capacidades', () => {
   it('mantém identidade Rancher/comunidade e versão da console, sem afirmar versão detectada', () => {
     render(<About open onClose={vi.fn()} />);
-    expect(screen.getByAltText('Rancher')).toBeInTheDocument();
-    expect(screen.getByText('Community Console')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Rancho Platform' })).toBeInTheDocument();
+    expect(screen.getByText('Rancher 1.6.30')).toBeInTheDocument();
     expect(screen.getByText('Base do laboratório')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Abrir Rancher clássico' })).toHaveAttribute(
       'href',

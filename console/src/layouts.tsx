@@ -260,11 +260,18 @@ export function AppShell() {
         <div className="sidebar-footer">
           <div className="product-signature">
             <span className="signature-mark">
-              <img src="/console/brand/rancher-symbol.svg" alt="" />
+              <img
+                src={
+                  app.config.branding
+                    ? '/console/brand/rancho-bull.png'
+                    : '/console/brand/rancher-symbol.svg'
+                }
+                alt=""
+              />
             </span>
             <div>
               <strong>Rancher 1.6.30</strong>
-              {app.config.branding && <span>Community Console</span>}
+              {app.config.branding && <span>Rancho Platform</span>}
             </div>
           </div>
           <button
@@ -364,7 +371,7 @@ export function AppShell() {
           </PageErrorBoundary>
         </main>
         <footer className="workspace-footer">
-          <span>{app.config.branding ? 'Rancher Community Console' : 'Rancher'}</span>
+          <span>{app.config.branding ? 'Rancho Platform' : 'Rancher'}</span>
           <span>
             {t('shell.footer.modern')} <span className="version-pill">v{version}</span>
           </span>
@@ -415,7 +422,14 @@ export function AuthLayout({ children }: { children: ReactNode }) {
           <p>{t('shell.story.description')}</p>
           <div className="auth-diagram" aria-hidden="true">
             <div className="diagram-core">
-              <img src="/console/brand/rancher-symbol.svg" alt="" />
+              <img
+                src={
+                  config.branding
+                    ? '/console/brand/rancho-bull.png'
+                    : '/console/brand/rancher-symbol.svg'
+                }
+                alt=""
+              />
             </div>
             <span className="diagram-node one" />
             <span className="diagram-node two" />
@@ -425,12 +439,12 @@ export function AuthLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
         <span className="auth-attribution">
-          {config.branding ? 'Rancher Community Console' : 'Rancher Console'}
+          {config.branding ? 'Rancho Platform · Rancher 1.6.30' : 'Rancher Console'}
         </span>
       </section>
       <section className="auth-panel">
         <div className="auth-panel-top">
-          <span>Rancher Console</span>
+          <span>{config.branding ? 'Rancho Platform' : 'Rancher Console'}</span>
           <LanguageSelector />
           {config.themeSelectable && (
             <Button
