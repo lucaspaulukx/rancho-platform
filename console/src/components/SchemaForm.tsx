@@ -1,3 +1,5 @@
+import { UlimitEditor } from './UlimitEditor';
+import { supportsUlimits, validateWorkloadUlimits } from '../workload-ulimits';
 import { CapabilityEditor } from './CapabilityEditor';
 import { validateWorkloadSecurity } from '../workload-security';
 import { MemoryEditor } from './MemoryEditor';
@@ -450,6 +452,7 @@ function EditorField({
   schedulingEditors = false,
   resourceEditors = false,
   securityEditors = false,
+  ulimitEditors = false,
 }: {
   name: string;
   field: SchemaField;
@@ -465,9 +468,12 @@ function EditorField({
   schedulingEditors?: boolean;
   resourceEditors?: boolean;
   securityEditors?: boolean;
+  ulimitEditors?: boolean;
 }) {
   const nested = objectSchema(field.type, schemas);
   const [revealed, setRevealed] = useState(false);
+  if (ulimitEditors && name === 'ulimits' && supportsUlimits(field, schemas))
+    return <UlimitEditor value={value} onChange={onChange} />;
   if (
     securityEditors &&
     ['capAdd', 'capDrop'].includes(name) &&
@@ -528,6 +534,7 @@ function EditorField({
         schedulingEditors={schedulingEditors}
         resourceEditors={resourceEditors}
         securityEditors={securityEditors}
+        ulimitEditors={ulimitEditors}
         healthCheckEditors={healthCheckEditors}
         onChange={onChange}
       />
@@ -564,6 +571,7 @@ function EditorField({
         schedulingEditors={schedulingEditors}
         resourceEditors={resourceEditors}
         securityEditors={securityEditors}
+        ulimitEditors={ulimitEditors}
         healthCheckEditors={healthCheckEditors}
       />
     );
@@ -780,6 +788,7 @@ export function SidecarsEditor({
   schedulingEditors = false,
   resourceEditors = false,
   securityEditors = false,
+  ulimitEditors = false,
   onChange,
 }: {
   value: unknown;
@@ -790,6 +799,7 @@ export function SidecarsEditor({
   schedulingEditors?: boolean;
   resourceEditors?: boolean;
   securityEditors?: boolean;
+  ulimitEditors?: boolean;
   onChange: (value: unknown) => void;
 }) {
   const [rows, setRows] = useState(() =>
@@ -851,6 +861,7 @@ export function SidecarsEditor({
                     schedulingEditors={schedulingEditors}
                     resourceEditors={resourceEditors}
                     securityEditors={securityEditors}
+                    ulimitEditors={ulimitEditors}
                     healthCheckEditors={healthCheckEditors}
                     onChange={(next) =>
                       update(
@@ -915,6 +926,7 @@ export function SchemaForm({
   schedulingEditors = false,
   resourceEditors = false,
   securityEditors = false,
+  ulimitEditors = false,
 }: {
   schema: Schema;
   schemas: Record<string, Schema>;
@@ -934,6 +946,7 @@ export function SchemaForm({
   schedulingEditors?: boolean;
   resourceEditors?: boolean;
   securityEditors?: boolean;
+  ulimitEditors?: boolean;
 }) {
   const fields = editableFields(schema, !!original).filter(
     ([name]) =>
@@ -985,6 +998,7 @@ export function SchemaForm({
       if (bindingEditors) validateBindingFields(schema, values, schemas, initialBindings.current);
       if (healthCheckEditors) validateWorkloadHealthChecks(schema, values, schemas);
       if (securityEditors) validateWorkloadSecurity(schema, values, schemas);
+      if (ulimitEditors) validateWorkloadUlimits(schema, values, schemas);
       if (resourceEditors) validateWorkloadResources(schema, values, schemas);
       if (schedulingEditors) validateWorkloadScheduling(schema, values, schemas);
       if (sidecarEditors && schema.id === 'service') validateSidecars(values, schemas);
@@ -1008,6 +1022,7 @@ export function SchemaForm({
       schedulingEditors={schedulingEditors}
       resourceEditors={resourceEditors}
       securityEditors={securityEditors}
+      ulimitEditors={ulimitEditors}
       onChange={(value) => {
         setValues((previous) => ({ ...previous, [name]: value }));
         if (field.type.startsWith('reference[')) onReferenceChange?.(name, String(value ?? ''));

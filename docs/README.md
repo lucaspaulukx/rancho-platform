@@ -152,3 +152,6 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 
 - [Plano de métricas contextuais de serviços](84-contextual-service-metrics.md).
 - [Diagnóstico do heartbeat do scheduler](85-scheduler-heartbeat-diagnosis.md).
+
+- [Fluxo Git do Rancho Platform](86-repository-workflow.md).
+- [Limites de processo na criação contextual](87-workload-ulimits.md).

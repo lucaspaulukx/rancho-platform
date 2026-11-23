@@ -21,7 +21,11 @@ describe('Migração da configuração pública', () => {
   it('preserva configuração completa e flags desligadas no upgrade e rollback em memória', () => {
     const { schemaVersion: _, ...legacy } = config;
     const upgraded = validateConfig(legacy);
-    expect(upgraded.modules).toEqual({ serviceMetrics: false, ...config.modules });
+    expect(upgraded.modules).toEqual({
+      serviceMetrics: false,
+      workloadUlimitEditors: false,
+      ...config.modules,
+    });
     expect(upgraded.modules.admin).toBe(false);
     expect(validateConfig(config)).toEqual(upgraded);
     expect(validateConfig(legacy)).toEqual(upgraded);

@@ -61,6 +61,7 @@ const moduleLabels: Record<ModuleName, string> = {
   metrics: 'Métricas',
   metricsPayloadTransport: 'Transporte negociado de métricas grandes',
   serviceMetrics: 'Métricas de containers no contexto do serviço',
+  workloadUlimitEditors: 'Editor de limites de processo na criação',
   admin: 'Administração geral',
   api: 'Integrações adicionais',
   apiKeys: 'Chaves de API',

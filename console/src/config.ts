@@ -36,6 +36,7 @@ export const moduleNames = [
   'metrics',
   'metricsPayloadTransport',
   'serviceMetrics',
+  'workloadUlimitEditors',
   'admin',
   'api',
   'apiKeys',
@@ -109,7 +110,10 @@ export function validateConfig(value: unknown): ConsoleConfig {
   const modules = Object.fromEntries(
     moduleNames.map((name) => [
       name,
-      (legacy || name === 'metricsPayloadTransport' || name === 'serviceMetrics') &&
+      (legacy ||
+        name === 'metricsPayloadTransport' ||
+        name === 'serviceMetrics' ||
+        name === 'workloadUlimitEditors') &&
       !Object.prototype.hasOwnProperty.call(supplied, name)
         ? false
         : supplied[name],
