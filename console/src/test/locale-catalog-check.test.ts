@@ -3,13 +3,15 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
-import {
-  englishMessages,
-  portugueseMessages,
-  previewCatalogs,
-  validateCatalog,
-} from '../i18n/messages';
+import { englishMessages, portugueseMessages, validateCatalog } from '../i18n/messages';
 import { localeInventory } from '../i18n/locales';
+import { previewLoaders } from '../i18n/preview-loaders';
+
+const previewCatalogs = Object.fromEntries(
+  await Promise.all(
+    Object.entries(previewLoaders).map(async ([locale, load]) => [locale, await load()]),
+  ),
+);
 
 // The CLI is an ES module; a computed URL avoids claiming a generated declaration exists.
 const root = process.cwd();

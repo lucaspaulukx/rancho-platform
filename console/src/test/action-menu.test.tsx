@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ActionMenu } from '../components/ActionMenu';
 import { I18nProvider } from '../i18n/provider';
@@ -36,7 +36,7 @@ describe('Menu de ações compartilhado', () => {
       window.dispatchEvent(new StorageEvent('storage', { key: 'rancho.console.locale.anonymous' }));
     });
     expect(screen.getByRole('menu')).toBe(menu);
-    expect(menu).toHaveStyle({ left: '300px' });
+    await waitFor(() => expect(menu).toHaveStyle({ left: '300px' }));
     expect(item).toHaveFocus();
     expect(choose).not.toHaveBeenCalled();
     await userEvent.keyboard('{Escape}');

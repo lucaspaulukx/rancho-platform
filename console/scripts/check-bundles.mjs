@@ -1,11 +1,11 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-export function checkBundleBudgets(manifest, sizeOf, budgets) {
+export function checkBundleBudgets(manifest, sizeOf, budgets, previewEntries = []) {
   const chunks = Object.values(manifest);
   const entries = Object.keys(manifest).filter((key) => manifest[key].isEntry);
   if (!entries.length) throw new Error('Missing entry.');
@@ -44,6 +44,8 @@ export function checkBundleBudgets(manifest, sizeOf, budgets) {
       return bytes > budgets[key];
     })
     .map(([key]) => key);
+  if (previewEntries.some((key) => !manifest[key]?.isDynamicEntry || seen.has(key)))
+    failures.push('preview-catalog-loading');
   return {
     status: failures.length ? 'failed' : 'passed',
     scope: 'gzip-build-artifacts',
@@ -60,6 +62,10 @@ function main() {
     const dist = resolve(root, 'dist');
     const manifest = JSON.parse(readFileSync(resolve(dist, '.vite/manifest.json'), 'utf8'));
     const budgets = JSON.parse(readFileSync(resolve(root, 'scripts/bundle-budgets.json'), 'utf8'));
+    const catalogDirectory = 'src/i18n/catalogs';
+    const previewEntries = readdirSync(resolve(root, catalogDirectory))
+      .filter((name) => name.endsWith('.ts'))
+      .map((name) => `${catalogDirectory}/${name}`);
     const sizes = new Map();
     report = checkBundleBudgets(
       manifest,
@@ -74,6 +80,7 @@ function main() {
         return sizes.get(file);
       },
       budgets,
+      previewEntries,
     );
   } catch {
     report = {

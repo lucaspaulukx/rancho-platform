@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createTranslator } from './messages';
+import { isPreviewLocale, previewLoaders } from './preview-loaders';
 import {
   defaultLocale,
   localeDirection,
@@ -42,8 +43,12 @@ export function preferredLocale(policy: LocalizationPolicy, identity: string): L
 }
 
 const defaultPolicy = normalizeLocalizationPolicy();
+const builtIn = {
+  'pt-BR': createTranslator('pt-BR'),
+  'en-US': createTranslator('en-US'),
+};
 const defaultState = {
-  ...createTranslator(defaultLocale),
+  ...builtIn[defaultLocale],
   policy: defaultPolicy,
   preview: false,
   direction: localeDirection(defaultLocale),
@@ -69,7 +74,7 @@ export function I18nProvider({
     policy,
   }));
   const initial = useMemo(() => preferredLocale(policy, identity), [policy, identity]);
-  const locale = !policy.enabled
+  const requestedLocale = !policy.enabled
     ? defaultLocale
     : !policy.selectable
       ? policy.defaultLocale
@@ -101,6 +106,34 @@ export function I18nProvider({
     window.addEventListener('storage', changed);
     return () => window.removeEventListener('storage', changed);
   }, [key, identity, policy]);
+  const [applied, setApplied] = useState(() => builtIn[defaultLocale]);
+  const [attempt, retryCatalog] = useState(0);
+  useEffect(() => {
+    if (!isPreviewLocale(requestedLocale)) {
+      setApplied(builtIn[requestedLocale]);
+      return;
+    }
+    let current = true;
+    void previewLoaders[requestedLocale]()
+      .then((messages) => createTranslator(requestedLocale, messages))
+      .then(
+        (translator) => {
+          if (current) setApplied(translator);
+        },
+        () => {
+          // Keep the visible language if the bundle failed. Selecting it again retries.
+        },
+      );
+    return () => {
+      current = false;
+    };
+  }, [requestedLocale, attempt]);
+  const translator = !isPreviewLocale(requestedLocale)
+    ? builtIn[requestedLocale]
+    : policy.availableLocales.includes(applied.locale)
+      ? applied
+      : builtIn[defaultLocale];
+  const { locale } = translator;
   const direction = localeDirection(locale);
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -115,7 +148,7 @@ export function I18nProvider({
   }, [locale, direction]);
   const value = useMemo(
     () => ({
-      ...createTranslator(locale),
+      ...translator,
       policy,
       preview: policy.enabled && policy.preview,
       direction,
@@ -123,6 +156,7 @@ export function I18nProvider({
       setLocale(next: Locale) {
         if (!policy.enabled || !policy.selectable || !policy.availableLocales.includes(next))
           return;
+        if (next === requestedLocale && locale !== next) retryCatalog((previous) => previous + 1);
         setChoice({ key, locale: next, explicit: true, policy });
         try {
           localStorage.setItem(key, JSON.stringify({ version: 1, locale: next }));
@@ -131,7 +165,7 @@ export function I18nProvider({
         }
       },
     }),
-    [locale, policy, direction, key],
+    [translator, locale, policy, direction, key, requestedLocale],
   );
   return <I18nContext value={value}>{children}</I18nContext>;
 }

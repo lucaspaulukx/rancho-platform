@@ -377,6 +377,7 @@ async function main() {
     ['hu-HU', 'Stackek', 'Aktív'], ['fa-IR', 'پشته‌ها', 'فعال'],
   ]) {
     await workspace.locator('.language-selector select').selectOption(locale);
+    await workspace.locator(`html[lang="${locale}"]`).waitFor();
     const stacksLink = workspace.locator('.sidebar a[href="/console/stacks?env=1a12"]');
     check(`${locale} navigation translates in place and keeps the environment route`,
       await stacksLink.getAttribute('title') === stacks &&

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider, useI18n } from '../i18n/provider';
 import { normalizeLocalizationPolicy, type LocalizationPolicy } from '../i18n/policy';
 import { LanguageSelector } from '../components/LanguageSelector';
+import { previewLoaders } from '../i18n/preview-loaders';
 import { validateConfig } from '../config';
 import config from '../../public/console-config.json';
 
@@ -36,6 +37,40 @@ function Probe({ mounted }: { mounted?: () => void }) {
 const key = (identity: string) => `rancho.console.locale.${encodeURIComponent(identity)}`;
 const save = (identity: string, locale: string) =>
   localStorage.setItem(key(identity), JSON.stringify({ version: 1, locale }));
+
+it('keeps the visible language on a catalog failure and ignores a stale retry', async () => {
+  const catalog = await previewLoaders['fa-IR']();
+  let completeRetry = () => {};
+  const retry = new Promise<typeof catalog>((resolve) => {
+    completeRetry = () => resolve(catalog);
+  });
+  const load = vi
+    .spyOn(previewLoaders, 'fa-IR')
+    .mockRejectedValueOnce(new Error('fixture load failure'))
+    .mockReturnValueOnce(retry);
+  try {
+    render(
+      <I18nProvider policy={{ ...preview, availableLocales: ['pt-BR', 'en-US', 'fa-IR'] }}>
+        <Probe />
+      </I18nProvider>,
+    );
+    const persian = screen.getByRole('button', { name: 'Persian' });
+    fireEvent.click(persian);
+    await waitFor(() => expect(load).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId('locale')).toHaveTextContent('pt-BR');
+    fireEvent.click(persian);
+    await waitFor(() => expect(load).toHaveBeenCalledTimes(2));
+    fireEvent.click(screen.getByRole('button', { name: 'English' }));
+    await act(async () => completeRetry());
+    expect(screen.getByTestId('locale')).toHaveTextContent('en-US');
+    expect(document.documentElement.dir).toBe('ltr');
+    fireEvent.click(persian);
+    await waitFor(() => expect(screen.getByTestId('locale')).toHaveTextContent('fa-IR'));
+    expect(document.documentElement.dir).toBe('rtl');
+  } finally {
+    load.mockRestore();
+  }
+});
 
 describe('Optional locale configuration', () => {
   it('upgrades old configuration without activation or mutation and round-trips normalized policy', () => {
@@ -212,7 +247,7 @@ describe('Locale provider lifetime and policy', () => {
         </I18nProvider>,
       );
       await user.click(screen.getByText('Persian', { exact: true }));
-      expect(document.documentElement.lang).toBe('fa-IR');
+      await waitFor(() => expect(document.documentElement.lang).toBe('fa-IR'));
       expect(document.documentElement.dir).toBe('rtl');
       rerender(
         <I18nProvider policy={{ ...policy }}>

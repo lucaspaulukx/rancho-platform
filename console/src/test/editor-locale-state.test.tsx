@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, it, vi } from 'vitest';
 import { I18nProvider, useI18n } from '../i18n/provider';
@@ -26,7 +26,7 @@ function Editor() {
   );
 }
 
-it('keeps Compose source left to right and preserves the draft when switching to Persian', () => {
+it('keeps Compose source left to right and preserves the draft when switching to Persian', async () => {
   const initial = 'services:\n  web:\n    image: alpine:3.20\n';
   function Composer() {
     const { setLocale } = useI18n();
@@ -57,7 +57,7 @@ it('keeps Compose source left to right and preserves the draft when switching to
   const draft = initial + '# fixture\n';
   fireEvent.change(source, { target: { value: draft } });
   fireEvent.click(screen.getByRole('button', { name: 'Persian' }));
-  expect(document.documentElement.dir).toBe('rtl');
+  await waitFor(() => expect(document.documentElement.dir).toBe('rtl'));
   expect(screen.getByRole('textbox', { name: 'Docker Compose' })).toBe(source);
   expect(source).toHaveAttribute('dir', 'ltr');
   expect(source).toHaveValue(draft);

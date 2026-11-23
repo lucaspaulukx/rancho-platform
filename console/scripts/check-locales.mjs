@@ -136,8 +136,14 @@ async function main() {
       appType: 'custom',
       logLevel: 'silent',
     });
-    const { englishMessages, portugueseMessages, previewCatalogs, validateCatalog } =
+    const { englishMessages, portugueseMessages, validateCatalog } =
       await server.ssrLoadModule('/src/i18n/messages.ts');
+    const { previewLoaders } = await server.ssrLoadModule('/src/i18n/preview-loaders.ts');
+    const previewCatalogs = Object.fromEntries(
+      await Promise.all(
+        Object.entries(previewLoaders).map(async ([locale, load]) => [locale, await load()]),
+      ),
+    );
     const { localeInventory } = await server.ssrLoadModule('/src/i18n/locales.ts');
     const previewSources = existsSync(sourceFile)
       ? JSON.parse(readFileSync(sourceFile, 'utf8'))

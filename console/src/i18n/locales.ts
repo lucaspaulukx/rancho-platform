@@ -12,7 +12,7 @@ export const localeInventory = [
   { code: 'zh-Hans', name: '简体中文', direction: 'ltr' },
 ] as const;
 export type Locale = (typeof localeInventory)[number]['code'];
-export const defaultLocale: Locale = 'pt-BR';
+export const defaultLocale = 'pt-BR' satisfies Locale;
 
 /** Accept legacy casing/underscores and regional variants without guessing a different script. */
 export function normalizeLocale(value: unknown): Locale | undefined {

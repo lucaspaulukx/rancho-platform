@@ -141,7 +141,7 @@ describe('Revogação de conexões já abertas', () => {
       fireEvent.change(filter, { target: { value: 'fixture' } });
       fetcher.mockClear();
       fireEvent.click(screen.getByRole('button', { name: 'Change language' }));
-      expect(screen.getByRole('textbox', { name: filterLabel })).toBe(filter);
+      expect(await screen.findByRole('textbox', { name: filterLabel })).toBe(filter);
       expect(filter).toHaveValue('fixture');
       expect(Socket.instances).toEqual([socket]);
       expect(socket.close).not.toHaveBeenCalled();
