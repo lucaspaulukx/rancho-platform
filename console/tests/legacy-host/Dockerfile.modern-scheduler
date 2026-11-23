@@ -1,0 +1,19 @@
+FROM golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 AS build
+ENV GO111MODULE=off GOPATH=/go CGO_ENABLED=0
+WORKDIR /go/src/github.com/rancher/scheduler
+ADD --checksum=sha256:5ebfc73bd7b03b73cb9e79e316afad301d78b0f5c30886ef3320ebe8cc1b8021 https://codeload.github.com/rancher/scheduler/tar.gz/d9a8d0a5b624a47649df52c72e125f29d582f36f /tmp/scheduler.tar.gz
+RUN --network=none tar -xzf /tmp/scheduler.tar.gz --strip-components=1 && \
+    go test -vet=off ./... && \
+    go build -trimpath -buildvcs=false -ldflags="-X main.VERSION=v0.8.6" -o /out/scheduler . && \
+    /out/scheduler --version && \
+    mkdir -p /out/licenses && \
+    find . -type f \( -iname '*license*' -o -iname 'notice*' -o -iname 'copying*' -o -iname 'patents*' \) \
+        -exec cp --parents '{}' /out/licenses/ \;
+
+FROM ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca17dcecaf5
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=build /out/scheduler /usr/bin/scheduler
+COPY --from=build /out/licenses/ /usr/share/doc/rancho-scheduler/
+COPY --chmod=0755 modern-metadata-entry.sh /rancher-entrypoint.sh
+ENTRYPOINT ["/rancher-entrypoint.sh"]
+CMD ["scheduler"]
