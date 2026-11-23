@@ -1,3 +1,4 @@
+import { navigateBrowser } from './browser-navigation';
 export interface Policy {
   enabled: boolean;
   only: boolean;
@@ -135,17 +136,100 @@ export function acceptToken(token: Token) {
   sessionStorage.removeItem('projectId');
   sessionStorage.removeItem('rancher.oidc.signedOut');
   sessionStorage.removeItem('rancher.oidc.autoAttempt');
+  sessionStorage.removeItem('rancher.oidc.logoutWarning');
 }
-export async function logout() {
+let logoutPending: Promise<void> | null = null;
+function currentSessionCookie() {
+  return document.cookie.split('; ').find((cookie) => cookie.startsWith('token='));
+}
+function logoutDestination(value: unknown): string {
+  if (typeof value !== 'string') throw new Error('Destino de saída inválido.');
+  const url = new URL(value);
+  const localHttp =
+    location.hostname === 'localhost' && url.hostname === 'localhost' && url.protocol === 'http:';
+  if (
+    (url.protocol !== 'https:' && !localHttp) ||
+    url.username ||
+    url.password ||
+    url.hash ||
+    url.searchParams.has('id_token_hint')
+  )
+    throw new Error('Destino de saída inválido.');
+  const returned = new URL(url.searchParams.get('post_logout_redirect_uri') || '');
+  if (
+    returned.origin !== location.origin ||
+    returned.pathname !== '/console/login' ||
+    !url.searchParams.get('client_id')
+  )
+    throw new Error('Retorno de saída inválido.');
+  return url.href;
+}
+async function performLogout(federated: boolean) {
+  const original = currentSessionCookie();
+  let destination = '/console/login?signedOut=true';
+  let warning = '';
+  if (federated && original) {
+    const request = new AbortController();
+    const timer = setTimeout(() => request.abort(), 5000);
+    try {
+      const response = await fetch('/oidc/logout', {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        signal: request.signal,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Api-Csrf': csrf(),
+        },
+        body: '{}',
+      });
+      const prepared = await response.json();
+      if (!response.ok || typeof prepared.federated !== 'boolean')
+        throw new Error('Saída do provedor indisponível.');
+      if (prepared.federated) destination = logoutDestination(prepared.url);
+    } catch {
+      warning = 'provider';
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  // A delayed preparation must never clear a replacement session from another tab/login.
+  if (currentSessionCookie() !== original) return;
+  const request = new AbortController();
+  const timer = setTimeout(() => request.abort(), 5000);
   try {
-    await api('token/current', undefined, 'DELETE');
+    await api('token/current', undefined, 'DELETE', request.signal);
+  } catch {
+    warning = 'server';
   } finally {
-    document.cookie = 'token=; Path=/; Max-Age=0';
+    clearTimeout(timer);
+  }
+  const remaining = currentSessionCookie();
+  if (remaining && remaining !== original && remaining !== 'token=') return;
+  document.cookie = 'token=; Path=/; Max-Age=0';
+  try {
     legacyKeys.forEach((key) => localStorage.removeItem(key));
+  } catch {
+    /* Cookie cleanup still applies. */
+  }
+  try {
     sessionStorage.removeItem('projectId');
     sessionStorage.setItem('rancher.oidc.signedOut', '1');
-    location.assign('/console/login');
+    sessionStorage.setItem('rancher.oidc.autoAttempt', '1');
+    if (warning) sessionStorage.setItem('rancher.oidc.logoutWarning', warning);
+    else sessionStorage.removeItem('rancher.oidc.logoutWarning');
+  } catch {
+    /* The fixed local URL also suppresses autologin without storage. */
   }
+  navigateBrowser(destination);
+}
+export function logout(federated = false) {
+  if (!logoutPending)
+    logoutPending = performLogout(federated).finally(() => {
+      logoutPending = null;
+    });
+  return logoutPending;
 }
 export async function checkOidcProvider(signal?: AbortSignal) {
   const response = await fetch('/oidc/readiness', { cache: 'no-store', signal });
@@ -162,7 +246,7 @@ export async function oidcLogin(preflight = false, signal?: AbortSignal) {
   if (signal?.aborted || currentSession() !== originalSession)
     throw new DOMException('Tentativa de login cancelada.', 'AbortError');
   sessionStorage.removeItem('rancher.oidc.signedOut');
-  location.assign('/oidc/login');
+  navigateBrowser('/oidc/login');
 }
 export interface Collection<T> {
   data: T[];

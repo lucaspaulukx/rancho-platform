@@ -1,6 +1,6 @@
 # Roadmap mestre — Rancher Community Console
 
-Referência:04/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build595 testes/70 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
+Referência:04/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build605 testes/71 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
 
 ## Resultado esperado
 
@@ -32,7 +32,7 @@ Desenvolvimento não altera Ember. Toda função nova tem flag e comportamento o
 | AUTH01 | Local/OIDC, callback, exclusivo/autologin, sem acesso | Aceito em recortes | Matriz final modos×sessão×retorno/deep link |
 | AUTH02 | Conta desativada/perfil global atual na sessão | Aceito42 | Regressão local/OIDC e credenciais técnicas; reset senha não revoga JWT |
 | AUTH03 | Expiração criptográfica real | API/rota local e OIDC aceitos54 | Sem perda simulada de cookie; encerramento de streams e sessão ociosa ainda OBS02/03 |
-| AUTH04 | Logout federado/IdP indisponível | Indisponibilidade aceita61; logout62 pendente | Logout Keycloak e Rancher coerentes, sem loops ou fallback local no exclusivo |
+| AUTH04 | Logout federado/IdP indisponível | Indisponibilidade61 e logout federado62 aceitos em recortes | Logout Keycloak e Rancher coerentes, sem loops ou fallback local no exclusivo |
 | AUTH05 | Administrador OIDC e recuperação | Aceito60 | Promoção explícita, botão Keycloak, exclusivo e recuperação híbrida testados; fixture removida |
 | RBAC01 | Grupos locais/membros/grants e revisão409 | Aceito em recortes | Regressão concorrência/remoção/acesso direto+grupos, sem concessão implícita |
 | RBAC02 | Acesso efetivo/auditoria/Meu acesso | Aceito em recortes | Fonte direta/grupo e limites conhecidos sem inferência visual |
@@ -127,3 +127,5 @@ VMs/Windows, Kubernetes/kubectl, Swarm e Mesos constam do inventário legado, ma
 Atualização73: corrigida revogação de token no subscribe UI sob flag independente. Matriz real on/off aprovada no mesmo backend, com HTTP/nova conexão401 e fechamento1000/zero eventos posteriores quando on; contratos Java128+10 e frontend595/70. Compose moderno habilita; default backend/basefalse. Remoção de grant, desativação, expiração, credenciais técnicas e logs/exec ainda não aceitos.
 
 Matriz73 ampliada: retirada de grant próprio, desativação e expiração real local/OIDC passaram no subscribe UI, incluindo limpeza completa e validade restaurada antes da espera. Transporte de logs/exec/métricas, API keys e carga permanecem abertos. Bootstrap75 preserva arquivos existentes e tem4 contratos PlanOnly/template aprovados; importação/instalação fresca ainda não aceita. Próximo: logout federado opcional62.
+
+Atualização62: logout federado opcional passou15 checks,4 cenários reais e8 axe/layout; nenhuma confirmação humana pendente. Retorno/Origin/CSRF/SSO local/IdP indisponível/exclusivo/autologin e replay validados. Flag defaultfalse, configuração restaurada. Cinco contratos de UI passaram a usar2 fixtures de schema sanitizadas versionadas: build do pacote limpo do Git aprovado595/70 no checkpoint4c9e645, sem capturas locais. Build funcional atual605/71 com TypeScript/Vite. Próxima prioridade: backup/restore completo de estado Rancher/Keycloak e limites do preflight72, mantendo OBS02 de logs/exec/métricas e todos os demais gates abertos.

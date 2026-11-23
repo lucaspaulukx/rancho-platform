@@ -1,8 +1,9 @@
+import { useLogout } from '../hooks/useLogout';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, LockKeyhole, LogOut, RefreshCw, ShieldCheck } from 'lucide-react';
-import { acceptToken, api, logout, oidcLogin, policy, type Token } from '../api';
+import { acceptToken, api, oidcLogin, policy, type Token } from '../api';
 import { useApp } from '../state';
 import { AuthLayout } from '../layouts';
 import { Alert, Button, Empty, Field, Loading, PageHeader } from '../components/ui';
@@ -20,6 +21,9 @@ export function Login() {
     () => new URLSearchParams(window.location.search).get('oidc_error') === 'failed',
   );
   const [ticketError, setTicketError] = useState('');
+  const [logoutWarning] = useState(
+    () => sessionStorage.getItem('rancher.oidc.logoutWarning') || '',
+  );
   const [oidcError, setOidcError] = useState(
     entryError ? 'Não foi possível concluir sua autenticação. Inicie um novo login.' : '',
   );
@@ -85,7 +89,13 @@ export function Login() {
       return;
     const stopped = sessionStorage.getItem('rancher.oidc.signedOut');
     const attempted = sessionStorage.getItem('rancher.oidc.autoAttempt');
-    if (!stopped && !attempted && !new URLSearchParams(window.location.search).has('timedOut')) {
+    if (
+      !stopped &&
+      !attempted &&
+      !['timedOut', 'signedOut', 'oidc_logout'].some((key) =>
+        new URLSearchParams(window.location.search).has(key),
+      )
+    ) {
       sessionStorage.setItem('rancher.oidc.autoAttempt', '1');
       void beginOidc();
     }
@@ -116,6 +126,18 @@ export function Login() {
           <p className="page-description">
             Entre com sua conta para gerenciar os recursos aos quais você tem acesso.
           </p>
+          {logoutWarning === 'provider' &&
+            new URLSearchParams(window.location.search).get('oidc_logout') !== 'returned' && (
+              <Alert tone="warning">
+                Você saiu desta console. Não foi possível confirmar a saída do provedor de login.
+              </Alert>
+            )}
+          {logoutWarning === 'server' && (
+            <Alert tone="warning">
+              A sessão foi removida deste navegador, mas não foi possível confirmar o encerramento
+              no servidor.
+            </Alert>
+          )}
           {ticketError && <Alert>{ticketError}</Alert>}
           {oidcError && <Alert>{oidcError}</Alert>}
           {settings.error && (
@@ -186,6 +208,7 @@ export function Login() {
   );
 }
 export function NoAccess() {
+  const { pending: loggingOut, signOut } = useLogout();
   const app = useApp();
   const [checking, setChecking] = useState(false);
   const [message, setMessage] = useState('');
@@ -254,7 +277,7 @@ export function NoAccess() {
             <RefreshCw size={16} />
             Verificar acesso
           </Button>
-          <Button onClick={() => void logout()}>
+          <Button onClick={() => void signOut()} busy={loggingOut}>
             <LogOut size={16} />
             Sair da conta
           </Button>

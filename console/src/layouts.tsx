@@ -1,3 +1,4 @@
+import { useLogout } from './hooks/useLogout';
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
 import {
@@ -18,7 +19,6 @@ import { environmentSearch, navigation } from './navigation';
 import { useApp } from './state';
 import { useTheme } from './theme';
 import { useSidebarPreference } from './hooks/useSidebarPreference';
-import { logout } from './api';
 import { Button, Empty, Field, Loading, Modal } from './components/ui';
 import { Brand } from './components/Brand';
 export { Brand };
@@ -87,6 +87,7 @@ export function Appearance({ open, onClose }: { open: boolean; onClose: () => vo
   );
 }
 export function AppShell() {
+  const { pending: loggingOut, signOut } = useLogout();
   const app = useApp();
   const { pathname, search } = useLocation();
   const [mobile, setMobile] = useState(false);
@@ -320,8 +321,8 @@ export function AppShell() {
                     <Info size={17} /> Sobre esta console
                   </button>
                 )}
-                <button onClick={() => void logout()}>
-                  <LogOut size={17} /> Sair
+                <button onClick={() => void signOut()} disabled={loggingOut} aria-busy={loggingOut}>
+                  <LogOut size={17} /> {loggingOut ? 'Saindo…' : 'Sair'}
                 </button>
               </div>
             </details>
