@@ -1,5 +1,7 @@
 # Testes
 
+O build de produção executa `check:bundles` após o Vite. Ele lê o manifesto gerado, percorre imports estáticos e verifica os tamanhos gzip contra `console/scripts/bundle-budgets.json`. Os limites cobrem JavaScript inicial (256 KiB), CSS inicial (20 KiB), o maior chunk JavaScript carregado sob demanda (100 KiB) e JavaScript total (600 KiB). Imports e CSS compartilhados são contados uma vez. A linha de base inicial inclui as prévias atuais de idiomas. Esses limites de artefatos complementam medições em runtime de latência, memória e renderização. Revise a alteração e seu custo medido antes de ajustar um limite.
+
 <!-- rancho-language-navigation:start -->
 [Português (Brasil)](testing.md) | [English](../en/testing.md)
 <!-- rancho-language-navigation:end -->

@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: '/console/',
   plugins: [react()],
-  build: { target: 'es2022' },
+  build: { target: 'es2022', manifest: true },
   server: {
     port: 18090,
     strictPort: true,
