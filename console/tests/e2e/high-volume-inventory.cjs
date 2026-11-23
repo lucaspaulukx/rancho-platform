@@ -204,14 +204,17 @@ async function checkOperationLayout(page) {
     .filter({ hasText: 'Retour à la version précédente en cours' })
     .first();
   const trigger = row.locator('.action-menu-trigger');
+  assert.match(await trigger.getAttribute('aria-label'), /^Actions pour ux06-/);
   await trigger.press('ArrowDown');
   const menu = page.getByRole('menu', {
     name: await trigger.getAttribute('aria-label'),
     exact: true,
   });
-  const details = menu.getByRole('menuitem', { name: 'View details', exact: true });
+  const details = menu.getByRole('menuitem', { name: 'Voir les détails', exact: true });
   await details.waitFor();
-  assert.ok(await menu.getByRole('menuitem', { name: 'View logs', exact: true }).isDisabled());
+  assert.ok(
+    await menu.getByRole('menuitem', { name: 'Voir les journaux', exact: true }).isDisabled(),
+  );
   assert.ok(await details.evaluate((button) => button === document.activeElement));
   await page.keyboard.press('ArrowDown');
   assert.ok(await details.evaluate((button) => button === document.activeElement));
