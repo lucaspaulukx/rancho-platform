@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Schema } from '../api';
+import { useI18n } from '../i18n/provider';
 import {
   healthDefaults,
   healthMethods,
@@ -21,6 +22,7 @@ export function HealthCheckEditor({
   quorum?: Schema;
   onChange: (value: unknown) => void;
 }) {
+  const { t } = useI18n();
   const v = (value || {}) as Record<string, unknown>;
   const [mode, setMode] = useState(value == null ? 'none' : v.requestLine ? 'http' : 'tcp');
   const [request, setRequest] = useState<HealthRequest>(
@@ -39,8 +41,8 @@ export function HealthCheckEditor({
   }
   return (
     <fieldset className="nested-fields">
-      <legend>Verificação de saúde</legend>
-      <Field label="Tipo de verificação">
+      <legend>{t('healthCheckEditor.title')}</legend>
+      <Field label={t('healthCheckEditor.type')}>
         {(id) => (
           <select
             id={id}
@@ -62,20 +64,17 @@ export function HealthCheckEditor({
               );
             }}
           >
-            <option value="none">Desativada</option>
-            <option value="tcp">Conexão TCP</option>
+            <option value="none">{t('healthCheckEditor.disabled')}</option>
+            <option value="tcp">{t('healthCheckEditor.tcp')}</option>
             {schema.resourceFields.requestLine?.create && (
-              <option value="http">Requisição HTTP</option>
+              <option value="http">{t('healthCheckEditor.http')}</option>
             )}
           </select>
         )}
       </Field>
       {mode !== 'none' && (
         <>
-          <Field
-            label="Porta da verificação"
-            hint="Porta interna do container; não publica uma porta no host."
-          >
+          <Field label={t('healthCheckEditor.port')} hint={t('healthCheckEditor.portHint')}>
             {(id, description) => (
               <input
                 id={id}
@@ -93,7 +92,7 @@ export function HealthCheckEditor({
           {mode === 'http' && (
             <>
               <div className="form-grid">
-                <Field label="Método HTTP">
+                <Field label={t('healthCheckEditor.method')}>
                   {(id) => (
                     <select
                       id={id}
@@ -106,7 +105,7 @@ export function HealthCheckEditor({
                     </select>
                   )}
                 </Field>
-                <Field label="Versão HTTP">
+                <Field label={t('healthCheckEditor.version')}>
                   {(id) => (
                     <select
                       id={id}
@@ -119,10 +118,7 @@ export function HealthCheckEditor({
                   )}
                 </Field>
               </div>
-              <Field
-                label="Caminho da verificação HTTP"
-                hint="Exemplo: /health. Escolha um endpoint sem efeitos de escrita."
-              >
+              <Field label={t('healthCheckEditor.path')} hint={t('healthCheckEditor.pathHint')}>
                 {(id, description) => (
                   <input
                     id={id}
@@ -135,7 +131,7 @@ export function HealthCheckEditor({
                 )}
               </Field>
               {request.version === 'HTTP/1.1' && (
-                <Field label="Host HTTP (opcional)">
+                <Field label={t('healthCheckEditor.host')}>
                   {(id) => (
                     <input
                       id={id}
@@ -149,13 +145,13 @@ export function HealthCheckEditor({
             </>
           )}
           <details className="advanced-fields">
-            <summary>Tempos e política de recuperação</summary>
+            <summary>{t('healthCheckEditor.advanced')}</summary>
             <div>
               <div className="form-grid">
                 {healthNumbers
                   .filter(([name]) => schema.resourceFields[name]?.create)
-                  .map(([name, label, min]) => (
-                    <Field key={name} label={label}>
+                  .map(([name, , min]) => (
+                    <Field key={name} label={t(`healthCheckEditor.number.${name}`)}>
                       {(id) => (
                         <input
                           id={id}
@@ -170,7 +166,7 @@ export function HealthCheckEditor({
                   ))}
               </div>
               {schema.resourceFields.strategy?.create && (
-                <Field label="Ação quando indisponível">
+                <Field label={t('healthCheckEditor.strategy')}>
                   {(id) => (
                     <select
                       id={id}
@@ -188,9 +184,9 @@ export function HealthCheckEditor({
                         <option key={key} value={key}>
                           {(
                             {
-                              none: 'Apenas sinalizar',
-                              recreate: 'Recriar container',
-                              recreateOnQuorum: 'Recriar conforme quórum',
+                              none: t('healthCheckEditor.strategy.none'),
+                              recreate: t('healthCheckEditor.strategy.recreate'),
+                              recreateOnQuorum: t('healthCheckEditor.strategy.recreateOnQuorum'),
                             } as Record<string, string>
                           )[key] || key}
                         </option>
@@ -200,7 +196,7 @@ export function HealthCheckEditor({
                 </Field>
               )}
               {v.strategy === 'recreateOnQuorum' && quorum?.resourceFields.quorum?.create && (
-                <Field label="Quórum de saúde">
+                <Field label={t('healthCheckEditor.quorum')}>
                   {(id) => (
                     <input
                       id={id}
@@ -223,10 +219,7 @@ export function HealthCheckEditor({
               )}
             </div>
           </details>
-          <Alert tone="info">
-            O Rancher poderá recriar containers conforme a política escolhida. Configurar a
-            verificação não comprova que o endpoint está saudável.
-          </Alert>
+          <Alert tone="info">{t('healthCheckEditor.notice')}</Alert>
         </>
       )}
     </fieldset>

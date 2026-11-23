@@ -13,6 +13,9 @@ import { enResourceCreator, ptResourceCreator } from './domains/resource-creator
 import { enBulkOperation, ptBulkOperation } from './domains/bulk-operation';
 import { enTopology, ptTopology } from './domains/topology';
 import { enSchemaForm, ptSchemaForm } from './domains/schema-form';
+import { enWorkloadControls, ptWorkloadControls } from './domains/workload-controls';
+import { enHealthCheckEditor, ptHealthCheckEditor } from './domains/health-check-editor';
+import { enResourceLimits, ptResourceLimits } from './domains/resource-limits';
 
 // Initial shared domain only. These catalogs do not represent full interface coverage.
 export const englishMessages = {
@@ -30,6 +33,9 @@ export const englishMessages = {
   ...enBulkOperation,
   ...enTopology,
   ...enSchemaForm,
+  ...enWorkloadControls,
+  ...enHealthCheckEditor,
+  ...enResourceLimits,
   'common.cancel': 'Cancel',
   'common.close': 'Close',
   'common.save': 'Save',
@@ -78,6 +84,9 @@ export const portugueseMessages = {
   ...ptBulkOperation,
   ...ptTopology,
   ...ptSchemaForm,
+  ...ptWorkloadControls,
+  ...ptHealthCheckEditor,
+  ...ptResourceLimits,
   'common.cancel': 'Cancelar',
   'common.close': 'Fechar',
   'common.save': 'Salvar',

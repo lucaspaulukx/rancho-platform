@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useI18n } from '../i18n/provider';
 import { memoryBytes, memoryUnits } from '../workload-resources';
 import { Field } from './ui';
 export function MemoryEditor({
@@ -10,6 +11,7 @@ export function MemoryEditor({
   value: unknown;
   onChange: (value: unknown) => void;
 }) {
+  const { t } = useI18n();
   const [unit, setUnit] = useState<keyof typeof memoryUnits>('Bytes');
   const [text, setText] = useState(String(value ?? ''));
   const [error, setError] = useState('');
@@ -17,9 +19,9 @@ export function MemoryEditor({
     <fieldset className="nested-fields">
       <legend>{label}</legend>
       <Field
-        label={label + ': valor'}
+        label={t('resourceLimits.memory.value', { label })}
         error={error}
-        hint="Zero mantém o comportamento sem limite explícito. Reserva não pode exceder um limite positivo."
+        hint={t('resourceLimits.memory.hint')}
       >
         {(id, description) => (
           <input
@@ -44,7 +46,7 @@ export function MemoryEditor({
           />
         )}
       </Field>
-      <Field label={label + ': unidade'}>
+      <Field label={t('resourceLimits.memory.unit', { label })}>
         {(id) => (
           <select
             id={id}

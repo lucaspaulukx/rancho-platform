@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { cpuFields, parseCpuResource, type CpuField } from '../cpu-resources';
+import { useEffect, useRef, useState } from 'react';
+import { parseCpuResource, CpuValidationError, type CpuField } from '../cpu-resources';
+import { useI18n } from '../i18n/provider';
 import { Field } from './ui';
 
 export function CpuResourceEditor({
@@ -11,13 +12,31 @@ export function CpuResourceEditor({
   value: unknown;
   onChange: (value: unknown) => void;
 }) {
+  const { t, locale } = useI18n();
+  const input = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(String(value ?? ''));
-  const [error, setError] = useState('');
-  const definition = cpuFields[name];
+  const [errorCode, setError] = useState('');
+  const label = t(`workloadControls.${name}.label`);
+  const hint = t(`workloadControls.${name}.hint`);
+  const error = !errorCode
+    ? ''
+    : errorCode === 'cpuInteger'
+      ? t('workloadControls.cpuInteger')
+      : errorCode === 'cpuSafeInteger'
+        ? t('workloadControls.cpuSafeInteger')
+        : errorCode === 'cpuIndices'
+          ? t('workloadControls.cpuIndices')
+          : errorCode === 'cpuRanges'
+            ? t('workloadControls.cpuRanges')
+            : t('workloadControls.cpuReview', { label: label.toLocaleLowerCase(locale), hint });
+  useEffect(() => {
+    input.current?.setCustomValidity(error);
+  }, [error]);
   return (
-    <Field label={definition.label} hint={definition.hint} error={error}>
+    <Field label={label} hint={hint} error={error}>
       {(id, description) => (
         <input
+          ref={input}
           id={id}
           aria-describedby={description}
           aria-invalid={!!error}
@@ -31,9 +50,7 @@ export function CpuResourceEditor({
               setError('');
               onChange(next);
             } catch (error) {
-              const message = (error as Error).message;
-              event.target.setCustomValidity(message);
-              setError(message);
+              setError(error instanceof CpuValidationError ? error.code : 'cpuReview');
               onChange(event.target.value);
             }
           }}

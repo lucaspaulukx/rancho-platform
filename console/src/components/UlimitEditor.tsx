@@ -1,4 +1,5 @@
 import { Plus, Trash2 } from 'lucide-react';
+import { useI18n } from '../i18n/provider';
 import { normalizeUlimits, ulimitNames } from '../workload-ulimits';
 import { Alert, Button, Field } from './ui';
 
@@ -9,6 +10,7 @@ export function UlimitEditor({
   value: unknown;
   onChange: (value: unknown) => void;
 }) {
+  const { t } = useI18n();
   const rows = value == null ? [] : value;
   const editable =
     Array.isArray(rows) &&
@@ -32,16 +34,11 @@ export function UlimitEditor({
     }
   }
   return (
-    <section aria-label="Limites de processo">
-      <p className="muted">
-        Sem linhas, os limites são herdados do Docker. As unidades dependem do recurso; -1 significa
-        ilimitado. Alterações valem para novos containers.
-      </p>
+    <section aria-label={t('resourceLimits.process.title')}>
+      <p className="muted">{t('resourceLimits.process.description')}</p>
       {error && <Alert>{error}</Alert>}
       {!editable ? (
-        <Alert>
-          Formato legado incompatível. Reabra com o editor nativo para preservar a configuração.
-        </Alert>
+        <Alert>{t('resourceLimits.process.legacy')}</Alert>
       ) : (
         <>
           {rows.map((row: Record<string, unknown>, index: number) => {
@@ -53,8 +50,8 @@ export function UlimitEditor({
               );
             return (
               <fieldset className="nested-fields" key={index}>
-                <legend>Limite {index + 1}</legend>
-                <Field label={`Recurso do limite ${index + 1}`}>
+                <legend>{t('resourceLimits.process.row', { index: index + 1 })}</legend>
+                <Field label={t('resourceLimits.process.resource', { index: index + 1 })}>
                   {(id, description) => (
                     <select
                       id={id}
@@ -63,11 +60,11 @@ export function UlimitEditor({
                       required
                       onChange={(event) => update('name', event.target.value)}
                     >
-                      <option value="">Selecionar…</option>
+                      <option value="">{t('resourceLimits.process.select')}</option>
                       {!!row.name &&
                         !ulimitNames.includes(row.name as (typeof ulimitNames)[number]) && (
                           <option value={String(row.name)}>
-                            Não reconhecido: {String(row.name)}
+                            {t('resourceLimits.process.unrecognized', { name: String(row.name) })}
                           </option>
                         )}
                       {ulimitNames.map((name) => (
@@ -81,8 +78,13 @@ export function UlimitEditor({
                 {(['soft', 'hard'] as const).map((key) => (
                   <Field
                     key={key}
-                    label={`${key === 'soft' ? 'Limite inicial' : 'Limite máximo'} ${index + 1}`}
-                    hint="Inteiro de -1 a 2147483647."
+                    label={t(
+                      key === 'soft'
+                        ? 'resourceLimits.process.soft'
+                        : 'resourceLimits.process.hard',
+                      { index: index + 1 },
+                    )}
+                    hint={t('resourceLimits.process.integerHint')}
                   >
                     {(id, description) => (
                       <input
@@ -101,10 +103,10 @@ export function UlimitEditor({
                 <Button
                   type="button"
                   variant="ghost"
-                  aria-label={`Remover limite ${index + 1}`}
+                  aria-label={t('resourceLimits.process.removeRow', { index: index + 1 })}
                   onClick={() => onChange(rows.filter((_, position) => position !== index))}
                 >
-                  <Trash2 size={15} /> Remover
+                  <Trash2 size={15} /> {t('resourceLimits.process.remove')}
                 </Button>
               </fieldset>
             );
@@ -115,7 +117,7 @@ export function UlimitEditor({
             onClick={() => onChange([...rows, { name: '', soft: '', hard: '' }])}
           >
             <Plus size={15} />
-            Adicionar limite de processo
+            {t('resourceLimits.process.add')}
           </Button>
         </>
       )}
