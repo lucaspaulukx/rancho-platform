@@ -24,6 +24,34 @@ Estados descrevem capacidades mantidas e aceites restantes, não diário de exec
 | CFG01 | Flags frontend/backend e fallback clássico | Parcial; falta matriz final de dependência/on/off/reversão |
 | CFG02 | Configuração versionada | Contrato/CLI implementados; rollback de artefato/dados pertence ao aceite de release |
 
+## Idiomas da interface e paridade com o Rancher original
+
+O console novo tem textos fixos em pt-BR, inclusive validações e rótulos acessíveis. Documentação bilingue do projeto não fornece localização da interface. A referência é o [Rancher server v1.6.30](https://github.com/rancher/rancher/blob/v1.6.30/server/Dockerfile), que seleciona a UI1.6.52. Seu [catálogo de traduções](https://github.com/rancher/ui/tree/v1.6.52/translations) e a [descoberta de locales](https://github.com/rancher/ui/blob/v1.6.52/config/environment.js) definem o inventário de idiomas de produção abaixo. O locale diagnóstico `none` fica fora da produção; arquivos de tradução existentes não comprovam que toda mensagem original estava traduzida.
+
+| Locale original | Locale alvo do console | Idioma | Direção |
+|---|---|---|---|
+| en-us | en-US | Inglês | LTR |
+| pt-br | pt-BR | Português (Brasil) | LTR |
+| de-de | de-DE | Alemão | LTR |
+| fr-fr | fr-FR | Francês | LTR |
+| hu-hu | hu-HU | Húngaro | LTR |
+| ja-jp | ja-JP | Japonês | LTR |
+| fa-ir | fa-IR | Persa | RTL |
+| ru-ru | ru-RU | Russo | LTR |
+| uk-ua | uk-UA | Ucraniano | LTR |
+| zh-hans | zh-Hans | Chinês simplificado | LTR |
+
+| ID | Capacidade | Estado e gate restante |
+|---|---|---|
+| I18N01 | Infraestrutura comum de locale, mensagens e formatação | Pendente; chaves/parâmetros tipados, normalização de locale, fallback explícito, plurais e números/datas/tempo relativo/ordenação regionais; sem substituir texto no DOM nem traduzir identificadores da API |
+| I18N02 | Configuração e seletor compartilhado de idioma | Pendente; contrato opt-in/default/off, política administrativa de idiomas/padrão/seleção, escolha nos layouts público e autenticado, persistência segura e negociação com idioma do navegador; troca preserva environment, rota, rascunhos e propriedade dos streams |
+| I18N03 | Extração completa pt-BR/en-US | Pendente; shell, login/sem-acesso/recuperação, todas as páginas, menus, tabelas, drawers, diálogos, confirmações, toasts, validadores e rótulos acessíveis; preservar comandos técnicos e conteúdo nativo/dos usuários |
+| I18N04 | Outros oito idiomas de produção | Pendente; catálogos completos de-DE/fr-FR/hu-HU/ja-JP/fa-IR/ru-RU/uk-UA/zh-Hans, consistência de parâmetros/plurais e revisão linguística; nunca anunciar catálogo com fallback inglês como tradução concluída |
+| I18N05 | RTL e apresentação multilingue | Pendente; direção fa-IR, espaçamento/alinhamento CSS lógico e ícones direcionais, código/IDs/terminal LTR misturados, rótulos longos e layout CJK; regressão de teclado/foco, mobile e temas |
+| I18N06 | Contribuição de traduções e gates de release | Pendente; checks de chaves/parâmetros/cobertura, detecção de tradução desatualizada, falha de lazy-load/offline e bundles limitados; testar os dez locales, fallback/preferência inválida, formatos regionais, troca com diálogos/streams abertos e erros API não localizados sem expor payloads privados |
+
+Implementar primeiro o contrato compartilhado, depois configuração/seleção e cobertura completa pt-BR/en-US, os demais catálogos, RTL e regressão final. Idiomas parcialmente traduzidos ficam fora do seletor normal de produção até o aceite de cobertura e revisão. Inventário, seletor ou fallback isolados não concluem suporte multilingue. Estas tasks fazem parte do aceite de release, não são domínio opcional; não exigem alterar Ember clássico nem traduzir nomes de workloads, logs, campos Compose/API ou páginas externas do IdP. A documentação continua mantida em pt-BR e inglês; paridade de interface não promete dez traduções da documentação.
+
 ## Identidade e autorização
 
 | ID | Capacidade | Estado e gate restante |
