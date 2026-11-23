@@ -64,6 +64,7 @@ describe('Registered locale catalog gate', () => {
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
     const previewDomains = new Set([
       'accessDiagnostics',
+      'apiKeys',
       'auth',
       'bindingsEditor',
       'bulkOperation',
@@ -104,6 +105,7 @@ describe('Registered locale catalog gate', () => {
       'topology',
       'ui',
       'users',
+      'webhooksPage',
       'workloadControls',
       'workloadPolicyValidation',
       'workloadsPage',

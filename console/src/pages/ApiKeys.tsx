@@ -466,12 +466,21 @@ export function ApiKeys() {
       >
         <Alert tone="warning">{t('apiKeys.saveWarning')}</Alert>
         <Field label={t('apiKeys.accessKey')}>
-          {(id) => <input id={id} readOnly value={secret?.publicValue || ''} autoComplete="off" />}
+          {(id) => (
+            <input
+              id={id}
+              dir="ltr"
+              readOnly
+              value={secret?.publicValue || ''}
+              autoComplete="off"
+            />
+          )}
         </Field>
         <Field label={t('apiKeys.secret')}>
           {(id) => (
             <input
               id={id}
+              dir="ltr"
               readOnly
               type={revealed ? 'text' : 'password'}
               value={secret?.secretValue || ''}

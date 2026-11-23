@@ -4,9 +4,10 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { ApiKeys } from '../pages/ApiKeys';
-import { allPages, ApiError, type Resource, type Schema } from '../api';
+import { allPages, api, ApiError, type Resource, type Schema } from '../api';
 import { I18nProvider } from '../i18n/provider';
 import type { Locale } from '../i18n/locales';
+import { frFR } from '../i18n/catalogs/fr-FR';
 const backend = vi.hoisted(() => ({
   records: [] as Resource[],
   contract: {} as Schema,
@@ -85,7 +86,7 @@ function mount() {
         policy={{
           enabled: true,
           defaultLocale,
-          availableLocales: ['pt-BR', 'en-US'],
+          availableLocales: ['pt-BR', 'en-US', 'fr-FR'],
           selectable: false,
           detectBrowser: false,
           preview: true,
@@ -156,6 +157,8 @@ describe('Tela de chaves de API', () => {
     const { client } = mount(),
       user = await create();
     expect(screen.getByLabelText('Segredo da chave')).toHaveAttribute('type', 'password');
+    expect(screen.getByLabelText('Segredo da chave')).toHaveAttribute('dir', 'ltr');
+    expect(screen.getByLabelText('Chave de acesso')).toHaveAttribute('dir', 'ltr');
     expect(cached(client)).not.toContain('synthetic-private');
     expect(screen.getByRole('button', { name: 'Concluir' })).toBeDisabled();
     const copy = vi.spyOn(navigator.clipboard, 'writeText');
@@ -220,6 +223,13 @@ describe('Tela de chaves de API', () => {
     expect(
       screen.getByText('Unable to complete the API key request (HTTP 422).'),
     ).toBeInTheDocument();
+    const requests = vi.mocked(api).mock.calls.length;
+    changeLocale('fr-FR');
+    expect(
+      await screen.findByText(frFR['apiKeys.httpFailed'].replace('{status}', '422')),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(frFR['apiKeys.name'])).toHaveValue('automation');
+    expect(vi.mocked(api)).toHaveBeenCalledTimes(requests);
     expect(screen.queryByText('synthetic-sensitive-error')).not.toBeInTheDocument();
     const error = client.getMutationCache().getAll()[0].state.error;
     expect(error).toMatchObject({ status: 422, message: 'apiKeys.requestFailed' });
