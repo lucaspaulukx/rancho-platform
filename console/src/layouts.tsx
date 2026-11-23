@@ -101,7 +101,7 @@ export function AppShell() {
   const navigation = localizedNavigation(t);
   const { pending: loggingOut, signOut } = useLogout();
   const app = useApp();
-  const { pathname, search } = useLocation();
+  const { pathname, search, hash } = useLocation();
   const [mobile, setMobile] = useState(false);
   const { collapsed, toggle: toggleSidebar } = useSidebarPreference(app.identity);
   const [appearance, setAppearance] = useState(false);
@@ -176,7 +176,7 @@ export function AppShell() {
   const current = navigation.find((item) => item.path !== '/' && pathname.startsWith(item.path));
   const groups = [...new Set(items.map((item) => item.section))];
   if (!app.authenticated)
-    return <Navigate to="/login" replace state={{ from: pathname + search }} />;
+    return <Navigate to="/login" replace state={{ from: pathname + search + hash }} />;
   if (!app.config.enabled)
     return (
       <Empty

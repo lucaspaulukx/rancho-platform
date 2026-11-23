@@ -9,11 +9,33 @@ import { AuthLayout } from '../layouts';
 import { Alert, Button, Empty, Field, Loading, PageHeader } from '../components/ui';
 import { useI18n } from '../i18n/provider';
 
+const oidcReturnPath = 'rancher.oidc.returnPath';
+
+function consoleDestination(value: unknown) {
+  if (
+    typeof value !== 'string' ||
+    !value.startsWith('/') ||
+    value.startsWith('//') ||
+    value.startsWith('/\\') ||
+    /[\u0000-\u001f\u007f]/.test(value)
+  )
+    return null;
+  const target = new URL(value, window.location.origin);
+  if (
+    target.origin !== window.location.origin ||
+    target.pathname.startsWith('//') ||
+    /^\/login(?:\/|$)/i.test(target.pathname)
+  )
+    return null;
+  return target.pathname + target.search + target.hash;
+}
+
 export function Login() {
   const app = useApp();
   const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
+  const returnPath = consoleDestination((location.state as { from?: string } | null)?.from);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [ticket, setTicket] = useState(() =>
@@ -33,24 +55,24 @@ export function Login() {
   const oidcRequest = useRef<AbortController | null>(null);
   const consuming = useRef(false);
   const settings = useQuery({ queryKey: ['login-policy'], queryFn: policy, retry: 1 });
-  async function finish(token: Token) {
+  async function finish(token: Token, destination: string | null) {
     acceptToken(token);
     setPassword('');
     await app.refresh();
-    const from = (location.state as { from?: string } | null)?.from;
-    navigate(
-      from?.startsWith('/') && !from.startsWith('//') && !from.startsWith('/login') ? from : '/',
-      { replace: true },
-    );
+    navigate(destination ?? '/', { replace: true });
   }
   const local = useMutation({
     gcTime: 0,
     mutationFn: () => api<Token>('token', { code: `${username}:${password}` }),
-    onSuccess: finish,
+    onSuccess: (token) => {
+      sessionStorage.removeItem(oidcReturnPath);
+      return finish(token, returnPath);
+    },
   });
   useEffect(() => () => oidcRequest.current?.abort(), []);
   useEffect(() => {
     if (!entryError || app.authenticated) return;
+    sessionStorage.removeItem(oidcReturnPath);
     history.replaceState({}, '', window.location.pathname);
     sessionStorage.setItem('rancher.oidc.autoAttempt', '1');
   }, [entryError, app.authenticated]);
@@ -63,6 +85,8 @@ export function Login() {
     setTicketError(false);
     setOidcError(null);
     setOidcPending(true);
+    if (returnPath) sessionStorage.setItem(oidcReturnPath, returnPath);
+    else sessionStorage.removeItem(oidcReturnPath);
     try {
       await oidcLogin(settings.data?.preflight === true, request.signal);
     } catch (error) {
@@ -79,9 +103,11 @@ export function Login() {
   useEffect(() => {
     if (!ticket || consuming.current) return;
     consuming.current = true;
+    const destination = consoleDestination(sessionStorage.getItem(oidcReturnPath));
+    sessionStorage.removeItem(oidcReturnPath);
     history.replaceState({}, '', window.location.pathname);
     void api<Token>('token', { code: `oidc-ticket:${ticket}` })
-      .then(finish)
+      .then((token) => finish(token, destination))
       .catch(() => setTicketError(true));
   }, [ticket]);
   useEffect(() => {
@@ -100,7 +126,7 @@ export function Login() {
       void beginOidc();
     }
   }, [settings.data, ticket, app.authenticated, ticketError, entryError]);
-  if (app.authenticated && !ticket) return <Navigate to="/" replace />;
+  if (app.authenticated && !ticket) return <Navigate to={returnPath ?? '/'} replace />;
   function submit(event: FormEvent) {
     event.preventDefault();
     oidcRequest.current?.abort();

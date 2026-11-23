@@ -1,5 +1,6 @@
 services:
   legacy-test-host:
+    profiles: [legacy-tests]
     build: ./console/tests/legacy-host
     image: rancher16-legacy-test-host:dev
     container_name: rancher16-legacy-test-host

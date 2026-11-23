@@ -45,18 +45,20 @@ function SwitchLanguage() {
     <>
       <button onClick={() => setLocale('en-US')}>English fixture</button>
       <button onClick={() => setLocale('pt-BR')}>Português fixture</button>
-      <output aria-label="Fixture route">{location.pathname + location.search}</output>
+      <output aria-label="Fixture route">
+        {location.pathname + location.search + location.hash}
+      </output>
     </>
   );
 }
 
-function mount(children: ReactNode, locale: Locale = 'pt-BR') {
+function mount(children: ReactNode, locale: Locale = 'pt-BR', from?: string) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: Infinity }, mutations: { retry: false } },
   });
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={['/login?env=1a12']}>
+      <MemoryRouter initialEntries={[{ pathname: '/login', search: '?env=1a12', state: { from } }]}>
         <I18nProvider
           identity="auth-localization-fixture"
           policy={{
@@ -78,6 +80,7 @@ function mount(children: ReactNode, locale: Locale = 'pt-BR') {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  sessionStorage.clear();
   window.history.replaceState({}, '', '/console/login');
   fixture.policy.mockResolvedValue({
     enabled: true,
@@ -90,6 +93,39 @@ beforeEach(() => {
 });
 
 describe('Authentication localization without session side effects', () => {
+  it('returns to the requested console path after the external OIDC round trip', async () => {
+    const destination = '/stacks?env=1a12#services';
+    const initial = mount(<Login />, 'pt-BR', destination);
+    await userEvent
+      .setup()
+      .click(await screen.findByRole('button', { name: 'Entrar com Keycloak' }));
+    expect(fixture.oidcLogin).toHaveBeenCalledTimes(1);
+    initial.unmount();
+
+    window.history.replaceState({}, '', '/console/login?oidc_ticket=synthetic-fixture-ticket');
+    fixture.api.mockResolvedValue({ jwt: 'synthetic-fixture-jwt' });
+    mount(<Login />);
+    await waitFor(() =>
+      expect(screen.getByLabelText('Fixture route')).toHaveTextContent(destination),
+    );
+    expect(sessionStorage.getItem('rancher.oidc.returnPath')).toBeNull();
+  });
+
+  it.each([
+    '//external.invalid',
+    '/\\external.invalid',
+    '/\t/[',
+    '/stacks/..//external.invalid',
+    '/login?env=1a12',
+  ])('falls back to the console home for unsafe stored return path %s', async (destination) => {
+    sessionStorage.setItem('rancher.oidc.returnPath', destination);
+    window.history.replaceState({}, '', '/console/login?oidc_ticket=synthetic-fixture-ticket');
+    fixture.api.mockResolvedValue({ jwt: 'synthetic-fixture-jwt' });
+    mount(<Login />);
+    await waitFor(() => expect(screen.getByLabelText('Fixture route')).toHaveTextContent(/^\/$/));
+    expect(sessionStorage.getItem('rancher.oidc.returnPath')).toBeNull();
+  });
+
   it('changes labels without losing credential drafts or the route', async () => {
     const user = userEvent.setup();
     mount(<Login />);

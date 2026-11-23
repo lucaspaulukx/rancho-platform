@@ -56,7 +56,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 
 | ID | Capacidade | Estado e gate restante |
 |---|---|---|
-| AUTH01 | Local/OIDC, callback, exclusivo/autologin/sem-acesso | Em duas restaurações do mesmo backup, o modo híbrido aceitou a senha do administrador local e o exclusivo a recusou. A cópia exclusiva anunciou entrada automática e validou o login pelo Keycloak, a ausência de acesso no primeiro login e a revogação da sessão. Faltam a navegação no navegador e a matriz final de sessões e links diretos |
+| AUTH01 | Local/OIDC, callback, exclusivo/autologin/sem-acesso | Duas restaurações do mesmo backup validaram as políticas híbrida e exclusiva. O Chromium verificou login pelo Keycloak, navegação automática, retorno sem atualização manual, recarga da tela sem acesso, saída, ticket inválido e redirecionamento interrompido. A reversão restaurou o login local e as permissões de grupo. Um build local do console retornou o leitor ao caminho, ao environment e ao fragmento solicitados em Stacks após login real pelo Keycloak. Faltam as demais combinações de sessões e links diretos |
 | AUTH02 | Conta/perfil global atuais | Implementado; falta regressão técnica final; reset de senha não revoga JWT sozinho |
 | AUTH03 | Expiração criptográfica | HTTP local/OIDC e streams UI validados em recortes; faltam caminhos técnicos/ociosidade/carga completos |
 | AUTH04 | Logout federado/falha do IdP | Recortes implementados; manter regressão sem loops/fallback local no exclusivo |
@@ -84,7 +84,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 | OPS09 | Memória/reserva | Criação/upgrade/rollback validados em recortes; falta matriz de recursos/OOM restante |
 | OPS10 | Capabilities/readOnly/privileged/opções de segurança | Reset/finish de capabilities/readOnly e criação com dispositivos validados, incluindo mapeamentos independentes no principal e no sidecar em um host. Upgrade, reversão, conclusão e remoção de dispositivos da configuração principal verificados pelo console com escala zero e por substituição nativa em um host Docker. Criação nativa com no-new-privileges verificada no processo com controle equivalente. Upgrade, reversão, conclusão e remoção independente de dispositivos em sidecar verificados pelo console com escala zero e por substituição nativa em um host Docker. O mapeamento principal foi preservado na substituição dos dois containers. Faltam múltiplos hosts, outras opções de segurança e variantes de privilégios |
 | OPS11 | CPU/IO/limites de processo | CPU/IO e nofile criar/upgrade/rollback/reset em um host validados, incluindo sidecar independente; faltam outros limites/carga/compatibilidade |
-| OPS12 | Editar/recriar container avulso | Parcial; falta contrato mutável/imutável e recriação nativa |
+| OPS12 | Editar/recriar container avulso | O Chromium editou nome e descrição pelo menu de Operações. O schema nativo expôs apenas esses campos para edição, e o Docker confirmou que o mesmo container continuou rodando com a mesma imagem. Falta a recriação nativa para alterações de campos imutáveis |
 | OPS13 | Detalhes/grafo/código/estatísticas por tipo | Parcial; métricas por réplica implementadas, falta inventário completo de tipos/campos/ações |
 
 ## Infraestrutura, dados e catálogos
