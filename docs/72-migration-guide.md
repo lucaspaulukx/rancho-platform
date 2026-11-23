@@ -48,6 +48,8 @@ Não arquivar diretamente um datadir MySQL ativo para chamá-lo de backup consis
 
 ## 4. Ensaio offline antes do cutover
 
+Complemento76: `python -m migration.recovery plan|backup|rehearse-files` cobre backup frio criptografado dos volumes/configuração Rancher/MySQL/Keycloak e comparação de arquivos em destinos próprios. Requer manutenção explícita e não inicia engines nem comprova login recuperado; consulte os limites e a sequência em [76](76-complete-recovery-plan.md). Não substitui o dump lógico abaixo nem libera cutover.
+
 ```sh
 python -m migration.tool rehearse-db --output migration-runs/backup-001
 ```

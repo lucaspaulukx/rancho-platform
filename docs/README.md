@@ -133,3 +133,5 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 - [Histórico Git e base comunitária](74-git-and-community-validation.md).
 
 - [Bootstrap seguro e limites de validação](75-bootstrap-safety.md).
+
+- [Backup frio completo e ensaio de recuperação](76-complete-recovery-plan.md).
