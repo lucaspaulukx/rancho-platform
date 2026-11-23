@@ -36,7 +36,7 @@ Desenvolvimento não altera Ember. Toda função nova tem flag e comportamento o
 | AUTH05 | Administrador OIDC e recuperação | Aceito60 | Promoção explícita, botão Keycloak, exclusivo e recuperação híbrida testados; fixture removida |
 | RBAC01 | Grupos locais/membros/grants e revisão409 | Aceito em recortes | Regressão concorrência/remoção/acesso direto+grupos, sem concessão implícita |
 | RBAC02 | Acesso efetivo/auditoria/Meu acesso | Aceito em recortes | Fonte direta/grupo e limites conhecidos sem inferência visual |
-| RBAC03 | Migração de acessos individuais para grupos | Plano readonly/diff criptografado78 aceito; cutover pendente | Plano/dry-run/diff/backup e rollback com20 envs sintéticos, sem perda de grants |
+| RBAC03 | Migração de acessos individuais para grupos | Plano78 e fluxo API original20 em cópia aceitos; automação real/concorrência pendentes | Plano/dry-run/diff/backup e rollback com20 envs sintéticos, sem perda de grants |
 | RBAC04 | Identidades externas dinâmicas | Parcial | Tratamento explícito do contrato necessário; não mover gestão de grupos para Keycloak |
 | RBAC05 | Contas técnicas e API keys | Parcial24 | Matriz escopo/expiração/revogação/owner e nenhum segredo reexposto |
 
@@ -137,3 +137,5 @@ Atualização76 ampliada:36 testes,4 imagens criptografadas,15 checks de engines
 Atualização77:001 agora versionada no Git e embarcada no backend; schema flagfalse, lock/checksum/estrutura/índices,9 contratos JDBC e138 configuração aprovados. Engine oficial original20→custom nos mesmos volumes copiados, restart idempotente, checksum corrompido impede startup e rollback por restore original aprovados, com origem preservada. Pacote limpo clona/aplica/checka/builda sem .env/SQL privado; corrigidos ignore indevido do SQL e paths longos do Git no Windows. REL01/02 continuam com limites do laboratório e REL04/06 globais abertos.
 
 Atualização78: planner consistente só leitura,13 testes incluindo50×20 sem expansão, CLI criptografada com origem intacta e fixture DB original20/3users/5grants→2grupos repetida3 restores passaram. Não cria grupos nem retira diretos; regra nativa exige owner direto, preservar recuperação no futuro cutover. API/acesso efetivo/rollback ainda pendentes.
+
+Atualização78 API:35 checks de coexistência/cutover/rollback nativos passaram com matrix60,5 fontes apenas grupo, negação readonly405/admin404 com controles positivos, revogação na sessão e stale revision409. Owner direto preservado e origem intacta; somente laboratório fixo. Não há apply público nem CAS de lista nativa/aceite concorrente. OBS02 logs/exec/métricas segue prioridade de segurança aberta.

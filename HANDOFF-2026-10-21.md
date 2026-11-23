@@ -1,3 +1,7 @@
+# Checkpoint — grupos/cutover API original20 (05/11/2026)
+
+Recorte78 API passou35 checks em cópia original20:3 users/5 bindings→2 grupos, matrix60 preservada em coexistência/cutover nativo/rollback, owner direto conservado, readonly405 e admin404 com controle positivo e zero criação proibida, revogação na sessão e revisão antiga409. Sessões/cópias limpas, origem IDs/HTTP preservados. Planner público segue readonly; harness não é apply de produção, precheck nativo não é CAS. Próximo: OBS02 logs/exec/métricas e demais gates48. Pesquisa preliminar fonte oficial websocket-proxy v0.23.12/5b4d22 no diretório ignorado migration-runs; nenhuma mudança nesse componente ainda.
+
 # Checkpoint — plano de acessos diretos (05/11/2026)
 
 Planner78 somente leitura/transaction consistente e plano AES-GCM:13 testes (grafo50×20), CLI real sem alteração da origem e fixture original20/3users/5grants→2grupos repetida3 restores aprovada. Fonte real tem só7 diretos adminglobais,0 propostas corretas. Nenhum apply/cutover disponível; Native setmembers exige owner direto, não remover o último no futuro. Próximo: grupos/API, matriz60 efetiva, cutover nativo/negação/revogação/rollback em cópia. Total53 testes Python no conjunto incluindo bootstrap; frontend605/71 e recorte77 permanecem. Roadmap48 ainda aberto.

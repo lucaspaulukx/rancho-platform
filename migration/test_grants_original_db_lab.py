@@ -7,8 +7,13 @@ from migration import grants, tool
 from migration.test_original_rehearsal import original_twenty_environments
 
 
-def seeded_grants(database):
-    original_twenty_environments(database)
+def seeded_grants(database, *, reset_original=True):
+    if not database.container.startswith('rancher-rehearsal-'):
+        raise tool.MigrationError('Synthetic grants require an owned rehearsal container.')
+    if reset_original:
+        original_twenty_environments(database)
+    else:
+        assert database.query("SELECT COUNT(*) FROM cattle.account WHERE kind='project' AND removed IS NULL;") == '20'
     users = []
     for index in range(3):
         uid = '7ff40000-0000-4000-8000-' + str(index).zfill(12)
