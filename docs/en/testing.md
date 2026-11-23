@@ -72,6 +72,8 @@ Add `--classic-browser` with Playwright Chromium installed to check Ember login 
 
 ## Native and browser acceptance
 
+Run `python tests/flag_integration.py --browser --release-images BACKEND_SHA256_ID CONSOLE_SHA256_ID` in the named loopback lab during a local maintenance window. The test recreates the Rancher backend with exclusive OIDC, automatic login and local groups disabled. It verifies browser login and failure paths, then restores the hybrid configuration and verifies group access and the original backend environment. Use the immutable image IDs from the release report.
+
 Run the classic browser smoke against the named local lab with Playwright Chromium installed. Use the same backend ID recorded in the release rehearsal. It checks that the expected container owns the loopback port, signs in through Ember, opens the Environments list without uncaught browser errors and revokes the test session. Browser requests are limited to local reads and the login request. This exercise covers the candidate backend while the isolated rollback probe covers classic asset delivery on the original backend.
 
 ```sh
