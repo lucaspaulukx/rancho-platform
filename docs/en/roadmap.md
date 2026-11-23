@@ -107,7 +107,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 | ID | Capability | State and remaining gate |
 |---|---|---|
 | OBS01 | Contextual logs/terminal/metrics | Implemented real-data slices; final focus/resize/buffer/environment regression remains |
-| OBS02 | Open-stream revocation | UI and personal/shared API-key host-stream slices validated; technical paths and final artifact regression remain |
+| OBS02 | Open-stream revocation | On Docker 29.9.2 behind the modern Compose gateway, revoking an administrator session closed its open logs, terminal, container metrics and service metrics. A separate current session received data on all four transports. Personal/shared API keys have separate partial coverage. Repeat local/OIDC user deactivation, expiry and API-key cases on the final artifacts. |
 | OBS03 | Final-build soak | Six-minute native tests verified host reconnect and a five-stream browser soak on one console image and one legacy host. Logs, terminal and host/container/service metrics ran concurrently with bounded CSV history and exact cleanup. Service metrics were enabled in the test browser. Acceptance with deployed flags and final topology remains |
 | ADM01 | Local accounts/profile/password/lifecycle | Implemented; final concurrency/OIDC-admin/technical matrix remains |
 | ADM02 | Audit/settings/process/replay | Implemented slices; final permission/privacy/error/native-effect regression remains |
