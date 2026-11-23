@@ -13,6 +13,7 @@ COPY --from=stream-proxy /out/websocket-proxy /usr/bin/websocket-proxy
 COPY --from=stream-proxy /out/licenses /usr/share/doc/community-websocket-proxy
 ENV RANCHER_HOST_STREAM_PROXY_PROTOCOL=1
 ENV RANCHER_METRICS_PAYLOAD_PROXY_PROTOCOL=1
+ENV RANCHER_API_KEY_STREAM_PROXY_PROTOCOL=1
 COPY cattle /lab/cattle
 COPY legacy-ui /lab/web
 COPY build-overlay.sh /lab/build-overlay.sh

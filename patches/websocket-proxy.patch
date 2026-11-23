@@ -160,10 +160,10 @@ index caa39de..3b8fccd 100644
  }
  
 diff --git a/proxy/config.go b/proxy/config.go
-index 86cba1f..2bfc69a 100644
+index 86cba1f..cd735af 100644
 --- a/proxy/config.go
 +++ b/proxy/config.go
-@@ -22,28 +22,32 @@ import (
+@@ -22,28 +22,34 @@ import (
  )
  
  type Config struct {
@@ -178,6 +178,7 @@ index 86cba1f..2bfc69a 100644
 -	MasterFile               string
 -	APIInterceptorConfigFile string
 +	HostStreamSessionGuardEnabled bool
++	APIKeyStreamGuardEnabled      bool
 +	hostStreamGuardKey            string
 +	PublicKey                     interface{}
 +	ListenAddr                    string
@@ -204,6 +205,7 @@ index 86cba1f..2bfc69a 100644
  	var proxyProtoHTTPSPorts string
  	var apiInterceptorConfigFile string
  
++	flag.BoolVar(&c.APIKeyStreamGuardEnabled, "api-key-stream-guard-enabled", false, "Revalidate selected API key host streams.")
 +	flag.BoolVar(&c.HostStreamSessionGuardEnabled, "host-stream-session-guard-enabled", false, "Revalidate bound UI host streams.")
  	flag.StringVar(&c.MasterFile, "master-file", "", "Location of the file containing the master address.")
  	flag.StringVar(&keyFile, "jwt-public-key-file", "", "Location of the public-key used to validate JWTs.")
@@ -346,10 +348,10 @@ index 089658e..8a2b736 100644
  	os.Exit(m.Run())
  }
 diff --git a/proxy/proxy.go b/proxy/proxy.go
-index 2bb6d93..09d3e91 100644
+index 2bb6d93..cced10d 100644
 --- a/proxy/proxy.go
 +++ b/proxy/proxy.go
-@@ -37,6 +37,10 @@ type Starter struct {
+@@ -37,6 +37,16 @@ type Starter struct {
  }
  
  func (s *Starter) StartProxy() error {
@@ -357,10 +359,16 @@ index 2bb6d93..09d3e91 100644
 +	if guardError != nil {
 +		return guardError
 +	}
++	if s.Config.APIKeyStreamGuardEnabled {
++		if streamGuard == nil {
++			return fmt.Errorf("API key stream guard requires host stream guard")
++		}
++		streamGuard.apiKeys = true
++	}
  	switcher := NewSwitcher(s.Config)
  
  	backendMultiplexers := make(map[string]*multiplexer)
-@@ -46,11 +50,13 @@ func (s *Starter) StartProxy() error {
+@@ -46,11 +56,13 @@ func (s *Starter) StartProxy() error {
  	}
  
  	frontendHandler := switcher.Wrap(&FrontendHandler{
@@ -374,14 +382,14 @@ index 2bb6d93..09d3e91 100644
  		backend:         bpm,
  		parsedPublicKey: s.Config.PublicKey,
  	})
-@@ -76,6 +82,11 @@ func (s *Starter) StartProxy() error {
+@@ -76,6 +88,11 @@ func (s *Starter) StartProxy() error {
  
  	router := mux.NewRouter()
  
 +	router.HandleFunc("/community/host-stream-guard", func(w http.ResponseWriter, r *http.Request) {
 +		w.Header().Set("Cache-Control", "no-store")
 +		w.Header().Set("Content-Type", "application/json")
-+		fmt.Fprintf(w, `{"protocol":1,"enabled":%t,"metricsPayloadProtocol":1}`, s.Config.HostStreamSessionGuardEnabled)
++		fmt.Fprintf(w, `{"protocol":1,"enabled":%t,"metricsPayloadProtocol":1,"apiKeyProtocol":1,"apiKeyGuardEnabled":%t}`, s.Config.HostStreamSessionGuardEnabled, s.Config.APIKeyStreamGuardEnabled)
 +	}).Methods("GET")
  	router.HandleFunc("/version", k8s.Version)
  	router.HandleFunc("/swaggerapi/api/v1", k8s.Swagger)
@@ -598,7 +606,7 @@ diff --git a/proxy/host_stream_guard.go b/proxy/host_stream_guard.go
 new file mode 100644
 --- /dev/null
 +++ b/proxy/host_stream_guard.go
-@@ -0,0 +1,410 @@
+@@ -0,0 +1,420 @@
 +package proxy
 +
 +import (
@@ -638,6 +646,7 @@ new file mode 100644
 +
 +// One shared, bounded cache for a proxy process. Keys never contain credentials.
 +type hostStreamGuard struct {
++	apiKeys   bool
 +	heartbeat time.Duration
 +	endpoint  string
 +	client    *http.Client
@@ -731,11 +740,17 @@ new file mode 100644
 +	host, hostOK := streamID(binding["hostId"])
 +	project, projectOK := streamID(binding["projectId"])
 +	mode, _ := binding["mode"].(string)
-+	if !hostOK || !projectOK || (mode != "ui" && mode != "technical") {
++	if !hostOK || !projectOK || (mode != "ui" && mode != "apikey" && mode != "technical") {
 +		return nil, errors.New("Invalid stream mode or target")
++	}
++	if mode == "apikey" && !g.apiKeys {
++		return nil, errors.New("API key stream mode disabled")
 +	}
 +	result := &hostStreamProof{raw: token.Raw, path: path, mode: mode, expires: expires}
 +	if mode == "technical" {
++		if g.apiKeys && binding["credentialKind"] != "agentApiKey" {
++			return nil, errors.New("Unbound technical credential")
++		}
 +		return result, nil
 +	}
 +	session, sessionOK := streamID(binding["tokenId"])
@@ -747,7 +762,7 @@ new file mode 100644
 +	uiExpires, expiryOK := streamSeconds(binding["uiExp"])
 +	if !sessionOK || !userOK || !expiryOK || hashErr != nil || len(hashBytes) != 32 || len(fingerprint) != 64 ||
 +		fingerprint != strings.ToLower(fingerprint) || uiExpires <= time.Now().Unix() ||
-+		(kind != "user" && kind != "admin") || (role != "owner" && role != "member" && role != "restricted" && role != "readonly") {
++		(kind != "user" && kind != "admin" && !(mode == "apikey" && kind == "project")) || (role != "owner" && role != "member" && role != "restricted" && role != "readonly") {
 +		return nil, errors.New("Invalid UI session reference")
 +	}
 +	result.uiExpires = uiExpires
@@ -762,7 +777,7 @@ new file mode 100644
 +		}
 +	}
 +	result.renewAt = expires - margin
-+	sum := sha256.Sum256([]byte(strings.Join([]string{session, fingerprint, user, kind, project, role, host, strconv.FormatInt(uiExpires, 10)}, "/")))
++	sum := sha256.Sum256([]byte(strings.Join([]string{mode, session, fingerprint, user, kind, project, role, host, strconv.FormatInt(uiExpires, 10)}, "/")))
 +	result.key = hex.EncodeToString(sum[:])
 +	if raw, present := token.Claims["rancherStreamProof"]; present {
 +		compact, ok := raw.(string)
@@ -777,7 +792,7 @@ new file mode 100644
 +			return nil, errors.New("Nested compact proof")
 +		}
 +		next, err := g.proof(inner, path)
-+		if err != nil || next.mode != "ui" || next.key != result.key {
++		if err != nil || next.mode != mode || next.key != result.key {
 +			return nil, errors.New("Compact scope mismatch")
 +		}
 +		return next, nil
@@ -812,10 +827,13 @@ new file mode 100644
 +		return nil, errors.New("Negotiation scope required")
 +	}
 +	if reference["mode"] == "technical" {
++		if g.apiKeys && reference["credentialKind"] != "agentApiKey" {
++			return nil, errors.New("Unbound negotiation credential")
++		}
 +		return &hostStreamProof{mode: "technical", expires: expires}, nil
 +	}
 +	raw, ok := reference["proof"].(string)
-+	if reference["mode"] != "ui" || !ok || len(raw) > 65536 {
++	if (reference["mode"] != "ui" && reference["mode"] != "apikey") || !ok || len(raw) > 65536 {
 +		return nil, errors.New("Invalid negotiation reference")
 +	}
 +	inner, err := jwt.Parse(raw, func(_ *jwt.Token) (interface{}, error) { return g.publicKey, nil })
@@ -831,7 +849,7 @@ new file mode 100644
 +		return nil, errors.New("Negotiation target missing")
 +	}
 +	proof, err := g.proof(inner, signedPath)
-+	if err != nil || proof.mode != "ui" {
++	if err != nil || proof.mode != reference["mode"] {
 +		return nil, errors.New("Invalid negotiation session")
 +	}
 +	return proof, nil
@@ -855,7 +873,7 @@ new file mode 100644
 +	if proof.mode == "envelope" {
 +		return true
 +	}
-+	if proof.mode != "ui" || proof.uiExpires <= time.Now().Unix() {
++	if (proof.mode != "ui" && proof.mode != "apikey") || proof.uiExpires <= time.Now().Unix() {
 +		return false
 +	}
 +	// A trusted proxy renews only a still-valid proof for an existing socket.
@@ -1013,7 +1031,7 @@ diff --git a/proxy/host_stream_guard_test.go b/proxy/host_stream_guard_test.go
 new file mode 100644
 --- /dev/null
 +++ b/proxy/host_stream_guard_test.go
-@@ -0,0 +1,463 @@
+@@ -0,0 +1,554 @@
 +package proxy
 +
 +import (
@@ -1475,5 +1493,96 @@ new file mode 100644
 +	}
 +	if g, err := newHostStreamGuard(false, "invalid", "", nil); err != nil || g != nil {
 +		t.Fatal("off configuration failed")
++	}
++}
++
++func TestHostStreamAPIKeyHandlers(t *testing.T) {
++	for _, mode := range []string{"idle", "output", "input", "metrics"} {
++		t.Run(mode, func(t *testing.T) {
++			var denied int32
++			g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) {
++				json.NewEncoder(w).Encode(map[string]bool{"allowed": atomic.LoadInt32(&denied) == 0})
++			})
++			g.apiKeys = true
++			b := &streamTestBackend{data: make(chan common.Message, 4)}
++			defer close(b.data)
++			var handler http.Handler = &FrontendHandler{guard: g, backend: b, parsedPublicKey: testutils.ParseTestPublicKey()}
++			if mode == "metrics" {
++				handler = &StatsHandler{guard: g, backend: b, parsedPublicKey: testutils.ParseTestPublicKey()}
++			}
++			server := httptest.NewServer(handler)
++			defer server.Close()
++			claims := streamTestClaims()
++			claims["rancherStream"].(map[string]interface{})["mode"] = "apikey"
++			claims["rancherStream"].(map[string]interface{})["userKind"] = "project"
++			token := streamTestToken(t, claims)
++			target := "ws" + strings.TrimPrefix(server.URL, "http") + "/v1/echo?token=" + token.Raw
++			ws, _, err := websocket.DefaultDialer.Dial(target, nil)
++			if err != nil {
++				t.Fatal("valid handshake failed")
++			}
++			defer ws.Close()
++			b.data <- common.Message{Type: common.Body, Body: "before"}
++			ws.SetReadDeadline(time.Now().Add(3 * time.Second))
++			if _, body, err := ws.ReadMessage(); err != nil || string(body) != "before" {
++				t.Fatal("control frame not forwarded")
++			}
++			atomic.StoreInt32(&denied, 1)
++			time.Sleep(300 * time.Millisecond)
++			if mode == "input" {
++				if err := ws.WriteMessage(1, []byte("after")); err != nil {
++					t.Fatal(err)
++				}
++			}
++			if mode == "output" || mode == "metrics" {
++				b.data <- common.Message{Type: common.Body, Body: "after"}
++			}
++			_, _, err = ws.ReadMessage()
++			if err == nil || !strings.Contains(err.Error(), "1008") {
++				t.Fatal("revoked stream did not close with policy violation")
++			}
++			if atomic.LoadInt32(&b.sent) != 0 {
++				t.Fatal("revoked terminal input forwarded")
++			}
++			next, response, err := websocket.DefaultDialer.Dial(target, nil)
++			if next != nil {
++				next.Close()
++				t.Fatal("revoked handshake upgraded")
++			}
++			if err == nil || response == nil || response.StatusCode != 401 || atomic.LoadInt32(&b.initialized) != 1 {
++				t.Fatal("revoked handshake reached backend")
++			}
++		})
++	}
++}
++
++func TestHostStreamAPIKeyModeBoundaries(t *testing.T) {
++	g := streamTestGuard(t, func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(`{"allowed":true}`)) })
++	claims := streamTestClaims()
++	binding := claims["rancherStream"].(map[string]interface{})
++	binding["mode"] = "apikey"
++	token := streamTestToken(t, claims)
++	if _, err := g.proof(token, "/v1/echo"); err == nil {
++		t.Fatal("disabled key mode accepted")
++	}
++	g.apiKeys = true
++	if _, err := g.proof(token, "/v1/echo"); err != nil {
++		t.Fatal("bound personal key rejected")
++	}
++	binding["userKind"] = "project"
++	if _, err := g.proof(streamTestToken(t, claims), "/v1/echo"); err != nil {
++		t.Fatal("bound project key rejected")
++	}
++	binding["mode"] = "technical"
++	if _, err := g.proof(streamTestToken(t, claims), "/v1/echo"); err == nil {
++		t.Fatal("legacy unbound key accepted")
++	}
++	binding["credentialKind"] = "agentApiKey"
++	if _, err := g.proof(streamTestToken(t, claims), "/v1/echo"); err != nil {
++		t.Fatal("native agent mode rejected")
++	}
++	binding["credentialKind"] = "apiKey"
++	if _, err := g.proof(streamTestToken(t, claims), "/v1/echo"); err == nil {
++		t.Fatal("API key downgraded to agent mode")
 +	}
 +}

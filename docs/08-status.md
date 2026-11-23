@@ -1,3 +1,9 @@
+## Checkpoint83 — guarda de API keys em validação (05/11/2026)
+
+Baseline pessoal/compartilhada confirmou streams válidos após desativação da chave. Implementação opcional false liga prova à credencial nativa realmente comparada, owner/scope/host/rota/role e teto configurável de socket30–86400s; marca agente separadamente, impede downgrade legado quando on e protege lotes/negociação. Java173 configuração/46 envelope/19 callback, Go upstream/novos/race, Linux628/72+TypeScript/Vite e build limpo aprovados.
+
+Novo artefato passou desativação pessoal+compartilhada em3 transportes pelo18090 com HTTP401, novosWS401,1008/zero dados e controles/cleanup. Grupo OIDC está em execução; conta/cookie/lease/lote e off do mesmo artefato ainda pendentes. Flag moderna não ativada por default; runtime local on somente para ensaios. Ver83; não encerrar OBS02/RBAC05/48 por esse recorte parcial.
+
 ## Checkpoint82 — proteção de credenciais na auditoria (05/11/2026)
 
 Baseline própria confirmou que readonly conseguia ler e reutilizar token admin de terminal pela auditoria do environment. Corrigidas gravação recursiva e projeção de registros novos/antigos, sob flag independente. Mesmo artefato on preservou capacidades legítimas e ator/ação/status, retirou tokens de novos registros no banco e protegeu2 antigos sem reescrevê-los; readonly sem acesso ao token, global404 e execute ausente. Revogação dos3 streams1008/novos401/zero dados, controles e cleanup aprovados.

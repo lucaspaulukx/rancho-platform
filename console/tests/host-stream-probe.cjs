@@ -37,7 +37,7 @@ function openProbe(variant) {
       target.pathname = input.mode === 'logs' ? '/v1/exec' : '/v1/logs';
     } else throw new Error('Invalid negative variant');
   }
-  const next = new WebSocket(target.href, { headers: { Cookie: 'token=' + input.session },
+  const next = new WebSocket(target.href, { headers: input.session ? { Cookie: 'token=' + input.session } : {},
     origin: new URL(input.url).origin.replace(/^ws/, 'http'), followRedirects: false, handshakeTimeout: 8000,
     perMessageDeflate: false, maxPayload: 1048576 });
   next.on('unexpected-response', (_, response) => { emit({ type: event, status: response.statusCode }); response.destroy(); next.terminate(); });
@@ -77,9 +77,9 @@ inputLines.on('line', line => {
     const expected = input.mode === 'service-metrics' ? ['/v1/containerstats/service'] : input.mode === 'metrics' ? ['/v1/containerstats/' + input.dockerId, '/v1/stats/' + input.dockerId]
       : ['/v1/' + (input.mode === 'exec' ? 'exec' : 'logs')];
     assert(expected.includes(url.pathname.replace(/\/$/, '')));
-    assert.match(input.session, /^[A-Za-z0-9_.~-]{1,8192}$/);
+    assert(typeof input.session === 'string' && (input.session === '' || /^[A-Za-z0-9_.~-]{1,8192}$/.test(input.session)));
     ({ ws: WebSocket } = require(path.join(input.runtimeModules, 'playwright-core/lib/utilsBundle.js')));
-    socket = new WebSocket(url.href, { headers: { Cookie: 'token=' + input.session }, origin: new URL(input.url).origin.replace(/^ws/, 'http'),
+    socket = new WebSocket(url.href, { headers: input.session ? { Cookie: 'token=' + input.session } : {}, origin: new URL(input.url).origin.replace(/^ws/, 'http'),
       followRedirects: false, handshakeTimeout: 10000, maxPayload: 1048576, perMessageDeflate: false });
     socket.on('upgrade', response => { stats.handshake = response.statusCode; });
     socket.on('unexpected-response', (_, response) => { stats.handshake = response.statusCode; emit({ type: 'handshake-rejected', status: response.statusCode }); response.destroy(); });
