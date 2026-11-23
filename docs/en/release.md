@@ -47,6 +47,14 @@ Use two previously built local Linux images. The rehearsal uses fresh owned volu
 python -m migration.test_fresh_install_lab --backend-image rancho-backend:local --console-image rancho-console:local
 ```
 
+## Rehearsal with one pinned artifact
+
+Run the combined gate with three local images and Playwright Chromium available in the Python environment. Leave loopback port 18091 free for the owned rollback proxy. The tool resolves the image IDs once, runs fresh installation and frontend upgrade/rollback on the same console candidate, and reports the selected IDs, configuration digest and cleanup. The report covers these two checks. The remaining release gates must be recorded separately.
+
+```sh
+python -m scripts.release_artifact_rehearsal --backend-image rancho-backend:local --previous-console-image rancho-console:previous --candidate-console-image rancho-console:candidate
+```
+
 ## Final acceptance
 
 Use one identified release candidate for authentication/RBAC/streams, contextual operations, accessibility/performance, classic compatibility, fresh installation, upgrade and full recovery/rollback. Record limits and supported topologies. Configure a private security-reporting channel before going public. Keep [migration](migration.md) and [recovery](recovery.md) procedures matched to the artifact; do not infer a universal migration guarantee from synthetic tests.

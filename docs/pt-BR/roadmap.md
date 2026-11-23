@@ -126,7 +126,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 | REL03 | Rollback frontend/backend | Rollback isolado da imagem do frontend verificou abas antigas, uma configuração compartilhada compatível e retenção de assets imutáveis. Faltam restauração correspondente de backend e dados e aceite do cliente clássico |
 | REL04 | Distribuição reproduzível | Pins/lockfiles/CI/inventário disponíveis; ensaio de instalação limpa isolado verificou UI clássica e console separado. Faltam upgrade, licenças, proveniência e revisão de segurança finais |
 | REL05 | Segurança final | Pendente aceite unificado rotas/ações/escopos/CSRF/secrets/cache/dependências/risco legado |
-| REL06 | Aceite local de release | Pendentes gates obrigatórios no mesmo artefato, cleanup exato e evidência reproduzível |
+| REL06 | Aceite local de release | Ensaio Docker validou instalação limpa e rollback do frontend com o mesmo ID de imagem candidata e confirmou a remoção dos recursos temporários. As demais verificações obrigatórias ainda precisam de evidência em um único artefato de release. |
 
 ## Ordem e domínios opcionais
 

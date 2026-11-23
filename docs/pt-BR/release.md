@@ -47,6 +47,14 @@ Use duas imagens Linux locais já compiladas. O ensaio usa volumes próprios nov
 python -m migration.test_fresh_install_lab --backend-image rancho-backend:local --console-image rancho-console:local
 ```
 
+## Ensaio com um artefato fixado
+
+Execute o teste combinado com três imagens locais e o Chromium do Playwright disponível no ambiente Python. Deixe a porta local 18091 livre para o proxy temporário de rollback. A ferramenta resolve os IDs das imagens uma vez, executa a instalação limpa e o upgrade/rollback do frontend com a mesma imagem candidata e registra os IDs, o hash da configuração e a limpeza. O relatório cobre essas duas verificações. Registre separadamente os demais critérios de release.
+
+```sh
+python -m scripts.release_artifact_rehearsal --backend-image rancho-backend:local --previous-console-image rancho-console:previous --candidate-console-image rancho-console:candidate
+```
+
 ## Aceite final
 
 Use um candidato identificado para autenticação/RBAC/streams, operação contextual, acessibilidade/performance, compatibilidade clássica, instalação nova, upgrade e recuperação/rollback completos. Registre limites/topologias. Configure canal privado de segurança antes de abrir o projeto. Mantenha [migração](migration.md) e [recuperação](recovery.md) vinculadas ao artefato; testes sintéticos não garantem migração universal.

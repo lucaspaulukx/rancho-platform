@@ -39,6 +39,7 @@ jobs:
           python3 scripts/docs_languages.py --require-complete
           python3 -m unittest discover -s tests -p test_docs_languages.py
           python3 -m unittest discover -s tests -p test_repository_layout.py
+          python3 -m unittest discover -s tests -p test_release_artifact_rehearsal.py
       - name: Check offline migration contracts
         run: |
           python3 -m venv "$RUNNER_TEMP/rancho-migration"
