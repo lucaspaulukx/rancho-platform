@@ -54,6 +54,10 @@ rm "$LIB/json-smart-1.3.1.jar"
 test -f "$LIB/snakeyaml-1.15.jar"
 rm "$LIB/snakeyaml-1.15.jar"
 install -m 0644 /lab/runtime-jars/yaml/snakeyaml-2.7.jar "$LIB/"
+# Spring JCL provides the Commons Logging API for the aligned Spring modules.
+test -f "$LIB/spring-core-4.3.2.RELEASE.jar"
+rm "$LIB"/spring-*.jar "$LIB/commons-logging-1.3.5.jar"
+install -m 0644 /lab/runtime-jars/spring/*.jar "$LIB/"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$ROOT/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java" >> /lab/sources
