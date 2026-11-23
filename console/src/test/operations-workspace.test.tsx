@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { OperationsPage } from '../pages/Operations';
 import type { Resource } from '../api';
+import { I18nProvider, useI18n } from '../i18n/provider';
 
 const fixture = vi.hoisted(() => ({
   project: { id: 'p1', name: 'Laboratório' },
@@ -138,6 +139,40 @@ afterEach(() => {
   fixture.readonly = false;
 });
 describe('Workspace unificado', () => {
+  it('keeps the active workload view and native action when changing language', async () => {
+    function SwitchLanguage() {
+      const { setLocale } = useI18n();
+      return <button onClick={() => setLocale('en-US')}>English</button>;
+    }
+    const router = createMemoryRouter([{ path: '/', element: <OperationsPage /> }], {
+      initialEntries: ['/?env=p1'],
+    });
+    render(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          preview: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: true,
+          detectBrowser: false,
+        }}
+      >
+        <SwitchLanguage />
+        <RouterProvider router={router} />
+      </I18nProvider>,
+    );
+    await userEvent.click(screen.getByRole('tab', { name: 'Containers' }));
+    await userEvent.click(screen.getByRole('button', { name: 'English' }));
+    expect(router.state.location.search).toContain('view=containers');
+    const panel = screen.getByRole('tabpanel', { name: 'Containers' });
+    await userEvent.click(within(panel).getByRole('button', { name: /Actions.*web-1/ }));
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Restart' }));
+    expect(screen.getByRole('dialog', { name: 'Operação do recurso' })).toHaveTextContent(
+      'restart',
+    );
+    router.dispose();
+  });
   it('oferece métricas no menu do serviço com flag ativa, inclusive para leitura, sem trocar a rota', async () => {
     fixture.config.modules.serviceMetrics = true;
     fixture.readonly = true;

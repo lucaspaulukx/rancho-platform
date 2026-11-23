@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Resource } from '../api';
+import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import { ResourceStream } from './ResourceStream';
 import { Button, Empty, Field, Modal } from './ui';
@@ -16,6 +17,7 @@ export function WorkloadStreams({
   onClose: () => void;
 }) {
   const app = useApp();
+  const { t } = useI18n();
   const choices = containers
     .filter(
       (value) => value.accountId === app.project?.id && !value.removed && value.actions?.[mode],
@@ -33,15 +35,15 @@ export function WorkloadStreams({
       <Modal
         open
         drawer
-        title={mode === 'logs' ? 'Logs do recurso' : 'Terminal do recurso'}
+        title={t(mode === 'logs' ? 'workloadStreams.logs' : 'workloadStreams.terminal')}
         onOpenChange={(value) => {
           if (!value) onClose();
         }}
-        footer={<Button onClick={onClose}>Fechar</Button>}
+        footer={<Button onClick={onClose}>{t('common.close')}</Button>}
       >
         <Empty
-          title="Nenhum container disponível"
-          description="O Rancher não disponibilizou esta operação para os containers deste recurso."
+          title={t('workloadStreams.emptyTitle')}
+          description={t('workloadStreams.emptyDescription')}
         />
       </Modal>
     );
@@ -54,10 +56,10 @@ export function WorkloadStreams({
       context={
         <div className="workload-stream-context">
           <p className="muted">
-            {parent.type === 'stack' ? 'Stack' : 'Serviço'}:{' '}
+            {t(parent.type === 'stack' ? 'workloadStreams.stack' : 'workloadStreams.service')}{' '}
             <strong>{parent.name || parent.id}</strong>
           </p>
-          <Field label="Container">
+          <Field label={t('workloadStreams.container')}>
             {(id) => (
               <select
                 id={id}
@@ -72,9 +74,7 @@ export function WorkloadStreams({
               </select>
             )}
           </Field>
-          <p className="muted">
-            Exibindo apenas o container selecionado. A troca encerra a conexão anterior.
-          </p>
+          <p className="muted">{t('workloadStreams.selectionHint')}</p>
         </div>
       }
     />

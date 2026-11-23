@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import type { Resource, Schema } from '../api';
 import { useApp } from '../state';
+import { useI18n } from '../i18n/provider';
 import { useSchemas, canManageResource } from '../hooks/useSchemas';
 import { useWorkloadInventory } from './Workloads';
 import { workloadTree, type ServiceNode } from '../workload-tree';
@@ -35,6 +36,7 @@ import {
 } from '../components/ui';
 import { ActionMenu } from '../components/ActionMenu';
 import {
+  operationActionLabel,
   operationCommands,
   operationContainers,
   type OperationCommand,
@@ -46,9 +48,11 @@ import {
   creationLabels,
   type CreationSelection,
 } from '../components/ResourceCreator';
-import { fieldLabel } from '../components/SchemaForm';
+import { enOperations } from '../i18n/domains/operations';
 import { commonBulkActions, resourceKey } from '../bulk-actions';
 import { BulkOperation, type BulkPlan } from '../components/BulkOperation';
+type CreationMessageKey = Extract<keyof typeof enOperations, `operations.creation.${string}`>;
+
 const ServiceTopology = lazy(() => import('../components/ServiceTopology'));
 
 export function OperationsPage({
@@ -57,6 +61,7 @@ export function OperationsPage({
   initialView?: 'stacks' | 'services' | 'containers';
 }) {
   const app = useApp();
+  const { t } = useI18n();
   const query = useWorkloadInventory();
   const schemas = useSchemas(true);
   const [params, setParams] = useSearchParams();
@@ -118,8 +123,8 @@ export function OperationsPage({
   if (!app.project)
     return (
       <Empty
-        title="Selecione um environment"
-        description="Escolha um environment autorizado na barra superior para operar seus recursos."
+        title={t('operations.selectEnvironment')}
+        description={t('operations.selectEnvironmentHint')}
       />
     );
   if (query.isPending || schemas.isPending) return <Loading />;
@@ -214,19 +219,24 @@ export function OperationsPage({
                       commonBulkActions([value], schemas.data || {}).includes('restart'),
                     )
                   : [];
-              return operationCommands(resource, schemas.data?.[resource.type], {
-                environment: app.project!.id,
-                observability: app.config.modules.observability,
-                metrics: app.config.modules.metrics,
-                serviceMetrics: serviceMetricsEnabled(app.config.modules),
-                containers,
-                containerWritable: canManageResource(schemas.data?.container),
-                createService: !!schemas.data?.service?.collectionMethods?.includes('POST'),
-                restartServices: restartable.length,
-                scaling: app.config.modules.workloadScaling,
-                serviceLinks: app.config.modules.serviceLinksEditor,
-                balancerRules: app.config.modules.balancerRulesEditor,
-              }).map((command) => ({
+              return operationCommands(
+                resource,
+                schemas.data?.[resource.type],
+                {
+                  environment: app.project!.id,
+                  observability: app.config.modules.observability,
+                  metrics: app.config.modules.metrics,
+                  serviceMetrics: serviceMetricsEnabled(app.config.modules),
+                  containers,
+                  containerWritable: canManageResource(schemas.data?.container),
+                  createService: !!schemas.data?.service?.collectionMethods?.includes('POST'),
+                  restartServices: restartable.length,
+                  scaling: app.config.modules.workloadScaling,
+                  serviceLinks: app.config.modules.serviceLinksEditor,
+                  balancerRules: app.config.modules.balancerRulesEditor,
+                },
+                t,
+              ).map((command) => ({
                 ...command,
                 onSelect: () => {
                   if (command.kind === 'logs' || command.kind === 'execute') {
@@ -255,7 +265,10 @@ export function OperationsPage({
         <div className="operation-expand-row">
           <button
             className="tree-toggle"
-            aria-label={`${expanded ? 'Recolher' : 'Expandir'} containers de ${node.resource.name || node.resource.id}`}
+            aria-label={t(
+              expanded ? 'operations.collapseContainers' : 'operations.expandContainers',
+              { name: node.resource.name || node.resource.id },
+            )}
             aria-expanded={expanded}
             aria-controls={`service-children-${node.resource.id}`}
             onClick={() => toggleService(node.resource.id)}
@@ -267,8 +280,11 @@ export function OperationsPage({
             'service',
             <span className="operation-count">
               {!indent &&
-                `${inventory.stacks.find((stack) => stack.id === node.resource.stackId)?.name || 'Sem stack'} · `}
-              {node.containers.length} containers · escala {String(node.resource.scale ?? '—')}
+                `${inventory.stacks.find((stack) => stack.id === node.resource.stackId)?.name || t('operations.noStack')} · `}
+              {t('operations.containerCount', {
+                count: node.containers.length,
+                scale: String(node.resource.scale ?? '—'),
+              })}
             </span>,
           )}
         </div>
@@ -277,9 +293,7 @@ export function OperationsPage({
             {node.containers.length ? (
               node.containers.map((container) => row(container, 'container'))
             ) : (
-              <p className="operation-empty">
-                Nenhum container neste serviço com os filtros atuais.
-              </p>
+              <p className="operation-empty">{t('operations.emptyService')}</p>
             )}
           </div>
         )}
@@ -290,8 +304,8 @@ export function OperationsPage({
     <>
       <PageHeader
         title={app.project.name}
-        eyebrow="OPERAÇÃO DO ENVIRONMENT"
-        description="Stacks, serviços e containers em uma única tela. Abra ações e detalhes sem sair do seu ambiente."
+        eyebrow={t('operations.eyebrow')}
+        description={t('operations.description')}
         action={
           <>
             {Object.keys(creationLabels).some((kind) =>
@@ -300,7 +314,7 @@ export function OperationsPage({
               <details className="creation-menu">
                 <summary className="button primary">
                   <Plus size={16} />
-                  Criar
+                  {t('operations.create')}
                 </summary>
                 <div className="creation-options">
                   {Object.entries(creationLabels)
@@ -314,7 +328,9 @@ export function OperationsPage({
                           setCreation({ kind });
                         }}
                       >
-                        {label}
+                        {Object.hasOwn(enOperations, `operations.creation.${kind}`)
+                          ? t(`operations.creation.${kind}` as CreationMessageKey)
+                          : label}
                       </button>
                     ))}
                 </div>
@@ -322,16 +338,16 @@ export function OperationsPage({
             )}
             <Button onClick={() => void query.refetch()} busy={query.isFetching}>
               <RefreshCw size={16} />
-              Atualizar
+              {t('operations.refresh')}
             </Button>
           </>
         }
       />
       <div className="operation-metrics">
         {[
-          [Layers3, inventory.stacks.length, 'stacks'],
-          [Network, inventory.services.length, 'serviços'],
-          [Box, inventory.containers.length, 'containers'],
+          [Layers3, inventory.stacks.length, t('operations.stackMetric')],
+          [Network, inventory.services.length, t('operations.serviceMetric')],
+          [Box, inventory.containers.length, t('operations.containerMetric')],
         ].map(([Icon, count, label]) => {
           const Symbol = Icon as typeof Box;
           return (
@@ -342,24 +358,24 @@ export function OperationsPage({
             </div>
           );
         })}
-        <span className="muted">Totais do environment · atualizados a cada 15s</span>
+        <span className="muted">{t('operations.totals')}</span>
       </div>
       <div className="operation-toolbar">
-        <Field label="Buscar na operação">
+        <Field label={t('operations.search')}>
           {(id) => (
             <input
               id={id}
               type="search"
               value={text}
               onChange={(event) => filter('q', event.target.value)}
-              placeholder="Stack, serviço, container, imagem ou ID…"
+              placeholder={t('operations.searchPlaceholder')}
             />
           )}
         </Field>
-        <Field label="Estado">
+        <Field label={t('operations.state')}>
           {(id) => (
             <select id={id} value={state} onChange={(event) => filter('state', event.target.value)}>
-              <option value="">Todos os estados</option>
+              <option value="">{t('operations.allStates')}</option>
               {states.map((value) => (
                 <option key={value} value={value}>
                   {value}
@@ -374,29 +390,31 @@ export function OperationsPage({
             checked={includeSystem}
             onChange={(event) => filter('system', event.target.checked ? 'true' : '')}
           />
-          Incluir infraestrutura
+          {t('operations.includeSystem')}
         </label>
       </div>
       {app.config.modules.contextActions && (
         <Tabs
-          labels={['Stacks', 'Serviços', 'Containers']}
+          labels={[t('operations.stacks'), t('operations.services'), t('operations.containers')]}
           selected={['stacks', 'services', 'containers'].indexOf(view)}
           onChange={(index) => filter('view', ['stacks', 'services', 'containers'][index])}
           idPrefix="operation-view"
           panelId="operation-workspace"
-          label="Visão da operação"
+          label={t('operations.view')}
         />
       )}
       <div className="operation-tree-tools">
         <span className="muted">
           <ListTree size={16} />
           {view === 'services'
-            ? `${visibleServices.length} serviços visíveis`
+            ? t('operations.visibleServices', { count: visibleServices.length })
             : view === 'containers'
-              ? `${visibleContainers.length} containers visíveis`
-              : `${tree?.stacks.length || 0} stacks visíveis`}
+              ? t('operations.visibleContainers', { count: visibleContainers.length })
+              : t('operations.visibleStacks', { count: tree?.stacks.length || 0 })}
           {!includeSystem &&
-            ` · ${inventory.stacks.filter((stack) => stack.system).length} de infraestrutura ocultas`}
+            t('operations.hiddenSystem', {
+              count: inventory.stacks.filter((stack) => stack.system).length,
+            })}
         </span>
         <Button
           variant="ghost"
@@ -405,7 +423,7 @@ export function OperationsPage({
             setExpandedServices(new Set(inventory.services.map((resource) => resource.id)));
           }}
         >
-          Expandir tudo
+          {t('operations.expandAll')}
         </Button>
         <Button
           variant="ghost"
@@ -414,11 +432,11 @@ export function OperationsPage({
             setExpandedServices(new Set());
           }}
         >
-          Recolher tudo
+          {t('operations.collapseAll')}
         </Button>
         <Button onClick={() => setTopology(true)}>
           <Network size={16} />
-          Topologia
+          {t('operations.topology')}
         </Button>
       </div>
       {noResults ? (
@@ -431,10 +449,7 @@ export function OperationsPage({
               : undefined
           }
         >
-          <Empty
-            title="Nenhum recurso neste filtro"
-            description="Revise a busca, o estado ou a opção de infraestrutura. Os recursos continuam restritos ao environment selecionado."
-          />
+          <Empty title={t('operations.empty')} description={t('operations.emptyHint')} />
         </div>
       ) : (
         <div
@@ -448,8 +463,8 @@ export function OperationsPage({
           }
         >
           {app.config.modules.bulkActions && !!selected.length && (
-            <section className="panel bulk-toolbar" aria-label="Ações em lote">
-              <strong>{selected.length} recursos selecionados · limite 100</strong>
+            <section className="panel bulk-toolbar" aria-label={t('operations.bulkActions')}>
+              <strong>{t('operations.selection', { count: selected.length })}</strong>
               {actions.map((action) => (
                 <Button
                   key={action}
@@ -457,16 +472,12 @@ export function OperationsPage({
                   onClick={() => setBatch({ action, resources: [...selected] })}
                 >
                   {action === 'remove' && <Trash2 size={16} />}
-                  {fieldLabel(action)} selecionados
+                  {t('operations.selectedAction', { action: operationActionLabel(t, action) })}
                 </Button>
               ))}
-              {!actions.length && (
-                <span className="muted">
-                  Os recursos selecionados não têm uma ação em comum disponível.
-                </span>
-              )}
+              {!actions.length && <span className="muted">{t('operations.noCommonAction')}</span>}
               <Button variant="ghost" onClick={() => setChecked(new Set())}>
-                Limpar seleção
+                {t('operations.clearSelection')}
               </Button>
             </section>
           )}
@@ -477,12 +488,17 @@ export function OperationsPage({
                 <section
                   className="operation-stack"
                   key={node.resource.id}
-                  aria-label={`Stack ${node.resource.name || node.resource.id}`}
+                  aria-label={t('operations.stackName', {
+                    name: node.resource.name || node.resource.id,
+                  })}
                 >
                   <div className="operation-expand-row stack-heading">
                     <button
                       className="tree-toggle"
-                      aria-label={`${expanded ? 'Recolher' : 'Expandir'} stack ${node.resource.name || node.resource.id}`}
+                      aria-label={t(
+                        expanded ? 'operations.collapseStack' : 'operations.expandStack',
+                        { name: node.resource.name || node.resource.id },
+                      )}
                       aria-expanded={expanded}
                       aria-controls={`stack-children-${node.resource.id}`}
                       onClick={() => toggleStack(node.resource.id)}
@@ -493,8 +509,8 @@ export function OperationsPage({
                       node.resource,
                       'stack',
                       <span className="operation-count">
-                        {node.services.length} serviços
-                        {node.resource.system ? ' · infraestrutura' : ''}
+                        {t('operations.serviceCount', { count: node.services.length })}
+                        {node.resource.system ? t('operations.system') : ''}
                       </span>,
                     )}
                   </div>
@@ -503,9 +519,7 @@ export function OperationsPage({
                       {node.services.map((node) => service(node))}
                       {node.containers.map((container) => row(container, 'container'))}
                       {!node.services.length && !node.containers.length && (
-                        <p className="operation-empty">
-                          Nenhum serviço ou container nesta stack com os filtros atuais.
-                        </p>
+                        <p className="operation-empty">{t('operations.emptyStack')}</p>
                       )}
                     </div>
                   )}
@@ -514,7 +528,7 @@ export function OperationsPage({
             })}
           {view === 'stacks' && !!tree!.services.length && (
             <section className="operation-stack">
-              <h2 className="operation-section-title">Serviços sem stack disponível</h2>
+              <h2 className="operation-section-title">{t('operations.orphanServices')}</h2>
               {tree!.services.map((node) => service(node, false))}
             </section>
           )}
@@ -522,18 +536,18 @@ export function OperationsPage({
             <section className="operation-stack">
               <h2 className="operation-section-title">
                 <Box size={19} />
-                Containers avulsos e outros vínculos
+                {t('operations.orphanContainers')}
               </h2>
               {tree!.containers.map((container) => row(container, 'container'))}
             </section>
           )}
           {view === 'services' && (
-            <section className="operation-stack" aria-label="Serviços do environment">
+            <section className="operation-stack" aria-label={t('operations.environmentServices')}>
               {visibleServices.map((node) => service(node, false))}
             </section>
           )}
           {view === 'containers' && (
-            <section className="operation-stack" aria-label="Containers do environment">
+            <section className="operation-stack" aria-label={t('operations.environmentContainers')}>
               {visibleContainers.map((container) =>
                 row(
                   container,
@@ -545,7 +559,7 @@ export function OperationsPage({
                         stackContents(stack, inventory).containers.some(
                           (value) => value.id === container.id,
                         ),
-                    )?.name || 'Container avulso'}
+                    )?.name || t('operations.standaloneContainer')}
                   </span>,
                 ),
               )}
@@ -628,6 +642,7 @@ function OperationRow({
   commands?: (OperationCommand & { onSelect: () => void })[];
 }) {
   const app = useApp();
+  const { t } = useI18n();
   const Icon = kind === 'stack' ? Layers3 : kind === 'service' ? Network : Box;
   const quickActions = [
     ['start', Play],
@@ -645,7 +660,7 @@ function OperationRow({
           className="operation-selection"
           type="checkbox"
           disabled={selectionDisabled}
-          aria-label={`Selecionar ${resource.name || resource.id}`}
+          aria-label={t('operations.selectResource', { name: resource.name || resource.id })}
           checked={selected || false}
           onChange={onToggleSelection}
         />
@@ -670,7 +685,10 @@ function OperationRow({
       </div>
       <div className="operation-row-actions">
         {commands ? (
-          <ActionMenu label={`Ações de ${resource.name || resource.id}`} actions={commands} />
+          <ActionMenu
+            label={t('operations.resourceActions', { name: resource.name || resource.id })}
+            actions={commands}
+          />
         ) : (
           <>
             {canManageResource(schema) &&
@@ -680,8 +698,11 @@ function OperationRow({
                   <Button
                     key={name}
                     variant="ghost"
-                    title={fieldLabel(name)}
-                    aria-label={`${fieldLabel(name)} ${resource.name || resource.id}`}
+                    title={operationActionLabel(t, name)}
+                    aria-label={t('operations.resourceAction', {
+                      action: operationActionLabel(t, name),
+                      name: resource.name || resource.id,
+                    })}
                     onClick={() => onOpen(resource, 'action', name)}
                   >
                     <ActionIcon size={16} />
@@ -690,8 +711,8 @@ function OperationRow({
             {app.config.modules.observability && resource.actions?.logs && (
               <Button
                 variant="ghost"
-                title="Ver logs"
-                aria-label={`Ver logs de ${resource.name || resource.id}`}
+                title={t('operations.logs')}
+                aria-label={t('operations.resourceLogs', { name: resource.name || resource.id })}
                 onClick={() => onOpen(resource, 'logs')}
               >
                 <ScrollText size={16} />
@@ -702,8 +723,10 @@ function OperationRow({
               resource.actions?.execute && (
                 <Button
                   variant="ghost"
-                  title="Abrir terminal"
-                  aria-label={`Abrir terminal de ${resource.name || resource.id}`}
+                  title={t('operations.terminal')}
+                  aria-label={t('operations.resourceTerminal', {
+                    name: resource.name || resource.id,
+                  })}
                   onClick={() => onOpen(resource, 'execute')}
                 >
                   <TerminalSquare size={16} />
@@ -712,8 +735,10 @@ function OperationRow({
             {onCreateService && (
               <Button
                 variant="ghost"
-                title="Adicionar serviço nesta stack"
-                aria-label={`Adicionar serviço em ${resource.name || resource.id}`}
+                title={t('operations.addService')}
+                aria-label={t('operations.addServiceToStack', {
+                  name: resource.name || resource.id,
+                })}
                 onClick={onCreateService}
               >
                 <Plus size={16} />
@@ -722,9 +747,9 @@ function OperationRow({
             <Button
               variant="ghost"
               onClick={() => onOpen(resource)}
-              aria-label={`Gerenciar ${resource.name || resource.id}`}
+              aria-label={t('operations.manageResource', { name: resource.name || resource.id })}
             >
-              Gerenciar
+              {t('operations.manage')}
             </Button>
           </>
         )}

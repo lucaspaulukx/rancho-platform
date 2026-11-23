@@ -7,6 +7,8 @@ import { enDevices, ptDevices } from './domains/devices';
 import { enDeviceUpgrade, ptDeviceUpgrade } from './domains/device-upgrade';
 import { enDeviceUpgradeForm, ptDeviceUpgradeForm } from './domains/device-upgrade-form';
 import { enResourceDetails, ptResourceDetails } from './domains/resource-details';
+import { enWorkloadStreams, ptWorkloadStreams } from './domains/workload-streams';
+import { enOperations, ptOperations } from './domains/operations';
 
 // Initial shared domain only. These catalogs do not represent full interface coverage.
 export const englishMessages = {
@@ -18,6 +20,8 @@ export const englishMessages = {
   ...enDeviceUpgrade,
   ...enDeviceUpgradeForm,
   ...enResourceDetails,
+  ...enWorkloadStreams,
+  ...enOperations,
   'common.cancel': 'Cancel',
   'common.close': 'Close',
   'common.save': 'Save',
@@ -60,6 +64,8 @@ export const portugueseMessages = {
   ...ptDeviceUpgrade,
   ...ptDeviceUpgradeForm,
   ...ptResourceDetails,
+  ...ptWorkloadStreams,
+  ...ptOperations,
   'common.cancel': 'Cancelar',
   'common.close': 'Fechar',
   'common.save': 'Salvar',
