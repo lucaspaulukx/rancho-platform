@@ -286,7 +286,7 @@ it('translates the open service topology without changing the stack or fetching 
     expect(stack).toHaveValue('st1');
     expect(graph).toHaveAccessibleName('Topologie des services de l’environnement');
     expect(
-      within(graph).getByRole('button', { name: 'Ajuster la topologie à la vue' }),
+      await within(graph).findByRole('button', { name: 'Ajuster la topologie à la vue' }),
     ).toBeVisible();
     expect(transport).toHaveBeenCalledTimes(1);
   } finally {
