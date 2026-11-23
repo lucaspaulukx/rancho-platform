@@ -1,5 +1,18 @@
 import type { Schema, Resource } from './api';
+import { ptCatalogRepositories } from './i18n/domains/catalog-repositories';
 import { settingSnapshot, prepareSetting, type SettingSnapshot } from './server-settings';
+
+type CatalogRepositoryValidationKey = Extract<
+  keyof typeof ptCatalogRepositories,
+  `catalogRepositories.validation.${string}`
+>;
+
+export class CatalogRepositoryValidationError extends Error {
+  constructor(readonly key: CatalogRepositoryValidationKey) {
+    super(ptCatalogRepositories[key]);
+  }
+}
+
 export interface RepositoryDraft {
   key: string;
   original: string | null;
@@ -19,19 +32,19 @@ export const repositoryNameValid = (v: string) =>
   !['__proto__', 'constructor', 'prototype'].includes(v);
 export function repositoryDocument(row: Resource): RepositoryDocument {
   const setting = settingSnapshot(row);
-  if (setting.name !== 'catalog.url') throw new Error('Configuração de catálogo inválida.');
+  if (setting.name !== 'catalog.url')
+    throw new CatalogRepositoryValidationError('catalogRepositories.validation.configuration');
   const value = setting.value ?? setting.activeValue ?? '';
+  if (value.length > 65535)
+    throw new CatalogRepositoryValidationError('catalogRepositories.validation.jsonRequired');
   let doc: unknown;
   try {
-    if (value.length > 65535) throw new Error();
     doc = JSON.parse(value);
   } catch {
-    throw new Error(
-      'Este editor exige catalog.url no formato JSON. Preserve o valor e use a configuração do servidor para formatos legados.',
-    );
+    throw new CatalogRepositoryValidationError('catalogRepositories.validation.jsonRequired');
   }
   if (!record(doc) || !record(doc.catalogs) || Object.keys(doc.catalogs).length > 1000)
-    throw new Error('Documento de catálogo não suportado.');
+    throw new CatalogRepositoryValidationError('catalogRepositories.validation.document');
   const entries = Object.entries(doc.catalogs).map(([name, value]) => {
     if (
       !repositoryNameValid(name) ||
@@ -39,7 +52,7 @@ export function repositoryDocument(row: Resource): RepositoryDocument {
       typeof value.url !== 'string' ||
       (value.branch != null && typeof value.branch !== 'string')
     )
-      throw new Error('Entrada de catálogo não suportada.');
+      throw new CatalogRepositoryValidationError('catalogRepositories.validation.entry');
     return {
       key: 'existing:' + name,
       original: name,
@@ -64,16 +77,17 @@ export function repositoryMetadata(doc: RepositoryDocument) {
 export function repositoryValue(before: RepositoryDocument, entries: RepositoryDraft[]) {
   const names = new Set<string>(),
     originals = new Set<string>();
-  if (entries.length > 1000) throw new Error('Quantidade de repositórios excedida.');
+  if (entries.length > 1000)
+    throw new CatalogRepositoryValidationError('catalogRepositories.validation.limit');
   const catalogs = Object.fromEntries(
     entries.map((row) => {
       if (!repositoryNameValid(row.name) || names.has(row.name))
-        throw new Error('Use nomes únicos, sem espaços ou chaves reservadas.');
+        throw new CatalogRepositoryValidationError('catalogRepositories.validation.uniqueNames');
       names.add(row.name);
       const existing =
         row.original !== null ? before.entries.find((v) => v.name === row.original) : undefined;
       if (row.original !== null && (!existing || originals.has(row.original)))
-        throw new Error('Reabra o editor de repositórios.');
+        throw new CatalogRepositoryValidationError('catalogRepositories.validation.reopen');
       if (row.original !== null) originals.add(row.original);
       validateRepositoryLocation(row.url, row.branch, existing?.url);
       const extra = existing
@@ -97,7 +111,7 @@ export function repositoryPayload(
   allowEmpty: boolean,
 ) {
   if (!entries.length && !allowEmpty)
-    throw new Error('Confirme a remoção de todos os repositórios globais.');
+    throw new CatalogRepositoryValidationError('catalogRepositories.validation.confirmEmpty');
   return prepareSetting(
     schema,
     before.setting,
@@ -113,7 +127,7 @@ export function validateRepositoryLocation(url: string, branch: string, original
     try {
       parsed = new URL(url);
     } catch {
-      throw new Error('URL do repositório inválida.');
+      throw new CatalogRepositoryValidationError('catalogRepositories.validation.url');
     }
     if (
       !['http:', 'https:', 'ssh:', 'git:'].includes(parsed.protocol) ||
@@ -121,10 +135,10 @@ export function validateRepositoryLocation(url: string, branch: string, original
       parsed.hash ||
       (['http:', 'https:'].includes(parsed.protocol) && parsed.username)
     )
-      throw new Error('Use URL Git, SSH, HTTP ou HTTPS sem senha, fragmento ou credenciais HTTP.');
+      throw new CatalogRepositoryValidationError('catalogRepositories.validation.urlParts');
   }
   if (!url || url.length > 8192 || url.includes('\0'))
-    throw new Error('URL do repositório inválida.');
+    throw new CatalogRepositoryValidationError('catalogRepositories.validation.url');
   if (
     branch.length > 255 ||
     /[\x00-\x20\x7f~^:?*\[\\]/.test(branch) ||
@@ -138,5 +152,5 @@ export function validateRepositoryLocation(url: string, branch: string, original
     branch.endsWith('/') ||
     branch.includes('@{')
   )
-    throw new Error('Branch inválida. Use um nome de referência Git.');
+    throw new CatalogRepositoryValidationError('catalogRepositories.validation.branch');
 }

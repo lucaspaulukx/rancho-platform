@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Resource } from '../api';
+import { CatalogRepositoryValidationError } from '../catalog-repositories';
 import {
   environmentRepositoryMetadata,
   environmentRepositoryPath,
@@ -82,7 +83,7 @@ describe('Fontes de catálogo por environment', () => {
   it('rejeita branch malformada, tipo não Cattle e nome/path malicioso', () => {
     expect(() =>
       prepareEnvironmentRepository('1a417', { ...draft(), branch: '../main' }, []),
-    ).toThrow('Branch');
+    ).toThrow(new CatalogRepositoryValidationError('catalogRepositories.validation.branch'));
     expect(() => prepareEnvironmentRepository('1a417', { ...draft(), kind: 'helm' }, [])).toThrow(
       'nativo',
     );

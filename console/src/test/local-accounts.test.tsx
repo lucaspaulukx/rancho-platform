@@ -14,6 +14,8 @@ import {
   sessionAccountId,
 } from '../local-accounts';
 import { LocalAccountPanel } from '../components/LocalAccountPanel';
+import { I18nProvider } from '../i18n/provider';
+import type { Locale } from '../i18n/locales';
 const state = vi.hoisted(() => ({ admin: true, enabled: true }));
 vi.mock('../state', () => ({
   useApp: () => ({
@@ -100,12 +102,24 @@ function mount(mode: 'create' | 'password' = 'create') {
       ),
     },
   ]);
-  render(
+  const view = (defaultLocale: Locale) => (
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale,
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: false,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <RouterProvider router={router} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
-  return { client, close };
+  const { rerender } = render(view('pt-BR'));
+  return { client, close, changeLocale: (locale: Locale) => rerender(view(locale)) };
 }
 describe('Contas locais: fronteiras de privilégio e credencial', () => {
   it('resolve a conta da sessão GET nativa sem confundir identidade externa e ID interno', () => {
@@ -224,6 +238,56 @@ describe('Contas locais: fronteiras de privilégio e credencial', () => {
       ),
     ).not.toContain('synthetic-private');
   });
+  it.each([
+    {
+      login: 'invalid:login',
+      portuguese: 'Informe login sem espaços/dois pontos e uma senha.',
+      english: 'Enter a login without spaces or colons and a password.',
+    },
+    {
+      login: 'valid-login',
+      portuguese: 'Nova senha local aceita até 4 caracteres.',
+      english: 'New local password accepts up to 4 characters.',
+    },
+  ])(
+    'retranslates an invalid credential without sending the draft ($login)',
+    async ({ login, portuguese, english }) => {
+      vi.mocked(allPages).mockResolvedValueOnce([
+        accountSchema,
+        {
+          ...passwordSchema,
+          resourceFields: {
+            ...passwordSchema.resourceFields,
+            secretValue: { ...passwordSchema.resourceFields.secretValue, maxLength: 4 },
+          },
+        },
+      ]);
+      const user = userEvent.setup();
+      const { client, changeLocale } = mount();
+      const password = 'unsubmitted-fixture-password';
+      await user.type(await screen.findByLabelText('Nome da conta'), 'Fixture');
+      const loginInput = screen.getByLabelText('Login local');
+      const passwordInput = screen.getByLabelText('Nova senha local');
+      await user.type(loginInput, login);
+      await user.type(passwordInput, password);
+      await user.type(screen.getByLabelText('Confirmar senha local'), password);
+      await user.click(screen.getByRole('button', { name: 'Revisar alterações' }));
+      await user.click(screen.getByRole('button', { name: 'Confirmar' }));
+      expect(await screen.findByText(portuguese)).toBeVisible();
+
+      changeLocale('en-US');
+      expect(screen.getByText(english)).toBeVisible();
+      expect(loginInput).toHaveValue(login);
+      expect(passwordInput).toHaveAttribute('type', 'password');
+      expect(passwordInput).toHaveValue(password);
+      expect(screen.queryByText(password)).not.toBeInTheDocument();
+      expect(vi.mocked(api).mock.calls.some(([, body]) => !!body)).toBe(false);
+      const mutation = client.getMutationCache().getAll()[0].state;
+      expect(JSON.stringify({ ...mutation, error: mutation.error?.message })).not.toContain(
+        password,
+      );
+    },
+  );
   it('não cria senha local implicitamente para uma identidade sem credencial', async () => {
     const user = userEvent.setup();
     mount('password');

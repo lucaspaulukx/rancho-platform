@@ -1,5 +1,20 @@
 import type { Resource } from './api';
 import { safeApiUrl } from './api';
+import { ptAuditPage } from './i18n/domains/audit-page';
+
+export class AuditError extends Error {
+  constructor(
+    readonly key:
+      | 'auditPage.invalidResponse'
+      | 'auditPage.reviewFilters'
+      | 'auditPage.invalidFilter'
+      | 'auditPage.invalidPage'
+      | 'auditPage.pageOutOfScope',
+  ) {
+    super(ptAuditPage[key]);
+  }
+}
+
 export interface AuditEvent {
   id: string;
   created: string;
@@ -55,18 +70,21 @@ export function auditQuery(filters: AuditFilters) {
       !identifier(value.trim()) ||
       (field === 'authenticatedAsAccountId' && !/^1a[1-9]\d*$/.test(value.trim()))
     )
-      throw new Error(
-        'Use identificadores válidos de evento/recurso e uma conta no formato 1a123.',
-      );
+      throw new AuditError('auditPage.invalidFilter');
     params.set(field, value.trim());
   }
   return '/v2-beta/auditlogs?' + params.toString();
 }
 export function auditNext(value: unknown) {
   if (!value) return null;
-  if (typeof value !== 'string') throw new Error('Paginação de auditoria inválida.');
-  const path = safeApiUrl(value);
+  if (typeof value !== 'string') throw new AuditError('auditPage.invalidPage');
+  let path: string;
+  try {
+    path = safeApiUrl(value);
+  } catch {
+    throw new AuditError('auditPage.invalidPage');
+  }
   if (new URL(path, location.origin).pathname !== '/v2-beta/auditlogs')
-    throw new Error('Paginação de auditoria fora do recurso autorizado.');
+    throw new AuditError('auditPage.pageOutOfScope');
   return path;
 }

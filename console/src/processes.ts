@@ -1,4 +1,23 @@
 import { safeApiUrl, type Resource, type Schema } from './api';
+import { ptProcesses } from './i18n/domains/processes';
+
+export class ProcessError extends Error {
+  constructor(
+    readonly key:
+      | 'processes.invalidResponse'
+      | 'processes.replayUnavailable'
+      | 'processes.reviewFilters'
+      | 'processes.invalidFilter'
+      | 'processes.invalidState'
+      | 'processes.invalidPage'
+      | 'processes.pageOutOfScope'
+      | 'processes.replayChanged'
+      | 'processes.recordChanged',
+  ) {
+    super(ptProcesses[key]);
+  }
+}
+
 export interface ProcessRecord {
   id: string;
   processName: string;
@@ -56,8 +75,7 @@ export function processQuery(f: ProcessFilters) {
     ['resourceId', f.id],
   ]) {
     if (!value.trim()) continue;
-    if (!identifier(value.trim()))
-      throw new Error('Use identificadores válidos nos filtros de processo e recurso.');
+    if (!identifier(value.trim())) throw new ProcessError('processes.invalidFilter');
     p.set(key, value.trim());
   }
   if (f.state === 'running') {
@@ -67,15 +85,20 @@ export function processQuery(f: ProcessFilters) {
     p.set('runningProcessServerId_null', 'true');
     p.set('endTime_null', 'true');
   } else if (f.state === 'completed') p.set('endTime_notnull', 'true');
-  else if (f.state !== 'all') throw new Error('Situação de processo inválida.');
+  else if (f.state !== 'all') throw new ProcessError('processes.invalidState');
   return '/v2-beta/processinstances?' + p.toString();
 }
 export function processNext(value: unknown) {
   if (!value) return null;
-  if (typeof value !== 'string') throw new Error('Paginação de processos inválida.');
-  const path = safeApiUrl(value);
+  if (typeof value !== 'string') throw new ProcessError('processes.invalidPage');
+  let path: string;
+  try {
+    path = safeApiUrl(value);
+  } catch {
+    throw new ProcessError('processes.invalidPage');
+  }
   if (new URL(path, location.origin).pathname !== '/v2-beta/processinstances')
-    throw new Error('Paginação fora da coleção de processos.');
+    throw new ProcessError('processes.pageOutOfScope');
   return path;
 }
 export function processReplayTarget(schema: Schema | undefined, v: ProcessRecord) {
@@ -103,7 +126,7 @@ export function processReplayTarget(schema: Schema | undefined, v: ProcessRecord
 }
 export function prepareReplay(schema: Schema, before: ProcessRecord, fresh: ProcessRecord) {
   const target = processReplayTarget(schema, fresh);
-  if (!target) throw new Error('O replay não está mais disponível.');
+  if (!target) throw new ProcessError('processes.replayChanged');
   if (
     [
       'id',
@@ -120,6 +143,6 @@ export function prepareReplay(schema: Schema, before: ProcessRecord, fresh: Proc
       'runningProcessServerId',
     ].some((k) => before[k as keyof ProcessRecord] !== fresh[k as keyof ProcessRecord])
   )
-    throw new Error('O processo mudou. Atualize e revise novamente.');
+    throw new ProcessError('processes.recordChanged');
   return target;
 }

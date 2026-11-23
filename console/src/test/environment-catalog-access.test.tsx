@@ -5,7 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api, ApiError } from '../api';
 import { environmentCatalogWriter } from '../environment-access';
-import { useEnvironmentCatalogAccess } from '../hooks/useEnvironmentCatalogAccess';
+import {
+  EnvironmentCatalogAccessError,
+  useEnvironmentCatalogAccess,
+} from '../hooks/useEnvironmentCatalogAccess';
 const state = vi.hoisted(() => ({
   admin: false,
   delegated: true,
@@ -52,7 +55,7 @@ beforeEach(() => {
     } as never;
   });
 });
-function Gate() {
+function Gate({ onError }: { onError?: (error: unknown) => void }) {
   const access = useEnvironmentCatalogAccess(),
     [result, setResult] = useState('');
   return (
@@ -62,7 +65,10 @@ function Gate() {
           onClick={() =>
             void access.check(new AbortController().signal).then(
               () => setResult('allowed'),
-              (error) => setResult(error.message),
+              (error) => {
+                onError?.(error);
+                setResult(error.message);
+              },
             )
           }
         >
@@ -73,11 +79,11 @@ function Gate() {
     </>
   );
 }
-function mount() {
+function mount(onError?: (error: unknown) => void) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <Gate />
+      <Gate onError={onError} />
     </QueryClientProvider>,
   );
   return client;
@@ -154,7 +160,8 @@ describe('Delegação de fontes por environment', () => {
   });
   it('erro ao revalidar não expõe payload privado', async () => {
     const user = userEvent.setup();
-    mount();
+    const onError = vi.fn();
+    mount(onError);
     const button = await screen.findByRole('button', { name: 'Editar fonte' });
     state.fail = true;
     await user.click(button);
@@ -162,5 +169,10 @@ describe('Delegação de fontes por environment', () => {
       await screen.findByText('Não foi possível validar seu acesso às fontes (HTTP 403).'),
     ).toBeVisible();
     expect(screen.queryByText('private backend payload')).not.toBeInTheDocument();
+    expect(onError).toHaveBeenCalledWith(expect.any(EnvironmentCatalogAccessError));
+    expect(onError.mock.calls[0][0].failure).toEqual({
+      key: 'environmentCatalogs.access.http',
+      status: 403,
+    });
   });
 });

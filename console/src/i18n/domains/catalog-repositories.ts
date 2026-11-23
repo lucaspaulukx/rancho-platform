@@ -48,6 +48,19 @@ export const enCatalogRepositories = {
   'catalogRepositories.configurationUnavailable': 'Configuration unavailable.',
   'catalogRepositories.reopen': 'Reopen the editor.',
   'catalogRepositories.retry': 'Try again',
+  'catalogRepositories.validation.configuration': 'Invalid catalog configuration.',
+  'catalogRepositories.validation.jsonRequired':
+    'This editor requires catalog.url in JSON format. Keep the value and use server settings for legacy formats.',
+  'catalogRepositories.validation.document': 'Unsupported catalog document.',
+  'catalogRepositories.validation.entry': 'Unsupported catalog entry.',
+  'catalogRepositories.validation.limit': 'Too many repositories.',
+  'catalogRepositories.validation.uniqueNames': 'Use unique names without spaces or reserved keys.',
+  'catalogRepositories.validation.reopen': 'Reopen the repository editor.',
+  'catalogRepositories.validation.confirmEmpty': 'Confirm removal of all global repositories.',
+  'catalogRepositories.validation.url': 'Invalid repository URL.',
+  'catalogRepositories.validation.urlParts':
+    'Use a Git, SSH, HTTP, or HTTPS URL without a password, fragment, or HTTP credentials.',
+  'catalogRepositories.validation.branch': 'Invalid branch. Use a Git reference name.',
 } as const;
 
 export const ptCatalogRepositories = {
@@ -101,4 +114,19 @@ export const ptCatalogRepositories = {
   'catalogRepositories.configurationUnavailable': 'Configuração indisponível.',
   'catalogRepositories.reopen': 'Reabra o editor.',
   'catalogRepositories.retry': 'Tentar novamente',
+  'catalogRepositories.validation.configuration': 'Configuração de catálogo inválida.',
+  'catalogRepositories.validation.jsonRequired':
+    'Este editor exige catalog.url no formato JSON. Preserve o valor e use a configuração do servidor para formatos legados.',
+  'catalogRepositories.validation.document': 'Documento de catálogo não suportado.',
+  'catalogRepositories.validation.entry': 'Entrada de catálogo não suportada.',
+  'catalogRepositories.validation.limit': 'Quantidade de repositórios excedida.',
+  'catalogRepositories.validation.uniqueNames':
+    'Use nomes únicos, sem espaços ou chaves reservadas.',
+  'catalogRepositories.validation.reopen': 'Reabra o editor de repositórios.',
+  'catalogRepositories.validation.confirmEmpty':
+    'Confirme a remoção de todos os repositórios globais.',
+  'catalogRepositories.validation.url': 'URL do repositório inválida.',
+  'catalogRepositories.validation.urlParts':
+    'Use URL Git, SSH, HTTP ou HTTPS sem senha, fragmento ou credenciais HTTP.',
+  'catalogRepositories.validation.branch': 'Branch inválida. Use um nome de referência Git.',
 } as const;

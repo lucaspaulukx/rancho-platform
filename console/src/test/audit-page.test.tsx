@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider, useI18n } from '../i18n/provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Audit } from '../pages/Audit';
 import { api } from '../api';
@@ -32,17 +33,38 @@ vi.mock('../api', async () => ({
     pagination: path.includes('marker') ? {} : { next: '/v2-beta/auditlogs?marker=100' },
   })),
 }));
-function mount() {
+function SwitchLanguage() {
+  const { setLocale } = useI18n();
+  return <button onClick={() => setLocale('en-US')}>English</button>;
+}
+function mount(localized = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <Audit />
+      <I18nProvider
+        policy={
+          localized
+            ? {
+                enabled: true,
+                preview: true,
+                defaultLocale: 'pt-BR',
+                availableLocales: ['pt-BR', 'en-US'],
+                selectable: true,
+                detectBrowser: false,
+              }
+            : undefined
+        }
+      >
+        {localized && <SwitchLanguage />}
+        <Audit />
+      </I18nProvider>
     </QueryClientProvider>,
   );
   return client;
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.removeItem('rancho.console.locale.anonymous');
   state.admin = true;
   state.enabled = true;
 });
@@ -73,7 +95,7 @@ describe('Tela de auditoria', () => {
     );
   });
   it('valida filtros sem disparar request inválido e reinicia paginação ao aplicar', async () => {
-    mount();
+    mount(true);
     const user = userEvent.setup();
     await screen.findByRole('button', { name: 'Detalhes do evento 1al1' });
     await user.type(screen.getByLabelText('Filtrar por conta autenticada'), 'bad-account');
@@ -81,10 +103,18 @@ describe('Tela de auditoria', () => {
     await screen.findByText(
       'Use identificadores válidos de evento/recurso e uma conta no formato 1a123.',
     );
+    const input = screen.getByLabelText('Filtrar por conta autenticada');
+    fireEvent.click(screen.getByText('English'));
+    expect(
+      screen.getByText(
+        'Use valid event and resource identifiers and an account in the 1a123 format.',
+      ),
+    ).toBeInTheDocument();
+    expect(input).toHaveValue('bad-account');
     expect(api).toHaveBeenCalledTimes(1);
-    await user.clear(screen.getByLabelText('Filtrar por conta autenticada'));
-    await user.type(screen.getByLabelText('Filtrar por conta autenticada'), '1a1');
-    await user.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
+    await user.clear(input);
+    await user.type(input, '1a1');
+    await user.click(screen.getByRole('button', { name: 'Apply filters' }));
     await waitFor(() =>
       expect(api).toHaveBeenLastCalledWith(
         expect.stringContaining('authenticatedAsAccountId=1a1'),

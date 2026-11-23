@@ -1,4 +1,3 @@
-/** Environment catalog UI. Native values and helper validation remain unchanged. */
 export const enEnvironmentCatalogs = {
   'environmentCatalogs.title': 'Environment repositories',
   'environmentCatalogs.close': 'Close',
@@ -49,6 +48,19 @@ export const enEnvironmentCatalogs = {
   'environmentCatalogs.error.unavailable': 'Repository unavailable in this environment.',
   'environmentCatalogs.error.reopen': 'Reopen the editor.',
   'environmentCatalogs.error.http': 'Catalog operation was not completed (HTTP {status}).',
+  'environmentCatalogs.access.disabled': 'Catalog source administration is disabled.',
+  'environmentCatalogs.access.identityChanged': 'The session identity changed.',
+  'environmentCatalogs.access.denied':
+    'Your access does not allow managing sources in this environment.',
+  'environmentCatalogs.access.http': 'Could not verify access to catalog sources (HTTP {status}).',
+  'environmentCatalogs.validation.configuration':
+    'No configuration is available for this repository.',
+  'environmentCatalogs.validation.name': 'Unsupported repository name.',
+  'environmentCatalogs.validation.environment': 'Invalid environment.',
+  'environmentCatalogs.validation.changed': 'The repository changed. Reopen the editor.',
+  'environmentCatalogs.validation.readOnly': 'This repository type is available for viewing only.',
+  'environmentCatalogs.validation.duplicate': 'A repository with this name already exists.',
+  'environmentCatalogs.validation.native': 'Choose a native Cattle catalog.',
 } as const;
 export const ptEnvironmentCatalogs = {
   'environmentCatalogs.title': 'Repositórios do environment',
@@ -100,4 +112,17 @@ export const ptEnvironmentCatalogs = {
   'environmentCatalogs.error.unavailable': 'Repositório indisponível neste environment.',
   'environmentCatalogs.error.reopen': 'Reabra o editor.',
   'environmentCatalogs.error.http': 'Operação de catálogo não concluída (HTTP {status}).',
+  'environmentCatalogs.access.disabled': 'A administração de fontes está desativada.',
+  'environmentCatalogs.access.identityChanged': 'A identidade da sessão mudou.',
+  'environmentCatalogs.access.denied': 'Seu acesso não permite gerenciar fontes neste environment.',
+  'environmentCatalogs.access.http':
+    'Não foi possível validar seu acesso às fontes (HTTP {status}).',
+  'environmentCatalogs.validation.configuration': 'Repositório sem configuração disponível.',
+  'environmentCatalogs.validation.name': 'Nome de repositório não suportado.',
+  'environmentCatalogs.validation.environment': 'Environment inválido.',
+  'environmentCatalogs.validation.changed': 'O repositório mudou. Reabra o editor.',
+  'environmentCatalogs.validation.readOnly':
+    'Este tipo de repositório está disponível apenas para consulta.',
+  'environmentCatalogs.validation.duplicate': 'Já existe um repositório com este nome.',
+  'environmentCatalogs.validation.native': 'Escolha um catálogo nativo Cattle.',
 } as const satisfies Record<keyof typeof enEnvironmentCatalogs, string>;

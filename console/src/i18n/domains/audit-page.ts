@@ -33,6 +33,10 @@ export const enAuditPage = {
   'auditPage.httpCode': 'HTTP code',
   'auditPage.invalidResponse': 'Invalid audit response.',
   'auditPage.reviewFilters': 'Review the filters.',
+  'auditPage.invalidFilter':
+    'Use valid event and resource identifiers and an account in the 1a123 format.',
+  'auditPage.invalidPage': 'Invalid audit pagination.',
+  'auditPage.pageOutOfScope': 'The next audit page is outside the authorized resource.',
   'auditPage.eventDetailsLabel': 'Details for event {event}',
   'auditPage.page': 'Page {page}',
 } as const;
@@ -70,6 +74,10 @@ export const ptAuditPage = {
   'auditPage.httpCode': 'Código HTTP',
   'auditPage.invalidResponse': 'Resposta de auditoria inválida.',
   'auditPage.reviewFilters': 'Revise os filtros.',
+  'auditPage.invalidFilter':
+    'Use identificadores válidos de evento/recurso e uma conta no formato 1a123.',
+  'auditPage.invalidPage': 'Paginação de auditoria inválida.',
+  'auditPage.pageOutOfScope': 'Paginação de auditoria fora do recurso autorizado.',
   'auditPage.eventDetailsLabel': 'Detalhes do evento {event}',
   'auditPage.page': 'Página {page}',
 } as const satisfies Record<keyof typeof enAuditPage, string>;
