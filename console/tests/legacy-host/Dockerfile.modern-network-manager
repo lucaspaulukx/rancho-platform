@@ -1,0 +1,27 @@
+FROM docker:29.9.2-cli@sha256:5e6baf67325a79f64ed3bed6863954d5e05d0f3d4e57cbdb14809346814bbfdb AS docker-cli
+FROM golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 AS build
+ENV GO111MODULE=off GOPATH=/go CGO_ENABLED=0
+WORKDIR /go/src/github.com/rancher/plugin-manager
+ADD --checksum=sha256:dbb371130dac9d6e3684d253e4c8e599ccf40d090c53aeee9d422d1c0ce2f995 https://codeload.github.com/rancher/plugin-manager/tar.gz/6b98f4dae9fe30575e9998cf530964341c8c3738 /tmp/plugin-manager.tar.gz
+COPY network-manager-docker-api.patch /tmp/
+RUN --network=none tar -xzf /tmp/plugin-manager.tar.gz --strip-components=1 && \
+    git apply --unidiff-zero /tmp/network-manager-docker-api.patch && \
+    go test -vet=off -run 'Test(ParseOneConntrackEntry|ParseMultipleEntries|GetMismatchDNATEntries|ConditionsMetToWatch)$' ./conntracksync/conntrack ./routesync && \
+    go build -trimpath -buildvcs=false -ldflags="-X main.VERSION=v0.7.22" -o /out/bin/plugin-manager . && \
+    go build -trimpath -buildvcs=false -o /out/bin/oldvethsync ./vethsync/oldvethsync && \
+    /out/bin/plugin-manager --version && \
+    mkdir -p /out/licenses && \
+    find . -type f \( -iname '*license*' -o -iname 'notice*' -o -iname 'copying*' -o -iname 'patents*' \) \
+        -exec cp --parents '{}' /out/licenses/ \;
+
+FROM ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca17dcecaf5
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates conntrack curl iproute2 ipset iptables jq mount procps && \
+    rm -rf /var/lib/apt/lists/* && ln -s / /mnt/sda1
+COPY --from=docker-cli /usr/local/bin/docker /usr/bin/docker
+COPY --from=build /out/bin/ /usr/bin/
+COPY --from=build /out/licenses/ /usr/share/doc/rancho-network-manager/
+COPY --from=build /go/src/github.com/rancher/plugin-manager/package/start.sh /usr/bin/start.sh
+COPY --chmod=0755 modern-metadata-entry.sh /rancher-entrypoint.sh
+ENTRYPOINT ["/rancher-entrypoint.sh", "/usr/bin/start.sh"]
+CMD ["plugin-manager"]
