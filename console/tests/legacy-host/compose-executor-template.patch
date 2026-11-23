@@ -1,0 +1,41 @@
+diff --git a/template/template.go b/template/template.go
+index 0ea00f2..76b6e17 100644
+--- a/template/template.go
++++ b/template/template.go
+@@ -29 +29,4 @@ func Apply(contents []byte, stackInfo StackInfo, environmentInfo EnvironmentInfo
+-	templateFuncs := sprig.TxtFuncMap()
++	templateFuncs := make(template.FuncMap)
++	for name, fn := range sprig.TxtFuncMap() {
++		templateFuncs[name] = fn
++	}
+diff --git a/template/parallel_test.go b/template/parallel_test.go
+new file mode 100644
+index 0000000..ac09203
+--- /dev/null
++++ b/template/parallel_test.go
+@@ -0,0 +1,25 @@
++package template
++
++import (
++	"sync"
++	"testing"
++)
++
++func TestApplyParallel(t *testing.T) {
++	var group sync.WaitGroup
++	for worker := 0; worker < 24; worker++ {
++		group.Add(1)
++		go func() {
++			defer group.Done()
++			for i := 0; i < 25; i++ {
++				result, err := Apply([]byte("{{ .Values.name | upper }}"), StackInfo{}, EnvironmentInfo{}, map[string]string{"name": "rancho"})
++				if err != nil || string(result) != "RANCHO" {
++					t.Errorf("unexpected template result %q, error %v", result, err)
++					return
++				}
++			}
++		}()
++	}
++	group.Wait()
++}
++
