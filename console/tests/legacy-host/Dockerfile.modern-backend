@@ -1,6 +1,23 @@
 ARG BACKEND_JAVA17_IMAGE=rancho-backend-java17:local
 FROM ${BACKEND_JAVA17_IMAGE} AS cattle
-RUN --network=none cp -aL /usr/share/cattle/war /opt/war && rm /opt/war/WEB-INF/lib/h2-1.4.187.jar
+COPY modern-backend-single-node.patch /tmp/modern-backend-single-node.patch
+RUN --network=none set -eu; \
+    cd /lab/cattle; \
+    git apply --ignore-space-change /tmp/modern-backend-single-node.patch; \
+    cp -aL /usr/share/cattle/war /opt/war; \
+    lib=/opt/war/WEB-INF/lib; \
+    rm "$lib/h2-1.4.187.jar" "$lib/hazelcast-3.8.jar" \
+        "$lib/cattle-hazelcast-eventing-0.5.0-SNAPSHOT.jar" \
+        "$lib/cattle-hazelcast-lock-0.5.0-SNAPSHOT.jar"; \
+    mkdir /tmp/single-node; \
+    /usr/lib/jvm/zulu-8-amd64/bin/javac -encoding UTF-8 \
+        -cp "/opt/war:$lib/*:/opt/war/WEB-INF/jetty/*" -d /tmp/single-node \
+        code/packaging/app-config/src/main/java/io/cattle/platform/app/AppConfig.java \
+        code/implementation/hazelcast/common/src/main/java/io/cattle/platform/hazelcast/membership/DBDiscovery.java; \
+    /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-app-config-0.5.0-SNAPSHOT.jar" \
+        -C /tmp/single-node io/cattle/platform/app/AppConfig.class; \
+    /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-hazelcast-common-0.5.0-SNAPSHOT.jar" \
+        -C /tmp/single-node io/cattle/platform/hazelcast/membership
 
 FROM debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git tini && rm -rf /var/lib/apt/lists/*
