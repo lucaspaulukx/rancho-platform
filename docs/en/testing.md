@@ -116,6 +116,18 @@ python console/tests/localization_acceptance.py --accessibility --release-images
 python console/tests/localization_acceptance.py --accessibility
 ```
 
+### Manual keyboard and screen reader acceptance
+
+Use the candidate images in a disposable lab with two named environments, one stack and service with synthetic logs, an administrator, and a user without any environment grants. Use a dedicated desktop session so the reader never announces unrelated apps or accounts. Record the Console and backend image IDs, operating system, browser, reader and their versions, language, and each case's result.
+
+1. With the mouse untouched, sign in and navigate from the first focusable control to the main heading using the skip link. Verify that the reader identifies the landmarks, page heading and current navigation item, and that focus remains visible.
+2. On Stacks, open the environment selector with the keyboard, filter by name, choose the other environment with arrows and Enter, and verify the selected environment and URL. Reopen and press Escape; verify that focus returns to the selector.
+3. Expand a stack and open its service action menu. Verify that the reader announces the expanded state and the action labels. Open Logs, verify the drawer title and close control, and close it with Escape. Check that focus returns to the originating row control.
+4. On Groups, open the create dialog, verify that the reader gives its title and labels the group name field, and tab through the dialog in both directions. Cancel without saving; confirm focus returns to the button that opened it.
+5. Sign out. Sign in as the user without grants and confirm the reader announces the no-access heading and that the sign-out control is reachable. Repeat the shared navigation and dialog checks in the other supported release language.
+
+Record announced names, roles and states, plus focus before and after each dialog or menu. A screen reader's speech viewer can capture announcements in the dedicated session. Save only sanitized observations; do not store credentials, tokens, or raw workload logs. Mark unavailable cases as blocked. Axe output alone does not complete this check.
+
 ## Evidence and scope
 
 Run `python console/tests/gateway_security.py` with the named loopback Rancher and Nginx console containers available on port 18090. The check uses one disposable administrator session and revokes it at the end. It checks cache policy and security headers through Nginx, including an invalid OIDC callback, without requiring a running identity provider. It verifies that hashed scripts retain immutable caching.
