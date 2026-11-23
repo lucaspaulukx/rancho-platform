@@ -26,14 +26,16 @@ const budgets = {
   initialJavaScriptGzip: 80,
   initialCssGzip: 5,
   largestLazyJavaScriptGzip: 50,
-  totalJavaScriptGzip: 130,
+  applicationJavaScriptGzip: 130,
+  largestPreviewCatalogGzip: 50,
 };
 describe('Production bundle budgets', () => {
   it('counts initial imports and shared CSS once, including cyclic imports', () => {
     expect(checkBundleBudgets(manifest, (file: string) => sizes[file], budgets)).toEqual({
       status: 'passed',
       scope: 'gzip-build-artifacts',
-      measured: budgets,
+      measured: { ...budgets, largestPreviewCatalogGzip: 0 },
+      packageJavaScriptGzip: 130,
       limits: budgets,
       failures: [],
     });
@@ -48,7 +50,7 @@ describe('Production bundle budgets', () => {
     expect(report.failures).toEqual([
       'initialJavaScriptGzip',
       'largestLazyJavaScriptGzip',
-      'totalJavaScriptGzip',
+      'applicationJavaScriptGzip',
     ]);
   });
   it('rejects incomplete manifests and invalid thresholds', () => {
@@ -57,13 +59,21 @@ describe('Production bundle budgets', () => {
       checkBundleBudgets({ ...manifest, shared: undefined }, () => 1, budgets),
     ).toThrow();
     expect(() =>
-      checkBundleBudgets(manifest, () => 1, { ...budgets, totalJavaScriptGzip: 0 }),
+      checkBundleBudgets(manifest, () => 1, { ...budgets, applicationJavaScriptGzip: 0 }),
     ).toThrow();
   });
   it('requires each preview catalog to stay outside the initial import graph', () => {
     const sizeOf = (file: string) => sizes[file];
     const preview = { ...manifest, lazy: { ...manifest.lazy, isDynamicEntry: true } };
-    expect(checkBundleBudgets(preview, sizeOf, budgets, ['lazy']).status).toBe('passed');
+    const report = checkBundleBudgets(preview, sizeOf, budgets, ['lazy']);
+    expect(report.status).toBe('passed');
+    expect(report.measured.applicationJavaScriptGzip).toBe(80);
+    expect(report.measured.largestPreviewCatalogGzip).toBe(50);
+    expect(report.packageJavaScriptGzip).toBe(130);
+    expect(
+      checkBundleBudgets(preview, sizeOf, { ...budgets, largestPreviewCatalogGzip: 49 }, ['lazy'])
+        .failures,
+    ).toEqual(['largestPreviewCatalogGzip']);
     expect(checkBundleBudgets(preview, sizeOf, budgets, ['missing']).failures).toContain(
       'preview-catalog-loading',
     );
@@ -74,5 +84,17 @@ describe('Production bundle budgets', () => {
     expect(checkBundleBudgets(eager, sizeOf, budgets, ['lazy']).failures).toContain(
       'preview-catalog-loading',
     );
+    const staticallyImportedByLazyRoute = {
+      ...preview,
+      route: { isDynamicEntry: true, file: 'assets/route.js', imports: ['lazy'] },
+    };
+    expect(
+      checkBundleBudgets(
+        staticallyImportedByLazyRoute,
+        (file: string) => sizes[file] ?? 1,
+        budgets,
+        ['lazy'],
+      ).failures,
+    ).toContain('preview-catalog-loading');
   });
 });

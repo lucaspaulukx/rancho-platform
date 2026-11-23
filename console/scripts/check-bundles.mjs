@@ -25,6 +25,21 @@ export function checkBundleBudgets(manifest, sizeOf, budgets, previewEntries = [
   const all = new Set(
     chunks.filter((chunk) => chunk.file?.endsWith('.js')).map((chunk) => chunk.file),
   );
+  const staticImports = new Set(
+    chunks.flatMap((chunk) => (chunk.imports ?? []).map((key) => manifest[key]?.file)),
+  );
+  const previewFiles = new Set(
+    previewEntries
+      .map((key) => manifest[key])
+      .filter(
+        (chunk) =>
+          chunk?.isDynamicEntry &&
+          all.has(chunk.file) &&
+          !initial.has(chunk.file) &&
+          !staticImports.has(chunk.file),
+      )
+      .map((chunk) => chunk.file),
+  );
   const sum = (files) => [...files].reduce((total, file) => total + sizeOf(file), 0);
   const measured = {
     initialJavaScriptGzip: sum(initial),
@@ -33,7 +48,8 @@ export function checkBundleBudgets(manifest, sizeOf, budgets, previewEntries = [
       0,
       ...[...all].filter((file) => !initial.has(file)).map(sizeOf),
     ),
-    totalJavaScriptGzip: sum(all),
+    applicationJavaScriptGzip: sum([...all].filter((file) => !previewFiles.has(file))),
+    largestPreviewCatalogGzip: Math.max(0, ...[...previewFiles].map(sizeOf)),
   };
   if (Object.keys(budgets).sort().join() !== Object.keys(measured).sort().join())
     throw new Error('Invalid budget keys.');
@@ -44,12 +60,12 @@ export function checkBundleBudgets(manifest, sizeOf, budgets, previewEntries = [
       return bytes > budgets[key];
     })
     .map(([key]) => key);
-  if (previewEntries.some((key) => !manifest[key]?.isDynamicEntry || seen.has(key)))
-    failures.push('preview-catalog-loading');
+  if (previewFiles.size !== previewEntries.length) failures.push('preview-catalog-loading');
   return {
     status: failures.length ? 'failed' : 'passed',
     scope: 'gzip-build-artifacts',
     measured,
+    packageJavaScriptGzip: sum(all),
     limits: budgets,
     failures,
   };

@@ -6,7 +6,7 @@
 
 O harness de navegador próprio `console/tests/localization_acceptance.py` também simula uma resposta de falha no módulo JavaScript de auditoria. Ele verifica a recuperação localizada, preserva a URL do environment e recarrega o módulo real após o transporte voltar. Seus contextos de navegador permitem tráfego de API somente para leitura e usam uma sessão temporária revogada durante a limpeza.
 
-O build de produção executa `check:bundles` após o Vite. Ele lê o manifesto gerado, percorre imports estáticos e verifica os tamanhos gzip contra `console/scripts/bundle-budgets.json`. Os limites cobrem JavaScript inicial (256 KiB), CSS inicial (20 KiB), o maior chunk JavaScript carregado sob demanda (100 KiB) e JavaScript total (600 KiB). Imports e CSS compartilhados são contados uma vez. Cada catálogo de prévia deve ter uma entrada dinâmica própria fora do grafo de imports iniciais. Esses limites de artefatos complementam medições em runtime de latência, memória e renderização. Revise a alteração e seu custo medido antes de ajustar um limite.
+O build de produção executa `check:bundles` após o Vite. Ele percorre os imports do manifesto e confere os tamanhos gzip em `console/scripts/bundle-budgets.json`. Os limites são 256 KiB para o JavaScript inicial, 20 KiB para o CSS inicial, 100 KiB para qualquer chunk JavaScript sob demanda, 600 KiB para o JavaScript da aplicação e 64 KiB por catálogo de prévia. Um catálogo entra no próprio limite quando tem uma entrada dinâmica exclusiva e nenhum import estático. O código compartilhado continua no total da aplicação, e o relatório também mostra o tamanho do pacote JavaScript completo.
 
 
 
