@@ -1,4 +1,252 @@
 export const deDE = {
+  'catalogRepositories.defaultBranch': 'Serverstandard',
+  'catalogRepositories.title': 'Katalog-Repositories',
+  'catalogRepositories.description':
+    'Konfiguration globaler Git-Quellen. Änderungen können alle Umgebungen betreffen.',
+  'catalogRepositories.override': 'Überschreibung in der Datenbank.',
+  'catalogRepositories.noOverride': 'Keine Überschreibung in der Datenbank.',
+  'catalogRepositories.tableLabel': 'Konfigurierte globale Repositories',
+  'catalogRepositories.repository': 'Repository',
+  'catalogRepositories.branch': 'Konfigurierter Branch',
+  'catalogRepositories.emptyTitle': 'Kein globales Repository konfiguriert',
+  'catalogRepositories.emptyDescription':
+    'Umgebungsspezifische Quellen können weiterhin verfügbar sein.',
+  'catalogRepositories.editorTitle': 'Globale Repositories konfigurieren',
+  'catalogRepositories.editorDescription':
+    'Einträge in diesem Formular betreffen die gesamte Instanz. URLs sind standardmäßig geschützt.',
+  'catalogRepositories.showUrls': 'Repository-URLs anzeigen',
+  'catalogRepositories.urlHint':
+    'Git, SSH, HTTP oder HTTPS. HTTP-URLs dürfen keine Anmeldedaten enthalten.',
+  'catalogRepositories.branchHint': 'Leer lassen, um den Serverstandard beizubehalten.',
+  'catalogRepositories.confirmEmpty':
+    'Ich bestätige, dass alle globalen Repositories entfernt werden sollen',
+  'catalogRepositories.saveTitle': 'Globale Repositories speichern?',
+  'catalogRepositories.discardTitle': 'Repository-Änderungen verwerfen?',
+  'catalogRepositories.discardDescription':
+    'Die Änderungen wurden noch nicht an den Server gesendet.',
+  'catalogRepositories.leaveTitle': 'Mit ausstehender Änderung verlassen?',
+  'catalogRepositories.leaveDescription':
+    'Die Repositories wurden noch nicht gespeichert. Warten Sie, bis eine laufende Übermittlung abgeschlossen ist.',
+  'catalogRepositories.unavailable':
+    'Die Repositories sind mit diesen Zugriffsrechten nicht verfügbar.',
+  'catalogRepositories.refresh': 'Liste aktualisieren',
+  'catalogRepositories.configure': 'Repositories konfigurieren',
+  'catalogRepositories.notice':
+    'Die Liste zeigt die Serverkonfiguration. Klonvorgänge, Commits und Synchronisierung werden dabei nicht geprüft. Umgebungseigene Kataloge werden hier nicht geändert.',
+  'catalogRepositories.cancel': 'Abbrechen',
+  'catalogRepositories.review': 'Repositories prüfen',
+  'catalogRepositories.remove': 'Repository entfernen',
+  'catalogRepositories.add': 'Repository hinzufügen',
+  'catalogRepositories.nameLabel': 'Repository-Name {index}',
+  'catalogRepositories.urlLabel': 'Repository-URL {index}',
+  'catalogRepositories.branchLabel': 'Repository-Branch {index}',
+  'catalogRepositories.removeLabel': 'Repository {index} entfernen',
+  'catalogRepositories.reviewDescription':
+    'Globale Repositories werden konfiguriert: {count}. Der Server kann auf diese URLs zugreifen und Git-Klonvorgänge ausführen. Beim Speichern wird die Synchronisierung nicht geprüft. Die URLs bleiben bei dieser Prüfung geschützt.',
+  'catalogRepositories.repositoryIndex': 'Repository {index}',
+  'catalogRepositories.source': 'Quelle: {source}.',
+  'catalogRepositories.saved':
+    'Konfiguration gespeichert. Der Katalogdienst klont und synchronisiert die Repositories.',
+  'catalogRepositories.httpError': 'Katalogvorgang nicht abgeschlossen (HTTP {status}).',
+  'catalogRepositories.requestError': 'Der Katalogvorgang konnte nicht abgeschlossen werden.',
+  'catalogRepositories.configurationUnavailable': 'Konfiguration nicht verfügbar.',
+  'catalogRepositories.reopen': 'Öffnen Sie den Editor erneut.',
+  'catalogRepositories.retry': 'Erneut versuchen',
+  'catalogRepositories.validation.configuration': 'Ungültige Katalogkonfiguration.',
+  'catalogRepositories.validation.jsonRequired':
+    'Dieser Editor benötigt catalog.url im JSON-Format. Behalten Sie den Wert bei und verwenden Sie für ältere Formate die Servereinstellungen.',
+  'catalogRepositories.validation.document': 'Nicht unterstütztes Katalogdokument.',
+  'catalogRepositories.validation.entry': 'Nicht unterstützter Katalogeintrag.',
+  'catalogRepositories.validation.limit': 'Zu viele Repositories.',
+  'catalogRepositories.validation.uniqueNames':
+    'Verwenden Sie eindeutige Namen ohne Leerzeichen oder reservierte Schlüssel.',
+  'catalogRepositories.validation.reopen': 'Öffnen Sie den Repository-Editor erneut.',
+  'catalogRepositories.validation.confirmEmpty':
+    'Bestätigen Sie das Entfernen aller globalen Repositories.',
+  'catalogRepositories.validation.url': 'Ungültige Repository-URL.',
+  'catalogRepositories.validation.urlParts':
+    'Verwenden Sie eine Git-, SSH-, HTTP- oder HTTPS-URL ohne Passwort, Fragment oder HTTP-Anmeldedaten.',
+  'catalogRepositories.validation.branch':
+    'Ungültiger Branch. Verwenden Sie einen Git-Referenznamen.',
+
+  'environmentCatalogs.title': 'Umgebungs-Repositories',
+  'environmentCatalogs.close': 'Schließen',
+  'environmentCatalogs.notice':
+    'Diese Konfiguration gilt nur für diese Umgebung. Beim Speichern kann der Server einen Git-Klonvorgang starten. Die Liste bestätigt keine Synchronisierung. Dieses Formular führt keine vorhandenen Vorlagen oder Stacks aus.',
+  'environmentCatalogs.sources': 'Katalogquellen der Umgebung',
+  'environmentCatalogs.repository': 'Repository',
+  'environmentCatalogs.scope': 'Geltungsbereich',
+  'environmentCatalogs.thisEnvironment': 'Diese Umgebung',
+  'environmentCatalogs.global': 'Global',
+  'environmentCatalogs.branch': 'Branch',
+  'environmentCatalogs.serverDefault': 'Serverstandard',
+  'environmentCatalogs.actions': 'Aktionen',
+  'environmentCatalogs.readOnly': 'Schreibgeschützt',
+  'environmentCatalogs.empty': 'Keine Repositories verfügbar',
+  'environmentCatalogs.emptyDescription': 'Fügen Sie eine native Quelle für diese Umgebung hinzu.',
+  'environmentCatalogs.add': 'Umgebungs-Repository hinzufügen',
+  'environmentCatalogs.editSource': 'Umgebungsquelle bearbeiten',
+  'environmentCatalogs.newSource': 'Neue Umgebungsquelle',
+  'environmentCatalogs.name': 'Repository-Name',
+  'environmentCatalogs.showUrl': 'Repository-URL anzeigen',
+  'environmentCatalogs.url': 'Git-URL',
+  'environmentCatalogs.urlHint':
+    'HTTP, HTTPS, Git oder SSH. Die URL darf kein Passwort enthalten. Der Server greift auf diese Adresse zu.',
+  'environmentCatalogs.repositoryBranch': 'Repository-Branch',
+  'environmentCatalogs.typeNotice':
+    'Typ: nativer Cattle-Katalog. Nach dem Erstellen kann der Name nicht geändert werden.',
+  'environmentCatalogs.cancel': 'Bearbeitung abbrechen',
+  'environmentCatalogs.review': 'Umgebungsquelle prüfen',
+  'environmentCatalogs.removeTitle': 'Umgebungsquelle entfernen?',
+  'environmentCatalogs.saveTitle': 'Umgebungsquelle speichern?',
+  'environmentCatalogs.discard': 'Repository-Änderungen verwerfen?',
+  'environmentCatalogs.unsent': 'Die Änderung wurde noch nicht an den Server gesendet.',
+  'environmentCatalogs.leave': 'Mit ausstehender Änderung verlassen?',
+  'environmentCatalogs.wait':
+    'Warten Sie, bis eine laufende Übermittlung abgeschlossen ist, bevor Sie die Seite verlassen.',
+  'environmentCatalogs.removed': 'Repository aus dieser Umgebung entfernt.',
+  'environmentCatalogs.saved':
+    'Repository gespeichert. Warten Sie auf die Synchronisierung durch den Katalogdienst.',
+  'environmentCatalogs.description':
+    'Quellen für {environment}. Globale Repositories werden schreibgeschützt angezeigt.',
+  'environmentCatalogs.edit': '{name} bearbeiten',
+  'environmentCatalogs.remove': '{name} entfernen',
+  'environmentCatalogs.removeDescription':
+    '{name} in {environment}. Die Quelle ist danach in dieser Umgebung nicht mehr verfügbar. Vorhandene Stacks und globale Quellen bleiben erhalten.',
+  'environmentCatalogs.saveDescription':
+    '{name} in {environment}. Der Server kann das Repository unter der konfigurierten URL klonen. Die Synchronisierung wird separat geprüft. Globale Quellen bleiben erhalten.',
+  'environmentCatalogs.error.operation': 'Der Katalogvorgang konnte nicht abgeschlossen werden.',
+  'environmentCatalogs.error.list':
+    'Die Repositories für diese Umgebung konnten nicht abgefragt werden.',
+  'environmentCatalogs.error.unavailable': 'Das Repository ist in dieser Umgebung nicht verfügbar.',
+  'environmentCatalogs.error.reopen': 'Öffnen Sie den Editor erneut.',
+  'environmentCatalogs.error.http': 'Katalogvorgang nicht abgeschlossen (HTTP {status}).',
+  'environmentCatalogs.access.disabled': 'Die Verwaltung von Katalogquellen ist deaktiviert.',
+  'environmentCatalogs.access.identityChanged': 'Die Sitzungsidentität wurde geändert.',
+  'environmentCatalogs.access.denied':
+    'Ihre Zugriffsrechte erlauben es nicht, Quellen in dieser Umgebung zu verwalten.',
+  'environmentCatalogs.access.http':
+    'Der Zugriff auf Katalogquellen konnte nicht geprüft werden (HTTP {status}).',
+  'environmentCatalogs.validation.configuration':
+    'Für dieses Repository ist keine Konfiguration verfügbar.',
+  'environmentCatalogs.validation.name': 'Nicht unterstützter Repository-Name.',
+  'environmentCatalogs.validation.environment': 'Ungültige Umgebung.',
+  'environmentCatalogs.validation.changed':
+    'Das Repository wurde geändert. Öffnen Sie den Editor erneut.',
+  'environmentCatalogs.validation.readOnly': 'Dieser Repository-Typ kann nur angezeigt werden.',
+  'environmentCatalogs.validation.duplicate': 'Ein Repository mit diesem Namen existiert bereits.',
+  'environmentCatalogs.validation.native': 'Wählen Sie einen nativen Cattle-Katalog aus.',
+
+  'catalogPage.validation.route': 'Der Katalog hat eine ungültige Route zurückgegeben.',
+  'catalogPage.validation.questions': 'Die Fragen der Vorlage sind ungültig.',
+  'catalogPage.validation.variables': 'Die Vorlage enthält ungültige oder doppelte Variablen.',
+  'catalogPage.validation.type':
+    'Das Feld {label} verwendet einen nicht unterstützten Typ: {type}.',
+  'catalogPage.validation.options': 'Die Optionsliste der Vorlage ist ungültig.',
+  'catalogPage.validation.stackName': 'Geben Sie einen Namen für den Stack ein.',
+  'catalogPage.validation.otherTemplate':
+    'Die ausgewählte Version gehört zu einer anderen Vorlage.',
+  'catalogPage.validation.missingFiles':
+    'Die Version hat keine Konfigurationsdateien bereitgestellt.',
+  'catalogPage.validation.dockerCompose':
+    'Diese Version enthält keine verwendbare Docker-Compose-Datei.',
+  'catalogPage.validation.required': 'Füllen Sie {label} aus.',
+  'catalogPage.validation.boolean': 'Wählen Sie einen gültigen Wert für {label}.',
+  'catalogPage.validation.number': 'Geben Sie eine gültige Zahl für {label} ein.',
+  'catalogPage.validation.range': '{label} liegt außerhalb des zulässigen Bereichs.',
+  'catalogPage.validation.string': 'Prüfen Sie {label}.',
+  'catalogPage.validation.enum': 'Wählen Sie eine gültige Option für {label}.',
+  'catalogPage.validation.reference': 'Wählen Sie eine verfügbare Ressource für {label} aus.',
+  'catalogPage.validation.date': 'Geben Sie ein gültiges Datum für {label} ein.',
+  'catalogPage.validation.upgradeOrigin':
+    'Diese Version gehört zu einem anderen Katalog oder einer anderen Vorlage.',
+  'catalogPage.filesDescription':
+    'Originalinhalt der ausgewählten Version. Rancher verarbeitet die Parameter.',
+  'catalogPage.stoppedHint':
+    'Der Stack wird erstellt, ohne seine Dienste zu starten. Sie können sie in der Vorgangsansicht starten.',
+  'catalogPage.authorize':
+    'Ich erlaube, Container neu zu erstellen und Dienste gemäß dieser Konfiguration zu starten',
+  'catalogPage.emptyDescription':
+    'Prüfen Sie die Filter und die Katalogverfügbarkeit in dieser Umgebung.',
+  'catalogPage.startHint':
+    'Rancher kann die in der Vorlage beschriebenen Container und Ressourcen erstellen.',
+  'catalogPage.updated':
+    'Aktualisierung entgegengenommen. Verfolgen Sie den Stack und seine Dienste in der Vorgangsansicht.',
+  'catalogPage.noVersionDescription':
+    'Der Katalog hat keine mit dieser Instanz kompatible Version zurückgegeben.',
+  'catalogPage.stackChanged':
+    'Ein anderer Client hat den Stack geändert. Schließen und öffnen Sie das Panel erneut.',
+  'catalogPage.created':
+    'Stack erstellt. Verfolgen Sie Dienste und ihren Status in der Vorgangsansicht.',
+  'catalogPage.description':
+    'Wählen Sie eine Anwendung aus, prüfen Sie ihre Version und konfigurieren Sie den Stack.',
+  'catalogPage.upgradeUnavailable':
+    'Die Katalogaktualisierung ist in diesem Zustand nicht verfügbar.',
+  'catalogPage.selectEnvironmentDescription':
+    'Wählen Sie die Umgebung aus, deren Katalog Sie anzeigen möchten.',
+  'catalogPage.wait': 'Warten Sie auf die Antwort von Rancher, bevor Sie den Kontext wechseln.',
+  'catalogPage.versionChanged':
+    'Die Katalogversion wurde geändert. Öffnen Sie das Panel zur Prüfung erneut.',
+  'catalogPage.upgradePermission':
+    'Sie haben keine Berechtigung mehr, Aktualisierungen vorzunehmen.',
+  'catalogPage.createPermission': 'Sie haben keine Berechtigung mehr zum Erstellen.',
+  'catalogPage.confirmImpact':
+    'Bestätigen Sie vor der Übermittlung die Auswirkungen der Aktualisierung.',
+  'catalogPage.discardDescription': 'Die eingegebenen Parameter wurden noch nicht gespeichert.',
+  'catalogPage.upgradeState': 'Die Aktualisierung ist in diesem Zustand nicht verfügbar.',
+  'catalogPage.leaveDescription': 'Die Vorlagenparameter werden verworfen.',
+  'catalogPage.defaultDescription': 'Anwendungsversionen und Konfiguration.',
+  'catalogPage.includeInfra': 'Infrastrukturvorlagen einbeziehen',
+  'catalogPage.startServices': 'Dienste nach dem Erstellen des Stacks starten',
+  'catalogPage.launchUnavailable': 'Das Starten ist nicht verfügbar.',
+  'catalogPage.versionRevalidation': 'Die Version kann nicht erneut geprüft werden.',
+  'catalogPage.readStackFailed': 'Der Stack konnte nicht gelesen werden.',
+  'catalogPage.empty': 'Keine Vorlagen verfügbar',
+  'catalogPage.noVersion': 'Keine Versionen verfügbar',
+  'catalogPage.selectEnvironment': 'Umgebung auswählen',
+  'catalogPage.discardTitle': 'Konfiguration verwerfen?',
+  'catalogPage.parameters': 'Anwendungsparameter',
+  'catalogPage.invalidTemplate': 'Die Vorlage ist ungültig.',
+  'catalogPage.reviewConfiguration': 'Prüfen Sie die Konfiguration.',
+  'catalogPage.sources': 'Umgebungsquellen',
+  'catalogPage.stay': 'Auf dieser Seite bleiben',
+  'catalogPage.stackConfiguration': 'Stack-Konfiguration',
+  'catalogPage.creating': 'Erstellung läuft',
+  'catalogPage.files': 'Vorlagendateien',
+  'catalogPage.allCategories': 'Alle Kategorien',
+  'catalogPage.show': 'Zum Bearbeiten anzeigen',
+  'catalogPage.refresh': 'Liste aktualisieren',
+  'catalogPage.allCatalogs': 'Alle Kataloge',
+  'catalogPage.templateVersion': 'Vorlagenversion',
+  'catalogPage.versionFiles': 'Versionsdateien',
+  'catalogPage.leave': 'Ohne Speichern verlassen?',
+  'catalogPage.hide': 'Inhalt ausblenden',
+  'catalogPage.upgrade': 'Stack aktualisieren',
+  'catalogPage.stackName': 'Stack-Name *',
+  'catalogPage.hidden': 'Inhalt ausgeblendet',
+  'catalogPage.defaultVersion': 'Standardversion',
+  'catalogPage.configuration': 'Konfiguration',
+  'catalogPage.versions': 'Versionen anzeigen',
+  'catalogPage.create': 'Stack erstellen',
+  'catalogPage.select': 'Auswählen…',
+  'catalogPage.categories': 'Kategorien',
+  'catalogPage.category': 'Kategorie',
+  'catalogPage.application': 'Anwendung',
+  'catalogPage.defaultSuffix': ' · Standard',
+  'catalogPage.fieldDescription': 'Beschreibung',
+  'catalogPage.title': 'Katalog',
+  'catalogPage.close': 'Schließen',
+  'catalogPage.cattleInfo':
+    'In dieser Konsole können Sie Vorlagen in Cattle-Umgebungen starten. Sie können Versionen und ihre Dateien anzeigen.',
+  'catalogPage.launchInfo':
+    'Sie können die Dateien anzeigen. Das Starten ist für Ihr Konto oder diesen Umgebungstyp nicht verfügbar.',
+  'catalogPage.impactWarning':
+    'Die native Aktualisierung kann gestoppte Dienste starten, Container neu erstellen und in der Vorlage definierte Ressourcen ändern. Prüfen Sie Parameter und Skalierung, bevor Sie zustimmen. Eine Änderung des Skalierungsparameters der Vorlage ändert die tatsächliche Skalierung möglicherweise nicht. Prüfen und ändern Sie die Skalierung der Dienste vor der Aktualisierung in der Vorgangsansicht.',
+  'catalogPage.upgradeTitle': 'Stack aktualisieren · {name}',
+  'catalogPage.environmentDescription': 'Umgebung: {name} · {description}',
+  'catalogPage.existingStack':
+    'Vorhandener Stack: {name} · aktuelle Referenz: {version}. Prüfen Sie Version, Parameter und Dateien vor der Übermittlung. Bei der Aktualisierung können Dienste und Container neu erstellt werden.',
+
   'processes.sent':
     'Erneute Ausführung an die Engine gesendet. Verfolgen Sie den vom Server zurückgegebenen Status.',
   'processes.description': 'Ausführungen der Engine und ihre Quellressourcen.',
