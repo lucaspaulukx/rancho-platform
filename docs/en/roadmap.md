@@ -170,6 +170,8 @@ The native single-node health recovery test also passed with the rebuilt healthc
 
 In the same isolated guest, moving the scheduler from Cattle-managed networking to the Docker bridge passed 15 managed workload allocations across five rounds. The scheduler logs showed one subscription startup and zero pong timeouts during that run. The optional catalog patch records the bridge mode and the healthcheck descriptor limits. A fresh environment inherited both settings from the patched catalog. After a new host registered, all six infrastructure services reached healthy state and two managed containers exchanged HTTP. Sustained verification on multiple hosts remains open.
 
+The modern bootstrap smoke also verified the persistent agent image, not just the registration container. The Cattle registration script selects the standard agent tag. In the disposable Docker daemon, tagging the modern image as `rancher/agent:v1.2.11` made the persistent agent use that same image ID. Restarting it preserved the registered host, and a new container reached running state on that host. Upgrade and private-CA registration remain open.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.
