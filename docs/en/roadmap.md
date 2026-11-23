@@ -162,6 +162,8 @@ On one isolated Docker 29.9.2 node with the manager and metadata candidates, two
 
 The follow-up IPsec test booted the disposable Docker 29.9.2 guest with the Ubuntu 6.8 kernel and loaded the required netfilter modules. The host registered and all six Cattle infrastructure services reported healthy, including IPsec. A two-host IPsec traffic test remains open. The optional scheduler and healthcheck images also reported zero high or critical findings in their separate scans. The scheduler passed its upstream tests. HAProxy accepted the healthcheck base configuration. The catalog integration of these rebuilt images and a real HAProxy reload still need verification.
 
+The optional `Dockerfile.modern-bootstrap` in `console/tests/legacy-host/` builds on the local modern-client image tagged `rancho-agent-modern-client:local`. It ports the pinned registration scripts and their API client to Python 3. A prototype on the Docker 29 VM registered a fresh host and ran a container. The packaged candidate built and scanned with zero reported high or critical findings. Agent upgrade, reconnect, private CA, and the behavior of copied legacy code beyond the scanner's coverage still require validation.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.

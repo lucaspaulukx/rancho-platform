@@ -162,6 +162,8 @@ Em um nó isolado com Docker 29.9.2 e as imagens candidatas de gerenciador de re
 
 No novo teste de IPsec, a VM descartável com Docker 29.9.2 iniciou com o kernel Ubuntu 6.8 e carregou os módulos de netfilter necessários. O host registrou e os seis serviços de infraestrutura do Cattle ficaram saudáveis, incluindo o IPsec. O tráfego IPsec entre dois hosts segue pendente. As imagens opcionais de scheduler e healthcheck também tiveram zero achados altos ou críticos em varreduras separadas. O scheduler passou nos testes do upstream. O HAProxy aceitou a configuração base do healthcheck. A integração dessas imagens recompiladas com o catálogo e um reload real do HAProxy ainda precisam de verificação.
 
+O `Dockerfile.modern-bootstrap` opcional em `console/tests/legacy-host/` usa a imagem local do modern-client com a tag `rancho-agent-modern-client:local`. Ele porta os scripts de registro fixados e seu cliente de API para Python 3. Um protótipo na VM com Docker 29 registrou um host novo e executou um container. A imagem candidata compilou e a varredura reportou zero achados altos ou críticos. Upgrade do agente, reconexão, CA privada e comportamento do código legado copiado além da cobertura do scanner ainda precisam de validação.
+
 ## Ordem e domínios opcionais
 
 Conclua contratos/efeitos nativos de workloads, depois infraestrutura/dados/catálogo/integrações. Feche identidade técnica/streams e migração segura de grants, seguido de acessibilidade/performance e regressão final de configuração/recuperação/release. Gate falho retorna à implementação; não aumente timeouts ou esconda limites para obter aprovação.
