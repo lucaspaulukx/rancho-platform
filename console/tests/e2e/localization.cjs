@@ -339,6 +339,34 @@ async function main() {
     await composeSource.evaluate((source) => getComputedStyle(source).direction === 'ltr') &&
     await composeSource.inputValue() === yamlDraft &&
     await workspace.locator('html').getAttribute('dir') === 'rtl');
+  result.stage = 'module-load-recovery';
+  const recoveryContext = await context({ authenticated: true });
+  await recoveryContext.addInitScript(() => {
+    localStorage.setItem('rancho.console.locale.anonymous', JSON.stringify({ version: 1, locale: 'en-US' }));
+  });
+  let simulatedFailures = 0;
+  await recoveryContext.route(/\/console\/assets\/Audit-[^/]+\.js$/, async (route) => {
+    if (simulatedFailures === 0) {
+      simulatedFailures++;
+      await route.fulfill({
+        status: 503, contentType: 'application/javascript',
+        headers: { 'cache-control': 'no-store' }, body: 'synthetic-private-module-response',
+      });
+    } else await route.continue();
+  });
+  const recoveryPage = await page(recoveryContext);
+  const recoveryUrl = origin + '/console/audit?env=1a12';
+  await recoveryPage.goto(recoveryUrl, { waitUntil: 'domcontentloaded' });
+  await recoveryPage.getByRole('heading', { name: 'This page could not be loaded', exact: true }).waitFor();
+  check('a failed lazy module displays localized recovery while preserving its route',
+    simulatedFailures === 1 && recoveryPage.url() === recoveryUrl &&
+    !await recoveryPage.getByText('synthetic-private-module-response', { exact: true }).count() &&
+    await recoveryPage.locator('.sidebar').isVisible());
+  await recoveryPage.getByRole('button', { name: 'Reload console', exact: true }).click();
+  await recoveryPage.getByRole('heading', { name: 'Audit', exact: true }).waitFor();
+  check('reload recovers the actual lazy module after transport returns',
+    simulatedFailures === 1 && recoveryPage.url() === recoveryUrl);
+  await closeContext(recoveryContext);
   check('no browser HTTP mutations or external navigation', result.blockedRequests === 0);
   check('no JavaScript errors', result.pageErrors === 0);
   result.status = 'passed';
