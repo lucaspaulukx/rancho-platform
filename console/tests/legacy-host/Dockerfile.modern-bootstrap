@@ -1,18 +1,57 @@
 ARG CLIENT_IMAGE=rancho-agent-modern-client:local
 FROM ${CLIENT_IMAGE} AS client
+
+FROM golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 AS bootstrap-source
+ENV GO111MODULE=off GOPATH=/go CGO_ENABLED=0
+WORKDIR /go/src/github.com/weaveworks/weave
+ADD --checksum=sha256:1e4d30f20c085852a235ec7793a52f59db08f1cb4e6aa271e610d890713b6289 https://codeload.github.com/rancher-archives/weave/tar.gz/00a22c8f6697ecd32669b223e7af59ebc2cb1014 /tmp/weave.tar.gz
+ADD --checksum=sha256:6bf0a74382ab9a5859725fc05a83bdcb5d2ef9496e3236ba0ca84180dca533d9 https://codeload.github.com/coreos/go-iptables/tar.gz/fbb73372b87f6e89951c2b6b31470c2c9d5cfae3 /tmp/go-iptables.tar.gz
+ADD --checksum=sha256:4b4185d220650309ac497d97fcc3f80fe51ba71c79f04368886b5fea08c02c2b https://codeload.github.com/j-keck/arping/tar.gz/af9a9003cfd88231902ab8959023d743f4ea93d7 /tmp/arping.tar.gz
+ADD --checksum=sha256:32def81bdab4bed2d2ec43e5bbecd38c8be3f473977d828fbb7a609ace23d313 https://codeload.github.com/vishvananda/netlink/tar.gz/a632d6dc2806fa19d2f7693017d3fb79d3d8fa03 /tmp/netlink.tar.gz
+ADD --checksum=sha256:7f3ce84c548fd45b7dee9e16a1123fc4a8530d0211a6e1a0696c188a20743b76 https://codeload.github.com/vishvananda/netns/tar.gz/1fec6582c067519857603311ad090e23a5ca57de /tmp/netns.tar.gz
+ADD --checksum=sha256:8f30f9f1b42b929f62ddc258da7eb2f69a301c3cc624f0c29f13e5ed51ff21e9 https://codeload.github.com/weaveworks/go-odp/tar.gz/429cc5809b78f5627a2d220c1eaacaae3517226e /tmp/go-odp.tar.gz
+ADD --checksum=sha256:20dacb0eb587acd4a939e20b755844af2cccb2722434099154eea036d136eaf8 https://codeload.github.com/rancher/rancher/tar.gz/e780d3416460277ec56d77ac367dacbf564669a9 /tmp/rancher.tar.gz
+ADD --checksum=sha256:6ae8b377d9a70a4351598b84854785ee5f4cb4b1a29abf5c33454bb58de2470e https://files.pythonhosted.org/packages/17/fd/65395f2f114faae4ca287236b84846bdc325a18ea0acd2e14b99d0cda709/cattle-0.5.4.tar.gz /tmp/cattle.tar.gz
+ADD --checksum=sha256:1a935073b8f99cc76f0384057ca1b647691010e5c97aea4f065331785d31bed5 https://files.pythonhosted.org/packages/e2/8e/7cda861f7ce2e7474ad2d5de0cb6bd2ed37864fba46c95f3fdf5027df46f/gdapi-python-0.5.3.tar.gz /tmp/gdapi.tar.gz
+RUN --network=none set -eu; \
+    tar -xzf /tmp/weave.tar.gz --strip-components=1; \
+    mkdir -p /out/bin /out/agent /out/python /out/licenses; \
+    install -Dm644 LICENSE /out/licenses/weave/LICENSE; \
+    install -Dm644 NOTICE /out/licenses/weave/NOTICE; \
+    install -Dm644 /usr/local/go/LICENSE /out/licenses/go/LICENSE; \
+    for dependency in coreos/go-iptables j-keck/arping vishvananda/netlink vishvananda/netns weaveworks/go-odp; do \
+        package=${dependency##*/}; \
+        directory=vendor/github.com/$dependency; \
+        mkdir -p "$directory"; \
+        tar -xzf "/tmp/$package.tar.gz" --strip-components=1 -C "$directory"; \
+        install -Dm644 "$directory/LICENSE" "/out/licenses/$package/LICENSE"; \
+        if [ -f "$directory/NOTICE" ]; then install -m644 "$directory/NOTICE" "/out/licenses/$package/NOTICE"; fi; \
+    done; \
+    go build -trimpath -tags iface -ldflags '-X github.com/weaveworks/weave/net.VethName=eth0 -s' -o /out/bin/r ./prog/weavewait; \
+    mkdir -p /tmp/rancher /tmp/cattle /tmp/gdapi; \
+    tar -xzf /tmp/rancher.tar.gz --strip-components=1 -C /tmp/rancher; \
+    tar -xzf /tmp/cattle.tar.gz --strip-components=1 -C /tmp/cattle; \
+    tar -xzf /tmp/gdapi.tar.gz --strip-components=1 -C /tmp/gdapi; \
+    install -m755 /tmp/rancher/agent/run.sh /tmp/rancher/agent/register.py /tmp/rancher/agent/resolve_url.py /out/agent/; \
+    install -m644 /tmp/cattle/cattle.py /tmp/gdapi/gdapi.py /out/python/; \
+    install -Dm644 /tmp/rancher/LICENSE /out/licenses/rancher/LICENSE; \
+    install -Dm644 /tmp/cattle/LICENSE.txt /out/licenses/cattle/LICENSE; \
+    install -Dm644 /tmp/gdapi/LICENSE.txt /out/licenses/gdapi/LICENSE
+
 FROM ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca17dcecaf5
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates curl iproute2 iptables iputils-ping jq kmod openssl procps \
         python3 python3-requests python3-six util-linux && rm -rf /var/lib/apt/lists/*
-COPY --from=client /usr/bin/docker /usr/bin/r /usr/bin/share-mnt /usr/bin/
+COPY --from=client /usr/bin/docker /usr/bin/share-mnt /usr/bin/
 COPY --from=client /usr/share/doc/rancho-share-mnt/ /usr/share/doc/rancho-share-mnt/
-COPY --from=client /run.sh /register.py /resolve_url.py /
-COPY --from=client /usr/local/lib/python2.7/dist-packages/gdapi.py /usr/local/lib/python2.7/dist-packages/cattle.py /usr/local/lib/python3.12/dist-packages/
-COPY --from=client /usr/local/lib/python2.7/dist-packages/gdapi_python-0.5.3.dist-info/ /usr/share/doc/rancho-bootstrap/gdapi/
-COPY --from=client /usr/local/lib/python2.7/dist-packages/cattle-0.5.4.dist-info/ /usr/share/doc/rancho-bootstrap/cattle/
+COPY --from=bootstrap-source /out/bin/r /usr/bin/r
+COPY --from=bootstrap-source /out/agent/ /
+COPY --from=bootstrap-source /out/python/ /usr/local/lib/python3.12/dist-packages/
+COPY --from=bootstrap-source /out/licenses/ /usr/share/doc/rancho-bootstrap/
 COPY port-bootstrap-python.py /tmp/
 RUN --network=none python3 /tmp/port-bootstrap-python.py && \
     rm /tmp/port-bootstrap-python.py && \
+    test -x /register.py && test -x /resolve_url.py && \
     python3 -m py_compile /register.py /resolve_url.py && \
     python3 -c 'import cattle, gdapi' && bash -n /run.sh
 ENV RANCHER_AGENT_IMAGE=rancher/agent:v1.2.11

@@ -175,6 +175,14 @@ docker build -f "$fixture/Dockerfile.modern-bootstrap" -t rancho-agent-modern-bo
 docker tag rancho-agent-modern-bootstrap:local rancher/agent:v1.2.11
 ```
 
+The bootstrap image builds the network wrapper `r` from pinned sources with CGO disabled. It packages the corresponding notices for Weave, its linked dependencies, the Rancher registration scripts and the Python clients under `/usr/share/doc/rancho-bootstrap`. Test that the wrapper waits for an IPv4 default route in a disposable Docker namespace before registering a host.
+
+```sh
+docker run --rm -i --pull=never --network none --cap-drop ALL --cap-add NET_ADMIN \
+  --entrypoint /bin/sh rancho-agent-modern-bootstrap:local -s < \
+  console/tests/legacy-host/smoke-modern-bootstrap.sh
+```
+
 Prepare the catalog at the pinned upstream commit, apply the standalone patch, commit the exact four changed templates and create a bare clone with a master branch. Set `RANCHO_CATALOG_DIRECTORY` to the absolute path of that clone in the Compose environment file. The catalog override starts the local library and Compose executor. The gateway is bound to loopback by default. For a remote disposable host use a reachable HTTPS endpoint with a certificate trusted by the disposable host.
 
 ```sh
