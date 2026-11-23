@@ -1,3 +1,7 @@
+# Checkpoint — schema runtime e upgrade original20 (05/11/2026)
+
+Recorte77:9 JDBC reais e138 configuração/64 combinações;001 embarcada/versionada, flagfalse e checksum/lock/estrutura validados. Engine oficial original20→custom sobre mesmos volumes copiados passou login/OIDC/PKCE/zero acesso, restart idempotente, recusa de checksum inválido e rollback por snapshot original. Cleanup e origem IDs/HTTP preservados. SQL estava indevidamente ignorado: corrigido; helper Git trata caminhos longos e build limpo do índice+patch funciona sem artefatos privados. Frontend605/71 + TypeScript/Vite,40 testes Python e contratos Java12 readiness/31 logout/10 writer. Nova imagem validada em cópias; não habilitada na origem. Roadmap48 segue aberto; próximo RBAC03/grants e demais gates.
+
 # Checkpoint — engines recuperados (05/11/2026)
 
 Recuperação76 passou36 testes Python,5 volumes,4 imagens criptografadas e15 checks reais: admin Rancher/Keycloak restaurados, OIDC-PKCE, novo usuário sem acesso/environment, inventário7envs e checksums de grants preservados. Engines em namespace loopback sem egress/portas/storage da origem.3 containers/5 volumes próprios removidos; origem com IDs e HTTP preservados. Import de imagem scratch própria provou perda/recuperação sem remover imagens da aplicação. Ainda não é migração original20envs+upgrade/rollback de engine nem aceite integral48. Próximo: versionamento runtime de schema/migração de grants e gates operacionais abertos.

@@ -23,6 +23,7 @@ test-results.json
 backups/
 migration-runs/
 *.sql
+!migration/sql/*.sql
 *.dump
 *.dpapi
 *.tar

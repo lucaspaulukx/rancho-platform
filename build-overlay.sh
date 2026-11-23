@@ -11,6 +11,8 @@ printf '%s\n' "$AUTH/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java" "$
 printf '%s\n' "$ROOT/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java" >> /lab/sources
 /usr/lib/jvm/zulu-8-amd64/bin/javac -encoding UTF-8 -source 8 -target 8 -cp "$WAR/WEB-INF/lib/*:$WAR/WEB-INF/jetty/*" -d /lab/classes @/lab/sources
 cd /lab/classes
+mkdir -p io/cattle/platform/iaas/api/auth/localrbac/migrations
+cp /lab/schema/001-local-groups.sql io/cattle/platform/iaas/api/auth/localrbac/migrations/001-local-groups.sql
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-iaas-auth-logic-0.5.0-SNAPSHOT.jar" io/cattle/platform/iaas/api/auth
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-app-config-0.5.0-SNAPSHOT.jar" io/cattle/platform/app
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$WAR/WEB-INF/lib/cattle-iaas-api-logic-0.5.0-SNAPSHOT.jar" io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy*.class

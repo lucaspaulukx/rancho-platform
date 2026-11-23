@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { version } from '../../package.json';
 const labels: Record<string, string> = {
   CUSTOMIZATION_ENABLED: 'Customização da instância',
+  SCHEMA_MIGRATIONS_ENABLED: 'Versionamento das tabelas da comunidade',
   LOCAL_RBAC_ENABLED: 'Grupos e RBAC local',
   NO_ACCESS_VIEW_ENABLED: 'Tela sem acesso',
   ENV_CREATION_ADMIN_ONLY: 'Criação de environments somente por administradores',

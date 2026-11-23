@@ -70,6 +70,7 @@ async function main() {
   const bearer = { Authorization: 'Bearer ' + master.data.access_token };
   const realm = await request('http://localhost:18081/admin/realms/rancher-lab', { jar: 'master', headers: { ...bearer } });
   check('restored dedicated realm', realm.status === 200 && realm.data.realm === 'rancher-lab');
+  if (!config.localOnly) {
   stage = 'new-oidc-identity';
   const username = 'recovery-copy-' + crypto.randomBytes(8).toString('hex');
   const password = crypto.randomBytes(32).toString('base64url');
@@ -93,8 +94,9 @@ async function main() {
   check('new user cannot create environment', forbidden.status === 403);
   const after = await request('http://localhost:8080/v2-beta/projects?all=true&limit=-1');
   check('OIDC first login created no environment', after.status === 200 && after.data.data.length === config.expectedEnvironments);
+  }
   stage = 'revoke-copy-sessions';
-  for (const jar of ['oidc', 'native']) {
+  for (const jar of config.localOnly ? ['native'] : ['oidc', 'native']) {
     const revoked = await request('http://localhost:8080/v2-beta/token/current', { jar, method: 'DELETE' });
     check('recovered ' + jar + ' session revoked', [200, 202, 204].includes(revoked.status));
   }

@@ -14,8 +14,12 @@ vi.mock('../state', () => ({
       ),
     },
     server: {
-      requested: { OIDC_ENABLED: true },
-      effective: { OIDC_ENABLED: true, unexpectedSecret: 'synthetic-private' },
+      requested: { OIDC_ENABLED: true, SCHEMA_MIGRATIONS_ENABLED: false },
+      effective: {
+        OIDC_ENABLED: true,
+        SCHEMA_MIGRATIONS_ENABLED: false,
+        unexpectedSecret: 'synthetic-private',
+      },
       available: { OIDC_ENABLED: true },
       clientSecret: 'synthetic-private',
     },
@@ -41,6 +45,7 @@ describe('Sobre e capacidades', () => {
     render(<About open onClose={vi.fn()} />);
     await userEvent.setup().click(screen.getByRole('tab', { name: 'Capacidades' }));
     expect(screen.getByText('Autenticação OIDC')).toBeInTheDocument();
+    expect(screen.getByText('Versionamento das tabelas da comunidade')).toBeInTheDocument();
     expect(screen.queryByText(/synthetic-private|unexpectedSecret/)).not.toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     expect(screen.getByText('Chaves de API')).toBeInTheDocument();
