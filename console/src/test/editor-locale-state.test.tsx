@@ -163,6 +163,7 @@ function Editor() {
   return (
     <>
       <button onClick={() => setLocale('en-US')}>English</button>
+      <button onClick={() => setLocale('fr-FR')}>Français</button>
       <CapabilityEditor
         label="Capabilities"
         value={value}
@@ -310,7 +311,7 @@ it('preserves a selected native capability and its control when switching locale
       policy={{
         enabled: true,
         defaultLocale: 'pt-BR',
-        availableLocales: ['pt-BR', 'en-US'],
+        availableLocales: ['pt-BR', 'en-US', 'fr-FR'],
         selectable: true,
         detectBrowser: false,
         preview: true,
@@ -331,4 +332,11 @@ it('preserves a selected native capability and its control when switching locale
   expect((memory as HTMLInputElement).validationMessage).toContain('Enter nonnegative memory');
   expect(control).toHaveValue('ALL');
   expect(screen.getByTestId('native')).toHaveTextContent('["ALL"]');
+  await user.click(screen.getByRole('button', { name: 'Français' }));
+  expect(await screen.findByLabelText('Memory : valeur')).toBe(memory);
+  expect(memory).toHaveValue('0invalid');
+  expect((memory as HTMLInputElement).validationMessage).toBe(
+    'Saisissez une valeur de mémoire positive ou nulle, sans notation exponentielle.',
+  );
+  expect(control).toHaveValue('ALL');
 });
