@@ -36,6 +36,8 @@ python -m unittest discover -s tests -p test_repository_layout.py
 python -m unittest discover -s tests -p test_artifact_inventory.py
 ```
 
+Execute `python scripts/check_backend_contracts.py` com um JDK que suporte `javac --release 8`. O script compila as classes selecionadas direto do patch exportado do Cattle e executa os contratos de configuração, logout OIDC e disponibilidade do provedor sem laboratório ou clone do upstream.
+
 O scanner de conteúdo confere o índice; revise alterações não selecionadas separadamente. Scanner de histórico e revisão de idiomas têm limites explícitos e não certificam ausência de secrets, qualidade da tradução, conformidade de licenças ou prontidão produtiva.
 
 ## Backend e migração
