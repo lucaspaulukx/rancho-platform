@@ -1,0 +1,76 @@
+{
+  "realm": "rancher-lab",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "rancher16",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "${OIDC_CLIENT_SECRET}",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:18080/oidc/callback",
+        "http://localhost:18090/oidc/callback"
+      ],
+      "webOrigins": [
+        "http://localhost:18080",
+        "http://localhost:18090"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:18090/console/login?oidc_logout=returned"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "sem-acesso",
+      "enabled": true,
+      "firstName": "sem-acesso",
+      "lastName": "Laboratorio",
+      "email": "sem-acesso@example.invalid",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${LAB_USER_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "leitor",
+      "enabled": true,
+      "firstName": "leitor",
+      "lastName": "Laboratorio",
+      "email": "leitor@example.invalid",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${LAB_USER_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "operador",
+      "enabled": true,
+      "firstName": "operador",
+      "lastName": "Laboratorio",
+      "email": "operador@example.invalid",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${LAB_USER_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

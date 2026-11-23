@@ -155,7 +155,7 @@ Próximo trabalho: completar expiração real de JWT/troca de contexto em F7; po
 Construir um **novo frontend independente** para Rancher 1.6.30, preservando as regras e funções do backend. O usuário autorizou desenvolvimento e testes locais até concluir todas as fases documentadas.
 
 - **Não continuar alterando o frontend Ember original.** Desenvolver em `console/`.
-- Manter **logo/identidade original do Rancher junto da logo comunidade**. Não substituir a identidade Rancher.
+- Manter **logo/identidade original do Rancher e assinatura comunitária opcional**. Não substituir a identidade Rancher.
 - Toda customização deve permitir ativar/desativar, com temas configuráveis e componentes reutilizáveis.
 - Sidebar/navbar/AppShell compartilhados nas telas autenticadas. Login usa AuthLayout comum.
 - Preservar a experiência de **operar tudo de uma tela**, organizada por environment → stack → serviço → container, com drawers para detalhes, ações, logs e terminal.
@@ -163,7 +163,7 @@ Construir um **novo frontend independente** para Rancher 1.6.30, preservando as 
 - Novo usuário começa sem acesso e sem environment pessoal automático; mostrar acesso pendente.
 - OIDC com Keycloak, modo exclusivo e autologin configuráveis; autorização deve existir no backend.
 - O usuário quer **todas as funções do Rancher**, não apenas um dashboard ou CRUD genérico. Não declarar fase concluída só porque existe uma rota/formulário.
-- Não fazer push, merge, release ou implantação produtiva por inferência. Não modificar o Rancher Console de referência.
+- Não fazer push, merge, release ou implantação produtiva por inferência. Não modificar outros projetos.
 
 ## 2. Workspace e mapa
 

@@ -22,12 +22,12 @@ Backend sources are pinned by commit in `upstream.json`; project changes are sto
 
 ## Local laboratory
 
-Do not point these commands at an existing production database. The laboratory initializes disposable credentials and resources. Existing installations must use the migration guide and a restored isolated copy before considering cutover.
+Do not point these commands at an existing production database. The laboratory initializes disposable credentials and resources. Existing credentials and realm files are preserved; PlanOnly makes no changes. Existing installations must use the migration guide and a restored isolated copy before considering cutover.
 
 ```powershell
-python ensure-lab-network.py
+./Start-Lab.ps1 -PlanOnly
 ./Start-Lab.ps1
-docker compose -f compose.yaml -f compose.console.yaml up -d --build console
+python tests/integration.py
 ```
 
 - Modern console: http://localhost:18090/console/

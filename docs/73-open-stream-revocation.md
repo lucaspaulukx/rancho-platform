@@ -27,3 +27,13 @@ Matriz real no mesmo artefato: flag on→handshake101, evento anterior recebido,
 Uma repetição intermediária foi invalidada: reinício do backend antes do fim do cleanup. Stack exata recuperada e baseline preservado, sem contar a tentativa como aceite. A limpeza de uma sessão controle perdida nessa interrupção não foi confirmada; não revogar sessões administrativas indistintamente para ocultar esse limite. Harness passou a registrar falha/cleanup e revogar sessões mesmo se a remoção atrasar.
 
 Ainda faltam: matriz real de remoção de grant/desativação/expiração local+OIDC, carga, API keys, logs/exec/métricas. OBS02 inteiro continua parcial.
+
+## Matriz ampliada aceita — subscribe UI
+
+Quatro cenários adicionais passaram: retirada do único grant readonly de um grupo próprio; desativação de conta própria; expiração real45s de sessão local; expiração real45s de sessão OIDC. Todos receberam evento próprio antes, fecharam1000, não receberam evento posterior e recusaram nova conexão. No grant, GET do project404 e handshake403; nos demais,401. Configuração de validade foi restaurada exatamente antes da espera, sem adulterar relógio/cookie. Não isola contribuição da expiração do registro versus exp do JWE.
+
+Grupos, contas, credenciais, usuários Keycloak, vínculos OIDC e stacks próprios foram limpos. Hashes dos registros anteriores e configuração foram preservados. Manifestos de recuperação ausentes no fim. A limpeza reativa somente a conta própria quando necessário para encerrar sua sessão, antes da remoção definitiva. Sessão do controlador e do helper de cleanup também são invalidadas.
+
+Harness OIDC corrigido: usar accountId da resposta POST do login, não GET token que pode retornar metadado sem seleção. Keycloak deste laboratório não preservou atributo de usuário não gerenciado; ownership usa username aleatório, lastname exata e mapeamento issuer/sub próprio. Renovar token administrativo do IdP imediatamente antes do cleanup. Aceitar tombstone nativo removed/purged apenas com ID/nome/descrição próprios e removed não nulo. Tentativas anteriores com falha de harness/cleanup foram recuperadas e não contam como aceite.
+
+OBS02 permanece parcial para credenciais técnicas e transportes de logs/exec/métricas. Carga, filas anteriores à revogação e latência de fechamento ficam em OBS03. Nenhuma alteração em grants/usuários existentes foi necessária para os cenários aceitos.

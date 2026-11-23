@@ -100,7 +100,7 @@ lines.on('line', (line) => {
       response.destroy();
       finish();
     });
-    timer = setTimeout(finish, 45000);
+    timer = setTimeout(finish, 90000);
   } catch {
     emit({ type: 'probe-error' });
     finish();
