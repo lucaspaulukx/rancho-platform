@@ -291,7 +291,7 @@ export const faIR = {
   'auth.methodsUnavailable': 'بررسی روش‌های ورود ممکن نشد.',
   'auth.retry': 'تلاش دوباره',
   'auth.checkingAccess': 'در حال بررسی دسترسی…',
-  'auth.keycloakLogin': 'ورود با Keycloak',
+  'auth.ssoLogin': 'ورود با SSO',
   'auth.localAlternative': 'یا از حساب محلی خود استفاده کنید',
   'auth.username': 'نام کاربری',
   'auth.password': 'گذرواژه',

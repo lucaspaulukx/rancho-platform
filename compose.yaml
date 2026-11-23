@@ -10,12 +10,11 @@ services:
       - rancher-state:/var/lib/cattle
       - rancher-db:/var/lib/mysql
     environment:
-      RANCHER_OIDC_ISSUER: http://localhost:18081/realms/rancher-lab
-      RANCHER_OIDC_CLIENT_ID: rancher16
-      RANCHER_OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
-      RANCHER_OIDC_CALLBACK: http://localhost:18080/oidc/callback
-      RANCHER_OIDC_BACKCHANNEL: http://keycloak:8080/realms/rancher-lab
-      RANCHER_LAB_ALLOW_HTTP: "true"
+      RANCHER_OIDC_ISSUER: ${RANCHER_OIDC_ISSUER:-}
+      RANCHER_OIDC_CLIENT_ID: ${RANCHER_OIDC_CLIENT_ID:-}
+      RANCHER_OIDC_CLIENT_SECRET: ${RANCHER_OIDC_CLIENT_SECRET:-}
+      RANCHER_OIDC_CALLBACK: ${RANCHER_OIDC_CALLBACK:-}
+      RANCHER_OIDC_BACKCHANNEL: ${RANCHER_OIDC_BACKCHANNEL:-}
       RANCHER_CUSTOMIZATION_ENABLED: ${RANCHER_CUSTOMIZATION_ENABLED:-true}
       RANCHER_METRICS_PAYLOAD_TRANSPORT_ENABLED: ${RANCHER_METRICS_PAYLOAD_TRANSPORT_ENABLED:-false}
       RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED: ${RANCHER_HOST_STREAM_SESSION_GUARD_ENABLED:-false}
@@ -30,7 +29,7 @@ services:
       RANCHER_CATALOG_WRITE_GUARD_ENABLED: ${RANCHER_CATALOG_WRITE_GUARD_ENABLED:-true}
       RANCHER_SUBSCRIPTION_SESSION_GUARD_ENABLED: ${RANCHER_SUBSCRIPTION_SESSION_GUARD_ENABLED:-false}
       RANCHER_SESSION_ACCOUNT_GUARD_ENABLED: ${RANCHER_SESSION_ACCOUNT_GUARD_ENABLED:-true}
-      RANCHER_OIDC_ENABLED: ${RANCHER_OIDC_ENABLED:-true}
+      RANCHER_OIDC_ENABLED: ${RANCHER_OIDC_ENABLED:-false}
       RANCHER_OIDC_FEDERATED_LOGOUT_ENABLED: ${RANCHER_OIDC_FEDERATED_LOGOUT_ENABLED:-false}
       RANCHER_OIDC_LOGIN_PREFLIGHT_ENABLED: ${RANCHER_OIDC_LOGIN_PREFLIGHT_ENABLED:-false}
       RANCHER_MODERN_UI_ENABLED: ${RANCHER_MODERN_UI_ENABLED:-false}
@@ -40,31 +39,11 @@ services:
       default:
         ipv4_address: ${RANCHER_LAB_SERVER_IPV4:-172.21.0.4}
     mem_limit: 2g
-    depends_on:
-      - keycloak
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.8.2@sha256:c68e286cacd87b942ac1939a0a1481461109d6acd3a57dc496969a319a76bbf0
-    container_name: rancher16-keycloak-lab
-    command: ["start-dev", "--import-realm"]
-    environment:
-      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
-      LAB_USER_PASSWORD: ${LAB_USER_PASSWORD}
-      KC_BOOTSTRAP_ADMIN_USERNAME: labadmin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_HOSTNAME: http://localhost:18081
-      KC_DB_USERNAME: sa
-      KC_DB_PASSWORD: password
-    ports:
-      - "127.0.0.1:18081:8080"
-    volumes:
-      - keycloak-data:/opt/keycloak/data
-      - ./keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
-    mem_limit: 1g
+
 volumes:
   rancher-db:
     external: true
     name: rancher16-rbac-lab-db
-  keycloak-data:
   rancher-state:
 
 networks:

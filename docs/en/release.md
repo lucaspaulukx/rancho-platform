@@ -63,6 +63,8 @@ For the [synthetic upgrade and backend rollback rehearsal](testing.md#original-e
 
 ## Experimental single-node installation
 
+For an existing Rancher installation, review [existing hosts and Docker versions](migration.md#existing-hosts-and-docker-versions) before selecting the modern Cattle catalog.
+
 Build the runtime and console from the same checkout. Run the pinned upstream preparation above before building the root Dockerfile.
 
 ```sh
@@ -74,6 +76,8 @@ docker build -t rancho-console:local console
 ```
 
 Set a unique `RANCHO_DB_PASSWORD` in the local env file and protect that file. The console is available on loopback at `http://localhost:18090/console/`. On a fresh database, initialize local administrator authentication before exposing the console through a network proxy. OIDC starts disabled. To enable it, set the issuer, client ID, client secret and callback, and register the callback at the console origin in the identity provider. Use HTTPS for network access. Run the deployment with one Rancher server replica.
+
+Configure [an existing OIDC provider](configuration.md#external-openid-connect-provider) if you want SSO. The example covers a single-tenant Microsoft Entra ID application.
 
 For the optional Ubuntu 24.04 Cattle healthcheck image, configure `nofile` soft and hard limits of 32768 on the **healthcheck service** in the isolated catalog. The integration on Docker 29 confirmed those limits reached the container and HAProxy exposed its stats socket. Reproduce a clean start and reload in a disposable container with:
 

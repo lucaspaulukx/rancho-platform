@@ -30,7 +30,7 @@ for user in realm.get('users',[]):
  for credential in user.get('credentials',[]):
   if credential.get('type')=='password':credential['value']='${LAB_USER_PASSWORD}'
 realm_path.write_text(json.dumps(realm,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
-p=ROOT/'compose.yaml';compose=p.read_text(encoding='utf-8');needle='      KC_BOOTSTRAP_ADMIN_USERNAME: labadmin\n';assert needle in compose
+p=ROOT/'compose.oidc-test.yaml';compose=p.read_text(encoding='utf-8');needle='      KC_BOOTSTRAP_ADMIN_USERNAME: labadmin\n';assert needle in compose
 if '      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}' not in compose:compose=compose.replace(needle,'      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}\n      LAB_USER_PASSWORD: ${LAB_USER_PASSWORD}\n'+needle)
 p.write_text(compose,encoding='utf-8')
 path='/realms/rancher-lab/protocol/openid-connect/token/introspect'

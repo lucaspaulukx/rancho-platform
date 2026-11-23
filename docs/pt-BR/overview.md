@@ -30,7 +30,7 @@ A coluna inicial mostra as varreduras anteriores dos respectivos componentes. As
 ## Funcionalidades
 
 - **Operação de workloads** · Inspecione stacks e containers, abra streams e execute as ações disponíveis no Rancher sem sair da tela.
-- **Gestão de acesso** · Conceda permissões por ambiente com grupos locais e, opcionalmente, entre com um provedor OIDC como o Keycloak.
+- **Gestão de acesso** · Conceda permissões por ambiente com grupos locais e, opcionalmente, entre com um provedor OIDC existente.
 - **Ensaio de migração** · Verifique o banco de origem, faça backup e ensaie restauração e rollback em isolamento. [Guia de migração](migration.md)
 
 ## Documentação
@@ -76,11 +76,10 @@ Compile e execute o perfil de nó único com o [guia de instalação da beta](re
 
 Revise o plano e as [fronteiras de migração/recuperação](migration.md). Credenciais/realm existentes são preservados; credenciais geradas ficam no `.env` ignorado. Não conecte laboratório descartável a dados ou agentes produtivos.
 
-Em um laboratório descartável recém-criado, execute `python tests/integration.py` para inicializar a autenticação local e criar os exemplos de RBAC. Entre no console como `labadmin` com a senha `RANCHER_ADMIN_PASSWORD` do seu `.env` local.
+Em um laboratório descartável novo, execute `python tests/integration.py --local-auth-only` para inicializar a autenticação local. Consulte o [guia de OIDC externo](configuration.md#provedor-openid-connect-externo) para configurar o SSO. Use o usuário `labadmin` e a senha `RANCHER_ADMIN_PASSWORD` do arquivo `.env`.
 
 - Console moderna: http://localhost:18090/console/
 - Rancher clássico: http://localhost:18080/
-- Keycloak local: http://localhost:18081/
 
 Veja o [guia da console](console.md) para desenvolvimento e [recuperação](recovery.md) para manutenção. Build do frontend não prova efeitos físicos ou migração completa.
 

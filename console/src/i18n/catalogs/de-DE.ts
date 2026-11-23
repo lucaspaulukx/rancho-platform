@@ -2840,7 +2840,7 @@ export const deDE = {
   'auth.methodsUnavailable': 'Die Anmeldemethoden konnten nicht überprüft werden.',
   'auth.retry': 'Erneut versuchen',
   'auth.checkingAccess': 'Zugriff wird geprüft…',
-  'auth.keycloakLogin': 'Mit Keycloak anmelden',
+  'auth.ssoLogin': 'Mit SSO anmelden',
   'auth.localAlternative': 'oder Ihr lokales Konto verwenden',
   'auth.username': 'Benutzername',
   'auth.password': 'Passwort',

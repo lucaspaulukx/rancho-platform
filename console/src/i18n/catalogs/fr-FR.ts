@@ -2804,7 +2804,7 @@ export const frFR = {
   'auth.methodsUnavailable': 'Impossible de vérifier les méthodes de connexion.',
   'auth.retry': 'Réessayer',
   'auth.checkingAccess': 'Vérification de l’accès…',
-  'auth.keycloakLogin': 'Se connecter avec Keycloak',
+  'auth.ssoLogin': 'Se connecter avec le SSO',
   'auth.localAlternative': 'ou utilisez votre compte local',
   'auth.username': 'Nom d’utilisateur',
   'auth.password': 'Mot de passe',

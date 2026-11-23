@@ -48,7 +48,7 @@ async function context(preflight) {
     held = r;
   });
   await p.goto('http://localhost:18090/console/login');
-  await p.getByRole('button', { name: 'Entrar com Keycloak', exact: true }).click();
+  await p.getByRole('button', { name: 'Entrar com SSO', exact: true }).click();
   const deadline = Date.now() + 5000;
   while (!held && Date.now() < deadline) await p.waitForTimeout(25);
   assert.ok(held);
@@ -77,7 +77,7 @@ async function context(preflight) {
     return r.fulfill({ status: 503, json: { ready: false, checked: true } });
   });
   await p.goto('http://localhost:18090/console/login');
-  await p.getByRole('button', { name: 'Entrar com Keycloak', exact: true }).click();
+  await p.getByRole('button', { name: 'Entrar com SSO', exact: true }).click();
   await p.locator('input[name="username"]').waitFor();
   assert.equal(probes, 0);
   check('feature off uses direct OIDC navigation without a readiness request');

@@ -33,7 +33,7 @@ function check(name) {
   });
   const p = await c.newPage();
   await p.goto('http://localhost:18090/console/login');
-  await p.getByRole('button', { name: 'Entrar com Keycloak', exact: true }).waitFor();
+  await p.getByRole('button', { name: 'Entrar com SSO', exact: true }).waitFor();
   assert.equal(await p.getByLabel('Usuário', { exact: true }).count(), input.exclusive ? 0 : 1);
   check(input.mode + ': login policy renders expected methods');
   await openKeycloakLogin(p);

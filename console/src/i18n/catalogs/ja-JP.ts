@@ -288,7 +288,7 @@ export const jaJP = {
   'auth.methodsUnavailable': 'ログイン方法を確認できませんでした。',
   'auth.retry': '再試行',
   'auth.checkingAccess': 'アクセス権を確認しています…',
-  'auth.keycloakLogin': 'Keycloak でログイン',
+  'auth.ssoLogin': 'SSO でログイン',
   'auth.localAlternative': 'またはローカルアカウントを使用',
   'auth.username': 'ユーザー名',
   'auth.password': 'パスワード',

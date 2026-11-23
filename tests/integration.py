@@ -1,6 +1,7 @@
 """Disposable local integration tests; never points at a remote Rancher.
 Uses browser-style authorization-code OIDC, including state cookies and PKCE.
 """
+import argparse
 import importlib.util
 import html
 import http.cookiejar
@@ -83,6 +84,10 @@ def check(name, condition=True):
     print('PASS:', name, flush=True)
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--local-auth-only', action='store_true',
+                        help='Initialize and verify the local administrator without an OIDC provider')
+    args = parser.parse_args()
     initial = Session()
     for _ in range(60):
         try:
@@ -94,6 +99,9 @@ def main():
     admin = Session()
     admin.login('labadmin', CONFIG['RANCHER_ADMIN_PASSWORD'])
     check('Local administrator login')
+    if args.local_auth_only:
+        admin.api('token/current', method='DELETE')
+        return
     admin.api('localGroups')
     check('Native localGroups API registered')
     projects = admin.api('projects?all=true&limit=-1')['data']

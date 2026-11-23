@@ -35,7 +35,7 @@ let visualDiagnostic = null;
   const base = 'http://localhost:18090';
   async function oidcLogin(fill = true) {
     await page.goto(base + '/console/login?signedOut=true');
-    await page.getByRole('button', { name: 'Entrar com Keycloak', exact: true }).click();
+    await page.getByRole('button', { name: 'Entrar com SSO', exact: true }).click();
     if (fill) {
       await page.waitForURL((url) => url.origin === 'http://localhost:18081');
       await page.locator('input[name="username"]').fill(input.username);
@@ -138,7 +138,7 @@ let visualDiagnostic = null;
       assert.deepEqual(violations, []); assert.equal(overflow, false);
       layouts.push({ theme, width, violations, overflow });
     }
-    await page.getByRole('button', { name: 'Entrar com Keycloak', exact: true }).click();
+    await page.getByRole('button', { name: 'Entrar com SSO', exact: true }).click();
     await page.waitForURL((url) => url.origin === 'http://localhost:18081');
     await page.locator('input[name="username"]').waitFor();
     await page.locator('input[name="password"]').waitFor();
