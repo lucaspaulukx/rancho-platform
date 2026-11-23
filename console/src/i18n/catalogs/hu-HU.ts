@@ -1,4 +1,93 @@
 export const huHU = {
+  'resourceLimits.process.title': 'Folyamatkorlátok',
+  'resourceLimits.process.description':
+    'Sorok hiányában a Docker korlátai érvényesek. A mértékegység az erőforrástól függ. A -1 korlátlan értéket jelent. A módosítások az új konténerekre érvényesek.',
+  'resourceLimits.process.legacy':
+    'Nem kompatibilis korábbi formátum. A konfiguráció megőrzéséhez nyissa meg újra a natív szerkesztőben.',
+  'resourceLimits.process.row': '{index}. korlát',
+  'resourceLimits.process.resource': 'A(z) {index}. korlát erőforrása',
+  'resourceLimits.process.select': 'Kiválasztás…',
+  'resourceLimits.process.unrecognized': 'Ismeretlen: {name}',
+  'resourceLimits.process.soft': '{index}. puha korlát',
+  'resourceLimits.process.hard': '{index}. kemény korlát',
+  'resourceLimits.process.integerHint': 'Egész szám -1 és 2147483647 között.',
+  'resourceLimits.process.removeRow': 'A(z) {index}. korlát eltávolítása',
+  'resourceLimits.process.remove': 'Eltávolítás',
+  'resourceLimits.process.add': 'Folyamatkorlát hozzáadása',
+  'resourceLimits.memory.value': '{label}: érték',
+  'resourceLimits.memory.unit': '{label}: mértékegység',
+  'resourceLimits.memory.hint':
+    'Nullánál továbbra sincs explicit korlát. A foglalás nem haladhatja meg a pozitív korlátot.',
+
+  'schedulingEditor.title': 'Ütemezési affinitások',
+  'schedulingEditor.description':
+    'Az erőforrás elhelyezéséhez kombinálja a szabályokat. Az előnyben részesített feltételek teljesítése nem garantált. A kötelező szabályok megakadályozhatják az ütemezést.',
+  'schedulingEditor.global':
+    'Globális szolgáltatás: csak gazdagépcímkéket használjon kötelező vagy kizáró szabályokkal. A globális skálázás megmarad.',
+  'schedulingEditor.legacy':
+    'A szerkesztő nem tud értelmezni néhány korábbi szabályt. Szerkessze a natív címkéket, vagy kapcsolja ki a strukturált szerkesztőt. Egyetlen szabály sem lett átalakítva.',
+  'schedulingEditor.rule': '{index}. affinitás',
+  'schedulingEditor.target': 'Affinitás célja',
+  'schedulingEditor.condition': 'Affinitás feltétele',
+  'schedulingEditor.kind.host_label': 'Gazdagépcímke',
+  'schedulingEditor.kind.container_label': 'Konténercímke',
+  'schedulingEditor.kind.container': 'Konténer neve',
+  'schedulingEditor.mode.required': 'Egyezés kötelező',
+  'schedulingEditor.mode.exclude': 'Egyezés kizárva',
+  'schedulingEditor.mode.prefer': 'Egyezés előnyben',
+  'schedulingEditor.mode.avoid': 'Egyezés lehetőleg kerülendő',
+  'schedulingEditor.key': 'Címkekulcs',
+  'schedulingEditor.serviceHint':
+    'Szolgáltatás esetén a kulcs io.rancher.stack_service.name, az érték pedig stack/service.',
+  'schedulingEditor.container': 'Hivatkozott konténer neve',
+  'schedulingEditor.value': 'Címkeérték',
+  'schedulingEditor.remove': 'A(z) {index}. affinitás eltávolítása',
+  'schedulingEditor.removeRule': 'Szabály eltávolítása',
+  'schedulingEditor.add': 'Affinitás hozzáadása',
+  'schedulingEditor.native': 'Egyéb címkék és natív szabályok',
+
+  'healthCheckEditor.title': 'Állapot-ellenőrzés',
+  'healthCheckEditor.type': 'Ellenőrzés típusa',
+  'healthCheckEditor.disabled': 'Kikapcsolva',
+  'healthCheckEditor.tcp': 'TCP-kapcsolat',
+  'healthCheckEditor.http': 'HTTP-kérés',
+  'healthCheckEditor.port': 'Ellenőrzési port',
+  'healthCheckEditor.portHint': 'A konténer belső portja. A gazdagépen nem tesz közzé portot.',
+  'healthCheckEditor.method': 'HTTP-metódus',
+  'healthCheckEditor.version': 'HTTP-verzió',
+  'healthCheckEditor.path': 'Az ellenőrzés HTTP-útvonala',
+  'healthCheckEditor.pathHint':
+    'Példa: /health. Olyan végpontot válasszon, amely nem végez írási műveletet.',
+  'healthCheckEditor.host': 'HTTP-gazdagép (nem kötelező)',
+  'healthCheckEditor.advanced': 'Időzítés és helyreállítási szabályzat',
+  'healthCheckEditor.strategy': 'Művelet elérhetetlenség esetén',
+  'healthCheckEditor.strategy.none': 'Csak jelentés',
+  'healthCheckEditor.strategy.recreate': 'Konténer újralétrehozása',
+  'healthCheckEditor.strategy.recreateOnQuorum': 'Újralétrehozás a kvórum alapján',
+  'healthCheckEditor.quorum': 'Állapot-ellenőrzési kvórum',
+  'healthCheckEditor.notice':
+    'A Rancher a kiválasztott szabályzat alapján újralétrehozhatja a konténereket. Az ellenőrzés beállítása nem igazolja, hogy a végpont megfelelően működik.',
+  'healthCheckEditor.number.interval': 'Ellenőrzési időköz (ms)',
+  'healthCheckEditor.number.responseTimeout': 'Válasz időkorlátja (ms)',
+  'healthCheckEditor.number.initializingTimeout': 'Inicializálás időkorlátja (ms)',
+  'healthCheckEditor.number.reinitializingTimeout': 'Újrainicializálás időkorlátja (ms)',
+  'healthCheckEditor.number.healthyThreshold':
+    'Szükséges sikeres ellenőrzések a megfelelő állapothoz',
+  'healthCheckEditor.number.unhealthyThreshold':
+    'Szükséges sikertelen ellenőrzések az elérhetetlen állapothoz',
+
+  'healthCheckValidation.request': 'Ellenőrizze az állapot-ellenőrzés HTTP-kérését.',
+  'healthCheckValidation.requestFormat':
+    'Adjon meg / jellel kezdődő HTTP-útvonalat szóközök, idézőjelek és sortörések nélkül, valamint érvényes Host értéket.',
+  'healthCheckValidation.contract': 'Az állapot-ellenőrzési szerződés nem érhető el.',
+  'healthCheckValidation.field':
+    'Az állapot-ellenőrzés {name} mezője nem érhető el. Nyissa meg újra a panelt.',
+  'healthCheckValidation.integer': 'A(z) {label} értéke {min} és {max} közötti egész szám lehet.',
+  'healthCheckValidation.strategy': 'Az állapot-ellenőrzési stratégia nem érhető el.',
+  'healthCheckValidation.quorum': 'A kvórum szerződése nem érhető el.',
+  'healthCheckValidation.depth':
+    'Az állapot-ellenőrzés konfigurációja túl sok egymásba ágyazott szintet tartalmaz.',
+
   'workloadControls.cpuShares.label': 'CPU-súly',
   'workloadControls.cpuShares.hint':
     'Relatív prioritás a CPU-ért versengő feladatok között. A használatot nem korlátozza. A pozitív CPU-foglalás felülírja ezt a súlyt. A Cattle-ügynök legalább 2-es súlyt alkalmaz, nulla esetén is.',

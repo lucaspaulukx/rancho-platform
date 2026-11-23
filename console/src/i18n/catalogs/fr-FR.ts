@@ -1,4 +1,91 @@
 export const frFR = {
+  'resourceLimits.process.title': 'Limites de processus',
+  'resourceLimits.process.description':
+    'Sans ligne, les limites sont héritées de Docker. Les unités dépendent de la ressource. -1 indique une valeur illimitée. Les modifications s’appliquent aux nouveaux conteneurs.',
+  'resourceLimits.process.legacy':
+    'Ancien format incompatible. Rouvrez la configuration dans l’éditeur natif pour la conserver.',
+  'resourceLimits.process.row': 'Limite {index}',
+  'resourceLimits.process.resource': 'Ressource de la limite {index}',
+  'resourceLimits.process.select': 'Sélectionner…',
+  'resourceLimits.process.unrecognized': 'Non reconnu : {name}',
+  'resourceLimits.process.soft': 'Limite souple {index}',
+  'resourceLimits.process.hard': 'Limite stricte {index}',
+  'resourceLimits.process.integerHint': 'Entier compris entre -1 et 2147483647.',
+  'resourceLimits.process.removeRow': 'Retirer la limite {index}',
+  'resourceLimits.process.remove': 'Retirer',
+  'resourceLimits.process.add': 'Ajouter une limite de processus',
+  'resourceLimits.memory.value': '{label} : valeur',
+  'resourceLimits.memory.unit': '{label} : unité',
+  'resourceLimits.memory.hint':
+    'La valeur 0 conserve le comportement sans limite explicite. La réservation ne peut pas dépasser une limite positive.',
+
+  'schedulingEditor.title': 'Affinités de placement',
+  'schedulingEditor.description':
+    'Combinez des règles pour placer la ressource. Les préférences peuvent rester insatisfaites. Les règles obligatoires peuvent empêcher le placement.',
+  'schedulingEditor.global':
+    'Service global : utilisez uniquement des étiquettes d’hôte avec des règles obligatoires ou d’exclusion. Le dimensionnement global est conservé.',
+  'schedulingEditor.legacy':
+    'Cet éditeur ne peut pas interpréter certaines anciennes règles. Modifiez les étiquettes natives ou désactivez l’éditeur structuré. Aucune règle n’a été convertie.',
+  'schedulingEditor.rule': 'Affinité {index}',
+  'schedulingEditor.target': 'Cible de l’affinité',
+  'schedulingEditor.condition': 'Condition de l’affinité',
+  'schedulingEditor.kind.host_label': 'Étiquette d’hôte',
+  'schedulingEditor.kind.container_label': 'Étiquette de conteneur',
+  'schedulingEditor.kind.container': 'Nom du conteneur',
+  'schedulingEditor.mode.required': 'Correspondance obligatoire',
+  'schedulingEditor.mode.exclude': 'Correspondance exclue',
+  'schedulingEditor.mode.prefer': 'Correspondance souhaitée',
+  'schedulingEditor.mode.avoid': 'Correspondance à éviter',
+  'schedulingEditor.key': 'Clé de l’étiquette',
+  'schedulingEditor.serviceHint':
+    'Pour un service, utilisez la clé io.rancher.stack_service.name et la valeur stack/service.',
+  'schedulingEditor.container': 'Nom du conteneur de référence',
+  'schedulingEditor.value': 'Valeur de l’étiquette',
+  'schedulingEditor.remove': 'Retirer l’affinité {index}',
+  'schedulingEditor.removeRule': 'Retirer la règle',
+  'schedulingEditor.add': 'Ajouter une affinité',
+  'schedulingEditor.native': 'Autres étiquettes et règles natives',
+
+  'healthCheckEditor.title': 'Contrôle d’état de santé',
+  'healthCheckEditor.type': 'Type de contrôle',
+  'healthCheckEditor.disabled': 'Désactivé',
+  'healthCheckEditor.tcp': 'Connexion TCP',
+  'healthCheckEditor.http': 'Requête HTTP',
+  'healthCheckEditor.port': 'Port de contrôle',
+  'healthCheckEditor.portHint': 'Port interne du conteneur. Aucun port n’est publié sur l’hôte.',
+  'healthCheckEditor.method': 'Méthode HTTP',
+  'healthCheckEditor.version': 'Version HTTP',
+  'healthCheckEditor.path': 'Chemin HTTP du contrôle',
+  'healthCheckEditor.pathHint':
+    'Exemple : /health. Choisissez un point de terminaison qui n’effectue aucune écriture.',
+  'healthCheckEditor.host': 'Hôte HTTP (facultatif)',
+  'healthCheckEditor.advanced': 'Délais et politique de récupération',
+  'healthCheckEditor.strategy': 'Action en cas d’indisponibilité',
+  'healthCheckEditor.strategy.none': 'Signaler uniquement',
+  'healthCheckEditor.strategy.recreate': 'Recréer le conteneur',
+  'healthCheckEditor.strategy.recreateOnQuorum': 'Recréer selon le quorum',
+  'healthCheckEditor.quorum': 'Quorum du contrôle d’état de santé',
+  'healthCheckEditor.notice':
+    'Rancher peut recréer des conteneurs selon la politique sélectionnée. Configurer le contrôle ne confirme pas le bon fonctionnement du point de terminaison.',
+  'healthCheckEditor.number.interval': 'Intervalle entre les contrôles (ms)',
+  'healthCheckEditor.number.responseTimeout': 'Délai maximal de réponse (ms)',
+  'healthCheckEditor.number.initializingTimeout': 'Délai maximal d’initialisation (ms)',
+  'healthCheckEditor.number.reinitializingTimeout': 'Délai maximal de réinitialisation (ms)',
+  'healthCheckEditor.number.healthyThreshold': 'Réussites avant de déclarer l’état sain',
+  'healthCheckEditor.number.unhealthyThreshold': 'Échecs avant de déclarer l’indisponibilité',
+
+  'healthCheckValidation.request': 'Vérifiez la requête HTTP du contrôle d’état de santé.',
+  'healthCheckValidation.requestFormat':
+    'Utilisez un chemin HTTP commençant par /, sans espaces, guillemets ni sauts de ligne, et une valeur Host valide.',
+  'healthCheckValidation.contract': 'Le contrat du contrôle d’état de santé est indisponible.',
+  'healthCheckValidation.field':
+    'Le champ {name} du contrôle d’état de santé est indisponible. Rouvrez le panneau.',
+  'healthCheckValidation.integer': '{label} doit être un entier compris entre {min} et {max}.',
+  'healthCheckValidation.strategy': 'La stratégie de contrôle d’état de santé est indisponible.',
+  'healthCheckValidation.quorum': 'Le contrat du quorum est indisponible.',
+  'healthCheckValidation.depth':
+    'La configuration du contrôle d’état de santé comporte trop de niveaux d’imbrication.',
+
   'workloadControls.cpuShares.label': 'Poids du CPU',
   'workloadControls.cpuShares.hint':
     'Priorité relative lorsque plusieurs tâches se disputent le CPU. Elle ne limite pas son utilisation. Une réservation de CPU positive prime sur ce poids. L’agent Cattle applique un minimum de 2, même si la valeur est 0.',

@@ -674,4 +674,90 @@ export const ruRU = {
   'workloadControls.cpuRanges':
     'Укажите диапазоны индексов ЦП в порядке возрастания. Индексы должны быть безопасными целыми числами.',
   'workloadControls.cpuReview': 'Проверьте поле «{label}». {hint}',
+  'resourceLimits.process.title': 'Ограничения процессов',
+  'resourceLimits.process.description':
+    'Если список пуст, ограничения наследуются от Docker. Единицы зависят от ресурса. Значение -1 означает отсутствие ограничения. Изменения применяются к новым контейнерам.',
+  'resourceLimits.process.legacy':
+    'Устаревший формат несовместим с этим редактором. Откройте настройки в редакторе Rancher, чтобы сохранить конфигурацию.',
+  'resourceLimits.process.row': 'Ограничение {index}',
+  'resourceLimits.process.resource': 'Ресурс для ограничения {index}',
+  'resourceLimits.process.select': 'Выбрать…',
+  'resourceLimits.process.unrecognized': 'Не распознано: {name}',
+  'resourceLimits.process.soft': 'Мягкое ограничение {index}',
+  'resourceLimits.process.hard': 'Жёсткое ограничение {index}',
+  'resourceLimits.process.integerHint': 'Целое число от -1 до 2147483647.',
+  'resourceLimits.process.removeRow': 'Удалить ограничение {index}',
+  'resourceLimits.process.remove': 'Удалить',
+  'resourceLimits.process.add': 'Добавить ограничение процесса',
+  'resourceLimits.memory.value': '{label}: значение',
+  'resourceLimits.memory.unit': '{label}: единица измерения',
+  'resourceLimits.memory.hint':
+    'При значении 0 явное ограничение не задаётся. Резерв не может превышать положительное значение ограничения.',
+  'schedulingEditor.title': 'Правила размещения',
+  'schedulingEditor.description':
+    'Комбинируйте правила для размещения рабочей нагрузки. Предпочтения могут не соблюдаться, а обязательные правила могут помешать размещению.',
+  'schedulingEditor.global':
+    'Глобальный сервис: используйте только метки хостов с правилами обязательного совпадения или исключения. Глобальный масштаб сохраняется.',
+  'schedulingEditor.legacy':
+    'Этот редактор не распознаёт некоторые устаревшие правила. Измените исходные метки или отключите структурированный редактор. Правила не были преобразованы.',
+  'schedulingEditor.rule': 'Правило размещения {index}',
+  'schedulingEditor.target': 'Объект правила размещения',
+  'schedulingEditor.condition': 'Условие размещения',
+  'schedulingEditor.kind.host_label': 'Метка хоста',
+  'schedulingEditor.kind.container_label': 'Метка контейнера',
+  'schedulingEditor.kind.container': 'Имя контейнера',
+  'schedulingEditor.mode.required': 'Должно совпадать',
+  'schedulingEditor.mode.exclude': 'Не должно совпадать',
+  'schedulingEditor.mode.prefer': 'Желательно совпадение',
+  'schedulingEditor.mode.avoid': 'Желательно отсутствие совпадения',
+  'schedulingEditor.key': 'Ключ метки',
+  'schedulingEditor.serviceHint':
+    'Для сервиса используйте ключ io.rancher.stack_service.name и значение stack/service.',
+  'schedulingEditor.container': 'Имя контейнера для сопоставления',
+  'schedulingEditor.value': 'Значение метки',
+  'schedulingEditor.remove': 'Удалить правило размещения {index}',
+  'schedulingEditor.removeRule': 'Удалить правило',
+  'schedulingEditor.add': 'Добавить правило размещения',
+  'schedulingEditor.native': 'Другие метки и исходные правила',
+  'healthCheckEditor.title': 'Проверка работоспособности',
+  'healthCheckEditor.type': 'Тип проверки',
+  'healthCheckEditor.disabled': 'Отключено',
+  'healthCheckEditor.tcp': 'TCP-соединение',
+  'healthCheckEditor.http': 'HTTP-запрос',
+  'healthCheckEditor.port': 'Порт проверки',
+  'healthCheckEditor.portHint': 'Внутренний порт контейнера. Порт на хосте не публикуется.',
+  'healthCheckEditor.method': 'Метод HTTP',
+  'healthCheckEditor.version': 'Версия HTTP',
+  'healthCheckEditor.path': 'Путь HTTP-проверки',
+  'healthCheckEditor.pathHint':
+    'Пример: /health. Выберите конечную точку, которая не изменяет данные.',
+  'healthCheckEditor.host': 'Хост HTTP (необязательно)',
+  'healthCheckEditor.advanced': 'Интервалы и политика восстановления',
+  'healthCheckEditor.strategy': 'Действие при недоступности',
+  'healthCheckEditor.strategy.none': 'Только сообщить',
+  'healthCheckEditor.strategy.recreate': 'Пересоздать контейнер',
+  'healthCheckEditor.strategy.recreateOnQuorum': 'Пересоздать с учётом кворума',
+  'healthCheckEditor.quorum': 'Кворум работоспособных экземпляров',
+  'healthCheckEditor.notice':
+    'Rancher может пересоздавать контейнеры по выбранной политике. Настройка проверки сама по себе не подтверждает работоспособность конечной точки.',
+  'healthCheckEditor.number.interval': 'Интервал проверок (мс)',
+  'healthCheckEditor.number.responseTimeout': 'Время ожидания ответа (мс)',
+  'healthCheckEditor.number.initializingTimeout': 'Время ожидания инициализации (мс)',
+  'healthCheckEditor.number.reinitializingTimeout': 'Время ожидания повторной инициализации (мс)',
+  'healthCheckEditor.number.healthyThreshold':
+    'Число успешных проверок для признания работоспособным',
+  'healthCheckEditor.number.unhealthyThreshold':
+    'Число неудачных проверок для признания недоступным',
+  'healthCheckValidation.request': 'Проверьте HTTP-запрос для проверки работоспособности.',
+  'healthCheckValidation.requestFormat':
+    'Укажите путь HTTP, начинающийся с /, без пробелов, кавычек и переносов строк, а также допустимый Host.',
+  'healthCheckValidation.contract': 'Контракт проверки работоспособности недоступен.',
+  'healthCheckValidation.field':
+    'Поле проверки работоспособности {name} недоступно. Откройте панель заново.',
+  'healthCheckValidation.integer':
+    'Значение поля «{label}» должно быть целым числом от {min} до {max}.',
+  'healthCheckValidation.strategy': 'Стратегия проверки работоспособности недоступна.',
+  'healthCheckValidation.quorum': 'Контракт кворума недоступен.',
+  'healthCheckValidation.depth':
+    'В конфигурации проверки работоспособности слишком много уровней вложенности.',
 } as const;

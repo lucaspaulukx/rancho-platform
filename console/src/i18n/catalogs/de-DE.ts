@@ -1,4 +1,94 @@
 export const deDE = {
+  'resourceLimits.process.title': 'Prozesslimits',
+  'resourceLimits.process.description':
+    'Ohne Einträge gelten die Docker-Limits. Die Einheit hängt von der Ressource ab. -1 bedeutet unbegrenzt. Änderungen gelten für neue Container.',
+  'resourceLimits.process.legacy':
+    'Inkompatibles Altformat. Öffnen Sie die Konfiguration erneut im nativen Editor, um sie zu erhalten.',
+  'resourceLimits.process.row': 'Limit {index}',
+  'resourceLimits.process.resource': 'Ressource für Limit {index}',
+  'resourceLimits.process.select': 'Auswählen…',
+  'resourceLimits.process.unrecognized': 'Nicht erkannt: {name}',
+  'resourceLimits.process.soft': 'Weiches Limit {index}',
+  'resourceLimits.process.hard': 'Hartes Limit {index}',
+  'resourceLimits.process.integerHint': 'Ganze Zahl von -1 bis 2147483647.',
+  'resourceLimits.process.removeRow': 'Limit {index} entfernen',
+  'resourceLimits.process.remove': 'Entfernen',
+  'resourceLimits.process.add': 'Prozesslimit hinzufügen',
+  'resourceLimits.memory.value': '{label}: Wert',
+  'resourceLimits.memory.unit': '{label}: Einheit',
+  'resourceLimits.memory.hint':
+    'Bei 0 bleibt das Verhalten ohne explizites Limit bestehen. Die Reservierung darf ein positives Limit nicht überschreiten.',
+
+  'schedulingEditor.title': 'Platzierungsaffinitäten',
+  'schedulingEditor.description':
+    'Kombinieren Sie Regeln zur Platzierung der Ressource. Präferenzen können unerfüllt bleiben. Zwingende Regeln können die Platzierung verhindern.',
+  'schedulingEditor.global':
+    'Globaler Dienst: Verwenden Sie ausschließlich Host-Labels mit zwingenden Regeln oder Ausschlussregeln. Die globale Skalierung bleibt erhalten.',
+  'schedulingEditor.legacy':
+    'Dieser Editor kann einige ältere Regeln nicht interpretieren. Bearbeiten Sie die nativen Labels oder deaktivieren Sie den strukturierten Editor. Es wurde nichts konvertiert.',
+  'schedulingEditor.rule': 'Affinität {index}',
+  'schedulingEditor.target': 'Affinitätsziel',
+  'schedulingEditor.condition': 'Affinitätsbedingung',
+  'schedulingEditor.kind.host_label': 'Host-Label',
+  'schedulingEditor.kind.container_label': 'Container-Label',
+  'schedulingEditor.kind.container': 'Containername',
+  'schedulingEditor.mode.required': 'Muss übereinstimmen',
+  'schedulingEditor.mode.exclude': 'Darf nicht übereinstimmen',
+  'schedulingEditor.mode.prefer': 'Übereinstimmung bevorzugen',
+  'schedulingEditor.mode.avoid': 'Übereinstimmung möglichst vermeiden',
+  'schedulingEditor.key': 'Label-Schlüssel',
+  'schedulingEditor.serviceHint':
+    'Für einen Dienst: io.rancher.stack_service.name mit dem Wert stack/service.',
+  'schedulingEditor.container': 'Name des Referenzcontainers',
+  'schedulingEditor.value': 'Label-Wert',
+  'schedulingEditor.remove': 'Affinität {index} entfernen',
+  'schedulingEditor.removeRule': 'Regel entfernen',
+  'schedulingEditor.add': 'Affinität hinzufügen',
+  'schedulingEditor.native': 'Weitere Labels und native Regeln',
+
+  'healthCheckEditor.title': 'Zustandsprüfung',
+  'healthCheckEditor.type': 'Prüftyp',
+  'healthCheckEditor.disabled': 'Deaktiviert',
+  'healthCheckEditor.tcp': 'TCP-Verbindung',
+  'healthCheckEditor.http': 'HTTP-Anfrage',
+  'healthCheckEditor.port': 'Prüfport',
+  'healthCheckEditor.portHint':
+    'Interner Containerport. Auf dem Host wird kein Port veröffentlicht.',
+  'healthCheckEditor.method': 'HTTP-Methode',
+  'healthCheckEditor.version': 'HTTP-Version',
+  'healthCheckEditor.path': 'HTTP-Prüfpfad',
+  'healthCheckEditor.pathHint':
+    'Beispiel: /health. Wählen Sie einen Endpunkt, der keine Schreibvorgänge auslöst.',
+  'healthCheckEditor.host': 'HTTP-Host (optional)',
+  'healthCheckEditor.advanced': 'Zeitsteuerung und Wiederherstellungsrichtlinie',
+  'healthCheckEditor.strategy': 'Aktion bei Nichtverfügbarkeit',
+  'healthCheckEditor.strategy.none': 'Nur melden',
+  'healthCheckEditor.strategy.recreate': 'Container neu erstellen',
+  'healthCheckEditor.strategy.recreateOnQuorum': 'Gemäß Quorum neu erstellen',
+  'healthCheckEditor.quorum': 'Quorum für die Zustandsprüfung',
+  'healthCheckEditor.notice':
+    'Rancher kann Container gemäß der gewählten Richtlinie neu erstellen. Die Konfiguration der Prüfung bestätigt die Funktionsfähigkeit des Endpunkts nicht.',
+  'healthCheckEditor.number.interval': 'Prüfintervall (ms)',
+  'healthCheckEditor.number.responseTimeout': 'Zeitlimit für die Antwort (ms)',
+  'healthCheckEditor.number.initializingTimeout': 'Zeitlimit für die Initialisierung (ms)',
+  'healthCheckEditor.number.reinitializingTimeout':
+    'Zeitlimit für die erneute Initialisierung (ms)',
+  'healthCheckEditor.number.healthyThreshold':
+    'Erfolgreiche Prüfungen bis zum Status „Funktionsfähig“',
+  'healthCheckEditor.number.unhealthyThreshold':
+    'Fehlgeschlagene Prüfungen bis zum Status „Nicht verfügbar“',
+
+  'healthCheckValidation.request': 'Prüfen Sie die HTTP-Anfrage der Zustandsprüfung.',
+  'healthCheckValidation.requestFormat':
+    'Verwenden Sie einen HTTP-Pfad, der mit / beginnt und keine Leerzeichen, Anführungszeichen oder Zeilenumbrüche enthält, sowie einen gültigen Host.',
+  'healthCheckValidation.contract': 'Der Vertrag für die Zustandsprüfung ist nicht verfügbar.',
+  'healthCheckValidation.field':
+    'Das Feld {name} der Zustandsprüfung ist nicht verfügbar. Öffnen Sie das Panel erneut.',
+  'healthCheckValidation.integer': '{label} muss eine ganze Zahl zwischen {min} und {max} sein.',
+  'healthCheckValidation.strategy': 'Die Strategie für die Zustandsprüfung ist nicht verfügbar.',
+  'healthCheckValidation.quorum': 'Der Vertrag für das Quorum ist nicht verfügbar.',
+  'healthCheckValidation.depth': 'Die Konfiguration der Zustandsprüfung ist zu tief verschachtelt.',
+
   'workloadControls.cpuShares.label': 'CPU-Gewichtung',
   'workloadControls.cpuShares.hint':
     'Relative Priorität bei konkurrierender CPU-Nutzung. Sie begrenzt die Nutzung nicht. Eine positive CPU-Reservierung hat Vorrang vor dieser Gewichtung. Der Cattle-Agent verwendet mindestens 2, auch wenn der Wert 0 ist.',
