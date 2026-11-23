@@ -45,3 +45,7 @@ Tests involving hosts use isolated legacy guests. A successful frontend build do
 ## License and attribution
 
 Apache-2.0; preserve [LICENSE](LICENSE), [NOTICE](NOTICE) and dependency notices. Project distribution and third-party license inventory are still part of the release gates. Never commit credentials, dumps, private keys or captured sessions.
+
+## Migration rehearsal
+
+Read the [migration guide](docs/72-migration-guide.md) before using the diagnostic/backup tool. It has passed database-only offline recovery rehearsals, including20 synthetic environments; complete state/IdP migration and production cutover are not yet accepted.

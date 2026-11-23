@@ -127,3 +127,7 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 - [Reset fisico de CPU e I/O](70-physical-cpu-reset.md)
 
 - [Distribuição comunitária e migração assistida](71-community-release-plan.md).
+
+- [Guia e ferramenta de migração](72-migration-guide.md).
+- [Revogação de streams](73-open-stream-revocation.md).
+- [Histórico Git e base comunitária](74-git-and-community-validation.md).

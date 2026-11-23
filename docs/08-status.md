@@ -1,3 +1,7 @@
+# Checkpoint — 04/11/2026
+
+Base comunitária74 e guia/ferramenta de migração72 entregues em recortes testados. Frontend595/70, TypeScript/Vite; Sobre8 + formulários4 axe/layout, rotas42. Migração17 testes +110 tabelas reais e fixture original20 environments offline: backup criptografado, integridade, restore, esquema aditivo/idempotência, rollback e cleanup aprovados. Nenhuma escrita na origem. OBS02/73 falhou nativamente: após revogar sessão, HTTP401 mas socket anterior entregou novo evento. Corrigir antes de considerar segurança de streams aceita. Roadmap48 permanece aberto; nenhuma liberação de produção.
+
 # 08 — Situação real e próxima execução
 
 ## Checkpoint vigente — CPU/IO e upgrades contextuais (26/10/2026)
