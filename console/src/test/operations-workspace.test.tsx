@@ -237,7 +237,12 @@ describe('Workspace unificado', () => {
     ];
     function SwitchLanguage() {
       const { setLocale } = useI18n();
-      return <button onClick={() => setLocale('en-US')}>English</button>;
+      return (
+        <>
+          <button onClick={() => setLocale('en-US')}>English</button>
+          <button onClick={() => setLocale('fr-FR')}>Français</button>
+        </>
+      );
     }
     const router = createMemoryRouter([{ path: '/', element: <OperationsPage /> }], {
       initialEntries: ['/?env=p1'],
@@ -248,7 +253,7 @@ describe('Workspace unificado', () => {
           enabled: true,
           preview: true,
           defaultLocale: 'pt-BR',
-          availableLocales: ['pt-BR', 'en-US'],
+          availableLocales: ['pt-BR', 'en-US', 'fr-FR'],
           selectable: true,
           detectBrowser: false,
         }}
@@ -274,8 +279,16 @@ describe('Workspace unificado', () => {
     expect(screen.getByRole('combobox', { name: 'State' })).toHaveValue('running');
     expect(panel.getAllByText('Running')).toHaveLength(2);
     expect(panel.getByText('Healthy')).toBeInTheDocument();
-    await userEvent.click(panel.getByRole('button', { name: /Actions.*web-1/ }));
-    await userEvent.click(screen.getByRole('menuitem', { name: 'Restart' }));
+    const selected = panel.getByRole('checkbox', { name: 'Select web-1' });
+    await userEvent.click(selected);
+    const route = router.state.location.search;
+    await userEvent.click(screen.getByRole('button', { name: 'Français' }));
+    expect(await panel.findByRole('checkbox', { name: 'Sélectionner web-1' })).toBe(selected);
+    expect(selected).toBeChecked();
+    expect(panel.getByRole('region', { name: 'Actions groupées' })).toBeInTheDocument();
+    expect(router.state.location.search).toBe(route);
+    await userEvent.click(panel.getByRole('button', { name: 'Actions pour web-1' }));
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Redémarrer' }));
     expect(screen.getByRole('dialog', { name: 'Operação do recurso' })).toHaveTextContent(
       'restart',
     );
