@@ -3,6 +3,7 @@
 Control session proves the same host/container remains usable after invalidation.
 No payloads/tokens in reports, subprocess arguments or persisted manifests.
 """
+import base64
 import hashlib
 import json
 import os
@@ -83,14 +84,18 @@ class Probe:
             except Exception: self.process.kill(); self.process.wait()
 
 
-def main():
+def main(*, identity_factory=None):
     assert not STATE.exists(), 'Recover previous owned host stream fixture before repeating.'
     control = shared.session()
     watched = None
+    identity = None
     stack = service = None
     probes = {}
     controls = []
     result = {'status': 'failed', 'stage': 'preflight', 'cleanupComplete': False, 'scope': 'own local admin session; raw logs/exec/container metrics; one host'}
+    def stage(value):
+        result['stage'] = value
+        print('STAGE: ' + value, flush=True)
     marker = 'console-host-stream-' + secrets.token_hex(6)
     def rows(path):
         return [value for value in control.api(BASE + path + '?limit=-1')['data'] if not value.get('removed')]
@@ -98,10 +103,15 @@ def main():
         return {v['id']: hashlib.sha256(json.dumps({k: v.get(k) for k in ('launchConfig', 'secondaryLaunchConfigs', 'scale', 'stackId')}, sort_keys=True).encode()).hexdigest()
                 for v in rows('services') if v['id'] not in exclude}
     before = service_snapshot()
-    containers_before = {value['id'] for value in rows('containers')}
-    volumes_before = {value['id'] for value in rows('volumes')}
+    initial_containers = rows('containers')
+    containers_before = {value['id'] for value in initial_containers}
+    user_containers_before = {value['id'] for value in initial_containers if not value.get('system')}
+    initial_volumes = rows('volumes')
+    volumes_before = {value['id'] for value in initial_volumes}
+    system_before = {value['id'] for value in initial_containers if value.get('system')}
+    user_volumes_before = {value['id'] for value in initial_volumes if value.get('instanceId') not in system_before}
     record = {'name': marker, 'environment': '1a12', 'baselineServices': before,
-              'baselineContainers': sorted(containers_before), 'baselineVolumes': sorted(volumes_before)}
+              'baselineContainers': sorted(containers_before), 'baselineUserContainers': sorted(user_containers_before), 'baselineVolumes': sorted(volumes_before), 'baselineUserVolumes': sorted(user_volumes_before)}
     def save(): STATE.write_text(json.dumps(record, indent=2), encoding='utf-8')
     def access(session, instance, mode):
         resource = session.api(BASE + 'containers/' + instance['id'])
@@ -120,8 +130,28 @@ def main():
                 'command': ['/bin/sh', '-c', 'while IFS= read -r value; do printf "%s\\n" "$value"; done']}
             code, value, _ = session.request(action, payload, 'POST')
         assert code in (200, 201, 202) and isinstance(value, dict) and value.get('url') and value.get('token')
+        if runtime_guard:
+            claims = json.loads(base64.urlsafe_b64decode(value['token'].split('.')[1] + '==='))
+            binding = claims['rancherStream']
+            key = next(c.value for c in session.cookies if c.name == 'token')
+            assert binding['mode'] == 'ui' and binding['projectId'] == '12' and binding['hostId'] == '1'
+            assert binding['sessionHash'] == hashlib.sha256(key.encode()).hexdigest()
+            assert key not in json.dumps(claims)
+            compact = claims['rancherStreamProof']
+            compact_claims = json.loads(base64.urlsafe_b64decode(compact.split('.')[1] + '==='))
+            assert compact_claims['rancherStream'] == binding and 'hostUuid' not in compact_claims
+            assert len(compact) <= 65536
+            result['compactSessionClaimsChecked'] = True
         return value
+    runtime_guard = False
     try:
+        import urllib.request
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        runtime_guard = json.load(opener.open('http://localhost:18080/community/host-stream-guard', timeout=5))['enabled']
+        image = subprocess.check_output(['docker', 'inspect', '--format', '{{.Image}}', 'rancher16-rbac-lab'], text=True).strip()
+        assert re.fullmatch(r'sha256:[a-f0-9]{64}', image)
+        result['runtimeImage'] = image
+        result['guardEnabled'] = runtime_guard
         host = control.api(BASE + 'hosts/1h1')
         assert host['state'] == 'active' and host['agentState'] == 'active'
         save()
@@ -142,18 +172,30 @@ def main():
         assert instance and instance['hostId'] == '1h1' and re.fullmatch(r'[a-f0-9]{64}', instance['externalId'])
         record['instance'] = instance['id']; save()
         print('PASS: own physical stream-emitter running on existing host1h1.', flush=True)
-        watched = shared.session()
+        stage('identity-setup')
+        identity = identity_factory(control) if identity_factory else None
+        watched = identity['session'] if identity else shared.session()
+        if identity: result['scope'] = identity['scope'].replace('; subscribe only', '') + '; raw logs/exec/container metrics'
         for mode in ('logs', 'exec', 'metrics'):
-            result['stage'] = mode + '-access'
+            stage(mode + '-access')
             probe = Probe(access(watched, instance, mode), watched, mode, instance, marker)
             probes[mode] = probe
-            result['stage'] = mode + '-handshake'
+            stage(mode + '-handshake')
             assert probe.wait('ready')['handshake'] == 101
-            result['stage'] = mode + '-before-frame'
+            stage(mode + '-before-frame')
             probe.wait('before')
         result['allOwnStreamsReceivedBeforeRevocation'] = True
-        assert watched.request('/v2-beta/token/current', None, 'DELETE')[0] in (200, 204)
-        result['protectedHttpAfterRevocation'] = watched.request('/v2-beta/projects')[0]
+        if runtime_guard:
+            for mode, probe in probes.items():
+                for variant in ('signature', 'proof-only', 'scope'):
+                    probe.send({'command': 'negative-handshake', 'variant': variant})
+                    code = probe.wait('negative-' + variant)['status']
+                    assert code in (401, 403, 404)
+                    result.setdefault('negativeHandshakes', {}).setdefault(mode, {})[variant] = code
+        stage('invalidate')
+        if identity: identity['invalidate']()
+        else: assert watched.request('/v2-beta/token/current', None, 'DELETE')[0] in (200, 204)
+        result['protectedHttpAfterRevocation'] = watched.request(identity['protected'] if identity else '/v2-beta/projects')[0]
         for mode, probe in probes.items():
             probe.send({'command': 'new-handshake'})
             result.setdefault('streams', {})[mode] = {'newHandshake': probe.wait('new-handshake')['status']}
@@ -175,10 +217,10 @@ def main():
             current.wait('after' if mode == 'logs' else 'before')
             result['streams'][mode]['freshControlHealthy'] = True
         time.sleep(4)
-        result['stage'] = 'measure-existing-streams'
+        stage('measure-existing-streams')
         for mode, probe in probes.items():
             result['streams'][mode].update(probe.finish())
-        result['revocationEnforced'] = result['protectedHttpAfterRevocation'] == 401 and all(
+        result['revocationEnforced'] = result['protectedHttpAfterRevocation'] in (401, 403, 404) and all(
             value['freshControlHealthy'] and value['newHandshake'] in (401, 403, 404) and value['closed'] and value['after'] == 0
             for value in result['streams'].values())
         result['status'] = 'passed' if result['revocationEnforced'] else 'failed'
@@ -189,6 +231,7 @@ def main():
         result['probeHttpStatus'] = getattr(error, 'http_status', None)
         # No exception message: native errors may contain payloads or private URLs.
     finally:
+        print('CLEANUP: own streams and workload', flush=True)
         for probe in [*probes.values(), *controls]:
             probe.close()
         try:
@@ -198,16 +241,32 @@ def main():
                 if not owned.get('removed'):
                     assert control.request(owned['actions']['remove'], {}, 'POST')[0] in (200, 201, 202, 204)
                 for attempt in range(180):
-                    if control.api(BASE + 'stacks/' + stack['id']).get('removed') and {v['id'] for v in rows('containers')} == containers_before:
+                    if control.api(BASE + 'stacks/' + stack['id']).get('removed') and not any(v['id'] == record.get('instance') for v in rows('containers')):
                         break
                     time.sleep(1)
                 assert control.api(BASE + 'stacks/' + stack['id']).get('removed')
-            result['cleanupComplete'] = service_snapshot() == before and {v['id'] for v in rows('containers')} == containers_before and {v['id'] for v in rows('volumes')} == volumes_before
+            final_containers = rows('containers')
+            final_ids = {v['id'] for v in final_containers}
+            final_user_ids = {v['id'] for v in final_containers if not v.get('system')}
+            result['systemContainerChurn'] = {
+                'removed': sorted((containers_before-final_ids)-user_containers_before),
+                'added': sorted((final_ids-containers_before)-final_user_ids)}
+            final_volumes = rows('volumes')
+            final_volume_ids = {v['id'] for v in final_volumes}
+            final_system_ids = {v['id'] for v in final_containers if v.get('system')}
+            final_user_volumes = {v['id'] for v in final_volumes if v.get('instanceId') not in (system_before | final_system_ids)}
+            result['systemVolumeChurn'] = {
+                'removed': sorted((volumes_before-final_volume_ids)-user_volumes_before),
+                'added': sorted((final_volume_ids-volumes_before)-final_user_volumes)}
+            result['cleanupComplete'] = service_snapshot() == before and final_user_ids == user_containers_before and record.get('instance') not in final_ids and final_user_volumes == user_volumes_before
             if not result['cleanupComplete']: result['status'] = 'failed'
         except Exception as error:
             result['cleanupErrorType'] = type(error).__name__; result['status'] = 'failed'
         finally:
-            for name, session in [('watched', watched), ('control', control)]:
+            if identity:
+                try: identity['prepare_cleanup']()
+                except Exception: result['identityRecoveryError'] = True; result['status'] = 'failed'
+            for name, session in [('watched', watched)]:
                 if session:
                     try:
                         if session.request('/v2-beta/projects')[0] != 401:
@@ -215,6 +274,18 @@ def main():
                         result[name + 'SessionRevoked'] = session.request('/v2-beta/projects')[0] == 401
                         if not result[name + 'SessionRevoked']: result['status'] = 'failed'
                     except Exception: result[name + 'SessionRevoked'] = False; result['status'] = 'failed'
+            if identity:
+                try:
+                    print('CLEANUP: own identity', flush=True)
+                    identity['cleanup']()
+                    result['identityFixtureCleaned'] = True
+                except Exception as error:
+                    result['identityCleanupErrorType'] = type(error).__name__; result['status'] = 'failed'
+            try:
+                control.request('/v2-beta/token/current', None, 'DELETE')
+                result['controlSessionRevoked'] = control.request('/v2-beta/projects')[0] == 401
+                if not result['controlSessionRevoked']: result['status'] = 'failed'
+            except Exception: result['controlSessionRevoked'] = False; result['status'] = 'failed'
         if result['cleanupComplete']: STATE.unlink(missing_ok=True)
         REPORT.write_text(json.dumps(result, indent=2), encoding='utf-8')
     print(json.dumps(result, indent=2), flush=True)

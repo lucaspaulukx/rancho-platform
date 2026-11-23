@@ -42,8 +42,8 @@ def short_session(admin, issue):
         STATE.unlink()
 
 
-def expiry_factory(admin, *, oidc=False):
-    context = identity_factory('grant', oidc=oidc)(admin)
+def expiry_factory(admin, *, oidc=False, role="readonly"):
+    context = identity_factory('grant', oidc=oidc, role=role)(admin)
     try:
         assert context['session'].request('/v2-beta/token/current', None, 'DELETE')[0] in (200, 204)
         watched = short_session(admin, context['renew_session'])
