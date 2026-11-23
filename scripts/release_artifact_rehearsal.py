@@ -1,4 +1,4 @@
-"""Rehearse clean installation and frontend rollback with one pinned console candidate."""
+"""Rehearse installation, migration and rollback using pinned local images."""
 
 import argparse
 import json
@@ -24,7 +24,10 @@ def run_check(arguments):
     ).stdout
 
 
-def rehearse(backend, previous, candidate, chromium, report, *, configuration_reversal=False):
+def rehearse(backend, previous, candidate, chromium, report, *, configuration_reversal=False,
+             modern_database=None, restore_image=None):
+    if bool(modern_database) != bool(restore_image) or (modern_database and configuration_reversal):
+        raise ValueError('Invalid rehearsal image combination')
     report['stage'] = 'resolve-images'
     images = {
         'backend': image_id(backend),
@@ -35,19 +38,27 @@ def rehearse(backend, previous, candidate, chromium, report, *, configuration_re
     if images['previousConsole'] == images['candidateConsole']:
         raise ValueError('Distinct console images required')
 
-    report['stage'] = 'fresh-install'
-    fresh_args = [
-        '-m', 'migration.test_fresh_install_lab',
-        '--backend-image', images['backend'],
-        '--console-image', images['candidateConsole'],
-    ]
-    if configuration_reversal:
-        fresh_args.append('--configuration-reversal')
-        report['configurationReversalPassed'] = False
-    run_check(fresh_args)
-    report['freshInstallPassed'] = True
-    if configuration_reversal:
-        report['configurationReversalPassed'] = True
+    if modern_database:
+        images['database'] = image_id(modern_database)
+        images['restore'] = image_id(restore_image)
+        report['scope'] = 'isolated first-start migration, database rollback and frontend rollback'
+        report['firstStartMigrationPassed'] = False
+        report['databaseRollbackPassed'] = False
+        report['stage'] = 'first-start-migration'
+        run_check([
+            '-m', 'migration.test_first_start_lab',
+            '--backend-image', images['backend'], '--console-image', images['candidateConsole'],
+            '--database-image', images['database'], '--restore-image', images['restore'],
+        ])
+        report['firstStartMigrationPassed'] = True
+        report['stage'] = 'database-rollback'
+        run_check([
+            '-m', 'migration.rehearse_modern_backend', '--backend-image', images['backend'],
+            '--database-image', images['database'],
+        ])
+        report['databaseRollbackPassed'] = True
+    else:
+        check_fresh_install(images, report, configuration_reversal)
 
     report['stage'] = 'frontend-rollback'
     args = [
@@ -69,6 +80,22 @@ def rehearse(backend, previous, candidate, chromium, report, *, configuration_re
     report.update(status='passed', stage='complete')
 
 
+def check_fresh_install(images, report, configuration_reversal):
+    report['stage'] = 'fresh-install'
+    report['freshInstallPassed'] = False
+    fresh_args = [
+        '-m', 'migration.test_fresh_install_lab',
+        '--backend-image', images['backend'],
+        '--console-image', images['candidateConsole'],
+    ]
+    if configuration_reversal:
+        fresh_args.append('--configuration-reversal')
+        report['configurationReversalPassed'] = False
+    run_check(fresh_args)
+    report['freshInstallPassed'] = True
+    if configuration_reversal:
+        report['configurationReversalPassed'] = True
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--backend-image', required=True)
@@ -76,18 +103,24 @@ def main():
     parser.add_argument('--candidate-console-image', required=True)
     parser.add_argument('--chromium-executable')
     parser.add_argument('--configuration-reversal', action='store_true')
+    parser.add_argument('--modern-database-image')
+    parser.add_argument('--restore-image')
     args = parser.parse_args()
+    if bool(args.modern_database_image) != bool(args.restore_image):
+        parser.error('--modern-database-image and --restore-image must be supplied together')
+    if args.modern_database_image and args.configuration_reversal:
+        parser.error('--configuration-reversal requires the embedded database rehearsal')
     report = {
         'status': 'failed',
         'scope': 'isolated fresh installation and frontend rollback',
-        'freshInstallPassed': False,
         'frontendRollbackPassed': False,
         'cleanupComplete': False,
         'completeReleaseAccepted': False,
     }
     try:
         rehearse(args.backend_image, args.previous_console_image, args.candidate_console_image,
-                 args.chromium_executable, report, configuration_reversal=args.configuration_reversal)
+                 args.chromium_executable, report, configuration_reversal=args.configuration_reversal,
+                 modern_database=args.modern_database_image, restore_image=args.restore_image)
     except Exception as error:
         report['errorType'] = type(error).__name__
     print(json.dumps(report, indent=2))
