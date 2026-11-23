@@ -185,4 +185,11 @@ export const jaJP = {
   'shell.environment.empty': '環境が見つかりません。',
   'shell.environment.manage': '環境を管理',
   'shell.environment.authorized': 'アクセス権のある環境を選択してください。',
+  'recovery.moduleTitle': 'このページを読み込めませんでした',
+  'recovery.renderTitle': 'このページを開けませんでした',
+  'recovery.moduleDescription':
+    'コンソールが更新されたか、接続が中断された可能性があります。再読み込みして最新バージョンを取得してください。このタブの未保存の変更は失われる場合があります。',
+  'recovery.renderDescription':
+    'インターフェースでエラーが発生しました。別のセクションを開くか、このページを再読み込みしてください。このタブの未保存の変更は失われる場合があります。',
+  'recovery.reload': 'コンソールを再読み込み',
 } as const;

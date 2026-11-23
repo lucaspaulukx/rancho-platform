@@ -340,7 +340,7 @@ async function main() {
     await composeSource.inputValue() === yamlDraft &&
     await workspace.locator('html').getAttribute('dir') === 'rtl');
   result.stage = 'module-load-recovery';
-  const recoveryContext = await context({ authenticated: true });
+  const recoveryContext = await context({ authenticated: true, extraLocales: ['fa-IR'] });
   await recoveryContext.addInitScript(() => {
     localStorage.setItem('rancho.console.locale.anonymous', JSON.stringify({ version: 1, locale: 'en-US' }));
   });
@@ -362,10 +362,16 @@ async function main() {
     simulatedFailures === 1 && recoveryPage.url() === recoveryUrl &&
     !await recoveryPage.getByText('synthetic-private-module-response', { exact: true }).count() &&
     await recoveryPage.locator('.sidebar').isVisible());
-  await recoveryPage.getByRole('button', { name: 'Reload console', exact: true }).click();
+  await recoveryPage.locator('.language-selector select').selectOption('fa-IR');
+  await recoveryPage.getByRole('heading', { name: 'بارگیری این صفحه ممکن نشد', exact: true }).waitFor();
+  check('an open recovery message translates into Persian without retrying the failed module',
+    simulatedFailures === 1 && recoveryPage.url() === recoveryUrl &&
+    await recoveryPage.locator('html').getAttribute('dir') === 'rtl');
+  await recoveryPage.getByRole('button', { name: 'بارگیری دوبارهٔ کنسول', exact: true }).click();
   await recoveryPage.getByRole('heading', { name: 'Audit', exact: true }).waitFor();
   check('reload recovers the actual lazy module after transport returns',
-    simulatedFailures === 1 && recoveryPage.url() === recoveryUrl);
+    simulatedFailures === 1 && recoveryPage.url() === recoveryUrl &&
+    await recoveryPage.locator('html').getAttribute('lang') === 'fa-IR');
   await closeContext(recoveryContext);
   check('no browser HTTP mutations or external navigation', result.blockedRequests === 0);
   check('no JavaScript errors', result.pageErrors === 0);

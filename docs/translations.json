@@ -68,8 +68,8 @@
         "pt-BR": "docs/pt-BR/configuration.md",
         "en": "docs/en/configuration.md"
       },
-      "reviewedSourceSha256": "ea25a0879ac409555d5f0c775458631036dee6a5ae603c37c753960343f50387",
-      "reviewedTranslationSha256": "24477f7a18872822ceb1278df4d8050c05380406d37176d6b4e3543350755db7"
+      "reviewedSourceSha256": "ca04c7575341628a4f8854928e62c3713513e82b55baf7236f1f67bbd421f158",
+      "reviewedTranslationSha256": "f51fc8ca38a35cb9eb8042c109219cd893da313752bfb13fcc49e00c7aba9485"
     },
     {
       "source": "docs/pt-BR/documentation.md",

@@ -1,4 +1,11 @@
 export const huHU = {
+  'recovery.moduleTitle': 'Az oldal nem tölthető be',
+  'recovery.renderTitle': 'Az oldal nem nyitható meg',
+  'recovery.moduleDescription':
+    'A konzol frissülhetett, vagy a kapcsolat megszakadt. Töltse újra az aktuális verzió lekéréséhez. A lap nem mentett módosításai elveszhetnek.',
+  'recovery.renderDescription':
+    'Hiba történt a felületen. Megnyithat egy másik részt, vagy újratöltheti ezt az oldalt. A lap nem mentett módosításai elveszhetnek.',
+  'recovery.reload': 'Konzol újratöltése',
   'ui.loading': 'Adatok betöltése…',
   'ui.loadFailed': 'Az adatok betöltése sikertelen.',
   'ui.retry': 'Újrapróbálkozás',

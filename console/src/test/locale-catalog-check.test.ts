@@ -62,7 +62,7 @@ describe('Registered locale catalog gate', () => {
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
     const previewScope = Object.keys(englishMessages).filter(
       (key) =>
-        /^(auth|ui|common|language|runtime|shell)\./.test(key) ||
+        /^(auth|ui|common|language|runtime|shell|recovery)\./.test(key) ||
         key === 'environment.selected' ||
         key === 'selection.count',
     );
