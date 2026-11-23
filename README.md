@@ -13,6 +13,10 @@ Operate Rancher 1.6 Docker/Cattle stacks, services and containers in one workspa
 > [!IMPORTANT]
 > Rancho is an independent community project built on the legacy Rancher 1.6 engine. The community beta targets an isolated Linux amd64 lab with a single Rancho server, MariaDB 10.11 and Docker 29 Cattle hosts.
 
+![Rancho Console showing stacks and services in one workspace](docs/images/migration-after.png)
+
+[See the migration before and after](docs/en/migration-evidence.md)
+
 ## Image security progress
 
 Trivy 0.74.0 scans of the initial lab images and subsequent candidates on November 13, 2026 reported the following critical and high package findings.

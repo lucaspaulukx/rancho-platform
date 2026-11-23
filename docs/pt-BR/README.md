@@ -4,7 +4,7 @@
 
 Escolha o idioma de cada documento. Traduções pendentes são indicadas; não representam documentação integral em inglês.
 
-Pares revisados: 15/15. Arquivos de instrução/template bilingues: 8.
+Pares revisados: 16/16. Arquivos de instrução/template bilingues: 8.
 
 | Documento | Português (Brasil) | English |
 |---|---|---|
@@ -16,6 +16,7 @@ Pares revisados: 15/15. Arquivos de instrução/template bilingues: 8.
 | Arquitetura | [Abrir](architecture.md) | [Open](../en/architecture.md) |
 | Configuração e flags | [Abrir](configuration.md) | [Open](../en/configuration.md) |
 | Manutenção da documentação | [Abrir](documentation.md) | [Open](../en/documentation.md) |
+| Ensaio de migração com capturas de tela | [Abrir](migration-evidence.md) | [Open](../en/migration-evidence.md) |
 | Migração a partir do Rancher 1.6 | [Abrir](migration.md) | [Open](../en/migration.md) |
 | Backup e recuperação isolada | [Abrir](recovery.md) | [Open](../en/recovery.md) |
 | Preparação de release | [Abrir](release.md) | [Open](../en/release.md) |

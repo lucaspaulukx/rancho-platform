@@ -21,6 +21,29 @@ python -m unittest migration.test_tool -v
 
 Ative o ambiente virtual com o comando apropriado à plataforma antes de instalar dependências.
 
+## Restauração automática no primeiro início
+
+Prepare as [imagens modernas do backend e da Console](release.md#instalação-experimental-de-nó-único). Use um projeto Compose novo com volumes de destino vazios. Crie `.env.rancho-migration` e um arquivo privado com a frase secreta usada no backup selado. Faça o backup em uma janela sem escritas e mantenha o ambiente original disponível para rollback.
+
+```dotenv
+RANCHO_DB_PASSWORD=<unique-target-database-password>
+RANCHO_MIGRATION_BACKUP_DIRECTORY=<absolute-path-to-backup-001>
+RANCHO_MIGRATION_PASSPHRASE_FILE=<absolute-path-to-private-passphrase-file>
+RANCHO_CONSOLE_PORT=18090
+```
+
+Execute os três comandos a seguir na raiz do repositório. Troque o nome do container de origem pelo da sua instalação. Se já tiver um backup selado, comece pelo comando Compose. Em uma instalação que usa autenticação local, mantenha no backup uma conta de administrador local funcional, já que o ensaio desliga o OIDC externo.
+
+```sh
+python -m migration.tool preflight --source-container rancher-server --output migration-runs/preflight-001 --check-tables
+python -m migration.tool backup-db --source-container rancher-server --output migration-runs/backup-001 --include-server-identity
+docker compose -p rancho-rehearsal --env-file .env.rancho-migration -f compose.modern.yaml -f compose.migrate.yaml up -d --build --wait
+```
+
+O Compose inicia o MariaDB, executa a imagem de restauração e só inicia o backend após a importação bem-sucedida. A imagem autentica o backup, importa o SQL, confere o inventário e instala a identidade criptografada do servidor quando presente. O backend aplica o schema versionado automaticamente. Acesse `http://localhost:18090/console/`. Se o Rancher de origem tinha autenticação, use a credencial local original. Repita o mesmo comando Compose para verificar que a importação foi pulada. O log registra `already-applied`. Para consultá-lo, use o mesmo projeto e arquivos Compose com `logs restore-backup`. O importador confere a identidade do backup em marcadores nos dois volumes. Um backup diferente ou um destino parcialmente importado exige projeto e volumes novos. Preserve os logs da falha e o backup original. O perfil isolado desliga OIDC, execução de catálogo e eventos do banco. Atualização do Docker dos hosts, cópia de volumes de workload e rede de produção exigem procedimentos próprios.
+
+[Veja as capturas e os resultados do ensaio de migração](migration-evidence.md).
+
 ## Diagnóstico somente leitura
 
 Substitua `rancher-server` pelo container de banco correto. O cliente MySQL padrão usa root local sem senha, adequado apenas a configurações locais compatíveis. Nos demais casos, use `--defaults-file /run/private/mysql-client.cnf`, arquivo protegido já existente dentro do container. A ferramenta não o cria na origem; não coloque senhas nos argumentos.
