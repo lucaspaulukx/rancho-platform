@@ -84,7 +84,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 | OPS09 | Memory/reservation | Creation/upgrade/rollback slices validated; remaining resource/OOM matrix remains |
 | OPS10 | Capabilities/readOnly/privileged/security options | Capability/readOnly reset/finish and device creation validated, including independent primary and sidecar mappings on one host. Primary service device upgrade, rollback, finish and reset verified through the console at scale zero and through native replacement on one Docker host. Native no-new-privileges creation verified against an equivalent control at process level. Independent sidecar device upgrade, rollback, finish and reset were verified through the console at scale zero and through native replacement on one Docker host. The primary mapping was preserved during replacement of both containers. Multiple hosts, other security options and privilege variants remain |
 | OPS11 | CPU/IO/process limits | One-host CPU/IO and nofile create/upgrade/rollback/reset validated, including independent sidecar creation; other limits/load/compatibility remain |
-| OPS12 | Standalone container editing/recreation | Partial; mutable/immutable fields and native recreation contract remain |
+| OPS12 | Standalone container editing/recreation | Chromium edited name and description through the Operations menu. The native schema exposed only those fields for update, and Docker confirmed the original container and image stayed running. Native recreation of immutable configuration remains |
 | OPS13 | Details/graph/code/statistics by type | Partial; per-replica service metrics implemented, complete type/field/action inventory remains |
 
 ## Infrastructure, data and catalogs

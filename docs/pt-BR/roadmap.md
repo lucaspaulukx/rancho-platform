@@ -84,7 +84,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 | OPS09 | Memória/reserva | Criação/upgrade/rollback validados em recortes; falta matriz de recursos/OOM restante |
 | OPS10 | Capabilities/readOnly/privileged/opções de segurança | Reset/finish de capabilities/readOnly e criação com dispositivos validados, incluindo mapeamentos independentes no principal e no sidecar em um host. Upgrade, reversão, conclusão e remoção de dispositivos da configuração principal verificados pelo console com escala zero e por substituição nativa em um host Docker. Criação nativa com no-new-privileges verificada no processo com controle equivalente. Upgrade, reversão, conclusão e remoção independente de dispositivos em sidecar verificados pelo console com escala zero e por substituição nativa em um host Docker. O mapeamento principal foi preservado na substituição dos dois containers. Faltam múltiplos hosts, outras opções de segurança e variantes de privilégios |
 | OPS11 | CPU/IO/limites de processo | CPU/IO e nofile criar/upgrade/rollback/reset em um host validados, incluindo sidecar independente; faltam outros limites/carga/compatibilidade |
-| OPS12 | Editar/recriar container avulso | Parcial; falta contrato mutável/imutável e recriação nativa |
+| OPS12 | Editar/recriar container avulso | O Chromium editou nome e descrição pelo menu de Operações. O schema nativo expôs apenas esses campos para edição, e o Docker confirmou que o mesmo container continuou rodando com a mesma imagem. Falta a recriação nativa para alterações de campos imutáveis |
 | OPS13 | Detalhes/grafo/código/estatísticas por tipo | Parcial; métricas por réplica implementadas, falta inventário completo de tipos/campos/ações |
 
 ## Infraestrutura, dados e catálogos

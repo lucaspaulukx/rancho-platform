@@ -72,6 +72,8 @@ Adicione `--classic-browser` com o Chromium do Playwright instalado para conferi
 
 ## Aceite nativo e de navegador
 
+Execute `python console/tests/standalone_metadata_readback.py` com o Chromium do Playwright e o host legado isolado em execução. O teste cria um container avulso, edita nome e descrição em Operações, confere sua identidade no Rancher e no Docker e remove o recurso de teste.
+
 Execute `python tests/flag_integration.py --browser --release-images BACKEND_SHA256_ID CONSOLE_SHA256_ID` no laboratório local indicado durante uma janela de manutenção. O teste recria o backend do Rancher com OIDC exclusivo, entrada automática e grupos locais desativados. Ele verifica o login e as falhas no navegador, restaura a configuração híbrida e confere o acesso dos grupos e as variáveis de ambiente originais do backend. Use os IDs imutáveis das imagens registrados no relatório de release.
 
 Execute o teste do cliente clássico no laboratório local indicado com o Chromium do Playwright instalado. Use o mesmo ID de backend registrado no ensaio de release. O teste confere se o container esperado é dono da porta local, entra pelo Ember, abre a lista de ambientes sem erros não tratados no navegador e revoga a sessão de teste. As requisições do navegador se limitam a leituras locais e ao login. Esse teste cobre o backend candidato. O ensaio de rollback isolado cobre a entrega dos arquivos clássicos no backend original.
