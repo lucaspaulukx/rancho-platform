@@ -45,6 +45,8 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/rancho-migration"
           "$RUNNER_TEMP/rancho-migration/bin/python" -m pip install --disable-pip-version-check --no-input -r migration/requirements.txt
           "$RUNNER_TEMP/rancho-migration/bin/python" -B -m unittest discover -s migration
+      - name: Check offline artifact inventory contracts
+        run: python3 -B -m unittest discover -s tests -p test_artifact_inventory.py
       - name: Check backend configuration and OIDC contracts
         run: python3 scripts/check_backend_contracts.py
       - name: Install locked console dependencies

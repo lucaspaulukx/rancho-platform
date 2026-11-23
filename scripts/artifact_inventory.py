@@ -43,7 +43,6 @@ def public_bom(raw, label, digest, scope):
     old_root = raw.get('metadata', {}).get('component', {}).get('bom-ref')
     if old_root:
         references[text(old_root)] = root_ref
-    unknown = 0
     for source in raw.get('components', []):
         if source.get('type') == 'file':
             if source.get('bom-ref') != old_root:
@@ -86,6 +85,8 @@ def public_bom(raw, label, digest, scope):
         references[old_ref] = reference
         component['bom-ref'] = reference
         components[reference] = component
+    if excluded.intersection(references):
+        raise ValueError('Ambiguous component reference')
     dependencies = {}
     for source in raw.get('dependencies', []):
         if source.get('ref') in excluded:

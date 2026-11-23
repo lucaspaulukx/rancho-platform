@@ -37,7 +37,7 @@ python scripts/artifact_inventory.py scan --output migration-runs/artifact-inven
 
 `--backend-image` and `--console-image` select existing local images; exports use resolved immutable IDs. The scanner has no network, Docker socket, workspace access or capabilities. It reads only owned archives/manifests and scratch under resource limits. Ownership/path checks protect cleanup.
 
-Public CycloneDX projections allow package identities/versions/hashes/licenses and graph references, excluding image configuration, environment, private file paths and unknown metadata. Package names can still be private and need review. Runtime image and development lockfile inventory are different evidence; bundled JavaScript or old Go binaries may not be completely detected. Unknown licenses are unresolved review, not approval. This is neither a CVE scanner nor legal certification, and it publishes nothing automatically.
+Public CycloneDX projections allow package identities/versions/hashes/licenses and graph references, excluding image configuration, environment, private file paths and unknown metadata. The offline CI checks that ambiguous references fail before a filtered file can hide a package dependency. Package names can still be private and need review. Runtime image and development lockfile inventory are different evidence; bundled JavaScript or old Go binaries may not be completely detected. Unknown licenses are unresolved review, not approval. This is neither a CVE scanner nor legal certification, and it publishes nothing automatically.
 
 ## Isolated fresh installation
 
