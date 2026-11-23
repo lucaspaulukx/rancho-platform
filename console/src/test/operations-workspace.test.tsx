@@ -205,6 +205,7 @@ describe('Workspace unificado', () => {
     await userEvent.click(screen.getByRole('tab', { name: 'Containers' }));
     const panel = screen.getByRole('tabpanel', { name: 'Containers' });
     expect(within(panel).getByRole('button', { name: 'web-1' })).toBeInTheDocument();
+    expect(within(panel).getAllByText('Loja')).toHaveLength(2);
     await userEvent.click(within(panel).getByRole('button', { name: 'Ações de web-1' }));
     await userEvent.click(screen.getByRole('menuitem', { name: 'Reiniciar' }));
     expect(screen.getByRole('dialog', { name: 'Operação do recurso' })).toHaveTextContent(

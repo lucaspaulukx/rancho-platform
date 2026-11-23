@@ -72,4 +72,14 @@ The scheduler transport helper is a bounded diagnostic for the legacy managed-ne
 
 `sidecar_device_upgrade_acceptance.py` checks the structured sidecar editor on an owned service at scale zero, including flag-off behavior, a missing field in the fresh scoped schema, draft retention, upgrade, rollback, finish and explicit reset. It verifies the primary mapping stays intact and checks cleanup and session revocation.
 
+### High-volume inventory
+
+With the built console serving on localhost:18090 and Playwright Chromium available, run this command from the repository root.
+
+```sh
+node console/tests/e2e/high-volume-inventory.cjs
+```
+
+Set `PLAYWRIGHT_MODULES` and `CHROMIUM_EXECUTABLE` if Playwright or Chromium are installed outside their default paths. The benchmark uses three fresh browser contexts and 20 synthetic environments with 20 stacks, 200 services and 2,000 containers each. It checks API pagination, searches for the last container and visits all environments in one context. It records the entry asset, load and switch times, DOM size, long tasks and heap after garbage collection. The browser supplies the API responses without credentials or Rancher writes. Use the same browser, machine and build configuration for comparisons. Backend latency and long sessions require separate tests.
+
 Distinguish unit/component, clean build, browser rendering, real native behavior and remote CI. Record artifact identity, flags, scope, controls, measured results and cleanup; publish only sanitized summaries. A one-host `nofile` test does not validate all limits or multi-host operation. A short WebSocket probe does not prove scheduler stability or soak. An offline DB restore does not prove engine/IdP/workload recovery. Remaining acceptance belongs in the [roadmap](roadmap.md).
