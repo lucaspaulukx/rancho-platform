@@ -153,3 +153,8 @@ Baseline off repetido com3 transportes saudáveis confirmou entrega indevida ap�
 
 A primeira tentativa on falhou fechada porque ApiRequestFilter usa a propriedade Archaius api.ignore.paths, não o parâmetro XML; servia indexHTML200 no callback. Corrigido o defaults.properties e prefixo sem slash final; matrix agora exige403JSON/no-store sem chave interna antes de criar fixtures. Remoções autônomas de scheduler e volumes-root associados são relatadas separadamente; preservação de serviços e containers/volumes de aplicação continua obrigatória. Baseline estrito anterior permanece falho, sem reescrever a evidência. Código/template de migração/DB não alterados por esta correção.
 
+
+## Checkpoint80 — inventário offline de artefatos (05/11/2026)
+
+CLI plan/scan implementada com Syft1.56.0 por digest, archive pelo ID local, sem rede/socket/restart de apps e com cleanup verificado. Dez contratos e scan real repetido passaram;486 pacotes backend/73 console/209 lockfile+dev, com145/1/0 licenças não identificadas. Projeção CycloneDX exclui arquivos/env/config/metadados desconhecidos e liga hashes dos manifests congelados. Console declara Apache-2.0 nos manifests, coerente com LICENSE. Raw/temp removidos e IDs preservados. REL04 segue parcial: falta revisão de licenças, detecção completa de binários, CVEs/procedência/schema independente e demais gates48. Não converter inventário em aprovação legal/segurança. Matriz79 de seis identidades local/OIDC passou; renovação longa está em execução, ainda sem aceite.
+
