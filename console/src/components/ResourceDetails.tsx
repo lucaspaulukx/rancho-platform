@@ -97,7 +97,7 @@ export function ResourceDetails({ resource, schema }: { resource: Resource; sche
                     ) : ['created', 'issuedAt'].includes(key) ? (
                       formatResourceDate(value, locale)
                     ) : key === 'type' ? (
-                      fieldLabel(String(resource[key]))
+                      fieldLabel(String(resource[key]), t)
                     ) : typeof resource[key] === 'object' ? (
                       JSON.stringify(safeConfiguration(resource[key]))
                     ) : typeof value === 'number' ? (

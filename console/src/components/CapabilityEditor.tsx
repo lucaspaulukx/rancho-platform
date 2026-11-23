@@ -40,7 +40,7 @@ export function CapabilityEditor({
                   update(rows.map((v) => (v.id === row.id ? { ...v, value: e.target.value } : v)))
                 }
               >
-                <option value="">Selecionarâ€¦</option>
+                <option value="">{t('workloadControls.select')}</option>
                 {row.value && !options.includes(row.value) && <option>{row.value}</option>}
                 {options.map((v) => (
                   <option key={v} disabled={v !== row.value && rows.some((r) => r.value === v)}>

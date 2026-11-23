@@ -196,7 +196,12 @@ function RepositoryScope() {
             searchText={(v) => `${v.name} ${v.branch}`}
             columns={[
               { key: 'name', label: t('catalogRepositories.repository'), render: (v) => v.name },
-              { key: 'branch', label: t('catalogRepositories.branch'), render: (v) => v.branch },
+              {
+                key: 'branch',
+                label: t('catalogRepositories.branch'),
+                render: (v) =>
+                  v.usesDefaultBranch ? t('catalogRepositories.defaultBranch') : v.branch,
+              },
             ]}
             emptyTitle={t('catalogRepositories.emptyTitle')}
             emptyDescription={t('catalogRepositories.emptyDescription')}

@@ -24,6 +24,10 @@ export function dataEditorSchema(
   schema: Schema,
   updating: boolean,
   replaceCertificate = false,
+  secretText = {
+    label: 'Conteúdo do secret',
+    description: 'Texto codificado em UTF-8 no envio. O valor não será recuperado após salvar.',
+  },
 ): Schema {
   const allowed: Record<string, string[]> = {
     secret: updating ? ['description'] : ['name', 'description', 'value'],
@@ -56,9 +60,8 @@ export function dataEditorSchema(
             ? {
                 ...field,
                 type: 'multiline',
-                label: 'Conteúdo do secret',
-                description:
-                  'Texto codificado em UTF-8 no envio. O valor não será recuperado após salvar.',
+                label: secretText.label,
+                description: secretText.description,
               }
             : name === 'driver' && schema.id === 'volume'
               ? { ...field, default: field.default || 'local' }

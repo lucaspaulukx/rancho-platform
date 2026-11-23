@@ -1,4 +1,5 @@
 export const enCatalogRepositories = {
+  'catalogRepositories.defaultBranch': 'Server default',
   'catalogRepositories.title': 'Catalog repositories',
   'catalogRepositories.description':
     'Global Git source configuration. Changes can affect all environments.',
@@ -50,6 +51,7 @@ export const enCatalogRepositories = {
 } as const;
 
 export const ptCatalogRepositories = {
+  'catalogRepositories.defaultBranch': 'Padrão do servidor',
   'catalogRepositories.title': 'Repositórios de catálogo',
   'catalogRepositories.description':
     'Configuração global de fontes Git. Alterações podem afetar todos os environments.',

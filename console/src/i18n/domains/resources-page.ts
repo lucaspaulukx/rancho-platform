@@ -1,4 +1,7 @@
 export const enResourcesPage = {
+  'resourcesPage.secretContent': 'Secret content',
+  'resourcesPage.secretContentHint':
+    'Text is encoded as UTF-8 when submitted. The value cannot be retrieved after saving.',
   'resourcesPage.operation': 'Operation',
   'resourcesPage.certificateUnavailable':
     'The current certificate is unavailable. Reload the resource before editing.',
@@ -97,6 +100,9 @@ export const enResourcesPage = {
 } as const;
 
 export const ptResourcesPage = {
+  'resourcesPage.secretContent': 'Conteúdo do secret',
+  'resourcesPage.secretContentHint':
+    'Texto codificado em UTF-8 no envio. O valor não será recuperado após salvar.',
   'resourcesPage.operation': 'Operação',
   'resourcesPage.certificateUnavailable':
     'O certificado atual não está disponível. Recarregue o recurso antes de editar.',
