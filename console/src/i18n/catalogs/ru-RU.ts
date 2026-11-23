@@ -413,7 +413,7 @@ export const ruRU = {
   'auth.methodsUnavailable': 'Не удалось проверить способы входа.',
   'auth.retry': 'Повторить попытку',
   'auth.checkingAccess': 'Проверка доступа…',
-  'auth.keycloakLogin': 'Войти через Keycloak',
+  'auth.ssoLogin': 'Войти через SSO',
   'auth.localAlternative': 'или используйте локальную учётную запись',
   'auth.username': 'Имя пользователя',
   'auth.password': 'Пароль',

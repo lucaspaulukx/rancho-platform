@@ -411,7 +411,7 @@ export const ukUA = {
   'auth.methodsUnavailable': 'Не вдалося перевірити способи входу.',
   'auth.retry': 'Спробувати ще раз',
   'auth.checkingAccess': 'Перевірка доступу…',
-  'auth.keycloakLogin': 'Увійти через Keycloak',
+  'auth.ssoLogin': 'Увійти через SSO',
   'auth.localAlternative': 'або скористайтеся локальним обліковим записом',
   'auth.username': 'Ім’я користувача',
   'auth.password': 'Пароль',

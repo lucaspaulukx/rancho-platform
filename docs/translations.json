@@ -18,8 +18,8 @@
         "en": "README.md",
         "pt-BR": "docs/pt-BR/overview.md"
       },
-      "reviewedSourceSha256": "2d196a942b36fe086b4340c979adbf000705237405b1cac92ea8fab810b45e96",
-      "reviewedTranslationSha256": "73ac40e0f67f4aa52c566c3d92e51186e4252ab0744a99f4778e6b5fab8c4901"
+      "reviewedSourceSha256": "c4167ec0b6c558a277463a2414ef6198fe110159620525d7de62e8f1b24d4411",
+      "reviewedTranslationSha256": "7211de3356ba97fc52f8118b200d6e6d675ab0aaf8ab70d186245ba14c163f74"
     },
     {
       "source": "SECURITY.md",
@@ -68,8 +68,8 @@
         "pt-BR": "docs/pt-BR/configuration.md",
         "en": "docs/en/configuration.md"
       },
-      "reviewedSourceSha256": "844400a6ce1acc6e80d4b72f1c7d4bfd0861d3089703e4bbb86d956aaf297d36",
-      "reviewedTranslationSha256": "dab00fdf0fa35b5aba8973c9653ae5c91439cbb140724bfc22ccad942b059b65"
+      "reviewedSourceSha256": "7b672d76ab90049a6f4c6b572d6fc4789081b63978f986295a131ee8c18c1722",
+      "reviewedTranslationSha256": "fa9bfe2a60effefaec0118f1ec0c648e16f0e2a51641817758a3bc9032885e4c"
     },
     {
       "source": "docs/pt-BR/documentation.md",
@@ -88,8 +88,8 @@
         "pt-BR": "docs/pt-BR/migration.md",
         "en": "docs/en/migration.md"
       },
-      "reviewedSourceSha256": "f8686d7d3da00bd66c9bb2d6323dd03344d41ba5694c16941d50e064a6d775b4",
-      "reviewedTranslationSha256": "3f9677bc82184d83e45f9f86a9a028eb712783d0417fe41885eec401083d7c60"
+      "reviewedSourceSha256": "bd6dd1c781145cbfe276458e131c8ae01095b5fb5aabc3b5bf9aced538aa43f4",
+      "reviewedTranslationSha256": "006231b45002d788765fa32ad0c49f0b1a4d13998034aa35d5f908f0b910f29f"
     },
     {
       "source": "docs/pt-BR/recovery.md",
@@ -108,8 +108,8 @@
         "pt-BR": "docs/pt-BR/release.md",
         "en": "docs/en/release.md"
       },
-      "reviewedSourceSha256": "356a31a4fc80a516d48ab8dfe3cf0602acaf2a83bcfa1daa516a772e8d041dc3",
-      "reviewedTranslationSha256": "89c40bb0e06bccb8fce57543b88d4f79b0a8b94db825d6a7a9787d10df004121"
+      "reviewedSourceSha256": "88fdaa7b5c99198e8c27fe1b593612a489508a8be1138a144618cbae9a16f944",
+      "reviewedTranslationSha256": "e5ebd7c1a4ca21a03ad5a942c77c2b5549c677d46aba1389d3a25903facac984"
     },
     {
       "source": "docs/pt-BR/roadmap.md",

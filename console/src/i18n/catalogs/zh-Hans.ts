@@ -272,7 +272,7 @@ export const zhHans = {
   'auth.methodsUnavailable': '无法验证登录方式。',
   'auth.retry': '重试',
   'auth.checkingAccess': '正在检查访问权限…',
-  'auth.keycloakLogin': '使用 Keycloak 登录',
+  'auth.ssoLogin': '使用 SSO 登录',
   'auth.localAlternative': '或使用您的本地账户',
   'auth.username': '用户名',
   'auth.password': '密码',

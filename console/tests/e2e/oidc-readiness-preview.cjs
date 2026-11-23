@@ -28,7 +28,7 @@ let browser;
   );
   const p = await c.newPage();
   await p.goto('http://localhost:18090/console/login');
-  await p.getByRole('button', { name: 'Entrar com Keycloak', exact: true }).click();
+  await p.getByRole('button', { name: 'Entrar com SSO', exact: true }).click();
   await p
     .getByRole('alert')
     .getByText('Não foi possível acessar o provedor de login. Tente novamente.', { exact: true })
