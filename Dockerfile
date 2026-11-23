@@ -16,6 +16,7 @@ ADD --checksum=sha256:424325e2cf21246bff27f8c30659a6c2da90b7f8b7d138cf7d04535df0
 ADD --checksum=sha256:cd9e9b2c25f0f309d05eadef1f6d50eb0dada930396128274470dc0845a6314c https://repo.maven.apache.org/maven2/com/fasterxml/jackson/jaxrs/jackson-jaxrs-json-provider/2.21.8/jackson-jaxrs-json-provider-2.21.8.jar /jackson/jackson-jaxrs-json-provider-2.21.8.jar
 ADD --checksum=sha256:32a3b1ac114a3547c3ceb6e5a48091372de097e5fb6f87d660b18a2665405c36 https://repo.maven.apache.org/maven2/com/fasterxml/jackson/module/jackson-module-jaxb-annotations/2.21.8/jackson-module-jaxb-annotations-2.21.8.jar /jackson/jackson-module-jaxb-annotations-2.21.8.jar
 ADD --checksum=sha256:0fac87dddd78f1223139e8ef88e819c7f483c0a3835cdf5982ad5e4576d1d896 https://repo.maven.apache.org/maven2/org/freemarker/freemarker/2.3.35/freemarker-2.3.35.jar /freemarker/freemarker-2.3.35.jar
+ADD --checksum=sha256:8fcf4a978bbee7548e8dee6e0528bc85b0ffa84c0f8517c94dd29e590e459449 https://repo.maven.apache.org/maven2/com/nimbusds/nimbus-jose-jwt/9.37.4/nimbus-jose-jwt-9.37.4.jar /nimbus/nimbus-jose-jwt-9.37.4.jar
 
 FROM rancher/server:v1.6.30@sha256:95b55603122c28baea4e8d94663aa34ad770bbc624a9ed6ef986fb3ea5224d91
 COPY --from=stream-proxy /out/websocket-proxy /usr/bin/websocket-proxy
