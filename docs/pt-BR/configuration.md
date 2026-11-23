@@ -89,6 +89,8 @@ O compose base mantém streams/payload/auditoria/schema opt-in. O moderno assume
 
 Segredos OIDC ficam em configuração privada/ignorada, não em docs ou realms públicos. O template usa placeholders e callbacks exatos. Preserve credenciais/realm existentes no startup. Comprove administrador de aplicação e recuperação antes do login exclusivo. Administrar Keycloak não concede administração Rancher automaticamente; grupos continuam locais.
 
+O Keycloak incluído é um fixture de desenvolvimento. O usuário e a senha explícitos do H2 preservam os padrões do banco anterior do laboratório. Uma cópia desse banco foi testada com o Keycloak 26.8.2. O Keycloak não dá suporte a migrações do H2 dev-file. Guarde um backup antes de mudar a imagem do laboratório e use um banco externo suportado em uma instalação real do Keycloak.
+
 Marcadores de protocolo backend/proxy precisam corresponder antes de ligar guardas. Desligar uma flag pode retirar proteção ou acesso por grupo; não é rollback de dados. Auditoria antiga continua sensível, e grants diretos devem ser restaurados antes de desligar RBAC local após cutover. Veja [segurança](security-model.md), [migração de acesso](access-migration.md) e [recuperação](recovery.md).
 
 ## Schema de banco no runtime
