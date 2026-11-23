@@ -1,4 +1,5 @@
 import { defaultLocale, localeFormats, type Locale } from './i18n/locales';
+import { createTranslator } from './i18n/messages';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 export function resourceDate(value: unknown): number | undefined {
@@ -21,12 +22,14 @@ export function formatResourceDate(value: unknown, locale: Locale = defaultLocal
   const timestamp = resourceDate(value);
   return timestamp === undefined ? '—' : localeFormats(locale).date(timestamp);
 }
-export function certificateValidity(value: unknown, now = Date.now()) {
+const defaultTranslator = createTranslator(defaultLocale).t;
+
+export function certificateValidity(value: unknown, now = Date.now(), t = defaultTranslator) {
   const expires = resourceDate(value);
-  if (expires === undefined) return { label: 'Validade indisponível', state: 'unknown' };
+  if (expires === undefined) return { label: t('details.certificate.unknown'), state: 'unknown' };
   const days = Math.ceil((expires - now) / 86_400_000);
-  if (expires <= now) return { label: 'Expirado', state: 'error' };
+  if (expires <= now) return { label: t('details.certificate.expired'), state: 'error' };
   if (days <= 30)
-    return { label: `Expira em ${days} ${days === 1 ? 'dia' : 'dias'}`, state: 'warning' };
-  return { label: 'Válido', state: 'active' };
+    return { label: t('details.certificate.expiring', { count: days }), state: 'warning' };
+  return { label: t('details.certificate.valid'), state: 'active' };
 }

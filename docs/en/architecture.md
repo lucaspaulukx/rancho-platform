@@ -36,6 +36,8 @@ The registered message domains cover authentication/no-access, shared shell/navi
 
 `npm run check:locales` validates exact pt-BR/en-US registered key sets and structural placeholders/plurals in source CI and the image build. Its sanitized report explicitly says interface coverage is not measured and other eight catalogs are pending. Complete string extraction and linguistic review remain roadmap work. Direction metadata and selector layout alone do not implement full RTL styling. Contextual page errors retain the locale; a catastrophic root route error replaces the provider subtree and safely returns to pt-BR. Tests of the registered domains do not establish all-route language parity.
 
+The shared resource details panel follows the active locale for tabs, field labels, numbers, dates and certificate validity. Switching language preserves the selected tab and keeps sanitized configuration JSON identical, including native keys, values and redaction markers.
+
 ## Data and mutations
 
 Use current resource schemas/action links instead of inventing routes or assuming global schemas equal environment-scoped schemas. Re-read the resource, scope and relevant contract before mutation. Preserve unknown configuration and unselected fields; do not silently replace unsupported values with empty defaults.

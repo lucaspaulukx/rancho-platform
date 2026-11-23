@@ -4,6 +4,7 @@ import type { Resource, Schema } from '../api';
 import { Badge, Button, Tabs, useToast } from './ui';
 import { fieldLabel, sensitiveField } from './SchemaForm';
 import { certificateValidity, formatResourceDate } from '../resource-format';
+import { useI18n } from '../i18n/provider';
 
 export function safeConfiguration(value: unknown, depth = 0): unknown {
   if (depth > 8) return '[profundidade limitada]';
@@ -23,6 +24,7 @@ export function safeConfiguration(value: unknown, depth = 0): unknown {
 export function ResourceDetails({ resource, schema }: { resource: Resource; schema?: Schema }) {
   const [tab, setTab] = useState(0);
   const toast = useToast();
+  const { t, locale, formats } = useI18n();
   const fields = [
     'id',
     'name',
@@ -48,7 +50,7 @@ export function ResourceDetails({ resource, schema }: { resource: Resource; sche
     'driver',
     'sizeMb',
     'transitioningMessage',
-  ];
+  ] as const;
   const summary = fields.filter(
     (key) => resource[key] !== undefined && resource[key] !== null && resource[key] !== '',
   );
@@ -63,12 +65,12 @@ export function ResourceDetails({ resource, schema }: { resource: Resource; sche
   return (
     <section className="panel resource-details">
       <Tabs
-        labels={['Resumo', 'Configuração']}
+        labels={[t('details.summary'), t('details.configuration')]}
         selected={tab}
         onChange={setTab}
         idPrefix={`resource-${resource.id}`}
         panelId={`resource-details-${resource.id}`}
-        label="Detalhes do recurso"
+        label={t('details.label')}
       />
       <div
         id={`resource-details-${resource.id}`}
@@ -77,54 +79,61 @@ export function ResourceDetails({ resource, schema }: { resource: Resource; sche
       >
         {tab === 0 ? (
           <dl className="details-grid">
-            {summary.map((key) => (
-              <div key={key}>
-                <dt>{fieldLabel(key)}</dt>
-                <dd>
-                  {key === 'state' ? (
-                    <Badge state={resource.state}>{resource.state}</Badge>
-                  ) : key === 'expiresAt' ? (
-                    <>
-                      <span>{formatResourceDate(resource[key])}</span>{' '}
-                      <Badge state={certificateValidity(resource[key]).state}>
-                        {certificateValidity(resource[key]).label}
-                      </Badge>
-                    </>
-                  ) : ['created', 'issuedAt'].includes(key) ? (
-                    formatResourceDate(resource[key])
-                  ) : key === 'type' ? (
-                    fieldLabel(String(resource[key]))
-                  ) : typeof resource[key] === 'object' ? (
-                    JSON.stringify(safeConfiguration(resource[key]))
-                  ) : (
-                    String(resource[key])
-                  )}
-                </dd>
-              </div>
-            ))}
+            {summary.map((key) => {
+              const validity =
+                key === 'expiresAt' ? certificateValidity(resource[key], undefined, t) : undefined;
+              const value = resource[key];
+              return (
+                <div key={key}>
+                  <dt>{t(`details.field.${key}`)}</dt>
+                  <dd>
+                    {key === 'state' ? (
+                      <Badge state={resource.state}>{resource.state}</Badge>
+                    ) : validity ? (
+                      <>
+                        <span>{formatResourceDate(value, locale)}</span>{' '}
+                        <Badge state={validity.state}>{validity.label}</Badge>
+                      </>
+                    ) : ['created', 'issuedAt'].includes(key) ? (
+                      formatResourceDate(value, locale)
+                    ) : key === 'type' ? (
+                      fieldLabel(String(resource[key]))
+                    ) : typeof resource[key] === 'object' ? (
+                      JSON.stringify(safeConfiguration(resource[key]))
+                    ) : typeof value === 'number' ? (
+                      formats.number(value)
+                    ) : (
+                      String(resource[key])
+                    )}
+                  </dd>
+                </div>
+              );
+            })}
           </dl>
         ) : (
           <>
             <div className="panel-heading">
-              <p className="muted">
-                Configuração retornada pelo Rancher. Campos sensíveis são protegidos nesta
-                visualização.
-              </p>
+              <p className="muted">{t('details.explanation')}</p>
               <Button
                 onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(json);
-                    toast('Configuração copiada.');
+                    toast(t('details.copied'));
                   } catch {
-                    toast('Não foi possível copiar. Selecione o texto para copiar manualmente.');
+                    toast(t('details.copyFailed'));
                   }
                 }}
               >
                 <Copy size={16} />
-                Copiar
+                {t('details.copy')}
               </Button>
             </div>
-            <pre className="configuration-viewer" tabIndex={0} aria-label="Configuração sanitizada">
+            <pre
+              className="configuration-viewer"
+              tabIndex={0}
+              dir="ltr"
+              aria-label={t('details.sanitized')}
+            >
               {json}
             </pre>
           </>
