@@ -91,6 +91,19 @@ class ArtifactInventoryContract(unittest.TestCase):
                 mutate.assert_not_called()
             self.assertEqual(sentinel.read_text(encoding='utf-8'), 'keep')
 
+    def test_additional_images_use_distinct_names_and_check_before_inspecting(self):
+        info = {'imageId': 'sha256:' + 'a' * 64, 'sizeBytes': 100}
+        with patch.object(inventory, 'image_info', return_value=info) as inspect:
+            result = inventory.plan('backend', 'console', ['database=local-db:tag', 'restore=local-restore:tag'])
+            self.assertEqual(set(result['images']), {'backend', 'console', 'runtime-database', 'runtime-restore'})
+            self.assertEqual([call.args[0] for call in inspect.call_args_list],
+                             ['backend', 'console', 'local-db:tag', 'local-restore:tag', inventory.SCANNER])
+            inspect.reset_mock()
+            for inputs in (['../outside=image'], ['data=--help'], ['db=a', 'db=b']):
+                with self.subTest(inputs=inputs), self.assertRaises(ValueError):
+                    inventory.plan('backend', 'console', inputs)
+            inspect.assert_not_called()
+
     def test_scanner_cannot_reach_network_or_daemon(self):
         command = inventory.scanner_arguments([], Path('/owned/scratch'))
         self.assertEqual(command[command.index('--network') + 1], 'none')
