@@ -8,5 +8,12 @@ RUN pip install --no-cache-dir --only-binary=:all: --require-hashes \
     && pip uninstall --yes pip
 COPY migration/__init__.py migration/tool.py migration/restore_on_start.py migration/
 COPY migration/licenses/openssl-4.0.3-LICENSE.txt /usr/share/licenses/rancho-restore/openssl-4.0.3-LICENSE.txt
-RUN --network=none echo '7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a  /usr/share/licenses/rancho-restore/openssl-4.0.3-LICENSE.txt' | sha256sum -c -
+COPY migration/licenses/gcc-14.2.0-COPYING3.txt migration/licenses/gcc-14.2.0-COPYING.RUNTIME.txt migration/licenses/libffi-3.4.6-LICENSE.txt /usr/share/licenses/rancho-restore/
+RUN --network=none cd /usr/share/licenses/rancho-restore \
+    && printf '%s\n' \
+        '7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a  openssl-4.0.3-LICENSE.txt' \
+        '8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903  gcc-14.2.0-COPYING3.txt' \
+        '9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74  gcc-14.2.0-COPYING.RUNTIME.txt' \
+        '67894089811f93fca47a76f85e017da6f8582d4ba0905963c6e0f1ad6df7a195  libffi-3.4.6-LICENSE.txt' \
+        | sha256sum -c -
 ENTRYPOINT ["python", "-m", "migration.restore_on_start"]
