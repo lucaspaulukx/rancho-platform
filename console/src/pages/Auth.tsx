@@ -235,7 +235,12 @@ export function NoAccess() {
   const [message, setMessage] = useState<'auth.pendingStill' | 'auth.accessCheckFailed' | null>(
     null,
   );
-  if (app.projects.length) return <Navigate to="/" replace />;
+  const pendingHeading = useRef<HTMLHeadingElement>(null);
+  const hasProjects = app.projects.length > 0;
+  useEffect(() => {
+    if (!hasProjects) pendingHeading.current?.focus();
+  }, [hasProjects]);
+  if (hasProjects) return <Navigate to="/" replace />;
   async function check() {
     setChecking(true);
     setMessage(null);
@@ -256,7 +261,9 @@ export function NoAccess() {
           <ShieldCheck size={32} />
         </div>
         <p className="eyebrow">{t('auth.pendingEyebrow')}</p>
-        <h2>{t('auth.pendingTitle')}</h2>
+        <h2 ref={pendingHeading} tabIndex={-1}>
+          {t('auth.pendingTitle')}
+        </h2>
         <p>{t('auth.pendingDescription')}</p>
         <div className="pending-steps">
           <div className="pending-step">
