@@ -82,4 +82,18 @@ describe('Device upgrade contract', () => {
       ),
     ).toThrow(expect.objectContaining({ key: 'deviceUpgrade.error.conflict' }));
   });
+
+  it('rejects a primary-only change when the current serializer would remove a sidecar mapping', () => {
+    const { devices: _devices, ...withoutDevices } = fields;
+    const changed = {
+      ...schemas,
+      secondaryLaunchConfig: {
+        ...schemas.secondaryLaunchConfig,
+        resourceFields: withoutDevices,
+      },
+    };
+    expect(() => configurationUpgradePayload(service, service, draft, changed)).toThrow(
+      expect.objectContaining({ key: 'deviceUpgrade.error.unavailable' }),
+    );
+  });
 });

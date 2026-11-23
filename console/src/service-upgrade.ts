@@ -439,6 +439,21 @@ export function configurationUpgradePayload(
     schemas,
     true,
   );
+  if (values.editDevices === true && values.editSidecars !== true) {
+    const original = (fresh.secondaryLaunchConfigs ?? []) as Record<string, unknown>[];
+    const strategy = result.inServiceStrategy as Record<string, unknown>;
+    const prepared = (strategy.secondaryLaunchConfigs ?? []) as Record<string, unknown>[];
+    if (
+      Array.isArray(original) &&
+      original.some(
+        (sidecar, index) =>
+          Array.isArray(sidecar.devices) &&
+          sidecar.devices.length > 0 &&
+          JSON.stringify(sidecar.devices) !== JSON.stringify(prepared[index]?.devices),
+      )
+    )
+      throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
+  }
   if (values.editCpuResources === true) {
     // An explicit empty cpuset removes pinning; the generic create serializer omits empty strings.
     const strategy = result.inServiceStrategy as Record<string, unknown>;
