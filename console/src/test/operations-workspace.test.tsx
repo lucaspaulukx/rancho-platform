@@ -12,6 +12,7 @@ const fixture = vi.hoisted(() => ({
   identity: 'admin',
   readonly: false,
   config: {
+    workloadInventoryPagination: false,
     modules: {
       workloads: true,
       contextActions: true,
@@ -22,6 +23,7 @@ const fixture = vi.hoisted(() => ({
     },
   },
   unmounted: [] as string[],
+  extraContainers: [] as Resource[],
 }));
 vi.mock('../state', () => ({ useApp: () => fixture }));
 vi.mock('../hooks/useSchemas', () => ({
@@ -85,6 +87,7 @@ vi.mock('../pages/Workloads', () => ({
           state: 'running',
           actions: { logs: 'logs', execute: 'execute' },
         },
+        ...fixture.extraContainers,
       ],
     },
   }),
@@ -136,9 +139,62 @@ function mount() {
 }
 afterEach(() => {
   fixture.config.modules.serviceMetrics = false;
+  fixture.config.workloadInventoryPagination = false;
+  fixture.extraContainers = [];
   fixture.readonly = false;
 });
+function addContainers() {
+  fixture.extraContainers = Array.from({ length: 50 }, (_, index) => ({
+    id: `extra-${index + 3}`,
+    name: `web-${index + 3}`,
+    type: 'container',
+    accountId: 'p1',
+    serviceIds: ['s1'],
+    links: {},
+    state: 'running',
+    actions: { restart: 'restart' },
+  }));
+}
+
 describe('Workspace unificado', () => {
+  it('paginates containers while preserving bulk selection and global search', async () => {
+    fixture.config.workloadInventoryPagination = true;
+    addContainers();
+    const router = mount();
+    await userEvent.click(screen.getByRole('tab', { name: 'Containers' }));
+    const panel = within(screen.getByRole('tabpanel', { name: 'Containers' }));
+    expect(panel.getAllByRole('button', { name: /^web-\d+$/ })).toHaveLength(50);
+    expect(panel.queryByRole('button', { name: 'web-52' })).not.toBeInTheDocument();
+    await userEvent.click(panel.getByRole('checkbox', { name: 'Selecionar web-1' }));
+    await userEvent.click(panel.getByRole('button', { name: 'Próxima página' }));
+    expect(panel.getAllByRole('checkbox')).toHaveLength(2);
+    expect(panel.getByText('1 recursos selecionados · limite 100')).toBeInTheDocument();
+    await userEvent.click(panel.getByRole('checkbox', { name: 'Selecionar web-52' }));
+    expect(panel.getByText('2 recursos selecionados · limite 100')).toBeInTheDocument();
+
+    const search = screen.getByRole('searchbox', { name: 'Buscar na operação' });
+    await userEvent.type(search, 'web-52');
+    expect(panel.getByRole('button', { name: 'web-52' })).toBeInTheDocument();
+    expect(panel.getAllByRole('checkbox')).toHaveLength(1);
+    expect(panel.getByRole('checkbox', { name: 'Selecionar web-52' })).toBeChecked();
+    expect(panel.queryByRole('button', { name: 'Próxima página' })).not.toBeInTheDocument();
+    await userEvent.clear(search);
+    expect(panel.getByRole('button', { name: 'Página anterior' })).toBeDisabled();
+    expect(panel.getByRole('checkbox', { name: 'Selecionar web-1' })).toBeChecked();
+    expect(router.state.location.search).toBe('?env=p1&view=containers');
+    router.dispose();
+  });
+
+  it('retains the continuous container list when pagination is disabled', async () => {
+    addContainers();
+    const router = mount();
+    await userEvent.click(screen.getByRole('tab', { name: 'Containers' }));
+    const panel = within(screen.getByRole('tabpanel', { name: 'Containers' }));
+    expect(panel.getAllByRole('button', { name: /^web-\d+$/ })).toHaveLength(52);
+    expect(panel.queryByRole('button', { name: 'Próxima página' })).not.toBeInTheDocument();
+    router.dispose();
+  });
+
   it('keeps the active workload view and native action when changing language', async () => {
     function SwitchLanguage() {
       const { setLocale } = useI18n();

@@ -33,6 +33,21 @@ describe('Migração da configuração pública', () => {
     expect(validateConfig(config)).toEqual(upgraded);
     expect(validateConfig(legacy)).toEqual(upgraded);
   });
+  it('preserves optional pagination and rejects invalid values', () => {
+    const { workloadInventoryPagination: _, ...existing } = config;
+    expect(validateConfig(existing).workloadInventoryPagination).toBeUndefined();
+    expect(
+      validateConfig({ ...existing, workloadInventoryPagination: true })
+        .workloadInventoryPagination,
+    ).toBe(true);
+    expect(
+      validateConfig({ ...existing, workloadInventoryPagination: false })
+        .workloadInventoryPagination,
+    ).toBe(false);
+    expect(() => validateConfig({ ...existing, workloadInventoryPagination: 'true' })).toThrow(
+      'workloadInventoryPagination',
+    );
+  });
   it.each([0, 2, '1', null, false])('recusa versão não suportada %s', (schemaVersion) => {
     expect(() => validateConfig({ ...config, schemaVersion })).toThrow('Versão');
   });

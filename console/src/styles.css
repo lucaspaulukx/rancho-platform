@@ -1012,6 +1012,13 @@ tbody tr:hover {
   min-height: 28px;
   padding: 5px;
 }
+:root[dir='rtl'] .table-footer .button svg {
+  transform: scaleX(-1);
+}
+.operation-stack > .table-footer {
+  border-top: 0;
+  border-bottom: 1px solid var(--border);
+}
 .row-title {
   display: flex;
   align-items: center;

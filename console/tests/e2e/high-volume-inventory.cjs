@@ -1,4 +1,5 @@
 // Runs against the built local console with synthetic, read-only API responses.
+// Set UX06_BASELINE=1 to measure the unpaginated path, including in older builds.
 const assert = require('node:assert/strict');
 const os = require('node:os');
 const path = require('node:path');
@@ -6,8 +7,10 @@ const { createRequire } = require('node:module');
 
 const origin = 'http://localhost:18090';
 const viewport = { width: 1440, height: 1000 };
+const mobileViewport = { width: 390, height: 844 };
 const projectCount = 20;
 const pageSize = 100;
+const renderedPageSize = 50;
 const counts = { stacks: 20, services: 200, containers: 2000 };
 const coldRuns = 3;
 const round = (number) => Math.round(number * 100) / 100;
@@ -110,16 +113,11 @@ async function waitForRows(page, name, count) {
   );
 }
 
-async function checkScope(page, id) {
-  assert.equal(
-    await page
-      .locator(rowNames)
-      .evaluateAll(
-        (names, prefix) => names.every((name) => name.textContent.startsWith(prefix)),
-        `ux06-${id}-container-`,
-      ),
-    true,
-  );
+async function checkScope(page, id, count) {
+  const names = await page.locator(rowNames).allTextContents();
+  assert.equal(names.length, count);
+  assert.ok(names.every((name) => name.startsWith(`ux06-${id}-container-`)));
+  return names;
 }
 
 async function paint(page) {
@@ -136,17 +134,23 @@ async function heap(session) {
   return (await session.send('Runtime.getHeapUsage')).usedSize;
 }
 
-async function run(browser, sweep) {
+async function run(browser, { pagination, sweep = false, smoke = false, size = viewport }) {
   const context = await browser.newContext({
-    viewport,
+    viewport: size,
     locale: 'pt-BR',
     colorScheme: 'dark',
     serviceWorkers: 'block',
   });
   const requests = [];
+  const apiRequests = [];
   let blocked = 0;
   let assetFailures = 0;
   let pageErrors = 0;
+  function checkNetwork() {
+    assert.equal(blocked, 0);
+    assert.equal(assetFailures, 0);
+    assert.equal(pageErrors, 0);
+  }
   try {
     await context.routeWebSocket('**/*', (socket) => {
       blocked += 1;
@@ -158,11 +162,18 @@ async function run(browser, sweep) {
       const entry = responses.get(url.pathname + url.search);
       if (url.origin === origin && request.method() === 'GET') {
         if (entry) {
+          apiRequests.push(url.pathname + url.search);
           if (entry.collection) requests.push(entry);
           return route.fulfill({ contentType: 'application/json', body: entry.body });
         }
+        if (url.pathname === '/console/console-config.json') {
+          const response = await route.fetch({ maxRedirects: 0 });
+          const config = await response.json();
+          config.workloadInventoryPagination = pagination;
+          return route.fulfill({ response, json: config });
+        }
         if (
-          ['/console/containers', '/console/console-config.json'].includes(url.pathname) ||
+          url.pathname === '/console/containers' ||
           url.pathname.startsWith('/console/assets/') ||
           url.pathname.startsWith('/console/brand/')
         ) {
@@ -210,13 +221,21 @@ async function run(browser, sweep) {
         assetFailures += 1;
     });
     const first = projects[0].id;
-    stage = 'initial inventory';
+    const expectedRows = pagination ? renderedPageSize : counts.containers;
+    stage = smoke ? 'pagination disabled smoke' : 'initial inventory';
     await page.goto(`${origin}/console/containers?env=${first}`, { waitUntil: 'domcontentloaded' });
-    await waitForRows(page, rowName(first, 0));
+    await waitForRows(page, rowName(first, 0), expectedRows);
     const readyMs = await paint(page);
     const coldRequests = requests.slice();
     checkCursors(coldRequests, first);
     assert.equal(coldRequests.length, 23);
+    assert.deepEqual(apiRequests.filter((url) => !responses.get(url).collection).sort(), [
+      '/oidc/config',
+      `/v2-beta/projects/${first}/schemas`,
+      '/v2-beta/projects?limit=100',
+      '/v2-beta/token',
+    ]);
+    const initialApiRequests = apiRequests.length;
     const initialRender = await page.evaluate((rowNames) => {
       const inventory = performance
         .getEntriesByType('resource')
@@ -231,9 +250,40 @@ async function run(browser, sweep) {
       };
     }, rowNames);
     assert.match(initialRender.assetEntry, /^\/console\/assets\/[A-Za-z0-9_.-]+\.js$/);
+    assert.equal(initialRender.renderedRows, expectedRows);
     const summary = await page.locator('.operation-metrics strong').allTextContents();
     assert.deepEqual(summary.map(Number), Object.values(counts));
-    await checkScope(page, first);
+    const firstPage = await checkScope(page, first, expectedRows);
+    const previous = page.getByRole('button', { name: 'Página anterior', exact: true });
+    const next = page.getByRole('button', { name: 'Próxima página', exact: true });
+    if (!pagination) {
+      assert.equal(await previous.count(), 0);
+      assert.equal(await next.count(), 0);
+    }
+    if (smoke) {
+      if (pagination) {
+        stage = 'mobile pagination';
+        assert.equal(await previous.isDisabled(), true);
+        await next.click();
+        await page.getByText('Página 2 de 40', { exact: true }).waitFor();
+        assert.ok(
+          (await checkScope(page, first, expectedRows)).every((name) => !firstPage.includes(name)),
+        );
+        assert.equal(apiRequests.length, initialApiRequests);
+        assert.equal(
+          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+          true,
+        );
+      }
+      checkNetwork();
+      return {
+        assetEntry: initialRender.assetEntry,
+        renderedRows: initialRender.renderedRows,
+        paginationControls: pagination,
+        ...(pagination && { viewport: size, nextPage: true, documentFitsViewport: true }),
+        initialApiRequests,
+      };
+    }
     const switcher = page.locator('.environment-trigger');
     const options = page.locator('.environment-options').getByRole('option');
     stage = 'environment choices';
@@ -251,8 +301,26 @@ async function run(browser, sweep) {
     await search.fill(rowName(first, counts.containers - 1));
     await waitForRows(page, rowName(first, counts.containers - 1), 1);
     const searchMs = round((await paint(page)) - searchStart);
+    await checkScope(page, first, 1);
     await search.clear();
-    await waitForRows(page, rowName(first, 0));
+    await waitForRows(page, rowName(first, 0), expectedRows);
+
+    if (pagination) {
+      stage = 'container pagination';
+      const totalPages = Math.ceil(counts.containers / renderedPageSize);
+      const pageStatus = (number) =>
+        page.getByText(`Página ${number} de ${totalPages}`, { exact: true });
+      await pageStatus(1).waitFor();
+      assert.equal(await previous.isDisabled(), true);
+      await next.click();
+      await pageStatus(2).waitFor();
+      const secondPage = await checkScope(page, first, expectedRows);
+      assert.ok(secondPage.every((name) => !firstPage.includes(name)));
+      await previous.click();
+      await pageStatus(1).waitFor();
+      assert.deepEqual(await checkScope(page, first, expectedRows), firstPage);
+      assert.equal(apiRequests.length, initialApiRequests);
+    }
 
     const switchMeasurements = [];
     let heapBytes;
@@ -260,15 +328,22 @@ async function run(browser, sweep) {
       stage = 'environment sweep';
       const session = await context.newCDPSession(page);
       const firstScope = await heap(session);
+      if (pagination) {
+        await next.click();
+        assert.equal(await previous.isEnabled(), true);
+        await checkScope(page, first, expectedRows);
+        assert.equal(apiRequests.length, initialApiRequests);
+      }
       for (const [index, { id }] of projects.entries()) {
         if (!index) continue;
         await switcher.click();
         const option = options.filter({ hasText: projectName(index + 1) });
         const start = await page.evaluate(() => performance.now());
         await option.click();
-        await waitForRows(page, rowName(id, 0));
+        await waitForRows(page, rowName(id, 0), expectedRows);
         switchMeasurements.push(round((await paint(page)) - start));
-        await checkScope(page, id);
+        await checkScope(page, id, expectedRows);
+        if (pagination) assert.equal(await previous.isDisabled(), true);
         checkCursors(requests, id);
       }
       const afterSweep = await heap(session);
@@ -277,8 +352,10 @@ async function run(browser, sweep) {
       const start = await page.evaluate(() => performance.now());
       const requestStart = requests.length;
       await options.filter({ hasText: projectName(1) }).click();
-      await waitForRows(page, rowName(first, 0));
+      await waitForRows(page, rowName(first, 0), expectedRows);
       const revisitMs = round((await paint(page)) - start);
+      await checkScope(page, first, expectedRows);
+      if (pagination) assert.equal(await previous.isDisabled(), true);
       const afterRevisit = await heap(session);
       heapBytes = { firstScope, afterSweep, afterRevisit };
       await session.detach();
@@ -293,9 +370,7 @@ async function run(browser, sweep) {
     stage = 'network and render checks';
     const { longTasks, staleFrames, transitionFrames } = await page.evaluate(() => window.ux06);
     assert.equal(staleFrames, 0);
-    assert.equal(blocked, 0);
-    assert.equal(assetFailures, 0);
-    assert.equal(pageErrors, 0);
+    checkNetwork();
     return {
       assetEntry: initialRender.assetEntry,
       initialReadyMs: round(readyMs),
@@ -304,6 +379,7 @@ async function run(browser, sweep) {
       domElements: initialRender.domElements,
       renderedRows: initialRender.renderedRows,
       urlTransitionFrames: transitionFrames,
+      initialApiRequests,
       initialInventoryRequests: coldRequests.length,
       initialInventoryJsonBytes: coldRequests.reduce(
         (sum, entry) => sum + Buffer.byteLength(entry.body),
@@ -328,9 +404,19 @@ async function run(browser, sweep) {
     executablePath: process.env.CHROMIUM_EXECUTABLE,
   });
   try {
+    const pagination = process.env.UX06_BASELINE !== '1';
     const samples = [];
-    for (let index = 0; index < coldRuns; index += 1) samples.push(await run(browser, index === 0));
+    for (let index = 0; index < coldRuns; index += 1)
+      samples.push(await run(browser, { pagination, sweep: index === 0 }));
     assert.equal(new Set(samples.map(({ assetEntry }) => assetEntry)).size, 1);
+    const disabledSmoke = pagination
+      ? await run(browser, { pagination: false, smoke: true })
+      : null;
+    if (disabledSmoke) assert.equal(disabledSmoke.assetEntry, samples[0].assetEntry);
+    const mobileSmoke = pagination
+      ? await run(browser, { pagination, smoke: true, size: mobileViewport })
+      : null;
+    if (mobileSmoke) assert.equal(mobileSmoke.assetEntry, samples[0].assetEntry);
     const initialMs = samples.map(({ initialReadyMs }) => initialReadyMs).sort((a, b) => a - b);
     console.log(
       JSON.stringify(
@@ -345,15 +431,24 @@ async function run(browser, sweep) {
             viewport,
           },
           fixture: { environments: projectCount, perEnvironment: counts, apiPageSize: pageSize },
+          workloadInventoryPagination: pagination,
           checks: {
             allEnvironmentsSelectable: true,
             apiPagination: true,
             search: true,
             environmentIsolation: true,
             networkAllowlist: true,
+            ...(pagination && {
+              renderedPageSize,
+              clientPagination: true,
+              environmentResetsPage: true,
+              noAdditionalApiRequestsForSearchOrPaging: true,
+            }),
           },
           initialReadyMs: { min: initialMs[0], median: initialMs[1], max: initialMs[2] },
           samples,
+          ...(disabledSmoke && { disabledSmoke }),
+          ...(mobileSmoke && { mobileSmoke }),
         },
         null,
         2,

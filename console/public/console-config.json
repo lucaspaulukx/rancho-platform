@@ -4,6 +4,7 @@
   "branding": true,
   "themeDefault": "dark",
   "themeSelectable": true,
+  "workloadInventoryPagination": true,
   "customTheme": {},
   "modules": {
     "groups": true,
