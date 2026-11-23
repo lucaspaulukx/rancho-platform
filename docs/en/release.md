@@ -55,6 +55,8 @@ Repeat `--extra-image NAME=IMAGE` to include each additional image used by the s
 
 Public CycloneDX projections allow package identities/versions/hashes/licenses and graph references, excluding image configuration, environment, private file paths and unknown metadata. The offline CI checks that ambiguous references fail before a filtered file can hide a package dependency. Package names can still be private and need review. Runtime image and development lockfile inventory are different evidence; bundled JavaScript or old Go binaries may not be completely detected. Unknown licenses are unresolved review, not approval. This is neither a CVE scanner nor legal certification, and it publishes nothing automatically.
 
+The modern backend includes the Cattle license under `/usr/share/doc/rancho-cattle` and the WebSocket proxy's upstream and bundled notices under `/usr/share/doc/community-websocket-proxy`. Check those directories on the final runtime image during the dependency review.
+
 ## Isolated fresh installation
 
 Use two previously built local Linux images. The rehearsal uses fresh owned volumes and a private bridge with no published ports. It checks the classic UI, the console proxy, the schema migration and idempotence after restarting the backend. The trial uses embedded MySQL and leaves OIDC and the backend modern redirect off.
