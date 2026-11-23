@@ -14,5 +14,5 @@ upstream product; their inclusion does not transfer trademark rights.
 The console bundles Inter under the SIL Open Font License, available at
 console/public/licenses/Inter-OFL.txt. Dependency licenses remain applicable;
 the release dependency/license review is a separate REL04 gate. Inventory tooling
-is documented in docs/80-artifact-dependency-inventory.md; generated metadata is
+is documented in docs/en/release.md; generated metadata is
 not an automatic license approval.

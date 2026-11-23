@@ -1,0 +1,8 @@
+---
+description: Rancho Platform contribution and validation workflow
+alwaysApply: true
+---
+
+Read `AGENTS.md` at the repository root and the relevant contribution/roadmap document. Keep changes scoped and validated; maintain the shared UI and current backend contracts. Follow existing user authorization without adding redundant sandbox approval prompts. Do not merge, change visibility or publish without the corresponding authorization.
+
+Leia `AGENTS.md` na raiz e os documentos pertinentes de contribuição/roadmap. Mantenha alterações no escopo e validadas, reutilizando UI e contratos atuais do backend. Respeite a autorização existente sem criar confirmações redundantes de sandbox. Merge, mudança de visibilidade e publicação dependem da autorização correspondente.
