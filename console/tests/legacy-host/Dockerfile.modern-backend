@@ -164,6 +164,9 @@ COPY --from=cattle /lab/cattle/LICENSE /usr/share/doc/rancho-cattle/LICENSE
 COPY --from=cattle /usr/share/doc/community-websocket-proxy /usr/share/doc/community-websocket-proxy
 COPY --from=webhook /out/webhook-service /usr/bin/webhook-service
 COPY --from=webhook /out/notices/ /usr/share/doc/rancho-webhook-service/
+COPY licenses/backend-jvm/ /usr/share/doc/rancho-backend-jvm/
+RUN --network=none cd /usr/share/doc/rancho-backend-jvm && \
+    sha256sum -c SHA256SUMS && sha256sum -c RUNTIME-SHA256SUMS
 COPY modern-backend-entry.sh /usr/local/bin/rancho-entry
 ENV CATTLE_HOME=/var/lib/cattle CATTLE_DB_CATTLE_DATABASE=mysql DEFAULT_CATTLE_API_UI_INDEX=local
 ENV RANCHER_HOST_STREAM_PROXY_PROTOCOL=1 RANCHER_METRICS_PAYLOAD_PROXY_PROTOCOL=1 RANCHER_API_KEY_STREAM_PROXY_PROTOCOL=1
