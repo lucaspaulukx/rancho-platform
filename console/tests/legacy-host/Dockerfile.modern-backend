@@ -21,9 +21,14 @@ ADD --checksum=sha256:12067b66548f7613fa8938ca6051a6d1dd8c397bf478e0bb1adb993635
 ADD --checksum=sha256:bc4ba6bd242f2db2642938960ae27589b53dd6a611d700a260af7b3383cd0c6c https://repo.maven.apache.org/maven2/org/springframework/spring-jdbc/7.0.10/spring-jdbc-7.0.10.jar /spring-jdbc-7.0.10.jar
 ADD --checksum=sha256:9442610a8ed3d44e70fa97f49896ea810c831da62620101450f0feb522edb4cd https://repo.maven.apache.org/maven2/org/springframework/spring-tx/7.0.10/spring-tx-7.0.10.jar /spring-tx-7.0.10.jar
 
+FROM scratch AS guava-jars
+ADD --checksum=sha256:97b79ec3f2c0a6313a0c2df51ce1abdf8907e6531803467b81efcaaf99b35161 https://repo.maven.apache.org/maven2/com/google/guava/guava/33.8.0-jre/guava-33.8.0-jre.jar /guava-33.8.0-jre.jar
+ADD --checksum=sha256:cbfc3906b19b8f55dd7cfd6dfe0aa4532e834250d7f080bd8d211a3e246b59cb https://repo.maven.apache.org/maven2/com/google/guava/failureaccess/1.0.3/failureaccess-1.0.3.jar /failureaccess-1.0.3.jar
+ADD --checksum=sha256:e411f419d4a940f6237891950c9bb804efc2bc115e42e13cb5a0f3d3abbbd5c4 https://repo.maven.apache.org/maven2/org/weakref/jmxutils/1.29/jmxutils-1.29.jar /jmxutils-1.29.jar
+
 FROM ${BACKEND_JAVA17_IMAGE} AS cattle
-COPY modern-backend-single-node.patch modern-backend-servlet.patch modern-backend-logback.patch ServletApplicationContext.java configure-modern-servlets.py migrate-spring-annotations.py /tmp/modern-backend/
-RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars --mount=from=spring-jars,target=/tmp/spring-jars set -eu; \
+COPY modern-backend-single-node.patch modern-backend-servlet.patch modern-backend-logback.patch modern-backend-guava.patch ServletApplicationContext.java configure-modern-servlets.py migrate-spring-annotations.py /tmp/modern-backend/
+RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars --mount=from=spring-jars,target=/tmp/spring-jars --mount=from=guava-jars,target=/tmp/guava-jars set -eu; \
     cd /lab/cattle; \
     git apply --ignore-space-change /tmp/modern-backend/*.patch; \
     cp -aL /usr/share/cattle/war /opt/war; \
@@ -37,6 +42,8 @@ RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars --mount=fr
     install -m 0644 /tmp/logging-jars/*.jar "$lib/"; \
     /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-framework-logback-0.5.0-SNAPSHOT.jar" \
         -C code/framework/logback/src/main/resources logback; \
+    rm "$lib/guava-15.0.jar" "$lib/jmxutils-1.14.jar"; \
+    install -m 0644 /tmp/guava-jars/*.jar "$lib/"; \
     mkdir /tmp/single-node; \
     /usr/lib/jvm/zulu-8-amd64/bin/javac -encoding UTF-8 \
         -cp "/opt/war:$lib/*:/opt/war/WEB-INF/jetty/*" -d /tmp/single-node \
@@ -46,6 +53,10 @@ RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars --mount=fr
         code/framework/module/src/main/java/io/cattle/platform/spring/web/SpringFilter.java \
         code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/OidcServlet.java \
         code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/HostStreamGuardServlet.java \
+        code/iaas/agent/src/main/java/io/cattle/platform/agent/impl/EventCallProgressHelper.java \
+        code/iaas/agent-server/src/main/java/io/cattle/platform/agent/server/ping/impl/PingMonitorImpl.java \
+        code/iaas/config-item/common/src/main/java/io/cattle/platform/configitem/version/impl/ConfigUpdatePublisher.java \
+        code/iaas/config-item/common/src/main/java/io/cattle/platform/configitem/version/impl/ConfigItemStatusManagerImpl.java \
         /tmp/modern-backend/ServletApplicationContext.java; \
     /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-app-config-0.5.0-SNAPSHOT.jar" \
         -C /tmp/single-node io/cattle/platform/app/AppConfig.class; \
@@ -55,6 +66,12 @@ RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars --mount=fr
         -C /tmp/single-node io/cattle/platform/spring/web; \
     /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-iaas-auth-logic-0.5.0-SNAPSHOT.jar" \
         -C /tmp/single-node io/cattle/platform/iaas/api/auth/localrbac; \
+    (cd /tmp/single-node; \
+        /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-iaas-agent-0.5.0-SNAPSHOT.jar" io/cattle/platform/agent/impl/EventCallProgressHelper*.class; \
+        /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-iaas-agent-server-0.5.0-SNAPSHOT.jar" io/cattle/platform/agent/server/ping/impl/PingMonitorImpl*.class; \
+        /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-config-item-common-0.5.0-SNAPSHOT.jar" io/cattle/platform/configitem/version/impl/ConfigUpdatePublisher*.class; \
+        /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-config-item-common-0.5.0-SNAPSHOT.jar" io/cattle/platform/configitem/version/impl/ConfigItemStatusManagerImpl*.class; \
+    ); \
     python3 /tmp/modern-backend/migrate-spring-annotations.py "$lib"; \
     rm "$lib"/spring-*-5.3.39.jar; \
     install -m 0644 /tmp/spring-jars/*.jar "$lib/"

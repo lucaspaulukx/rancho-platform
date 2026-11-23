@@ -23,7 +23,7 @@ Em 13 de novembro de 2026, o Trivy 0.74.0 encontrou as seguintes ocorrências cr
 | Gateway da console | 3 / 73 | 0 / 0 |
 | Keycloak opcional | 8 / 101 | 0 / 6 |
 
-As contagens valem para as imagens analisadas e dependem da base de avisos. A base legada do backend chegou ao fim do suporte. O backend experimental de nó único com Ubuntu 24.04 apresenta **0 críticas / 5 altas** no scan. O [roadmap](roadmap.md) acompanha os achados restantes, o backend experimental e os critérios de aceite da beta.
+As contagens valem para as imagens analisadas e dependem da base de avisos. A base legada do backend chegou ao fim do suporte. O backend experimental de nó único com Ubuntu 24.04 apresenta **0 críticas / 3 altas** no scan. O [roadmap](roadmap.md) acompanha os achados restantes, o backend experimental e os critérios de aceite da beta.
 
 ## Funcionalidades
 

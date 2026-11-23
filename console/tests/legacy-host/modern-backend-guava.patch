@@ -1,0 +1,84 @@
+--- a/code/iaas/agent/src/main/java/io/cattle/platform/agent/impl/EventCallProgressHelper.java
++++ b/code/iaas/agent/src/main/java/io/cattle/platform/agent/impl/EventCallProgressHelper.java
+@@ -8,6 +8,7 @@
+ import io.cattle.platform.eventing.model.EventVO;
+
+ import com.google.common.base.Function;
++import com.google.common.util.concurrent.MoreExecutors;
+ import com.google.common.util.concurrent.Futures;
+ import com.google.common.util.concurrent.ListenableFuture;
+
+@@ -60,6 +61,6 @@
+             public T apply(Event input) {
+                 return converter.convert(input, reply);
+             }
+-        });
++        }, MoreExecutors.directExecutor());
+     }
+ }
+--- a/code/iaas/agent-server/src/main/java/io/cattle/platform/agent/server/ping/impl/PingMonitorImpl.java
++++ b/code/iaas/agent-server/src/main/java/io/cattle/platform/agent/server/ping/impl/PingMonitorImpl.java
+@@ -38,6 +38,7 @@
+ import com.google.common.cache.CacheBuilder;
+ import com.google.common.cache.CacheLoader;
+ import com.google.common.cache.LoadingCache;
++import com.google.common.util.concurrent.MoreExecutors;
+ import com.google.common.util.concurrent.FutureCallback;
+ import com.google.common.util.concurrent.ListeningExecutorService;
+ import com.netflix.config.DynamicLongProperty;
+@@ -122,7 +123,7 @@
+             public void onFailure(Throwable t) {
+                 pingFailure(agent);
+             }
+-        });
++        }, MoreExecutors.directExecutor());
+     }
+
+     protected void pingSuccess(Agent agent, Ping pong) {
+--- a/code/iaas/config-item/common/src/main/java/io/cattle/platform/configitem/version/impl/ConfigUpdatePublisher.java
++++ b/code/iaas/config-item/common/src/main/java/io/cattle/platform/configitem/version/impl/ConfigUpdatePublisher.java
+@@ -42,6 +42,7 @@
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+
++import com.google.common.util.concurrent.MoreExecutors;
+ import com.google.common.util.concurrent.FutureCallback;
+ import com.google.common.util.concurrent.Futures;
+ import com.google.common.util.concurrent.ListenableFuture;
+@@ -241,7 +242,7 @@
+                     item.t = t;
+                     requests.add(item);
+                 }
+-            });
++            }, MoreExecutors.directExecutor());
+         } catch (Throwable t) {
+             item.t = t;
+             requests.add(item);
+--- a/code/iaas/config-item/common/src/main/java/io/cattle/platform/configitem/version/impl/ConfigItemStatusManagerImpl.java
++++ b/code/iaas/config-item/common/src/main/java/io/cattle/platform/configitem/version/impl/ConfigItemStatusManagerImpl.java
+@@ -38,6 +38,7 @@
+ import org.slf4j.LoggerFactory;
+
+ import com.google.common.base.Function;
++import com.google.common.util.concurrent.MoreExecutors;
+ import com.google.common.util.concurrent.FutureCallback;
+ import com.google.common.util.concurrent.Futures;
+ import com.google.common.util.concurrent.ListenableFuture;
+@@ -225,7 +226,7 @@
+
+                 return Boolean.TRUE;
+             }
+-        });
++        }, MoreExecutors.directExecutor());
+     }
+
+     protected List<ConfigUpdateItem> getNeedsUpdating(ConfigUpdateRequest request, boolean checkVersions) {
+@@ -314,7 +315,7 @@
+                             log.error("Error {} item(s) {} on [{}]", migration ? "migrating" : "updating", entry.getValue(), client, t);
+                         }
+                     }
+-                });
++                }, MoreExecutors.directExecutor());
+             }
+
+             first = false;
