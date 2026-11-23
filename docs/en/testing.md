@@ -118,6 +118,8 @@ python console/tests/localization_acceptance.py --accessibility
 
 Run `python console/tests/gateway_security.py` with the named loopback Rancher and Nginx console containers available on port 18090. The check uses one disposable administrator session and revokes it at the end. It checks cache policy and security headers through Nginx, including an invalid OIDC callback, without requiring a running identity provider. It verifies that hashed scripts retain immutable caching.
 
+For the default Compose profile with OIDC disabled, add `--oidc-disabled`. The check verifies the effective mode through the gateway and expects HTTP 404 from the disabled callback. With OIDC enabled it expects HTTP 401 for the invalid callback. Use the authorization suite below to verify sign-in with an identity provider.
+
 Run `python console/tests/gateway_authorization.py` with the same local gateway and Keycloak running. The test requires the named RBAC-DEV/RBAC-PROD fixtures and uses three disposable sessions. It checks project scope, read-only writes, OIDC ticket replay, absence of credential fields in public OIDC configuration and foreign-origin requests carrying a session cookie. Verify that a reverse proxy in front of Nginx preserves the public Host header for origin matching.
 
 `physical_security_options.py` compares a native `no-new-privileges` container with an otherwise identical control. It requires Docker on the original isolated legacy host, then compares scoped API values, Docker's security options and `NoNewPrivs` in the running processes. The test is limited to one option and one runtime.

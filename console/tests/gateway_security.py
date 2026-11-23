@@ -1,4 +1,6 @@
 """Check the loopback Nginx gateway using one disposable administrator session."""
+import argparse
+import json
 from pathlib import Path
 import re
 import sys
@@ -29,7 +31,7 @@ def no_store(cache_control):
     return 'no-store' in directives and 'public' not in directives
 
 
-def main():
+def main(*, oidc_enabled=True):
     with fetch('/console/login?oidc_ticket=synthetic-gateway-probe') as response:
         require('Login deep link serves the shell', response.status == 200)
         require('Login route has no referrer and forbids framing',
@@ -45,10 +47,15 @@ def main():
         require('Console configuration forbids caching', response.status == 200
                 and no_store(response.headers.get('Cache-Control', '')))
 
+    with fetch('/oidc/status') as response:
+        require('Gateway exposes the expected OIDC mode',
+                response.status == 200 and json.load(response).get('enabled') is oidc_enabled)
+
     for path, statuses in [
         ('/v2-beta/projects', (401, 403)),
         ('/v2-beta/localGroups', (401, 403, 404)),
-        ('/oidc/callback?state=synthetic-invalid&code=synthetic-invalid', (401,)),
+        ('/oidc/callback?state=synthetic-invalid&code=synthetic-invalid',
+         (401,) if oidc_enabled else (404,)),
         ('/oidc/config', (200,)),
     ]:
         with fetch(path) as response:
@@ -79,4 +86,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--oidc-disabled', action='store_true',
+                        help='Require the OIDC servlet to report disabled and reject the callback with 404.')
+    args = parser.parse_args()
+    main(oidc_enabled=not args.oidc_disabled)
