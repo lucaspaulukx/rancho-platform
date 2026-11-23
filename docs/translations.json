@@ -118,8 +118,8 @@
         "pt-BR": "docs/pt-BR/roadmap.md",
         "en": "docs/en/roadmap.md"
       },
-      "reviewedSourceSha256": "d095e7515a850eb65fd7b06d0a2508f12a5925de46ee6bf9e3935d230e3e1b91",
-      "reviewedTranslationSha256": "c4735f96afdbf78a814c058bb95c31b8934c1fa4a9be86b1bfcf7273aec20ca6"
+      "reviewedSourceSha256": "b97eed54b8c9d45f319f949734535f6e0ee42a45d1618891b62771905397cafd",
+      "reviewedTranslationSha256": "3cf235109ebff647045260823b49184456343fc9c283c7ed3ba7bf7c13ad1f64"
     },
     {
       "source": "docs/pt-BR/security-model.md",
