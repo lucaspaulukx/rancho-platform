@@ -1,4 +1,15 @@
 export const huHU = {
+  'workloadStreams.logs': 'Erőforrásnaplók',
+  'workloadStreams.terminal': 'Az erőforrás terminálja',
+  'workloadStreams.emptyTitle': 'Nincs elérhető konténer',
+  'workloadStreams.emptyDescription':
+    'A Rancher nem tette elérhetővé ezt a műveletet az erőforrás konténereihez.',
+  'workloadStreams.stack': 'Stack:',
+  'workloadStreams.service': 'Szolgáltatás:',
+  'workloadStreams.container': 'Konténer',
+  'workloadStreams.selectionHint':
+    'Csak a kiválasztott konténer látható. Konténerváltáskor az előző kapcsolat bezárul.',
+
   'operations.stackMetric': 'stack',
   'operations.serviceMetric': 'szolgáltatás',
   'operations.containerMetric': 'konténer',

@@ -1,4 +1,15 @@
 export const ruRU = {
+  'workloadStreams.logs': 'Журналы ресурса',
+  'workloadStreams.terminal': 'Терминал ресурса',
+  'workloadStreams.emptyTitle': 'Нет доступных контейнеров',
+  'workloadStreams.emptyDescription':
+    'Rancher не предоставил возможность выполнить эту операцию для контейнеров данного ресурса.',
+  'workloadStreams.stack': 'Стек:',
+  'workloadStreams.service': 'Сервис:',
+  'workloadStreams.container': 'Контейнер',
+  'workloadStreams.selectionHint':
+    'Отображается только выбранный контейнер. При переключении на другой контейнер предыдущее соединение закрывается.',
+
   'operations.stackMetric': 'стеки',
   'operations.serviceMetric': 'сервисы',
   'operations.containerMetric': 'контейнеры',

@@ -1,4 +1,15 @@
 export const faIR = {
+  'workloadStreams.logs': 'لاگ‌های منبع',
+  'workloadStreams.terminal': 'ترمینال منبع',
+  'workloadStreams.emptyTitle': 'هیچ کانتینری در دسترس نیست',
+  'workloadStreams.emptyDescription':
+    'Rancher این عملیات را برای کانتینرهای این منبع در دسترس قرار نداده است.',
+  'workloadStreams.stack': 'پشته:',
+  'workloadStreams.service': 'سرویس:',
+  'workloadStreams.container': 'کانتینر',
+  'workloadStreams.selectionHint':
+    'فقط کانتینر انتخاب‌شده نمایش داده می‌شود. با تغییر کانتینر، اتصال قبلی بسته می‌شود.',
+
   'operations.stackMetric': 'پشته',
   'operations.serviceMetric': 'سرویس',
   'operations.containerMetric': 'کانتینر',

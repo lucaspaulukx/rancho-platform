@@ -1,4 +1,13 @@
 export const zhHans = {
+  'workloadStreams.logs': '资源日志',
+  'workloadStreams.terminal': '资源终端',
+  'workloadStreams.emptyTitle': '没有可用的容器',
+  'workloadStreams.emptyDescription': 'Rancher 未对该资源的容器开放此操作。',
+  'workloadStreams.stack': '堆栈：',
+  'workloadStreams.service': '服务：',
+  'workloadStreams.container': '容器',
+  'workloadStreams.selectionHint': '仅显示所选容器。切换容器会关闭之前的连接。',
+
   'operations.stackMetric': '堆栈',
   'operations.serviceMetric': '服务',
   'operations.containerMetric': '容器',

@@ -1,4 +1,15 @@
 export const frFR = {
+  'workloadStreams.logs': 'Journaux de la ressource',
+  'workloadStreams.terminal': 'Terminal de la ressource',
+  'workloadStreams.emptyTitle': 'Aucun conteneur disponible',
+  'workloadStreams.emptyDescription':
+    'Rancher ne propose pas cette opération pour les conteneurs de cette ressource.',
+  'workloadStreams.stack': 'Stack :',
+  'workloadStreams.service': 'Service :',
+  'workloadStreams.container': 'Conteneur',
+  'workloadStreams.selectionHint':
+    'Seul le conteneur sélectionné est affiché. Changer de conteneur ferme la connexion précédente.',
+
   'operations.stackMetric': 'stacks',
   'operations.serviceMetric': 'services',
   'operations.containerMetric': 'conteneurs',
