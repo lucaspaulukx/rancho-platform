@@ -92,6 +92,8 @@ Projeções CycloneDX públicas permitem identidades/versões/hashes/licenças e
 
 A imagem moderna do backend inclui a licença do Cattle em `/usr/share/doc/rancho-cattle` e os avisos do proxy WebSocket e de suas dependências empacotadas em `/usr/share/doc/community-websocket-proxy`. Confira esses diretórios na imagem final durante a revisão de dependências.
 
+O build da console inclui em `dist/licenses/npm` os textos de licença das dependências de produção instaladas. O arquivo publicado em `/console/licenses/npm/index.json` lista as versões, as declarações de licença e os avisos. Quando o pacote publicado omite o texto da licença, o build exige um aviso revisado para aquela versão.
+
 ## Instalação limpa isolada
 
 Use duas imagens Linux locais já compiladas. O ensaio usa volumes próprios novos e uma rede privada sem portas publicadas. Verifica a UI clássica, o proxy do console, a migração de schema e a idempotência após reiniciar o backend. O teste usa MySQL embutido com OIDC e redirecionamento moderno do backend desligados.
