@@ -1,0 +1,101 @@
+--- a/code/framework/api-pub-sub-jetty/src/main/java/io/cattle/platform/api/pubsub/subscribe/jetty/JettyWebSocketSubcriptionHandler.java
++++ b/code/framework/api-pub-sub-jetty/src/main/java/io/cattle/platform/api/pubsub/subscribe/jetty/JettyWebSocketSubcriptionHandler.java
+@@ -15,10 +15,7 @@
+ import javax.servlet.http.HttpServletResponse;
+
+ import org.apache.commons.lang3.StringUtils;
+-import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
+-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
++import org.eclipse.jetty.ee8.websocket.server.JettyWebSocketServerContainer;
+
+ public class JettyWebSocketSubcriptionHandler extends NonBlockingSubscriptionHandler {
+
+@@ -37,16 +34,8 @@
+             }
+         }
+         final WebSocketMessageWriter messageWriter = new WebSocketMessageWriter(identifier);
+-        WebSocketServerFactory factory = new WebSocketServerFactory();
+-        factory.getPolicy().setAsyncWriteTimeout(1000);
+-        factory.setCreator(new WebSocketCreator() {
+-            @Override
+-            public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
+-                return messageWriter;
+-            }
+-        });
+-
+-        if ("websocket".equalsIgnoreCase(req.getHeader("Upgrade")) && factory.acceptWebSocket(req, resp)) {
++        JettyWebSocketServerContainer container = JettyWebSocketServerContainer.getContainer(req.getServletContext());
++        if ("websocket".equalsIgnoreCase(req.getHeader("Upgrade")) && container.upgrade((request, response) -> messageWriter, req, resp)) {
+             apiRequest.setResponseCode(101);
+             apiRequest.commit();
+             return messageWriter;
+--- a/code/framework/launcher/src/main/java/io/cattle/platform/launcher/jetty/Main.java
++++ b/code/framework/launcher/src/main/java/io/cattle/platform/launcher/jetty/Main.java
+@@ -15,14 +15,14 @@
+
+ import org.apache.commons.lang.StringUtils;
+ import org.eclipse.jetty.jmx.MBeanContainer;
++import org.eclipse.jetty.ee8.websocket.server.config.JettyWebSocketServletContainerInitializer;
+ import org.eclipse.jetty.server.Connector;
+ import org.eclipse.jetty.server.HttpConfiguration;
+ import org.eclipse.jetty.server.HttpConnectionFactory;
+ import org.eclipse.jetty.server.Server;
+ import org.eclipse.jetty.server.ServerConnector;
+-import org.eclipse.jetty.util.log.Log;
+-import org.eclipse.jetty.webapp.WebAppClassLoader;
+-import org.eclipse.jetty.webapp.WebAppContext;
++import org.eclipse.jetty.server.handler.gzip.GzipHandler;
++import org.eclipse.jetty.ee8.webapp.WebAppContext;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+
+@@ -109,7 +109,6 @@
+             MBeanContainer mbContainer = new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
+             s.addEventListener(mbContainer);
+             s.addBean(mbContainer);
+-            s.addBean(Log.getRootLogger());
+
+             WebAppContext context = new WebAppContext();
+             context.setThrowUnavailableOnStartupException(true);
+@@ -141,10 +140,13 @@
+             }
+
+             context.setParentLoaderPriority(true);
+-            context.setClassLoader(new WebAppClassLoader(Main.class.getClassLoader(), context));
++            context.setClassLoader(Main.class.getClassLoader());
+             context.setContextPath("/");
+
+-            s.setHandler(context);
++            JettyWebSocketServletContainerInitializer.configure(context, null);
++            GzipHandler compression = new GzipHandler();
++            compression.setHandler(context);
++            s.setHandler(compression);
+             s.start();
+
+             CONSOLE_LOG.info("[DONE ] [{}ms] Startup Succeeded, Listening on port {}", (System.currentTimeMillis() - start), getHttpPort());
+--- a/code/framework/api-pub-sub-jetty/src/main/java/io/cattle/platform/api/pubsub/subscribe/jetty/WebSocketMessageWriter.java
++++ b/code/framework/api-pub-sub-jetty/src/main/java/io/cattle/platform/api/pubsub/subscribe/jetty/WebSocketMessageWriter.java
+@@ -7,9 +7,9 @@
+ import java.io.IOException;
+ import java.util.concurrent.atomic.AtomicInteger;
+
+-import org.eclipse.jetty.websocket.api.Session;
+-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+-import org.eclipse.jetty.websocket.api.WebSocketException;
++import org.eclipse.jetty.ee8.websocket.api.Session;
++import org.eclipse.jetty.ee8.websocket.api.WebSocketAdapter;
++import org.eclipse.jetty.websocket.core.exception.WebSocketException;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+
+--- a/code/framework/api-pub-sub-jetty/src/main/java/io/cattle/platform/api/pubsub/subscribe/jetty/WebSocketWriteCallback.java
++++ b/code/framework/api-pub-sub-jetty/src/main/java/io/cattle/platform/api/pubsub/subscribe/jetty/WebSocketWriteCallback.java
+@@ -1,5 +1,5 @@
+ package io.cattle.platform.api.pubsub.subscribe.jetty;
+
+-import org.eclipse.jetty.websocket.api.WriteCallback;
++import org.eclipse.jetty.ee8.websocket.api.WriteCallback;
+
+ public class WebSocketWriteCallback implements WriteCallback {
