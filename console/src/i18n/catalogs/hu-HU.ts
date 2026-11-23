@@ -330,6 +330,33 @@ export const huHU = {
   'operations.expandAll': 'Összes kibontása',
   'operations.collapseAll': 'Összes összecsukása',
   'operations.topology': 'Topológia',
+
+  'topology.title': 'Szolgáltatástopológia',
+  'topology.close': 'Bezárás',
+  'topology.unavailableTitle': 'A topológia nem érhető el',
+  'topology.unavailableDescription':
+    'A kiszolgáló ebben a környezetben nem teszi elérhetővé a szolgáltatáskapcsolatok listáját.',
+  'topology.emptyTitle': 'Nincsenek szolgáltatások',
+  'topology.emptyDescription': 'Ebben a környezetben nincs elérhető szolgáltatás.',
+  'topology.stack': 'Stack',
+  'topology.allStacks': 'Összes stack',
+  'topology.noStack': 'Nincs stack',
+  'topology.summary': '{services} szolgáltatás · {links} natív kapcsolat',
+  'topology.unresolved':
+    '{count} kapcsolat a leltáron kívüli szolgáltatásra mutat. A topológia hiányos.',
+  'topology.limit':
+    'A topológia túllépi az 500 szolgáltatásos vagy 2000 kapcsolatos korlátot. Használja a listanézetet.',
+  'topology.wrongEnvironment': 'A topológia egy másik környezet erőforrásait tartalmazza.',
+  'topology.duplicateServices': 'A leltárban ismétlődő szolgáltatások vannak.',
+  'topology.region': 'A környezet szolgáltatástopológiája',
+  'topology.controls': 'A topológia vezérlői',
+  'topology.zoomIn': 'Topológia nagyítása',
+  'topology.zoomOut': 'Topológia kicsinyítése',
+  'topology.fitView': 'Topológia igazítása a nézethez',
+  'topology.nodeKeyboard':
+    'Csomópont kijelöléséhez nyomja meg az Enter vagy a Szóköz billentyűt. A nyílbillentyűkkel mozgathatja, az Esc billentyűvel megszüntetheti a kijelölést.',
+  'topology.nodeMoved': 'A kijelölt csomópont elmozdult. Pozíció: x {x}, y {y}.',
+  'topology.link': 'Kapcsolat innen: {source}, ide: {target}',
   'operations.search': 'Keresés a műveletekben',
   'operations.searchPlaceholder': 'Stack, szolgáltatás, konténer, lemezkép vagy azonosító…',
   'operations.state': 'Állapot',

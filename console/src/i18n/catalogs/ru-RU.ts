@@ -572,4 +572,30 @@ export const ruRU = {
   'resourcePanel.actionNotice':
     'Операция «{action}» будет применена только к ресурсу {name} в среде {environment}.',
   'resourcePanel.downloadLabel': 'Скачать {filename}',
+  'topology.title': 'Топология сервисов',
+  'topology.close': 'Закрыть',
+  'topology.unavailableTitle': 'Топология недоступна',
+  'topology.unavailableDescription':
+    'В этом контексте сервер не предоставляет список связей между сервисами.',
+  'topology.emptyTitle': 'Нет сервисов',
+  'topology.emptyDescription': 'В этой среде нет доступных сервисов.',
+  'topology.stack': 'Стек',
+  'topology.allStacks': 'Все стеки',
+  'topology.noStack': 'Без стека',
+  'topology.summary': 'Сервисов: {services} · Нативных связей: {links}',
+  'topology.unresolved':
+    'Связей с сервисами за пределами этого инвентаря: {count}. Топология неполная.',
+  'topology.limit':
+    'Топология превышает лимит в 500 сервисов или 2 000 связей. Используйте представление в виде списка.',
+  'topology.wrongEnvironment': 'Топология содержит ресурсы из другой среды.',
+  'topology.duplicateServices': 'Инвентарь содержит дублирующиеся сервисы.',
+  'topology.region': 'Топология сервисов среды',
+  'topology.controls': 'Элементы управления топологией',
+  'topology.zoomIn': 'Увеличить масштаб топологии',
+  'topology.zoomOut': 'Уменьшить масштаб топологии',
+  'topology.fitView': 'Показать всю топологию',
+  'topology.nodeKeyboard':
+    'Нажмите Enter или пробел, чтобы выбрать узел. Перемещайте его клавишами со стрелками или нажмите Escape, чтобы снять выделение.',
+  'topology.nodeMoved': 'Выбранный узел перемещён. Положение: x {x}, y {y}.',
+  'topology.link': 'Связь от {source} к {target}',
 } as const;

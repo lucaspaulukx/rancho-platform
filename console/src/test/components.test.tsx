@@ -14,6 +14,7 @@ import { SecretField } from '../components/SecretField';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BulkOperation } from '../components/BulkOperation';
+import ServiceTopology from '../components/ServiceTopology';
 
 vi.mock('../state', () => ({
   useApp: () => ({ identity: 'fixture', project: { id: 'p1', name: 'Operações' } }),
@@ -163,6 +164,59 @@ describe('Confirmação de remoção em lote', () => {
     expect(translated).not.toBeInTheDocument();
     router.dispose();
   });
+});
+
+it('translates the open service topology without changing the stack or fetching it again', async () => {
+  const transport = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+    new Response(JSON.stringify({ data: [] }), {
+      headers: { 'Content-Type': 'application/json' },
+    }),
+  );
+  try {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <I18nProvider
+          policy={{
+            enabled: true,
+            preview: true,
+            defaultLocale: 'pt-BR',
+            availableLocales: ['pt-BR', 'fr-FR'],
+            selectable: true,
+            detectBrowser: false,
+          }}
+        >
+          <ServiceTopology
+            services={[{ id: 's1', accountId: 'p1', stackId: 'st1', type: 'service', links: {} }]}
+            stacks={[{ id: 'st1', accountId: 'p1', type: 'stack', name: 'Loja', links: {} }]}
+            schema={{
+              id: 'serviceConsumeMap',
+              pluralName: 'serviceConsumeMaps',
+              links: {},
+              resourceFields: {},
+              collectionMethods: ['GET'],
+            }}
+            onClose={vi.fn()}
+          />
+        </I18nProvider>
+      </QueryClientProvider>,
+    );
+    const stack = await screen.findByRole('combobox', { name: 'Stack' });
+    await userEvent.selectOptions(stack, 'st1');
+    const graph = screen.getByRole('region', { name: 'Topologia de serviços do environment' });
+    const key = 'rancho.console.locale.anonymous';
+    localStorage.setItem(key, JSON.stringify({ version: 1, locale: 'fr-FR' }));
+    fireEvent(window, new StorageEvent('storage', { key }));
+    expect(await screen.findByRole('dialog', { name: 'Topologie des services' })).toBeVisible();
+    expect(screen.getByRole('combobox')).toBe(stack);
+    expect(stack).toHaveValue('st1');
+    expect(graph).toHaveAccessibleName('Topologie des services de l’environnement');
+    expect(
+      within(graph).getByRole('button', { name: 'Ajuster la topologie à la vue' }),
+    ).toBeVisible();
+    expect(transport).toHaveBeenCalledTimes(1);
+  } finally {
+    transport.mockRestore();
+  }
 });
 
 describe('Comandos de registro protegidos', () => {

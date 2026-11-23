@@ -569,4 +569,30 @@ export const ukUA = {
   'resourcePanel.actionNotice':
     'Операцію «{action}» буде застосовано лише до ресурсу {name} в середовищі {environment}.',
   'resourcePanel.downloadLabel': 'Завантажити {filename}',
+  'topology.title': 'Топологія сервісів',
+  'topology.close': 'Закрити',
+  'topology.unavailableTitle': 'Топологія недоступна',
+  'topology.unavailableDescription':
+    'У цьому контексті сервер не надає списку зв’язків між сервісами.',
+  'topology.emptyTitle': 'Немає сервісів',
+  'topology.emptyDescription': 'У цьому середовищі немає доступних сервісів.',
+  'topology.stack': 'Стек',
+  'topology.allStacks': 'Усі стеки',
+  'topology.noStack': 'Без стека',
+  'topology.summary': 'Сервісів: {services} · Нативних зв’язків: {links}',
+  'topology.unresolved':
+    'Зв’язків із сервісами поза межами цього інвентарю: {count}. Топологія неповна.',
+  'topology.limit':
+    'Топологія перевищує ліміт у 500 сервісів або 2 000 зв’язків. Скористайтеся поданням у вигляді списку.',
+  'topology.wrongEnvironment': 'Топологія містить ресурси з іншого середовища.',
+  'topology.duplicateServices': 'Інвентар містить дублікати сервісів.',
+  'topology.region': 'Топологія сервісів середовища',
+  'topology.controls': 'Елементи керування топологією',
+  'topology.zoomIn': 'Збільшити масштаб топології',
+  'topology.zoomOut': 'Зменшити масштаб топології',
+  'topology.fitView': 'Показати всю топологію',
+  'topology.nodeKeyboard':
+    'Натисніть Enter або пробіл, щоб вибрати вузол. Переміщуйте його клавішами зі стрілками або натисніть Escape, щоб скасувати вибір.',
+  'topology.nodeMoved': 'Вибраний вузол переміщено. Положення: x {x}, y {y}.',
+  'topology.link': 'Зв’язок від {source} до {target}',
 } as const;

@@ -540,4 +540,30 @@ export const jaJP = {
     '応答を確認できませんでした。再試行する前に状態を確認してください。',
   'bulkOperation.message.timeout': '制限時間内にリソースの情報を取得できませんでした。',
   'bulkOperation.message.failed': '操作を適用できませんでした。',
+  'topology.title': 'サービスのトポロジー',
+  'topology.close': '閉じる',
+  'topology.unavailableTitle': 'トポロジーを表示できません',
+  'topology.unavailableDescription':
+    'このコンテキストでは、サーバーからサービスリンクの一覧を取得できません。',
+  'topology.emptyTitle': 'サービスがありません',
+  'topology.emptyDescription': 'この環境に利用可能なサービスはありません。',
+  'topology.stack': 'スタック',
+  'topology.allStacks': 'すべてのスタック',
+  'topology.noStack': 'スタックなし',
+  'topology.summary': 'サービス {services} 件 · ネイティブリンク {links} 件',
+  'topology.unresolved':
+    '{count} 件のリンクがインベントリに含まれていないサービスを参照しています。トポロジーは不完全です。',
+  'topology.limit':
+    'サービス 500 件またはリンク 2,000 件の上限を超えています。一覧ビューを使用してください。',
+  'topology.wrongEnvironment': 'トポロジーに別の環境のリソースが含まれています。',
+  'topology.duplicateServices': 'インベントリに重複したサービスが含まれています。',
+  'topology.region': '環境のサービスのトポロジー',
+  'topology.controls': 'トポロジーの操作',
+  'topology.zoomIn': 'トポロジーを拡大',
+  'topology.zoomOut': 'トポロジーを縮小',
+  'topology.fitView': 'トポロジー全体を表示',
+  'topology.nodeKeyboard':
+    'Enter キーまたはスペースキーでノードを選択します。矢印キーで移動し、Escape キーで選択を解除します。',
+  'topology.nodeMoved': '選択したノードを移動しました。位置：x {x}、y {y}。',
+  'topology.link': '{source} から {target} へのリンク',
 } as const;

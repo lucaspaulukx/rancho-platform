@@ -538,4 +538,30 @@ export const faIR = {
     'دریافت پاسخ تأیید نشد. پیش از تلاش دوباره، وضعیت را بررسی کنید.',
   'bulkOperation.message.timeout': 'دریافت اطلاعات منبع در مهلت مقرر ممکن نبود.',
   'bulkOperation.message.failed': 'اعمال عملیات ممکن نبود.',
+  'topology.title': 'توپولوژی سرویس‌ها',
+  'topology.close': 'بستن',
+  'topology.unavailableTitle': 'توپولوژی در دسترس نیست',
+  'topology.unavailableDescription':
+    'سرور در این زمینه مجموعهٔ پیوندهای سرویس‌ها را ارائه نمی‌کند.',
+  'topology.emptyTitle': 'سرویسی وجود ندارد',
+  'topology.emptyDescription': 'در این محیط هیچ سرویسی در دسترس نیست.',
+  'topology.stack': 'پشته',
+  'topology.allStacks': 'همهٔ پشته‌ها',
+  'topology.noStack': 'بدون پشته',
+  'topology.summary': '{services} سرویس · {links} پیوند بومی',
+  'topology.unresolved':
+    '{count} پیوند به سرویس‌های خارج از این فهرست اشاره می‌کنند. توپولوژی ناقص است.',
+  'topology.limit':
+    'توپولوژی از حد ۵۰۰ سرویس یا ۲٬۰۰۰ پیوند فراتر رفته است. از نمای فهرست استفاده کنید.',
+  'topology.wrongEnvironment': 'توپولوژی شامل منابعی از محیط دیگری است.',
+  'topology.duplicateServices': 'این فهرست شامل سرویس‌های تکراری است.',
+  'topology.region': 'توپولوژی سرویس‌های محیط',
+  'topology.controls': 'کنترل‌های توپولوژی',
+  'topology.zoomIn': 'بزرگ‌نمایی توپولوژی',
+  'topology.zoomOut': 'کوچک‌نمایی توپولوژی',
+  'topology.fitView': 'نمایش کل توپولوژی در نما',
+  'topology.nodeKeyboard':
+    'برای انتخاب گره، کلید Enter یا فاصله را بزنید. با کلیدهای جهت‌دار آن را جابه‌جا کنید یا با Escape انتخاب را لغو کنید.',
+  'topology.nodeMoved': 'گره انتخاب‌شده جابه‌جا شد. موقعیت: x {x}، y {y}.',
+  'topology.link': 'پیوند از {source} به {target}',
 } as const;

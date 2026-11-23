@@ -341,6 +341,33 @@ export const deDE = {
   'operations.expandAll': 'Alle aufklappen',
   'operations.collapseAll': 'Alle zuklappen',
   'operations.topology': 'Topologie',
+
+  'topology.title': 'Diensttopologie',
+  'topology.close': 'Schließen',
+  'topology.unavailableTitle': 'Topologie nicht verfügbar',
+  'topology.unavailableDescription':
+    'Der Server stellt die Liste der Dienstverknüpfungen in diesem Kontext nicht bereit.',
+  'topology.emptyTitle': 'Keine Dienste',
+  'topology.emptyDescription': 'In dieser Umgebung sind keine Dienste verfügbar.',
+  'topology.stack': 'Stack',
+  'topology.allStacks': 'Alle Stacks',
+  'topology.noStack': 'Kein Stack',
+  'topology.summary': '{services} Dienste · {links} native Verknüpfungen',
+  'topology.unresolved':
+    '{count} Verknüpfungen verweisen auf Dienste außerhalb dieses Inventars. Die Topologie ist unvollständig.',
+  'topology.limit':
+    'Die Topologie überschreitet die Grenze von 500 Diensten oder 2.000 Verknüpfungen. Verwenden Sie die Listenansicht.',
+  'topology.wrongEnvironment': 'Die Topologie enthält Ressourcen aus einer anderen Umgebung.',
+  'topology.duplicateServices': 'Das Inventar enthält doppelte Dienste.',
+  'topology.region': 'Diensttopologie der Umgebung',
+  'topology.controls': 'Steuerelemente der Topologie',
+  'topology.zoomIn': 'Topologie vergrößern',
+  'topology.zoomOut': 'Topologie verkleinern',
+  'topology.fitView': 'Topologie an Ansicht anpassen',
+  'topology.nodeKeyboard':
+    'Drücken Sie die Eingabe- oder Leertaste, um einen Knoten auszuwählen. Verschieben Sie ihn mit den Pfeiltasten oder heben Sie die Auswahl mit Esc auf.',
+  'topology.nodeMoved': 'Ausgewählter Knoten verschoben. Position: x {x}, y {y}.',
+  'topology.link': 'Verknüpfung von {source} zu {target}',
   'operations.search': 'Vorgänge durchsuchen',
   'operations.searchPlaceholder': 'Stack, Dienst, Container, Image oder ID…',
   'operations.state': 'Status',
