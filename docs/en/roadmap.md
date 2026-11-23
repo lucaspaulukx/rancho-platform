@@ -114,7 +114,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 | ADM03 | HA/pools | Monitoring implemented; physical configuration/failover remains |
 | ADM04 | Machine/catalog drivers | CRUD implemented; isolated provisioning/reactivation remains |
 | INT01 | API keys | Management implemented; full technical scope/expiry acceptance remains |
-| INT02 | Webhooks/receivers | Configuration implemented; real local delivery/retries/denial remain |
+| INT02 | Webhooks/receivers | Modern Compose opt-in for service scaling. Physical delivery increased a Docker 29 service from 1 to 2 replicas and returned it to 1. Invalid, revoked and cross-environment keys were denied. Retry behavior and delivery for the other drivers remain open |
 | HELP01 | About/capabilities/version/attribution | The pinned console displayed the product and Rancher base versions, Rancher branding, the Inter license matching the source copy and OIDC/RBAC capability labels in Chromium. Final configuration and capability-value consistency remain |
 
 ## Delivery and recovery

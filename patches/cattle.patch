@@ -262,7 +262,7 @@ index b6f6727..3603805 100644
 \ No newline at end of file
 +}
 diff --git a/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java b/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java
-index 42b2a92..219b649 100644
+index 42b2a92..0eee17d 100644
 --- a/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java
 +++ b/code/iaas/api-logic/src/main/java/io/cattle/platform/iaas/api/request/handler/GenericWhitelistedProxy.java
 @@ -8,6 +8,7 @@ import io.cattle.platform.core.constants.CommonStatesConstants;
@@ -273,7 +273,17 @@ index 42b2a92..219b649 100644
  import io.cattle.platform.object.ObjectManager;
  import io.cattle.platform.object.meta.ObjectMetaDataManager;
  import io.cattle.platform.object.util.DataAccessor;
-@@ -330,6 +331,15 @@ public class GenericWhitelistedProxy extends AbstractResponseGenerator implement
+@@ -91,7 +92,8 @@ public class GenericWhitelistedProxy extends AbstractResponseGenerator implement
+     private static final String FORWARD_PROTO = "X-Forwarded-Proto";
+     private static final String API_AUTH = "X-API-AUTH-HEADER";
+     private static final Set<String> BAD_HEADERS = new HashSet<>(Arrays.asList(HTTP.TARGET_HOST.toLowerCase(), "authorization",
+-            HTTP.TRANSFER_ENCODING.toLowerCase(), HTTP.CONTENT_LEN.toLowerCase(), API_AUTH.toLowerCase()));
++            HTTP.TRANSFER_ENCODING.toLowerCase(), HTTP.CONTENT_LEN.toLowerCase(), API_AUTH.toLowerCase(),
++            ProjectConstants.PROJECT_HEADER.toLowerCase(), ProjectConstants.ROLES_HEADER.toLowerCase()));
+     private static final String AUTH_ACCESS_TOKEN = "access_token";
+ 
+     private static final Executor EXECUTOR;
+@@ -330,6 +332,15 @@ public class GenericWhitelistedProxy extends AbstractResponseGenerator implement
          temp.setHeader(ProjectConstants.PROJECT_HEADER, projectHeader);
          temp.setHeader(ProjectConstants.ROLES_HEADER, roleString);
  

@@ -73,6 +73,7 @@ def rehearse(directory, password, username, admin_password, *, load_images=False
                                if key.startswith(ENV_PREFIXES[role])}
                 if role == 'rancher':
                     environment.update(CATTLE_CATALOG_EXECUTE='false', CATTLE_COMPOSE_EXECUTOR_EXECUTE='false',
+                                       CATTLE_WEBHOOK_SERVICE_EXECUTE='false',
                                        RANCHER_OIDC_ENABLED='false', RANCHER_OIDC_ONLY='false',
                                        RANCHER_OIDC_AUTO_LOGIN='false')
                 args = ['create', '--pull', 'never', '--log-driver', 'none', '--label', OWNER + '=' + label,
