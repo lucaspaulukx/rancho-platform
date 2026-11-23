@@ -176,6 +176,8 @@ The isolated two-host rehearsal passed on Docker 29.9.2 guests with the Ubuntu 6
 
 The isolated two-host environment also accepted the rebuilt IPsec router prototype through the Cattle service upgrade API. A new pair of workloads exchanged HTTP across the two guests, with nonzero XFRM packet counters on each router. The corresponding optional build in `Dockerfile.modern-ipsec-router` uses the packaged Ubuntu strongSwan and removes shell tracing from the startup script. Upstream Go tests passed and the packaged image reported zero high or critical findings. The router is a sidecar replacement. The network holder, CNI driver and connectivity checker still use their catalog images.
 
+Both Docker 29.9.2 guests registered with the modern bootstrap and started the eight rebuilt Cattle system images from a fresh catalog template. All four infrastructure stacks and six services reported healthy. A managed container on one guest fetched the HTTP fixture from the other guest; both IPsec routers reported nonzero XFRM packet counters. The Trivy scan of these eight images and the bootstrap reported zero critical and zero high findings against the November 13, 2026 advisory database. This confirms fresh provisioning. Existing IPsec stacks require their own upgrade and rollback rehearsal.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.
