@@ -1,4 +1,11 @@
 export const zhHans = {
+  'operations.stacks': '堆栈',
+  'operations.services': '服务',
+  'operations.containers': '容器',
+  'operations.view': '运维视图',
+  'operations.expandAll': '全部展开',
+  'operations.collapseAll': '全部折叠',
+  'operations.topology': '拓扑',
   'operations.search': '搜索运维资源',
   'operations.searchPlaceholder': '堆栈、服务、容器、镜像或 ID…',
   'operations.state': '状态',

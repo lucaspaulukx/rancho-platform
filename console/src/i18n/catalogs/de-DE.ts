@@ -1,4 +1,11 @@
 export const deDE = {
+  'operations.stacks': 'Stacks',
+  'operations.services': 'Dienste',
+  'operations.containers': 'Container',
+  'operations.view': 'Vorgangsansicht',
+  'operations.expandAll': 'Alle aufklappen',
+  'operations.collapseAll': 'Alle zuklappen',
+  'operations.topology': 'Topologie',
   'operations.search': 'Vorgänge durchsuchen',
   'operations.searchPlaceholder': 'Stack, Dienst, Container, Image oder ID…',
   'operations.state': 'Status',

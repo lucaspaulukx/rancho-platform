@@ -242,6 +242,29 @@ async function main() {
   }
   await workspace.locator('.language-selector select').selectOption('en-US');
 
+  result.stage = 'operation-navigation-previews';
+  await workspace.getByRole('tab', { name: 'Services', exact: true }).click();
+  const serviceUrl = workspace.url();
+  assert.equal(new URL(serviceUrl).searchParams.get('view'), 'services');
+  for (const [locale, services, view] of [
+    ['de-DE', 'Dienste', 'Vorgangsansicht'], ['fr-FR', 'Services', 'Vue des opérations'],
+    ['hu-HU', 'Szolgáltatások', 'Műveleti nézet'], ['ja-JP', 'サービス', '操作ビュー'],
+    ['fa-IR', 'سرویس‌ها', 'نمای عملیات'], ['ru-RU', 'Сервисы', 'Представление операций'],
+    ['uk-UA', 'Сервіси', 'Подання операцій'], ['zh-Hans', '服务', '运维视图'],
+  ]) {
+    await workspace.locator('.language-selector select').selectOption(locale);
+    const tabs = workspace.getByRole('tablist', { name: view, exact: true });
+    const service = tabs.getByRole('tab', { name: services, selected: true, exact: true });
+    await service.waitFor();
+    check(`${locale} translates the selected Services tab and preserves its route and filter`,
+      await workspace.getByRole('tabpanel', { name: services, exact: true }).isVisible() &&
+      workspace.url() === serviceUrl &&
+      await workspace.locator('input[type="search"]').first().inputValue() === 'localization-acceptance');
+  }
+  await workspace.locator('.language-selector select').selectOption('en-US');
+  await workspace.goto(workspaceUrl);
+  await language().waitFor();
+
   result.stage = 'open-appearance-dialog';
   await workspace.getByLabel('User menu', { exact: true }).click();
   await workspace.getByRole('button', { name: 'Appearance', exact: true }).click();

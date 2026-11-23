@@ -1,4 +1,11 @@
 export const faIR = {
+  'operations.stacks': 'پشته‌ها',
+  'operations.services': 'سرویس‌ها',
+  'operations.containers': 'کانتینرها',
+  'operations.view': 'نمای عملیات',
+  'operations.expandAll': 'باز کردن همه',
+  'operations.collapseAll': 'بستن همه',
+  'operations.topology': 'توپولوژی',
   'operations.search': 'جست‌وجو در عملیات',
   'operations.searchPlaceholder': 'پشته، سرویس، کانتینر، ایمیج یا شناسه…',
   'operations.state': 'وضعیت',

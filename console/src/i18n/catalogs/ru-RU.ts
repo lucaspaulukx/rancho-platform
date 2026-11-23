@@ -1,4 +1,11 @@
 export const ruRU = {
+  'operations.stacks': 'Стеки',
+  'operations.services': 'Сервисы',
+  'operations.containers': 'Контейнеры',
+  'operations.view': 'Представление операций',
+  'operations.expandAll': 'Развернуть всё',
+  'operations.collapseAll': 'Свернуть всё',
+  'operations.topology': 'Топология',
   'operations.search': 'Поиск в операциях',
   'operations.searchPlaceholder': 'Стек, сервис, контейнер, образ или ID…',
   'operations.state': 'Состояние',
