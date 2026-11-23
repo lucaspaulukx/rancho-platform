@@ -173,7 +173,7 @@ async function main() {
   await closeContext(publicContext);
 
   result.stage = 'authenticated-shell';
-  const authenticated = await context({ authenticated: true });
+  const authenticated = await context({ authenticated: true, extraLocales: ['fa-IR'] });
   const workspace = await page(authenticated);
   const workspaceUrl = origin + '/console/stacks?env=1a12&q=localization-acceptance';
   await workspace.goto(workspaceUrl, { waitUntil: 'domcontentloaded' });
@@ -233,6 +233,11 @@ async function main() {
     check('mobile ' + theme + ' selector text contrast', await contrast(selector) >= 4.5);
   }
   result.stage = 'administration-routes';
+  await workspace.locator('.environment-trigger').click();
+  const ltrEnvironment = workspace.locator('.environment-popover');
+  await ltrEnvironment.waitFor();
+  check('English mobile environment menu remains within the viewport', await insideViewport(ltrEnvironment));
+  await workspace.keyboard.press('Escape');
   await workspace.setViewportSize({ width: 1440, height: 1000 });
   for (const [route, title] of [
     ['groups', 'Groups and permissions'],
@@ -264,6 +269,49 @@ async function main() {
   await about.getByText('Rancher 1.6.30', { exact: true }).waitFor();
   check('About dialog uses the active locale and retains Rancher attribution',
     await about.getByText('Rancher 1.6.30', { exact: true }).isVisible());
+  await about.getByRole('button', { name: 'Close dialog', exact: true }).click();
+  result.stage = 'authenticated-rtl';
+  await language().selectOption('fa-IR');
+  await workspace.getByRole('combobox', { name: 'زبان', exact: true }).waitFor();
+  check('Persian desktop places the sidebar on the right with its divider facing the workspace',
+    await workspace.locator('.sidebar').evaluate((sidebar) => {
+      const box = sidebar.getBoundingClientRect();
+      return document.documentElement.dir === 'rtl' &&
+        Math.abs(box.right - document.documentElement.clientWidth) <= 1 &&
+        getComputedStyle(sidebar).borderLeftWidth === '1px';
+    }));
+  await workspace.getByRole('button', { name: 'View network policies', exact: true }).click();
+  const rtlDrawer = workspace.getByRole('dialog', { name: 'Network policies', exact: true });
+  await rtlDrawer.waitFor();
+  check('Persian desktop drawer opens at inline end without changing environment',
+    await rtlDrawer.evaluate((drawer) => Math.abs(drawer.getBoundingClientRect().left) <= 1) &&
+    new URL(workspace.url()).searchParams.get('env') === '1a12');
+  await workspace.keyboard.press('Escape');
+  await rtlDrawer.waitFor({ state: 'hidden' });
+  await workspace.setViewportSize({ width: 390, height: 844 });
+  const mobileMenu = workspace.getByRole('button', { name: 'Open navigation', exact: true });
+  await mobileMenu.focus();
+  await workspace.keyboard.press('Enter');
+  const mobileSidebar = workspace.locator('.sidebar.mobile-open');
+  await mobileSidebar.waitFor();
+  await workspace.waitForFunction(() => {
+    const sidebar = document.querySelector('.sidebar.mobile-open');
+    return sidebar?.contains(document.activeElement) &&
+      Math.abs(sidebar.getBoundingClientRect().right - document.documentElement.clientWidth) <= 1;
+  });
+  await workspace.keyboard.press('Shift+Tab');
+  check('Persian mobile sidebar opens on the right and retains keyboard focus',
+    await mobileSidebar.evaluate((sidebar) => sidebar.contains(document.activeElement)));
+  await workspace.keyboard.press('Escape');
+  await mobileSidebar.waitFor({ state: 'hidden' });
+  await workspace.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Open navigation');
+  check('Escape closes the Persian mobile sidebar and returns focus to its trigger');
+  await workspace.locator('.environment-trigger').click();
+  const rtlEnvironment = workspace.locator('.environment-popover');
+  await rtlEnvironment.waitFor();
+  check('Persian mobile environment menu remains within the viewport',
+    await insideViewport(rtlEnvironment) && new URL(workspace.url()).searchParams.get('env') === '1a12');
+  await workspace.keyboard.press('Escape');
   check('no browser HTTP mutations or external navigation', result.blockedRequests === 0);
   check('no JavaScript errors', result.pageErrors === 0);
   result.status = 'passed';
