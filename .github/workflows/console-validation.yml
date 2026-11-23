@@ -41,6 +41,8 @@ jobs:
           python3 -m unittest discover -s tests -p test_repository_layout.py
           python3 -m unittest discover -s tests -p test_release_artifact_rehearsal.py
           python3 -m unittest discover -s tests -p test_stage_release_assets.py
+          python3 -m unittest discover -s tests -p test_publish_registry_image.py
+          python3 -m unittest discover -s tests -p test_bootstrap_admin.py
       - name: Check offline migration contracts
         run: |
           python3 -m venv "$RUNNER_TEMP/rancho-migration"

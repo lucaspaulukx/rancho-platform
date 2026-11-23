@@ -18,7 +18,8 @@ def git(*args, **kwargs):
 
 def main(*, require_policy=False):
     common = Path(git('rev-parse', '--git-common-dir').decode().strip())
-    policy = (common if common.is_absolute() else ROOT / common) / 'private-policy.json'
+    common = (common if common.is_absolute() else ROOT / common).resolve()
+    policy = common / 'private-policy.json'
     if require_policy and not policy.is_file():
         raise RuntimeError('A private publication policy is required; store it in the common Git directory.')
     terms = json.loads(policy.read_text(encoding='utf-8')).get('retiredTerms', []) if policy.exists() else []
@@ -27,8 +28,9 @@ def main(*, require_policy=False):
     if require_policy and not terms:
         raise RuntimeError('The private publication policy must contain blocked identity terms.')
     secrets = []
-    env = ROOT / '.env'
-    if env.exists():
+    for env in {ROOT / '.env', common.parent / '.env'}:
+        if not env.exists():
+            continue
         for line in env.read_text(encoding='utf-8').splitlines():
             if '=' not in line:
                 continue

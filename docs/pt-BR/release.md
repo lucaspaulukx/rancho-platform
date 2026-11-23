@@ -7,11 +7,33 @@
 
 ## Fronteira atual
 
-A instalação da beta comunitária abaixo destina-se à avaliação em laboratório isolado com Linux amd64, um servidor Rancho, MariaDB 10.11 externo e hosts Cattle Docker 29. A distribuição de código inclui as receitas de build e os avisos de licença. Aceite de produção, alta disponibilidade e substituição direta de stacks IPsec existentes ficam fora do escopo da beta. O [roadmap](roadmap.md) registra as validações pendentes.
+O perfil de instalação documentado usa Linux amd64 com um servidor Rancho, MariaDB 10.11 externo e hosts Cattle Docker 29. A distribuição de código inclui as receitas de build e os avisos de licença. Valide sua instalação isoladamente antes do corte. Certificação de produção, alta disponibilidade e substituição direta de stacks IPsec existentes ficam fora do escopo aceito desse perfil. O [roadmap](roadmap.md) registra a validação e as capacidades pendentes.
 
 O pacote contém fontes de aplicação/extensões, patches pinados, testes, templates, licenças e documentação mantida. Clones de consulta, dependências instaladas, credenciais/realms locais, dumps, evidências de sessão, estado de fixtures, backups e notas de máquina ficam fora do versionamento. Git preserva versões anteriores; elas não são instruções de onboarding.
 
 ## Fontes reproduzíveis e validação
+
+### Instalar imagens prontas de uma release
+
+As versões de runtime publicadas usam o pacote GHCR `ghcr.io/lucaspaulukx/rancho-platform`, com tags como `backend-0.1.0`, `console-0.1.0` e `database-0.1.0`. Use uma versão somente depois que sua release listar os digests aceitos do registry. Pré-releases somente de código fonte não significam que essas imagens estejam disponíveis.
+
+Faça checkout da release correspondente, crie um `.env` privado com uma senha forte em `RANCHO_DB_PASSWORD` e mantenha esse arquivo fora do Git. O overlay do registry dispensa builds locais:
+
+```sh
+docker compose -f compose.modern.yaml -f compose.registry.yaml pull
+docker compose -f compose.modern.yaml -f compose.registry.yaml up -d --wait
+python scripts/bootstrap_admin.py --origin http://localhost:18090 --username admin
+```
+
+O inicializador pede a senha do administrador sem exibi-la. Só aceita endereços loopback, ignora proxies HTTP, recusa redirecionamentos e se recusa a sobrescrever um provedor de autenticação já configurado. Execute-o somente em uma instalação nova. Para um banco restaurado, use o administrador existente e o [procedimento de migração](migration.md). Abra `http://localhost:18090/console/` depois da configuração.
+
+Defina `RANCHO_VERSION` para selecionar outra versão publicada. Para instalações imutáveis, defina `RANCHO_BACKEND_IMAGE`, `RANCHO_CONSOLE_IMAGE` e `RANCHO_DATABASE_IMAGE` com as referências por digest registradas na release; elas têm prioridade sobre as tags de versão. Na migração no primeiro boot, selecione também a imagem publicada `restore-VERSAO` por `RANCHO_MIGRATION_RESTORE_IMAGE` e use o overlay de migração conforme documentado.
+
+### Publicar imagens aceitas no registry
+
+O workflow `Publish verified runtime images`, iniciado manualmente, promove os arquivos exatos de uma execução bem-sucedida de `Runtime image provenance`. Seu commit precisa coincidir com a revisão da `main` selecionada na execução. Ele verifica as atestações dos arquivos e checksums, confere a identidade carregada, publica uma tag de versão, baixa o digest do registry e compara a configuração da imagem e as camadas do sistema de arquivos. Também atesta esse manifesto e preserva uma referência JSON por componente. Não recompila durante a promoção nem publica uma tag mutável `latest`.
+
+Use o workflow somente depois do aceite de privacidade, segurança, migração, rollback e runtime. Tags existentes e iguais podem ser retomadas; uma imagem existente diferente falha na verificação. Vincule o pacote GHCR ao repositório e torne sua visibilidade pública. O GitHub cria pacotes inicialmente privados; a visibilidade do repositório não é a verificação final. Confira as 13 referências com uma configuração Docker sem credenciais e então suba o Compose a partir dessas referências antes de publicar a release estável. Consulte a [documentação do registry do GitHub](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
 
 ```sh
 python scripts/upstream.py apply
@@ -115,7 +137,7 @@ A imagem moderna do backend inclui a licença do Cattle em `/usr/share/doc/ranch
 
 O build da console inclui em `dist/licenses/npm` os textos de licença das dependências de produção instaladas. O arquivo publicado em `/console/licenses/npm/index.json` lista as versões, as declarações de licença e os avisos. Quando o pacote publicado omite o texto da licença, o build exige um aviso revisado para aquela versão.
 
-O Console preserva o aviso do pacote e inclui o copyright e a licença completos do NGINX 1.30.6, vindos do [arquivo fonte assinado do NGINX](https://nginx.org/download/nginx-1.30.6.tar.gz), em `/usr/share/licenses/nginx/`. A imagem do importador inclui a licença do [arquivo fonte do OpenSSL 4.0.3](https://github.com/openssl/openssl/releases/tag/openssl-4.0.3) em `/usr/share/licenses/rancho-restore/`. Os dois builds conferem os hashes dos avisos e as versões de runtime do NGINX e do OpenSSL.
+O Console preserva o aviso do pacote e inclui o copyright e a licença completos do NGINX 1.30.7, vindos do [arquivo fonte assinado do NGINX](https://nginx.org/download/nginx-1.30.7.tar.gz), em `/usr/share/licenses/nginx/`. A imagem do importador inclui a licença do [arquivo fonte do OpenSSL 4.0.3](https://github.com/openssl/openssl/releases/tag/openssl-4.0.3) em `/usr/share/licenses/rancho-restore/`. Os dois builds conferem os hashes dos avisos e as versões de runtime do NGINX e do OpenSSL.
 
 A imagem amd64 do importador também inclui os avisos do código nativo incorporado às wheels verificadas: [GCC 14.2.0](https://gcc.gnu.org/pub/gcc/releases/gcc-14.2.0/) com a exceção da biblioteca de runtime do GCC para o `libgcc_s` do `cryptography`, e [libffi 3.4.6](https://github.com/libffi/libffi/tree/v3.4.6) ligado estaticamente pela [receita de build da versão do CFFI](https://github.com/python-cffi/cffi/blob/v2.1.1/.github/workflows/ci.yaml). O código fonte do GCC dessa wheel também usa a [receita e os patches do Alpine para a versão 14.2.0-r6](https://github.com/alpinelinux/aports/tree/fbf60319be3bbaf6dd32ef55cc6fb7189e05c266/main/gcc). Ao preparar uma release, preserve os arquivos fonte oficiais e os insumos de empacotamento do Alpine junto dos avisos de runtime.
 

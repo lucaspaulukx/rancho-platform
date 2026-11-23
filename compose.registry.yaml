@@ -1,0 +1,8 @@
+# Prebuilt Rancho images. Override with a release's digest environment file when available.
+services:
+  rancho:
+    image: ${RANCHO_BACKEND_IMAGE:-ghcr.io/lucaspaulukx/rancho-platform:backend-${RANCHO_VERSION:-0.1.0}}
+  console:
+    image: ${RANCHO_CONSOLE_IMAGE:-ghcr.io/lucaspaulukx/rancho-platform:console-${RANCHO_VERSION:-0.1.0}}
+  db:
+    image: ${RANCHO_DATABASE_IMAGE:-ghcr.io/lucaspaulukx/rancho-platform:database-${RANCHO_VERSION:-0.1.0}}

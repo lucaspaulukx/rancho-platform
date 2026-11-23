@@ -57,10 +57,10 @@ class HistoryChecks(unittest.TestCase):
             publication.main()
 
     def test_removed_known_local_secret_is_scanned(self):
-        secret = 'fixture-only-' + 'not-a-real-credential'
-        self.commit('README.md', secret)
+        marker = 'fixture-only-' + 'not-a-real-credential'
+        self.commit('README.md', marker)
         self.commit('README.md', 'Sanitized')
-        (self.root / '.env').write_text('FIXTURE_PASSWORD='+secret)
+        (self.root / '.env').write_text('FIXTURE_PASSWORD='+marker)
         with self.assertRaisesRegex(RuntimeError, 'historical content'):
             publication.main()
 
@@ -94,6 +94,21 @@ class HistoryChecks(unittest.TestCase):
         self.git('commit', '-qm', 'Remove synthetic archive')
         with self.assertRaisesRegex(RuntimeError, 'historical path'):
             publication.main()
+
+    def test_worktree_checks_known_secrets_from_the_primary_checkout(self):
+        marker = 'synthetic-only-worktree-known-credential'
+        self.commit('README.md', marker)
+        self.commit('README.md', 'Public fixture')
+        (self.root / '.env').write_text('FIXTURE_PASSWORD=' + marker)
+        with tempfile.TemporaryDirectory(prefix='rancho-known-secret-worktree-') as folder:
+            self.git('worktree', 'add', '--detach', folder, 'HEAD')
+            try:
+                publication.ROOT = Path(folder)
+                with self.assertRaisesRegex(RuntimeError, 'historical content'):
+                    publication.main()
+            finally:
+                publication.ROOT = self.root
+                self.git('worktree', 'remove', folder)
 
 
 if __name__ == '__main__':

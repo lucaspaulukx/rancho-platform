@@ -428,7 +428,10 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
             except Exception: result['controlSessionRevoked'] = False; result['status'] = 'failed'
         if result['cleanupComplete']: STATE.unlink(missing_ok=True)
         REPORT.write_text(json.dumps(result, indent=2), encoding='utf-8')
-    print(json.dumps(result, indent=2), flush=True)
+    if result['status'] == 'passed' and result['cleanupComplete']:
+        print('PASS: owned host-stream revocation and cleanup; detailed report retained privately.', flush=True)
+    else:
+        print('FAIL: owned host-stream acceptance incomplete; detailed report retained privately.', flush=True)
     return 0 if result['status'] == 'passed' and result['cleanupComplete'] else 1
 
 

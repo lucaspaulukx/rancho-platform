@@ -9,6 +9,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main(*, require_policy=False):
+    common = Path(subprocess.check_output(['git', 'rev-parse', '--git-common-dir'], cwd=ROOT).decode().strip())
+    common = (common if common.is_absolute() else ROOT / common).resolve()
     entries = subprocess.check_output(['git', 'ls-files', '--stage', '-z'], cwd=ROOT).split(b'\0')
     blobs = {}
     for entry in entries:
@@ -35,16 +37,16 @@ def main(*, require_policy=False):
             raise RuntimeError('Private/generated artifact found in index; path withheld.')
         blobs[blob] = path
     values = []
-    env = ROOT / '.env'
-    if env.exists():
+    for env in {ROOT / '.env', common.parent / '.env'}:
+        if not env.exists():
+            continue
         for line in env.read_text(encoding='utf-8').splitlines():
             if '=' not in line:
                 continue
             key, value = line.split('=', 1)
             if re.search(r'PASSWORD|SECRET|TOKEN|PRIVATE_KEY', key) and len(value) >= 12:
                 values.append(value.encode())
-    common = Path(subprocess.check_output(['git', 'rev-parse', '--git-common-dir'], cwd=ROOT).decode().strip())
-    policy = (common if common.is_absolute() else ROOT / common) / 'private-policy.json'
+    policy = common / 'private-policy.json'
     if require_policy and not policy.is_file():
         raise RuntimeError('A private publication policy is required; store it in the common Git directory.')
     terms = json.loads(policy.read_text(encoding='utf-8')).get('retiredTerms', []) if policy.exists() else []

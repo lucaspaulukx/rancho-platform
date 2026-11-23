@@ -1,0 +1,93 @@
+name: Publish verified runtime images
+
+"on":
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Full accepted main commit (must match the dispatched revision)
+        required: true
+        type: string
+      runtime_run:
+        description: Successful Runtime image provenance run for that commit
+        required: true
+        type: string
+      version:
+        description: Immutable version, for example 0.1.0 or 0.1.0-rc.2
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: registry-release-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main' && github.repository == 'lucaspaulukx/rancho-platform'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        component: [backend, console, database, restore, agent, ipsec-holder, ipsec-router, ipsec-cni, network-manager, metadata, dns, healthcheck, scheduler]
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_COMMIT: ${{ inputs.commit }}
+      RUNTIME_RUN: ${{ inputs.runtime_run }}
+      RELEASE_VERSION: ${{ inputs.version }}
+      COMPONENT: ${{ matrix.component }}
+    steps:
+      - name: Check out the publisher
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Validate the exact candidate and download its artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_COMMIT" =~ ^[a-f0-9]{40}$ && "$RELEASE_COMMIT" == "$GITHUB_SHA" ]]
+          [[ "$RUNTIME_RUN" =~ ^[1-9][0-9]+$ ]]
+          gh run view "$RUNTIME_RUN" --repo "$GITHUB_REPOSITORY" --json headSha,conclusion,workflowName |
+            jq -e --arg commit "$RELEASE_COMMIT" '.headSha == $commit and .conclusion == "success" and .workflowName == "Runtime image provenance"'
+          gh run download "$RUNTIME_RUN" --repo "$GITHUB_REPOSITORY" +            --name "runtime-${COMPONENT}-${RELEASE_COMMIT}" --dir "$RUNNER_TEMP/runtime"
+
+      - name: Authenticate the repository publisher
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Verify, promote and read back the exact image
+        id: promote
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m scripts.publish_registry_image --input "$RUNNER_TEMP/runtime" +            --commit "$RELEASE_COMMIT" --component "$COMPONENT" --version "$RELEASE_VERSION" +            --output "$RUNNER_TEMP/registry-${COMPONENT}.json"
+          jq -r '"digest=" + .digest' "$RUNNER_TEMP/registry-${COMPONENT}.json" >> "$GITHUB_OUTPUT"
+
+      - name: Attest the registry manifest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ghcr.io/lucaspaulukx/rancho-platform
+          subject-digest: ${{ steps.promote.outputs.digest }}
+          push-to-registry: true
+
+      - name: Retain the verified registry reference
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: registry-${{ matrix.component }}-${{ inputs.commit }}
+          path: ${{ runner.temp }}/registry-${{ matrix.component }}.json
+          if-no-files-found: error
+          retention-days: 14

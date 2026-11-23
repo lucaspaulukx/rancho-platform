@@ -8,6 +8,10 @@ keycloak/realm.json
 evidence
 backups
 migration-runs
+**/*.sql.*
+**/*.dump
+**/*.dump.*
+**/.npmrc
 **/*.log
 **/*-fixture.json
 **/*-fixture.yaml
