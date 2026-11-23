@@ -1,4 +1,11 @@
 export const ruRU = {
+  'requestError.scopeChanged': 'Контекст изменился. Прежде чем продолжить, откройте панель заново.',
+  'requestError.resourceOutOfScope': 'Ресурс недоступен в этой среде.',
+  'requestError.unsafeUrl': 'Сервер вернул недопустимый адрес API.',
+  'requestError.paginationCycle': 'API вернул цикл разбиения на страницы.',
+  'requestError.paginationLimit': 'Коллекция слишком велика. Уточните фильтры.',
+  'requestError.invalidCollection': 'API вернул недопустимую коллекцию.',
+
   'bulkOperation.title': 'Массовое действие — {action}',
   'bulkOperation.resources': {
     one: '{count} ресурс',

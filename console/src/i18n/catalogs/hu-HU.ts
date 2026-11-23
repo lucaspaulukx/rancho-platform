@@ -1,4 +1,11 @@
 export const huHU = {
+  'requestError.scopeChanged': 'A környezet megváltozott. A folytatáshoz nyissa meg újra a panelt.',
+  'requestError.resourceOutOfScope': 'Az erőforrás nem érhető el ebben a környezetben.',
+  'requestError.unsafeUrl': 'A kiszolgáló nem engedélyezett API-címet adott vissza.',
+  'requestError.paginationCycle': 'Az API lapozási ciklust adott vissza.',
+  'requestError.paginationLimit': 'A gyűjtemény túl nagy. Szűkítse a szűrési feltételeket.',
+  'requestError.invalidCollection': 'Az API érvénytelen gyűjteményt adott vissza.',
+
   'resourceCreator.kind.stack': 'Stack',
   'resourceCreator.kind.service': 'Szolgáltatás',
   'resourceCreator.kind.loadBalancerService': 'Terheléselosztó',

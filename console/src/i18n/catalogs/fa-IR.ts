@@ -1,4 +1,11 @@
 export const faIR = {
+  'requestError.scopeChanged': 'زمینه تغییر کرده است. پیش از ادامه، پنل را دوباره باز کنید.',
+  'requestError.resourceOutOfScope': 'این منبع در این محیط در دسترس نیست.',
+  'requestError.unsafeUrl': 'سرور یک نشانی غیرمجاز API برگرداند.',
+  'requestError.paginationCycle': 'API یک چرخهٔ صفحه‌بندی برگرداند.',
+  'requestError.paginationLimit': 'مجموعه بیش از حد بزرگ است. فیلترها را محدودتر کنید.',
+  'requestError.invalidCollection': 'API یک مجموعهٔ نامعتبر برگرداند.',
+
   'details.field.id': 'شناسه',
   'details.field.name': 'نام',
   'details.field.description': 'توضیحات',
