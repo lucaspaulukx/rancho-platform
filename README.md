@@ -13,6 +13,18 @@ Operate Rancher 1.6 Docker/Cattle stacks, services and containers in one workspa
 > [!IMPORTANT]
 > Rancho is an independent community project built on the legacy Rancher 1.6 engine. Use the alpha in an isolated lab with synthetic data or an isolated copy. Production acceptance is still open.
 
+## Image security progress
+
+Trivy 0.74.0 scans of the initial lab images and subsequent candidates on November 13, 2026 reported the following critical and high package findings.
+
+| Image | Initial critical / high | Candidate critical / high |
+|---|---:|---:|
+| Backend on the legacy base | 30 / 88 | 5 / 22 |
+| Console gateway | 3 / 73 | 0 / 0 |
+| Optional Keycloak | 8 / 101 | 0 / 6 |
+
+These counts describe the images scanned and depend on the advisory database. The legacy backend base has reached end of support. The [roadmap](docs/en/roadmap.md#beta-image-security-gate) tracks the remaining findings, the experimental Debian backend and the beta acceptance gates.
+
 ## Features
 
 - **Workload operations** · Inspect stacks and containers, open streams and run available Rancher actions from the same workspace.
