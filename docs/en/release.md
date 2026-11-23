@@ -83,6 +83,8 @@ docker build -f console/tests/legacy-host/Dockerfile.modern-healthcheck -t ranch
 docker run --rm --network none --ulimit nofile=32768:32768 --entrypoint /bin/bash -i rancho-healthcheck-modern:local -s < console/tests/legacy-host/smoke-modern-healthcheck.sh
 ```
 
+The optional `console/tests/legacy-host/modern-catalog-runtime.patch` applies to Rancher catalog commit `52a5850bc49247eadd84045da890deaeaeddb9a4`. Apply it to a separate catalog copy in the isolated lab and point the lab at that copy. It sets the healthcheck descriptor limits and runs the scheduler on the Docker bridge. The catalog image tags still select the standard Rancher images unless the corresponding rebuilt images are loaded under those tags on the disposable daemon.
+
 ## Final acceptance
 
 Use one identified release candidate for authentication/RBAC/streams, contextual operations, accessibility/performance, classic compatibility, fresh installation, upgrade and full recovery/rollback. Record limits and supported topologies. Configure a private security-reporting channel before going public. Keep [migration](migration.md) and [recovery](recovery.md) procedures matched to the artifact; do not infer a universal migration guarantee from synthetic tests.
