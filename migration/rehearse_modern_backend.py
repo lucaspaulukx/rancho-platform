@@ -90,10 +90,13 @@ def main():
     parser.add_argument(
         "--backend-image", required=True, help="Local Java 17 candidate image"
     )
+    parser.add_argument(
+        "--database-image", default=db_image, help="Local MariaDB 10.11 candidate image"
+    )
     args = parser.parse_args()
     app_image = image_id(args.backend_image)
+    database_image = image_id(args.database_image)
     image_id(source_image)
-    image_id(db_image)
     try:
         docker("network", "create", "--internal", "--label", f"{label}={owner}", prefix)
         launch(source, source_image)
@@ -127,7 +130,7 @@ def main():
             "MARIADB_RANDOM_ROOT_PASSWORD=1",
             "-e",
             "MARIADB_PASSWORD",
-            db_image,
+            database_image,
             env={**os.environ, "MARIADB_PASSWORD": password},
         )
         ready("exec", db, "healthcheck.sh", "--connect", "--innodb_initialized")
