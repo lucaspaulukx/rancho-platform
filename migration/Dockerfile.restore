@@ -4,7 +4,9 @@ WORKDIR /opt/rancho
 COPY migration/requirements.txt migration/requirements.restore.txt ./
 RUN pip install --no-cache-dir --only-binary=:all: --require-hashes \
         -c requirements.txt -r requirements.restore.txt \
-    && python -c 'from cryptography.hazmat.backends.openssl.backend import backend; version = backend.openssl_version_text(); print(version); assert backend.openssl_version_number() >= 0x40000030, version' \
+    && python -c 'from cryptography.hazmat.backends.openssl.backend import backend; version = backend.openssl_version_text(); print(version); assert backend.openssl_version_number() == 0x40000030, version' \
     && pip uninstall --yes pip
 COPY migration/__init__.py migration/tool.py migration/restore_on_start.py migration/
+COPY migration/licenses/openssl-4.0.3-LICENSE.txt /usr/share/licenses/rancho-restore/openssl-4.0.3-LICENSE.txt
+RUN --network=none echo '7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a  /usr/share/licenses/rancho-restore/openssl-4.0.3-LICENSE.txt' | sha256sum -c -
 ENTRYPOINT ["python", "-m", "migration.restore_on_start"]

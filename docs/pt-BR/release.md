@@ -106,6 +106,8 @@ A imagem moderna do backend inclui a licença do Cattle em `/usr/share/doc/ranch
 
 O build da console inclui em `dist/licenses/npm` os textos de licença das dependências de produção instaladas. O arquivo publicado em `/console/licenses/npm/index.json` lista as versões, as declarações de licença e os avisos. Quando o pacote publicado omite o texto da licença, o build exige um aviso revisado para aquela versão.
 
+O Console preserva o aviso do pacote e inclui o copyright e a licença completos do NGINX 1.30.6, vindos do [arquivo fonte assinado do NGINX](https://nginx.org/download/nginx-1.30.6.tar.gz), em `/usr/share/licenses/nginx/`. A imagem do importador inclui a licença do [arquivo fonte do OpenSSL 4.0.3](https://github.com/openssl/openssl/releases/tag/openssl-4.0.3) em `/usr/share/licenses/rancho-restore/`. Os dois builds conferem os hashes dos avisos e a versão do runtime que cada aviso cobre.
+
 ## Instalação limpa isolada
 
 Use duas imagens Linux locais já compiladas. O ensaio usa volumes próprios novos e uma rede privada sem portas publicadas. Verifica a UI clássica, o proxy do console, a migração de schema e a idempotência após reiniciar o backend. O teste usa MySQL embutido com OIDC e redirecionamento moderno do backend desligados.

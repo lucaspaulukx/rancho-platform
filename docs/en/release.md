@@ -106,6 +106,8 @@ The modern backend includes the Cattle license under `/usr/share/doc/rancho-catt
 
 The console build includes the license texts from installed production dependencies in `dist/licenses/npm`. The shipped `/console/licenses/npm/index.json` lists the versions, license declarations and notice files. When a published package omits its license text, the build requires an explicitly reviewed notice for that version.
 
+The Console preserves the upstream package notice and adds the complete NGINX 1.30.6 copyright and license from the [signed NGINX source archive](https://nginx.org/download/nginx-1.30.6.tar.gz) under `/usr/share/licenses/nginx/`. The restore image includes the license from the [OpenSSL 4.0.3 source archive](https://github.com/openssl/openssl/releases/tag/openssl-4.0.3) under `/usr/share/licenses/rancho-restore/`. Both builds verify the shipped notices against their source digests and check the runtime version that each notice covers.
+
 ## Isolated fresh installation
 
 Use two previously built local Linux images. The rehearsal uses fresh owned volumes and a private bridge with no published ports. It checks the classic UI, the console proxy, the schema migration and idempotence after restarting the backend. The trial uses embedded MySQL and leaves OIDC and the backend modern redirect off.
