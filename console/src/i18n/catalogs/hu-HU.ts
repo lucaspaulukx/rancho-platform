@@ -1,4 +1,36 @@
 export const huHU = {
+  'resourceCreator.kind.stack': 'Stack',
+  'resourceCreator.kind.service': 'Szolgáltatás',
+  'resourceCreator.kind.loadBalancerService': 'Terheléselosztó',
+  'resourceCreator.kind.dnsService': 'Szolgáltatásalias',
+  'resourceCreator.kind.externalService': 'Külső szolgáltatás',
+  'resourceCreator.kind.container': 'Önálló konténer',
+  'resourceCreator.kind.resource': 'Erőforrás',
+  'resourceCreator.title': 'Új {kind} létrehozása',
+  'resourceCreator.stackContext': 'Környezet: {environment} · Stack: {stack}',
+  'resourceCreator.create': 'Létrehozás',
+  'resourceCreator.created':
+    'Sikeresen létrejött a következő {kind}: {name}. Az állapota a műveletnél követhető.',
+  'resourceCreator.unavailable': 'Ebben a környezetben nem érhető el a létrehozás.',
+  'resourceCreator.schemaUnavailable': 'A létrehozáshoz szükséges séma nem érhető el.',
+  'resourceCreator.permissionChanged': 'Már nincs jogosultsága erőforrásokat létrehozni.',
+  'resourceCreator.stackUnavailable': 'Ehhez a stackhez nem adhatók hozzá szolgáltatások.',
+  'resourceCreator.schemaChanged': 'A létrehozáshoz szükséges séma már nem érhető el.',
+  'resourceCreator.validation.unavailable': 'Ez az erőforrás már nem hozható létre.',
+  'resourceCreator.validation.depth': 'A konfiguráció túl sok egymásba ágyazott szintet tartalmaz.',
+  'resourceCreator.validation.fieldUnavailable':
+    'A(z) {name} mező már nem érhető el a létrehozáskor. Nyissa meg újra a panelt.',
+  'resourceCreator.validation.schemaUnavailable':
+    'A(z) {name} sémája már nem érhető el. Nyissa meg újra a panelt.',
+  'resourceCreator.creationDenied':
+    'A profilja vagy a kiszolgáló nem engedélyezi az erőforrás létrehozását a kiválasztott környezetben.',
+  'resourceCreator.discardTitle': 'Elveti a piszkozatot?',
+  'resourceCreator.discardDescription':
+    'Az erőforrás még nem jött létre. A megadott adatok elvesznek.',
+  'resourceCreator.contextTitle': 'Másik nézetre vált?',
+  'resourceCreator.pending': 'Várja meg a Rancher válaszát.',
+  'resourceCreator.unsaved': 'Van egy mentetlen piszkozat.',
+
   'workloadStreams.logs': 'Erőforrásnaplók',
   'workloadStreams.terminal': 'Az erőforrás terminálja',
   'workloadStreams.emptyTitle': 'Nincs elérhető konténer',

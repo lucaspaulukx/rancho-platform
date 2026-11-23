@@ -143,10 +143,9 @@ describe('Typed message catalogs', () => {
     const french = createTranslator('fr-FR', frFR);
     expect(french.t('common.cancel')).toBe('Annuler');
     expect(french.resolvedLocale('selection.count')).toBe('fr-FR');
-    expect(french.resolvedLocale('resourceCreator.kind.service')).toBe('en-US');
-    expect(french.t('resourceCreator.kind.service')).toBe(
-      createTranslator('en-US').t('resourceCreator.kind.service'),
-    );
+    expect(french.resolvedLocale('resourceCreator.kind.service')).toBe('fr-FR');
+    expect(french.resolvedLocale('aboutPage.title')).toBe('en-US');
+    expect(french.t('aboutPage.title')).toBe(createTranslator('en-US').t('aboutPage.title'));
   });
   it('supports language-specific plural forms and requires an other form', () => {
     const russian = createTranslator('ru-RU', {

@@ -48,6 +48,7 @@ export function ResourceCreator({
   const app = useApp();
   const { t, locale } = useI18n();
   const kindLabel = getCreationLabel(selection.kind, t);
+  const titleKind = locale === 'de-DE' ? kindLabel : kindLabel.toLocaleLowerCase(locale);
   const scope = useActionScope();
   const client = useQueryClient();
   const toast = useToast();
@@ -199,7 +200,7 @@ export function ResourceCreator({
         onOpenChange={(open) => {
           if (!open) close();
         }}
-        title={t('resourceCreator.title', { kind: kindLabel.toLocaleLowerCase(locale) })}
+        title={t('resourceCreator.title', { kind: titleKind })}
         description={
           selection.stack
             ? t('resourceCreator.stackContext', {

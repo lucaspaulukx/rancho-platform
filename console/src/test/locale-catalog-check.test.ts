@@ -47,7 +47,7 @@ describe('Registered locale catalog gate', () => {
     expect(checkRegisteredCatalogs({ ...inputs, englishMessages: reordered }).status).toBe(
       'passed',
     );
-    const unrelated = { ...englishMessages, 'resourceCreator.kind.service': 'Workload service' };
+    const unrelated = { ...englishMessages, 'aboutPage.title': 'About this instance' };
     expect(checkRegisteredCatalogs({ ...inputs, englishMessages: unrelated }).status).toBe(
       'passed',
     );
@@ -64,7 +64,7 @@ describe('Registered locale catalog gate', () => {
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
     const previewScope = Object.keys(englishMessages).filter(
       (key) =>
-        /^(auth|bulkOperation|ui|common|details|language|operations|runtime|shell|recovery|resourceState|resourceMetrics|resourcePanel|resourceStream|topology|workloadStreams)\./.test(
+        /^(auth|bulkOperation|ui|common|details|language|operations|runtime|shell|recovery|resourceCreator|resourceState|resourceMetrics|resourcePanel|resourceStream|topology|workloadStreams)\./.test(
           key,
         ) ||
         key.startsWith('groups.role.') ||

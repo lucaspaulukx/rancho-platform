@@ -1,4 +1,36 @@
 export const frFR = {
+  'resourceCreator.kind.stack': 'Stack',
+  'resourceCreator.kind.service': 'Service',
+  'resourceCreator.kind.loadBalancerService': 'Équilibreur de charge',
+  'resourceCreator.kind.dnsService': 'Alias de service',
+  'resourceCreator.kind.externalService': 'Service externe',
+  'resourceCreator.kind.container': 'Conteneur autonome',
+  'resourceCreator.kind.resource': 'Ressource',
+  'resourceCreator.title': 'Créer : {kind}',
+  'resourceCreator.stackContext': 'Environnement : {environment} · Stack : {stack}',
+  'resourceCreator.create': 'Créer',
+  'resourceCreator.created':
+    'La création a réussi pour {kind} « {name} ». Suivez son état dans l’opération.',
+  'resourceCreator.unavailable': 'La création est indisponible dans ce contexte.',
+  'resourceCreator.schemaUnavailable': 'Le schéma de création est indisponible.',
+  'resourceCreator.permissionChanged': 'Vous n’avez plus l’autorisation de créer des ressources.',
+  'resourceCreator.stackUnavailable': 'Il est impossible d’ajouter des services à cette stack.',
+  'resourceCreator.schemaChanged': 'Le schéma de création n’est plus disponible.',
+  'resourceCreator.validation.unavailable': 'Cette ressource ne peut plus être créée.',
+  'resourceCreator.validation.depth': 'La configuration comporte trop de niveaux d’imbrication.',
+  'resourceCreator.validation.fieldUnavailable':
+    'Le champ {name} n’est plus disponible pour la création. Rouvrez le panneau.',
+  'resourceCreator.validation.schemaUnavailable':
+    'Le schéma de {name} n’est plus disponible. Rouvrez le panneau.',
+  'resourceCreator.creationDenied':
+    'Votre profil ou le serveur ne permet pas de créer cette ressource dans l’environnement sélectionné.',
+  'resourceCreator.discardTitle': 'Abandonner le brouillon ?',
+  'resourceCreator.discardDescription':
+    'La ressource n’a pas encore été créée. Les informations saisies seront perdues.',
+  'resourceCreator.contextTitle': 'Changer de contexte ?',
+  'resourceCreator.pending': 'Attendez la réponse de Rancher.',
+  'resourceCreator.unsaved': 'Un brouillon n’a pas été enregistré.',
+
   'workloadStreams.logs': 'Journaux de la ressource',
   'workloadStreams.terminal': 'Terminal de la ressource',
   'workloadStreams.emptyTitle': 'Aucun conteneur disponible',
