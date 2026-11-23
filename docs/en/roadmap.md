@@ -115,7 +115,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 | ADM04 | Machine/catalog drivers | CRUD implemented; isolated provisioning/reactivation remains |
 | INT01 | API keys | Management implemented; full technical scope/expiry acceptance remains |
 | INT02 | Webhooks/receivers | Configuration implemented; real local delivery/retries/denial remain |
-| HELP01 | About/capabilities/version/attribution | Implemented; final artifact/license/capability consistency remains |
+| HELP01 | About/capabilities/version/attribution | The pinned console displayed the product and Rancher base versions, Rancher branding, the Inter license matching the source copy and OIDC/RBAC capability labels in Chromium. Final configuration and capability-value consistency remain |
 
 ## Delivery and recovery
 
@@ -123,8 +123,8 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 |---|---|---|
 | REL01 | Versioned DB/config migrations | Additive/runtime and synthetic original-engine upgrade validated; isolated fresh boot verified schema and idempotent restart with local images. Final package and federated bootstrap acceptance remain |
 | REL02 | Full Rancher/IdP backup and recovery | Encrypted database, state and image recovery tested in isolated rehearsals. A cold capture and loopback-only Rancher and Keycloak restore verified local and federated login, preserved inventory and grant counts, and zero environment access on first federated login. Workload, storage and final topology acceptance remains |
-| REL03 | Frontend/backend rollback | An isolated frontend image rollback verified old tabs, compatible configuration and immutable asset retention. A separate synthetic 20-environment upgrade and rollback restored the original backend and database, verified classic asset delivery and preserved the running lab. Chromium verified classic login and environment listing on the pinned candidate. Browser interaction on the restored original backend and final topology acceptance remain |
-| REL04 | Reproducible distribution | Pins/lockfiles/source CI/inventory available; isolated fresh-install rehearsal verified classic UI and the separate console. Final upgrade, licenses, provenance and security review remain |
+| REL03 | Frontend/backend rollback | An isolated frontend image rollback verified old tabs, compatible configuration and immutable asset retention. A separate synthetic 20-environment upgrade and rollback restored the original backend and database and preserved the running lab. Chromium verified classic login, environment listing and session revocation on both the candidate and the restored original. Workload, storage and final topology acceptance remain |
+| REL04 | Reproducible distribution | Pins, lockfiles, source CI and fresh installation verified. Offline inventory ran on the pinned backend/console pair and source lockfile. Dependency license review, provenance, final topology and security review remain |
 | REL05 | Final security | Pending unified route/action/scope/CSRF/secret/cache/dependency/legacy-risk acceptance |
 | REL06 | Local release acceptance | Docker rehearsal passed fresh installation and frontend rollback using the same candidate console image ID, with cleanup verified. A separate synthetic upgrade and backend/database rollback passed using the backend ID from that same candidate pair. Remaining mandatory gates still need evidence on one release artifact |
 

@@ -60,11 +60,13 @@ python -m migration.test_original_rehearsal
 
 ### Upgrade e rollback do engine original
 
-Execute apenas no laboratório sintético indicado, durante uma janela de manutenção. O teste interrompe brevemente o Rancher, o Keycloak e o console locais para uma captura a frio consistente e reinicia os três antes de testar a cópia restaurada. A cópia isolada inicia o Rancher 1.6.30 com 20 ambientes, migra para a imagem local de backend selecionada, confere o registro da migração após reiniciar e verifica que uma divergência de checksum bloqueia a inicialização. No rollback, o teste inicia a imagem original sobre uma nova cópia do snapshot original correspondente e verifica a ausência das tabelas customizadas. O teste de recuperação confere o documento de entrada do cliente clássico e os dois bundles JavaScript, o login administrativo e o inventário de ambientes. Registre os IDs das duas imagens, a preservação dos containers de origem e a disponibilidade HTTP a partir do relatório. O ensaio cobre o engine, o banco isolado e a entrega dos arquivos do cliente clássico. A interação do cliente clássico no navegador e o aceite de workloads, armazenamento externo e topologia final são separados.
+Execute apenas no laboratório sintético indicado, durante uma janela de manutenção. O teste interrompe brevemente o Rancher, o Keycloak e o console locais para uma captura a frio consistente e reinicia os três antes de testar a cópia restaurada. A cópia isolada inicia o Rancher 1.6.30 com 20 ambientes, migra para a imagem local de backend selecionada, confere o registro da migração após reiniciar e verifica que uma divergência de checksum bloqueia a inicialização. No rollback, o teste inicia a imagem original sobre uma nova cópia do snapshot original correspondente e verifica a ausência das tabelas customizadas. O teste de recuperação confere o documento de entrada do cliente clássico e os dois bundles JavaScript, o login administrativo e o inventário de ambientes. Registre os IDs das duas imagens, a preservação dos containers de origem e a disponibilidade HTTP a partir do relatório. O aceite de workloads, armazenamento externo e topologia final é separado.
 
 ```sh
 python -m migration.test_original_engine_lab --quiesce --backend-image my-backend:candidate
 ```
+
+Adicione `--classic-browser` com o Chromium do Playwright instalado para conferir o login pelo Ember e a lista de ambientes depois de restaurar o engine original. Uma ponte temporária em porta local efêmera encaminha apenas leituras, login e revogação da sessão para a cópia restaurada. O namespace Docker restaurado fica sem portas publicadas. O teste bloqueia outras origens no navegador e registra a revogação da sessão.
 
 ## Aceite nativo e de navegador
 
