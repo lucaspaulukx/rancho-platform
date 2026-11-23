@@ -1,0 +1,67 @@
+name: Runtime image provenance
+
+"on":
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        component:
+          - backend
+          - console
+          - database
+          - restore
+          - agent
+          - ipsec-holder
+          - ipsec-router
+          - ipsec-cni
+          - network-manager
+          - metadata
+          - dns
+          - healthcheck
+          - scheduler
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out the dispatched commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Build and export the runtime image
+        shell: bash
+        env:
+          COMPONENT: ${{ matrix.component }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 scripts/check_repository.py
+          bash scripts/build_release_image.sh "$COMPONENT" "$GITHUB_SHA" "$RUNNER_TEMP/rancho-runtime"
+
+      - name: Attest the exported image archive
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: |
+            ${{ runner.temp }}/rancho-runtime/*.docker.tar.gz
+            ${{ runner.temp }}/rancho-runtime/SHA256SUMS.txt
+
+      - name: Retain the exact attested archive
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: runtime-${{ matrix.component }}-${{ github.sha }}
+          path: ${{ runner.temp }}/rancho-runtime/
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 14
