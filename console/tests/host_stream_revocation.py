@@ -27,13 +27,13 @@ BASE = 'projects/1a12/'
 
 
 class Probe:
-    def __init__(self, access, session, mode, instance, marker):
+    def __init__(self, access, session, mode, instance, marker, *, max_duration_ms=120000, proxy_port=18080):
         runtime = Path.home() / '.cache/codex-runtimes/codex-primary-runtime/dependencies/node'
         url = urllib.parse.urlparse(access['url'])
         assert url.scheme in ('http', 'ws') and url.netloc == 'localhost:18080'
         query = urllib.parse.parse_qs(url.query)
         assert not query and not url.fragment
-        url = urllib.parse.urlunparse(('ws', url.netloc, url.path, '', urllib.parse.urlencode({'token': access['token']}), ''))
+        url = urllib.parse.urlunparse(('ws', 'localhost:' + str(proxy_port), url.path, '', urllib.parse.urlencode({'token': access['token']}), ''))
         self.process = subprocess.Popen([str(runtime / 'bin/node.exe'), str(ROOT / 'console/tests/host-stream-probe.cjs')],
                                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                                         text=True, encoding='utf-8', env=dict(os.environ, DEBUG='', NODE_DEBUG=''))
@@ -47,7 +47,7 @@ class Probe:
         self.send({'url': url, 'session': next(c.value for c in session.cookies if c.name == 'token'),
                    'mode': mode, 'marker': marker, 'dockerId': instance['externalId'], 'instanceId': instance['id'],
                    'instanceUuid': instance['uuid'],
-                   'runtimeModules': str(runtime / 'node_modules')})
+                   'runtimeModules': str(runtime / 'node_modules'), 'maxDurationMs': max_duration_ms, 'expectedPort': proxy_port})
 
     def send(self, value):
         self.process.stdin.write(json.dumps(value) + '\n'); self.process.stdin.flush()
@@ -84,15 +84,19 @@ class Probe:
             except Exception: self.process.kill(); self.process.wait()
 
 
-def main(*, identity_factory=None):
+def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, console_proxy=False, service_scale=1):
+    assert isinstance(hold_seconds, int) and 0 <= hold_seconds <= 600
     assert not STATE.exists(), 'Recover previous owned host stream fixture before repeating.'
+    assert isinstance(service_scale, int) and 1 <= service_scale <= 5 and (service_scale == 1 or service_metrics)
+    proxy_port = 18090 if console_proxy else 18080
+    modes = ('logs', 'exec', 'metrics', 'service-metrics') if service_metrics else ('logs', 'exec', 'metrics')
     control = shared.session()
     watched = None
     identity = None
     stack = service = None
     probes = {}
     controls = []
-    result = {'status': 'failed', 'stage': 'preflight', 'cleanupComplete': False, 'scope': 'own local admin session; raw logs/exec/container metrics; one host'}
+    result = {'status': 'failed', 'stage': 'preflight', 'cleanupComplete': False, 'scope': 'own local admin session; raw logs/exec/container metrics; one host', 'serviceMetricsIncluded': service_metrics, 'serviceScale': service_scale, 'proxyPort': proxy_port}
     def stage(value):
         result['stage'] = value
         print('STAGE: ' + value, flush=True)
@@ -114,9 +118,9 @@ def main(*, identity_factory=None):
               'baselineContainers': sorted(containers_before), 'baselineUserContainers': sorted(user_containers_before), 'baselineVolumes': sorted(volumes_before), 'baselineUserVolumes': sorted(user_volumes_before)}
     def save(): STATE.write_text(json.dumps(record, indent=2), encoding='utf-8')
     def access(session, instance, mode):
-        resource = session.api(BASE + 'containers/' + instance['id'])
-        if mode == 'metrics':
-            link = resource['links'].get('stats') or resource['links'].get('containerStats')
+        resource = session.api(BASE + ('services/' + service['id'] if mode == 'service-metrics' else 'containers/' + instance['id']))
+        if mode in ('metrics', 'service-metrics'):
+            link = resource['links'].get('containerStats') if mode == 'service-metrics' else (resource['links'].get('stats') or resource['links'].get('containerStats'))
             assert link
             target = urllib.parse.urlparse(link)
             assert target.netloc == 'localhost:18080' and target.path.startswith('/v2-beta/' + BASE)
@@ -130,23 +134,32 @@ def main(*, identity_factory=None):
                 'command': ['/bin/sh', '-c', 'while IFS= read -r value; do printf "%s\\n" "$value"; done']}
             code, value, _ = session.request(action, payload, 'POST')
         assert code in (200, 201, 202) and isinstance(value, dict) and value.get('url') and value.get('token')
+        result.setdefault('accessTokenChars', {})[mode] = len(value['token'])
         if runtime_guard:
-            claims = json.loads(base64.urlsafe_b64decode(value['token'].split('.')[1] + '==='))
-            binding = claims['rancherStream']
+            def decode(raw): return json.loads(base64.urlsafe_b64decode(raw.split('.')[1] + '==='))
+            outer = decode(value['token'])
+            pairs = [(outer, urllib.parse.urlparse(value['url']).path)]
+            if mode == 'service-metrics':
+                assert isinstance(outer.get('service'), list) and len(outer['service']) == service_scale
+                pairs = [(decode(item['token']), urllib.parse.urlparse(item['url']).path) for item in outer['service']]
             key = next(c.value for c in session.cookies if c.name == 'token')
-            assert binding['mode'] == 'ui' and binding['projectId'] == '12' and binding['hostId'] == '1'
-            assert binding['sessionHash'] == hashlib.sha256(key.encode()).hexdigest()
-            assert key not in json.dumps(claims)
-            compact = claims['rancherStreamProof']
-            compact_claims = json.loads(base64.urlsafe_b64decode(compact.split('.')[1] + '==='))
-            assert compact_claims['rancherStream'] == binding and 'hostUuid' not in compact_claims
-            assert len(compact) <= 65536
-            result['compactSessionClaimsChecked'] = True
+            for claims, signed_path in pairs:
+                binding = claims['rancherStream']
+                assert binding['mode'] == 'ui' and binding['projectId'] == '12' and binding['hostId'] == '1' and binding['path'] == signed_path
+                assert binding['sessionHash'] == hashlib.sha256(key.encode()).hexdigest()
+                assert key not in json.dumps(claims)
+                compact = claims['rancherStreamProof']; compact_claims = decode(compact)
+                assert compact_claims['rancherStream'] == binding and 'hostUuid' not in compact_claims
+                assert len(compact) <= 65536
+                result['compactSessionClaimsChecked'] = True
+                result.setdefault('originalLeaseSeconds', []).append(int(compact_claims['exp']) - int(compact_claims['iat']))
+                if hold_seconds: assert int(binding['uiExp']) > time.time() + hold_seconds + 30
+
         return value
     runtime_guard = False
     try:
         import urllib.request
-        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        opener = shared.lab.loopback_opener()
         runtime_guard = json.load(opener.open('http://localhost:18080/community/host-stream-guard', timeout=5))['enabled']
         image = subprocess.check_output(['docker', 'inspect', '--format', '{{.Image}}', 'rancher16-rbac-lab'], text=True).strip()
         assert re.fullmatch(r'sha256:[a-f0-9]{64}', image)
@@ -159,29 +172,30 @@ def main(*, identity_factory=None):
         record['stack'] = stack['id']; save()
         command = 'printf "%s\\n" ' + shlex.quote(marker + '-before') + ' > /tmp/stream-guard-marker; while true; do cat /tmp/stream-guard-marker; sleep 1; done'
         service = control.api(BASE + 'services', {'name': 'stream-emitter', 'description': marker, 'stackId': stack['id'],
-                                                 'scale': 1, 'startOnCreate': True, 'launchConfig': {
+                                                 'scale': service_scale, 'startOnCreate': True, 'launchConfig': {
                                                      'imageUuid': 'docker:alpine:3.20', 'requestedHostId': '1h1', 'networkMode': 'none',
                                                      'command': ['/bin/sh', '-c', command], 'labels': {'rancher.console.stream-fixture': marker}}})
         record['service'] = service['id']; save()
         instance = None
         for attempt in range(240):
             running = [v for v in rows('services/' + service['id'] + '/instances') if v['state'] == 'running' and v.get('externalId')]
-            if len(running) == 1:
+            if len(running) == service_scale:
                 instance = running[0]; break
             time.sleep(1)
         assert instance and instance['hostId'] == '1h1' and re.fullmatch(r'[a-f0-9]{64}', instance['externalId'])
-        record['instance'] = instance['id']; save()
+        record['instance'] = instance['id']; record['instances'] = sorted(v['id'] for v in running); save()
         print('PASS: own physical stream-emitter running on existing host1h1.', flush=True)
         stage('identity-setup')
         identity = identity_factory(control) if identity_factory else None
         watched = identity['session'] if identity else shared.session()
         if identity: result['scope'] = identity['scope'].replace('; subscribe only', '') + '; raw logs/exec/container metrics'
-        for mode in ('logs', 'exec', 'metrics'):
+        for mode in modes:
             stage(mode + '-access')
-            probe = Probe(access(watched, instance, mode), watched, mode, instance, marker)
+            probe = Probe(access(watched, instance, mode), watched, mode, instance, marker, max_duration_ms=max(120000, (hold_seconds+120)*1000), proxy_port=proxy_port)
             probes[mode] = probe
             stage(mode + '-handshake')
-            assert probe.wait('ready')['handshake'] == 101
+            ready = probe.wait('ready')
+            assert ready['handshake'] == 101 and ready['port'] == proxy_port
             stage(mode + '-before-frame')
             probe.wait('before')
         result['allOwnStreamsReceivedBeforeRevocation'] = True
@@ -192,6 +206,20 @@ def main(*, identity_factory=None):
                     code = probe.wait('negative-' + variant)['status']
                     assert code in (401, 403, 404)
                     result.setdefault('negativeHandshakes', {}).setdefault(mode, {})[variant] = code
+        if hold_seconds:
+            assert runtime_guard and hold_seconds > max(result['originalLeaseSeconds']) + 2
+            stage('hold-past-original-proof-expiry')
+            deadline = time.monotonic() + hold_seconds
+            while time.monotonic() < deadline:
+                time.sleep(min(15, max(.01, deadline-time.monotonic())))
+            for mode, probe in probes.items():
+                probe.send({'command': 'watch-lease'})
+                probe.wait('watching-lease')
+            for mode, probe in probes.items():
+                event = probe.wait('after-lease')
+                assert event['open'] is True
+            result['allThreeStreamsLivePastOriginalProofExpiry'] = True
+            result['heldSeconds'] = hold_seconds
         stage('invalidate')
         if identity: identity['invalidate']()
         else: assert watched.request('/v2-beta/token/current', None, 'DELETE')[0] in (200, 204)
@@ -210,10 +238,11 @@ def main(*, identity_factory=None):
         probes['exec'].send({'command': 'send-after'}); probes['exec'].wait('after-input-attempted')
         # Independent current-session control for each transport; a host outage
         # must never be mistaken for successful enforcement of revocation.
-        for mode in ('logs', 'exec', 'metrics'):
-            current = Probe(access(control, instance, mode), control, mode, instance, marker)
+        for mode in modes:
+            current = Probe(access(control, instance, mode), control, mode, instance, marker, proxy_port=proxy_port)
             controls.append(current)
-            assert current.wait('ready')['handshake'] == 101
+            ready = current.wait('ready')
+            assert ready['handshake'] == 101 and ready['port'] == proxy_port
             current.wait('after' if mode == 'logs' else 'before')
             result['streams'][mode]['freshControlHealthy'] = True
         time.sleep(4)
@@ -241,7 +270,7 @@ def main(*, identity_factory=None):
                 if not owned.get('removed'):
                     assert control.request(owned['actions']['remove'], {}, 'POST')[0] in (200, 201, 202, 204)
                 for attempt in range(180):
-                    if control.api(BASE + 'stacks/' + stack['id']).get('removed') and not any(v['id'] == record.get('instance') for v in rows('containers')):
+                    if control.api(BASE + 'stacks/' + stack['id']).get('removed') and not any(v['id'] in record.get('instances', [record.get('instance')]) for v in rows('containers')):
                         break
                     time.sleep(1)
                 assert control.api(BASE + 'stacks/' + stack['id']).get('removed')

@@ -1,8 +1,8 @@
 """Private admin client restricted to the local synthetic realm."""
 import json,urllib.request,urllib.parse,urllib.error
 class KeycloakLab:
- def __init__(self,password):
-  self.opener=urllib.request.build_opener(urllib.request.ProxyHandler({}));self.bearer=None
+ def __init__(self,password,*,opener=None):
+  self.opener=opener or urllib.request.build_opener(urllib.request.ProxyHandler({}));self.bearer=None
   code,body=self.request('/realms/master/protocol/openid-connect/token',{'client_id':'admin-cli','username':'labadmin','password':password,'grant_type':'password'},form=True)
   assert code==200;self.bearer=body['access_token']
  def request(self,path,body=None,method=None,form=False):

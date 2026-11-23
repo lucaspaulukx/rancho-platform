@@ -66,7 +66,7 @@ def identity_factory(mode, *, oidc=False, role="readonly"):
             result = subprocess.run([sys.executable, str(ROOT / 'console/tests/local_account_fixture_cleanup.py')], capture_output=True, timeout=180)
             assert result.returncode == 0, 'Exact identity cleanup failed; private diagnostics withheld.'
             if keycloak_user:
-                fresh_keycloak = KeycloakLab(probe.lab.CONFIG['KEYCLOAK_ADMIN_PASSWORD'])
+                fresh_keycloak = KeycloakLab(probe.lab.CONFIG['KEYCLOAK_ADMIN_PASSWORD'], opener=probe.lab.loopback_opener())
                 code, own = fresh_keycloak.request('/admin/realms/rancher-lab/users/' + keycloak_user)
                 assert code == 200 and own['username'] == name and own.get('lastName') == name
                 assert fresh_keycloak.request('/admin/realms/rancher-lab/users/' + keycloak_user, method='DELETE')[0] == 204
@@ -81,7 +81,7 @@ def identity_factory(mode, *, oidc=False, role="readonly"):
             save()
             def login_session():
                 renewed = probe.lab.Session()
-                renewed.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPCookieProcessor(renewed.cookies))
+                renewed.opener = probe.lab.loopback_opener(renewed.cookies)
                 if oidc:
                     previous = probe.lab.CONFIG['LAB_USER_PASSWORD']
                     try:
@@ -101,7 +101,7 @@ def identity_factory(mode, *, oidc=False, role="readonly"):
             if oidc:
                 original_mapping_checksum = mapping_checksum()
                 state['baselineOidcMappingChecksum'] = original_mapping_checksum.decode().strip(); save()
-                keycloak = KeycloakLab(probe.lab.CONFIG['KEYCLOAK_ADMIN_PASSWORD'])
+                keycloak = KeycloakLab(probe.lab.CONFIG['KEYCLOAK_ADMIN_PASSWORD'], opener=probe.lab.loopback_opener())
                 code, _ = keycloak.request('/admin/realms/rancher-lab/users', {'username': name, 'enabled': True, 'firstName': 'Console Fixture', 'lastName': name, 'email': name + '@example.invalid', 'emailVerified': True, 'attributes': {'consoleFixtureMarker': [marker]}, 'credentials': [{'type': 'password', 'value': password, 'temporary': False}]})
                 assert code == 201
                 code, found = keycloak.request('/admin/realms/rancher-lab/users?username=' + name + '&exact=true')
@@ -120,7 +120,7 @@ def identity_factory(mode, *, oidc=False, role="readonly"):
                 state['credential'] = credential['id']; save()
                 wait('passwords/' + credential['id'], lambda v: v['state'] == 'active')
                 ordinary = probe.lab.Session()
-                ordinary.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPCookieProcessor(ordinary.cookies))
+                ordinary.opener = probe.lab.loopback_opener(ordinary.cookies)
                 ordinary.login(name, password)
             assert ordinary.api('projects')['data'] == []
             numeric = account['id'].removeprefix('1a'); assert numeric.isdigit()

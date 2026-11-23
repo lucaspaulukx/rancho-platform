@@ -28,7 +28,8 @@ function openProbe(variant) {
       parts[2] = (parts[2][0] === 'a' ? 'b' : 'a') + parts[2].slice(1);
       target.searchParams.set('token', parts.join('.'));
     } else if (variant === 'proof-only') {
-      const claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+      let claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+      if (input.mode === 'service-metrics') claims = JSON.parse(Buffer.from(claims.service[0].token.split('.')[1], 'base64url').toString('utf8'));
       assert.equal(typeof claims.rancherStreamProof, 'string');
       target.searchParams.set('token', claims.rancherStreamProof);
     } else if (variant === 'scope') {
@@ -36,7 +37,7 @@ function openProbe(variant) {
     } else throw new Error('Invalid negative variant');
   }
   const next = new WebSocket(target.href, { headers: { Cookie: 'token=' + input.session },
-    origin: 'http://localhost:18080', followRedirects: false, handshakeTimeout: 8000,
+    origin: new URL(input.url).origin.replace(/^ws/, 'http'), followRedirects: false, handshakeTimeout: 8000,
     perMessageDeflate: false, maxPayload: 1048576 });
   next.on('unexpected-response', (_, response) => { emit({ type: event, status: response.statusCode }); response.destroy(); next.terminate(); });
   next.on('open', () => { emit({ type: event, status: 101 }); next.terminate(); });
@@ -53,38 +54,48 @@ inputLines.on('line', line => {
         if (input.mode !== 'exec') throw new Error('Unexpected input mode');
         if (socket.readyState === WebSocket.OPEN) socket.send(Buffer.from(input.marker + '-after\n').toString('base64'));
         emit({ type: 'after-input-attempted', open: socket.readyState === WebSocket.OPEN });
+      } else if (message.command === 'watch-lease') {
+        input.leasePhase = true;
+        emit({ type: 'watching-lease' });
+        if (input.mode === 'exec' && socket.readyState === WebSocket.OPEN)
+          socket.send(Buffer.from(input.marker + '-lease\n').toString('base64'));
       } else if (message.command === 'watch-after') { input.afterPhase = true; emit({ type: 'watching-after' }); }
       return;
     }
     input = message;
-    assert(['logs', 'exec', 'metrics'].includes(input.mode));
+    assert(['logs', 'exec', 'metrics', 'service-metrics'].includes(input.mode));
     assert.match(input.marker, /^console-host-stream-[a-f0-9]{12}$/);
     assert.match(input.dockerId, /^[a-f0-9]{64}$/);
     assert.match(input.instanceId, /^1i[0-9]+$/);
     assert.match(input.instanceUuid, /^[a-f0-9-]{36}$/);
     const url = new URL(input.url);
-    assert.equal(url.origin, 'ws://localhost:18080');
+    assert(['ws://localhost:18080', 'ws://localhost:18090'].includes(url.origin));
+    assert.equal(Number(url.port), input.expectedPort);
     assert.equal(url.username + url.password + url.hash, '');
     assert.equal([...url.searchParams.keys()].join(','), 'token');
-    const expected = input.mode === 'metrics' ? ['/v1/containerstats/' + input.dockerId, '/v1/stats/' + input.dockerId]
+    const expected = input.mode === 'service-metrics' ? ['/v1/containerstats/service'] : input.mode === 'metrics' ? ['/v1/containerstats/' + input.dockerId, '/v1/stats/' + input.dockerId]
       : ['/v1/' + (input.mode === 'exec' ? 'exec' : 'logs')];
     assert(expected.includes(url.pathname.replace(/\/$/, '')));
     assert.match(input.session, /^[A-Za-z0-9_.~-]{1,8192}$/);
     ({ ws: WebSocket } = require(path.join(input.runtimeModules, 'playwright-core/lib/utilsBundle.js')));
-    socket = new WebSocket(url.href, { headers: { Cookie: 'token=' + input.session }, origin: 'http://localhost:18080',
+    socket = new WebSocket(url.href, { headers: { Cookie: 'token=' + input.session }, origin: new URL(input.url).origin.replace(/^ws/, 'http'),
       followRedirects: false, handshakeTimeout: 10000, maxPayload: 1048576, perMessageDeflate: false });
     socket.on('upgrade', response => { stats.handshake = response.statusCode; });
     socket.on('unexpected-response', (_, response) => { stats.handshake = response.statusCode; emit({ type: 'handshake-rejected', status: response.statusCode }); response.destroy(); });
     socket.on('open', () => {
-      emit({ type: 'ready', handshake: stats.handshake });
+      emit({ type: 'ready', handshake: stats.handshake, port: Number(url.port) });
       if (input.mode === 'exec') socket.send(Buffer.from(input.marker + '-before\n').toString('base64'));
     });
     socket.on('message', buffer => {
       const text = decoded(buffer);
-      const ownsMetric = input.mode === 'metrics' && (text.includes(input.dockerId) || text.includes(input.instanceId) || text.includes(input.instanceUuid));
+      const ownsMetric = input.mode.endsWith('metrics') && (text.includes(input.dockerId) || text.includes(input.instanceId) || text.includes(input.instanceUuid));
       if (text.includes(input.marker + '-before') || (ownsMetric && !input.afterPhase)) {
         stats.before++;
         if (stats.before === 1) emit({ type: 'before' });
+      }
+      if (input.leasePhase && (text.includes(input.marker + '-before') || text.includes(input.marker + '-lease') || ownsMetric)) {
+        input.leasePhase = false;
+        emit({ type: 'after-lease', open: socket.readyState === WebSocket.OPEN });
       }
       if (text.includes(input.marker + '-after') || (ownsMetric && input.afterPhase)) {
         stats.after++;
@@ -93,6 +104,8 @@ inputLines.on('line', line => {
     });
     socket.on('close', code => { stats.closed = true; stats.closeCode = code; emit({ type: 'closed', code }); });
     socket.on('error', () => { emit({ type: 'socket-error' }); });
-    timer = setTimeout(stop, 120000);
+    const duration = input.maxDurationMs ?? 120000;
+    assert(Number.isInteger(duration) && duration >= 120000 && duration <= 900000);
+    timer = setTimeout(stop, duration);
   } catch { emit({ type: 'probe-error' }); stop(); }
 });

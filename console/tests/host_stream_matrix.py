@@ -14,8 +14,12 @@ def main():
     parser.add_argument('mode', choices=('admin-revoke', 'grant-local', 'grant-oidc',
                                       'deactivate-local', 'deactivate-oidc', 'expire-local', 'expire-oidc'))
     parser.add_argument('--expect-legacy', action='store_true')
+    parser.add_argument('--console-proxy', action='store_true')
+    parser.add_argument('--service-scale', type=int, default=1)
+    parser.add_argument('--service-metrics', action='store_true')
+    parser.add_argument('--hold-seconds', type=int, default=0)
     args = parser.parse_args()
-    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    opener = probe.shared.lab.loopback_opener()
     with opener.open('http://localhost:18080/community/host-stream-guard', timeout=5) as response:
         capability = json.load(response)
     assert capability == {'protocol': 1, 'enabled': not args.expect_legacy}, 'Unexpected actual proxy mode.'
@@ -27,6 +31,7 @@ def main():
     assert response.headers.get_content_type() == 'application/json' and response.headers.get('Cache-Control') == 'no-store'
     assert json.load(response) == ({} if args.expect_legacy else {'allowed': False})
     assert not args.expect_legacy or args.mode == 'admin-revoke'
+    assert not args.hold_seconds or (args.mode == 'admin-revoke' and not args.expect_legacy and 0 < args.hold_seconds <= 600)
     factory = None
     if args.mode != 'admin-revoke':
         mode, kind = args.mode.split('-')
@@ -34,13 +39,13 @@ def main():
             factory = lambda admin: expiry_factory(admin, oidc=kind == 'oidc', role='member')
         else:
             factory = identity_factory(mode, oidc=kind == 'oidc', role='member')
-    probe.REPORT = probe.ROOT / ('console/host-stream-' + args.mode + ('-off' if args.expect_legacy else '-on') + '-results.json')
-    status = probe.main(identity_factory=factory)
+    probe.REPORT = probe.ROOT / ('console/host-stream-' + args.mode + ('-lease' if args.hold_seconds else '') + ('-service' if args.service_metrics else '') + ('-proxy' if args.console_proxy else '') + ('-scale' + str(args.service_scale) if args.service_scale != 1 else '') + ('-off' if args.expect_legacy else '-on') + '-results.json')
+    status = probe.main(identity_factory=factory, hold_seconds=args.hold_seconds, service_metrics=args.service_metrics, console_proxy=args.console_proxy, service_scale=args.service_scale)
     report = json.loads(probe.REPORT.read_text(encoding='utf-8'))
     if args.expect_legacy:
         reproduced = report.get('cleanupComplete') and report.get('watchedSessionRevoked') and report.get('controlSessionRevoked') and report.get('allOwnStreamsReceivedBeforeRevocation') and report.get('protectedHttpAfterRevocation') == 401 and all(
             value.get('newHandshake') == 101 and value.get('freshControlHealthy') and not value.get('closed') and value.get('after', 0) > 0
-            for value in report.get('streams', {}).values()) and len(report.get('streams', {})) == 3
+            for value in report.get('streams', {}).values()) and len(report.get('streams', {})) == (4 if args.service_metrics else 3)
         report['legacyBehaviorReproduced'] = bool(reproduced)
         # Preserve failed enforcement status: this is a baseline, not a security pass.
         probe.REPORT.write_text(json.dumps(report, indent=2), encoding='utf-8')

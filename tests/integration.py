@@ -1,6 +1,7 @@
 """Disposable local integration tests; never points at a remote Rancher.
 Uses browser-style authorization-code OIDC, including state cookies and PKCE.
 """
+import importlib.util
 import html
 import http.cookiejar
 import json
@@ -12,6 +13,10 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+_transport_spec = importlib.util.spec_from_file_location('lab_loopback_transport', Path(__file__).with_name('loopback_transport.py'))
+_transport = importlib.util.module_from_spec(_transport_spec)
+_transport_spec.loader.exec_module(_transport)
+loopback_opener = _transport.loopback_opener
 CONFIG = dict(line.split('=', 1) for line in (ROOT / '.env').read_text().splitlines() if '=' in line)
 BASE = 'http://localhost:18080'
 RESULTS = []
@@ -26,7 +31,7 @@ class LoopbackBrowserPolicy(http.cookiejar.DefaultCookiePolicy):
 class Session:
     def __init__(self):
         self.cookies = http.cookiejar.CookieJar(policy=LoopbackBrowserPolicy())
-        self.opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(self.cookies))
+        self.opener = loopback_opener(self.cookies)
 
     def request(self, path, body=None, method=None, form=False):
         url = path if path.startswith('http') else BASE + path

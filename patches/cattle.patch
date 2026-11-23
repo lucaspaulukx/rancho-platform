@@ -320,6 +320,32 @@ index 0972b21..b88af50 100644
          if (token == null) {
              return null;
          }
+diff --git a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ServiceContainerStatsLinkHandler.java b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ServiceContainerStatsLinkHandler.java
+index 38c67d9..2b24a37 100644
+--- a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ServiceContainerStatsLinkHandler.java
++++ b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ServiceContainerStatsLinkHandler.java
+@@ -81,7 +81,7 @@ public class ServiceContainerStatsLinkHandler implements LinkHandler {
+             containerIdsMap.put(DockerUtils.getDockerIdentifier(instance),
+                     ApiContext.getContext().getIdFormatter().formatId(objectManager.getType(instance), instance.getId()));
+             payload.put("containerIds", containerIdsMap);
+-            HostApiAccess apiAccess = hostApiService.getAccess(request, host.getId(), payload, new String[] { StatsConstants.CONTAINER_STATS_PATH.get() });
++            HostApiAccess apiAccess = hostApiService.getAccess(request, host.getId(), payload, new String[] { StatsConstants.CONTAINER_STATS_PATH.get(), dockerId });
+             if (apiAccess == null) {
+                 continue;
+             }
+@@ -90,9 +90,9 @@ public class ServiceContainerStatsLinkHandler implements LinkHandler {
+ 
+             url.append(apiAccess.getUrl());
+ 
+-            metaUrl = url.toString() + SERVICE_PATH;
+-
+-            url.append("/").append(dockerId);
++            // Access must be signed for the same complete path sent to the proxy.
++            // Keep the native aggregate endpoint while avoiding post-signing URL changes.
++            metaUrl = url.substring(0, url.lastIndexOf("/")) + SERVICE_PATH;
+ 
+             StatsAccess statsAccess = new StatsAccess();
+             statsAccess.setToken(apiAccess.getAuthenticationToken());
 diff --git a/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java b/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
 index 40fe2eb..b7c2c10 100644
 --- a/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
