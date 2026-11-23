@@ -1,3 +1,4 @@
+import { WorkloadPolicyValidationError } from './workload-scheduling';
 import type { Schema } from './api';
 export function validateWorkloadSecurity(
   schema: Schema,
@@ -5,7 +6,7 @@ export function validateWorkloadSecurity(
   schemas: Record<string, Schema>,
   depth = 0,
 ) {
-  if (depth > 12) throw new Error('A configuração tem níveis demais.');
+  if (depth > 12) throw new WorkloadPolicyValidationError('workloadPolicyValidation.depth');
   for (const key of ['capAdd', 'capDrop']) {
     const value = values[key],
       field = schema.resourceFields[key];
@@ -18,7 +19,7 @@ export function validateWorkloadSecurity(
       value.some((v) => typeof v !== 'string' || !field.options!.includes(v)) ||
       new Set(value).size !== value.length
     )
-      throw new Error('Revise as capabilities de segurança conforme o contrato atual.');
+      throw new WorkloadPolicyValidationError('workloadPolicyValidation.capabilities');
   }
   for (const [key, value] of Object.entries(values)) {
     const field = schema.resourceFields[key],

@@ -1,4 +1,5 @@
 import { ResourceValidationError } from '../resource-validation';
+import { workloadValidationMessage } from '../workload-validation-message';
 import { UlimitEditor } from './UlimitEditor';
 import { DeviceEditor } from './DeviceEditor';
 import {
@@ -1001,7 +1002,7 @@ export function SchemaForm({
   function describeError(value?: Error | null) {
     if (value instanceof DeviceValidationError || value instanceof ResourceValidationError)
       return t(value.key);
-    if (!(value instanceof SchemaPayloadError)) return value?.message;
+    if (!(value instanceof SchemaPayloadError)) return workloadValidationMessage(value, t);
     const [key, name, limit] = value.detail;
     if (key === 'schemaForm.validation.depth') return t(key);
     const labelKey = fieldLabelKey(name);

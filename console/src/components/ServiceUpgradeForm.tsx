@@ -2,6 +2,7 @@ import { UlimitEditor } from './UlimitEditor';
 import { DeviceEditor } from './DeviceEditor';
 import { DeviceValidationError } from '../workload-devices';
 import { ResourceValidationError } from '../resource-validation';
+import { workloadValidationMessage } from '../workload-validation-message';
 import { useI18n } from '../i18n/provider';
 import { editableUlimits } from '../workload-ulimits';
 import { CapabilityEditor } from './CapabilityEditor';
@@ -81,7 +82,7 @@ export function ServiceUpgradeForm({
       value instanceof ResourceValidationError
     )
       return t(value.key);
-    return value?.message;
+    return workloadValidationMessage(value, t);
   }
   const launch = resource.launchConfig as Record<string, unknown>;
   const available = bindingsEnabled && supportsConfigurationUpgrade(resource, schemas);

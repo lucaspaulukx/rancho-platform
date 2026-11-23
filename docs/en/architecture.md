@@ -60,6 +60,8 @@ Stack creation, service scaling, service links and the About dialog use the shar
 
 Compose, environment template, service link and service upgrade validators expose typed errors. Their panels resolve the error in the active locale and retain the original draft. Existing callers of the validators keep the original Portuguese error messages.
 
+Health check, sidecar, scheduling and security validation messages follow the active locale at both workload creation and service upgrade boundaries.
+
 Hosts, catalog templates and webhooks also use the shared locale. Host registration commands and secret values remain native and masked until explicitly revealed; switching language changes labels without requesting registration or copying a secret. Template names, parameter content and webhook driver identifiers retain their native values. Helper errors that have not been extracted remain unchanged.
 
 Use current resource schemas/action links instead of inventing routes or assuming global schemas equal environment-scoped schemas. Re-read the resource, scope and relevant contract before mutation. Preserve unknown configuration and unselected fields; do not silently replace unsupported values with empty defaults.

@@ -50,6 +50,15 @@ import { enComposeEditor, ptComposeEditor } from './domains/compose-editor';
 import { enServiceEditors, ptServiceEditors } from './domains/service-editors';
 import { enComposeValidation, ptComposeValidation } from './domains/compose-validation';
 import {
+  enHealthCheckValidation,
+  ptHealthCheckValidation,
+} from './domains/health-check-validation';
+import { enSidecarValidation, ptSidecarValidation } from './domains/sidecar-validation';
+import {
+  enWorkloadPolicyValidation,
+  ptWorkloadPolicyValidation,
+} from './domains/workload-policy-validation';
+import {
   enStackComposeUpgradePanel,
   ptStackComposeUpgradePanel,
 } from './domains/stack-compose-upgrade-panel';
@@ -108,6 +117,9 @@ export const englishMessages = {
   ...enComposeEditor,
   ...enServiceEditors,
   ...enComposeValidation,
+  ...enHealthCheckValidation,
+  ...enSidecarValidation,
+  ...enWorkloadPolicyValidation,
   ...enStackComposeUpgradePanel,
   ...enResourcePanel,
   ...enResourceStream,
@@ -195,6 +207,9 @@ export const portugueseMessages = {
   ...ptComposeEditor,
   ...ptServiceEditors,
   ...ptComposeValidation,
+  ...ptHealthCheckValidation,
+  ...ptSidecarValidation,
+  ...ptWorkloadPolicyValidation,
   ...ptStackComposeUpgradePanel,
   ...ptResourcePanel,
   ...ptResourceStream,

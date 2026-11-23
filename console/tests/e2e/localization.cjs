@@ -214,6 +214,14 @@ async function main() {
   await workspace.getByRole('dialog', { name: 'Network policies', exact: true }).waitFor();
   check('network policy drawer follows the active locale and preserves environment scope',
     new URL(workspace.url()).searchParams.get('env') === '1a12');
+  await workspace.getByRole('dialog', { name: 'Network policies', exact: true })
+    .getByRole('button', { name: 'Close', exact: true }).click();
+  await workspace.getByLabel('User menu', { exact: true }).click();
+  await workspace.getByRole('button', { name: 'About this console', exact: true }).click();
+  const about = workspace.getByRole('dialog', { name: 'About this console', exact: true });
+  await about.getByText('Rancher 1.6.30', { exact: true }).waitFor();
+  check('About dialog uses the active locale and retains Rancher attribution',
+    await about.getByText('Rancher 1.6.30', { exact: true }).isVisible());
   check('no browser HTTP mutations or external navigation', result.blockedRequests === 0);
   check('no JavaScript errors', result.pageErrors === 0);
   result.status = 'passed';

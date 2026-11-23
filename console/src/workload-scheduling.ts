@@ -1,3 +1,9 @@
+import { ptWorkloadPolicyValidation } from './i18n/domains/workload-policy-validation';
+export class WorkloadPolicyValidationError extends Error {
+  constructor(readonly key: keyof typeof ptWorkloadPolicyValidation) {
+    super(ptWorkloadPolicyValidation[key]);
+  }
+}
 import type { Schema } from './api';
 export const affinityPrefix = 'io.rancher.scheduler.affinity:';
 export const globalLabel = 'io.rancher.scheduler.global';
@@ -46,7 +52,7 @@ export function decodeScheduling(labels: Record<string, string>) {
       rules.push(rule);
     }
   }
-  if (rules.length > 100) throw new Error('Use no máximo 100 regras de afinidade.');
+  if (rules.length > 100) throw new WorkloadPolicyValidationError('workloadPolicyValidation.limit');
   return { rules, other };
 }
 function validateRule(rule: SchedulingRule) {
@@ -59,16 +65,14 @@ function validateRule(rule: SchedulingRule) {
     (rule.kind !== 'container' &&
       (!rule.key.trim() || /[=,\s\x00-\x1f\x7f]/.test(rule.key) || rule.key.length > 255))
   )
-    throw new Error(
-      'Preencha chave e valor válidos nas regras de afinidade, sem vírgulas ou quebras de linha.',
-    );
+    throw new WorkloadPolicyValidationError('workloadPolicyValidation.rule');
 }
 export function encodeScheduling(
   rules: SchedulingRule[],
   other: Record<string, string>,
   strict = true,
 ) {
-  if (rules.length > 100) throw new Error('Use no máximo 100 regras de afinidade.');
+  if (rules.length > 100) throw new WorkloadPolicyValidationError('workloadPolicyValidation.limit');
   const labels = { ...other };
   for (const rule of rules) {
     if (strict) validateRule(rule);
@@ -81,18 +85,16 @@ export function encodeScheduling(
 }
 export function validateSchedulingLabels(value: unknown) {
   if (!value || typeof value !== 'object' || Array.isArray(value))
-    throw new Error('Labels de agendamento inválidas.');
+    throw new WorkloadPolicyValidationError('workloadPolicyValidation.map');
   const labels = value as Record<string, string>;
   if (Object.values(labels).some((v) => typeof v !== 'string'))
-    throw new Error('Labels precisam conter texto.');
+    throw new WorkloadPolicyValidationError('workloadPolicyValidation.text');
   const { rules } = decodeScheduling(labels);
   if (
     labels[globalLabel] === 'true' &&
     rules.some((v) => v.kind !== 'host_label' || v.mode.includes('_soft'))
   )
-    throw new Error(
-      'Agendamento global aceita somente label de host com regra obrigatória ou de negação.',
-    );
+    throw new WorkloadPolicyValidationError('workloadPolicyValidation.global');
 }
 export function validateWorkloadScheduling(
   schema: Schema,
@@ -100,7 +102,7 @@ export function validateWorkloadScheduling(
   schemas: Record<string, Schema>,
   depth = 0,
 ) {
-  if (depth > 12) throw new Error('A configuração tem níveis demais.');
+  if (depth > 12) throw new WorkloadPolicyValidationError('workloadPolicyValidation.depth');
   for (const [name, value] of Object.entries(values)) {
     const field = schema.resourceFields[name];
     if (name === 'labels' && field?.type === 'map[string]' && value != null)
