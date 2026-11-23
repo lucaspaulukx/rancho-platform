@@ -74,6 +74,18 @@ docker image tag "rancho-release-agent:${commit}" rancher/agent:v1.2.11
 
 Keep each component’s archive, image ID and checksum manifest in its own directory. Retain copies alongside the matching source, package notices and corresponding sources before publishing runtime archives. Workflow artifacts expire after 14 days.
 
+### Stage durable runtime downloads
+
+Download the CI source artifact into `source/` and each runtime artifact into a directory named for its component, all under one private input directory. Stage a copy of the signed files in a new output directory:
+
+```sh
+python scripts/stage_release_assets.py --commit "$commit" --input ./candidate --output ./release-assets
+```
+
+The command checks the workflow and commit attestations, verifies the checksums and stages flat asset names for GitHub Releases. It does not upload anything. Keep dependency sources and notices separate and complete the final acceptance checks before publication.
+
+To verify a downloaded runtime component, place its `.docker.tar.gz` archive in its own directory. In that directory, rename `rancho-COMPONENT-SHA256SUMS.txt` to `SHA256SUMS.txt` and `rancho-COMPONENT-IMAGE-ID.txt` to `IMAGE-ID.txt`, then run the attestation, checksum and load steps above. The checksums keep the original filenames in their contents. For the source ZIP, use `rancho-source-SHA256SUMS.txt` with the source verification command.
+
 ## Artifact inventory
 
 The offline inventory tool uses a pinned Syft image and already-local application image IDs. `plan` resolves scalar identities/sizes and manifest hashes without exporting images or restarting services. Scanning is explicit, with a new output directory.
