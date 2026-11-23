@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Resource, Schema } from '../api';
-import contract from '../../upgrade-contract.json';
+import contract from './fixtures/upgrade-schema.json';
 import {
   imageUpgradePayload,
   supportsImageUpgrade,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Resource } from '../api';
 import { lifecyclePayload } from '../lifecycle-actions';
-import contract from '../../upgrade-contract.json';
+import contract from './fixtures/upgrade-schema.json';
 
 describe('Contrato nativo de reinício', () => {
   it.each(['service', 'loadBalancerService'])('inclui estratégia obrigatória para %s', (type) => {

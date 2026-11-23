@@ -1,0 +1,297 @@
+{
+  "receiver": {
+    "id": "receiver",
+    "resourceFields": {
+      "actions": {
+        "type": "map[string]"
+      },
+      "driver": {
+        "create": true,
+        "options": ["scaleService", "serviceUpgrade", "scaleHost", "forwardPost"],
+        "type": "enum"
+      },
+      "forwardPostConfig": {
+        "create": true,
+        "type": "forwardPost"
+      },
+      "id": {
+        "type": "string"
+      },
+      "links": {},
+      "name": {
+        "create": true,
+        "type": "string"
+      },
+      "scaleHostConfig": {
+        "create": true,
+        "type": "scaleHost"
+      },
+      "scaleServiceConfig": {
+        "create": true,
+        "type": "scaleService"
+      },
+      "serviceUpgradeConfig": {
+        "create": true,
+        "type": "serviceUpgrade"
+      },
+      "state": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "url": {
+        "type": "string"
+      }
+    },
+    "collectionMethods": ["GET", "POST"],
+    "resourceMethods": ["GET", "DELETE"],
+    "resourceActions": null
+  },
+  "scaleService": {
+    "id": "scaleService",
+    "resourceFields": {
+      "action": {
+        "create": true,
+        "options": ["up", "down"],
+        "type": "enum"
+      },
+      "amount": {
+        "create": true,
+        "type": "int"
+      },
+      "max": {
+        "create": true,
+        "default": 100,
+        "min": 1,
+        "type": "int"
+      },
+      "min": {
+        "create": true,
+        "default": 1,
+        "min": 1,
+        "type": "int"
+      },
+      "serviceId": {
+        "create": true,
+        "type": "string"
+      },
+      "type": {
+        "create": true,
+        "type": "string"
+      }
+    },
+    "collectionMethods": null,
+    "resourceMethods": ["GET"],
+    "resourceActions": null
+  },
+  "serviceUpgrade": {
+    "id": "serviceUpgrade",
+    "resourceFields": {
+      "addressType": {
+        "create": true,
+        "default": "registry",
+        "options": ["registry", "registry-internal", "registry-vpc"],
+        "type": "enum"
+      },
+      "batchSize": {
+        "create": true,
+        "default": 1,
+        "min": 1,
+        "type": "int"
+      },
+      "intervalMillis": {
+        "create": true,
+        "default": 2,
+        "min": 1,
+        "type": "int"
+      },
+      "payloadFormat": {
+        "create": true,
+        "default": "dockerhub",
+        "options": ["dockerhub", "alicloud", "azure"],
+        "type": "enum"
+      },
+      "serviceSelector": {
+        "create": true,
+        "type": "map[string]"
+      },
+      "startFirst": {
+        "create": true,
+        "default": false,
+        "type": "bool"
+      },
+      "tag": {
+        "create": true,
+        "type": "string"
+      },
+      "type": {
+        "create": true,
+        "type": "string"
+      }
+    },
+    "collectionMethods": null,
+    "resourceMethods": ["GET"],
+    "resourceActions": null
+  },
+  "scaleHost": {
+    "id": "scaleHost",
+    "resourceFields": {
+      "action": {
+        "create": true,
+        "options": ["up", "down"],
+        "type": "enum"
+      },
+      "amount": {
+        "create": true,
+        "type": "int"
+      },
+      "deleteOption": {
+        "create": true,
+        "options": ["mostRecent", "leastRecent"],
+        "type": "enum"
+      },
+      "hostSelector": {
+        "create": true,
+        "type": "map[string]"
+      },
+      "max": {
+        "create": true,
+        "default": 100,
+        "min": 1,
+        "type": "int"
+      },
+      "min": {
+        "create": true,
+        "default": 1,
+        "min": 1,
+        "type": "int"
+      },
+      "type": {
+        "create": true,
+        "type": "string"
+      }
+    },
+    "collectionMethods": null,
+    "resourceMethods": ["GET"],
+    "resourceActions": null
+  },
+  "forwardPost": {
+    "id": "forwardPost",
+    "resourceFields": {
+      "path": {
+        "create": true,
+        "type": "string"
+      },
+      "port": {
+        "create": true,
+        "type": "string"
+      },
+      "projectId": {
+        "create": true,
+        "type": "string"
+      },
+      "serviceName": {
+        "create": true,
+        "type": "string"
+      },
+      "type": {
+        "create": true,
+        "type": "string"
+      }
+    },
+    "collectionMethods": null,
+    "resourceMethods": ["GET"],
+    "resourceActions": null
+  },
+  "apiVersion": {
+    "id": "apiVersion",
+    "resourceFields": {
+      "actions": {
+        "type": "map[string]"
+      },
+      "id": {
+        "type": "string"
+      },
+      "links": {},
+      "type": {
+        "type": "string"
+      }
+    },
+    "collectionMethods": ["GET"],
+    "resourceMethods": ["GET"],
+    "resourceActions": null
+  },
+  "schema": {
+    "id": "schema",
+    "resourceFields": {
+      "actions": {
+        "type": "map[string]"
+      },
+      "collectionActions": {
+        "type": "map[string]"
+      },
+      "collectionFields": {
+        "type": "map[string]"
+      },
+      "collectionFilters": {
+        "type": "map[string]"
+      },
+      "collectionMethods": {
+        "type": "array[string]"
+      },
+      "id": {
+        "type": "string"
+      },
+      "includeableLinks": {
+        "type": "array[string]"
+      },
+      "links": {},
+      "pluralName": {
+        "type": "string"
+      },
+      "resourceActions": {
+        "type": "map[string]"
+      },
+      "resourceFields": {
+        "type": "map[string]"
+      },
+      "resourceMethods": {
+        "type": "array[string]"
+      },
+      "type": {
+        "type": "string"
+      }
+    },
+    "collectionMethods": ["GET"],
+    "resourceMethods": ["GET"],
+    "resourceActions": null
+  },
+  "error": {
+    "id": "error",
+    "resourceFields": {
+      "actions": {
+        "type": "map[string]"
+      },
+      "id": {
+        "type": "string"
+      },
+      "links": {},
+      "message": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      },
+      "statusCode": {
+        "type": "int"
+      },
+      "type": {
+        "type": "string"
+      }
+    },
+    "collectionMethods": ["GET"],
+    "resourceMethods": ["GET"],
+    "resourceActions": null
+  }
+}
