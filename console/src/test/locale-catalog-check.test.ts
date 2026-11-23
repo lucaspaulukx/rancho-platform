@@ -64,9 +64,13 @@ describe('Registered locale catalog gate', () => {
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
     const previewDomains = new Set([
       'auth',
+      'bindingsEditor',
       'bulkOperation',
       'common',
       'details',
+      'deviceUpgrade',
+      'deviceUpgradeForm',
+      'devices',
       'healthCheckEditor',
       'healthCheckValidation',
       'language',
@@ -81,6 +85,7 @@ describe('Registered locale catalog gate', () => {
       'resourceStream',
       'runtime',
       'schedulingEditor',
+      'selectorRows',
       'shell',
       'topology',
       'ui',

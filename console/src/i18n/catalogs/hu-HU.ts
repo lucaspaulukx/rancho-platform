@@ -1,4 +1,104 @@
 export const huHU = {
+  'bindingsEditor.portsTitle': 'Közzétett portok',
+  'bindingsEditor.volumesTitle': 'Kötetek',
+  'bindingsEditor.portsHint':
+    'Adja meg a konténer portját, valamint szükség esetén a gazdagép portját és IP-címét. A Rancher közzéteszi a portot.',
+  'bindingsEditor.volumesHint':
+    'Csatoljon névvel ellátott kötetet, gazdagépútvonalat vagy névtelen kötetet a konténer egy abszolút célútvonalára.',
+  'bindingsEditor.unsupported':
+    'A kapott formátum nem támogatott. A konfiguráció megőrzéséhez használja a natív űrlapot.',
+  'bindingsEditor.native':
+    'A natív bejegyzés megmarad. A többi sor módosítása nem alakítja át ezt az értéket.',
+  'bindingsEditor.readWrite': 'Olvasás és írás',
+  'bindingsEditor.readOnly': 'Csak olvasás',
+  'bindingsEditor.hostPortHint': 'Nem kötelező. A Rancher natív portkiosztása érvényes.',
+  'bindingsEditor.ipHint':
+    'Nem kötelező. A gazdagép portját meg kell adni. Szögletes zárójel nélküli IPv4- vagy IPv6-cím használható.',
+  'bindingsEditor.sourceHint':
+    'Kötetnév vagy abszolút gazdagépútvonal. Névtelen kötethez hagyja üresen.',
+  'bindingsEditor.targetHint': 'Abszolút útvonal a konténerben, például /data.',
+  'bindingsEditor.containerPort': '{index}. konténerport',
+  'bindingsEditor.hostPort': '{index}. gazdagépport',
+  'bindingsEditor.protocol': '{index}. port protokollja',
+  'bindingsEditor.ip': '{index}. közzétett IP-cím',
+  'bindingsEditor.source': '{index}. kötet forrása',
+  'bindingsEditor.target': '{index}. kötet célja',
+  'bindingsEditor.access': '{index}. kötet hozzáférési módja',
+  'bindingsEditor.portRow': '{index}. port',
+  'bindingsEditor.volumeRow': '{index}. kötet',
+  'bindingsEditor.removePort': 'A(z) {index}. port eltávolítása',
+  'bindingsEditor.removeVolume': 'A(z) {index}. kötet eltávolítása',
+  'bindingsEditor.addPort': 'Port hozzáadása',
+  'bindingsEditor.addVolume': 'Kötet hozzáadása',
+  'bindingsEditor.validation.limit': 'Mezőnként legfeljebb 100 natív bejegyzést adjon meg.',
+  'bindingsEditor.validation.ports':
+    'Ellenőrizze, hogy a portok 1 és 65535 közötti egész számok, a protokoll és a közzétett IP-cím pedig érvényes.',
+  'bindingsEditor.validation.volumes':
+    'Ellenőrizze minden kötet forrását, abszolút célútvonalát és hozzáférési módját.',
+  'bindingsEditor.validation.ipNeedsHostPort':
+    'A közzétett IP-címhez meg kell adni a gazdagép portját.',
+  'bindingsEditor.validation.portConflict':
+    'Ugyanazon a gazdagépporton és protokollon ütköző hozzárendelések vannak.',
+  'bindingsEditor.validation.duplicateTarget': 'Minden kötethez más csatolási célt adjon meg.',
+  'bindingsEditor.validation.depth': 'A konfiguráció túl sok egymásba ágyazott szintet tartalmaz.',
+
+  'deviceUpgradeForm.edit': 'Eszközök szerkesztése ebben a frissítésben',
+  'deviceUpgradeForm.impact':
+    'Az eszköz-hozzárendelések módosítása lecseréli a szolgáltatás konténereit, és megváltoztathatja a hozzáférést a gazdagép eszközeihez. Az összes sor törlése eltávolítja az explicit hozzárendeléseket. A futtatókörnyezet alapértelmezett eszközei és a többi indítási beállítás megmaradnak.',
+  'deviceUpgradeForm.reset': 'Az összes explicit hozzárendelés eltávolítása',
+  'deviceUpgradeForm.confirmTitle': 'Frissíti a szolgáltatás eszközeit?',
+  'deviceUpgradeForm.confirmDescription':
+    'Szolgáltatás: {service}. Az eszköz-hozzárendelések módosítják a gazdagép eszközeihez való hozzáférést, és lecserélik a szolgáltatás konténereit. Az üres lista eltávolítja az explicit hozzárendeléseket. A futtatókörnyezet alapértelmezett eszközjogosultságai megmaradnak. A frissítés egyéb kiválasztott beállításai a portokat, csatolásokat, sidecarokat és az állapotot is érinthetik. A megerősítés előtt ellenőrizze az összes kiválasztott módosítást.',
+
+  'deviceUpgrade.error.unavailable':
+    'Az eszközfrissítés nem érhető el az aktuális szolgáltatáshoz, hatókörhöz vagy natív szerződéshez.',
+  'deviceUpgrade.error.conflict':
+    'Az indítási konfiguráció vagy a sidecarok megváltoztak egy másik kliensben. Nyissa meg újra az eszközfrissítést.',
+  'deviceUpgrade.error.noChange':
+    'Az eszköz-hozzárendelések frissítése előtt módosítsa a konténerképet vagy a kiválasztott konfigurációt.',
+  'deviceUpgrade.error.disabled': 'Az eszköz-hozzárendelések frissítése ki van kapcsolva.',
+
+  'devices.title': 'Eszköz-hozzárendelések',
+  'devices.description':
+    'A kiválasztott gazdagépen már létező eszközöket rendeljen hozzá. A jogosultságok az új konténerekre vonatkoznak. Ez a művelet nem hoz létre eszközt a gazdagépen, és nem kapcsolja be a privilegizált módot.',
+  'devices.effectivePermissions':
+    'A kért r/w/m jogosultságok nem írják felül a futtatókörnyezet alapértelmezett eszközjogosultságait. Ellenőrizze a tényleges hozzáférést a célgazdagépen. A már engedélyezett eszköz csak olvasható hozzárendelése mellett az írás továbbra is lehetséges lehet.',
+  'devices.row': '{index}. eszköz',
+  'devices.host': '{index}. útvonal a gazdagépen',
+  'devices.container': '{index}. útvonal a konténerben',
+  'devices.pathHint':
+    'Adjon meg explicit abszolút útvonalat. A gazdagépen kompatibilis eszköznek kell lennie.',
+  'devices.read': '{index}. eszköz: olvasás (r)',
+  'devices.write': '{index}. eszköz: írás (w)',
+  'devices.mknod': '{index}. eszköz: eszközcsomópont létrehozása (m)',
+  'devices.add': 'Eszköz hozzáadása',
+  'devices.remove': 'A(z) {index}. eszköz eltávolítása',
+  'devices.rawValue': 'A(z) {index}. eszköz natív értéke',
+  'devices.legacy':
+    'A natív érték változatlanul megmarad a piszkozatban. Ez a szerkesztő nem tudja beküldeni. A formátum beküldéséhez nyissa meg újra a natív űrlapot, vagy távolítsa el kifejezetten ezt a sort.',
+  'devices.incompatible':
+    'Az eszközlista nem kompatibilis korábbi formátumú, vagy meghaladja a szerkesztő korlátját. A megőrzéséhez használja a natív szerkesztőt.',
+  'devices.error.list': 'Legfeljebb 32 eszköz-hozzárendelést tartalmazó listát állítson be.',
+  'devices.error.format':
+    'Minden eszköz-hozzárendelésnél adjon meg explicit gazdagépútvonalat, konténerútvonalat és jogosultságokat.',
+  'devices.error.path':
+    'Az eszközútvonalaknak abszolútnak kell lenniük, nem tartalmazhatnak vezérlőkaraktereket, és meg kell felelniük a szerkesztő korlátjának.',
+  'devices.error.permissions':
+    'Válasszon legalább egy jogosultságot az r, w és m közül. Minden jogosultság csak egyszer szerepelhet.',
+  'devices.error.duplicate': 'Minden eszköz-hozzárendeléshez eltérő konténerútvonalat adjon meg.',
+  'devices.error.contract':
+    'A jelenlegi szerződés nem engedélyezi az eszköz-hozzárendeléseket létrehozáskor.',
+  'devices.error.depth': 'A konfiguráció túl sok egymásba ágyazott szintet tartalmaz.',
+
+  'selectorRows.target': 'Célcímkék',
+  'selectorRows.guidance':
+    'Minden címkének egyeznie kell a cél címkéivel. Adjon meg legalább egy kiválasztócímkét.',
+  'selectorRows.key': '{index}. címke: kulcs',
+  'selectorRows.value': '{index}. címke: érték',
+  'selectorRows.removeRow': 'A(z) {index}. címke eltávolítása',
+  'selectorRows.remove': 'Eltávolítás',
+  'selectorRows.add': 'Címke hozzáadása',
+
   'resourceLimits.process.title': 'Folyamatkorlátok',
   'resourceLimits.process.description':
     'Sorok hiányában a Docker korlátai érvényesek. A mértékegység az erőforrástól függ. A -1 korlátlan értéket jelent. A módosítások az új konténerekre érvényesek.',

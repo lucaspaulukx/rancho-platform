@@ -717,4 +717,97 @@ export const faIR = {
   'healthCheckValidation.strategy': 'راهبرد بررسی سلامت در دسترس نیست.',
   'healthCheckValidation.quorum': 'قرارداد حد نصاب در دسترس نیست.',
   'healthCheckValidation.depth': 'عمق تودرتویی پیکربندی بررسی سلامت بیش از حد مجاز است.',
+  'bindingsEditor.portsTitle': 'درگاه‌های منتشرشده',
+  'bindingsEditor.volumesTitle': 'ولوم‌ها',
+  'bindingsEditor.portsHint':
+    'درگاه کانتینر را تعیین کنید. می‌توانید درگاه و IP میزبان را هم مشخص کنید. Rancher تنظیمات انتشار درگاه را اعمال می‌کند.',
+  'bindingsEditor.volumesHint':
+    'یک ولوم نام‌دار، مسیر میزبان یا ولوم ناشناس را روی یک مسیر مطلق در کانتینر سوار کنید.',
+  'bindingsEditor.unsupported':
+    'قالب دریافتی پشتیبانی نمی‌شود. برای حفظ پیکربندی، از فرم بومی استفاده کنید.',
+  'bindingsEditor.native':
+    'ورودی بومی حفظ شده است. ویرایش ردیف‌های دیگر این مقدار را تبدیل نمی‌کند.',
+  'bindingsEditor.readWrite': 'خواندن و نوشتن',
+  'bindingsEditor.readOnly': 'فقط خواندن',
+  'bindingsEditor.hostPortHint': 'اختیاری است و از تخصیص بومی Rancher پیروی می‌کند.',
+  'bindingsEditor.ipHint':
+    'اختیاری است. به درگاه میزبان نیاز دارد و IPv4 یا IPv6 بدون کروشه را می‌پذیرد.',
+  'bindingsEditor.sourceHint':
+    'نام ولوم یا مسیر مطلق میزبان را وارد کنید. برای ولوم ناشناس، این فیلد را خالی بگذارید.',
+  'bindingsEditor.targetHint': 'مسیر مطلق در کانتینر، مانند /data.',
+  'bindingsEditor.containerPort': 'درگاه کانتینر {index}',
+  'bindingsEditor.hostPort': 'درگاه میزبان {index}',
+  'bindingsEditor.protocol': 'پروتکل درگاه {index}',
+  'bindingsEditor.ip': 'IP انتشار {index}',
+  'bindingsEditor.source': 'مبدأ ولوم {index}',
+  'bindingsEditor.target': 'مقصد ولوم {index}',
+  'bindingsEditor.access': 'حالت دسترسی ولوم {index}',
+  'bindingsEditor.portRow': 'درگاه {index}',
+  'bindingsEditor.volumeRow': 'ولوم {index}',
+  'bindingsEditor.removePort': 'حذف درگاه {index}',
+  'bindingsEditor.removeVolume': 'حذف ولوم {index}',
+  'bindingsEditor.addPort': 'افزودن درگاه',
+  'bindingsEditor.addVolume': 'افزودن ولوم',
+  'bindingsEditor.validation.limit': 'در هر فیلد حداکثر 100 ورودی بومی نگه دارید.',
+  'bindingsEditor.validation.ports':
+    'بررسی کنید که درگاه‌ها اعداد صحیح بین 1 تا 65535 باشند و پروتکل و IP انتشار معتبر باشند.',
+  'bindingsEditor.validation.volumes': 'مبدأ، مسیر مطلق مقصد و حالت دسترسی هر ولوم را بررسی کنید.',
+  'bindingsEditor.validation.ipNeedsHostPort':
+    'برای تعیین IP انتشار باید درگاه میزبان را مشخص کنید.',
+  'bindingsEditor.validation.portConflict':
+    'چند اتصال متعارض روی یک درگاه و پروتکل میزبان وجود دارد.',
+  'bindingsEditor.validation.duplicateTarget':
+    'برای هر ولوم از مقصد سوار کردن متفاوتی استفاده کنید.',
+  'bindingsEditor.validation.depth': 'عمق تودرتویی پیکربندی بیش از حد مجاز است.',
+  'deviceUpgradeForm.edit': 'ویرایش دستگاه‌ها در این ارتقا',
+  'deviceUpgradeForm.impact':
+    'تغییر نگاشت دستگاه‌ها باعث جایگزینی کانتینرهای سرویس می‌شود و ممکن است دسترسی به دستگاه‌های میزبان را تغییر دهد. با حذف همهٔ ردیف‌ها، نگاشت‌های صریح حذف می‌شوند و دستگاه‌های پیش‌فرض محیط اجرا و سایر تنظیمات راه‌اندازی حفظ می‌شوند.',
+  'deviceUpgradeForm.reset': 'حذف همهٔ نگاشت‌های صریح',
+  'deviceUpgradeForm.confirmTitle': 'دستگاه‌های سرویس ارتقا داده شوند؟',
+  'deviceUpgradeForm.confirmDescription':
+    'سرویس {service}. تغییر نگاشت دستگاه‌ها دسترسی به دستگاه‌های میزبان را تغییر می‌دهد و کانتینرهای سرویس را جایگزین می‌کند. فهرست خالی نگاشت‌های صریح را حذف می‌کند و مجوزهای پیش‌فرض دستگاه‌ها در محیط اجرا حفظ می‌شوند. سایر گزینه‌های انتخاب‌شده برای این ارتقا ممکن است بر درگاه‌ها، اتصال‌های ذخیره‌سازی، کانتینرهای جانبی و وضعیت سلامت اثر بگذارند. پیش از تأیید، همهٔ تغییرات انتخاب‌شده را بررسی کنید.',
+  'deviceUpgrade.error.unavailable':
+    'ارتقای دستگاه برای سرویس، دامنه یا قرارداد بومی فعلی در دسترس نیست.',
+  'deviceUpgrade.error.conflict':
+    'پیکربندی راه‌اندازی یا کانتینرهای جانبی در کلاینت دیگری تغییر کرده‌اند. پنل ارتقای دستگاه را دوباره باز کنید.',
+  'deviceUpgrade.error.noChange':
+    'پیش از ارتقای نگاشت دستگاه‌ها، ایمیج یا پیکربندی انتخاب‌شده را تغییر دهید.',
+  'deviceUpgrade.error.disabled': 'ارتقای نگاشت دستگاه‌ها غیرفعال است.',
+  'devices.title': 'نگاشت دستگاه‌ها',
+  'devices.description':
+    'دستگاه‌هایی را که از قبل روی میزبان انتخاب‌شده وجود دارند نگاشت کنید. مجوزها برای کانتینرهای جدید اعمال می‌شوند. این کار دستگاهی روی میزبان ایجاد نمی‌کند و حالت دارای دسترسی ویژه را فعال نمی‌کند.',
+  'devices.effectivePermissions':
+    'مجوزهای درخواستی r/w/m جایگزین مجوزهای پیش‌فرض دستگاه‌ها در محیط اجرا نمی‌شوند. دسترسی مؤثر را روی میزبان مقصد بررسی کنید. اگر دستگاه از قبل مجوز داشته باشد، نگاشت فقط‌خواندنی آن ممکن است همچنان اجازهٔ نوشتن بدهد.',
+  'devices.row': 'دستگاه {index}',
+  'devices.host': 'مسیر میزبان {index}',
+  'devices.container': 'مسیر کانتینر {index}',
+  'devices.pathHint': 'مسیر مطلق را به‌صراحت وارد کنید. میزبان باید دستگاه سازگاری داشته باشد.',
+  'devices.read': 'دستگاه {index}: خواندن (r)',
+  'devices.write': 'دستگاه {index}: نوشتن (w)',
+  'devices.mknod': 'دستگاه {index}: ایجاد گرهٔ دستگاه (m)',
+  'devices.add': 'افزودن دستگاه',
+  'devices.remove': 'حذف دستگاه {index}',
+  'devices.rawValue': 'مقدار بومی دستگاه {index}',
+  'devices.legacy':
+    'این مقدار بومی بدون تغییر در پیش‌نویس حفظ می‌شود، اما این ویرایشگر نمی‌تواند آن را ارسال کند. برای ارسال با این قالب، فرم بومی را دوباره باز کنید یا این ردیف را به‌صراحت حذف کنید.',
+  'devices.incompatible':
+    'قالب قدیمی این فهرست دستگاه‌ها ناسازگار است یا فهرست از حد مجاز این ویرایشگر فراتر رفته است. برای حفظ فهرست از ویرایشگر بومی استفاده کنید.',
+  'devices.error.list': 'حداکثر 32 نگاشت دستگاه پیکربندی کنید.',
+  'devices.error.format':
+    'برای هر نگاشت دستگاه، مسیر میزبان، مسیر کانتینر و مجوزها را به‌صراحت مشخص کنید.',
+  'devices.error.path':
+    'مسیرهای دستگاه باید مطلق و بدون نویسهٔ کنترلی باشند و از حد مجاز ویرایشگر فراتر نروند.',
+  'devices.error.permissions':
+    'حداقل یک مجوز دستگاه از میان r، w و m انتخاب کنید. مجوزها نباید تکراری باشند.',
+  'devices.error.duplicate': 'هر نگاشت دستگاه باید مسیر کانتینر متفاوتی داشته باشد.',
+  'devices.error.contract': 'قرارداد فعلی اجازهٔ نگاشت دستگاه‌ها هنگام ایجاد را نمی‌دهد.',
+  'devices.error.depth': 'عمق تودرتویی پیکربندی بیش از حد مجاز است.',
+  'selectorRows.target': 'برچسب‌های هدف',
+  'selectorRows.guidance':
+    'همهٔ برچسب‌ها باید با هدف مطابقت داشته باشند. دست‌کم یک برچسب برای گزینشگر وارد کنید.',
+  'selectorRows.key': 'برچسب {index}: کلید',
+  'selectorRows.value': 'برچسب {index}: مقدار',
+  'selectorRows.removeRow': 'حذف برچسب {index}',
+  'selectorRows.remove': 'حذف',
+  'selectorRows.add': 'افزودن برچسب',
 } as const;

@@ -1,4 +1,103 @@
 export const deDE = {
+  'bindingsEditor.portsTitle': 'Veröffentlichte Ports',
+  'bindingsEditor.volumesTitle': 'Volumes',
+  'bindingsEditor.portsHint':
+    'Legen Sie den Containerport und optional den Host-Port und die IP-Adresse fest. Rancher veröffentlicht den Port.',
+  'bindingsEditor.volumesHint':
+    'Binden Sie ein benanntes Volume, einen Host-Pfad oder ein anonymes Volume unter einem absoluten Zielpfad im Container ein.',
+  'bindingsEditor.unsupported':
+    'Das erhaltene Format wird nicht unterstützt. Verwenden Sie das native Formular, um die Konfiguration zu erhalten.',
+  'bindingsEditor.native':
+    'Der native Eintrag bleibt erhalten. Änderungen an anderen Zeilen konvertieren diesen Wert nicht.',
+  'bindingsEditor.readWrite': 'Lesen und schreiben',
+  'bindingsEditor.readOnly': 'Nur lesen',
+  'bindingsEditor.hostPortHint': 'Optional. Es gilt die native Portzuweisung von Rancher.',
+  'bindingsEditor.ipHint':
+    'Optional. Erfordert einen Host-Port. IPv4 oder IPv6 ohne Klammern sind zulässig.',
+  'bindingsEditor.sourceHint': 'Volumename, absoluter Host-Pfad oder leer für ein anonymes Volume.',
+  'bindingsEditor.targetHint': 'Absoluter Pfad im Container, zum Beispiel /data.',
+  'bindingsEditor.containerPort': 'Containerport {index}',
+  'bindingsEditor.hostPort': 'Host-Port {index}',
+  'bindingsEditor.protocol': 'Portprotokoll {index}',
+  'bindingsEditor.ip': 'Veröffentlichte IP-Adresse {index}',
+  'bindingsEditor.source': 'Volumequelle {index}',
+  'bindingsEditor.target': 'Volumeziel {index}',
+  'bindingsEditor.access': 'Volumezugriff {index}',
+  'bindingsEditor.portRow': 'Port {index}',
+  'bindingsEditor.volumeRow': 'Volume {index}',
+  'bindingsEditor.removePort': 'Port {index} entfernen',
+  'bindingsEditor.removeVolume': 'Volume {index} entfernen',
+  'bindingsEditor.addPort': 'Port hinzufügen',
+  'bindingsEditor.addVolume': 'Volume hinzufügen',
+  'bindingsEditor.validation.limit': 'Verwenden Sie höchstens 100 native Einträge pro Feld.',
+  'bindingsEditor.validation.ports':
+    'Prüfen Sie, ob die Ports ganze Zahlen von 1 bis 65535 sind und ob das Protokoll und die veröffentlichte IP-Adresse gültig sind.',
+  'bindingsEditor.validation.volumes':
+    'Prüfen Sie die Quelle, den absoluten Zielpfad und den Zugriffsmodus jedes Volumes.',
+  'bindingsEditor.validation.ipNeedsHostPort':
+    'Eine veröffentlichte IP-Adresse erfordert einen Host-Port.',
+  'bindingsEditor.validation.portConflict':
+    'Für denselben Host-Port und dasselbe Protokoll gibt es widersprüchliche Zuordnungen.',
+  'bindingsEditor.validation.duplicateTarget':
+    'Verwenden Sie für jedes Volume ein anderes Einbindungsziel.',
+  'bindingsEditor.validation.depth': 'Die Konfiguration ist zu tief verschachtelt.',
+
+  'deviceUpgradeForm.edit': 'Geräte bei diesem Upgrade bearbeiten',
+  'deviceUpgradeForm.impact':
+    'Eine Änderung der Gerätezuordnungen ersetzt die Dienstcontainer und kann den Zugriff auf Host-Geräte ändern. Wenn Sie alle Zeilen entfernen, entfallen die expliziten Zuordnungen. Die Standardgeräte der Laufzeitumgebung und andere Starteinstellungen bleiben erhalten.',
+  'deviceUpgradeForm.reset': 'Alle expliziten Zuordnungen entfernen',
+  'deviceUpgradeForm.confirmTitle': 'Geräte des Dienstes aktualisieren?',
+  'deviceUpgradeForm.confirmDescription':
+    'Dienst {service}. Änderungen an den Gerätezuordnungen ändern den Zugriff auf Host-Geräte und ersetzen die Dienstcontainer. Eine leere Liste entfernt explizite Zuordnungen. Die Standardgeräteberechtigungen der Laufzeitumgebung bleiben erhalten. Andere für dieses Upgrade ausgewählte Optionen können Ports, Einbindungen, Sidecars und den Zustand beeinflussen. Prüfen Sie vor dem Bestätigen alle ausgewählten Änderungen.',
+
+  'deviceUpgrade.error.unavailable':
+    'Das Geräte-Upgrade ist für den aktuellen Dienst, Geltungsbereich oder nativen Vertrag nicht verfügbar.',
+  'deviceUpgrade.error.conflict':
+    'Die Startkonfiguration oder die Sidecars wurden in einem anderen Client geändert. Öffnen Sie das Geräte-Upgrade erneut.',
+  'deviceUpgrade.error.noChange':
+    'Ändern Sie das Image oder die ausgewählte Konfiguration, bevor Sie die Gerätezuordnungen aktualisieren.',
+  'deviceUpgrade.error.disabled': 'Upgrades von Gerätezuordnungen sind deaktiviert.',
+
+  'devices.title': 'Gerätezuordnungen',
+  'devices.description':
+    'Ordnen Sie Geräte zu, die bereits auf dem ausgewählten Host vorhanden sind. Die Berechtigungen gelten für neue Container. Auf dem Host wird kein Gerät erstellt und der privilegierte Modus bleibt unverändert.',
+  'devices.effectivePermissions':
+    'Die angeforderten r/w/m-Berechtigungen ersetzen die Standardgeräteberechtigungen der Laufzeitumgebung nicht. Prüfen Sie den tatsächlichen Zugriff auf dem Zielhost. Eine schreibgeschützte Zuordnung eines bereits freigegebenen Geräts kann weiterhin Schreibzugriff erlauben.',
+  'devices.row': 'Gerät {index}',
+  'devices.host': 'Host-Pfad {index}',
+  'devices.container': 'Containerpfad {index}',
+  'devices.pathHint':
+    'Verwenden Sie einen expliziten absoluten Pfad. Auf dem Host muss ein kompatibles Gerät vorhanden sein.',
+  'devices.read': 'Gerät {index}: lesen (r)',
+  'devices.write': 'Gerät {index}: schreiben (w)',
+  'devices.mknod': 'Gerät {index}: Geräteknoten erstellen (m)',
+  'devices.add': 'Gerät hinzufügen',
+  'devices.remove': 'Gerät {index} entfernen',
+  'devices.rawValue': 'Nativer Wert von Gerät {index}',
+  'devices.legacy':
+    'Dieser native Wert bleibt unverändert im Entwurf erhalten. Dieser Editor kann ihn nicht übermitteln. Öffnen Sie das native Formular erneut, um dieses Format zu übermitteln, oder entfernen Sie diese Zeile ausdrücklich.',
+  'devices.incompatible':
+    'Diese Geräteliste liegt in einem inkompatiblen Altformat vor oder überschreitet das Limit des Editors. Verwenden Sie den nativen Editor, um die Liste zu erhalten.',
+  'devices.error.list': 'Konfigurieren Sie eine Liste mit höchstens 32 Gerätezuordnungen.',
+  'devices.error.format':
+    'Geben Sie für jede Gerätezuordnung einen expliziten Host-Pfad, einen Containerpfad und Berechtigungen an.',
+  'devices.error.path':
+    'Gerätepfade müssen absolut sein, dürfen keine Steuerzeichen enthalten und müssen innerhalb des Limits dieses Editors liegen.',
+  'devices.error.permissions':
+    'Wählen Sie mindestens eine der Geräteberechtigungen r, w oder m. Jede Berechtigung darf nur einmal vorkommen.',
+  'devices.error.duplicate': 'Jede Gerätezuordnung muss einen anderen Containerpfad haben.',
+  'devices.error.contract': 'Der aktuelle Vertrag erlaubt keine Gerätezuordnungen beim Erstellen.',
+  'devices.error.depth': 'Die Konfiguration hat zu viele Verschachtelungsebenen.',
+
+  'selectorRows.target': 'Ziel-Labels',
+  'selectorRows.guidance':
+    'Alle Labels müssen mit dem Ziel übereinstimmen. Geben Sie mindestens ein Auswahl-Label ein.',
+  'selectorRows.key': 'Label {index}: Schlüssel',
+  'selectorRows.value': 'Label {index}: Wert',
+  'selectorRows.removeRow': 'Label {index} entfernen',
+  'selectorRows.remove': 'Entfernen',
+  'selectorRows.add': 'Label hinzufügen',
+
   'resourceLimits.process.title': 'Prozesslimits',
   'resourceLimits.process.description':
     'Ohne Einträge gelten die Docker-Limits. Die Einheit hängt von der Ressource ab. -1 bedeutet unbegrenzt. Änderungen gelten für neue Container.',

@@ -1,4 +1,107 @@
 export const frFR = {
+  'bindingsEditor.portsTitle': 'Ports publiés',
+  'bindingsEditor.volumesTitle': 'Volumes',
+  'bindingsEditor.portsHint':
+    'Définissez le port du conteneur et, si nécessaire, le port et l’adresse IP de l’hôte. Rancher publiera le port.',
+  'bindingsEditor.volumesHint':
+    'Montez un volume nommé, un chemin de l’hôte ou un volume anonyme sur un chemin absolu dans le conteneur.',
+  'bindingsEditor.unsupported':
+    'Le format reçu n’est pas pris en charge. Utilisez le formulaire natif pour conserver la configuration.',
+  'bindingsEditor.native':
+    'L’entrée native est conservée. La modification des autres lignes ne convertit pas cette valeur.',
+  'bindingsEditor.readWrite': 'Lecture et écriture',
+  'bindingsEditor.readOnly': 'Lecture seule',
+  'bindingsEditor.hostPortHint': 'Facultatif. L’attribution native de Rancher s’applique.',
+  'bindingsEditor.ipHint':
+    'Facultatif. Nécessite un port de l’hôte. Les adresses IPv4 ou IPv6 sans crochets sont acceptées.',
+  'bindingsEditor.sourceHint':
+    'Nom du volume, chemin absolu de l’hôte ou champ vide pour un volume anonyme.',
+  'bindingsEditor.targetHint': 'Chemin absolu dans le conteneur, par exemple /data.',
+  'bindingsEditor.containerPort': 'Port du conteneur {index}',
+  'bindingsEditor.hostPort': 'Port de l’hôte {index}',
+  'bindingsEditor.protocol': 'Protocole du port {index}',
+  'bindingsEditor.ip': 'Adresse IP publiée {index}',
+  'bindingsEditor.source': 'Source du volume {index}',
+  'bindingsEditor.target': 'Cible du volume {index}',
+  'bindingsEditor.access': 'Mode d’accès du volume {index}',
+  'bindingsEditor.portRow': 'Port {index}',
+  'bindingsEditor.volumeRow': 'Volume {index}',
+  'bindingsEditor.removePort': 'Retirer le port {index}',
+  'bindingsEditor.removeVolume': 'Retirer le volume {index}',
+  'bindingsEditor.addPort': 'Ajouter un port',
+  'bindingsEditor.addVolume': 'Ajouter un volume',
+  'bindingsEditor.validation.limit': 'Conservez au plus 100 entrées natives par champ.',
+  'bindingsEditor.validation.ports':
+    'Vérifiez que les ports sont des entiers compris entre 1 et 65535, et que le protocole et l’adresse IP publiée sont valides.',
+  'bindingsEditor.validation.volumes':
+    'Vérifiez la source, le chemin absolu de la cible et le mode d’accès de chaque volume.',
+  'bindingsEditor.validation.ipNeedsHostPort':
+    'Une adresse IP publiée nécessite un port de l’hôte.',
+  'bindingsEditor.validation.portConflict':
+    'Plusieurs liaisons sont en conflit sur le même port de l’hôte et le même protocole.',
+  'bindingsEditor.validation.duplicateTarget':
+    'Utilisez une cible de montage différente pour chaque volume.',
+  'bindingsEditor.validation.depth': 'La configuration comporte trop de niveaux d’imbrication.',
+
+  'deviceUpgradeForm.edit': 'Modifier les périphériques lors de cette mise à niveau',
+  'deviceUpgradeForm.impact':
+    'La modification des associations de périphériques remplace les conteneurs du service et peut modifier l’accès aux périphériques de l’hôte. Supprimer toutes les lignes retire les associations explicites. Les périphériques par défaut de l’environnement d’exécution et les autres paramètres de lancement sont conservés.',
+  'deviceUpgradeForm.reset': 'Retirer toutes les associations explicites',
+  'deviceUpgradeForm.confirmTitle': 'Mettre à niveau les périphériques du service ?',
+  'deviceUpgradeForm.confirmDescription':
+    'Service {service}. La modification des associations de périphériques change l’accès aux périphériques de l’hôte et remplace les conteneurs du service. Une liste vide retire les associations explicites. Les autorisations par défaut de l’environnement d’exécution sur les périphériques restent en vigueur. Les autres options sélectionnées pour cette mise à niveau peuvent affecter les ports, les montages, les sidecars et l’état de santé. Vérifiez toutes les modifications sélectionnées avant de confirmer.',
+
+  'deviceUpgrade.error.unavailable':
+    'La mise à niveau des périphériques est indisponible pour le service, le périmètre ou le contrat natif actuel.',
+  'deviceUpgrade.error.conflict':
+    'La configuration de lancement ou les sidecars ont changé dans un autre client. Rouvrez la mise à niveau des périphériques.',
+  'deviceUpgrade.error.noChange':
+    'Modifiez l’image ou la configuration sélectionnée avant de mettre à niveau les associations de périphériques.',
+  'deviceUpgrade.error.disabled':
+    'La mise à niveau des associations de périphériques est désactivée.',
+
+  'devices.title': 'Associations de périphériques',
+  'devices.description':
+    'Associez des périphériques déjà présents sur l’hôte sélectionné. Les autorisations s’appliquent aux nouveaux conteneurs. Cette opération ne crée aucun périphérique sur l’hôte et n’active pas le mode privilégié.',
+  'devices.effectivePermissions':
+    'Les autorisations r/w/m demandées ne remplacent pas les autorisations par défaut de l’environnement d’exécution sur les périphériques. Vérifiez l’accès effectif sur l’hôte cible. Une association en lecture seule peut encore autoriser l’écriture sur un périphérique dont l’accès est déjà permis.',
+  'devices.row': 'Périphérique {index}',
+  'devices.host': 'Chemin sur l’hôte {index}',
+  'devices.container': 'Chemin dans le conteneur {index}',
+  'devices.pathHint':
+    'Utilisez un chemin absolu explicite. L’hôte doit disposer d’un périphérique compatible.',
+  'devices.read': 'Périphérique {index} : lecture (r)',
+  'devices.write': 'Périphérique {index} : écriture (w)',
+  'devices.mknod': 'Périphérique {index} : création de nœuds de périphérique (m)',
+  'devices.add': 'Ajouter un périphérique',
+  'devices.remove': 'Retirer le périphérique {index}',
+  'devices.rawValue': 'Valeur native du périphérique {index}',
+  'devices.legacy':
+    'Cette valeur native est conservée telle quelle dans le brouillon. Cet éditeur ne peut pas l’envoyer. Rouvrez le formulaire natif pour envoyer ce format ou retirez explicitement cette ligne.',
+  'devices.incompatible':
+    'Cette liste de périphériques utilise un ancien format incompatible ou dépasse la limite de cet éditeur. Utilisez l’éditeur natif pour la conserver.',
+  'devices.error.list': 'Configurez une liste de 32 associations de périphériques au maximum.',
+  'devices.error.format':
+    'Indiquez un chemin explicite sur l’hôte, un chemin dans le conteneur et des autorisations pour chaque association de périphérique.',
+  'devices.error.path':
+    'Les chemins de périphériques doivent être absolus, sans caractères de contrôle et respecter la limite de cet éditeur.',
+  'devices.error.permissions':
+    'Sélectionnez au moins une autorisation parmi r, w et m, sans doublon.',
+  'devices.error.duplicate':
+    'Chaque association de périphérique doit utiliser un chemin différent dans le conteneur.',
+  'devices.error.contract':
+    'Le contrat actuel n’autorise pas les associations de périphériques lors de la création.',
+  'devices.error.depth': 'La configuration comporte trop de niveaux d’imbrication.',
+
+  'selectorRows.target': 'Étiquettes de la cible',
+  'selectorRows.guidance':
+    'Toutes les étiquettes doivent correspondre à la cible. Saisissez au moins une étiquette de sélection.',
+  'selectorRows.key': 'Étiquette {index} : clé',
+  'selectorRows.value': 'Étiquette {index} : valeur',
+  'selectorRows.removeRow': 'Retirer l’étiquette {index}',
+  'selectorRows.remove': 'Retirer',
+  'selectorRows.add': 'Ajouter une étiquette',
+
   'resourceLimits.process.title': 'Limites de processus',
   'resourceLimits.process.description':
     'Sans ligne, les limites sont héritées de Docker. Les unités dépendent de la ressource. -1 indique une valeur illimitée. Les modifications s’appliquent aux nouveaux conteneurs.',

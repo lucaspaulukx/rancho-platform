@@ -9,7 +9,54 @@ import { SchemaForm } from '../components/SchemaForm';
 import { ComposeEditor } from '../components/ComposeEditor';
 import { CpuResourceEditor } from '../components/CpuResourceEditor';
 import { HealthCheckEditor } from '../components/HealthCheckEditor';
+import { WorkloadBindingsEditor } from '../components/WorkloadBindingsEditor';
+import { faIR } from '../i18n/catalogs/fa-IR';
 import { frFR } from '../i18n/catalogs/fr-FR';
+
+it('preserves legacy port bindings and their direction when switching to Persian', async () => {
+  const change = vi.fn();
+  const legacy = 'native-port-fixture';
+  function Editor() {
+    const { setLocale } = useI18n();
+    return (
+      <>
+        <button onClick={() => setLocale('fa-IR')}>Persian</button>
+        <WorkloadBindingsEditor
+          kind="ports"
+          value={[legacy, '[::1]:9000:80/udp']}
+          onChange={change}
+        />
+      </>
+    );
+  }
+  render(
+    <I18nProvider
+      policy={{
+        enabled: true,
+        defaultLocale: 'pt-BR',
+        availableLocales: ['pt-BR', 'fa-IR'],
+        selectable: true,
+        detectBrowser: false,
+        preview: true,
+      }}
+    >
+      <Editor />
+    </I18nProvider>,
+  );
+  const port = screen.getByRole('textbox', { name: 'Porta no host 2' });
+  fireEvent.change(port, { target: { value: '9001' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Persian' }));
+  await waitFor(() => expect(document.documentElement.dir).toBe('rtl'));
+  const bindings = screen.getByRole('group', { name: faIR['bindingsEditor.portsTitle'] });
+  const index = new Intl.NumberFormat('fa-IR').format(2);
+  expect(bindings).toContainElement(port);
+  expect(port).toHaveAccessibleName(faIR['bindingsEditor.hostPort'].replace('{index}', index));
+  expect(port).toHaveAttribute('dir', 'ltr');
+  expect(port).toHaveValue('9001');
+  expect(screen.getByText(legacy)).toHaveAttribute('dir', 'ltr');
+  expect(screen.getByRole('combobox')).toHaveValue('udp');
+  expect(change).toHaveBeenCalledExactlyOnceWith([legacy, '[::1]:9001:80/udp']);
+});
 
 it('preserves the HTTP health check draft and native values when switching to French', async () => {
   const change = vi.fn();

@@ -720,4 +720,99 @@ export const jaJP = {
   'healthCheckValidation.strategy': 'ヘルスチェックの復旧ポリシーを利用できません。',
   'healthCheckValidation.quorum': 'クォーラムの仕様を取得できません。',
   'healthCheckValidation.depth': 'ヘルスチェック設定のネストが深すぎます。',
+  'bindingsEditor.portsTitle': '公開ポート',
+  'bindingsEditor.volumesTitle': 'ボリューム',
+  'bindingsEditor.portsHint':
+    'コンテナのポートを設定します。必要に応じてホストのポートと IP も設定できます。Rancher が公開設定を適用します。',
+  'bindingsEditor.volumesHint':
+    '名前付きボリューム、ホスト上のパス、または匿名ボリュームを、コンテナ内の絶対パスにマウントします。',
+  'bindingsEditor.unsupported':
+    'サポートされていない形式です。設定を保持するにはネイティブフォームを使用してください。',
+  'bindingsEditor.native':
+    'ネイティブの項目は保持されています。他の行を編集しても、この値は変換されません。',
+  'bindingsEditor.readWrite': '読み取りと書き込み',
+  'bindingsEditor.readOnly': '読み取り専用',
+  'bindingsEditor.hostPortHint': '任意です。Rancher 標準の割り当てに従います。',
+  'bindingsEditor.ipHint':
+    '任意です。ホストポートの指定が必要です。角括弧なしの IPv4 または IPv6 を指定できます。',
+  'bindingsEditor.sourceHint':
+    'ボリューム名、ホスト上の絶対パスを指定します。匿名ボリュームの場合は空欄にします。',
+  'bindingsEditor.targetHint': '/data など、コンテナ内の絶対パスを指定します。',
+  'bindingsEditor.containerPort': 'コンテナポート {index}',
+  'bindingsEditor.hostPort': 'ホストポート {index}',
+  'bindingsEditor.protocol': 'ポートのプロトコル {index}',
+  'bindingsEditor.ip': '公開 IP {index}',
+  'bindingsEditor.source': 'ボリュームのマウント元 {index}',
+  'bindingsEditor.target': 'ボリュームのマウント先 {index}',
+  'bindingsEditor.access': 'ボリュームのアクセスモード {index}',
+  'bindingsEditor.portRow': 'ポート {index}',
+  'bindingsEditor.volumeRow': 'ボリューム {index}',
+  'bindingsEditor.removePort': 'ポート {index} を削除',
+  'bindingsEditor.removeVolume': 'ボリューム {index} を削除',
+  'bindingsEditor.addPort': 'ポートを追加',
+  'bindingsEditor.addVolume': 'ボリュームを追加',
+  'bindingsEditor.validation.limit':
+    'ネイティブの項目は、各フィールドにつき 100 件までにしてください。',
+  'bindingsEditor.validation.ports':
+    'ポートが 1 から 65535 までの整数であることと、プロトコルおよび公開 IP が有効であることを確認してください。',
+  'bindingsEditor.validation.volumes':
+    '各ボリュームのマウント元、マウント先の絶対パス、アクセスモードを確認してください。',
+  'bindingsEditor.validation.ipNeedsHostPort': '公開 IP を指定するにはホストポートが必要です。',
+  'bindingsEditor.validation.portConflict':
+    '同じホストポートとプロトコルに対するバインドが競合しています。',
+  'bindingsEditor.validation.duplicateTarget':
+    'ボリュームごとに異なるマウント先を指定してください。',
+  'bindingsEditor.validation.depth': '設定のネストが深すぎます。',
+  'deviceUpgradeForm.edit': 'このアップグレードでデバイスを編集',
+  'deviceUpgradeForm.impact':
+    'デバイスマッピングを変更すると、サービスのコンテナが置き換えられ、ホストデバイスへのアクセスが変わることがあります。すべての行を削除すると、明示的なマッピングが削除されます。ランタイムの既定のデバイスやその他の起動設定は維持されます。',
+  'deviceUpgradeForm.reset': '明示的なマッピングをすべて削除',
+  'deviceUpgradeForm.confirmTitle': 'サービスのデバイスをアップグレードしますか？',
+  'deviceUpgradeForm.confirmDescription':
+    'サービス：{service}。デバイスマッピングを変更すると、ホストデバイスへのアクセスが変わり、サービスのコンテナが置き換えられます。リストが空の場合は明示的なマッピングが削除され、ランタイムの既定のデバイス権限は維持されます。このアップグレードで選択した他のオプションは、ポート、マウント、サイドカー、ヘルスに影響する場合があります。確認する前に、選択した変更をすべて見直してください。',
+  'deviceUpgrade.error.unavailable':
+    '現在のサービス、スコープ、またはネイティブ仕様ではデバイスをアップグレードできません。',
+  'deviceUpgrade.error.conflict':
+    '別のクライアントで起動設定またはサイドカーが変更されました。デバイスのアップグレード画面を開き直してください。',
+  'deviceUpgrade.error.noChange':
+    'デバイスマッピングをアップグレードする前に、イメージまたは選択した設定を変更してください。',
+  'deviceUpgrade.error.disabled': 'デバイスマッピングのアップグレードは無効です。',
+  'devices.title': 'デバイスマッピング',
+  'devices.description':
+    '選択したホストにすでに存在するデバイスをマッピングします。権限は新しいコンテナに適用されます。ホスト上にデバイスが作成されたり、特権モードが有効になったりすることはありません。',
+  'devices.effectivePermissions':
+    '指定した r/w/m 権限は、ランタイムの既定のデバイス権限を上書きしません。対象ホストで実際のアクセス権限を確認してください。すでに許可されているデバイスは、読み取り専用でマッピングしても書き込める場合があります。',
+  'devices.row': 'デバイス {index}',
+  'devices.host': 'ホスト上のパス {index}',
+  'devices.container': 'コンテナ内のパス {index}',
+  'devices.pathHint':
+    '絶対パスを明示的に指定してください。ホストに互換性のあるデバイスが必要です。',
+  'devices.read': 'デバイス {index}：読み取り (r)',
+  'devices.write': 'デバイス {index}：書き込み (w)',
+  'devices.mknod': 'デバイス {index}：デバイスノードの作成 (m)',
+  'devices.add': 'デバイスを追加',
+  'devices.remove': 'デバイス {index} を削除',
+  'devices.rawValue': 'デバイス {index} のネイティブ値',
+  'devices.legacy':
+    'このネイティブ値は下書きに保持されていますが、このエディターからは送信できません。この形式で送信するにはネイティブフォームで開き直すか、この行を明示的に削除してください。',
+  'devices.incompatible':
+    'デバイス一覧の旧形式に互換性がないか、このエディターの上限を超えています。一覧を保持するにはネイティブエディターを使用してください。',
+  'devices.error.list': 'デバイスマッピングは最大 32 件まで設定できます。',
+  'devices.error.format':
+    'デバイスマッピングごとに、ホスト上のパス、コンテナ内のパス、権限を明示的に指定してください。',
+  'devices.error.path':
+    'デバイスのパスには、制御文字を含まない絶対パスを使用し、このエディターの上限内に収めてください。',
+  'devices.error.permissions':
+    'デバイス権限 r、w、m のうち、少なくとも 1 つを重複なく選択してください。',
+  'devices.error.duplicate': 'デバイスマッピングごとに異なるコンテナ内のパスを指定してください。',
+  'devices.error.contract': '現在の仕様では作成時にデバイスをマッピングできません。',
+  'devices.error.depth': '設定のネストが深すぎます。',
+  'selectorRows.target': '対象のラベル',
+  'selectorRows.guidance':
+    'すべてのラベルが対象と一致する必要があります。セレクターのラベルを少なくとも 1 つ入力してください。',
+  'selectorRows.key': 'ラベル {index}：キー',
+  'selectorRows.value': 'ラベル {index}：値',
+  'selectorRows.removeRow': 'ラベル {index} を削除',
+  'selectorRows.remove': '削除',
+  'selectorRows.add': 'ラベルを追加',
 } as const;

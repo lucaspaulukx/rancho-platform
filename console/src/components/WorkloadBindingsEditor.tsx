@@ -74,7 +74,9 @@ export function WorkloadBindingsEditor({
               {row.kind === 'native' ? (
                 <>
                   <Alert tone="info">{t('bindingsEditor.native')}</Alert>
-                  <code className="binding-native">{row.original}</code>
+                  <code className="binding-native" dir="ltr">
+                    {row.original}
+                  </code>
                 </>
               ) : row.kind === 'ports' ? (
                 <>
@@ -84,6 +86,7 @@ export function WorkloadBindingsEditor({
                         <input
                           id={id}
                           required
+                          dir="ltr"
                           inputMode="numeric"
                           value={row.container}
                           onChange={(e) => update(row.key, { container: e.target.value })}
@@ -97,6 +100,7 @@ export function WorkloadBindingsEditor({
                       {(id) => (
                         <input
                           id={id}
+                          dir="ltr"
                           inputMode="numeric"
                           value={row.host}
                           onChange={(e) => update(row.key, { host: e.target.value })}
@@ -123,6 +127,7 @@ export function WorkloadBindingsEditor({
                         <input
                           id={id}
                           value={row.ip}
+                          dir="ltr"
                           autoComplete="off"
                           onChange={(e) => update(row.key, { ip: e.target.value })}
                         />
@@ -140,6 +145,7 @@ export function WorkloadBindingsEditor({
                       <input
                         id={id}
                         value={row.source}
+                        dir="ltr"
                         autoComplete="off"
                         onChange={(e) => update(row.key, { source: e.target.value })}
                       />
@@ -155,6 +161,7 @@ export function WorkloadBindingsEditor({
                           id={id}
                           required
                           value={row.target}
+                          dir="ltr"
                           autoComplete="off"
                           onChange={(e) => update(row.key, { target: e.target.value })}
                         />
