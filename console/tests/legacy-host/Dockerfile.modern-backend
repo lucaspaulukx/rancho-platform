@@ -65,6 +65,7 @@ RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars --mount=fr
     cp -aL /usr/share/cattle/war /opt/war; \
     python3 /tmp/modern-backend/configure-modern-servlets.py; \
     python3 /tmp/modern-backend/configure-jetty-descriptors.py; \
+    sed -i 's/\r$//' resources/content/config-content/configscripts/config.sh; \
     /usr/lib/jvm/zulu-8-amd64/bin/jar uf /opt/war/WEB-INF/lib/cattle-resources-0.5.0-SNAPSHOT.jar \
         -C resources/content config-content/configscripts/config.sh; \
     lib=/opt/war/WEB-INF/lib; \
