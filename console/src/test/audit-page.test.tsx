@@ -5,6 +5,7 @@ import { I18nProvider, useI18n } from '../i18n/provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Audit } from '../pages/Audit';
 import { api } from '../api';
+import { frFR } from '../i18n/catalogs/fr-FR';
 const state = vi.hoisted(() => ({ admin: true, enabled: true }));
 vi.mock('../state', () => ({
   useApp: () => ({
@@ -35,7 +36,12 @@ vi.mock('../api', async () => ({
 }));
 function SwitchLanguage() {
   const { setLocale } = useI18n();
-  return <button onClick={() => setLocale('en-US')}>English</button>;
+  return (
+    <>
+      <button onClick={() => setLocale('en-US')}>English</button>
+      <button onClick={() => setLocale('fr-FR')}>Français</button>
+    </>
+  );
 }
 function mount(localized = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -48,7 +54,7 @@ function mount(localized = false) {
                 enabled: true,
                 preview: true,
                 defaultLocale: 'pt-BR',
-                availableLocales: ['pt-BR', 'en-US'],
+                availableLocales: ['pt-BR', 'en-US', 'fr-FR'],
                 selectable: true,
                 detectBrowser: false,
               }
@@ -111,11 +117,14 @@ describe('Tela de auditoria', () => {
         'Use valid event and resource identifiers and an account in the 1a123 format.',
       ),
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Français'));
+    expect(await screen.findByText(frFR['auditPage.invalidFilter'])).toBeInTheDocument();
+    expect(screen.getByLabelText(frFR['auditPage.filterAccount'])).toBe(input);
     expect(input).toHaveValue('bad-account');
     expect(api).toHaveBeenCalledTimes(1);
     await user.clear(input);
     await user.type(input, '1a1');
-    await user.click(screen.getByRole('button', { name: 'Apply filters' }));
+    await user.click(screen.getByRole('button', { name: frFR['auditPage.apply'] }));
     await waitFor(() =>
       expect(api).toHaveBeenLastCalledWith(
         expect.stringContaining('authenticatedAsAccountId=1a1'),
