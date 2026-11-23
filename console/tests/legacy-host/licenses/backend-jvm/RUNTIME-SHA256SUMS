@@ -1,0 +1,4 @@
+0d0680fbdad51e4d537a97e824f18fcc87de10d7ca44e2452d84b9001f9dd611  /opt/cattle/WEB-INF/lib/annotations-2.0.0.jar
+8f01f644890b34e70a3bfdc5e2cbd1bc102c10fd150d5b53fc7ec5f475636277  /opt/cattle/WEB-INF/lib/jersey-apache-connector-2.11.jar
+b22071374cfe51271f85c047baf34ddeb98e81378dbba250d4caa9eb4392b166  /opt/cattle/WEB-INF/lib/aspectjweaver-1.7.4.jar
+b97c89a7933549269f756b0a7de9e3489ee87bb1ebf089d8c020ec54e3701950  /opt/cattle/WEB-INF/lib/hk2-utils-2.3.0-b05.jar

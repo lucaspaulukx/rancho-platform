@@ -170,6 +170,7 @@
     ".github/PULL_REQUEST_TEMPLATE.md": "Bilingual PR template in one file.",
     ".agents/skills/rancho-contribute/SKILL.md": "Bilingual repository skill in one file.",
     ".cursor/rules/rancho.mdc": "Bilingual Cursor adapter to the canonical instructions.",
-    "docs/README.md": "Bilingual documentation language selector."
+    "docs/README.md": "Bilingual documentation language selector.",
+    "console/tests/legacy-host/licenses/backend-jvm/SOURCES.md": "Bilingual JVM notice provenance shipped with the backend."
   }
 }
