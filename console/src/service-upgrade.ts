@@ -1,3 +1,4 @@
+import { supportsUlimits, normalizeUlimits, editableUlimits } from './workload-ulimits';
 import { validateWorkloadSecurity } from './workload-security';
 import { validateWorkloadResources } from './workload-resources';
 import { cpuFields, cpuResourceDefaults, validatedCpuResources } from './cpu-resources';
@@ -83,6 +84,12 @@ export function supportsConfigurationUpgrade(resource: Resource, schemas: Record
     ['ports', 'dataVolumes'].every(
       (name) => schemas.launchConfig?.resourceFields[name]?.create === true,
     )
+  );
+}
+export function supportsUlimitUpgrade(resource: Resource, schemas: Record<string, Schema>) {
+  return (
+    supportsImageUpgrade(resource, schemas) &&
+    supportsUlimits(schemas.launchConfig?.resourceFields.ulimits, schemas)
   );
 }
 export function supportsSecurityUpgrade(resource: Resource, schemas: Record<string, Schema>) {
@@ -221,21 +228,23 @@ export function configurationUpgradePayload(
   schemas: Record<string, Schema>,
 ) {
   if (
-    !(values.editBindings === true
-      ? supportsConfigurationUpgrade(fresh, schemas)
-      : values.editHealthCheck === true
-        ? supportsHealthCheckUpgrade(fresh, schemas)
-        : values.editSidecars === true
-          ? supportsSidecarUpgrade(fresh, schemas)
-          : values.editScheduling === true
-            ? supportsSchedulingUpgrade(fresh, schemas)
-            : values.editCpuResources === true
-              ? supportsCpuResourceUpgrade(fresh, schemas)
-              : values.editResources === true
-                ? supportsResourceUpgrade(fresh, schemas)
-                : values.editSecurity === true
-                  ? supportsSecurityUpgrade(fresh, schemas)
-                  : supportsConfigurationUpgrade(fresh, schemas)) ||
+    !(values.editUlimits === true
+      ? supportsUlimitUpgrade(fresh, schemas)
+      : values.editBindings === true
+        ? supportsConfigurationUpgrade(fresh, schemas)
+        : values.editHealthCheck === true
+          ? supportsHealthCheckUpgrade(fresh, schemas)
+          : values.editSidecars === true
+            ? supportsSidecarUpgrade(fresh, schemas)
+            : values.editScheduling === true
+              ? supportsSchedulingUpgrade(fresh, schemas)
+              : values.editCpuResources === true
+                ? supportsCpuResourceUpgrade(fresh, schemas)
+                : values.editResources === true
+                  ? supportsResourceUpgrade(fresh, schemas)
+                  : values.editSecurity === true
+                    ? supportsSecurityUpgrade(fresh, schemas)
+                    : supportsConfigurationUpgrade(fresh, schemas)) ||
     before.id !== fresh.id ||
     before.type !== fresh.type ||
     before.accountId !== fresh.accountId ||
@@ -252,7 +261,8 @@ export function configurationUpgradePayload(
       values.editScheduling === true ||
       values.editResources === true ||
       values.editCpuResources === true ||
-      values.editSecurity === true) &&
+      values.editSecurity === true ||
+      values.editUlimits === true) &&
       JSON.stringify(canonical([before.launchConfig, before.secondaryLaunchConfigs])) !==
         JSON.stringify(canonical([fresh.launchConfig, fresh.secondaryLaunchConfigs])))
   )
@@ -265,7 +275,8 @@ export function configurationUpgradePayload(
       values.editScheduling !== true &&
       values.editResources !== true &&
       values.editCpuResources !== true &&
-      values.editSecurity !== true);
+      values.editSecurity !== true &&
+      values.editUlimits !== true);
   if (editBindings) {
     validateBindings('ports', values.ports, launch.ports ?? []);
     validateBindings('dataVolumes', values.dataVolumes, launch.dataVolumes ?? []);
@@ -279,6 +290,11 @@ export function configurationUpgradePayload(
       schemas.instanceHealthCheck,
       schemas.recreateOnQuorumStrategyConfig,
     );
+  }
+  if (values.editUlimits === true) {
+    if (!supportsUlimitUpgrade(fresh, schemas))
+      throw new Error('Contrato de limites de processo indisponível.');
+    normalizeUlimits(values.ulimits);
   }
   if (values.editSecurity === true) {
     if (
@@ -358,6 +374,9 @@ export function configurationUpgradePayload(
     (values.editCpuResources !== true ||
       JSON.stringify(canonical(validatedCpuResources(values.cpuResources))) ===
         JSON.stringify(canonical(cpuResourceDefaults(launch)))) &&
+    (values.editUlimits !== true ||
+      JSON.stringify(canonical(normalizeUlimits(values.ulimits))) ===
+        JSON.stringify(canonical(editableUlimits(launch.ulimits)))) &&
     (values.editSecurity !== true ||
       JSON.stringify(canonical(securityValues(values))) ===
         JSON.stringify(canonical(securityValues(launch))))
@@ -372,6 +391,7 @@ export function configurationUpgradePayload(
       launchConfig: {
         ...launch,
         ...(values.editSecurity === true ? securityValues(values) : {}),
+        ...(values.editUlimits === true ? { ulimits: normalizeUlimits(values.ulimits) } : {}),
         ...(editBindings ? { ports: values.ports, dataVolumes: values.dataVolumes } : {}),
         ...(values.editResources === true
           ? { memory: values.memory, memoryReservation: values.memoryReservation }

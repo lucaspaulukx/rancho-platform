@@ -233,7 +233,8 @@ function ResourcePanelContext({
           payload.editScheduling === true ||
           payload.editResources === true ||
           payload.editCpuResources === true ||
-          payload.editSecurity === true)
+          payload.editSecurity === true ||
+          payload.editUlimits === true)
       ) {
         if (payload.editBindings === true && !app.config.modules.workloadConfigUpgrades)
           throw new Error('A edição de portas/volumes está desativada.');
@@ -249,11 +250,14 @@ function ResourcePanelContext({
           throw new Error('Upgrade de CPU e I/O desativado.');
         if (payload.editSecurity === true && !app.config.modules.workloadSecurityUpgrades)
           throw new Error('Upgrade de segurança desativado.');
+        if (payload.editUlimits === true && !app.config.modules.workloadUlimitUpgrades)
+          throw new Error('Upgrade de limites de processo desativado.');
         const names = [
           'service',
           'serviceUpgrade',
           'inServiceUpgradeStrategy',
           'launchConfig',
+          ...(payload.editUlimits === true ? ['ulimit'] : []),
           ...(payload.editHealthCheck === true
             ? ['instanceHealthCheck', 'recreateOnQuorumStrategyConfig']
             : []),
@@ -539,6 +543,7 @@ function ResourcePanelContext({
                     schedulingEnabled={app.config.modules.workloadSchedulingUpgrades}
                     resourcesEnabled={app.config.modules.workloadResourceUpgrades}
                     securityEnabled={app.config.modules.workloadSecurityUpgrades}
+                    ulimitsEnabled={app.config.modules.workloadUlimitUpgrades}
                     resource={resource}
                     schemas={schemas.data || {}}
                     onSubmit={(payload) => mutation.mutate(payload)}

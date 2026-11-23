@@ -155,3 +155,5 @@ Compose de stacks Cattle com fonte persistida habilitado no recorte34; parâmetr
 
 - [Fluxo Git do Rancho Platform](86-repository-workflow.md).
 - [Limites de processo na criação contextual](87-workload-ulimits.md).
+
+- [Upgrade contextual de limites de processo](88-service-ulimit-upgrades.md).

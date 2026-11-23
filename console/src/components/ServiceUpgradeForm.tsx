@@ -1,3 +1,5 @@
+import { UlimitEditor } from './UlimitEditor';
+import { editableUlimits } from '../workload-ulimits';
 import { CapabilityEditor } from './CapabilityEditor';
 import { MemoryEditor } from './MemoryEditor';
 import { CpuResourceEditor } from './CpuResourceEditor';
@@ -17,6 +19,7 @@ import {
   supportsResourceUpgrade,
   supportsCpuResourceUpgrade,
   supportsSecurityUpgrade,
+  supportsUlimitUpgrade,
   securityValues,
 } from '../service-upgrade';
 import { WorkloadBindingsEditor } from './WorkloadBindingsEditor';
@@ -34,6 +37,7 @@ export function ServiceUpgradeForm({
   schedulingEnabled = false,
   resourcesEnabled = false,
   securityEnabled = false,
+  ulimitsEnabled = false,
   onSubmit,
   onDirtyChange,
   busy,
@@ -46,6 +50,7 @@ export function ServiceUpgradeForm({
   schedulingEnabled?: boolean;
   resourcesEnabled?: boolean;
   securityEnabled?: boolean;
+  ulimitsEnabled?: boolean;
   schemas: Record<string, Schema>;
   onSubmit: (values: Record<string, unknown>) => void;
   onDirtyChange: (dirty: boolean) => void;
@@ -84,6 +89,9 @@ export function ServiceUpgradeForm({
   const securityAvailable = securityEnabled && supportsSecurityUpgrade(resource, schemas);
   const [editSecurity, setEditSecurity] = useState(false);
   const [security, setSecurity] = useState(securityValues(launch));
+  const ulimitsAvailable = ulimitsEnabled && supportsUlimitUpgrade(resource, schemas);
+  const [editUlimits, setEditUlimits] = useState(false);
+  const [ulimits, setUlimits] = useState(() => editableUlimits(launch?.ulimits));
   const editingConfiguration =
     (available && editBindings) ||
     (healthAvailable && editHealthCheck) ||
@@ -91,7 +99,8 @@ export function ServiceUpgradeForm({
     (schedulingAvailable && editScheduling) ||
     (resourceAvailable && editResources) ||
     (cpuAvailable && editCpuResources) ||
-    (securityAvailable && editSecurity);
+    (securityAvailable && editSecurity) ||
+    (ulimitsAvailable && editUlimits);
   const [ports, setPorts] = useState(launch?.ports ?? []),
     [volumes, setVolumes] = useState(launch?.dataVolumes ?? []);
   const [review, setReview] = useState<Record<string, unknown> | null>(null);
@@ -104,6 +113,7 @@ export function ServiceUpgradeForm({
       intervalMillis,
       startFirst,
       ...(securityAvailable && editSecurity ? { editSecurity: true, ...security } : {}),
+      ...(ulimitsAvailable && editUlimits ? { editUlimits: true, ulimits } : {}),
       ...(resourceAvailable && editResources
         ? { editResources: true, memory, memoryReservation: reservation }
         : {}),
@@ -206,6 +216,31 @@ export function ServiceUpgradeForm({
                 onDirtyChange(true);
               }}
             />
+          )}
+          {ulimitsAvailable && (
+            <CheckboxField
+              label="Editar limites de processo nesta atualização"
+              checked={editUlimits}
+              onChange={(event) => {
+                setEditUlimits(event.target.checked);
+                onDirtyChange(true);
+              }}
+            />
+          )}
+          {ulimitsAvailable && editUlimits && (
+            <>
+              <Alert tone="info">
+                Alterar limites substitui os containers do serviço. Uma lista vazia retira os
+                limites explícitos e passa a herdar o Docker.
+              </Alert>
+              <UlimitEditor
+                value={ulimits}
+                onChange={(value) => {
+                  setUlimits(value);
+                  onDirtyChange(true);
+                }}
+              />
+            </>
           )}
           {securityAvailable && (
             <CheckboxField

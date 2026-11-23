@@ -24,6 +24,7 @@ describe('Migração da configuração pública', () => {
     expect(upgraded.modules).toEqual({
       serviceMetrics: false,
       workloadUlimitEditors: false,
+      workloadUlimitUpgrades: false,
       ...config.modules,
     });
     expect(upgraded.modules.admin).toBe(false);

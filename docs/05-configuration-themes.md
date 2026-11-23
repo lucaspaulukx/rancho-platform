@@ -196,3 +196,5 @@ Contrato vigente schemaVersion1: [migração, dry-run, checksums e rollback](53-
 ## Editor opcional de limites de processo
 
 `modules.workloadUlimitEditors` é aditiva, ausente=false. Ativa linhas estruturadas de ulimits na criação de containers/serviços e sidecars, conforme o schema criável atual. Off conserva o campo nativo; a flag não concede acesso ao environment e não torna campos imutáveis editáveis. Exige o fluxo de workloads para disponibilizar criação. Dados incompatíveis não são apagados automaticamente. O pacote público não habilita a flag por padrão. Plano, testes e limites em [87](87-workload-ulimits.md).
+
+`modules.workloadUlimitUpgrades` é uma flag aditiva independente, ausente=false. Habilita a seleção explícita de limites primários no upgrade de serviços Docker compatíveis com o schema atual. Não expõe edição PUT para containers existentes nem altera sidecars implicitamente. Revisão, snapshot e revalidação de flag/schema precedem o POST. Reset vazio, rollback/finish e limites do aceite constam em [88](88-service-ulimit-upgrades.md); flag pública permanece off.
