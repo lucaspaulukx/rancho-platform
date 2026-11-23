@@ -20,6 +20,8 @@ STATIC_FILES = {
     '/console/brand/rancher-favicon.ico',
     '/console/brand/rancher-symbol.svg',
     '/console/brand/rancher-wordmark.svg',
+    '/console/brand/rancho-platform.png',
+    '/console/brand/rancho-bull.png',
     '/console/favicon.svg',
 }
 FIXTURES = {

@@ -6,14 +6,14 @@
 
 [![Console validation](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)
 [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-2563eb)](LICENSE)
-[![Community beta](https://img.shields.io/badge/status-community%20beta-9a5b00)](https://github.com/lucaspaulukx/rancho-platform/releases)
+[![Release](https://img.shields.io/github/v/release/lucaspaulukx/rancho-platform?include_prereleases)](https://github.com/lucaspaulukx/rancho-platform/releases)
 
 Operate Rancher 1.6 Docker/Cattle stacks, services and containers in one workspace, with logs, terminal and metrics in context.
 
 [Releases](https://github.com/lucaspaulukx/rancho-platform/releases) · [Migration](docs/en/migration.md) · [Roadmap](docs/en/roadmap.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 > [!IMPORTANT]
-> Rancho is an independent community project built on the legacy Rancher 1.6 engine. The community beta targets an isolated Linux amd64 lab with a single Rancho server, MariaDB 10.11 and Docker 29 Cattle hosts.
+> Rancho is an independent community project built on the Rancher 1.6 engine. The documented Linux amd64 profile uses a single Rancho server, MariaDB 10.11 and Docker 29 Cattle hosts. Rancher and its original contributors retain full credit for the base platform.
 
 ![Rancho Console showing stacks and services in one workspace](docs/images/migration-after.png)
 
@@ -69,9 +69,9 @@ Official sources are pinned in `upstream.json`; changes live in `patches/`. Igno
 
 </details>
 
-## Install the beta
+## Install a release
 
-Build and run the single-server profile using the [beta installation guide](docs/en/release.md#experimental-single-node-installation). Follow the [migration guide](docs/en/migration.md) before restoring a Rancher 1.6 database.
+Use the [prebuilt GHCR image guide](docs/en/release.md#install-prebuilt-release-images) for a published runtime version. The Compose stack downloads the server, Console and database images without a local build. Source-only prereleases do not include a runtime image publication. Build instructions remain available in the [single-server guide](docs/en/release.md#experimental-single-node-installation). Follow the [migration guide](docs/en/migration.md) before restoring a Rancher 1.6 database.
 
 ## Run the legacy comparison lab
 

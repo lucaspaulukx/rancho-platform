@@ -95,6 +95,21 @@ class HistoryChecks(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'historical path'):
             publication.main()
 
+    def test_worktree_checks_known_secrets_from_the_primary_checkout(self):
+        secret = 'synthetic-only-worktree-known-credential'
+        self.commit('README.md', secret)
+        self.commit('README.md', 'Public fixture')
+        (self.root / '.env').write_text('FIXTURE_PASSWORD=' + secret)
+        with tempfile.TemporaryDirectory(prefix='rancho-known-secret-worktree-') as folder:
+            self.git('worktree', 'add', '--detach', folder, 'HEAD')
+            try:
+                publication.ROOT = Path(folder)
+                with self.assertRaisesRegex(RuntimeError, 'historical content'):
+                    publication.main()
+            finally:
+                publication.ROOT = self.root
+                self.git('worktree', 'remove', folder)
+
 
 if __name__ == '__main__':
     unittest.main()

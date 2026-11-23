@@ -16,7 +16,9 @@ cd "$root"
 
 fixture=console/tests/legacy-host
 image="rancho-release-${component}:${revision}"
-labels=(--platform linux/amd64 --label "org.opencontainers.image.revision=$revision")
+labels=(--platform linux/amd64 --label "org.opencontainers.image.revision=$revision"
+        --label "org.opencontainers.image.source=https://github.com/lucaspaulukx/rancho-platform"
+        --label "org.opencontainers.image.title=Rancho Platform $component")
 
 case "$component" in
     backend)

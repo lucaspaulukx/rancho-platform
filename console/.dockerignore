@@ -2,6 +2,14 @@ node_modules
 dist
 coverage
 .git
+.env
+.env.*
+.npmrc
+backups
+migration-runs
+evidence
+**/*.sql*
+**/*.dump*
 *.log
 tests
 *-results.json

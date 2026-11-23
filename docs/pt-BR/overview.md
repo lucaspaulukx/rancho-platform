@@ -6,14 +6,14 @@
 
 [![Validação do console](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)
 [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-2563eb)](../../LICENSE)
-[![Beta comunitária](https://img.shields.io/badge/status-beta%20comunit%C3%A1ria-9a5b00)](https://github.com/lucaspaulukx/rancho-platform/releases)
+[![Release](https://img.shields.io/github/v/release/lucaspaulukx/rancho-platform?include_prereleases)](https://github.com/lucaspaulukx/rancho-platform/releases)
 
 Opere stacks, serviços e containers do Rancher 1.6 Docker/Cattle em uma só tela, com logs, terminal e métricas no contexto do workload.
 
 [Releases](https://github.com/lucaspaulukx/rancho-platform/releases) · [Migração](migration.md) · [Roadmap](roadmap.md) · [Contribuição](contributing.md) · [Segurança](security.md)
 
 > [!IMPORTANT]
-> O Rancho é um projeto comunitário independente que usa o engine legado do Rancher 1.6. A beta comunitária destina-se a laboratório isolado Linux amd64 com um servidor Rancho, MariaDB 10.11 e hosts Cattle Docker 29.
+> O Rancho é um projeto comunitário independente baseado no engine do Rancher 1.6. O perfil Linux amd64 documentado usa um servidor Rancho, MariaDB 10.11 e hosts Cattle Docker 29. O Rancher e seus contribuidores originais mantêm todo o crédito pela plataforma base.
 
 ![Console Rancho mostrando stacks e serviços em uma tela](../images/migration-after.png)
 
@@ -69,9 +69,9 @@ Fontes oficiais são pinados em `upstream.json`; mudanças ficam em `patches/`. 
 
 </details>
 
-## Instale a beta
+## Instale uma release
 
-Compile e execute o perfil de nó único com o [guia de instalação da beta](release.md#instalação-experimental-de-nó-único). Siga o [guia de migração](migration.md) antes de restaurar um banco do Rancher 1.6.
+Use o [guia de imagens prontas do GHCR](release.md#instalar-imagens-prontas-de-uma-release) para uma versão de runtime publicada. O Compose baixa as imagens de servidor, Console e banco sem build local. Pré-releases somente de código fonte não incluem publicação de imagens de runtime. As instruções de build continuam disponíveis no [guia de nó único](release.md#instalação-experimental-de-nó-único). Siga o [guia de migração](migration.md) antes de restaurar um banco do Rancher 1.6.
 
 ## Execute o laboratório de comparação com a versão legada
 
