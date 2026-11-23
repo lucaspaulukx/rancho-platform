@@ -7,7 +7,7 @@
 
 ## Current boundary
 
-The community alpha provides source code for isolated lab evaluation. Source availability, a green CI run or an accepted feature slice does not authorize changing visibility, publishing a package, merging a PR or production cutover. Release acceptance is tracked by capability and risk in the [roadmap](roadmap.md), not by accumulated test counts.
+The community beta installation below targets isolated evaluation on Linux amd64 with a single Rancho server, an external MariaDB 10.11 database and Docker 29 Cattle hosts. The source distribution includes the build recipes and notices. Production acceptance, HA and in-place replacement of existing IPsec stacks remain outside this beta scope. The [roadmap](roadmap.md) tracks remaining validation.
 
 Distributable contents are application/extension source, pinned patches, tests, configuration templates, licenses and maintained documentation. Keep consultation clones, installed dependencies, lab credentials/realms, dumps, session evidence, fixture state, backups and machine-specific notes outside the tracked package. Git preserves prior versions; they are not onboarding instructions.
 
@@ -71,7 +71,6 @@ docker build -f console/tests/legacy-host/Dockerfile.java17 --build-arg BACKEND_
 docker build -f console/tests/legacy-host/Dockerfile.modern-backend -t rancho-backend-modern-runtime:local console/tests/legacy-host
 docker build -f console/tests/legacy-host/Dockerfile.modern-packages --build-arg BACKEND_IMAGE=rancho-backend-modern-runtime:local -t rancho-backend-modern:local console/tests/legacy-host
 docker build -t rancho-console:local console
-docker compose -f compose.modern.yaml --env-file <local-env-file> up -d --pull never
 ```
 
 Set a unique `RANCHO_DB_PASSWORD` in the local env file and protect that file. The console is available on loopback at `http://localhost:18090/console/`. On a fresh database, initialize local administrator authentication before exposing the console through a network proxy. OIDC starts disabled. To enable it, set the issuer, client ID, client secret and callback, and register the callback at the console origin in the identity provider. Use HTTPS for network access. Run the deployment with one Rancher server replica.
@@ -92,7 +91,6 @@ fixture=console/tests/legacy-host
 for component in ipsec-holder ipsec-router ipsec-cni network-manager metadata dns healthcheck scheduler; do
   docker build -f "$fixture/Dockerfile.modern-$component" -t "rancho-$component:local" "$fixture" || exit
 done
-git -C "$catalog_checkout" apply "$absolute_patch_path"
 ```
 
 The modern Compose profile accepts `RANCHO_DATABASE_IMAGE`. To use the MariaDB 10.11 build with the recompiled `gosu` helper, build it locally and set `RANCHO_DATABASE_IMAGE=rancho-mariadb:local` in the same environment file used by Compose. The database continues to run its upstream entrypoint on an internal network. Use `--database-image rancho-mariadb:local` with the synthetic migration rehearsal to validate the same image.
@@ -102,6 +100,45 @@ docker build -f console/tests/legacy-host/Dockerfile.modern-mariadb -t rancho-ma
 ```
 
 The pinned upstream MariaDB 10.11.19 container reported one critical and 25 high matches, all in the Go runtime linked into `gosu`. The optional database build recompiles the same gosu 1.20 sources with Go 1.27.3. With the November 13, 2026 advisory database, the derived MariaDB image reported zero critical and high findings. Fresh installation through the Console gateway and backend restart passed with this database.
+
+Build the modern bootstrap image and use the canonical agent tag only on the isolated target Docker hosts. Both registration and the persistent agent use that tag. Load all eight Cattle images on the same hosts before registration.
+
+```sh
+fixture=console/tests/legacy-host
+docker build -f "$fixture/Dockerfile.modern-client" -t rancho-agent-modern-client:local "$fixture"
+docker build -f "$fixture/Dockerfile.modern-bootstrap" -t rancho-agent-modern-bootstrap:local "$fixture"
+docker tag rancho-agent-modern-bootstrap:local rancher/agent:v1.2.11
+```
+
+Prepare the catalog at the pinned upstream commit, apply the standalone patch, commit the exact four changed templates and create a bare clone with a master branch. Set `RANCHO_CATALOG_DIRECTORY` to the absolute path of that clone in the Compose environment file. The catalog override starts the local library and Compose executor. The gateway is bound to loopback by default. For a remote disposable host use a reachable HTTPS endpoint with a certificate trusted by the disposable host.
+
+```sh
+catalog_checkout="$PWD/../rancho-catalog-worktree"
+absolute_patch_path="$PWD/console/tests/legacy-host/modern-catalog-images.patch"
+git clone https://github.com/rancher/rancher-catalog.git "$catalog_checkout"
+git -C "$catalog_checkout" switch --detach 52a5850bc49247eadd84045da890deaeaeddb9a4
+git -C "$catalog_checkout" apply "$absolute_patch_path"
+git -C "$catalog_checkout" add -- infra-templates/ipsec/18/docker-compose.yml.tpl \
+  infra-templates/network-services/29/docker-compose.yml.tpl \
+  infra-templates/healthcheck/7/docker-compose.yml infra-templates/scheduler/13/docker-compose.yml
+git -C "$catalog_checkout" commit -m "Use the Rancho modern Cattle images"
+git -C "$catalog_checkout" branch -f master HEAD
+git clone --bare --branch master "$catalog_checkout" "$PWD/../rancho-catalog.git"
+```
+
+Create a local `.env.rancho-beta` with these values. Substitute your actual catalog path and generate a unique database password.
+
+```dotenv
+RANCHO_DB_PASSWORD=<unique-password>
+RANCHO_DATABASE_IMAGE=rancho-mariadb:local
+RANCHO_CATALOG_DIRECTORY=<absolute-path-to-rancho-catalog.git>
+```
+
+```sh
+docker compose --env-file ./.env.rancho-beta -f compose.modern.yaml -f compose.modern-cattle.yaml up -d --pull never
+```
+
+The release candidate passed install and restart with the catalog overlay, frontend upgrade and rollback with old tabs, and a MySQL 5.5 dump/restore rehearsal with 20 synthetic environments. The gateway checks on the same console, backend and database builds covered OIDC replay, RBAC isolation, CSRF, session revocation and cache handling. The security comparison uses the November 13 Trivy database. The SBOM lists unresolved license metadata. The source package preserves upstream references and notices.
 
 ## Final acceptance
 

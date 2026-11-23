@@ -4,14 +4,14 @@
 
 [![Console validation](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)
 [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-2563eb)](LICENSE)
-[![Community alpha](https://img.shields.io/badge/status-community%20alpha-9a5b00)](https://github.com/lucaspaulukx/rancho-platform/releases)
+[![Community beta](https://img.shields.io/badge/status-community%20beta-9a5b00)](https://github.com/lucaspaulukx/rancho-platform/releases)
 
 Operate Rancher 1.6 Docker/Cattle stacks, services and containers in one workspace, with logs, terminal and metrics in context.
 
 [Releases](https://github.com/lucaspaulukx/rancho-platform/releases) · [Migration](docs/en/migration.md) · [Roadmap](docs/en/roadmap.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 > [!IMPORTANT]
-> Rancho is an independent community project built on the legacy Rancher 1.6 engine. Use the alpha in an isolated lab with synthetic data or an isolated copy. Production acceptance is still open.
+> Rancho is an independent community project built on the legacy Rancher 1.6 engine. The community beta targets an isolated Linux amd64 lab with a single Rancho server, MariaDB 10.11 and Docker 29 Cattle hosts.
 
 ## Image security progress
 
@@ -23,9 +23,9 @@ Trivy 0.74.0 scans of the initial lab images and subsequent candidates on Novemb
 | Experimental single-node backend on Ubuntu 24.04 | — | 0 / 0 |
 | Console gateway | 3 / 73 | 0 / 0 |
 | Optional Keycloak | 8 / 101 | 0 / 6 |
-| Experimental Docker host bootstrap agent | — | 0 / 27 |
+| Experimental Docker host bootstrap agent | 0 / 27 | 0 / 0 |
 
-The initial column shows earlier scans of the corresponding components. Counts depend on the advisory database. The legacy backend base has reached end of support. The separately scanned legacy Cattle system images each reported 27 to 29 high findings. The host agent and Cattle system image findings remain beta release gates. See the [security roadmap](docs/en/roadmap.md#beta-image-security-gate).
+The initial column shows earlier scans of the corresponding components. Counts depend on the advisory database. The legacy backend base has reached end of support. The separately scanned legacy Cattle system images each reported 27 to 29 high findings. The rebuilt bootstrap and all eight rebuilt Cattle system images reported 0 critical and 0 high in the same advisory database. The derived MariaDB image reduced findings from 1 critical and 25 high to 0 and 0. The optional Keycloak lab image is outside the distributed beta runtime. See the [security roadmap](docs/en/roadmap.md#beta-image-security-gate).
 
 ## Features
 
@@ -44,7 +44,7 @@ Start with [architecture](docs/en/architecture.md), [contributing](CONTRIBUTING.
 ```sh
 git clone https://github.com/lucaspaulukx/rancho-platform.git
 cd rancho-platform
-git switch --detach v0.1.0-alpha.1
+git switch --detach v0.1.0-beta.1
 ```
 
 <details>
@@ -63,7 +63,11 @@ Official sources are pinned in `upstream.json`; changes live in `patches/`. Igno
 
 </details>
 
-## Run the local lab
+## Install the beta
+
+Build and run the single-server profile using the [beta installation guide](docs/en/release.md#experimental-single-node-installation). Follow the [migration guide](docs/en/migration.md) before restoring a Rancher 1.6 database.
+
+## Run the legacy comparison lab
 
 ```powershell
 ./Start-Lab.ps1 -PlanOnly
