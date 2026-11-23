@@ -66,6 +66,13 @@ Forneça senha de backup separada, mínimo20 caracteres, pelo prompt sem eco ou 
 
 Backup de banco não basta. Capture também estado criptográfico Rancher consistente, dados/configuração/chaves completos do IdP dedicado, compose/manifests, certificados e imagens imutáveis correspondentes. Mantenha cópias protegidas fora do host e teste recuperação. Não chame arquivo de datadir MySQL ativo de backup consistente nem substitua volumes por `docker commit`. Veja [recuperação](recovery.md).
 
+Para repetir a validação automatizada usando apenas recursos descartáveis, prepare as imagens locais do guia de release e compile a imagem de restauração. O teste também verifica que outro backup selado é rejeitado no mesmo banco já preenchido.
+
+```sh
+docker build -f migration/Dockerfile.restore -t rancho-migration-restore:local .
+python -m migration.test_first_start_lab
+```
+
 ## Ensaio offline
 
 ```sh
