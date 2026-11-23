@@ -1,4 +1,13 @@
 export const faIR = {
+  'operations.search': 'جست‌وجو در عملیات',
+  'operations.searchPlaceholder': 'پشته، سرویس، کانتینر، ایمیج یا شناسه…',
+  'operations.state': 'وضعیت',
+  'operations.allStates': 'همهٔ وضعیت‌ها',
+  'operations.includeSystem': 'نمایش زیرساخت',
+  'operations.empty': 'هیچ منبعی با این فیلترها مطابقت ندارد',
+  'operations.emptyHint':
+    'جست‌وجو، وضعیت یا گزینهٔ زیرساخت را بررسی کنید. فقط منابع محیط انتخاب‌شده نمایش داده می‌شوند.',
+
   'groups.role.readonly': 'فقط خواندنی',
   'groups.role.restricted': 'محدود',
   'groups.role.member': 'عضو',

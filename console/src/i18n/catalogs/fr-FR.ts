@@ -1,4 +1,13 @@
 export const frFR = {
+  'operations.search': 'Rechercher dans les opérations',
+  'operations.searchPlaceholder': 'Stack, service, conteneur, image ou ID…',
+  'operations.state': 'État',
+  'operations.allStates': 'Tous les états',
+  'operations.includeSystem': 'Inclure l’infrastructure',
+  'operations.empty': 'Aucune ressource ne correspond à ces filtres',
+  'operations.emptyHint':
+    'Vérifiez la recherche, l’état ou l’option d’infrastructure. Seules les ressources de l’environnement sélectionné sont affichées.',
+
   'groups.role.readonly': 'Lecture seule',
   'groups.role.restricted': 'Accès restreint',
   'groups.role.member': 'Membre',
