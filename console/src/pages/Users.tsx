@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useI18n } from '../i18n/provider';
+import { roleLabel } from '../i18n/role-label';
 import { Link, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight, ShieldCheck, UsersRound } from 'lucide-react';
-import { rawId, roles, type Group, type Account } from '../api';
+import { rawId, type Group, type Account } from '../api';
 import { useApp } from '../state';
 import { useLocalAccessData } from '../hooks/useLocalAccessData';
 import {
@@ -214,7 +215,7 @@ export function Users() {
                         </strong>
                         <small>{group.name}</small>
                       </div>
-                      <Badge>{roles.find((r) => r.value === role)?.label || role}</Badge>
+                      <Badge>{roleLabel(t, role)}</Badge>
                     </div>
                   )),
                 )}

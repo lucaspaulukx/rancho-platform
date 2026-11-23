@@ -34,7 +34,8 @@ export interface Token {
   jwt?: string;
   security?: boolean;
 }
-export type Role = 'owner' | 'member' | 'readonly' | 'restricted';
+export const roles = ['readonly', 'restricted', 'member', 'owner'] as const;
+export type Role = (typeof roles)[number];
 export interface Group {
   id: string;
   name: string;
@@ -319,13 +320,3 @@ export async function allPages<T>(
   return items;
 }
 export const rawId = (id: string) => id.replace(/^1a/, '');
-export const roles: { value: Role; label: string; description: string }[] = [
-  { value: 'readonly', label: 'Read Only', description: 'Consulta os recursos do environment.' },
-  {
-    value: 'restricted',
-    label: 'Restricted',
-    description: 'Usa as permissões restritas do Rancher.',
-  },
-  { value: 'member', label: 'Member', description: 'Gerencia serviços e recursos do environment.' },
-  { value: 'owner', label: 'Owner', description: 'Administra o environment e seus membros.' },
-];

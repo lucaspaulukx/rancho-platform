@@ -463,6 +463,20 @@ async function main() {
     failedInventory.url() === hostsUrl &&
     !(await inventoryAlert.textContent()).includes('synthetic-private-pagination') &&
     result.blockedRequests === 0);
+  result.stage = 'group-role-translation';
+  const groupPage = await page(authenticated);
+  const groupsUrl = origin + '/console/groups?env=1a12';
+  await groupPage.goto(groupsUrl);
+  await groupPage.getByRole('button', { name: 'Criar grupo', exact: true }).click();
+  const groupEditor = groupPage.getByRole('dialog');
+  await groupEditor.getByRole('tab', { name: 'Environments (0)', exact: true }).click();
+  const permission = groupEditor.getByRole('combobox', { name: 'Permissão em UI-OPS-LAB', exact: true });
+  await permission.selectOption({ label: 'Somente leitura' });
+  await localePeer.locator('.language-selector select').selectOption('en-US');
+  const translatedPermission = groupEditor.getByRole('combobox', { name: 'Permission in UI-OPS-LAB', exact: true });
+  await translatedPermission.getByRole('option', { name: 'Read Only', exact: true }).waitFor({ state: 'attached' });
+  check('group role translation preserves the draft grant identifier and route',
+    await translatedPermission.inputValue() === 'readonly' && groupPage.url() === groupsUrl);
   if (axe) {
     result.stage = 'accessibility-results';
     check('axe checks for six routes in both themes on mobile and desktop',
