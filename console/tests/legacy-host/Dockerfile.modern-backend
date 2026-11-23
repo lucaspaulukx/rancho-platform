@@ -1,0 +1,16 @@
+ARG BACKEND_JAVA17_IMAGE=rancho-backend-java17:local
+FROM ${BACKEND_JAVA17_IMAGE} AS cattle
+RUN --network=none cp -aL /usr/share/cattle/war /opt/war
+
+FROM debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git tini && rm -rf /var/lib/apt/lists/*
+COPY --from=cattle /opt/rancho-java17 /opt/rancho-java17
+COPY --from=cattle /opt/war /opt/cattle
+COPY --from=cattle /usr/share/cattle/artifacts /usr/share/cattle/artifacts
+COPY --from=cattle /usr/share/cattle/env_vars /usr/share/cattle/env_vars
+COPY --from=cattle /usr/bin/rancher-* /usr/bin/docker-machine* /usr/bin/compose /usr/bin/websocket-proxy /usr/bin/
+COPY modern-backend-entry.sh /usr/local/bin/rancho-entry
+ENV CATTLE_HOME=/var/lib/cattle CATTLE_DB_CATTLE_DATABASE=mysql DEFAULT_CATTLE_API_UI_INDEX=local
+ENV RANCHER_HOST_STREAM_PROXY_PROTOCOL=1 RANCHER_METRICS_PAYLOAD_PROXY_PROTOCOL=1 RANCHER_API_KEY_STREAM_PROXY_PROTOCOL=1
+WORKDIR /var/lib/cattle
+ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/usr/local/bin/rancho-entry"]
