@@ -16,7 +16,7 @@ Estados descrevem capacidades mantidas e aceites restantes, não diário de exec
 | ID | Capacidade | Estado e gate restante |
 |---|---|---|
 | UX01 | Shell, marca, navegação, seletor, login/sem-acesso | Implementado; as ações do cabeçalho compartilhado quebram linha em telas estreitas. O teste de navegador cobre treze rotas a 320 e 390 px. Falta regressão final de rotas e temas |
-| UX02 | Tabelas, filtros, seleção, menus, drawers, revisão/rascunhos | Recortes implementados; falta matriz completa de teclado/foco/erro parcial/contexto |
+| UX02 | Tabelas, filtros, seleção, menus, drawers, revisão/rascunhos | Recortes implementados. O teste mobile do menu de Operações e do painel de detalhes verifica ações desabilitadas e retorno de foco pelo teclado. Falta a matriz restante de teclado, erro parcial e contexto |
 | UX03 | Tokens de tema e overrides | Implementado; conferir contraste efetivo nas rotas finais |
 | UX04 | Recuperação de chunks/abas antigas e retenção de assets | Abas antigas carregaram os chunks originais durante upgrade e rollback isolados do frontend. Um novo documento carregou a imagem restaurada. Falta o aceite final no artefato e na topologia de release |
 | UX05 | Acessibilidade manual/leitor de tela | A verificação automatizada com axe cobre seis rotas administrativas em duas larguras e nos dois temas. Falta o aceite manual de teclado e leitor de tela nos fluxos críticos |
@@ -108,7 +108,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 |---|---|---|
 | OBS01 | Logs/terminal/métricas contextuais | Recortes reais implementados; falta regressão final foco/resize/buffer/environment |
 | OBS02 | Revogar streams abertos | UI/API keys pessoais e compartilhadas de host validadas em recortes; faltam caminhos técnicos e regressão final |
-| OBS03 | Soak do build final | Teste nativo de seis minutos no host verificou continuidade dos frames, reconexão explícita, limite do CSV, heap e tempo de trabalho do renderer. Falta o soak no artefato final com logs, terminal e métricas de containers e serviços simultâneos |
+| OBS03 | Soak do build final | Testes nativos de seis minutos verificaram a reconexão do host e cinco streams concorrentes no navegador com uma imagem do console e um host legado. Logs, terminal e métricas de host, container e serviço rodaram juntos com histórico CSV limitado e limpeza confirmada. As métricas de serviço foram ativadas no navegador de teste. Falta o aceite com flags servidas e topologia final |
 | ADM01 | Contas locais/perfil/senha/lifecycle | Implementado; falta matriz final concorrência/admin OIDC/técnicos |
 | ADM02 | Auditoria/settings/processos/replay | Recortes implementados; falta regressão final permissão/privacidade/erro/efeito nativo |
 | ADM03 | HA/pools | Monitor implementado; falta configuração/failover físico |

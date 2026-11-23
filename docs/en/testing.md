@@ -116,4 +116,14 @@ Run this on the named local UI-OPS-LAB with its existing active host. It opens t
 python console/tests/host_metrics_soak.py --seconds 360
 ```
 
+### Concurrent native streams
+
+Run on the named UI-OPS-LAB with its active legacy host. The harness provisions one owned service with a single replica, then opens logs, terminal, and host, container and service metrics on separate browser pages. It reports frames, maximum gaps, terminal replies, bounded CSV history, the loaded entry hash and cleanup of the sockets, fixture and temporary session.
+
+Enable the deployed service metrics feature for release acceptance. Use `--service-preview` to enable the feature in the owned browser context when rehearsing a disabled deployment. If the local legacy scheduler requires its isolated diagnostic, pass `--scheduler-relay`. The harness verifies the relay has been removed before opening the streams. Both options are recorded in the report.
+
+```sh
+python console/tests/concurrent_streams_soak.py --seconds 360
+```
+
 Distinguish unit/component, clean build, browser rendering, real native behavior and remote CI. Record artifact identity, flags, scope, controls, measured results and cleanup; publish only sanitized summaries. A one-host `nofile` test does not validate all limits or multi-host operation. A short WebSocket probe does not prove scheduler stability or soak. An offline DB restore does not prove engine/IdP/workload recovery. Remaining acceptance belongs in the [roadmap](roadmap.md).

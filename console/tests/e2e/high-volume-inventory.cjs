@@ -198,6 +198,42 @@ async function checkOperationLayout(page) {
     }),
     'a long translated state fits within its column',
   );
+
+  const row = page
+    .locator('.operation-row.service')
+    .filter({ hasText: 'Retour à la version précédente en cours' })
+    .first();
+  const trigger = row.locator('.action-menu-trigger');
+  await trigger.press('ArrowDown');
+  const menu = page.getByRole('menu', {
+    name: await trigger.getAttribute('aria-label'),
+    exact: true,
+  });
+  const details = menu.getByRole('menuitem', { name: 'View details', exact: true });
+  await details.waitFor();
+  assert.ok(await menu.getByRole('menuitem', { name: 'View logs', exact: true }).isDisabled());
+  assert.ok(await details.evaluate((button) => button === document.activeElement));
+  await page.keyboard.press('ArrowDown');
+  assert.ok(await details.evaluate((button) => button === document.activeElement));
+  await page.keyboard.press('Escape');
+  await menu.waitFor({ state: 'hidden' });
+  assert.ok(await trigger.evaluate((button) => button === document.activeElement));
+
+  await trigger.press('ArrowDown');
+  await details.waitFor();
+  await page.keyboard.press('Enter');
+  const drawer = page.getByRole('dialog');
+  await drawer.waitFor();
+  await page.waitForFunction(
+    (element) => element.contains(document.activeElement),
+    await drawer.elementHandle(),
+  );
+  await page.keyboard.press('Escape');
+  await drawer.waitFor({ state: 'hidden' });
+  await page.waitForFunction(
+    (button) => button === document.activeElement,
+    await trigger.elementHandle(),
+  );
 }
 
 async function paint(page) {
@@ -593,6 +629,7 @@ async function run(
           if (layout && entry.collection === 'services') {
             const json = JSON.parse(entry.body);
             json.data[0].state = 'rolling-back';
+            json.data[0].accountId = entry.scope;
             return route.fulfill({ json });
           }
           return route.fulfill({ contentType: 'application/json', body: entry.body });
@@ -603,6 +640,7 @@ async function run(
           config.workloadInventoryPagination = pagination;
           config.workloadTreePagination = grouped === true;
           if (layout) {
+            config.modules.observability = true;
             config.localization = {
               enabled: true,
               defaultLocale: 'pt-BR',
@@ -751,7 +789,7 @@ async function run(
         renderedRows: initialRender.renderedRows,
         paginationControls: pagination,
         ...(pagination && { viewport: size, nextPage: true, documentFitsViewport: true }),
-        ...(layout && { longNamesAndRtlLayout: true }),
+        ...(layout && { longNamesAndRtlLayout: true, contextMenuKeyboard: true }),
         initialApiRequests,
       };
     }
