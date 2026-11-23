@@ -42,6 +42,9 @@ Use the named-volume workload rehearsal to verify that a new service can start a
 python -m migration.test_workload_volume_recovery_lab
 ```
 
+
+A separate isolated Linux VM rehearsal used Docker 29.9.2 and the modern Rancher agent. After the Cattle service was deactivated and Docker confirmed there were no writers, the rehearsal authenticated and decrypted the local volume archive. Cattle created a new container for the same service. It read the restored data with the original checksum, owner, mode and symlink. Switching back to the original volume contents and reactivating the service passed the same checks. This exercise used a host-network service and a local Docker volume. Host or Docker Engine rollback and shared volume drivers still require separate acceptance.
+
 ## Engine and identity rehearsal
 
 `migration.engines` starts restored Rancher/IdP copies in one loopback-only namespace: no external egress, published ports, source storage or Docker socket. Helpers use only that namespace. Copy-only hostname/IP/callback adjustments must remain confined to the copy; never apply them to the source to make a rehearsal pass.
