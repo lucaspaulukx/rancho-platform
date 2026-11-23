@@ -4,3 +4,5 @@
 *.ico -text
 *.woff2 -text
 *.patch -text
+console/licenses/runtime/*.txt -text
+migration/licenses/*.txt -text
