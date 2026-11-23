@@ -50,6 +50,8 @@ export function ResourceCreator({
     app.config.modules.workloadHealthChecks && ['service', 'container'].includes(selection.kind);
   const ulimits =
     app.config.modules.workloadUlimitEditors && ['service', 'container'].includes(selection.kind);
+  const devices =
+    app.config.modules.workloadDeviceEditors && ['service', 'container'].includes(selection.kind);
   const security =
     app.config.modules.workloadSecurityEditors && ['service', 'container'].includes(selection.kind);
   const resources =
@@ -83,7 +85,8 @@ export function ResourceCreator({
         scheduling ||
         resources ||
         security ||
-        ulimits
+        ulimits ||
+        devices
       ) {
         const refreshed = Object.fromEntries(
           (await allPages<Schema>(`projects/${scope.environment}/schemas`, signal)).map((value) => [
@@ -104,6 +107,7 @@ export function ResourceCreator({
           resources,
           security,
           ulimits,
+          devices,
         );
       }
       return api<Resource>(
@@ -225,6 +229,7 @@ export function ResourceCreator({
             resourceEditors={resources}
             securityEditors={security}
             ulimitEditors={ulimits}
+            deviceEditors={devices}
             id="workspace-create-form"
             schema={formSchema}
             schemas={formSchemas}

@@ -1,4 +1,11 @@
 import { UlimitEditor } from './UlimitEditor';
+import { DeviceEditor } from './DeviceEditor';
+import {
+  DeviceValidationError,
+  supportsDevices,
+  validateWorkloadDevices,
+} from '../workload-devices';
+import { useI18n } from '../i18n/provider';
 import { supportsUlimits, validateWorkloadUlimits } from '../workload-ulimits';
 import { CapabilityEditor } from './CapabilityEditor';
 import { validateWorkloadSecurity } from '../workload-security';
@@ -453,6 +460,7 @@ function EditorField({
   resourceEditors = false,
   securityEditors = false,
   ulimitEditors = false,
+  deviceEditors = false,
 }: {
   name: string;
   field: SchemaField;
@@ -469,9 +477,12 @@ function EditorField({
   resourceEditors?: boolean;
   securityEditors?: boolean;
   ulimitEditors?: boolean;
+  deviceEditors?: boolean;
 }) {
   const nested = objectSchema(field.type, schemas);
   const [revealed, setRevealed] = useState(false);
+  if (deviceEditors && name === 'devices' && supportsDevices(field))
+    return <DeviceEditor value={value} onChange={onChange} />;
   if (ulimitEditors && name === 'ulimits' && supportsUlimits(field, schemas))
     return <UlimitEditor value={value} onChange={onChange} />;
   if (
@@ -535,6 +546,7 @@ function EditorField({
         resourceEditors={resourceEditors}
         securityEditors={securityEditors}
         ulimitEditors={ulimitEditors}
+        deviceEditors={deviceEditors}
         healthCheckEditors={healthCheckEditors}
         onChange={onChange}
       />
@@ -572,6 +584,7 @@ function EditorField({
         resourceEditors={resourceEditors}
         securityEditors={securityEditors}
         ulimitEditors={ulimitEditors}
+        deviceEditors={deviceEditors}
         healthCheckEditors={healthCheckEditors}
       />
     );
@@ -789,6 +802,7 @@ export function SidecarsEditor({
   resourceEditors = false,
   securityEditors = false,
   ulimitEditors = false,
+  deviceEditors = false,
   onChange,
 }: {
   value: unknown;
@@ -800,6 +814,7 @@ export function SidecarsEditor({
   resourceEditors?: boolean;
   securityEditors?: boolean;
   ulimitEditors?: boolean;
+  deviceEditors?: boolean;
   onChange: (value: unknown) => void;
 }) {
   const [rows, setRows] = useState(() =>
@@ -862,6 +877,7 @@ export function SidecarsEditor({
                     resourceEditors={resourceEditors}
                     securityEditors={securityEditors}
                     ulimitEditors={ulimitEditors}
+                    deviceEditors={deviceEditors}
                     healthCheckEditors={healthCheckEditors}
                     onChange={(next) =>
                       update(
@@ -927,6 +943,7 @@ export function SchemaForm({
   resourceEditors = false,
   securityEditors = false,
   ulimitEditors = false,
+  deviceEditors = false,
 }: {
   schema: Schema;
   schemas: Record<string, Schema>;
@@ -947,6 +964,7 @@ export function SchemaForm({
   resourceEditors?: boolean;
   securityEditors?: boolean;
   ulimitEditors?: boolean;
+  deviceEditors?: boolean;
 }) {
   const fields = editableFields(schema, !!original).filter(
     ([name]) =>
@@ -990,7 +1008,8 @@ export function SchemaForm({
     window.addEventListener('beforeunload', unload);
     return () => window.removeEventListener('beforeunload', unload);
   }, [dirty]);
-  const [validation, setValidation] = useState('');
+  const { t } = useI18n();
+  const [validation, setValidation] = useState<string | DeviceValidationError>('');
   function submit(event: FormEvent) {
     event.preventDefault();
     setValidation('');
@@ -999,12 +1018,19 @@ export function SchemaForm({
       if (healthCheckEditors) validateWorkloadHealthChecks(schema, values, schemas);
       if (securityEditors) validateWorkloadSecurity(schema, values, schemas);
       if (ulimitEditors) validateWorkloadUlimits(schema, values, schemas);
+      if (deviceEditors && !original) validateWorkloadDevices(schema, values, schemas);
       if (resourceEditors) validateWorkloadResources(schema, values, schemas);
       if (schedulingEditors) validateWorkloadScheduling(schema, values, schemas);
       if (sidecarEditors && schema.id === 'service') validateSidecars(values, schemas);
       onSubmit(preparePayload(schema, values, original, schemas));
     } catch (error) {
-      setValidation(error instanceof Error ? error.message : 'Revise os campos.');
+      setValidation(
+        error instanceof DeviceValidationError
+          ? error
+          : error instanceof Error
+            ? error.message
+            : 'Revise os campos.',
+      );
     }
   }
   const render = ([name, field]: [string, SchemaField]) => (
@@ -1023,6 +1049,7 @@ export function SchemaForm({
       resourceEditors={resourceEditors}
       securityEditors={securityEditors}
       ulimitEditors={ulimitEditors}
+      deviceEditors={deviceEditors && !original}
       onChange={(value) => {
         setValues((previous) => ({ ...previous, [name]: value }));
         if (field.type.startsWith('reference[')) onReferenceChange?.(name, String(value ?? ''));
@@ -1031,6 +1058,9 @@ export function SchemaForm({
   );
   const main = fields.filter(([name, field]) => basics.has(name) || field.required);
   const advanced = fields.filter(([name, field]) => !basics.has(name) && !field.required);
+  const validationText =
+    validation instanceof DeviceValidationError ? t(validation.key) : validation;
+  const errorText = error instanceof DeviceValidationError ? t(error.key) : error?.message;
   return (
     <form id={id} onSubmit={submit}>
       <fieldset disabled={busy} className="form-fieldset">
@@ -1050,7 +1080,7 @@ export function SchemaForm({
           </>
         )}
       </fieldset>
-      {(validation || error) && <Alert>{validation || error?.message}</Alert>}
+      {(validationText || errorText) && <Alert>{validationText || errorText}</Alert>}
     </form>
   );
 }

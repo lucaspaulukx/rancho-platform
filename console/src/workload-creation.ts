@@ -1,4 +1,5 @@
 import { validateWorkloadUlimits } from './workload-ulimits';
+import { validateWorkloadDevices } from './workload-devices';
 import { validateWorkloadSecurity } from './workload-security';
 import { validateWorkloadResources } from './workload-resources';
 import type { Schema, SchemaField } from './api';
@@ -132,6 +133,7 @@ export function validateWorkloadCreation(
   resources = false,
   security = false,
   ulimits = false,
+  devices = false,
 ) {
   if (!['service', 'container'].includes(schema.id) || !schema.collectionMethods?.includes('POST'))
     throw new Error('A criação deste workload não está mais disponível.');
@@ -164,6 +166,7 @@ export function validateWorkloadCreation(
   validate(schema, values);
   if (security) validateWorkloadSecurity(schema, values, schemas);
   if (ulimits) validateWorkloadUlimits(schema, values, schemas);
+  if (devices) validateWorkloadDevices(schema, values, schemas);
   if (resources) validateWorkloadResources(schema, values, schemas);
   if (scheduling) validateWorkloadScheduling(schema, values, schemas);
   if (healthChecks) validateWorkloadHealthChecks(schema, values, schemas);

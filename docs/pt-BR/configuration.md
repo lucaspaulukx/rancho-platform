@@ -9,7 +9,7 @@
 
 A distribuição lê `console/public/console-config.json`; `console/src/config.ts` define o contrato validado. Parta de uma configuração completa existente, não de um exemplo parcial sobreposto ao arquivo. Chaves desconhecidas, booleanos inválidos e overrides de tema inválidos são rejeitados.
 
-`schemaVersion: 1` versiona a configuração. Entrada legada é convertida em memória sem reescrever a origem. Módulos existentes da versão1 são explícitos; flags aditivas `metricsPayloadTransport`, `serviceMetrics`, `workloadUlimitEditors` e `workloadUlimitUpgrades` ficam false quando ausentes. Flags novas precisam preservar essa compatibilidade.
+`schemaVersion: 1` versiona a configuração. Entrada legada é convertida em memória sem reescrever a origem. Módulos existentes da versão1 são explícitos; flags aditivas `metricsPayloadTransport`, `serviceMetrics`, `workloadUlimitEditors`, `workloadUlimitUpgrades` e `workloadDeviceEditors` ficam false quando ausentes. Flags novas precisam preservar essa compatibilidade.
 
 Em `console/`, valide ou gere um arquivo migrado separado:
 
@@ -32,6 +32,14 @@ O destino precisa ser novo. Revise o diff antes de selecioná-lo para deploy. A 
 | Outras entradas `modules` | Environments, catálogo, armazenamento, rede, administração e integrações |
 
 Use `moduleNames` e os rótulos de Sobre como inventário exato. Cada função verifica dependências e entradas de rota/ação. Alterar módulo visual não muda permissões nativas, grants existentes ou workloads armazenados.
+
+## Editor de dispositivos na criação
+
+`modules.workloadDeviceEditors` habilita de forma independente um editor comum de dispositivos na criação de container avulso, launch config principal do serviço e sidecars. O default off mantém o formulário nativo genérico de lista de strings. Não habilita edição por PUT de container avulso ou upgrade de serviço nem altera workloads existentes. O schema atual do escopo ainda precisa oferecer `devices: array[string]` com create habilitado; o contrato é relido antes do POST.
+
+Cada novo mapeamento informa caminho absoluto no host, caminho absoluto no container e permissões r/w/m distintas. O editor local permite até32 mapeamentos, recusa linhas incompletas/caracteres de controle/destinos duplicados e preserva strings aceitas exatamente até edição explícita. Strings legadas opacas continuam visíveis no rascunho e não são reescritas silenciosamente; enviar formatos incompatíveis exige retornar ao formulário nativo com o editor desligado. O frontend não comprova que um caminho existe ou é dispositivo permitido no host; autorização nativa e Docker continuam decidindo.
+
+Permissões pedidas pelo mapeamento não substituem a lista padrão de dispositivos do runtime. No Docker19.03.15, os [defaults do Moby](https://github.com/moby/moby/blob/v19.03.15/oci/defaults.go) incluem /dev/null rwm, e a [configuração de dispositivos](https://github.com/moby/moby/blob/v19.03.15/daemon/oci_linux.go) adiciona as regras solicitadas. Um mapeamento de /dev/null com r pode persistir corretamente enquanto abrir para escrita continua permitido. Não afirme negação efetiva com base somente em HostConfig ou UI. Teste o processo real no runtime desejado antes de depender de uma restrição.
 
 ## Política de idiomas da interface
 
