@@ -20,7 +20,7 @@ async function closeContext(value) {
   result.contextsClosed++;
 }
 
-async function context({ authenticated = false, enabled = true, frenchPreview = false } = {}) {
+async function context({ authenticated = false, enabled = true, extraLocales = [] } = {}) {
   const value = await browser.newContext({
     viewport: { width: 1440, height: 1000 }, locale: 'pt-BR', colorScheme: 'dark',
   });
@@ -43,7 +43,7 @@ async function context({ authenticated = false, enabled = true, frenchPreview = 
     assert.equal(response.status(), 200);
     const config = await response.json();
     config.localization = {
-      enabled, defaultLocale: 'pt-BR', availableLocales: frenchPreview ? ['pt-BR', 'en-US', 'fr-FR'] : ['pt-BR', 'en-US'],
+      enabled, defaultLocale: 'pt-BR', availableLocales: ['pt-BR', 'en-US', ...extraLocales],
       selectable: true, detectBrowser: false, preview: true,
     };
     // Theme variation is local to this browser context, never the deployed JSON.
@@ -100,7 +100,7 @@ async function main() {
   await closeContext(disabled);
 
   result.stage = 'public-login-drafts';
-  const publicContext = await context({ frenchPreview: true });
+  const publicContext = await context({ extraLocales: ['fr-FR', 'de-DE', 'ja-JP', 'zh-Hans'] });
   const publicPage = await page(publicContext);
   await publicPage.goto(loginUrl, { waitUntil: 'domcontentloaded' });
   const publicSelector = publicPage.getByRole('combobox', { name: 'Idioma', exact: true });
@@ -135,6 +135,20 @@ async function main() {
     await publicPage.getByText('Aperçu · traductions incomplètes', { exact: true }).isVisible() &&
     await username.inputValue() === 'localization-draft-only' &&
     await password.inputValue() === 'not-a-real-password' && publicPage.url() === loginUrl);
+  for (const [locale, title, label, notice] of [
+    ['de-DE', 'Auf Ihre Umgebung zugreifen', 'Sprache', 'Vorschau · Übersetzungen unvollständig'],
+    ['ja-JP', '環境にアクセス', '言語', 'プレビュー · 一部未翻訳'],
+    ['zh-Hans', '访问您的环境', '语言', '预览 · 翻译尚未完成'],
+  ]) {
+    await publicPage.locator('.language-selector select').selectOption(locale);
+    await publicPage.getByRole('heading', { name: title, exact: true }).waitFor();
+    check(`${locale} login preview keeps mobile controls, drafts and URL`,
+      await insideViewport(publicPage.getByRole('combobox', { name: label, exact: true })) &&
+      await publicPage.getByText(notice, { exact: true }).isVisible() &&
+      await publicPage.locator('html').getAttribute('lang') === locale &&
+      await username.inputValue() === 'localization-draft-only' &&
+      await password.inputValue() === 'not-a-real-password' && publicPage.url() === loginUrl);
+  }
   await closeContext(publicContext);
 
   result.stage = 'authenticated-shell';
