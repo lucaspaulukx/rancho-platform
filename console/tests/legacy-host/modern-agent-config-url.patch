@@ -1,0 +1,11 @@
+--- a/resources/content/config-content/configscripts/config.sh
++++ b/resources/content/config-content/configscripts/config.sh
+@@ -99,7 +99,7 @@
+         current=$(<${DOWNLOAD}/$name/current)
+     fi
+
+-    DOWNLOAD_URL=${URL}/${URL_SUFFIX}/$name
++    DOWNLOAD_URL=${URL%/}${URL_SUFFIX}$name
+
+     local get_opts
+     local archive_version
