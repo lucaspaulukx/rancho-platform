@@ -1,4 +1,5 @@
 export const enResourcesPage = {
+  'resourcesPage.operation': 'Operation',
   'resourcesPage.certificateUnavailable':
     'The current certificate is unavailable. Reload the resource before editing.',
   'resourcesPage.environmentHint':
@@ -96,6 +97,7 @@ export const enResourcesPage = {
 } as const;
 
 export const ptResourcesPage = {
+  'resourcesPage.operation': 'Operação',
   'resourcesPage.certificateUnavailable':
     'O certificado atual não está disponível. Recarregue o recurso antes de editar.',
   'resourcesPage.environmentHint':

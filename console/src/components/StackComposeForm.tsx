@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/provider';
 import { useState, type FormEvent } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import type { Schema } from '../api';
@@ -18,6 +19,7 @@ export function StackComposeForm({
   busy: boolean;
   error: Error | null;
 }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState<StackComposeDraft>({
     name: '',
     description: '',
@@ -28,10 +30,10 @@ export function StackComposeForm({
     variables: [],
   });
   const [nextId, setNextId] = useState(1);
-  const [validation, setValidation] = useState('');
+  const [validation, setValidation] = useState<Error | 'review' | null>(null);
   function update(change: Partial<StackComposeDraft>) {
     setDraft({ ...draft, ...change });
-    setValidation('');
+    setValidation(null);
     onDirtyChange(true);
   }
   function submit(event: FormEvent) {
@@ -39,15 +41,15 @@ export function StackComposeForm({
     if (busy) return;
     try {
       onSubmit(prepareStackCompose(schema, draft));
-      setValidation('');
+      setValidation(null);
     } catch (caught) {
-      setValidation(caught instanceof Error ? caught.message : 'Revise a stack.');
+      setValidation(caught instanceof Error ? caught : 'review');
     }
   }
   return (
     <form id="workspace-create-form" onSubmit={submit}>
       <fieldset className="form-fieldset" disabled={busy}>
-        <Field label="Nome da stack" hint="Letras, números e hífen. Até 63 caracteres.">
+        <Field label={t('composeEditor.stackName')} hint={t('composeEditor.nameHint')}>
           {(id) => (
             <input
               id={id}
@@ -59,7 +61,7 @@ export function StackComposeForm({
             />
           )}
         </Field>
-        <Field label="Descrição">
+        <Field label={t('composeEditor.description')}>
           {(id) => (
             <textarea
               id={id}
@@ -70,7 +72,7 @@ export function StackComposeForm({
             />
           )}
         </Field>
-        <Field label="Como criar a stack">
+        <Field label={t('composeEditor.creationMode')}>
           {(id) => (
             <select
               id={id}
@@ -79,7 +81,7 @@ export function StackComposeForm({
                 update({ compose: event.target.value === 'compose', startOnCreate: false })
               }
             >
-              <option value="empty">Stack vazia</option>
+              <option value="empty">{t('composeEditor.empty')}</option>
               <option
                 value="compose"
                 disabled={
@@ -87,40 +89,34 @@ export function StackComposeForm({
                   !schema.resourceFields.startOnCreate?.create
                 }
               >
-                Importar Compose
+                {t('composeEditor.import')}
               </option>
             </select>
           )}
         </Field>
         {draft.compose ? (
           <>
-            <Alert tone="info">
-              Use o formato compatível com Rancher 1.6. O servidor valida os arquivos e processa a
-              importação; acompanhe o resultado na stack.
-            </Alert>
+            <Alert tone="info">{t('composeEditor.compatibility')}</Alert>
             <ComposeEditor
-              label="Docker Compose"
+              label={t('composeEditor.docker')}
               value={draft.dockerCompose}
               onChange={(dockerCompose) => update({ dockerCompose })}
               required
             />
             {schema.resourceFields.rancherCompose?.create && (
               <ComposeEditor
-                label="Rancher Compose (opcional)"
+                label={t('composeEditor.rancher')}
                 value={draft.rancherCompose}
                 onChange={(rancherCompose) => update({ rancherCompose })}
               />
             )}
             {schema.resourceFields.environment?.create && (
               <section>
-                <h3>Variáveis de interpolação</h3>
-                <p className="muted">
-                  Valores usados pelo Rancher ao importar os arquivos. Não são guardados nas
-                  preferências da console.
-                </p>
+                <h3>{t('composeEditor.variables')}</h3>
+                <p className="muted">{t('composeEditor.variablesNote')}</p>
                 {draft.variables.map((row, index) => (
                   <div className="compose-variable" key={row.id}>
-                    <Field label={`Nome da variável ${index + 1}`}>
+                    <Field label={t('composeEditor.variableName', { index: String(index + 1) })}>
                       {(id) => (
                         <input
                           id={id}
@@ -136,7 +132,7 @@ export function StackComposeForm({
                         />
                       )}
                     </Field>
-                    <Field label={`Valor da variável ${index + 1}`}>
+                    <Field label={t('composeEditor.variableValue', { index: String(index + 1) })}>
                       {(id) => (
                         <input
                           id={id}
@@ -155,7 +151,7 @@ export function StackComposeForm({
                     </Field>
                     <Button
                       type="button"
-                      aria-label={`Remover variável ${index + 1}`}
+                      aria-label={t('composeEditor.removeVariable', { index: String(index + 1) })}
                       onClick={() =>
                         update({ variables: draft.variables.filter((v) => v.id !== row.id) })
                       }
@@ -174,26 +170,32 @@ export function StackComposeForm({
                   }}
                 >
                   <Plus size={16} />
-                  Adicionar variável
+                  {t('composeEditor.addVariable')}
                 </Button>
               </section>
             )}
             <CheckboxField
-              label="Iniciar os serviços após importar"
-              description="Cria containers no environment selecionado. Deixe desmarcado para revisar os serviços antes de iniciar."
+              label={t('composeEditor.start')}
+              description={t('composeEditor.startDescription')}
               checked={draft.startOnCreate}
               onChange={(event) => update({ startOnCreate: event.target.checked })}
             />
             <Alert tone={draft.startOnCreate ? 'warning' : 'info'}>
               {draft.startOnCreate
-                ? 'A importação pode criar containers e consumir recursos no environment selecionado.'
-                : 'Os serviços serão importados sem início automático. Você poderá iniciá-los pela operação.'}
+                ? t('composeEditor.startWarning')
+                : t('composeEditor.startManually')}
             </Alert>
           </>
         ) : (
-          <p className="muted">Crie a stack e adicione serviços pelo menu da própria linha.</p>
+          <p className="muted">{t('composeEditor.emptyHint')}</p>
         )}
-        {(validation || error) && <Alert tone="danger">{validation || error?.message}</Alert>}
+        {(validation || error) && (
+          <Alert tone="danger">
+            {validation === 'review'
+              ? t('composeEditor.review')
+              : validation?.message || error?.message}
+          </Alert>
+        )}
       </fieldset>
     </form>
   );

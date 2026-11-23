@@ -1,7 +1,14 @@
+import { useI18n } from '../i18n/provider';
 import { useState, type FormEvent } from 'react';
 import type { Resource, Schema } from '../api';
 import { prepareServiceScale } from '../service-scaling';
 import { Alert, Field } from './ui';
+
+class ServiceEditorError extends Error {
+  constructor(readonly key: 'serviceEditors.confirmZero' | 'serviceEditors.reviewScale') {
+    super(key);
+  }
+}
 
 export function ServiceScaleForm({
   resource,
@@ -18,29 +25,38 @@ export function ServiceScaleForm({
   busy: boolean;
   error: Error | null;
 }) {
+  const { t, formats } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof ServiceEditorError ? t(error.key) : error.message;
   const [value, setValue] = useState(String(resource.scale));
   const [zero, setZero] = useState(false);
-  const [validation, setValidation] = useState('');
+  const [validation, setValidation] = useState<Error | null>(null);
   function submit(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
     try {
       const payload = prepareServiceScale(resource, resource, schema, value);
-      if (payload.scale === 0 && !zero)
-        throw new Error('Confirme o encerramento dos containers antes de aplicar escala zero.');
-      setValidation('');
+      if (payload.scale === 0 && !zero) throw new ServiceEditorError('serviceEditors.confirmZero');
+      setValidation(null);
       onSubmit(payload);
     } catch (caught) {
-      setValidation(caught instanceof Error ? caught.message : 'Revise a escala.');
+      setValidation(
+        caught instanceof Error ? caught : new ServiceEditorError('serviceEditors.reviewScale'),
+      );
     }
   }
   return (
     <form id="workspace-resource-form" onSubmit={submit}>
       <fieldset className="form-fieldset" disabled={busy}>
         <p>
-          Escala configurada atualmente: <strong>{String(resource.scale)}</strong>.
+          {t('serviceEditors.currentScale', {
+            scale:
+              typeof resource.scale === 'number'
+                ? formats.number(resource.scale)
+                : String(resource.scale),
+          })}
         </p>
-        <Field label="Quantidade desejada de containers">
+        <Field label={t('serviceEditors.quantity')}>
           {(id) => (
             <input
               id={id}
@@ -53,16 +69,14 @@ export function ServiceScaleForm({
               onChange={(event) => {
                 setValue(event.target.value);
                 setZero(false);
-                setValidation('');
+                setValidation(null);
                 onDirtyChange(event.target.value !== String(resource.scale));
               }}
             />
           )}
         </Field>
         <Alert tone={Number(value) === 0 ? 'warning' : 'info'}>
-          O Rancher ajustará a escala efetiva do serviço. Reduzir a quantidade pode encerrar
-          containers; aumentar depende da capacidade disponível. A contagem de containers em
-          execução pode levar um tempo para acompanhar a escala configurada.
+          {t('serviceEditors.scaleInfo')}
         </Alert>
         {value.trim() !== '' && Number(value) === 0 && (
           <label className="workload-system">
@@ -71,14 +85,18 @@ export function ServiceScaleForm({
               checked={zero}
               onChange={(event) => {
                 setZero(event.target.checked);
-                setValidation('');
+                setValidation(null);
               }}
             />
-            Entendo que escala zero encerra os containers deste serviço
+            {t('serviceEditors.acknowledgeZero')}
           </label>
         )}
-        <p className="muted">Esta operação não altera as respostas de um template do catálogo.</p>
-        {(validation || error) && <Alert tone="danger">{validation || error?.message}</Alert>}
+        <p className="muted">{t('serviceEditors.templateHint')}</p>
+        {(validation || error) && (
+          <Alert tone="danger">
+            {validation ? errorText(validation) : error ? errorText(error) : ''}
+          </Alert>
+        )}
       </fieldset>
     </form>
   );
