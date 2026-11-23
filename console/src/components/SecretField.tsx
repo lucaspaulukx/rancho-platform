@@ -31,6 +31,7 @@ export function SecretField({
           multiline ? (
             <textarea
               id={id}
+              dir="ltr"
               readOnly
               rows={4}
               className={visible ? 'code-input' : 'secret-input'}
@@ -40,6 +41,7 @@ export function SecretField({
           ) : (
             <input
               id={id}
+              dir="ltr"
               type={visible ? 'text' : 'password'}
               readOnly
               value={value}
