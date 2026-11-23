@@ -10,6 +10,35 @@ export const ukUA = {
   'workloadStreams.selectionHint':
     'Відображається лише вибраний контейнер. Перемикання на інший контейнер закриває попереднє з’єднання.',
 
+  'resourceStream.scope': 'Ресурс не належить до вибраного середовища.',
+  'resourceStream.invalidFrame': 'Отримано недійсне повідомлення з’єднання.',
+  'resourceStream.failed': 'Не вдалося підключитися. Закрийте цю панель і спробуйте ще раз.',
+  'resourceStream.revoked':
+    'З’єднання закрито, оскільки ваш сеанс більше недоступний або ви більше не маєте потрібного дозволу.',
+  'resourceStream.unavailable': 'Ресурс більше недоступний або термін дії вашого доступу минув.',
+  'resourceStream.startFailed':
+    'Не вдалося встановити з’єднання. Перевірте стан ресурсу та свої дозволи.',
+  'resourceStream.logs': 'Журнали',
+  'resourceStream.console': 'Консоль',
+  'resourceStream.connected': 'Підключено',
+  'resourceStream.closed': 'З’єднання закрито',
+  'resourceStream.connecting': 'Підключення…',
+  'resourceStream.waiting': 'Очікування підключення',
+  'resourceStream.description': 'Середовище: {name} · {status}',
+  'resourceStream.close': 'Закрити з’єднання',
+  'resourceStream.warning':
+    'Консоль виконує команди у вибраному контейнері з дозволами, наданими Rancher.',
+  'resourceStream.connect': 'Підключитися до контейнера',
+  'resourceStream.terminal': 'Термінал контейнера',
+  'resourceStream.filter': 'Фільтрувати журнали',
+  'resourceStream.filterPlaceholder': 'Фільтрувати отримані рядки…',
+  'resourceStream.resume': 'Відновити прокручування',
+  'resourceStream.pause': 'Призупинити прокручування',
+  'resourceStream.download': 'Завантажити',
+  'resourceStream.buffer':
+    'У буфері зберігається до 2 000 останніх рядків загальним обсягом не більше ніж 512 КБ. Пошук і завантаження охоплюють лише вміст, отриманий на цій панелі.',
+  'resourceStream.logLabel': 'Журнали контейнера',
+
   'operations.stackMetric': 'стеки',
   'operations.serviceMetric': 'сервіси',
   'operations.containerMetric': 'контейнери',

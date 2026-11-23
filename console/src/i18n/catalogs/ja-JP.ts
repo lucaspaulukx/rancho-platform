@@ -10,6 +10,35 @@ export const jaJP = {
   'workloadStreams.selectionHint':
     '選択したコンテナのみを表示しています。コンテナを切り替えると、直前の接続が閉じられます。',
 
+  'resourceStream.scope': 'このリソースは選択した環境に属していません。',
+  'resourceStream.invalidFrame': '無効な接続メッセージを受信しました。',
+  'resourceStream.failed': '接続に失敗しました。このパネルを閉じて、もう一度お試しください。',
+  'resourceStream.revoked':
+    'セッションが無効になったか、必要な権限がなくなったため、接続が閉じられました。',
+  'resourceStream.unavailable': 'リソースが利用できなくなったか、アクセスの有効期限が切れました。',
+  'resourceStream.startFailed':
+    '接続を開始できませんでした。リソースの状態とアクセス権限を確認してください。',
+  'resourceStream.logs': 'ログ',
+  'resourceStream.console': 'コンソール',
+  'resourceStream.connected': '接続済み',
+  'resourceStream.closed': '接続終了',
+  'resourceStream.connecting': '接続中…',
+  'resourceStream.waiting': '接続待ち',
+  'resourceStream.description': '環境：{name} · {status}',
+  'resourceStream.close': '接続を閉じる',
+  'resourceStream.warning':
+    'コンソールは、Rancher から付与された権限で、選択したコンテナ内でコマンドを実行します。',
+  'resourceStream.connect': 'コンテナに接続',
+  'resourceStream.terminal': 'コンテナのターミナル',
+  'resourceStream.filter': 'ログを絞り込む',
+  'resourceStream.filterPlaceholder': '受信した行を絞り込む…',
+  'resourceStream.resume': 'スクロールを再開',
+  'resourceStream.pause': 'スクロールを一時停止',
+  'resourceStream.download': 'ダウンロード',
+  'resourceStream.buffer':
+    'バッファーには直近の最大 2,000 行、512 KB まで保持されます。検索とダウンロードの対象は、このパネルで受信した内容に限られます。',
+  'resourceStream.logLabel': 'コンテナのログ',
+
   'operations.stackMetric': 'スタック',
   'operations.serviceMetric': 'サービス',
   'operations.containerMetric': 'コンテナ',
