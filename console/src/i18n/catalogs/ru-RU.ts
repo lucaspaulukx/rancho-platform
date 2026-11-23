@@ -31,8 +31,24 @@ export const ruRU = {
   'workloadsPage.health': 'Работоспособность: {state}',
   'workloadsPage.open': 'Открыть {name}',
   'workloadsPage.openStack': 'Открыть стек {name}',
-  'workloadsPage.inventorySummary':
-    'Стеки: {stacks} · Сервисы: {services} · Контейнеры: {containers}',
+  'workloadsPage.stackCount': {
+    one: '{count} стек',
+    few: '{count} стека',
+    many: '{count} стеков',
+    other: '{count} стека',
+  },
+  'workloadsPage.serviceCount': {
+    one: '{count} сервис',
+    few: '{count} сервиса',
+    many: '{count} сервисов',
+    other: '{count} сервиса',
+  },
+  'workloadsPage.containerCount': {
+    one: '{count} контейнер',
+    few: '{count} контейнера',
+    many: '{count} контейнеров',
+    other: '{count} контейнера',
+  },
   'workloadsPage.servicesTab': 'Сервисы ({count})',
   'workloadsPage.containersTab': 'Контейнеры ({count})',
   'resourceValidation.memoryFormat':

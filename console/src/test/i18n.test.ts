@@ -190,6 +190,19 @@ describe('Typed message catalogs', () => {
       'Вибрано 5 ресурсів · максимум 100',
     ]);
   });
+  it('inflects each workload inventory count independently', () => {
+    const ru = createTranslator('ru-RU', ruRU);
+    const uk = createTranslator('uk-UA', ukUA);
+    const en = createTranslator('en-US');
+    expect(ru.t('workloadsPage.stackCount', { count: 1 })).toBe('1 стек');
+    expect(ru.t('workloadsPage.serviceCount', { count: 22 })).toBe('22 сервиса');
+    expect(ru.t('workloadsPage.containerCount', { count: 15 })).toBe('15 контейнеров');
+    expect(uk.t('workloadsPage.stackCount', { count: 2 })).toBe('2 стеки');
+    expect(uk.t('workloadsPage.serviceCount', { count: 5 })).toBe('5 сервісів');
+    expect(uk.t('workloadsPage.containerCount', { count: 21 })).toBe('21 контейнер');
+    expect(en.t('workloadsPage.stackCount', { count: 1 })).toBe('1 stack');
+    expect(en.t('workloadsPage.serviceCount', { count: 0 })).toBe('0 services');
+  });
   it('rejects corrupted catalog shapes, unknown keys, empty text and changed placeholders', () => {
     for (const value of [
       null,

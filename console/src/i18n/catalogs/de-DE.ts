@@ -32,7 +32,9 @@ export const deDE = {
   'workloadsPage.health': 'Zustand: {state}',
   'workloadsPage.open': '{name} öffnen',
   'workloadsPage.openStack': 'Stack {name} öffnen',
-  'workloadsPage.inventorySummary': '{stacks} Stacks · {services} Dienste · {containers} Container',
+  'workloadsPage.stackCount': { one: '{count} Stack', other: '{count} Stacks' },
+  'workloadsPage.serviceCount': { one: '{count} Dienst', other: '{count} Dienste' },
+  'workloadsPage.containerCount': { one: '{count} Container', other: '{count} Container' },
   'workloadsPage.servicesTab': 'Dienste ({count})',
   'workloadsPage.containersTab': 'Container ({count})',
   'resourceValidation.memoryFormat':
