@@ -1,4 +1,6 @@
 import { supportsUlimits, normalizeUlimits, editableUlimits } from './workload-ulimits';
+import { normalizeDevices, supportsDevices } from './workload-devices';
+import { ptDeviceUpgrade } from './i18n/domains/device-upgrade';
 import { validateWorkloadSecurity } from './workload-security';
 import { validateWorkloadResources } from './workload-resources';
 import { cpuFields, cpuResourceDefaults, validatedCpuResources } from './cpu-resources';
@@ -9,6 +11,14 @@ import { decodeHealthRequest, validateHealthCheck } from './workload-healthcheck
 import { validateWorkloadHealthChecks } from './workload-healthchecks';
 import { validateSidecars } from './workload-sidecars';
 import { validateSchedulingLabels } from './workload-scheduling';
+
+type DeviceUpgradeErrorKey = Extract<keyof typeof ptDeviceUpgrade, `deviceUpgrade.error.${string}`>;
+export class DeviceUpgradeValidationError extends Error {
+  constructor(public readonly key: DeviceUpgradeErrorKey) {
+    super(ptDeviceUpgrade[key]);
+    this.name = 'DeviceUpgradeValidationError';
+  }
+}
 
 export function imageName(value: unknown) {
   return typeof value === 'string' ? value.replace(/^docker:/, '') : '';
@@ -90,6 +100,12 @@ export function supportsUlimitUpgrade(resource: Resource, schemas: Record<string
   return (
     supportsImageUpgrade(resource, schemas) &&
     supportsUlimits(schemas.launchConfig?.resourceFields.ulimits, schemas)
+  );
+}
+export function supportsDeviceUpgrade(resource: Resource, schemas: Record<string, Schema>) {
+  return (
+    supportsImageUpgrade(resource, schemas) &&
+    supportsDevices(schemas.launchConfig?.resourceFields.devices)
   );
 }
 export function supportsSecurityUpgrade(resource: Resource, schemas: Record<string, Schema>) {
@@ -228,23 +244,25 @@ export function configurationUpgradePayload(
   schemas: Record<string, Schema>,
 ) {
   if (
-    !(values.editUlimits === true
-      ? supportsUlimitUpgrade(fresh, schemas)
-      : values.editBindings === true
-        ? supportsConfigurationUpgrade(fresh, schemas)
-        : values.editHealthCheck === true
-          ? supportsHealthCheckUpgrade(fresh, schemas)
-          : values.editSidecars === true
-            ? supportsSidecarUpgrade(fresh, schemas)
-            : values.editScheduling === true
-              ? supportsSchedulingUpgrade(fresh, schemas)
-              : values.editCpuResources === true
-                ? supportsCpuResourceUpgrade(fresh, schemas)
-                : values.editResources === true
-                  ? supportsResourceUpgrade(fresh, schemas)
-                  : values.editSecurity === true
-                    ? supportsSecurityUpgrade(fresh, schemas)
-                    : supportsConfigurationUpgrade(fresh, schemas)) ||
+    !(values.editDevices === true
+      ? supportsDeviceUpgrade(fresh, schemas)
+      : values.editUlimits === true
+        ? supportsUlimitUpgrade(fresh, schemas)
+        : values.editBindings === true
+          ? supportsConfigurationUpgrade(fresh, schemas)
+          : values.editHealthCheck === true
+            ? supportsHealthCheckUpgrade(fresh, schemas)
+            : values.editSidecars === true
+              ? supportsSidecarUpgrade(fresh, schemas)
+              : values.editScheduling === true
+                ? supportsSchedulingUpgrade(fresh, schemas)
+                : values.editCpuResources === true
+                  ? supportsCpuResourceUpgrade(fresh, schemas)
+                  : values.editResources === true
+                    ? supportsResourceUpgrade(fresh, schemas)
+                    : values.editSecurity === true
+                      ? supportsSecurityUpgrade(fresh, schemas)
+                      : supportsConfigurationUpgrade(fresh, schemas)) ||
     before.id !== fresh.id ||
     before.type !== fresh.type ||
     before.accountId !== fresh.accountId ||
@@ -253,7 +271,9 @@ export function configurationUpgradePayload(
     !['active', 'inactive'].includes(fresh.state || '') ||
     !fresh.actions?.upgrade
   )
-    throw new Error('A atualização de configuração não está disponível neste serviço.');
+    throw values.editDevices === true
+      ? new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable')
+      : new Error('A atualização de configuração não está disponível neste serviço.');
   if (
     bindingsSnapshot(before) !== bindingsSnapshot(fresh) ||
     ((values.editHealthCheck === true ||
@@ -262,11 +282,14 @@ export function configurationUpgradePayload(
       values.editResources === true ||
       values.editCpuResources === true ||
       values.editSecurity === true ||
-      values.editUlimits === true) &&
+      values.editUlimits === true ||
+      values.editDevices === true) &&
       JSON.stringify(canonical([before.launchConfig, before.secondaryLaunchConfigs])) !==
         JSON.stringify(canonical([fresh.launchConfig, fresh.secondaryLaunchConfigs])))
   )
-    throw new Error('A configuração foi alterada por outro cliente. Reabra o upgrade.');
+    throw values.editDevices === true
+      ? new DeviceUpgradeValidationError('deviceUpgrade.error.conflict')
+      : new Error('A configuração foi alterada por outro cliente. Reabra o upgrade.');
   const launch = fresh.launchConfig as Record<string, unknown>;
   const editBindings =
     values.editBindings === true ||
@@ -276,7 +299,8 @@ export function configurationUpgradePayload(
       values.editResources !== true &&
       values.editCpuResources !== true &&
       values.editSecurity !== true &&
-      values.editUlimits !== true);
+      values.editUlimits !== true &&
+      values.editDevices !== true);
   if (editBindings) {
     validateBindings('ports', values.ports, launch.ports ?? []);
     validateBindings('dataVolumes', values.dataVolumes, launch.dataVolumes ?? []);
@@ -295,6 +319,11 @@ export function configurationUpgradePayload(
     if (!supportsUlimitUpgrade(fresh, schemas))
       throw new Error('Contrato de limites de processo indisponível.');
     normalizeUlimits(values.ulimits);
+  }
+  if (values.editDevices === true) {
+    if (!supportsDeviceUpgrade(fresh, schemas))
+      throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
+    normalizeDevices(values.devices);
   }
   if (values.editSecurity === true) {
     if (
@@ -377,11 +406,15 @@ export function configurationUpgradePayload(
     (values.editUlimits !== true ||
       JSON.stringify(canonical(normalizeUlimits(values.ulimits))) ===
         JSON.stringify(canonical(editableUlimits(launch.ulimits)))) &&
+    (values.editDevices !== true ||
+      JSON.stringify(normalizeDevices(values.devices)) === JSON.stringify(launch.devices ?? [])) &&
     (values.editSecurity !== true ||
       JSON.stringify(canonical(securityValues(values))) ===
         JSON.stringify(canonical(securityValues(launch))))
   )
-    throw new Error('Altere a imagem ou a configuração antes de atualizar.');
+    throw values.editDevices === true
+      ? new DeviceUpgradeValidationError('deviceUpgrade.error.noChange')
+      : new Error('Altere a imagem ou a configuração antes de atualizar.');
   const result = upgradePayload(
     {
       ...fresh,
@@ -392,6 +425,7 @@ export function configurationUpgradePayload(
         ...launch,
         ...(values.editSecurity === true ? securityValues(values) : {}),
         ...(values.editUlimits === true ? { ulimits: normalizeUlimits(values.ulimits) } : {}),
+        ...(values.editDevices === true ? { devices: normalizeDevices(values.devices) } : {}),
         ...(editBindings ? { ports: values.ports, dataVolumes: values.dataVolumes } : {}),
         ...(values.editResources === true
           ? { memory: values.memory, memoryReservation: values.memoryReservation }

@@ -64,6 +64,7 @@ const moduleLabels: Record<ModuleName, string> = {
   workloadUlimitEditors: 'Editor de limites de processo na criação',
   workloadUlimitUpgrades: 'Limites de processo no upgrade de serviço',
   workloadDeviceEditors: 'Editor de dispositivos na criação',
+  workloadDeviceUpgrades: 'Dispositivos no upgrade de serviço',
   admin: 'Administração geral',
   api: 'Integrações adicionais',
   apiKeys: 'Chaves de API',

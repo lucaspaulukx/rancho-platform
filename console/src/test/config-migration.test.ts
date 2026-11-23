@@ -26,6 +26,7 @@ describe('Migração da configuração pública', () => {
       workloadUlimitEditors: false,
       workloadUlimitUpgrades: false,
       workloadDeviceEditors: false,
+      workloadDeviceUpgrades: false,
       ...config.modules,
     });
     expect(upgraded.modules.admin).toBe(false);

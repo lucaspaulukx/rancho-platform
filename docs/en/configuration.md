@@ -33,9 +33,11 @@ The destination must be new. Review the diff before selecting it for deployment.
 
 Use `moduleNames` and the shared About labels as the exact inventory. Every feature checks its own dependencies and route/action entrypoints. Changing a UI module never changes native permissions, existing grants or stored workloads.
 
-## Device creation editor
+## Device creation and service upgrade
 
-`modules.workloadDeviceEditors` independently enables a shared device-mapping editor in standalone container, primary service launch config and sidecar creation. It defaults off, retaining the generic native string-array form. It does not enable device editing through standalone PUT or service upgrades, and does not change existing workloads. The current scoped schema must still offer create-enabled `devices: array[string]`; the contract is reread before POST.
+`modules.workloadDeviceEditors` enables a shared device-mapping editor in standalone container, primary service launch config and sidecar creation. It defaults off, retaining the generic native string-array form. The current scoped schema must still offer create-enabled `devices: array[string]`. The contract is reread before POST.
+
+`modules.workloadDeviceUpgrades` is a separate flag that defaults off when absent. With `modules.workloadUpgrades` enabled, it exposes an explicit selection and confirmation for devices in the primary launch configuration of a native service. An empty list removes explicit mappings. The console rereads the service and upgrade schemas and checks for drift in the primary and sidecar configurations before submission. Rancher applies changes through container replacement, with its native rollback and finish actions. Standalone PUT and structured edits to sidecar devices during upgrade are outside this editor's scope.
 
 Each new mapping explicitly supplies an absolute host path, absolute container path and distinct r/w/m permissions. The local editor allows at most32 mappings, rejects incomplete rows/control characters/duplicate target paths, and preserves accepted mapping strings exactly until an explicit edit. Opaque legacy strings remain visible in the draft and are not silently rewritten; submitting unsupported formats requires returning to the native form with this editor off. The frontend does not prove a path exists or is an allowed device on a host; native authorization and Docker still decide.
 

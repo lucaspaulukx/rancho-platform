@@ -17,6 +17,7 @@ import {
   imageUpgradePayload,
   supportsImageUpgrade,
   configurationUpgradePayload,
+  DeviceUpgradeValidationError,
 } from '../service-upgrade';
 import { ServiceUpgradeForm } from './ServiceUpgradeForm';
 import { lifecyclePayload } from '../lifecycle-actions';
@@ -199,6 +200,12 @@ function ResourcePanelContext({
       const signal = scope.signal();
       const current = await api<Resource>(resource.links.self, undefined, undefined, signal);
       scope.resource(current, resource);
+      if (payload.editDevices === true) {
+        if (!app.config.modules.workloadDeviceUpgrades)
+          throw new DeviceUpgradeValidationError('deviceUpgrade.error.disabled');
+        if (!imageUpgrade || !scope.environment)
+          throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
+      }
       if (mode === 'edit' || mode === 'scale') {
         if (!schema?.links.self) throw new Error('O schema de edição não está disponível.');
         const permission = await api<Schema>(schema.links.self, undefined, undefined, signal);
@@ -234,7 +241,8 @@ function ResourcePanelContext({
           payload.editResources === true ||
           payload.editCpuResources === true ||
           payload.editSecurity === true ||
-          payload.editUlimits === true)
+          payload.editUlimits === true ||
+          payload.editDevices === true)
       ) {
         if (payload.editBindings === true && !app.config.modules.workloadConfigUpgrades)
           throw new Error('A edição de portas/volumes está desativada.');
@@ -271,7 +279,7 @@ function ResourcePanelContext({
             : await Promise.all(
                 names.map((name) =>
                   api<Schema>(
-                    `projects/${app.project?.id}/schemas/${name}`,
+                    `projects/${scope.environment}/schemas/${name}`,
                     undefined,
                     undefined,
                     signal,
@@ -279,6 +287,12 @@ function ResourcePanelContext({
                 ),
               );
         scope.assertCurrent();
+        if (
+          payload.editDevices === true &&
+          payload.editSidecars !== true &&
+          names.some((name, index) => contracts[index]?.id !== name)
+        )
+          throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
         const freshSchemas = {
           ...schemas.data,
           ...Object.fromEntries(contracts.map((v) => [v.id, v])),
@@ -544,6 +558,7 @@ function ResourcePanelContext({
                     resourcesEnabled={app.config.modules.workloadResourceUpgrades}
                     securityEnabled={app.config.modules.workloadSecurityUpgrades}
                     ulimitsEnabled={app.config.modules.workloadUlimitUpgrades}
+                    devicesEnabled={app.config.modules.workloadDeviceUpgrades}
                     resource={resource}
                     schemas={schemas.data || {}}
                     onSubmit={(payload) => mutation.mutate(payload)}

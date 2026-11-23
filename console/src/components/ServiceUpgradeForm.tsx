@@ -1,4 +1,7 @@
 import { UlimitEditor } from './UlimitEditor';
+import { DeviceEditor } from './DeviceEditor';
+import { DeviceValidationError } from '../workload-devices';
+import { useI18n } from '../i18n/provider';
 import { editableUlimits } from '../workload-ulimits';
 import { CapabilityEditor } from './CapabilityEditor';
 import { MemoryEditor } from './MemoryEditor';
@@ -20,13 +23,15 @@ import {
   supportsCpuResourceUpgrade,
   supportsSecurityUpgrade,
   supportsUlimitUpgrade,
+  supportsDeviceUpgrade,
+  DeviceUpgradeValidationError,
   securityValues,
 } from '../service-upgrade';
 import { WorkloadBindingsEditor } from './WorkloadBindingsEditor';
 import { HealthCheckEditor } from './HealthCheckEditor';
 import { SidecarsEditor, MapField } from './SchemaForm';
 import { SchedulingEditor } from './SchedulingEditor';
-import { Alert, CheckboxField, Confirm, Field } from './ui';
+import { Alert, Button, CheckboxField, Confirm, Field } from './ui';
 
 export function ServiceUpgradeForm({
   resource,
@@ -38,6 +43,7 @@ export function ServiceUpgradeForm({
   resourcesEnabled = false,
   securityEnabled = false,
   ulimitsEnabled = false,
+  devicesEnabled = false,
   onSubmit,
   onDirtyChange,
   busy,
@@ -51,18 +57,22 @@ export function ServiceUpgradeForm({
   resourcesEnabled?: boolean;
   securityEnabled?: boolean;
   ulimitsEnabled?: boolean;
+  devicesEnabled?: boolean;
   schemas: Record<string, Schema>;
   onSubmit: (values: Record<string, unknown>) => void;
   onDirtyChange: (dirty: boolean) => void;
   busy: boolean;
   error: Error | null;
 }) {
+  const { t } = useI18n();
   const current = imageName((resource.launchConfig as Record<string, unknown>)?.imageUuid);
   const [image, setImage] = useState(current);
   const [batchSize, setBatch] = useState('1');
   const [intervalMillis, setInterval] = useState('2000');
   const [startFirst, setFirst] = useState(false);
-  const [validation, setValidation] = useState('');
+  const [validation, setValidation] = useState<
+    string | DeviceValidationError | DeviceUpgradeValidationError
+  >('');
   const launch = resource.launchConfig as Record<string, unknown>;
   const available = bindingsEnabled && supportsConfigurationUpgrade(resource, schemas);
   const [editBindings, setEditBindings] = useState(false);
@@ -92,6 +102,9 @@ export function ServiceUpgradeForm({
   const ulimitsAvailable = ulimitsEnabled && supportsUlimitUpgrade(resource, schemas);
   const [editUlimits, setEditUlimits] = useState(false);
   const [ulimits, setUlimits] = useState(() => editableUlimits(launch?.ulimits));
+  const devicesAvailable = devicesEnabled && supportsDeviceUpgrade(resource, schemas);
+  const [editDevices, setEditDevices] = useState(false);
+  const [devices, setDevices] = useState<unknown>(() => launch?.devices ?? []);
   const editingConfiguration =
     (available && editBindings) ||
     (healthAvailable && editHealthCheck) ||
@@ -100,7 +113,8 @@ export function ServiceUpgradeForm({
     (resourceAvailable && editResources) ||
     (cpuAvailable && editCpuResources) ||
     (securityAvailable && editSecurity) ||
-    (ulimitsAvailable && editUlimits);
+    (ulimitsAvailable && editUlimits) ||
+    (devicesAvailable && editDevices);
   const [ports, setPorts] = useState(launch?.ports ?? []),
     [volumes, setVolumes] = useState(launch?.dataVolumes ?? []);
   const [review, setReview] = useState<Record<string, unknown> | null>(null);
@@ -114,6 +128,7 @@ export function ServiceUpgradeForm({
       startFirst,
       ...(securityAvailable && editSecurity ? { editSecurity: true, ...security } : {}),
       ...(ulimitsAvailable && editUlimits ? { editUlimits: true, ulimits } : {}),
+      ...(devicesAvailable && editDevices ? { editDevices: true, devices } : {}),
       ...(resourceAvailable && editResources
         ? { editResources: true, memory, memoryReservation: reservation }
         : {}),
@@ -132,7 +147,13 @@ export function ServiceUpgradeForm({
       if (editingConfiguration) setReview(values);
       else onSubmit(values);
     } catch (caught) {
-      setValidation(caught instanceof Error ? caught.message : 'Revise a atualização.');
+      setValidation(
+        caught instanceof DeviceValidationError || caught instanceof DeviceUpgradeValidationError
+          ? caught
+          : caught instanceof Error
+            ? caught.message
+            : 'Revise a atualização.',
+      );
     }
   }
   return (
@@ -240,6 +261,39 @@ export function ServiceUpgradeForm({
                   onDirtyChange(true);
                 }}
               />
+            </>
+          )}
+          {devicesAvailable && (
+            <CheckboxField
+              label={t('deviceUpgradeForm.edit')}
+              checked={editDevices}
+              onChange={(event) => {
+                setEditDevices(event.target.checked);
+                onDirtyChange(true);
+              }}
+            />
+          )}
+          {devicesAvailable && editDevices && (
+            <>
+              <Alert tone="info">{t('deviceUpgradeForm.impact')}</Alert>
+              <DeviceEditor
+                value={devices}
+                onChange={(value) => {
+                  setDevices(value);
+                  onDirtyChange(true);
+                }}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={Array.isArray(devices) && devices.length === 0}
+                onClick={() => {
+                  setDevices([]);
+                  onDirtyChange(true);
+                }}
+              >
+                {t('deviceUpgradeForm.reset')}
+              </Button>
             </>
           )}
           {securityAvailable && (
@@ -427,7 +481,18 @@ export function ServiceUpgradeForm({
             Após a troca, acompanhe o estado nesta tela. Concluir atualização e Reverter atualização
             aparecem conforme as ações disponíveis no Rancher.
           </p>
-          {(validation || error) && <Alert tone="danger">{validation || error?.message}</Alert>}
+          {(validation || error) && (
+            <Alert tone="danger">
+              {validation instanceof DeviceValidationError ||
+              validation instanceof DeviceUpgradeValidationError
+                ? t(validation.key)
+                : validation ||
+                  (error instanceof DeviceValidationError ||
+                  error instanceof DeviceUpgradeValidationError
+                    ? t(error.key)
+                    : error?.message)}
+            </Alert>
+          )}
         </fieldset>
       </form>
       <Confirm
@@ -435,8 +500,16 @@ export function ServiceUpgradeForm({
         onOpenChange={(open) => {
           if (!open && !busy) setReview(null);
         }}
-        title="Atualizar configuração do serviço?"
-        description={`Serviço ${resource.name || resource.id}. Portas publicadas podem mudar o acesso; alterar montagens pode tornar dados anteriores indisponíveis. Editar ou remover sidecars substitui containers auxiliares e pode afetar dados/rede. Verificações de saúde podem recriar containers ou interromper a atualização se o endpoint falhar. O Rancher substituirá containers conforme a estratégia escolhida. Revise os campos antes de confirmar.`}
+        title={
+          review?.editDevices === true
+            ? t('deviceUpgradeForm.confirmTitle')
+            : 'Atualizar configuração do serviço?'
+        }
+        description={
+          review?.editDevices === true
+            ? t('deviceUpgradeForm.confirmDescription', { service: resource.name || resource.id })
+            : `Serviço ${resource.name || resource.id}. Portas publicadas podem mudar o acesso; alterar montagens pode tornar dados anteriores indisponíveis. Editar ou remover sidecars substitui containers auxiliares e pode afetar dados/rede. Verificações de saúde podem recriar containers ou interromper a atualização se o endpoint falhar. O Rancher substituirá containers conforme a estratégia escolhida. Revise os campos antes de confirmar.`
+        }
         busy={busy}
         onConfirm={() => {
           if (review) {
