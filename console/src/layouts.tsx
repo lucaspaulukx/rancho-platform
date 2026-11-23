@@ -26,6 +26,7 @@ import { Brand } from './components/Brand';
 export { Brand };
 import { EnvironmentSwitcher } from './components/EnvironmentSwitcher';
 import { PageErrorBoundary } from './components/PageErrorBoundary';
+import { version } from '../package.json';
 const About = lazy(() =>
   import('./components/About').then((module) => ({ default: module.About })),
 );
@@ -365,7 +366,7 @@ export function AppShell() {
         <footer className="workspace-footer">
           <span>{app.config.branding ? 'Rancher Community Console' : 'Rancher'}</span>
           <span>
-            {t('shell.footer.modern')} <span className="version-pill">v0.1.0</span>
+            {t('shell.footer.modern')} <span className="version-pill">v{version}</span>
           </span>
         </footer>
       </div>
