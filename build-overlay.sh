@@ -53,6 +53,9 @@ for file in StatsAccess StatsPayloadTransport ContainerStatsLinkHandler HostStat
 done
 printf '%s\n' "$ROOT/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditServiceImpl.java" "$ROOT/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditCredentialRedactor.java" "$ROOT/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditLogOutPutFilter.java" >> /lab/sources
 /usr/lib/jvm/zulu-8-amd64/bin/javac -encoding UTF-8 -source 8 -target 8 -cp "$WAR/WEB-INF/lib/*:$WAR/WEB-INF/jetty/*" -d /lab/classes @/lab/sources
+# Rebuild the exploded WAR launcher with the platform class loader as its parent.
+/usr/lib/jvm/zulu-8-amd64/bin/javac -encoding UTF-8 -source 8 -target 8 -cp "$WAR:$LIB/*:$WAR/WEB-INF/jetty/*" -d "$WAR" \
+    "$ROOT/code/framework/launcher/src/main/java/io/cattle/platform/launcher/Main.java"
 cd /lab/classes
 mkdir -p io/cattle/platform/iaas/api/auth/localrbac/migrations
 cp /lab/schema/001-local-groups.sql io/cattle/platform/iaas/api/auth/localrbac/migrations/001-local-groups.sql

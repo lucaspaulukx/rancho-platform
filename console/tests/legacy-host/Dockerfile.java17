@@ -1,0 +1,18 @@
+ARG BACKEND_IMAGE=rancho-backend:local
+FROM golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 AS runtime
+ADD --checksum=sha256:9f41bf88c7900c7097444a1bdeb84146ae692bc08842490ab098063c74bf9a8a https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.21%2B9/OpenJDK17U-jre_x64_linux_hotspot_17.0.21_9.tar.gz /tmp/jre.tar.gz
+RUN --network=none mkdir /java && tar -xzf /tmp/jre.tar.gz -C /java --strip-components=1
+
+FROM scratch AS jaxb
+ADD --checksum=sha256:27d85fc134c9271d5c79d3300fc4669668f017e72409727c428f54f2417f04cd https://repo.maven.apache.org/maven2/com/sun/istack/istack-commons-runtime/3.0.12/istack-commons-runtime-3.0.12.jar /istack-commons-runtime-3.0.12.jar
+ADD --checksum=sha256:02156773e4ae9d048d14a56ad35d644bee9f1052a791d072df3ded3c656e6e1a https://repo.maven.apache.org/maven2/com/sun/activation/jakarta.activation/1.2.2/jakarta.activation-1.2.2.jar /jakarta.activation-1.2.2.jar
+ADD --checksum=sha256:c04539f472e9a6dd0c7685ea82d677282269ab8e7baca2e14500e381e0c6cec5 https://repo.maven.apache.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/2.3.3/jakarta.xml.bind-api-2.3.3.jar /jakarta.xml.bind-api-2.3.3.jar
+ADD --checksum=sha256:ba88e5bde7c0d878c3e1f2ec2fcabaf51d201eaf93b3bb9cfecfc1f11b2304d4 https://repo.maven.apache.org/maven2/org/glassfish/jaxb/jaxb-runtime/2.3.9/jaxb-runtime-2.3.9.jar /jaxb-runtime-2.3.9.jar
+ADD --checksum=sha256:973018b87af911ecf6e6d861dd0d6a477e4d8ae6a883ec5d073d3df1330b87f0 https://repo.maven.apache.org/maven2/org/glassfish/jaxb/txw2/2.3.9/txw2-2.3.9.jar /txw2-2.3.9.jar
+
+FROM ${BACKEND_IMAGE}
+COPY --from=runtime /java /opt/rancho-java17
+COPY --from=jaxb / /usr/share/cattle/war/WEB-INF/lib/
+RUN --network=none /opt/rancho-java17/bin/java -version
+ENV JAVA_HOME=/opt/rancho-java17 PATH=/opt/rancho-java17/bin:$PATH
+ENV CATTLE_JAVA_OPTS="-Xms128m -Xmx1536m --add-opens=java.base/java.lang=ALL-UNNAMED"
