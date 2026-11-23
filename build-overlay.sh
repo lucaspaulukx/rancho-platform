@@ -51,6 +51,9 @@ install -m 0644 /lab/runtime-jars/bouncycastle/*.jar "$LIB/"
 # The upgraded Nimbus runtime uses its own shaded JSON parser.
 test -f "$LIB/json-smart-1.3.1.jar"
 rm "$LIB/json-smart-1.3.1.jar"
+test -f "$LIB/snakeyaml-1.15.jar"
+rm "$LIB/snakeyaml-1.15.jar"
+install -m 0644 /lab/runtime-jars/yaml/snakeyaml-2.7.jar "$LIB/"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$ROOT/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java" >> /lab/sources
@@ -64,11 +67,15 @@ for file in StatsAccess StatsPayloadTransport ContainerStatsLinkHandler HostStat
 done
 printf '%s\n' "$ROOT/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditServiceImpl.java" "$ROOT/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditCredentialRedactor.java" "$ROOT/code/framework/auditing/src/main/java/io/cattle/platform/iaas/api/auditing/AuditLogOutPutFilter.java" >> /lab/sources
 printf '%s\n' "$ROOT/code/framework/java-server/src/main/java/io/github/ibuildthecloud/gdapi/request/parser/DefaultApiRequestParser.java" "$ROOT/code/framework/java-server/src/main/java/io/github/ibuildthecloud/gdapi/servlet/ApiRequestFilterDelegate.java" >> /lab/sources
+printf '%s\n' "$ROOT/code/implementation/system-stack/src/main/java/io/cattle/platform/systemstack/catalog/impl/CatalogServiceImpl.java" \
+    "$ROOT/code/iaas/service-discovery/api/src/main/java/io/cattle/platform/servicediscovery/api/service/impl/ServiceDiscoveryApiServiceImpl.java" >> /lab/sources
 /usr/lib/jvm/zulu-8-amd64/bin/javac -encoding UTF-8 -source 8 -target 8 -cp "$WAR/WEB-INF/lib/*:$WAR/WEB-INF/jetty/*" -d /lab/classes @/lab/sources
 # Rebuild the exploded WAR launcher with the platform class loader as its parent.
 /usr/lib/jvm/zulu-8-amd64/bin/javac -encoding UTF-8 -source 8 -target 8 -cp "$WAR:$LIB/*:$WAR/WEB-INF/jetty/*" -d "$WAR" \
     "$ROOT/code/framework/launcher/src/main/java/io/cattle/platform/launcher/Main.java"
 cd /lab/classes
+/usr/lib/jvm/zulu-8-amd64/bin/jar uf "$LIB/cattle-system-stack-0.5.0-SNAPSHOT.jar" io/cattle/platform/systemstack/catalog/impl/CatalogServiceImpl*.class
+/usr/lib/jvm/zulu-8-amd64/bin/jar uf "$LIB/cattle-iaas-service-discovery-api-0.5.0-SNAPSHOT.jar" io/cattle/platform/servicediscovery/api/service/impl/ServiceDiscoveryApiServiceImpl*.class
 /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$LIB/cattle-framework-java-server-0.5.0-SNAPSHOT.jar" io/github/ibuildthecloud/gdapi/request/parser/DefaultApiRequestParser.class io/github/ibuildthecloud/gdapi/servlet/ApiRequestFilterDelegate.class
 mkdir -p io/cattle/platform/iaas/api/auth/localrbac/migrations
 cp /lab/schema/001-local-groups.sql io/cattle/platform/iaas/api/auth/localrbac/migrations/001-local-groups.sql
