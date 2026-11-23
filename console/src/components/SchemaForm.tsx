@@ -306,8 +306,15 @@ function JsonField({
 }) {
   const { t } = useI18n();
   const [text, setText] = useState(value === undefined ? '' : JSON.stringify(value, null, 2));
+  const input = useRef<HTMLTextAreaElement>(null);
+  const [invalid, setInvalid] = useState(false);
+  useEffect(() => {
+    input.current?.setCustomValidity(invalid ? t('schemaForm.invalidJson') : '');
+  }, [invalid, t]);
   return (
     <textarea
+      ref={input}
+      dir="ltr"
       id={id}
       className="code-input"
       rows={6}
@@ -319,8 +326,10 @@ function JsonField({
         try {
           const parsed = e.target.value ? JSON.parse(e.target.value) : undefined;
           e.target.setCustomValidity('');
+          setInvalid(false);
           onChange(parsed);
         } catch {
+          setInvalid(true);
           e.target.setCustomValidity(t('schemaForm.invalidJson'));
         }
       }}

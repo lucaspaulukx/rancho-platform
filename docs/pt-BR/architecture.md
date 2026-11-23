@@ -50,6 +50,8 @@ Grupos, contas, diálogos de contas locais, diagnóstico de acesso efetivo, chav
 
 ## Dados e mutações
 
+O editor de JSON bruto usa direção LTR para o código e preserva rascunhos inválidos. As mensagens de validação do navegador acompanham a troca de idioma no lugar e são limpas quando o JSON se torna válido.
+
 Tabelas compartilhadas, títulos de recursos e controles de criação se alinham ao início da direção de texto ativa. O menu de ações se reposiciona quando a direção muda, preservando o foco do teclado e o estado aberto.
 
 Listas de recursos e workloads, ações de recursos, edição de environments, repositórios de catálogo por environment e políticas de rede usam mensagens compartilhadas. O painel de logs e terminal traduz controles e estados da conexão no lugar. A troca de idioma preserva a conexão ativa, o filtro, os comandos nativos e o conteúdo dos logs.
