@@ -14,6 +14,7 @@ import secrets
 import shlex
 import subprocess
 import threading
+import traceback
 import time
 import urllib.parse
 
@@ -44,7 +45,7 @@ class Probe:
                 try: self.events.put(json.loads(line))
                 except ValueError: self.events.put({'type': 'probe-error'})
         threading.Thread(target=reader, daemon=True).start()
-        self.send({'url': url, 'session': next(c.value for c in session.cookies if c.name == 'token'),
+        self.send({'url': url, 'session': next(c.value for c in session.cookies if c.name == 'token'), 'payload': access.get('payload'),
                    'mode': mode, 'marker': marker, 'dockerId': instance['externalId'], 'instanceId': instance['id'],
                    'instanceUuid': instance['uuid'],
                    'runtimeModules': str(runtime / 'node_modules'), 'maxDurationMs': max_duration_ms, 'expectedPort': proxy_port})
@@ -84,7 +85,7 @@ class Probe:
             except Exception: self.process.kill(); self.process.wait()
 
 
-def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, console_proxy=False, service_scale=1):
+def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, console_proxy=False, service_scale=1, payload_transport=False, frontend_probe=False):
     assert isinstance(hold_seconds, int) and 0 <= hold_seconds <= 600
     assert not STATE.exists(), 'Recover previous owned host stream fixture before repeating.'
     assert isinstance(service_scale, int) and 1 <= service_scale <= 5 and (service_scale == 1 or service_metrics)
@@ -96,7 +97,7 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
     stack = service = None
     probes = {}
     controls = []
-    result = {'status': 'failed', 'stage': 'preflight', 'cleanupComplete': False, 'scope': 'own local admin session; raw logs/exec/container metrics; one host', 'serviceMetricsIncluded': service_metrics, 'serviceScale': service_scale, 'proxyPort': proxy_port}
+    result = {'status': 'failed', 'stage': 'preflight', 'cleanupComplete': False, 'scope': 'own local admin session; raw logs/exec/container metrics; one host', 'serviceMetricsIncluded': service_metrics, 'serviceScale': service_scale, 'proxyPort': proxy_port, 'payloadTransportRequested': payload_transport}
     def stage(value):
         result['stage'] = value
         print('STAGE: ' + value, flush=True)
@@ -124,7 +125,7 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
             assert link
             target = urllib.parse.urlparse(link)
             assert target.netloc == 'localhost:18080' and target.path.startswith('/v2-beta/' + BASE)
-            code, value, _ = session.request(link)
+            code, value, _ = session.request(link, extra_headers={'X-Rancher-Stats-Payload': '1'} if payload_transport else None)
         else:
             action = resource['actions']['execute' if mode == 'exec' else 'logs']
             target = urllib.parse.urlparse(action)
@@ -135,9 +136,18 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
             code, value, _ = session.request(action, payload, 'POST')
         assert code in (200, 201, 202) and isinstance(value, dict) and value.get('url') and value.get('token')
         result.setdefault('accessTokenChars', {})[mode] = len(value['token'])
+        negotiated = value.get('payload') is not None
+        if negotiated:
+            assert payload_transport and isinstance(value['payload'], str) and len(value['payload']) <= 16*1024*1024
+            result.setdefault('metadataResponses', {})[mode] = session.response_metadata
+            assert 'no-store' in {v.strip().lower() for v in session.response_metadata['cacheControl'].split(',')}
+            result.setdefault('negotiatedPayloadChars', {})[mode] = len(value['payload'])
         if runtime_guard:
             def decode(raw): return json.loads(base64.urlsafe_b64decode(raw.split('.')[1] + '==='))
-            outer = decode(value['token'])
+            outer = decode(value['payload'] if negotiated else value['token'])
+            if negotiated:
+                envelope = decode(value['token'])
+                assert envelope.get('payload') is True and 'rancherNegotiation' in envelope and 'hostUuid' not in envelope
             pairs = [(outer, urllib.parse.urlparse(value['url']).path)]
             if mode == 'service-metrics':
                 assert isinstance(outer.get('service'), list) and len(outer['service']) == service_scale
@@ -206,6 +216,21 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
                     code = probe.wait('negative-' + variant)['status']
                     assert code in (401, 403, 404)
                     result.setdefault('negativeHandshakes', {}).setdefault(mode, {})[variant] = code
+        if frontend_probe:
+            assert payload_transport and service_metrics and console_proxy and service_scale >= 3
+            stage('browser-transport')
+            runtime = Path.home() / '.cache/codex-runtimes/codex-primary-runtime/dependencies/node'
+            executable = Path.home() / 'AppData/Local/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-win64/chrome-headless-shell.exe'
+            assert executable.is_file()
+            browser_input = {'runtimeModules': str(runtime / 'node_modules'), 'browserExecutable': str(executable),
+                             'instanceId': instance['id'], 'instanceName': instance['name'], 'serviceId': service['id'],
+                             'cookies': [{'name': c.name, 'value': c.value} for c in watched.cookies if c.name in ('token','CSRF')]}
+            browser = subprocess.run([str(runtime / 'bin/node.exe'), str(ROOT / 'console/tests/e2e/metrics-payload.cjs')],
+                                     input=json.dumps(browser_input), text=True, encoding='utf-8', capture_output=True,
+                                     timeout=80, env=dict(os.environ, DEBUG='', NODE_DEBUG=''))
+            browser_result = json.loads(browser.stdout)
+            result['browserTransport'] = browser_result
+            assert browser.returncode == 0 and browser_result.get('status') == 'passed'
         if hold_seconds:
             assert runtime_guard and hold_seconds > max(result['originalLeaseSeconds']) + 2
             stage('hold-past-original-proof-expiry')
@@ -250,12 +275,13 @@ def main(*, identity_factory=None, hold_seconds=0, service_metrics=False, consol
         for mode, probe in probes.items():
             result['streams'][mode].update(probe.finish())
         result['revocationEnforced'] = result['protectedHttpAfterRevocation'] in (401, 403, 404) and all(
-            value['freshControlHealthy'] and value['newHandshake'] in (401, 403, 404) and value['closed'] and value['after'] == 0
+            value['freshControlHealthy'] and value['newHandshake'] in (401, 403, 404) and value['closed'] and value['closeCode'] == 1008 and value['after'] == 0
             for value in result['streams'].values())
         result['status'] = 'passed' if result['revocationEnforced'] else 'failed'
         result['stage'] = 'measured'
     except Exception as error:
         result['errorType'] = type(error).__name__
+        result['errorLocations'] = [{'file': Path(frame.filename).name, 'line': frame.lineno} for frame in traceback.extract_tb(error.__traceback__)]
         result['probeEvent'] = getattr(error, 'probe_event', None)
         result['probeHttpStatus'] = getattr(error, 'http_status', None)
         # No exception message: native errors may contain payloads or private URLs.

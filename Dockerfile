@@ -12,6 +12,7 @@ FROM rancher/server:v1.6.30@sha256:95b55603122c28baea4e8d94663aa34ad770bbc624a9e
 COPY --from=stream-proxy /out/websocket-proxy /usr/bin/websocket-proxy
 COPY --from=stream-proxy /out/licenses /usr/share/doc/community-websocket-proxy
 ENV RANCHER_HOST_STREAM_PROXY_PROTOCOL=1
+ENV RANCHER_METRICS_PAYLOAD_PROXY_PROTOCOL=1
 COPY cattle /lab/cattle
 COPY legacy-ui /lab/web
 COPY build-overlay.sh /lab/build-overlay.sh

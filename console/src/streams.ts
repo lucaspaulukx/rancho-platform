@@ -31,6 +31,51 @@ export function websocketAddress(endpoint: string, token: string, classicUrl: st
   return url.toString();
 }
 
+export interface MetricsAccess {
+  url: string;
+  token: string;
+  payload?: unknown;
+}
+const statsPayloadLimit = 16 * 1024 * 1024;
+const signedToken = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+function tokenPart(value: string) {
+  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+  const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+  return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)) as Record<
+    string,
+    unknown
+  >;
+}
+export function metricsConnection(access: MetricsAccess, classicUrl: string, enabled: boolean) {
+  if (
+    typeof access?.url !== 'string' ||
+    typeof access.token !== 'string' ||
+    !access.token ||
+    access.token.length > statsPayloadLimit
+  )
+    throw new Error('O servidor retornou uma conexão de métricas inválida.');
+  const address = websocketAddress(access.url, access.token, classicUrl);
+  if (access.payload === undefined || access.payload === null) return { address };
+  const url = new URL(address);
+  if (
+    !enabled ||
+    typeof access.payload !== 'string' ||
+    !access.payload ||
+    access.payload.length > statsPayloadLimit ||
+    access.token.length > 4096 ||
+    !signedToken.test(access.token) ||
+    !signedToken.test(access.payload) ||
+    !/^\/v1\/(containerstats|hoststats)(\/|$)/.test(url.pathname) ||
+    url.hash ||
+    [...url.searchParams.keys()].some((name) => name !== 'token')
+  )
+    throw new Error('O servidor retornou uma negociação de métricas inválida.');
+  const [header, claims] = access.token.split('.');
+  if (tokenPart(header).alg !== 'RS256' || tokenPart(claims).payload !== true)
+    throw new Error('O servidor retornou um envelope de métricas inválido.');
+  return { address, payload: access.payload };
+}
+
 export { encodeUtf8Base64 as encodeTerminal } from './encoding';
 export function decodeTerminal(text: string, decoder?: TextDecoder) {
   const raw = atob(text);

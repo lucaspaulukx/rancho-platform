@@ -28,7 +28,8 @@ function openProbe(variant) {
       parts[2] = (parts[2][0] === 'a' ? 'b' : 'a') + parts[2].slice(1);
       target.searchParams.set('token', parts.join('.'));
     } else if (variant === 'proof-only') {
-      let claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+      const source = input.payload || raw;
+      let claims = JSON.parse(Buffer.from(source.split('.')[1], 'base64url').toString('utf8'));
       if (input.mode === 'service-metrics') claims = JSON.parse(Buffer.from(claims.service[0].token.split('.')[1], 'base64url').toString('utf8'));
       assert.equal(typeof claims.rancherStreamProof, 'string');
       target.searchParams.set('token', claims.rancherStreamProof);
@@ -83,6 +84,11 @@ inputLines.on('line', line => {
     socket.on('upgrade', response => { stats.handshake = response.statusCode; });
     socket.on('unexpected-response', (_, response) => { stats.handshake = response.statusCode; emit({ type: 'handshake-rejected', status: response.statusCode }); response.destroy(); });
     socket.on('open', () => {
+      if (input.payload != null) {
+        assert.equal(typeof input.payload, 'string');
+        assert(input.payload.length <= 16*1024*1024);
+        socket.send(input.payload);
+      }
       emit({ type: 'ready', handshake: stats.handshake, port: Number(url.port) });
       if (input.mode === 'exec') socket.send(Buffer.from(input.marker + '-before\n').toString('base64'));
     });

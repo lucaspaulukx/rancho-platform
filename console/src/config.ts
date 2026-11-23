@@ -34,6 +34,7 @@ export const moduleNames = [
   'catalog',
   'observability',
   'metrics',
+  'metricsPayloadTransport',
   'admin',
   'api',
   'apiKeys',
@@ -107,7 +108,10 @@ export function validateConfig(value: unknown): ConsoleConfig {
   const modules = Object.fromEntries(
     moduleNames.map((name) => [
       name,
-      legacy && !Object.prototype.hasOwnProperty.call(supplied, name) ? false : supplied[name],
+      (legacy || name === 'metricsPayloadTransport') &&
+      !Object.prototype.hasOwnProperty.call(supplied, name)
+        ? false
+        : supplied[name],
     ]),
   );
   const c = { ...source, schemaVersion: 1, modules } as unknown as ConsoleConfig;

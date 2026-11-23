@@ -11,7 +11,7 @@ import {
   type MetricCounters,
   type MetricPoint,
 } from '../metrics';
-import { websocketAddress } from '../streams';
+import { metricsConnection, type MetricsAccess } from '../streams';
 import { useApp } from '../state';
 import { Alert, Badge, Button, Empty, Modal } from './ui';
 
@@ -38,6 +38,9 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
   const [error, setError] = useState('');
   const received = useRef(0);
   const enabled = app.config.modules.observability && app.config.modules.metrics;
+  const usePayload =
+    app.config.modules.metricsPayloadTransport === true &&
+    app.server?.effective?.METRICS_PAYLOAD_TRANSPORT_ENABLED === true;
   useEffect(() => {
     if (paused || !enabled) return;
     if (!app.project?.id || resource.accountId !== app.project.id) {
@@ -50,6 +53,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
       socket: WebSocket | undefined,
       previous: MetricCounters | undefined;
     let heartbeat: ReturnType<typeof setInterval> | undefined;
+    let pendingPayload: string | undefined;
     setStatus('connecting');
     setError('');
     received.current = 0;
@@ -75,16 +79,32 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
           !['active', 'running', 'reconnecting', 'updating-active'].includes(current.state || '')
         )
           throw new Error('Unavailable');
-        const access = await api<{ url: string; token: string }>(
+        const access = await api<MetricsAccess>(
           metricsLink(current)!,
           undefined,
           undefined,
           AbortSignal.any([controller.signal, AbortSignal.timeout(20_000)]),
+          usePayload ? { 'X-Rancher-Stats-Payload': '1' } : undefined,
         );
         if (disposed) return;
-        socket = new WebSocket(websocketAddress(access.url, access.token, app.config.classicUrl));
+        const connection = metricsConnection(access, app.config.classicUrl, usePayload);
+        pendingPayload = connection.payload;
+        socket = new WebSocket(connection.address);
         socket.onopen = () => {
-          if (disposed) socket?.close();
+          const payload = pendingPayload;
+          pendingPayload = undefined;
+          if (disposed) {
+            socket?.close();
+            return;
+          }
+          if (payload) {
+            try {
+              socket?.send(payload);
+            } catch {
+              setError('Não foi possível negociar a conexão de métricas.');
+              socket?.close();
+            }
+          }
         };
         socket.onmessage = (event) => {
           if (disposed || typeof event.data !== 'string') return;
@@ -103,9 +123,11 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
           }
         };
         socket.onerror = () => {
+          pendingPayload = undefined;
           if (!disposed) setError('A conexão de métricas falhou. Tente conectar novamente.');
         };
         socket.onclose = (event) => {
+          pendingPayload = undefined;
           if (heartbeat) clearInterval(heartbeat);
           if (!disposed) {
             setStatus('closed');
@@ -135,6 +157,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
             .catch(denied);
         }, 15_000);
       } catch {
+        pendingPayload = undefined;
         if (!disposed) {
           setError(
             'Não foi possível obter métricas deste recurso. Confira seu estado, a conectividade do agente e suas permissões.',
@@ -146,11 +169,12 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
     void connect();
     return () => {
       disposed = true;
+      pendingPayload = undefined;
       controller.abort();
       if (heartbeat) clearInterval(heartbeat);
       socket?.close();
     };
-  }, [resource.id, app.identity, app.project?.id, enabled, paused, attempt]);
+  }, [resource.id, app.identity, app.project?.id, enabled, usePayload, paused, attempt]);
   const latest = points.at(-1);
   function download() {
     const fields = [

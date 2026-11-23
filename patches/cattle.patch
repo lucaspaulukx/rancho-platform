@@ -320,8 +320,61 @@ index 0972b21..b88af50 100644
          if (token == null) {
              return null;
          }
+diff --git a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ContainerStatsLinkHandler.java b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ContainerStatsLinkHandler.java
+index d92daee..75b0545 100644
+--- a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ContainerStatsLinkHandler.java
++++ b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ContainerStatsLinkHandler.java
+@@ -10,6 +10,7 @@ import io.cattle.platform.core.model.Instance;
+ import io.cattle.platform.docker.util.DockerUtils;
+ import io.cattle.platform.host.model.HostApiAccess;
+ import io.cattle.platform.host.service.HostApiService;
++import io.cattle.platform.token.TokenService;
+ import io.cattle.platform.host.stats.utils.StatsConstants;
+ import io.cattle.platform.object.ObjectManager;
+ import io.github.ibuildthecloud.gdapi.context.ApiContext;
+@@ -28,6 +29,7 @@ import javax.inject.Inject;
+ import org.apache.commons.lang3.StringUtils;
+ 
+ public class ContainerStatsLinkHandler implements LinkHandler {
++    @Inject TokenService tokenService;
+ 
+     @Inject
+     HostApiService hostApiService;
+@@ -108,7 +110,7 @@ public class ContainerStatsLinkHandler implements LinkHandler {
+         statsAccess.setToken(apiAccess.getAuthenticationToken());
+         statsAccess.setUrl(url);
+ 
+-        return statsAccess;
++        return StatsPayloadTransport.prepare(statsAccess, request, tokenService);
+     }
+ 
+ }
+\ No newline at end of file
+diff --git a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/HostStatsLinkHandler.java b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/HostStatsLinkHandler.java
+index 0665c31..02be318 100644
+--- a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/HostStatsLinkHandler.java
++++ b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/HostStatsLinkHandler.java
+@@ -87,7 +87,7 @@ public class HostStatsLinkHandler implements LinkHandler {
+             statsAccess.setUrl(url.toString());
+ 
+             if (!project) {
+-                return statsAccess;
++                return StatsPayloadTransport.prepare(statsAccess, request, tokenService);
+             }
+ 
+             serviceStatsQuery.add(statsAccess);
+@@ -98,7 +98,7 @@ public class HostStatsLinkHandler implements LinkHandler {
+         meta.setToken(tokenService.generateToken(metaQueryPayload));
+         meta.setUrl(metaUrl);
+ 
+-        return meta;
++        return StatsPayloadTransport.prepare(meta, request, tokenService);
+     }
+ 
+ }
+\ No newline at end of file
 diff --git a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ServiceContainerStatsLinkHandler.java b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ServiceContainerStatsLinkHandler.java
-index 38c67d9..2b24a37 100644
+index 38c67d9..fc64222 100644
 --- a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ServiceContainerStatsLinkHandler.java
 +++ b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/ServiceContainerStatsLinkHandler.java
 @@ -81,7 +81,7 @@ public class ServiceContainerStatsLinkHandler implements LinkHandler {
@@ -346,6 +399,31 @@ index 38c67d9..2b24a37 100644
  
              StatsAccess statsAccess = new StatsAccess();
              statsAccess.setToken(apiAccess.getAuthenticationToken());
+@@ -106,7 +106,7 @@ public class ServiceContainerStatsLinkHandler implements LinkHandler {
+         meta.setToken(tokenService.generateToken(metaQueryPayload));
+         meta.setUrl(metaUrl);
+ 
+-        return meta;
++        return StatsPayloadTransport.prepare(meta, request, tokenService);
+     }
+ 
+ }
+\ No newline at end of file
+diff --git a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/StatsAccess.java b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/StatsAccess.java
+index 0b600be..241181c 100644
+--- a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/StatsAccess.java
++++ b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/StatsAccess.java
+@@ -7,6 +7,10 @@ public class StatsAccess {
+ 
+     String url;
+     String token;
++    String payload;
++
++    public String getPayload() { return payload; }
++    public void setPayload(String payload) { this.payload = payload; }
+ 
+     public String getUrl() {
+         return url;
 diff --git a/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java b/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
 index 40fe2eb..b7c2c10 100644
 --- a/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
@@ -429,7 +507,7 @@ index 931a830..62ea426 100644
          ".*\\.data" : "r",
          ".*\\.removeTime" : "r",
 diff --git a/resources/content/schema/user/user-auth.json b/resources/content/schema/user/user-auth.json
-index 209a46f..1bf6cf8 100644
+index 209a46f..6618014 100644
 --- a/resources/content/schema/user/user-auth.json
 +++ b/resources/content/schema/user/user-auth.json
 @@ -19,6 +19,14 @@
@@ -447,6 +525,14 @@ index 209a46f..1bf6cf8 100644
          "portRange": "cru",
  
          "apiKey" : "crud",
+@@ -533,6 +541,7 @@
+ 
+         "statsAccess" : "r",
+         "statsAccess.token" : "r",
++        "statsAccess.payload" : "r",
+         "statsAccess.url" : "r",
+ 
+         "storagePool": "r",
 diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CommunitySchemaMigrations.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CommunitySchemaMigrations.java
 new file mode 100644
 --- /dev/null
@@ -591,7 +677,7 @@ diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth
 new file mode 100644
 --- /dev/null
 +++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/CustomizationConfig.java
-@@ -0,0 +1,74 @@
+@@ -0,0 +1,78 @@
 +package io.cattle.platform.iaas.api.auth.localrbac;
 +
 +import java.util.*;
@@ -603,12 +689,13 @@ new file mode 100644
 +    private final Map<String,Boolean> effective = new LinkedHashMap<>();
 +    private final boolean oidcConfigured;
 +    private final boolean streamProxyConfigured;
++    private final boolean metricsProxyConfigured;
 +
 +    public CustomizationConfig(Map<String,String> env) {
-+        String[] names={"CUSTOMIZATION_ENABLED","SCHEMA_MIGRATIONS_ENABLED","HOST_STREAM_SESSION_GUARD_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
++        String[] names={"CUSTOMIZATION_ENABLED","SCHEMA_MIGRATIONS_ENABLED","METRICS_PAYLOAD_TRANSPORT_ENABLED","HOST_STREAM_SESSION_GUARD_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
 +            "ENV_CREATION_ADMIN_ONLY","DISABLE_AUTO_ENVIRONMENT","CATALOG_WRITE_GUARD_ENABLED","SESSION_ACCOUNT_GUARD_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED","OIDC_LOGIN_PREFLIGHT_ENABLED","OIDC_FEDERATED_LOGOUT_ENABLED","OIDC_ONLY","OIDC_AUTO_LOGIN","MODERN_UI_ENABLED"};
 +        for (String name:names) {
-+            boolean fallback=!(name.equals("HOST_STREAM_SESSION_GUARD_ENABLED") || name.equals("SCHEMA_MIGRATIONS_ENABLED") || name.equals("OIDC_FEDERATED_LOGOUT_ENABLED") || name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
++            boolean fallback=!(name.equals("METRICS_PAYLOAD_TRANSPORT_ENABLED") || name.equals("HOST_STREAM_SESSION_GUARD_ENABLED") || name.equals("SCHEMA_MIGRATIONS_ENABLED") || name.equals("OIDC_FEDERATED_LOGOUT_ENABLED") || name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
 +            String value=env.get("RANCHER_"+name);
 +            if(value!=null && !value.equals("true") && !value.equals("false")) { throw new IllegalArgumentException("Invalid boolean: RANCHER_"+name); }
 +            requested.put(name,value==null?fallback:Boolean.valueOf(value));
@@ -638,8 +725,10 @@ new file mode 100644
 +        effective.putAll(requested);
 +        boolean custom=requested.get("CUSTOMIZATION_ENABLED");
 +        streamProxyConfigured="1".equals(env.get("RANCHER_HOST_STREAM_PROXY_PROTOCOL"));
++        metricsProxyConfigured="1".equals(env.get("RANCHER_METRICS_PAYLOAD_PROXY_PROTOCOL"));
++        if(custom && requested.get("METRICS_PAYLOAD_TRANSPORT_ENABLED") && !metricsProxyConfigured) { throw new IllegalArgumentException("Metrics payload transport requires a compatible proxy build"); }
 +        if(custom && requested.get("HOST_STREAM_SESSION_GUARD_ENABLED") && !streamProxyConfigured) { throw new IllegalArgumentException("Host stream guard requires a compatible proxy build"); }
-+        for(String name:new String[]{"SCHEMA_MIGRATIONS_ENABLED","HOST_STREAM_SESSION_GUARD_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED"}) {
++        for(String name:new String[]{"SCHEMA_MIGRATIONS_ENABLED","METRICS_PAYLOAD_TRANSPORT_ENABLED","HOST_STREAM_SESSION_GUARD_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED"}) {
 +            effective.put(name,custom && requested.get(name));
 +        }
 +        effective.put("OIDC_ENABLED",effective.get("OIDC_ENABLED") && oidcConfigured);
@@ -658,6 +747,7 @@ new file mode 100644
 +        result.put("effective",Collections.unmodifiableMap(effective));
 +        Map<String,Boolean> available=new LinkedHashMap<>();
 +        for(String key:requested.keySet()) { available.put(key,!key.equals("MODERN_UI_ENABLED")); }
++        available.put("METRICS_PAYLOAD_TRANSPORT_ENABLED",metricsProxyConfigured);
 +        available.put("HOST_STREAM_SESSION_GUARD_ENABLED",streamProxyConfigured);
 +        available.put("OIDC_ENABLED",oidcConfigured);
 +        available.put("OIDC_FEDERATED_LOGOUT_ENABLED",oidcConfigured);
@@ -1636,7 +1726,7 @@ diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth
 new file mode 100644
 --- /dev/null
 +++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/UiHostStreamSessionGuard.java
-@@ -0,0 +1,220 @@
+@@ -0,0 +1,224 @@
 +package io.cattle.platform.iaas.api.auth.localrbac;
 +
 +import io.cattle.platform.api.auth.Identity;
@@ -1677,7 +1767,10 @@ new file mode 100644
 +    public boolean enabled() { return CustomizationConfig.CURRENT.enabled("HOST_STREAM_SESSION_GUARD_ENABLED"); }
 +
 +    public Map<String,Object> data(ApiRequest request, Host host, Map<String,Object> input, String... segments) {
-+        if (!enabled()) { return input; }
++        if (!enabled()) {
++            if (CustomizationConfig.CURRENT.enabled("METRICS_PAYLOAD_TRANSPORT_ENABLED") && !compatibleProxy()) { throw new ClientVisibleException(503,"StreamGuardUnavailable"); }
++            return input;
++        }
 +        if (!compatibleProxy()) { throw new ClientVisibleException(503, "StreamGuardUnavailable"); }
 +        Policy policy = ApiUtils.getPolicy();
 +        if (!SecurityConstants.SECURITY.get() || policy == null || policy.getAuthenticatedAsAccountId() < 1) {
@@ -1851,11 +1944,85 @@ new file mode 100644
 +                while ((next = input.read()) != -1) { if (bytes.size() >= 1024) { return false; } bytes.write(next); }
 +            }
 +            Map<?,?> state = new com.fasterxml.jackson.databind.ObjectMapper().readValue(new String(bytes.toByteArray(),StandardCharsets.UTF_8), Map.class);
-+            proxyReady = Boolean.TRUE.equals(state.get("enabled")) && Integer.valueOf(1).equals(state.get("protocol"));
++            proxyReady = Integer.valueOf(1).equals(state.get("protocol")) && (!enabled() || Boolean.TRUE.equals(state.get("enabled"))) &&
++                (!CustomizationConfig.CURRENT.enabled("METRICS_PAYLOAD_TRANSPORT_ENABLED") || Integer.valueOf(1).equals(state.get("metricsPayloadProtocol")));
 +        } catch (Exception unavailable) { proxyReady = false; }
 +        finally { proxyCheckedAt = now; if (connection != null) { connection.disconnect(); } }
 +        return proxyReady;
 +    }
++}
+diff --git a/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/StatsPayloadTransport.java b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/StatsPayloadTransport.java
+new file mode 100644
+--- /dev/null
++++ b/code/implementation/host-stats/src/main/java/io/cattle/platform/host/stats/api/StatsPayloadTransport.java
+@@ -0,0 +1,68 @@
++package io.cattle.platform.host.stats.api;
++
++import io.cattle.platform.iaas.api.auth.localrbac.CustomizationConfig;
++import io.cattle.platform.token.TokenService;
++import io.github.ibuildthecloud.gdapi.exception.ClientVisibleException;
++import io.github.ibuildthecloud.gdapi.request.ApiRequest;
++import java.util.Collections;
++import java.util.Map;
++import java.util.LinkedHashMap;
++import java.util.List;
++import java.net.URI;
++
++/** Capability negotiation only. The native link/action must already authorize the caller. */
++public final class StatsPayloadTransport {
++    public static final int URL_TOKEN_LIMIT = 4096;
++    public static final int PAYLOAD_LIMIT = 16 * 1024 * 1024;
++    private StatsPayloadTransport() { }
++    public static StatsAccess prepare(StatsAccess access, ApiRequest request, TokenService service) {
++        request.getServletContext().getResponse().setHeader("Cache-Control","no-store");
++        request.getServletContext().getResponse().setHeader("Referrer-Policy","no-referrer");
++        return prepare(access, CustomizationConfig.CURRENT.enabled("METRICS_PAYLOAD_TRANSPORT_ENABLED"),
++            request.getServletContext().getRequest().getHeader("X-Rancher-Stats-Payload"), service);
++    }
++    public static StatsAccess prepare(StatsAccess access, boolean enabled, String optIn, TokenService service) {
++        if (!enabled || !"1".equals(optIn) || access == null || access.getToken() == null || access.getToken().length() <= URL_TOKEN_LIMIT) {
++            return access;
++        }
++        if (access.getToken().length() > PAYLOAD_LIMIT) { throw new ClientVisibleException(413, "StatsPayloadTooLarge"); }
++        String payload = access.getToken();
++        Map<String,Object> claims = new LinkedHashMap<>();
++        claims.put("payload",true);
++        if (CustomizationConfig.CURRENT.enabled("HOST_STREAM_SESSION_GUARD_ENABLED")) {
++            claims.put("rancherNegotiation", negotiation(access,service));
++        }
++        String envelope = service.generateToken(claims);
++        access.setToken(envelope);
++        access.setPayload(payload);
++        return access;
++    }
++    private static Map<String,Object> negotiation(StatsAccess access,TokenService service) {
++        try {
++            Map<String,Object> source = service.getJsonPayload(access.getToken(),false);
++            Object entries = source.containsKey("service") ? source.get("service") : source.get("project");
++            if (entries instanceof List) {
++                List<?> rows = (List<?>)entries;
++                if (rows.isEmpty() || !(rows.get(0) instanceof Map)) { throw new IllegalArgumentException(); }
++                Object token = ((Map<?,?>)rows.get(0)).get("token");
++                if (!(token instanceof String)) { throw new IllegalArgumentException(); }
++                source = service.getJsonPayload((String)token,false);
++            }
++            Object raw = source.get("rancherStream");
++            if (!(raw instanceof Map)) { throw new IllegalArgumentException(); }
++            String mode = String.valueOf(((Map<?,?>)raw).get("mode"));
++            if (!"ui".equals(mode) && !"technical".equals(mode)) { throw new IllegalArgumentException(); }
++            URI target = new URI(access.getUrl());
++            if (target.getPath() == null || target.getRawQuery() != null || target.getFragment() != null || target.getUserInfo() != null) { throw new IllegalArgumentException(); }
++            Map<String,Object> result = new LinkedHashMap<>();
++            result.put("path",target.getPath()); result.put("mode",mode);
++            if ("ui".equals(mode)) {
++                Object proof = source.get("rancherStreamProof");
++                if (!(proof instanceof String) || ((String)proof).isEmpty() || ((String)proof).length() > 65536) { throw new IllegalArgumentException(); }
++                result.put("proof",proof);
++            }
++            return result;
++        } catch (Exception invalid) { throw new ClientVisibleException(503,"StatsNegotiationUnavailable"); }
++    }
++
 +}
 diff --git a/resources/content/schema/base/localAccessReport.json b/resources/content/schema/base/localAccessReport.json
 new file mode 100644
