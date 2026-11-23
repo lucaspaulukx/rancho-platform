@@ -7,6 +7,47 @@ import { CapabilityEditor } from '../components/CapabilityEditor';
 import { MemoryEditor } from '../components/MemoryEditor';
 import { SchemaForm } from '../components/SchemaForm';
 import { ComposeEditor } from '../components/ComposeEditor';
+import { CpuResourceEditor } from '../components/CpuResourceEditor';
+
+it('retranslates the native CPU validation message without changing the draft', async () => {
+  const change = vi.fn();
+  function CpuEditor() {
+    const { setLocale } = useI18n();
+    return (
+      <>
+        <button onClick={() => setLocale('fr-FR')}>Français</button>
+        <CpuResourceEditor name="cpuShares" value={null} onChange={change} />
+      </>
+    );
+  }
+  render(
+    <I18nProvider
+      policy={{
+        enabled: true,
+        defaultLocale: 'pt-BR',
+        availableLocales: ['pt-BR', 'fr-FR'],
+        selectable: true,
+        detectBrowser: false,
+        preview: true,
+      }}
+    >
+      <CpuEditor />
+    </I18nProvider>,
+  );
+  const input = screen.getByRole<HTMLInputElement>('textbox', { name: 'Peso de CPU' });
+  fireEvent.change(input, { target: { value: '1e3' } });
+  expect(input).toBeInvalid();
+  fireEvent.click(screen.getByRole('button', { name: 'Français' }));
+  expect(await screen.findByRole('textbox', { name: 'Poids du CPU' })).toBe(input);
+  expect(input).toHaveValue('1e3');
+  expect(input.validationMessage).toBe(
+    'Saisissez un entier sans fraction ni notation exponentielle.',
+  );
+  expect(change).toHaveBeenCalledExactlyOnceWith('1e3');
+  fireEvent.change(input, { target: { value: '256' } });
+  expect(input).toBeValid();
+  expect(change).toHaveBeenLastCalledWith(256);
+});
 
 function Editor() {
   const { setLocale } = useI18n();

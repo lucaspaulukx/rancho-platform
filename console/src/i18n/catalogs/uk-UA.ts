@@ -636,4 +636,39 @@ export const ukUA = {
   'resourceCreator.contextTitle': 'Змінити контекст?',
   'resourceCreator.pending': 'Дочекайтеся відповіді Rancher.',
   'resourceCreator.unsaved': 'Є незбережена чернетка.',
+  'workloadControls.cpuShares.label': 'Вага ЦП',
+  'workloadControls.cpuShares.hint':
+    'Відносний пріоритет під час конкуренції за ресурси ЦП без обмеження використання. Додатне значення резерву ЦП має пріоритет над цією вагою. Агент Cattle застосовує мінімальну вагу 2, зокрема для значення 0.',
+  'workloadControls.cpuPeriod.label': 'Період ЦП (µs)',
+  'workloadControls.cpuPeriod.hint':
+    'Інтервал для обмеження: від 1 000 до 1 000 000 µs. За значення 0 використовується типовий період Docker (зазвичай 100 000 µs).',
+  'workloadControls.cpuQuota.label': 'Квота ЦП (µs)',
+  'workloadControls.cpuQuota.hint':
+    'Доступний час за період. Наприклад, 50 000 / 100 000 відповідає 0,5 ЦП. За значення 0 або -1 явна квота не встановлюється.',
+  'workloadControls.cpuSet.label': 'Дозволені ЦП',
+  'workloadControls.cpuSet.hint':
+    'Індекси ЦП, наприклад 0,1 або 0-3. Ці ЦП мають бути доступні на хості.',
+  'workloadControls.blkioWeight.label': 'Вага вводу-виводу',
+  'workloadControls.blkioWeight.hint':
+    'Відносна вага від 10 до 1 000. За значення 0 використовується типова вага. Залежить від підтримки ядром і не встановлює швидкість у MB/s.',
+  'workloadControls.milliCpuReservation.label': 'Резерв ЦП (міліядра)',
+  'workloadControls.milliCpuReservation.hint':
+    'Резерв під час планування: 1 000 міліядер = 1 ЦП. Додатне значення також замінює вагу ЦП (250 міліядер → вага 256). Квота на час роботи не встановлюється.',
+  'workloadControls.capabilityHint':
+    'Виберіть лише потрібні можливості (capabilities). ALL означає всі доступні варіанти. Налаштування застосує Docker.',
+  'workloadControls.unknownCapability':
+    'Значення не передбачено поточним контрактом: {value}. Перевірте його перед створенням.',
+  'workloadControls.capabilityLabel': '{label}: можливість {index}',
+  'workloadControls.select': 'Вибрати…',
+  'workloadControls.removeLabel': 'Видалити «{label}» {index}',
+  'workloadControls.removeCapability': 'Видалити можливість',
+  'workloadControls.addLabel': 'Додати «{label}»',
+  'workloadControls.cpuInteger':
+    'Укажіть ціле число без дробової частини й експоненційного запису.',
+  'workloadControls.cpuSafeInteger': 'Укажіть ціле число в безпечному діапазоні.',
+  'workloadControls.cpuIndices':
+    'Укажіть індекси ЦП через кому або використайте діапазони, наприклад 0-3.',
+  'workloadControls.cpuRanges':
+    'Укажіть діапазони індексів ЦП у порядку зростання. Індекси мають бути безпечними цілими числами.',
+  'workloadControls.cpuReview': 'Перевірте поле «{label}». {hint}',
 } as const;

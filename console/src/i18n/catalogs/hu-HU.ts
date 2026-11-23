@@ -1,4 +1,40 @@
 export const huHU = {
+  'workloadControls.cpuShares.label': 'CPU-súly',
+  'workloadControls.cpuShares.hint':
+    'Relatív prioritás a CPU-ért versengő feladatok között. A használatot nem korlátozza. A pozitív CPU-foglalás felülírja ezt a súlyt. A Cattle-ügynök legalább 2-es súlyt alkalmaz, nulla esetén is.',
+  'workloadControls.cpuPeriod.label': 'CPU-periódus (µs)',
+  'workloadControls.cpuPeriod.hint':
+    'A korlát időablaka 1 000 és 1 000 000 µs közé esik. Nullánál a Docker alapértelmezett értéke érvényes (általában 100 000 µs).',
+  'workloadControls.cpuQuota.label': 'CPU-kvóta (µs)',
+  'workloadControls.cpuQuota.hint':
+    'Periódusonként rendelkezésre álló idő. Például 50 000 / 100 000 értéke 0,5 CPU-nak felel meg. A 0 vagy a -1 érték nem szab meg külön kvótát.',
+  'workloadControls.cpuSet.label': 'Engedélyezett CPU-k',
+  'workloadControls.cpuSet.hint':
+    'CPU-indexek, például 0,1 vagy 0-3. Ezeknek a CPU-knak elérhetőnek kell lenniük a gazdagépen.',
+  'workloadControls.blkioWeight.label': 'I/O-súly',
+  'workloadControls.blkioWeight.hint':
+    'Relatív súly 10 és 1 000 között. Nullánál az alapértelmezett érték érvényes. A rendszermag támogatása szükséges hozzá, és nem határoz meg MB/s-ban megadott sebességet.',
+  'workloadControls.milliCpuReservation.label': 'CPU-foglalás (millimag)',
+  'workloadControls.milliCpuReservation.hint':
+    'Ütemezési foglalás: 1 000 millimag = 1 CPU. A pozitív érték a CPU-súlyt is felülírja (250 millimag → 256-os súly). A foglalás nem szab meg futásidejű kvótát.',
+  'workloadControls.capabilityHint':
+    'Csak a szükséges Linux-jogosultságokat válassza ki. Az ALL az összes lehetőséget jelöli. A beállításokat a Docker alkalmazza.',
+  'workloadControls.unknownCapability':
+    'A jelenlegi szerződésben nem szereplő érték: {value}. Ellenőrizze a létrehozás előtt.',
+  'workloadControls.capabilityLabel': '{label}: {index}. jogosultság',
+  'workloadControls.select': 'Kiválasztás…',
+  'workloadControls.removeLabel': '{label} {index} eltávolítása',
+  'workloadControls.removeCapability': 'Jogosultság eltávolítása',
+  'workloadControls.addLabel': '{label} hozzáadása',
+  'workloadControls.cpuInteger': 'Adjon meg egész számot tört vagy exponenciális jelölés nélkül.',
+  'workloadControls.cpuSafeInteger':
+    'Adjon meg egy egész számot a pontosan ábrázolható tartományban.',
+  'workloadControls.cpuIndices':
+    'A CPU-indexeket vesszővel válassza el, vagy adjon meg tartományt, például 0-3.',
+  'workloadControls.cpuRanges':
+    'A pontosan ábrázolható egész CPU-indexekből növekvő tartományokat adjon meg.',
+  'workloadControls.cpuReview': 'Ellenőrizze a következő mezőt: {label}. {hint}',
+
   'requestError.scopeChanged': 'A környezet megváltozott. A folytatáshoz nyissa meg újra a panelt.',
   'requestError.resourceOutOfScope': 'Az erőforrás nem érhető el ebben a környezetben.',
   'requestError.unsafeUrl': 'A kiszolgáló nem engedélyezett API-címet adott vissza.',

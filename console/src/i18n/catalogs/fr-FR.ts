@@ -1,4 +1,40 @@
 export const frFR = {
+  'workloadControls.cpuShares.label': 'Poids du CPU',
+  'workloadControls.cpuShares.hint':
+    'Priorité relative lorsque plusieurs tâches se disputent le CPU. Elle ne limite pas son utilisation. Une réservation de CPU positive prime sur ce poids. L’agent Cattle applique un minimum de 2, même si la valeur est 0.',
+  'workloadControls.cpuPeriod.label': 'Période du CPU (µs)',
+  'workloadControls.cpuPeriod.hint':
+    'Fenêtre d’application de la limite : de 1 000 à 1 000 000 µs. Avec 0, Docker utilise sa valeur par défaut (généralement 100 000 µs).',
+  'workloadControls.cpuQuota.label': 'Quota du CPU (µs)',
+  'workloadControls.cpuQuota.hint':
+    'Temps disponible par période. Par exemple, 50 000 / 100 000 équivaut à 0,5 CPU. Avec 0 ou -1, aucun quota explicite ne s’applique.',
+  'workloadControls.cpuSet.label': 'CPU autorisés',
+  'workloadControls.cpuSet.hint':
+    'Indices des CPU, par exemple 0,1 ou 0-3. Ces CPU doivent être disponibles sur l’hôte.',
+  'workloadControls.blkioWeight.label': 'Poids des E/S',
+  'workloadControls.blkioWeight.hint':
+    'Poids relatif de 10 à 1 000. Avec 0, la valeur par défaut s’applique. Ce réglage dépend de la prise en charge par le noyau et ne fixe aucun débit en MB/s.',
+  'workloadControls.milliCpuReservation.label': 'Réservation de CPU (millicœurs)',
+  'workloadControls.milliCpuReservation.hint':
+    'Réservation pour le placement : 1 000 millicœurs = 1 CPU. Une valeur positive remplace aussi le poids du CPU (250 millicœurs → poids de 256). Cette réservation ne fixe aucun quota d’exécution.',
+  'workloadControls.capabilityHint':
+    'Sélectionnez uniquement les capacités Linux nécessaires. ALL représente toutes les options. Docker applique la configuration.',
+  'workloadControls.unknownCapability':
+    'Valeur hors du contrat actuel : {value}. Vérifiez-la avant la création.',
+  'workloadControls.capabilityLabel': '{label} : capacité {index}',
+  'workloadControls.select': 'Sélectionner…',
+  'workloadControls.removeLabel': 'Retirer {label} {index}',
+  'workloadControls.removeCapability': 'Retirer la capacité',
+  'workloadControls.addLabel': 'Ajouter {label}',
+  'workloadControls.cpuInteger': 'Saisissez un entier sans fraction ni notation exponentielle.',
+  'workloadControls.cpuSafeInteger':
+    'Saisissez un entier dans la plage représentable avec exactitude.',
+  'workloadControls.cpuIndices':
+    'Utilisez des indices de CPU séparés par des virgules ou des plages telles que 0-3.',
+  'workloadControls.cpuRanges':
+    'Utilisez des plages croissantes d’indices de CPU entiers représentables avec exactitude.',
+  'workloadControls.cpuReview': 'Vérifiez {label}. {hint}',
+
   'requestError.scopeChanged': 'Le contexte a changé. Rouvrez le panneau avant de continuer.',
   'requestError.resourceOutOfScope': 'La ressource est indisponible dans cet environnement.',
   'requestError.unsafeUrl': 'Le serveur a renvoyé une adresse d’API non autorisée.',

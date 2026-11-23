@@ -21,6 +21,7 @@
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "fa-IR": {
@@ -44,6 +45,7 @@
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "fr-FR": {
@@ -67,6 +69,7 @@
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "hu-HU": {
@@ -90,6 +93,7 @@
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "ja-JP": {
@@ -113,6 +117,7 @@
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "ru-RU": {
@@ -136,6 +141,7 @@
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "uk-UA": {
@@ -159,6 +165,7 @@
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     },
     "zh-Hans": {
@@ -182,6 +189,7 @@
       "shell": "51acac0705aec883ad843c5de51ad448461ec90bec44a9ef7caa115077f98ac3",
       "topology": "86cd4766dcaa21d9cc4f6df3f41379897ab40e892baf6aca1cc05a79de372ee5",
       "ui": "d3890fd1a934a91e6d4d13a879009c1fa8164bec36dd2659f979acea1d457415",
+      "workloadControls": "aaae59503d0aa4269cdc9024e1675ed66f91ee8713298d412657f8ac32086c38",
       "workloadStreams": "ed4ba479cad0fc422414fdb37da0b3b48b8bcaee31d75dd74581194c6e0f261c"
     }
   },
