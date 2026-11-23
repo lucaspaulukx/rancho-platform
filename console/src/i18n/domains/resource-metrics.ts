@@ -35,6 +35,14 @@ export const enResourceMetrics = {
   'resourceMetrics.wrongEnvironment': 'The resource does not belong to the selected environment.',
   'resourceMetrics.resourceDenied':
     'Metrics stopped because the resource or permission is no longer available.',
+  'resourceMetrics.serviceUnavailable': 'The server does not provide metrics for this service.',
+  'resourceMetrics.serviceLinkMismatch':
+    'The metrics address does not belong to the selected service.',
+  'resourceMetrics.serviceEnvironmentMismatch':
+    'The service does not belong to the selected environment.',
+  'resourceMetrics.serviceContainerMismatch':
+    'The container list does not match the selected service.',
+  'resourceMetrics.serviceContainerConflict': 'The container list contains conflicting identities.',
   'resourceMetrics.incomplete': 'The service container list is incomplete.',
   'resourceMetrics.targetLimit': 'This panel supports up to 64 containers per service.',
   'resourceMetrics.noTargets': 'There are no running containers to measure in this service.',
@@ -96,6 +104,15 @@ export const ptResourceMetrics = {
   'resourceMetrics.wrongEnvironment': 'O recurso não pertence ao environment selecionado.',
   'resourceMetrics.resourceDenied':
     'As métricas foram encerradas porque o recurso ou a permissão não está mais disponível.',
+  'resourceMetrics.serviceUnavailable': 'O servidor não disponibiliza métricas para este serviço.',
+  'resourceMetrics.serviceLinkMismatch':
+    'O endereço de métricas não pertence ao serviço selecionado.',
+  'resourceMetrics.serviceEnvironmentMismatch':
+    'O serviço não pertence ao environment selecionado.',
+  'resourceMetrics.serviceContainerMismatch':
+    'A lista de containers não corresponde ao serviço selecionado.',
+  'resourceMetrics.serviceContainerConflict':
+    'A lista de containers contém identidades conflitantes.',
   'resourceMetrics.incomplete': 'A lista de containers do serviço está incompleta.',
   'resourceMetrics.targetLimit': 'O painel suporta até 64 containers por serviço.',
   'resourceMetrics.noTargets': 'Não há containers em execução para medir neste serviço.',

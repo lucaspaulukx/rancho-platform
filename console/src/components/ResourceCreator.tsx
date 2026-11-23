@@ -12,7 +12,7 @@ import { Alert, Button, Confirm, ErrorState, Loading, Modal, useToast } from './
 import { SchemaForm } from './SchemaForm';
 import { StackComposeForm } from './StackComposeForm';
 import { validateStackCreation } from '../stack-compose';
-import { validateWorkloadCreation } from '../workload-creation';
+import { ResourceCreationError, validateWorkloadCreation } from '../workload-creation';
 
 export interface CreationSelection {
   kind: string;
@@ -76,17 +76,19 @@ export function ResourceCreator({
   const mutation = useMutation({
     gcTime: 0,
     mutationFn: async (payload: Record<string, unknown>) => {
-      if (!allowed || !schema?.links.collection) throw new Error(t('resourceCreator.unavailable'));
+      if (!allowed || !schema?.links.collection)
+        throw new ResourceCreationError('resourceCreator.unavailable');
       const signal = scope.signal();
-      if (!schema.links.self) throw new Error(t('resourceCreator.schemaUnavailable'));
+      if (!schema.links.self) throw new ResourceCreationError('resourceCreator.schemaUnavailable');
       const current = await api<Schema>(schema.links.self, undefined, undefined, signal);
       scope.assertCurrent();
       if (current.id !== schema.id || !current.collectionMethods?.includes('POST'))
-        throw new Error(t('resourceCreator.permissionChanged'));
+        throw new ResourceCreationError('resourceCreator.permissionChanged');
       if (selection.stack) {
         const stack = await api<Resource>(selection.stack.links.self, undefined, undefined, signal);
         scope.resource(stack, selection.stack);
-        if (stack.state !== 'active') throw new Error(t('resourceCreator.stackUnavailable'));
+        if (stack.state !== 'active')
+          throw new ResourceCreationError('resourceCreator.stackUnavailable');
       }
       scope.assertCurrent();
       if (composeEditor) payload = validateStackCreation(current, payload);
@@ -107,7 +109,8 @@ export function ResourceCreator({
           ]),
         );
         scope.assertCurrent();
-        if (!refreshed[selection.kind]) throw new Error(t('resourceCreator.schemaChanged'));
+        if (!refreshed[selection.kind])
+          throw new ResourceCreationError('resourceCreator.schemaChanged');
         payload = validateWorkloadCreation(
           refreshed[selection.kind],
           payload,
@@ -137,6 +140,10 @@ export function ResourceCreator({
       onClose();
     },
   });
+  const error =
+    mutation.error instanceof ResourceCreationError
+      ? new Error(mutation.error.format(t))
+      : mutation.error;
   const blocker = useBlocker(dirty || mutation.isPending);
   usePageLeaveGuard(dirty || mutation.isPending, app.config.modules.unsavedChangesGuard);
   function close() {
@@ -228,7 +235,7 @@ export function ResourceCreator({
           <StackComposeForm
             schema={formSchema}
             onSubmit={(payload) => mutation.mutate(payload)}
-            error={mutation.error}
+            error={error}
             busy={mutation.isPending}
             onDirtyChange={setDirty}
           />
@@ -248,7 +255,7 @@ export function ResourceCreator({
             schemas={formSchemas}
             references={references}
             onSubmit={(payload) => mutation.mutate(payload)}
-            error={mutation.error}
+            error={error}
             busy={mutation.isPending}
             onDirtyChange={setDirty}
           />

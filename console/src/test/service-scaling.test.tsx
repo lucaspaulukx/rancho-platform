@@ -2,8 +2,15 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Resource, Schema } from '../api';
-import { canScaleService, prepareServiceScale, scaleValue } from '../service-scaling';
+import {
+  canScaleService,
+  prepareServiceScale,
+  scaleValue,
+  ServiceScaleValidationError,
+} from '../service-scaling';
 import { ServiceScaleForm } from '../components/ServiceScaleForm';
+import type { Locale } from '../i18n/locales';
+import { I18nProvider } from '../i18n/provider';
 import { operationCommands } from '../operation-actions';
 const resource = {
   id: 's1',
@@ -124,5 +131,51 @@ describe('Escala efetiva de serviços', () => {
     await userEvent.clear(input);
     await userEvent.type(input, '0');
     expect(screen.getByRole('checkbox', { name: /Entendo que escala zero/ })).not.toBeChecked();
+  });
+
+  it('translates form and submission validation without resetting the draft', async () => {
+    const submit = vi.fn();
+    const dirty = vi.fn();
+    const form = (locale: Locale, error: Error | null = null) => (
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: locale,
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: false,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <ServiceScaleForm
+          resource={resource}
+          schema={schema}
+          onSubmit={submit}
+          onDirtyChange={dirty}
+          busy={false}
+          error={error}
+        />
+        <button form="workspace-resource-form">Apply fixture</button>
+      </I18nProvider>
+    );
+    const { rerender } = render(form('pt-BR'));
+    await userEvent.click(screen.getByRole('button', { name: 'Apply fixture' }));
+    expect(screen.getByText('Informe uma escala diferente da atual.')).toBeInTheDocument();
+
+    rerender(form('en-US'));
+    expect(screen.getByText('Enter a scale different from the current scale.')).toBeInTheDocument();
+    const input = screen.getByRole('spinbutton', { name: 'Desired container count' });
+    await userEvent.clear(input);
+    await userEvent.type(input, '3');
+    expect(submit).not.toHaveBeenCalled();
+
+    rerender(form('en-US', new ServiceScaleValidationError('serviceEditors.scaleError.changed')));
+    expect(
+      screen.getByText('Another client changed the scale. Reopen the panel to refresh it.'),
+    ).toBeInTheDocument();
+    expect(input).toHaveValue(3);
+
+    rerender(form('en-US', new Error('Native Rancher error')));
+    expect(screen.getByText('Native Rancher error')).toBeInTheDocument();
   });
 });

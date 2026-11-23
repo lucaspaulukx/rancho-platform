@@ -2697,6 +2697,15 @@ input[type='checkbox']:focus-visible {
   }
   .page-actions {
     width: 100%;
+    flex-wrap: wrap;
+  }
+  .page-actions > .button {
+    max-inline-size: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .page-actions > .button > svg {
+    flex-shrink: 0;
   }
   .workspace-footer {
     padding: 16px 18px;

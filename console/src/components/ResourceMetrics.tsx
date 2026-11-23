@@ -13,7 +13,8 @@ import {
   serviceMetricsEnabled,
   serviceMetricTargets,
   ServiceMetricHistory,
-  ServiceMetricsError,
+  MetricsError,
+  type MetricsErrorKey,
   type MetricCounters,
   type MetricPoint,
   type ServiceMetricTarget,
@@ -23,23 +24,6 @@ import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import { Alert, Badge, Button, Empty, Field, Modal } from './ui';
 
-type MetricsErrorKey =
-  | 'resourceMetrics.wrongEnvironment'
-  | 'resourceMetrics.resourceDenied'
-  | 'resourceMetrics.incomplete'
-  | 'resourceMetrics.targetLimit'
-  | 'resourceMetrics.noTargets'
-  | 'resourceMetrics.negotiation'
-  | 'resourceMetrics.invalidSample'
-  | 'resourceMetrics.connectionFailed'
-  | 'resourceMetrics.sessionDenied'
-  | 'resourceMetrics.membershipChanged'
-  | 'resourceMetrics.failed';
-class MetricsPanelError extends Error {
-  constructor(readonly key: MetricsErrorKey) {
-    super(key);
-  }
-}
 interface MetricsProps {
   resource: Resource;
   onClose: () => void;
@@ -63,7 +47,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
   const [paused, setPaused] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<'connecting' | 'live' | 'closed' | 'stale'>('connecting');
-  const [error, setError] = useState<MetricsErrorKey | ServiceMetricsError | null>(null);
+  const [error, setError] = useState<MetricsErrorKey | null>(null);
   const received = useRef(0);
   const service = resource.type === 'service';
   const enabled =
@@ -112,8 +96,8 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
         AbortSignal.any([controller.signal, AbortSignal.timeout(10_000)]),
       );
       if (!Array.isArray(page.data) || page.pagination?.partial)
-        throw new MetricsPanelError('resourceMetrics.incomplete');
-      if (page.pagination?.next) throw new MetricsPanelError('resourceMetrics.targetLimit');
+        throw new MetricsError('resourceMetrics.incomplete');
+      if (page.pagination?.next) throw new MetricsError('resourceMetrics.targetLimit');
       return serviceMetricTargets(current, page.data, environment);
     };
     async function connect() {
@@ -136,7 +120,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
         if (service) {
           const currentTargets = await readTargets(current);
           if (disposed) return;
-          if (!currentTargets.length) throw new MetricsPanelError('resourceMetrics.noTargets');
+          if (!currentTargets.length) throw new MetricsError('resourceMetrics.noTargets');
           membership = serviceMetricMembership(currentTargets);
           history = new ServiceMetricHistory(currentTargets);
           setTargets(currentTargets);
@@ -249,13 +233,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
       } catch (error) {
         pendingPayload = undefined;
         if (!disposed) {
-          setError(
-            error instanceof MetricsPanelError
-              ? error.key
-              : error instanceof ServiceMetricsError
-                ? error
-                : 'resourceMetrics.failed',
-          );
+          setError(error instanceof MetricsError ? error.key : 'resourceMetrics.failed');
           setStatus('closed');
         }
       }
@@ -364,7 +342,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
               </Button>
             </div>
           </div>
-          {error && <Alert>{typeof error === 'string' ? t(error) : error.message}</Alert>}
+          {error && <Alert>{t(error)}</Alert>}
           {service && !!targets.length && (
             <Field
               label={t('resourceMetrics.container')}
