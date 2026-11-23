@@ -200,12 +200,20 @@ async function main() {
     ['hosts', 'Hosts'],
     ['catalog', 'Catalog'],
     ['webhooks', 'Webhooks'],
+    ['environments', 'Environments'],
+    ['volumes', 'Volumes'],
   ]) {
     await workspace.goto(origin + '/console/' + route + '?env=1a12');
     await workspace.getByRole('heading', { name: title, exact: true }).waitFor();
     check('translated administrative route ' + route + ' keeps scope',
       new URL(workspace.url()).searchParams.get('env') === '1a12');
   }
+  await workspace.goto(origin + '/console/environments/1a12?env=1a12');
+  await workspace.getByRole('heading', { name: 'Resources in this environment', exact: true }).waitFor();
+  await workspace.getByRole('button', { name: 'View network policies', exact: true }).click();
+  await workspace.getByRole('dialog', { name: 'Network policies', exact: true }).waitFor();
+  check('network policy drawer follows the active locale and preserves environment scope',
+    new URL(workspace.url()).searchParams.get('env') === '1a12');
   check('no browser HTTP mutations or external navigation', result.blockedRequests === 0);
   check('no JavaScript errors', result.pageErrors === 0);
   result.status = 'passed';

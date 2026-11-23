@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { allPages, api, type Resource, type Schema } from '../api';
+import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import {
-  policyDraft,
   policyChanges,
-  policyLabels,
+  policyDraft,
   policyScopes,
   preparePolicy,
   supportedPolicyNetwork,
@@ -15,17 +15,22 @@ import {
 } from '../network-policy';
 import { Alert, Badge, Button, Confirm, Empty, ErrorState, Field, Loading, Modal } from './ui';
 
+class NetworkPolicyPageError extends Error {
+  constructor(readonly key: 'networkPoliciesPage.reopen' | 'networkPoliciesPage.contextChanged') {
+    super(key);
+  }
+}
+
 export function NetworkPolicies({ project }: { project: Resource }) {
+  const { t } = useI18n();
   const app = useApp();
   const [opened, setOpened] = useState(false);
   if (!app.config.modules.environments || !app.config.modules.networkPolicies) return null;
   return (
     <section className="panel" style={{ marginTop: 24 }}>
-      <h2>Políticas de rede</h2>
-      <p className="muted">
-        Controle a comunicação entre stacks, serviços e containers deste environment.
-      </p>
-      <Button onClick={() => setOpened(true)}>Consultar políticas de rede</Button>
+      <h2>{t('networkPoliciesPage.titleHeading')}</h2>
+      <p className="muted">{t('networkPoliciesPage.description')}</p>
+      <Button onClick={() => setOpened(true)}>{t('networkPoliciesPage.view')}</Button>
       {opened && (
         <PolicyPanel
           key={`${app.identity}:${project.id}`}
@@ -37,6 +42,13 @@ export function NetworkPolicies({ project }: { project: Resource }) {
   );
 }
 function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => void }) {
+  const { t } = useI18n();
+  const scopeLabels = {
+    default: t('networkPoliciesPage.defaultScope'),
+    linked: t('networkPoliciesPage.linkedScope'),
+    service: t('networkPoliciesPage.serviceScope'),
+    stack: t('networkPoliciesPage.stackScope'),
+  };
   const app = useApp();
   const scope = `${app.identity}:${project.id}:${app.config.modules.networkPolicies}`;
   const live = useRef(scope);
@@ -73,7 +85,7 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
   const save = useMutation({
     gcTime: 0,
     mutationFn: async () => {
-      if (!editing) throw new Error('Reabra a política antes de salvar.');
+      if (!editing) throw new NetworkPolicyPageError('networkPoliciesPage.reopen');
       const signal = AbortSignal.timeout(20_000);
       const [current, schema, managers] = await Promise.all([
         api<Resource>(editing.resource.links.self, undefined, undefined, signal, headers),
@@ -81,7 +93,7 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
         allPages<Resource>(base + 'stacks?name=network-policy-manager', signal, headers),
       ]);
       if (!mounted.current || live.current !== scope || !app.config.modules.environments)
-        throw new Error('O contexto mudou. Reabra o painel.');
+        throw new NetworkPolicyPageError('networkPoliciesPage.contextChanged');
       const body = preparePolicy(
         editing.resource,
         current,
@@ -122,7 +134,7 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
     query.data?.schema.resourceMethods?.includes('PUT') &&
     query.data.schema.resourceFields.policy?.update &&
     query.data.schema.resourceFields.defaultPolicyAction?.update;
-  const changes = editing ? policyChanges(editing.resource, editing.draft) : [];
+  const changes = editing ? policyChanges(editing.resource, editing.draft, scopeLabels) : [];
   function close() {
     if (save.isPending) return;
     if (editing) setDiscard(true);
@@ -133,14 +145,14 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
       <Modal
         open
         drawer
-        title="Políticas de rede"
+        title={t('networkPoliciesPage.title')}
         description={project.name || project.id}
         onOpenChange={(value) => {
           if (!value) close();
         }}
         footer={
           <Button disabled={save.isPending} onClick={close}>
-            Fechar
+            {t('networkPoliciesPage.close')}
           </Button>
         }
       >
@@ -150,16 +162,11 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
           <ErrorState error={query.error} retry={() => void query.refetch()} />
         ) : (
           <>
-            {!ready && (
-              <Alert tone="warning">
-                O network-policy-manager não está ativo e saudável. As regras podem ser consultadas;
-                alterações ficam indisponíveis até validar essa infraestrutura.
-              </Alert>
-            )}
+            {!ready && <Alert tone="warning">{t('networkPoliciesPage.managerWarning')}</Alert>}
             {!query.data?.networks.length && (
               <Empty
-                title="Nenhuma rede compatível"
-                description="As políticas nativas exigem uma rede ipsec ou vxlan neste environment."
+                title={t('networkPoliciesPage.noNetwork')}
+                description={t('networkPoliciesPage.noNetworkDescription')}
               />
             )}
             {query.data?.networks.map((resource) => {
@@ -171,17 +178,11 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
                     {resource.name} <Badge state={resource.state}>{resource.state}</Badge>
                   </h3>
                   {!draft ? (
-                    <Alert tone="info">
-                      Esta rede possui regras avançadas ou não reconhecidas. O editor simplificado
-                      não as substitui.
-                    </Alert>
+                    <Alert tone="info">{t('networkPoliciesPage.advancedNotice')}</Alert>
                   ) : (
                     <>
                       {(['default', ...policyScopes] as const).map((scope) => (
-                        <Field
-                          key={scope}
-                          label={scope === 'default' ? 'Demais comunicações' : policyLabels[scope]}
-                        >
+                        <Field key={scope} label={scopeLabels[scope]}>
                           {(id) => (
                             <select
                               id={id}
@@ -212,8 +213,8 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
                                 });
                               }}
                             >
-                              <option value="allow">Permitir</option>
-                              <option value="deny">Bloquear</option>
+                              <option value="allow">{t('networkPoliciesPage.allowOption')}</option>
+                              <option value="deny">{t('networkPoliciesPage.denyOption')}</option>
                             </select>
                           )}
                         </Field>
@@ -227,7 +228,7 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
                               save.reset();
                             }}
                           >
-                            Descartar alterações
+                            {t('networkPoliciesPage.discard')}
                           </Button>
                           <Button
                             variant="primary"
@@ -235,7 +236,7 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
                             disabled={!changes.length}
                             onClick={() => setConfirm(true)}
                           >
-                            Revisar alteração
+                            {t('networkPoliciesPage.review')}
                           </Button>
                         </div>
                       )}
@@ -246,19 +247,26 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
             })}
           </>
         )}
-        {save.error && <ErrorState error={save.error} />}
+        {save.error &&
+          (save.error instanceof NetworkPolicyPageError ? (
+            <Alert>{t(save.error.key)}</Alert>
+          ) : (
+            <ErrorState error={save.error} />
+          ))}
       </Modal>
       <Modal
         open={confirm}
         onOpenChange={(value) => {
           if (!save.isPending) setConfirm(value);
         }}
-        title="Aplicar políticas de rede?"
-        description={`A alteração pode interromper conexões existentes em ${project.name || project.id}. O Rancher receberá a configuração; a aplicação depende do gerenciador de políticas.`}
+        title={t('networkPoliciesPage.confirmTitle')}
+        description={t('networkPoliciesPage.confirmDescription', {
+          name: project.name || project.id,
+        })}
         footer={
           <>
             <Button disabled={save.isPending} onClick={() => setConfirm(false)}>
-              Cancelar
+              {t('networkPoliciesPage.cancel')}
             </Button>
             <Button
               variant="primary"
@@ -269,7 +277,7 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
                 save.mutate();
               }}
             >
-              Confirmar
+              {t('networkPoliciesPage.confirm')}
             </Button>
           </>
         }
@@ -279,8 +287,15 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
             <div key={change.label}>
               <dt>{change.label}</dt>
               <dd>
-                {change.before === 'allow' ? 'Permitir' : 'Bloquear'} →{' '}
-                <strong>{change.after === 'allow' ? 'Permitir' : 'Bloquear'}</strong>
+                {change.before === 'allow'
+                  ? t('networkPoliciesPage.allow')
+                  : t('networkPoliciesPage.deny')}{' '}
+                →{' '}
+                <strong>
+                  {change.after === 'allow'
+                    ? t('networkPoliciesPage.allow')
+                    : t('networkPoliciesPage.deny')}
+                </strong>
               </dd>
             </div>
           ))}
@@ -295,8 +310,8 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
             if (blocker.state === 'blocked') blocker.reset();
           }
         }}
-        title="Descartar alterações de rede?"
-        description="As alterações ainda não foram enviadas ao Rancher."
+        title={t('networkPoliciesPage.discardTitle')}
+        description={t('networkPoliciesPage.discardDescription')}
         onConfirm={() => {
           if (save.isPending) return;
           setEditing(null);

@@ -34,6 +34,13 @@ import { enHostRegistration, ptHostRegistration } from './domains/host-registrat
 import { enHostsPage, ptHostsPage } from './domains/hosts-page';
 import { enCatalogPage, ptCatalogPage } from './domains/catalog-page';
 import { enWebhooksPage, ptWebhooksPage } from './domains/webhooks-page';
+import { enEnvironmentEditor, ptEnvironmentEditor } from './domains/environment-editor';
+import { enWorkloadsPage, ptWorkloadsPage } from './domains/workloads-page';
+import { enEnvironmentCatalogs, ptEnvironmentCatalogs } from './domains/environment-catalogs';
+import { enNetworkPoliciesPage, ptNetworkPoliciesPage } from './domains/network-policies-page';
+import { enResourcesPage, ptResourcesPage } from './domains/resources-page';
+import { enResourcePanel, ptResourcePanel } from './domains/resource-panel';
+import { enResourceStream, ptResourceStream } from './domains/resource-stream';
 
 // Initial shared domain only. These catalogs do not represent full interface coverage.
 export const englishMessages = {
@@ -72,6 +79,13 @@ export const englishMessages = {
   ...enHostsPage,
   ...enCatalogPage,
   ...enWebhooksPage,
+  ...enEnvironmentEditor,
+  ...enWorkloadsPage,
+  ...enEnvironmentCatalogs,
+  ...enNetworkPoliciesPage,
+  ...enResourcesPage,
+  ...enResourcePanel,
+  ...enResourceStream,
   'common.cancel': 'Cancel',
   'common.close': 'Close',
   'common.save': 'Save',
@@ -141,6 +155,13 @@ export const portugueseMessages = {
   ...ptHostsPage,
   ...ptCatalogPage,
   ...ptWebhooksPage,
+  ...ptEnvironmentEditor,
+  ...ptWorkloadsPage,
+  ...ptEnvironmentCatalogs,
+  ...ptNetworkPoliciesPage,
+  ...ptResourcesPage,
+  ...ptResourcePanel,
+  ...ptResourceStream,
   'common.cancel': 'Cancelar',
   'common.close': 'Fechar',
   'common.save': 'Salvar',

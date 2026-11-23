@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/provider';
 import { useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -28,6 +29,18 @@ import {
   useToast,
 } from './ui';
 
+class EnvironmentCatalogError extends Error {
+  constructor(
+    readonly key:
+      | 'environmentCatalogs.error.operation'
+      | 'environmentCatalogs.error.list'
+      | 'environmentCatalogs.error.unavailable'
+      | 'environmentCatalogs.error.reopen',
+    readonly status?: number,
+  ) {
+    super(key);
+  }
+}
 const emptyDraft = (): EnvironmentRepositoryDraft => ({
   name: '',
   url: '',
@@ -35,6 +48,13 @@ const emptyDraft = (): EnvironmentRepositoryDraft => ({
   kind: 'native',
 });
 export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof EnvironmentCatalogError
+      ? error.status === undefined
+        ? t(error.key)
+        : t('environmentCatalogs.error.http', { status: error.status })
+      : error.message;
   const app = useApp(),
     scope = useActionScope(),
     client = useQueryClient(),
@@ -50,7 +70,7 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
   const [review, setReview] = useState<'save' | 'remove' | null>(null);
   const [discard, setDiscard] = useState(false),
     [discardCloses, setDiscardCloses] = useState(false),
-    [error, setError] = useState('');
+    [error, setError] = useState<Error | null>(null);
   async function request<T>(
     path: string,
     body?: unknown,
@@ -60,18 +80,16 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
     try {
       return await api<T>(path, body, method, signal, headers);
     } catch (e) {
-      throw new Error(
-        e instanceof ApiError
-          ? `Operação de catálogo não concluída (HTTP ${e.status}).`
-          : 'Não foi possível concluir a operação de catálogo.',
-      );
+      throw e instanceof ApiError
+        ? new EnvironmentCatalogError('environmentCatalogs.error.operation', e.status)
+        : new EnvironmentCatalogError('environmentCatalogs.error.operation');
     }
   }
   async function rows(signal = scope.signal()) {
     try {
       return await allPages<Resource>('/v1-catalog/catalogs', signal, headers);
     } catch {
-      throw new Error('Não foi possível consultar os repositórios deste environment.');
+      throw new EnvironmentCatalogError('environmentCatalogs.error.list');
     }
   }
   const query = useQuery({
@@ -85,7 +103,7 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
     JSON.stringify(draft) !== JSON.stringify(before ? repositoryDraft(before) : emptyDraft());
   async function open(row: EnvironmentRepository, remove = false) {
     setOpening(true);
-    setError('');
+    setError(null);
     try {
       await access.check(scope.signal());
       scope.assertCurrent();
@@ -94,13 +112,13 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
       );
       scope.assertCurrent();
       if (!fresh || fresh.kind !== 'native')
-        throw new Error('Repositório indisponível neste environment.');
+        throw new EnvironmentCatalogError('environmentCatalogs.error.unavailable');
       setBefore(fresh);
       setDraft(repositoryDraft(fresh));
       setRevealed(false);
       if (remove) setReview('remove');
     } catch (e) {
-      setError((e as Error).message);
+      setError(e as Error);
     } finally {
       setOpening(false);
     }
@@ -110,14 +128,15 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
     setBefore(undefined);
     setRevealed(false);
     setReview(null);
-    setError('');
+    setError(null);
     write.reset();
   }
   const write = useMutation({
     retry: false,
     gcTime: 0,
     mutationFn: async () => {
-      if (!enabled || !draft || !review) throw new Error('Reabra o editor.');
+      if (!enabled || !draft || !review)
+        throw new EnvironmentCatalogError('environmentCatalogs.error.reopen');
       await access.check(scope.signal());
       scope.assertCurrent();
       await request<Resource>('projects/' + environment);
@@ -143,11 +162,7 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
       const removed = review === 'remove';
       clear();
       void client.invalidateQueries({ queryKey: ['data', app.identity] });
-      toast(
-        removed
-          ? 'Repositório removido deste environment.'
-          : 'Repositório salvo. Aguarde a sincronização do serviço de catálogo.',
-      );
+      toast(removed ? t('environmentCatalogs.removed') : t('environmentCatalogs.saved'));
     },
   });
   const blocker = useBlocker(dirty || write.isPending);
@@ -168,63 +183,74 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
       <Modal
         open
         drawer
-        title="Repositórios do environment"
-        description={`Fontes de ${app.project!.name}. Repositórios globais aparecem somente para consulta.`}
+        title={t('environmentCatalogs.title')}
+        description={t('environmentCatalogs.description', { environment: app.project!.name })}
         onOpenChange={(o) => {
           if (!o) close();
         }}
         footer={
           <Button onClick={close} disabled={write.isPending}>
-            Fechar
+            {t('environmentCatalogs.close')}
           </Button>
         }
       >
-        <Alert tone="info">
-          A configuração é exclusiva deste environment. Salvar pode iniciar clone Git pelo servidor;
-          a listagem não comprova sincronização. Templates e stacks existentes não são executados
-          por este formulário.
-        </Alert>
-        {error && <Alert>{error}</Alert>}
+        <Alert tone="info">{t('environmentCatalogs.notice')}</Alert>
+        {error && <Alert>{errorText(error)}</Alert>}
         {query.isPending ? (
           <Loading />
         ) : query.error ? (
-          <ErrorState error={query.error} retry={() => void query.refetch()} />
+          <ErrorState
+            error={
+              query.error instanceof EnvironmentCatalogError
+                ? new Error(errorText(query.error))
+                : query.error
+            }
+            retry={() => void query.refetch()}
+          />
         ) : (
           <DataTable
-            label="Fontes de catálogo do environment"
+            label={t('environmentCatalogs.sources')}
             rows={query.data || []}
             rowKey={(v) => v.id}
             searchText={(v) => `${v.name} ${v.branch}`}
             columns={[
-              { key: 'name', label: 'Repositório', render: (v) => v.name },
+              { key: 'name', label: t('environmentCatalogs.repository'), render: (v) => v.name },
               {
                 key: 'scope',
-                label: 'Escopo',
+                label: t('environmentCatalogs.scope'),
                 render: (v) => (
-                  <Badge>{v.environmentId === environment ? 'Este environment' : 'Global'}</Badge>
+                  <Badge>
+                    {v.environmentId === environment
+                      ? t('environmentCatalogs.thisEnvironment')
+                      : t('environmentCatalogs.global')}
+                  </Badge>
                 ),
               },
-              { key: 'branch', label: 'Branch', render: (v) => v.branch || 'Padrão do servidor' },
+              {
+                key: 'branch',
+                label: t('environmentCatalogs.branch'),
+                render: (v) => v.branch || t('environmentCatalogs.serverDefault'),
+              },
               {
                 key: 'actions',
-                label: 'Ações',
+                label: t('environmentCatalogs.actions'),
                 render: (v) =>
                   v.environmentId === environment && v.kind === 'native' ? (
                     <div className="row-actions">
                       <Button disabled={opening || !!draft} onClick={() => void open(v)}>
-                        Editar {v.name}
+                        {t('environmentCatalogs.edit', { name: v.name })}
                       </Button>
                       <Button disabled={opening || !!draft} onClick={() => void open(v, true)}>
-                        Remover {v.name}
+                        {t('environmentCatalogs.remove', { name: v.name })}
                       </Button>
                     </div>
                   ) : (
-                    'Somente consulta'
+                    t('environmentCatalogs.readOnly')
                   ),
               },
             ]}
-            emptyTitle="Nenhum repositório disponível"
-            emptyDescription="Adicione uma fonte nativa para este environment."
+            emptyTitle={t('environmentCatalogs.empty')}
+            emptyDescription={t('environmentCatalogs.emptyDescription')}
           />
         )}
         {!draft && (
@@ -233,16 +259,18 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
             onClick={() => {
               setBefore(undefined);
               setDraft(emptyDraft());
-              setError('');
+              setError(null);
             }}
           >
-            Adicionar repositório do environment
+            {t('environmentCatalogs.add')}
           </Button>
         )}
         {draft && (
           <fieldset className="form-fieldset nested-fields" disabled={write.isPending}>
-            <legend>{before ? 'Editar fonte do environment' : 'Nova fonte do environment'}</legend>
-            <Field label="Nome do repositório">
+            <legend>
+              {before ? t('environmentCatalogs.editSource') : t('environmentCatalogs.newSource')}
+            </legend>
+            <Field label={t('environmentCatalogs.name')}>
               {(id) => (
                 <input
                   id={id}
@@ -254,14 +282,11 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
               )}
             </Field>
             <CheckboxField
-              label="Mostrar URL do repositório"
+              label={t('environmentCatalogs.showUrl')}
               checked={revealed}
               onChange={(e) => setRevealed(e.target.checked)}
             />
-            <Field
-              label="URL Git"
-              hint="HTTP, HTTPS, Git ou SSH; sem senha na URL. O servidor acessará este endereço."
-            >
+            <Field label={t('environmentCatalogs.url')} hint={t('environmentCatalogs.urlHint')}>
               {(id, description) => (
                 <input
                   id={id}
@@ -273,7 +298,7 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
                 />
               )}
             </Field>
-            <Field label="Branch do repositório">
+            <Field label={t('environmentCatalogs.repositoryBranch')}>
               {(id) => (
                 <input
                   id={id}
@@ -283,9 +308,7 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
                 />
               )}
             </Field>
-            <p className="muted">
-              Tipo: catálogo nativo Cattle. O nome permanece fixo após a criação.
-            </p>
+            <p className="muted">{t('environmentCatalogs.typeNotice')}</p>
             <div className="row-actions">
               <Button
                 onClick={() => {
@@ -295,7 +318,7 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
                   } else clear();
                 }}
               >
-                Cancelar edição
+                {t('environmentCatalogs.cancel')}
               </Button>
               <Button
                 disabled={!dirty}
@@ -304,7 +327,7 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
                   setReview('save');
                 }}
               >
-                Revisar fonte do environment
+                {t('environmentCatalogs.review')}
               </Button>
             </div>
           </fieldset>
@@ -319,19 +342,29 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
           }
         }}
         title={
-          review === 'remove' ? 'Remover fonte do environment?' : 'Salvar fonte do environment?'
+          review === 'remove'
+            ? t('environmentCatalogs.removeTitle')
+            : t('environmentCatalogs.saveTitle')
         }
-        description={`${draft?.name || 'Repositório'} em ${app.project!.name}. ${review === 'remove' ? 'A fonte deixará de estar disponível neste environment. Stacks existentes não serão removidas.' : 'O servidor poderá clonar a URL configurada. A sincronização será validada separadamente.'} Fontes globais permanecem preservadas.`}
+        description={t(
+          review === 'remove'
+            ? 'environmentCatalogs.removeDescription'
+            : 'environmentCatalogs.saveDescription',
+          {
+            name: draft?.name || t('environmentCatalogs.repository'),
+            environment: app.project!.name,
+          },
+        )}
         busy={write.isPending}
         onConfirm={() => write.mutate()}
       >
-        {write.error && <Alert>{write.error.message}</Alert>}
+        {write.error && <Alert>{errorText(write.error)}</Alert>}
       </Confirm>
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar edição do repositório?"
-        description="A alteração ainda não foi enviada ao servidor."
+        title={t('environmentCatalogs.discard')}
+        description={t('environmentCatalogs.unsent')}
         onConfirm={() => {
           setDiscard(false);
           clear();
@@ -343,8 +376,8 @@ export function EnvironmentCatalogs({ onClose }: { onClose: () => void }) {
         onOpenChange={(o) => {
           if (!o && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Sair com alteração pendente?"
-        description="Aguarde qualquer envio em andamento antes de sair."
+        title={t('environmentCatalogs.leave')}
+        description={t('environmentCatalogs.wait')}
         busy={write.isPending}
         onConfirm={() => {
           if (!write.isPending && blocker.state === 'blocked') {

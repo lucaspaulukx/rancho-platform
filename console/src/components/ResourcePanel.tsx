@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
 import { api, allPages, type Resource, type Schema } from '../api';
 import { useActionScope } from '../hooks/useActionScope';
+import { useI18n } from '../i18n/provider';
+import { ptSchemaForm } from '../i18n/domains/schema-form';
 import { useApp, useDataKey } from '../state';
 import { canManageResource, useSchemas } from '../hooks/useSchemas';
 import { Alert, Badge, Button, Confirm, ErrorState, Loading, Modal, useToast } from './ui';
@@ -35,6 +37,26 @@ const ResourceMetrics = lazy(() =>
   import('./ResourceMetrics').then((module) => ({ default: module.ResourceMetrics })),
 );
 
+class ResourcePanelError extends Error {
+  constructor(
+    readonly key:
+      | 'resourcePanel.operationUnavailable'
+      | 'resourcePanel.editSchemaUnavailable'
+      | 'resourcePanel.editPermissionUnavailable'
+      | 'resourcePanel.scalingDisabled'
+      | 'resourcePanel.actionUnavailable'
+      | 'resourcePanel.bindingsDisabled'
+      | 'resourcePanel.healthCheckDisabled'
+      | 'resourcePanel.sidecarsDisabled'
+      | 'resourcePanel.schedulingDisabled'
+      | 'resourcePanel.memoryDisabled'
+      | 'resourcePanel.cpuDisabled'
+      | 'resourcePanel.securityDisabled'
+      | 'resourcePanel.ulimitsDisabled',
+  ) {
+    super(key);
+  }
+}
 export interface ResourceSelection {
   resource: Resource;
   mode: 'balancer' | 'detail' | 'edit' | 'scale' | 'action' | 'logs' | 'execute' | 'metrics';
@@ -153,6 +175,17 @@ function ResourcePanelContext({
   onServiceLinks?: () => void;
   onBalancer?: () => void;
 }) {
+  const { t } = useI18n();
+  function actionName(name: string) {
+    const exact = `schemaForm.label.${name}`;
+    const lower = `schemaForm.label.${name.toLowerCase()}`;
+    type LabelKey = Extract<keyof typeof ptSchemaForm, `schemaForm.label.${string}`>;
+    return Object.hasOwn(ptSchemaForm, exact)
+      ? t(exact as LabelKey)
+      : Object.hasOwn(ptSchemaForm, lower)
+        ? t(lower as LabelKey)
+        : fieldLabel(name);
+  }
   const app = useApp();
   const scope = useActionScope();
   const client = useQueryClient();
@@ -181,8 +214,8 @@ function ResourcePanelContext({
   const actionSchema = input ? schemas.data?.[input] : undefined;
   const actionLabel =
     action === 'upgrade' && selection.resource.type === 'stack'
-      ? 'Atualizar stack'
-      : fieldLabel(action || '');
+      ? t('resourcePanel.upgradeStack')
+      : actionName(action || '');
   const writable = canManageResource(schema);
   const scalable =
     !!resource && canScaleService(resource, schema, app.config.modules.workloadScaling);
@@ -196,7 +229,7 @@ function ResourcePanelContext({
     gcTime: 0,
     mutationFn: async (payload: Record<string, unknown>) => {
       if (!resource || !writable)
-        throw new Error('Esta operação não está disponível para sua conta.');
+        throw new ResourcePanelError('resourcePanel.operationUnavailable');
       const signal = scope.signal();
       const current = await api<Resource>(resource.links.self, undefined, undefined, signal);
       scope.resource(current, resource);
@@ -207,14 +240,15 @@ function ResourcePanelContext({
           throw new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable');
       }
       if (mode === 'edit' || mode === 'scale') {
-        if (!schema?.links.self) throw new Error('O schema de edição não está disponível.');
+        if (!schema?.links.self)
+          throw new ResourcePanelError('resourcePanel.editSchemaUnavailable');
         const permission = await api<Schema>(schema.links.self, undefined, undefined, signal);
         scope.assertCurrent();
         if (!permission.resourceMethods?.includes('PUT'))
-          throw new Error('Sua permissão de editar não está mais disponível.');
+          throw new ResourcePanelError('resourcePanel.editPermissionUnavailable');
         if (mode === 'scale') {
           if (!app.config.modules.workloadScaling)
-            throw new Error('O módulo de escala está desativado.');
+            throw new ResourcePanelError('resourcePanel.scalingDisabled');
           return api<Resource>(
             current.links.self,
             prepareServiceScale(
@@ -230,8 +264,7 @@ function ResourcePanelContext({
         return api<Resource>(current.links.self, payload, 'PUT', signal);
       }
       const url = action && current.actions?.[action];
-      if (!url)
-        throw new Error('A operação não está mais disponível neste estado. Atualize o recurso.');
+      if (!url) throw new ResourcePanelError('resourcePanel.actionUnavailable');
       if (
         imageUpgrade &&
         (payload.editBindings === true ||
@@ -245,21 +278,21 @@ function ResourcePanelContext({
           payload.editDevices === true)
       ) {
         if (payload.editBindings === true && !app.config.modules.workloadConfigUpgrades)
-          throw new Error('A edição de portas/volumes está desativada.');
+          throw new ResourcePanelError('resourcePanel.bindingsDisabled');
         if (payload.editHealthCheck === true && !app.config.modules.workloadHealthCheckUpgrades)
-          throw new Error('A edição da verificação de saúde está desativada.');
+          throw new ResourcePanelError('resourcePanel.healthCheckDisabled');
         if (payload.editSidecars === true && !app.config.modules.workloadSidecarUpgrades)
-          throw new Error('A edição de sidecars está desativada.');
+          throw new ResourcePanelError('resourcePanel.sidecarsDisabled');
         if (payload.editScheduling === true && !app.config.modules.workloadSchedulingUpgrades)
-          throw new Error('A edição de afinidades está desativada.');
+          throw new ResourcePanelError('resourcePanel.schedulingDisabled');
         if (payload.editResources === true && !app.config.modules.workloadResourceUpgrades)
-          throw new Error('Upgrade de memória desativado.');
+          throw new ResourcePanelError('resourcePanel.memoryDisabled');
         if (payload.editCpuResources === true && !app.config.modules.workloadResourceUpgrades)
-          throw new Error('Upgrade de CPU e I/O desativado.');
+          throw new ResourcePanelError('resourcePanel.cpuDisabled');
         if (payload.editSecurity === true && !app.config.modules.workloadSecurityUpgrades)
-          throw new Error('Upgrade de segurança desativado.');
+          throw new ResourcePanelError('resourcePanel.securityDisabled');
         if (payload.editUlimits === true && !app.config.modules.workloadUlimitUpgrades)
-          throw new Error('Upgrade de limites de processo desativado.');
+          throw new ResourcePanelError('resourcePanel.ulimitsDisabled');
         const names = [
           'service',
           'serviceUpgrade',
@@ -324,7 +357,7 @@ function ResourcePanelContext({
       await client.invalidateQueries({
         queryKey: ['data', app.identity, 'project', app.project?.id],
       });
-      toast('Operação recebida pelo Rancher. Acompanhe o estado nesta tela.');
+      toast(t('resourcePanel.saved'));
     },
   });
   const blocker = useBlocker(dirty || mutation.isPending);
@@ -380,15 +413,18 @@ function ResourcePanelContext({
       <Modal
         open
         drawer
-        title={`${mode === 'edit' ? 'Editar · ' : mode === 'scale' ? 'Escalar serviço · ' : mode === 'action' ? actionLabel + ' · ' : ''}${resource?.name || selection.resource.name || selection.resource.id}`}
-        description={`Environment: ${app.project?.name || '—'} · ${selection.resource.id}`}
+        title={`${mode === 'edit' ? t('resourcePanel.editPrefix') : mode === 'scale' ? t('resourcePanel.scalePrefix') : mode === 'action' ? actionLabel + ' · ' : ''}${resource?.name || selection.resource.name || selection.resource.id}`}
+        description={t('resourcePanel.environment', {
+          name: app.project?.name || '—',
+          id: selection.resource.id,
+        })}
         onOpenChange={(open) => {
           if (!open) close();
         }}
         footer={
           <>
             <Button onClick={close} disabled={mutation.isPending}>
-              Fechar
+              {t('resourcePanel.close')}
             </Button>
             {(mode === 'edit' || mode === 'scale' || mode === 'action') &&
               !busy &&
@@ -408,10 +444,10 @@ function ResourcePanelContext({
                   }
                 >
                   {mode === 'edit'
-                    ? 'Salvar alterações'
+                    ? t('resourcePanel.save')
                     : mode === 'scale'
-                      ? 'Aplicar escala'
-                      : 'Confirmar operação'}
+                      ? t('resourcePanel.applyScale')
+                      : t('resourcePanel.confirm')}
                 </Button>
               )}
           </>
@@ -434,14 +470,16 @@ function ResourcePanelContext({
                 <div className="workspace-panel-status">
                   <Badge state={resource.state}>{resource.state}</Badge>
                   {typeof resource.healthState === 'string' && (
-                    <span className="muted">Saúde: {resource.healthState}</span>
+                    <span className="muted">
+                      {t('resourcePanel.health', { state: resource.healthState })}
+                    </span>
                   )}
                   <Link
                     className="button ghost"
                     to={`/${path}/${resource.id}?env=${app.project?.id}`}
                   >
                     <ExternalLink size={15} />
-                    Link direto
+                    {t('resourcePanel.directLink')}
                   </Link>
                 </div>
                 {typeof resource.transitioningMessage === 'string' &&
@@ -452,7 +490,7 @@ function ResourcePanelContext({
                   )}
                 <div className="workspace-panel-actions">
                   {onBalancer && writable && (
-                    <Button onClick={onBalancer}>Configurar balanceador</Button>
+                    <Button onClick={onBalancer}>{t('resourcePanel.balancer')}</Button>
                   )}
                   {scalable && (
                     <Button
@@ -461,13 +499,15 @@ function ResourcePanelContext({
                         setMode('scale');
                       }}
                     >
-                      Escalar serviço
+                      {t('resourcePanel.scale')}
                     </Button>
                   )}
                   {app.config.modules.observability &&
                     app.config.modules.metrics &&
                     metricsLink(resource, serviceMetricsEnabled(app.config.modules)) && (
-                      <Button onClick={() => setMode('metrics')}>Métricas</Button>
+                      <Button onClick={() => setMode('metrics')}>
+                        {t('resourcePanel.metrics')}
+                      </Button>
                     )}
                   {writable && schema?.resourceMethods?.includes('PUT') && (
                     <Button
@@ -478,7 +518,7 @@ function ResourcePanelContext({
                         setMode('edit');
                       }}
                     >
-                      Editar
+                      {t('resourcePanel.edit')}
                     </Button>
                   )}
                   {Object.keys(resource.actions || {})
@@ -491,8 +531,8 @@ function ResourcePanelContext({
                     .map((name) => (
                       <Button key={name} onClick={() => selectAction(name)}>
                         {resource.type === 'stack' && name === 'upgrade'
-                          ? 'Atualizar stack'
-                          : fieldLabel(name)}
+                          ? t('resourcePanel.upgradeStack')
+                          : actionName(name)}
                       </Button>
                     ))}
                 </div>
@@ -504,7 +544,7 @@ function ResourcePanelContext({
                 {!dirty && (
                   <Button variant="ghost" onClick={back}>
                     <ArrowLeft size={15} />
-                    Voltar ao recurso
+                    {t('resourcePanel.back')}
                   </Button>
                 )}
                 {mode === 'action' && (
@@ -515,16 +555,20 @@ function ResourcePanelContext({
                         : 'info'
                     }
                   >
-                    A operação “{actionLabel}” será aplicada somente a{' '}
-                    {resource.name || resource.id}, no environment {app.project?.name}.
+                    {t('resourcePanel.actionNotice', {
+                      action: actionLabel,
+                      name: resource.name || resource.id,
+                      environment: app.project?.name || '',
+                    })}
                   </Alert>
                 )}
+                {mutation.error instanceof ResourcePanelError && (
+                  <Alert>{t(mutation.error.key)}</Alert>
+                )}
                 {!writable ? (
-                  <Alert>
-                    Seu perfil permite consultar este recurso. A alteração não está disponível.
-                  </Alert>
+                  <Alert>{t('resourcePanel.readOnly')}</Alert>
                 ) : unavailableInput ? (
-                  <Alert>O servidor não disponibilizou os campos exigidos por esta operação.</Alert>
+                  <Alert>{t('resourcePanel.inputUnavailable')}</Alert>
                 ) : mode === 'scale' ? (
                   scalable && schema ? (
                     <ServiceScaleForm
@@ -533,11 +577,11 @@ function ResourcePanelContext({
                       schema={schema}
                       onSubmit={(payload) => mutation.mutate(payload)}
                       busy={mutation.isPending}
-                      error={mutation.error}
+                      error={mutation.error instanceof ResourcePanelError ? null : mutation.error}
                       onDirtyChange={setDirty}
                     />
                   ) : (
-                    <Alert>A escala não está disponível neste estado ou módulo.</Alert>
+                    <Alert>{t('resourcePanel.scaleUnavailable')}</Alert>
                   )
                 ) : mode === 'edit' && schema ? (
                   <SchemaForm
@@ -547,7 +591,7 @@ function ResourcePanelContext({
                     original={resource}
                     onSubmit={(payload) => mutation.mutate(payload)}
                     busy={mutation.isPending}
-                    error={mutation.error}
+                    error={mutation.error instanceof ResourcePanelError ? null : mutation.error}
                     onDirtyChange={setDirty}
                   />
                 ) : imageUpgrade ? (
@@ -565,7 +609,7 @@ function ResourcePanelContext({
                     schemas={schemas.data || {}}
                     onSubmit={(payload) => mutation.mutate(payload)}
                     busy={mutation.isPending}
-                    error={mutation.error}
+                    error={mutation.error instanceof ResourcePanelError ? null : mutation.error}
                     onDirtyChange={setDirty}
                   />
                 ) : actionSchema ? (
@@ -576,11 +620,14 @@ function ResourcePanelContext({
                     initialValues={lifecyclePayload(resource, action || '')}
                     onSubmit={(payload) => mutation.mutate(payload)}
                     busy={mutation.isPending}
-                    error={mutation.error}
+                    error={mutation.error instanceof ResourcePanelError ? null : mutation.error}
                     onDirtyChange={setDirty}
                   />
                 ) : (
-                  mutation.error && <Alert>{mutation.error.message}</Alert>
+                  mutation.error &&
+                  !(mutation.error instanceof ResourcePanelError) && (
+                    <Alert>{mutation.error.message}</Alert>
+                  )
                 )}
               </>
             )}
@@ -590,8 +637,8 @@ function ResourcePanelContext({
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar rascunho?"
-        description="As alterações ainda não foram salvas."
+        title={t('resourcePanel.discardTitle')}
+        description={t('resourcePanel.discardDescription')}
         onConfirm={onClose}
       />
       <Confirm
@@ -600,11 +647,11 @@ function ResourcePanelContext({
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title={mutation.isPending ? 'Operação em andamento' : 'Sair sem salvar?'}
+        title={mutation.isPending ? t('resourcePanel.pendingTitle') : t('resourcePanel.leaveTitle')}
         description={
           mutation.isPending
-            ? 'Aguarde a resposta do Rancher antes de mudar o contexto.'
-            : 'Há alterações que ainda não foram salvas neste painel.'
+            ? t('resourcePanel.pendingDescription')
+            : t('resourcePanel.leaveDescription')
         }
         onConfirm={() => {
           if (!mutation.isPending && blocker.state === 'blocked') blocker.proceed();
@@ -614,6 +661,7 @@ function ResourcePanelContext({
   );
 }
 function ComposeExport({ resource, onClose }: { resource: Resource; onClose: () => void }) {
+  const { t } = useI18n();
   function download(field: string, filename: string) {
     const content = resource[field];
     if (typeof content !== 'string') return;
@@ -628,8 +676,8 @@ function ComposeExport({ resource, onClose }: { resource: Resource; onClose: () 
   }
   return (
     <section className="panel compose-result">
-      <h2>Compose exportado</h2>
-      <p className="muted">O resultado permanece neste painel até ele ser fechado.</p>
+      <h2>{t('resourcePanel.composeTitle')}</h2>
+      <p className="muted">{t('resourcePanel.composeDescription')}</p>
       {[
         ['dockerComposeConfig', 'docker-compose.yml'],
         ['rancherComposeConfig', 'rancher-compose.yml'],
@@ -639,16 +687,19 @@ function ComposeExport({ resource, onClose }: { resource: Resource; onClose: () 
             <div key={key}>
               <div className="panel-heading">
                 <strong>{filename}</strong>
-                <Button aria-label={`Baixar ${filename}`} onClick={() => download(key, filename)}>
+                <Button
+                  aria-label={t('resourcePanel.downloadLabel', { filename })}
+                  onClick={() => download(key, filename)}
+                >
                   <Download size={15} />
-                  Baixar
+                  {t('resourcePanel.download')}
                 </Button>
               </div>
               <pre className="configuration-viewer">{String(resource[key])}</pre>
             </div>
           ),
       )}
-      <Button onClick={onClose}>Fechar resultado</Button>
+      <Button onClick={onClose}>{t('resourcePanel.closeResult')}</Button>
     </section>
   );
 }

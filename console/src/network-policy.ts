@@ -52,17 +52,21 @@ export function policyDraft(resource: Resource): PolicyDraft | null {
 export function policySnapshot(value: Resource) {
   return JSON.stringify([value.id, value.accountId, value.defaultPolicyAction, value.policy]);
 }
-export function policyChanges(original: Resource, draft: PolicyDraft) {
+export function policyChanges(
+  original: Resource,
+  draft: PolicyDraft,
+  labels = { default: 'Demais comunicações', ...policyLabels },
+) {
   const before = policyDraft(original);
   if (!before) return [];
   const rows = [
     {
-      label: 'Demais comunicações',
+      label: labels.default,
       before: before.defaultPolicyAction,
       after: draft.defaultPolicyAction,
     },
     ...policyScopes.map((scope) => ({
-      label: policyLabels[scope],
+      label: labels[scope],
       before: before.within[scope],
       after: draft.within[scope],
     })),

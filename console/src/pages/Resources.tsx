@@ -1,3 +1,6 @@
+import { useI18n } from '../i18n/provider';
+import { ptSchemaForm } from '../i18n/domains/schema-form';
+import { localizedNavigation } from '../navigation';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useBlocker } from 'react-router-dom';
@@ -58,6 +61,35 @@ const OperationsPage = lazy(() =>
   import('./Operations').then((module) => ({ default: module.OperationsPage })),
 );
 
+type ResourceErrorKey =
+  | 'resourcesPage.permission'
+  | 'resourcesPage.certificateUnavailable'
+  | 'resourcesPage.operationUnavailable'
+  | 'resourcesPage.invalidRelated';
+class ResourcePageError extends Error {
+  constructor(readonly key: ResourceErrorKey) {
+    super(key);
+  }
+}
+class ResourceSaveError extends Error {
+  constructor(readonly status: number) {
+    super('resourcesPage.saveFailed');
+  }
+}
+function useResourceLabels() {
+  const { t } = useI18n();
+  return (name: string) => {
+    const exact = `schemaForm.label.${name}`;
+    const lower = `schemaForm.label.${name.toLowerCase()}`;
+    type Key = Extract<keyof typeof ptSchemaForm, `schemaForm.label.${string}`>;
+    const key = Object.hasOwn(ptSchemaForm, exact)
+      ? (exact as Key)
+      : Object.hasOwn(ptSchemaForm, lower)
+        ? (lower as Key)
+        : undefined;
+    return key ? t(key) : fieldLabel(name);
+  };
+}
 export function ResourcePage({ item }: { item: NavItem }) {
   const app = useApp();
   const params = useParams();
@@ -84,6 +116,15 @@ export function ResourcePage({ item }: { item: NavItem }) {
   return <ResourceContext item={item} />;
 }
 function ResourceContext({ item }: { item: NavItem }) {
+  const { t, locale } = useI18n();
+  const label = useResourceLabels();
+  const pageItem = localizedNavigation(t).find((entry) => entry.path === item.path) || item;
+  const errorText = (error: Error) =>
+    error instanceof ResourceSaveError
+      ? t('resourcesPage.saveFailed', { status: error.status })
+      : error instanceof ResourcePageError
+        ? t(error.key)
+        : error.message;
   const app = useApp();
   const client = useQueryClient();
   const toast = useToast();
@@ -168,14 +209,12 @@ function ResourceContext({ item }: { item: NavItem }) {
           ? !current.resourceMethods?.includes('PUT')
           : !current.collectionMethods?.includes('POST')
       )
-        throw new Error('Sua permissão de alteração não está mais disponível.');
+        throw new ResourcePageError('resourcesPage.permission');
       try {
         if (dataKind === 'certificate' && editor === 'edit' && !replaceCertificate) {
           const latest = await api<Resource>(resource!.links.self);
           if (typeof latest.cert !== 'string' || !latest.cert.includes('BEGIN CERTIFICATE'))
-            throw new Error(
-              'O certificado atual não está disponível. Recarregue o recurso antes de editar.',
-            );
+            throw new ResourcePageError('resourcesPage.certificateUnavailable');
           // Rancher 1.6 reparses certificate metadata on every PUT, including description edits.
           body.cert = latest.cert;
         }
@@ -186,11 +225,7 @@ function ResourceContext({ item }: { item: NavItem }) {
         );
         return dataKind ? dataResourceMetadata(output) : output;
       } catch (error) {
-        if (dataKind && error instanceof ApiError)
-          throw new ApiError(
-            error.status,
-            `Não foi possível salvar o recurso (HTTP ${error.status}). Confira os campos e suas permissões.`,
-          );
+        if (dataKind && error instanceof ApiError) throw new ResourceSaveError(error.status);
         throw error;
       }
     },
@@ -199,7 +234,7 @@ function ResourceContext({ item }: { item: NavItem }) {
       setDirty(false);
       setEditor(null);
       await client.invalidateQueries({ queryKey: ['data', app.identity] });
-      toast('Alteração recebida pelo Rancher. Acompanhe o estado do recurso.');
+      toast(t('resourcesPage.saved'));
       save.reset();
       if (created && (dataKind || item.schema === 'project'))
         setNextRoute(`${item.path}/${output.id}${scoped ? `?env=${app.project?.id}` : ''}`);
@@ -210,7 +245,7 @@ function ResourceContext({ item }: { item: NavItem }) {
     mutationFn: async (payload: Record<string, unknown>) => {
       const current = await api<Resource>(resource!.links.self);
       const url = current.actions?.[action!];
-      if (!url) throw new Error('A operação não está mais disponível para este recurso.');
+      if (!url) throw new ResourcePageError('resourcesPage.operationUnavailable');
       const output = await api<Resource>(url, payload);
       return dataKind ? dataResourceMetadata(output) : output;
     },
@@ -218,7 +253,7 @@ function ResourceContext({ item }: { item: NavItem }) {
       setDirty(false);
       setAction(null);
       await client.invalidateQueries({ queryKey: ['data', app.identity] });
-      toast('Operação recebida. O estado será atualizado pelo servidor.');
+      toast(t('resourcesPage.operationReceived'));
       run.reset();
     },
   });
@@ -237,8 +272,8 @@ function ResourceContext({ item }: { item: NavItem }) {
   if (scoped && !app.project)
     return (
       <Empty
-        title="Selecione um environment"
-        description="Escolha um ambiente autorizado para consultar seus recursos."
+        title={t('resourcesPage.selectEnvironment')}
+        description={t('resourcesPage.selectDescription')}
       />
     );
   if (schemas.isPending || (query.isPending && !!collection && (!!params.id || !workloadKind)))
@@ -256,8 +291,8 @@ function ResourceContext({ item }: { item: NavItem }) {
   if (!schema || !collection)
     return (
       <Empty
-        title="Recurso indisponível"
-        description="A API não disponibilizou este recurso para sua conta neste contexto."
+        title={t('resourcesPage.unavailable')}
+        description={t('resourcesPage.unavailableDescription')}
       />
     );
   const rows = !params.id ? (query.data as Collection<Resource> | undefined)?.data || [] : [];
@@ -270,11 +305,11 @@ function ResourceContext({ item }: { item: NavItem }) {
   return (
     <>
       <PageHeader
-        title={resource?.name || resource?.id || item.title}
+        title={resource?.name || resource?.id || pageItem.title}
         description={
           resource
-            ? `${item.title} · ${scoped ? app.project?.name || 'Instância' : 'Instância'}`
-            : item.description
+            ? `${pageItem.title} · ${scoped ? app.project?.name || t('resourcesPage.instance') : t('resourcesPage.instance')}`
+            : pageItem.description
         }
         eyebrow={scoped ? app.project?.name : undefined}
         action={
@@ -284,14 +319,14 @@ function ResourceContext({ item }: { item: NavItem }) {
               schemas.data?.projectTemplate?.collectionMethods?.includes('GET') && (
                 <Button onClick={() => setTemplates(true)}>
                   <Layers3 size={16} />
-                  Templates
+                  {t('resourcesPage.templates')}
                 </Button>
               )}
             {resource ? (
               <>
                 <Button onClick={() => navigate(item.path)}>
                   <ArrowLeft size={16} />
-                  Voltar
+                  {t('resourcesPage.back')}
                 </Button>
                 {item.schema === 'project' && (
                   <Button
@@ -301,12 +336,12 @@ function ResourceContext({ item }: { item: NavItem }) {
                       navigate(`/?env=${resource.id}`);
                     }}
                   >
-                    Abrir environment
+                    {t('resourcesPage.openEnvironment')}
                   </Button>
                 )}
                 {schema.resourceMethods?.includes('PUT') && (
                   <Button variant="primary" onClick={() => setEditor('edit')}>
-                    Editar
+                    {t('resourcesPage.edit')}
                   </Button>
                 )}
               </>
@@ -314,11 +349,16 @@ function ResourceContext({ item }: { item: NavItem }) {
               createAllowed && (
                 <Button variant="primary" onClick={() => setEditor('new')}>
                   <Plus size={16} />
-                  Criar {fieldLabel(item.schema || 'recurso').toLocaleLowerCase()}
+                  {t('resourcesPage.create', {
+                    kind: label(item.schema || 'resource').toLocaleLowerCase(locale),
+                  })}
                 </Button>
               )
             )}
-            <Button aria-label="Atualizar dados" onClick={() => void query.refetch()}>
+            <Button
+              aria-label={t('resourcesPage.refreshData')}
+              onClick={() => void query.refetch()}
+            >
               <RefreshCw size={16} />
             </Button>
           </>
@@ -342,7 +382,7 @@ function ResourceContext({ item }: { item: NavItem }) {
               {app.config.modules.observability &&
                 app.config.modules.metrics &&
                 metricsLink(resource, serviceMetricsEnabled(app.config.modules)) && (
-                  <Button onClick={() => setStream('metrics')}>Métricas</Button>
+                  <Button onClick={() => setStream('metrics')}>{t('resourcesPage.metrics')}</Button>
                 )}
               {Object.keys(resource.actions || {})
                 .filter(
@@ -359,8 +399,8 @@ function ResourceContext({ item }: { item: NavItem }) {
                     }}
                   >
                     {item.schema === 'project' && name === 'upgrade'
-                      ? 'Atualizar infraestrutura'
-                      : fieldLabel(name)}
+                      ? t('resourcesPage.upgradeInfrastructure')
+                      : label(name)}
                   </Button>
                 ))}
             </div>
@@ -391,7 +431,7 @@ function ResourceContext({ item }: { item: NavItem }) {
               (name) => !['self', 'collection'].includes(name),
             ).length > 0 && (
               <section className="panel" style={{ marginTop: 20 }}>
-                <h2>Recursos relacionados</h2>
+                <h2>{t('resourcesPage.related')}</h2>
                 <div className="related-links">
                   {Object.entries(resource.links)
                     .filter(
@@ -415,7 +455,7 @@ function ResourceContext({ item }: { item: NavItem }) {
                 checked={showInternalVolumes}
                 onChange={(event) => setShowInternalVolumes(event.target.checked)}
               />
-              Mostrar também discos dos containers e bind mounts
+              {t('resourcesPage.showVolumes')}
             </label>
           )}
           <DataTable
@@ -424,12 +464,14 @@ function ResourceContext({ item }: { item: NavItem }) {
             searchText={(r) =>
               `${r.name || ''} ${r.id} ${r.state || ''} ${r.description || ''} ${r.serverAddress || ''} ${r.CN || ''} ${r.driver || ''} ${r.hostId || ''}`
             }
-            emptyTitle={`Nenhum registro em ${item.title.toLocaleLowerCase()}`}
-            emptyDescription="Os dados aparecerão aqui quando houver recursos disponíveis neste contexto."
+            emptyTitle={t('resourcesPage.emptyTitle', {
+              title: pageItem.title.toLocaleLowerCase(locale),
+            })}
+            emptyDescription={t('resourcesPage.emptyDescription')}
             columns={[
               {
                 key: 'name',
-                label: 'Nome',
+                label: t('resourcesPage.name'),
                 sortValue: (r) => r.name || r.id,
                 render: (r) => (
                   <Link
@@ -448,23 +490,23 @@ function ResourceContext({ item }: { item: NavItem }) {
               },
               {
                 key: 'state',
-                label: 'Estado',
+                label: t('resourcesPage.state'),
                 sortValue: (r) => r.state || '',
                 render: (r) => <Badge state={r.state}>{r.state || '—'}</Badge>,
               },
               {
                 key: 'description',
-                label: 'Descrição',
+                label: t('resourcesPage.description'),
                 render: (r) => <span className="muted">{r.description || '—'}</span>,
               },
-              ...dataColumns(dataKind),
+              ...dataColumns(dataKind, t, locale, label),
               {
                 key: 'open',
-                label: 'Detalhes',
+                label: t('resourcesPage.details'),
                 render: (r) => (
                   <Link
                     className="button ghost"
-                    aria-label={`Abrir ${r.name || r.id}`}
+                    aria-label={t('resourcesPage.open', { name: r.name || r.id })}
                     to={`${item.path}/${encodeURIComponent(r.id)}${scoped ? `?env=${app.project?.id}` : ''}`}
                   >
                     <ArrowRight size={16} />
@@ -475,8 +517,7 @@ function ResourceContext({ item }: { item: NavItem }) {
           />
           {(query.data as Collection<Resource> | undefined)?.pagination?.next && (
             <Alert tone="info">
-              Esta coleção possui mais resultados no servidor. A busca atual se limita aos registros
-              carregados.{' '}
+              {t('resourcesPage.moreInfo')}{' '}
               <Button
                 onClick={async () => {
                   const page = await api<Collection<Resource>>(
@@ -488,7 +529,7 @@ function ResourceContext({ item }: { item: NavItem }) {
                   }));
                 }}
               >
-                Carregar mais
+                {t('resourcesPage.loadMore')}
               </Button>
             </Alert>
           )}
@@ -516,17 +557,21 @@ function ResourceContext({ item }: { item: NavItem }) {
         drawer
         title={
           editor === 'edit'
-            ? `Editar ${resource?.name || resource?.id}`
-            : `Criar ${fieldLabel(item.schema || 'recurso').toLocaleLowerCase()}`
+            ? t('resourcesPage.editTitle', { name: resource?.name || resource?.id || '' })
+            : t('resourcesPage.create', {
+                kind: label(item.schema || 'resource').toLocaleLowerCase(locale),
+              })
         }
-        description={`Contexto: ${scoped ? app.project?.name : 'instância'}. Revise os campos antes de salvar.`}
+        description={t('resourcesPage.context', {
+          name: (scoped ? app.project?.name : t('resourcesPage.instanceLower')) || '',
+        })}
         footer={
           <>
             <Button onClick={closeForm} disabled={save.isPending}>
-              Cancelar
+              {t('resourcesPage.cancel')}
             </Button>
             <Button form="resource-form" type="submit" variant="primary" busy={save.isPending}>
-              Salvar
+              {t('resourcesPage.save')}
             </Button>
           </>
         }
@@ -544,20 +589,12 @@ function ResourceContext({ item }: { item: NavItem }) {
                     else setReplaceCertificate(event.target.checked);
                   }}
                 />
-                Substituir certificado e chave privada
+                {t('resourcesPage.replaceCertificate')}
               </label>
             )}
-            {dataKind === 'secret' && (
-              <Alert tone="info">
-                O valor do secret é definido somente na criação. Para substituí-lo, crie outro
-                secret e atualize os vínculos nos serviços.
-              </Alert>
-            )}
+            {dataKind === 'secret' && <Alert tone="info">{t('resourcesPage.secretInfo')}</Alert>}
             {dataKind === 'registry' && editor === 'new' && (
-              <Alert tone="info">
-                Após salvar o endereço, você poderá cadastrar as credenciais de acesso no painel do
-                registry.
-              </Alert>
+              <Alert tone="info">{t('resourcesPage.registryInfo')}</Alert>
             )}
             {references.error && dataKind === 'volume' && (
               <ErrorState error={references.error} retry={() => void references.refetch()} />
@@ -570,7 +607,7 @@ function ResourceContext({ item }: { item: NavItem }) {
                 original={editor === 'edit' ? resource : undefined}
                 onSubmit={(payload) => save.mutate(payload)}
                 busy={save.isPending}
-                error={save.error}
+                error={save.error ? new Error(errorText(save.error)) : null}
                 onDirtyChange={setDirty}
               />
             ) : (
@@ -592,7 +629,7 @@ function ResourceContext({ item }: { item: NavItem }) {
                 references={references.data}
                 onSubmit={(payload) => save.mutate(payload)}
                 busy={save.isPending}
-                error={save.error}
+                error={save.error ? new Error(errorText(save.error)) : null}
                 onDirtyChange={setDirty}
               />
             )}
@@ -604,12 +641,14 @@ function ResourceContext({ item }: { item: NavItem }) {
         onOpenChange={(open) => {
           if (!open && !run.isPending) closeForm();
         }}
-        title={`${fieldLabel(action || 'Operação')}: ${resource?.name || resource?.id}`}
-        description={`Confira o alvo e o impacto. Contexto: ${app.project?.name || 'instância'}.`}
+        title={`${label(action || 'Operação')}: ${resource?.name || resource?.id}`}
+        description={t('resourcesPage.operationContext', {
+          name: app.project?.name || t('resourcesPage.instanceLower'),
+        })}
         footer={
           <>
             <Button onClick={closeForm} disabled={run.isPending}>
-              Cancelar
+              {t('resourcesPage.cancel')}
             </Button>
             <Button
               variant="primary"
@@ -618,7 +657,7 @@ function ResourceContext({ item }: { item: NavItem }) {
               form={actionSchema ? 'action-form' : undefined}
               onClick={actionSchema ? undefined : () => run.mutate({})}
             >
-              Confirmar operação
+              {t('resourcesPage.confirmOperation')}
             </Button>
           </>
         }
@@ -631,16 +670,13 @@ function ResourceContext({ item }: { item: NavItem }) {
             schemas={schemas.data || {}}
             onSubmit={(payload) => run.mutate(payload)}
             busy={run.isPending}
-            error={run.error}
+            error={run.error ? new Error(errorText(run.error)) : null}
             onDirtyChange={setDirty}
           />
         ) : (
           <>
-            <Alert tone="warning">
-              A operação será executada pelo Rancher sobre este recurso. O resultado deve ser
-              acompanhado pelo estado retornado.
-            </Alert>
-            {run.error && <Alert>{run.error.message}</Alert>}
+            <Alert tone="warning">{t('resourcesPage.operationInfo')}</Alert>
+            {run.error && <Alert>{errorText(run.error)}</Alert>}
           </>
         )}
       </Modal>
@@ -649,8 +685,8 @@ function ResourceContext({ item }: { item: NavItem }) {
         onOpenChange={(open) => {
           if (!open) setCertificateMode(null);
         }}
-        title="Trocar o modo de edição?"
-        description="As alterações ainda não salvas deste formulário serão descartadas."
+        title={t('resourcesPage.editMode')}
+        description={t('resourcesPage.editModeDescription')}
         onConfirm={() => {
           setReplaceCertificate(certificateMode!);
           setCertificateMode(null);
@@ -661,8 +697,8 @@ function ResourceContext({ item }: { item: NavItem }) {
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar rascunho?"
-        description="Há alterações que ainda não foram salvas."
+        title={t('resourcesPage.discard')}
+        description={t('resourcesPage.discardDescription')}
         onConfirm={() => {
           setDiscard(false);
           setDirty(false);
@@ -677,8 +713,8 @@ function ResourceContext({ item }: { item: NavItem }) {
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Sair sem salvar?"
-        description="As alterações deste formulário serão descartadas."
+        title={t('resourcesPage.leave')}
+        description={t('resourcesPage.leaveDescription')}
         onConfirm={() => {
           if (blocker.state === 'blocked') blocker.proceed();
         }}
@@ -688,15 +724,15 @@ function ResourceContext({ item }: { item: NavItem }) {
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Operação em andamento"
-        description="Aguarde a resposta do Rancher antes de trocar de contexto."
+        title={t('resourcesPage.pending')}
+        description={t('resourcesPage.pendingDescription')}
         footer={
           <Button
             onClick={() => {
               if (blocker.state === 'blocked') blocker.reset();
             }}
           >
-            Permanecer nesta tela
+            {t('resourcesPage.stay')}
           </Button>
         }
       >
@@ -705,24 +741,29 @@ function ResourceContext({ item }: { item: NavItem }) {
     </>
   );
 }
-function dataColumns(kind?: string): Column<Resource>[] {
+function dataColumns(
+  kind: string | undefined,
+  t: ReturnType<typeof useI18n>['t'],
+  locale: ReturnType<typeof useI18n>['locale'],
+  label: (name: string) => string,
+): Column<Resource>[] {
   if (kind === 'certificate')
     return [
       {
         key: 'CN',
-        label: 'Nome comum',
+        label: t('resourcesPage.commonName'),
         sortValue: (r) => String(r.CN || ''),
         render: (r) => String(r.CN || '—'),
       },
       {
         key: 'expiresAt',
-        label: 'Validade',
+        label: t('resourcesPage.validity'),
         sortValue: (r) => resourceDate(r.expiresAt) || 0,
         render: (r) => (
           <>
-            <span>{formatResourceDate(r.expiresAt)}</span>{' '}
-            <Badge state={certificateValidity(r.expiresAt).state}>
-              {certificateValidity(r.expiresAt).label}
+            <span>{formatResourceDate(r.expiresAt, locale)}</span>{' '}
+            <Badge state={certificateValidity(r.expiresAt, Date.now(), t).state}>
+              {certificateValidity(r.expiresAt, Date.now(), t).label}
             </Badge>
           </>
         ),
@@ -732,34 +773,38 @@ function dataColumns(kind?: string): Column<Resource>[] {
     return [
       {
         key: 'address',
-        label: 'Servidor',
+        label: t('resourcesPage.server'),
         sortValue: (r) => String(r.serverAddress || ''),
         render: (r) => String(r.serverAddress || '—'),
       },
     ];
   if (kind === 'volume')
     return [
-      { key: 'driver', label: 'Driver', render: (r) => String(r.driver || '—') },
-      { key: 'host', label: 'Host', render: (r) => String(r.hostId || '—') },
+      { key: 'driver', label: t('resourcesPage.driver'), render: (r) => String(r.driver || '—') },
+      { key: 'host', label: t('resourcesPage.host'), render: (r) => String(r.hostId || '—') },
     ];
   if (kind === 'secret')
     return [
       {
         key: 'created',
-        label: 'Criado em',
+        label: t('resourcesPage.created'),
         sortValue: (r) => resourceDate(r.created) || 0,
-        render: (r) => formatResourceDate(r.created),
+        render: (r) => formatResourceDate(r.created, locale),
       },
     ];
   return [
     {
       key: 'type',
-      label: 'Tipo',
-      render: (r) => <span className="muted">{fieldLabel(r.type)}</span>,
+      label: t('resourcesPage.type'),
+      render: (r) => <span className="muted">{label(r.type)}</span>,
     },
   ];
 }
 function RelatedCollection({ name, url }: { name: string; url: string }) {
+  const { t } = useI18n();
+  const label = useResourceLabels();
+  const errorText = (error: Error) =>
+    error instanceof ResourcePageError ? t(error.key) : error.message;
   const [open, setOpen] = useState(false);
   const query = useQuery({
     queryKey: useDataKey('related', url),
@@ -768,7 +813,7 @@ function RelatedCollection({ name, url }: { name: string; url: string }) {
       if (Array.isArray(result.data)) return { data: result.data.map(dataResourceMetadata) };
       if ('id' in result && typeof result.id === 'string')
         return { data: [dataResourceMetadata(result as Resource)] };
-      throw new Error('O Rancher não retornou um recurso ou uma coleção válida.');
+      throw new ResourcePageError('resourcesPage.invalidRelated');
     },
     enabled: open,
     retry: 1,
@@ -776,34 +821,34 @@ function RelatedCollection({ name, url }: { name: string; url: string }) {
   return (
     <>
       <Button onClick={() => setOpen(true)}>
-        {fieldLabel(name)}
+        {label(name)}
         <ArrowRight size={15} />
       </Button>
       <Modal
         open={open}
         onOpenChange={setOpen}
-        title={fieldLabel(name)}
-        description="Recursos relacionados retornados pelo servidor."
+        title={label(name)}
+        description={t('resourcesPage.relatedDescription')}
       >
         {query.isPending ? (
           <Loading />
         ) : query.error ? (
-          <ErrorState error={query.error} />
+          <ErrorState error={new Error(errorText(query.error))} />
         ) : Array.isArray(query.data?.data) ? (
           <DataTable
             rows={query.data.data}
             rowKey={(r) => r.id}
             columns={[
-              { key: 'name', label: 'Nome', render: (r) => r.name || r.id },
+              { key: 'name', label: t('resourcesPage.name'), render: (r) => r.name || r.id },
               {
                 key: 'state',
-                label: 'Estado',
+                label: t('resourcesPage.state'),
                 render: (r) => <Badge state={r.state}>{r.state || '—'}</Badge>,
               },
             ]}
           />
         ) : (
-          <Alert tone="info">Este vínculo não retorna uma coleção navegável.</Alert>
+          <Alert tone="info">{t('resourcesPage.notCollection')}</Alert>
         )}
       </Modal>
     </>
@@ -820,11 +865,12 @@ export function Overview() {
   );
 }
 function EnvironmentSummary() {
+  const { t, formats } = useI18n();
   const app = useApp();
   const types = [
-    ['hosts', 'Hosts', Server],
-    ['containers', 'Containers', Box],
-    ['stacks', 'Stacks', Layers3],
+    ['hosts', t('resourcesPage.hosts'), Server],
+    ['containers', t('resourcesPage.containers'), Box],
+    ['stacks', t('resourcesPage.stacks'), Layers3],
   ] as const;
   const query = useQuery({
     queryKey: useDataKey('overview', app.config.modules.hosts, app.config.modules.workloads),
@@ -849,15 +895,15 @@ function EnvironmentSummary() {
     return (
       <>
         <PageHeader
-          title="Sua console"
-          description="Selecione ou crie um environment para começar."
+          title={t('resourcesPage.console')}
+          description={t('resourcesPage.startDescription')}
         />
         <Empty
-          title="Nenhum environment disponível"
-          description="Os recursos serão apresentados conforme seus ambientes e permissões."
+          title={t('resourcesPage.noEnvironment')}
+          description={t('resourcesPage.noEnvironmentDescription')}
           action={
             <Link className="button primary" to="/environments">
-              Ver environments
+              {t('resourcesPage.viewEnvironments')}
             </Link>
           }
         />
@@ -868,12 +914,12 @@ function EnvironmentSummary() {
     <>
       <PageHeader
         title={app.project.name}
-        description="Uma visão dos recursos disponíveis no environment selecionado."
-        eyebrow="VISÃO GERAL"
+        description={t('resourcesPage.overviewDescription')}
+        eyebrow={t('resourcesPage.overview')}
         action={
           <Button onClick={() => void query.refetch()}>
             <RefreshCw size={16} />
-            Atualizar
+            {t('resourcesPage.refresh')}
           </Button>
         }
       />
@@ -885,14 +931,16 @@ function EnvironmentSummary() {
               <strong>
                 {query.data?.[index].disabled || query.data?.[index].error
                   ? '—'
-                  : (query.data?.[index].rows.length ?? '—')}
+                  : query.data?.[index]
+                    ? formats.number(query.data[index].rows.length)
+                    : '—'}
               </strong>
               <small>
                 {query.data?.[index].disabled
-                  ? 'Módulo desativado'
+                  ? t('resourcesPage.moduleDisabled')
                   : query.data?.[index].error
-                    ? 'Não foi possível consultar'
-                    : 'Recursos neste environment'}
+                    ? t('resourcesPage.queryFailed')
+                    : t('resourcesPage.environmentResources')}
               </small>
             </div>
             <div className="metric-icon">
@@ -902,7 +950,7 @@ function EnvironmentSummary() {
         ))}
         <div className="metric">
           <div>
-            <p>Estado do environment</p>
+            <p>{t('resourcesPage.environmentState')}</p>
             <strong style={{ fontSize: 21 }}>{app.project.state}</strong>
             <small>{app.project.orchestration || 'Rancher'}</small>
           </div>
@@ -913,30 +961,28 @@ function EnvironmentSummary() {
       </div>
       <section className="panel">
         <div className="panel-heading">
-          <h2>Contexto do ambiente</h2>
+          <h2>{t('resourcesPage.environmentContext')}</h2>
           <Badge state={app.project.state}>{app.project.state}</Badge>
         </div>
         <dl className="details-grid">
           <div>
-            <dt>Nome</dt>
+            <dt>{t('resourcesPage.name')}</dt>
             <dd>{app.project.name}</dd>
           </div>
           <div>
-            <dt>ID</dt>
+            <dt>{t('resourcesPage.id')}</dt>
             <dd>{app.project.id}</dd>
           </div>
           <div>
-            <dt>Seu perfil</dt>
-            <dd>{app.admin ? 'Administrador' : 'Usuário'}</dd>
+            <dt>{t('resourcesPage.profile')}</dt>
+            <dd>{app.admin ? t('resourcesPage.admin') : t('resourcesPage.user')}</dd>
           </div>
           <div>
-            <dt>Origem das permissões</dt>
-            <dd>Regras do Rancher e grupos locais</dd>
+            <dt>{t('resourcesPage.permissionSource')}</dt>
+            <dd>{t('resourcesPage.permissionRules')}</dd>
           </div>
         </dl>
-        <Alert tone="info">
-          Alterar o environment atualiza os recursos apresentados nas telas da console.
-        </Alert>
+        <Alert tone="info">{t('resourcesPage.environmentHint')}</Alert>
       </section>
       {query.error && <ErrorState error={query.error} />}
     </>

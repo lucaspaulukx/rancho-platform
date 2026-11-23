@@ -50,6 +50,8 @@ Grupos, contas, diálogos de contas locais, diagnóstico de acesso efetivo, chav
 
 ## Dados e mutações
 
+Listas de recursos e workloads, ações de recursos, edição de environments, repositórios de catálogo por environment e políticas de rede usam mensagens compartilhadas. O painel de logs e terminal traduz controles e estados da conexão no lugar. A troca de idioma preserva a conexão ativa, o filtro, os comandos nativos e o conteúdo dos logs.
+
 Hosts, templates de catálogo e webhooks também usam o idioma compartilhado. Comandos de registro de hosts e valores de secrets permanecem nativos e mascarados até serem revelados explicitamente; trocar o idioma altera rótulos sem solicitar registro nem copiar um secret. Nomes de templates, conteúdo de parâmetros e identificadores de drivers de webhooks mantêm os valores nativos. Erros de helpers ainda não extraídos permanecem inalterados.
 
 Use schemas/action links atuais, sem inventar rotas ou supor igualdade entre schemas globais e do environment. Releia recurso, escopo e contrato relevante antes da mutação. Preserve configuração desconhecida e campos não selecionados; não transforme valores incompatíveis em defaults vazios silenciosamente.
