@@ -69,6 +69,32 @@ class HistoryChecks(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'historical content'):
             publication.main()
 
+    def test_missing_required_policy_fails_closed(self):
+        self.commit('README.md', 'Public fixture')
+        with self.assertRaisesRegex(RuntimeError, 'policy is required'):
+            publication.main(require_policy=True)
+
+    def test_worktree_uses_the_common_private_policy(self):
+        self.commit('README.md', 'fixture-retired-name')
+        (self.root / '.git/private-policy.json').write_text(
+            json.dumps({'retiredTerms': ['fixture-retired-name']}))
+        with tempfile.TemporaryDirectory(prefix='rancho-policy-worktree-') as folder:
+            self.git('worktree', 'add', '--detach', folder, 'HEAD')
+            try:
+                publication.ROOT = Path(folder)
+                with self.assertRaisesRegex(RuntimeError, 'historical content'):
+                    publication.main(require_policy=True)
+            finally:
+                publication.ROOT = self.root
+                self.git('worktree', 'remove', folder)
+
+    def test_deleted_compressed_dump_is_still_blocked(self):
+        self.commit('private.sql.gz', 'Synthetic archive placeholder')
+        self.git('rm', 'private.sql.gz')
+        self.git('commit', '-qm', 'Remove synthetic archive')
+        with self.assertRaisesRegex(RuntimeError, 'historical path'):
+            publication.main()
+
 
 if __name__ == '__main__':
     unittest.main()

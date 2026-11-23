@@ -47,11 +47,39 @@ class RepositoryLayout(unittest.TestCase):
 
     def test_private_artifacts_are_still_rejected(self):
         for name in ('.env', '.env.private', 'backups/private.txt', 'capture.dump',
+                     'private.sql.gz', 'private.sql.zip', 'private.sql.xz', 'private.sql.bz2',
+                     'private.dump.gz', 'private.dump.zip',
                      'keycloak/realm.json', 'console/own-fixture.json', 'console/own-results.json'):
             self.stage(name)
             with self.assertRaisesRegex(RuntimeError, 'Private/generated artifact'):
                 gate.main()
             subprocess.run(['git', 'rm', '--cached', '--', name], cwd=self.root, check=True, capture_output=True)
+
+    def test_required_policy_is_not_silently_omitted(self):
+        self.stage('README.md')
+        with self.assertRaisesRegex(RuntimeError, 'policy is required'):
+            gate.main(require_policy=True)
+
+    def test_staged_worktree_uses_common_private_policy(self):
+        subprocess.run(['git', 'config', 'user.name', 'Fixture'], cwd=self.root, check=True)
+        subprocess.run(['git', 'config', 'user.email', 'fixture@example.invalid'], cwd=self.root, check=True)
+        self.stage('README.md')
+        subprocess.run(['git', 'commit', '-qm', 'Fixture'], cwd=self.root, check=True, capture_output=True)
+        (self.root / '.git/private-policy.json').write_text(
+            '{"retiredTerms":["fixture-retired-name"]}')
+        with tempfile.TemporaryDirectory(prefix='rancho-index-worktree-') as folder:
+            subprocess.run(['git', 'worktree', 'add', '--detach', folder, 'HEAD'],
+                           cwd=self.root, check=True, capture_output=True)
+            try:
+                gate.ROOT = Path(folder)
+                (Path(folder) / 'README.md').write_text('fixture-retired-name')
+                subprocess.run(['git', 'add', 'README.md'], cwd=folder, check=True)
+                with self.assertRaisesRegex(RuntimeError, 'Retired identity'):
+                    gate.main(require_policy=True)
+            finally:
+                gate.ROOT = self.root
+                subprocess.run(['git', 'worktree', 'remove', '--force', folder],
+                               cwd=self.root, check=True, capture_output=True)
 
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -15,9 +16,16 @@ def git(*args, **kwargs):
     return subprocess.check_output(['git', *args], cwd=ROOT, **kwargs)
 
 
-def main():
-    policy = ROOT / '.git/private-policy.json'
+def main(*, require_policy=False):
+    common = Path(git('rev-parse', '--git-common-dir').decode().strip())
+    policy = (common if common.is_absolute() else ROOT / common) / 'private-policy.json'
+    if require_policy and not policy.is_file():
+        raise RuntimeError('A private publication policy is required; store it in the common Git directory.')
     terms = json.loads(policy.read_text(encoding='utf-8')).get('retiredTerms', []) if policy.exists() else []
+    if not isinstance(terms, list) or any(not isinstance(term, str) or not term.strip() for term in terms):
+        raise RuntimeError('Invalid private publication policy.')
+    if require_policy and not terms:
+        raise RuntimeError('The private publication policy must contain blocked identity terms.')
     secrets = []
     env = ROOT / '.env'
     if env.exists():
@@ -38,7 +46,7 @@ def main():
     for raw in paths:
         path = raw.strip('\r\n')
         if (path.startswith(forbidden) or '/node_modules/' in path or Path(path).name == '.env'
-                or path.endswith(('.dump', '.dpapi', '.enc', '.log'))
+                or path.endswith(('.dump', '.dpapi', '.enc', '.log', '.sql.gz', '.sql.zip', '.sql.xz', '.sql.bz2', '.dump.gz', '.dump.zip'))
                 or (path.endswith('.sql') and not path.startswith('migration/sql/'))
                 or any(term.lower() in path.lower() for term in terms)):
             raise RuntimeError('Non-distributable historical path found; details withheld.')
@@ -61,4 +69,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--require-policy', action='store_true')
+    main(require_policy=parser.parse_args().require_policy)
