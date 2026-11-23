@@ -27,6 +27,15 @@ Source/console CI uses read-only repository permission, pinned actions and no la
 
 ## Verify a source package
 
+Before publishing, run both privacy gates with `--require-policy`. Keep the release owner's `private-policy.json` in the directory returned by `git rev-parse --git-common-dir`, with a nonempty `retiredTerms` array containing the organization labels that must not be distributed. Do not commit the policy or its terms. Linked worktrees use this same private policy. A missing or empty required policy fails the check.
+
+```sh
+python scripts/check_repository.py --require-policy
+python scripts/check_public_history.py --require-policy
+```
+
+The history gate examines reachable commits, tag objects and file contents, including deleted historical files. Compressed SQL/database dumps are blocked alongside plain dumps. Also inspect the exact release ZIP, attachments, rendered screenshots and notices; pattern checks cannot prove the absence of every possible secret. Use only sanitized synthetic evidence in public material.
+
 The manually dispatched `Source release provenance` workflow on `main` packages the selected commit and signs the ZIP's digest. Download the archived workflow artifact and set `commit` to the full commit hash of the release. Verify both the checksum and the GitHub attestation.
 
 ```sh

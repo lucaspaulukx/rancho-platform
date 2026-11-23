@@ -27,6 +27,15 @@ CI de fontes/console usa permissão readonly, actions pinadas e nenhum secret de
 
 ## Verificar um pacote de código-fonte
 
+Antes de publicar, execute as duas verificações de privacidade com `--require-policy`. Mantenha o `private-policy.json` do responsável pela release no diretório retornado por `git rev-parse --git-common-dir`, com um array `retiredTerms` não vazio contendo os nomes de organizações que não podem ser distribuídos. Não versione a política nem seus termos. Worktrees vinculadas usam essa mesma política privada. A verificação falha quando a política obrigatória está ausente ou vazia.
+
+```sh
+python scripts/check_repository.py --require-policy
+python scripts/check_public_history.py --require-policy
+```
+
+A verificação do histórico examina commits alcançáveis, objetos de tags e conteúdo dos arquivos, inclusive arquivos excluídos de versões anteriores. Dumps SQL/de banco compactados são bloqueados junto dos dumps simples. Inspecione também o ZIP exato da release, anexos, capturas renderizadas e avisos de licença; padrões não provam a ausência de todo segredo possível. Use apenas evidências sintéticas sanitizadas no material público.
+
 O workflow `Source release provenance`, iniciado manualmente na `main`, empacota o commit selecionado e assina o digest do ZIP. Baixe o artefato do workflow e atribua a `commit` o hash completo do commit da release. Verifique o checksum e a atestação do GitHub.
 
 ```sh

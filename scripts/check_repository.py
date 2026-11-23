@@ -3,11 +3,12 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def main():
+def main(*, require_policy=False):
     entries = subprocess.check_output(['git', 'ls-files', '--stage', '-z'], cwd=ROOT).split(b'\0')
     blobs = {}
     for entry in entries:
@@ -30,7 +31,7 @@ def main():
                 or (basename.startswith('.env.') and not basename.endswith('.example'))
                 or basename.endswith(('-fixture.json', '-fixture.yaml', '-results.json'))):
             raise RuntimeError('Private/generated artifact found in index; path withheld.')
-        if path.startswith(('cattle/', 'websocket-proxy/', 'ui/', 'rancher/', 'references/', 'migration-runs/', 'backups/', 'evidence/')) or '/node_modules/' in path or path.endswith(('.dump', '.dpapi', '.enc', '.log')) or Path(path).name == '.env' or (path.endswith('.sql') and not path.startswith('migration/sql/')):
+        if path.startswith(('cattle/', 'websocket-proxy/', 'ui/', 'rancher/', 'references/', 'migration-runs/', 'backups/', 'evidence/')) or '/node_modules/' in path or path.endswith(('.dump', '.dpapi', '.enc', '.log', '.sql.gz', '.sql.zip', '.sql.xz', '.sql.bz2', '.dump.gz', '.dump.zip')) or Path(path).name == '.env' or (path.endswith('.sql') and not path.startswith('migration/sql/')):
             raise RuntimeError('Private/generated artifact found in index; path withheld.')
         blobs[blob] = path
     values = []
@@ -42,8 +43,15 @@ def main():
             key, value = line.split('=', 1)
             if re.search(r'PASSWORD|SECRET|TOKEN|PRIVATE_KEY', key) and len(value) >= 12:
                 values.append(value.encode())
-    policy = ROOT / '.git/private-policy.json'
+    common = Path(subprocess.check_output(['git', 'rev-parse', '--git-common-dir'], cwd=ROOT).decode().strip())
+    policy = (common if common.is_absolute() else ROOT / common) / 'private-policy.json'
+    if require_policy and not policy.is_file():
+        raise RuntimeError('A private publication policy is required; store it in the common Git directory.')
     terms = json.loads(policy.read_text(encoding='utf-8')).get('retiredTerms', []) if policy.exists() else []
+    if not isinstance(terms, list) or any(not isinstance(term, str) or not term.strip() for term in terms):
+        raise RuntimeError('Invalid private publication policy.')
+    if require_policy and not terms:
+        raise RuntimeError('The private publication policy must contain blocked identity terms.')
     output = subprocess.check_output(['git', 'cat-file', '--batch'], input=b''.join(blob + b'\n' for blob in blobs), cwd=ROOT)
     offset = 0
     for blob, path in blobs.items():
@@ -63,4 +71,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--require-policy', action='store_true')
+    main(require_policy=parser.parse_args().require_policy)
