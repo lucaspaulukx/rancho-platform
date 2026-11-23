@@ -5,6 +5,7 @@
   "themeDefault": "dark",
   "themeSelectable": true,
   "workloadInventoryPagination": true,
+  "workloadTreePagination": true,
   "customTheme": {},
   "modules": {
     "groups": true,

@@ -1015,7 +1015,8 @@ tbody tr:hover {
 :root[dir='rtl'] .table-footer .button svg {
   transform: scaleX(-1);
 }
-.operation-stack > .table-footer {
+.operation-stack > .table-footer,
+.operation-tree > .table-footer {
   border-top: 0;
   border-bottom: 1px solid var(--border);
 }
