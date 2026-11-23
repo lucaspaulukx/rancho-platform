@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError, type Resource, type Schema } from '../api';
+import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import { useActionScope } from '../hooks/useActionScope';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
@@ -16,15 +17,32 @@ import {
 } from '../stack-compose-upgrade';
 import { ComposeEditor } from './ComposeEditor';
 import { Alert, Button, CheckboxField, Confirm, ErrorState, Loading, Modal, useToast } from './ui';
+type ComposeErrorKey =
+  | 'stackComposeUpgradePanel.unavailable'
+  | 'stackComposeUpgradePanel.permission'
+  | 'stackComposeUpgradePanel.loadFailed'
+  | 'stackComposeUpgradePanel.reopen'
+  | 'stackComposeUpgradePanel.requestFailed';
+class ComposePanelError extends Error {
+  constructor(
+    ...args:
+      | [key: ComposeErrorKey]
+      | [key: 'stackComposeUpgradePanel.httpError', params: { status: string }]
+  ) {
+    super(args[0]);
+    this.detail = args;
+  }
+  readonly detail:
+    | [key: ComposeErrorKey]
+    | [key: 'stackComposeUpgradePanel.httpError', params: { status: string }];
+}
 async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
   try {
     return await api<T>(path, body, method, signal);
   } catch (e) {
-    throw new Error(
-      e instanceof ApiError
-        ? `Operação Compose não concluída (HTTP ${e.status}). Revise o arquivo ou consulte os processos da stack.`
-        : 'Não foi possível concluir a operação Compose.',
-    );
+    throw e instanceof ApiError
+      ? new ComposePanelError('stackComposeUpgradePanel.httpError', { status: String(e.status) })
+      : new ComposePanelError('stackComposeUpgradePanel.requestFailed');
   }
 }
 interface Props {
@@ -39,6 +57,12 @@ export default function StackComposeUpgradePanel(props: Props) {
   );
 }
 function ComposeScope({ resource, onClose, onSaved }: Props) {
+  const { t } = useI18n();
+  function errorText(error: Error) {
+    if (!(error instanceof ComposePanelError)) return error.message;
+    const [key, params] = error.detail;
+    return key === 'stackComposeUpgradePanel.httpError' ? t(key, params) : t(key);
+  }
   const app = useApp(),
     scope = useActionScope(),
     client = useQueryClient(),
@@ -59,7 +83,7 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
       app.project?.orchestration === 'cattle';
   async function load(signal: AbortSignal) {
     if (!enabled || !composeStackEligible(resource))
-      throw new Error('Editor Compose indisponível para esta stack.');
+      throw new ComposePanelError('stackComposeUpgradePanel.unavailable');
     const base = `projects/${scope.environment}/`,
       [stack, permission] = await Promise.all([
         request<Resource>(base + 'stacks/' + resource.id, undefined, undefined, signal),
@@ -67,7 +91,7 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
       ]);
     scope.resource(stack, resource);
     if (!composeStackPermission(permission))
-      throw new Error('Sua permissão de exportar ou atualizar não está disponível.');
+      throw new ComposePanelError('stackComposeUpgradePanel.permission');
     const exported = await request<Resource>(
       composeStackTarget(stack, scope.environment!, 'exportconfig'),
       {},
@@ -89,7 +113,9 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
       })
       .catch((e) => {
         if (!controller.signal.aborted)
-          setError(e instanceof Error ? e : new Error('Compose indisponível.'));
+          setError(
+            e instanceof Error ? e : new ComposePanelError('stackComposeUpgradePanel.loadFailed'),
+          );
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -104,7 +130,7 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
     retry: false,
     gcTime: 0,
     mutationFn: async () => {
-      if (!baseline || !enabled) throw new Error('Reabra o editor Compose.');
+      if (!baseline || !enabled) throw new ComposePanelError('stackComposeUpgradePanel.reopen');
       const signal = scope.signal(),
         base = `projects/${scope.environment}/`;
       const [fresh, permission, input] = await Promise.all([
@@ -140,9 +166,7 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
       void client.invalidateQueries({
         queryKey: ['data', app.identity, 'project', app.project?.id],
       });
-      toast(
-        'Upgrade recebido. Acompanhe a stack e escolha finalizar ou rollback nas ações nativas.',
-      );
+      toast(t('stackComposeUpgradePanel.saved'));
       if (updated.current) onSaved(updated.current);
     },
   });
@@ -158,15 +182,15 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
       <Modal
         open
         drawer
-        title={`Atualizar Compose · ${resource.name || resource.id}`}
-        description={`Environment: ${app.project?.name || '—'}. Arquivos exportados da configuração atual.`}
+        title={t('stackComposeUpgradePanel.title', { name: resource.name || resource.id })}
+        description={t('stackComposeUpgradePanel.description', { name: app.project?.name || '—' })}
         onOpenChange={(o) => {
           if (!o) close();
         }}
         footer={
           <>
             <Button onClick={close} disabled={write.isPending}>
-              Fechar
+              {t('stackComposeUpgradePanel.close')}
             </Button>
             <Button
               onClick={() => {
@@ -175,7 +199,7 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
               }}
               disabled={loading || !!error || !dirty || !impact}
             >
-              Revisar atualização
+              {t('stackComposeUpgradePanel.review')}
             </Button>
           </>
         }
@@ -183,18 +207,20 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
         {loading ? (
           <Loading />
         ) : error ? (
-          <ErrorState error={error} retry={() => setAttempt((v) => v + 1)} />
+          error instanceof ComposePanelError ? (
+            <div className="error-state">
+              <Alert>{errorText(error)}</Alert>
+              <Button onClick={() => setAttempt((v) => v + 1)}>{t('ui.retry')}</Button>
+            </div>
+          ) : (
+            <ErrorState error={error} retry={() => setAttempt((v) => v + 1)} />
+          )
         ) : (
           <>
-            <Alert tone="warning">
-              Atualizar Compose pode iniciar serviços e recriar containers. O Rancher preserva a
-              escala dos serviços existentes; use Escalar serviço para alterá-la. Novos serviços
-              podem iniciar com escala 1 mesmo com scale: 0 no arquivo. A exportação não é um backup
-              completo do ambiente. Confirme a escala e os arquivos antes de continuar.
-            </Alert>
+            <Alert tone="warning">{t('stackComposeUpgradePanel.warning')}</Alert>
             <ComposeEditor
               key={'docker:' + editorKey}
-              label="Docker Compose"
+              label={t('stackComposeUpgradePanel.dockerCompose')}
               value={draft.dockerCompose}
               onChange={(value) => {
                 setDraft((v) => ({ ...v, dockerCompose: value }));
@@ -204,7 +230,7 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
             />
             <ComposeEditor
               key={'rancher:' + editorKey}
-              label="Rancher Compose"
+              label={t('stackComposeUpgradePanel.rancherCompose')}
               value={draft.rancherCompose}
               onChange={(value) => {
                 setDraft((v) => ({ ...v, rancherCompose: value }));
@@ -212,7 +238,7 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
               }}
             />
             <CheckboxField
-              label="Entendo que o upgrade pode iniciar serviços e substituir containers"
+              label={t('stackComposeUpgradePanel.impact')}
               checked={impact}
               onChange={(e) => setImpact(e.target.checked)}
             />
@@ -224,18 +250,18 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
         onOpenChange={(o) => {
           if (!write.isPending) setReview(o);
         }}
-        title="Atualizar a stack por Compose?"
-        description="Os arquivos foram ocultados na revisão. A stack e sua exportação serão conferidas novamente antes do envio. Parâmetros existentes serão preservados; o servidor valida o YAML e executa a atualização."
+        title={t('stackComposeUpgradePanel.reviewTitle')}
+        description={t('stackComposeUpgradePanel.reviewDescription')}
         busy={write.isPending}
         onConfirm={() => write.mutate()}
       >
-        {write.error && <Alert>{write.error.message}</Alert>}
+        {write.error && <Alert>{errorText(write.error)}</Alert>}
       </Confirm>
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar alterações Compose?"
-        description="Os arquivos editados ainda não foram enviados ao Rancher."
+        title={t('stackComposeUpgradePanel.discardTitle')}
+        description={t('stackComposeUpgradePanel.discardDescription')}
         onConfirm={() => {
           setDiscard(false);
           onClose();
@@ -246,8 +272,8 @@ function ComposeScope({ resource, onClose, onSaved }: Props) {
         onOpenChange={(o) => {
           if (!o && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Sair com Compose pendente?"
-        description="Os arquivos ainda não foram enviados. Aguarde qualquer atualização em andamento."
+        title={t('stackComposeUpgradePanel.leaveTitle')}
+        description={t('stackComposeUpgradePanel.leaveDescription')}
         busy={write.isPending}
         onConfirm={() => {
           if (!write.isPending && blocker.state === 'blocked') blocker.proceed();

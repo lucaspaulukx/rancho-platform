@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/provider';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { allPages, api, ApiError, type Resource } from '../api';
@@ -17,6 +18,24 @@ import {
 } from './ui';
 import { SchemaForm } from './SchemaForm';
 
+class RegistryCredentialError extends Error {
+  constructor(
+    readonly key:
+      | 'registryCredentials.error.unavailable'
+      | 'registryCredentials.error.permission'
+      | 'registryCredentials.error.registryMismatch'
+      | 'registryCredentials.error.actionUnavailable'
+      | 'registryCredentials.error.actionChanged',
+  ) {
+    super(key);
+  }
+}
+class RegistryCredentialSaveError extends ApiError {
+  constructor(status: number) {
+    super(status, 'registryCredentials.error.save');
+  }
+}
+
 export function RegistryCredentials({
   registry,
   onDirty,
@@ -26,6 +45,16 @@ export function RegistryCredentials({
   onDirty: (value: boolean) => void;
   onPending: (value: boolean) => void;
 }) {
+  const { t } = useI18n();
+  function localizeError(error: Error) {
+    if (error instanceof RegistryCredentialSaveError)
+      return new ApiError(
+        error.status,
+        t('registryCredentials.error.save', { status: error.status }),
+      );
+    if (error instanceof RegistryCredentialError) return new Error(t(error.key));
+    return error;
+  }
   const app = useApp();
   const schemas = useSchemas(true);
   const schema = schemas.data?.registryCredential;
@@ -52,19 +81,19 @@ export function RegistryCredentials({
   const save = useMutation({
     gcTime: 0,
     mutationFn: async (payload: Record<string, unknown>) => {
-      if (!schema) throw new Error('As credenciais não estão disponíveis neste contexto.');
+      if (!schema) throw new RegistryCredentialError('registryCredentials.error.unavailable');
       const permission = await api<import('../api').Schema>(schema.links.self);
       if (
         editing
           ? !permission.resourceMethods?.includes('PUT')
           : !permission.collectionMethods?.includes('POST')
       )
-        throw new Error('Sua permissão de alteração não está mais disponível.');
+        throw new RegistryCredentialError('registryCredentials.error.permission');
       let url = permission.links.collection;
       if (editing) {
         const current = await api<Resource>(editing.links.self);
         if (current.registryId !== registry.id)
-          throw new Error('A credencial não pertence a este registry.');
+          throw new RegistryCredentialError('registryCredentials.error.registryMismatch');
         url = current.links.self;
       }
       try {
@@ -75,11 +104,7 @@ export function RegistryCredentials({
         );
         return dataResourceMetadata(result);
       } catch (error) {
-        if (error instanceof ApiError)
-          throw new ApiError(
-            error.status,
-            `Não foi possível salvar a credencial (HTTP ${error.status}). Confira os dados e suas permissões.`,
-          );
+        if (error instanceof ApiError) throw new RegistryCredentialSaveError(error.status);
         throw error;
       }
     },
@@ -88,17 +113,17 @@ export function RegistryCredentials({
       setEditing(undefined);
       save.reset();
       void query.refetch();
-      toast('Credencial salva. A senha não será exibida novamente.');
+      toast(t('registryCredentials.saved'));
     },
   });
   const run = useMutation({
     gcTime: 0,
     mutationFn: async () => {
       if (!action || !canManageResource(schema))
-        throw new Error('Esta operação não está disponível.');
+        throw new RegistryCredentialError('registryCredentials.error.actionUnavailable');
       const current = await api<Resource>(action.resource.links.self);
       if (current.registryId !== registry.id || !current.actions?.[action.name])
-        throw new Error('A operação não está mais disponível para esta credencial.');
+        throw new RegistryCredentialError('registryCredentials.error.actionChanged');
       await api(current.actions[action.name], {});
     },
     onSuccess: () => {
@@ -107,7 +132,7 @@ export function RegistryCredentials({
       void client.invalidateQueries({
         queryKey: ['data', app.identity, 'project', app.project?.id],
       });
-      toast('Operação recebida pelo Rancher.');
+      toast(t('registryCredentials.operationSent'));
     },
   });
   const busy = save.isPending || run.isPending;
@@ -138,14 +163,12 @@ export function RegistryCredentials({
             .map(([name, field]) => [
               name,
               name === 'publicValue'
-                ? { ...field, label: 'Usuário do registry' }
+                ? { ...field, label: t('registryCredentials.usernameLabel') }
                 : name === 'secretValue'
                   ? {
                       ...field,
-                      label: 'Senha ou token',
-                      description: editing
-                        ? 'Deixe em branco para preservar a senha existente.'
-                        : undefined,
+                      label: t('registryCredentials.secretLabel'),
+                      description: editing ? t('registryCredentials.preserveSecret') : undefined,
                     }
                   : field,
             ]),
@@ -156,8 +179,8 @@ export function RegistryCredentials({
     <section className="panel" style={{ marginTop: 24 }}>
       <div className="panel-heading">
         <div>
-          <h2>Credenciais do registry</h2>
-          <p className="muted">Gerencie as contas usadas para obter imagens deste registry.</p>
+          <h2>{t('registryCredentials.title')}</h2>
+          <p className="muted">{t('registryCredentials.description')}</p>
         </div>
         {schema?.collectionMethods?.includes('POST') && (
           <Button
@@ -167,12 +190,12 @@ export function RegistryCredentials({
               setEditing(null);
             }}
           >
-            Adicionar credencial
+            {t('registryCredentials.add')}
           </Button>
         )}
       </div>
       {!schema ? (
-        <Alert tone="info">Sua conta não tem acesso às credenciais deste registry.</Alert>
+        <Alert tone="info">{t('registryCredentials.noAccess')}</Alert>
       ) : query.isPending ? (
         <Loading />
       ) : query.error ? (
@@ -181,23 +204,27 @@ export function RegistryCredentials({
         <DataTable
           rows={query.data}
           rowKey={(value) => value.id}
-          emptyTitle="Nenhuma credencial cadastrada"
-          emptyDescription="Adicione uma credencial se o registry exige autenticação. Registries públicos podem ser usados sem senha."
+          emptyTitle={t('registryCredentials.empty')}
+          emptyDescription={t('registryCredentials.emptyDescription')}
           columns={[
-            { key: 'name', label: 'Nome', render: (value) => value.name || value.id },
+            {
+              key: 'name',
+              label: t('registryCredentials.name'),
+              render: (value) => value.name || value.id,
+            },
             {
               key: 'user',
-              label: 'Usuário',
+              label: t('registryCredentials.username'),
               render: (value) => (typeof value.publicValue === 'string' ? value.publicValue : '—'),
             },
             {
               key: 'state',
-              label: 'Estado',
+              label: t('registryCredentials.state'),
               render: (value) => <Badge state={value.state}>{value.state}</Badge>,
             },
             {
               key: 'actions',
-              label: 'Ações',
+              label: t('registryCredentials.actions'),
               render: (value) => (
                 <div className="row-actions">
                   {schema.resourceMethods?.includes('PUT') && (
@@ -207,7 +234,7 @@ export function RegistryCredentials({
                         setEditing(value);
                       }}
                     >
-                      Editar
+                      {t('registryCredentials.edit')}
                     </Button>
                   )}
                   {canManageResource(schema) &&
@@ -216,10 +243,10 @@ export function RegistryCredentials({
                       .map((name) => (
                         <Button key={name} onClick={() => setAction({ resource: value, name })}>
                           {name === 'activate'
-                            ? 'Ativar'
+                            ? t('registryCredentials.activate')
                             : name === 'deactivate'
-                              ? 'Desativar'
-                              : 'Remover'}
+                              ? t('registryCredentials.deactivate')
+                              : t('registryCredentials.remove')}
                         </Button>
                       ))}
                 </div>
@@ -231,15 +258,18 @@ export function RegistryCredentials({
       <Modal
         open={editing !== undefined}
         drawer
-        title={editing ? 'Editar credencial' : 'Adicionar credencial'}
-        description={`Registry: ${String(registry.serverAddress || registry.name || registry.id)} · Environment: ${app.project?.name}`}
+        title={editing ? t('registryCredentials.editTitle') : t('registryCredentials.add')}
+        description={t('registryCredentials.context', {
+          registry: String(registry.serverAddress || registry.name || registry.id),
+          environment: app.project?.name || '',
+        })}
         onOpenChange={(open) => {
           if (!open) close();
         }}
         footer={
           <>
             <Button onClick={close} disabled={busy}>
-              Cancelar
+              {t('registryCredentials.cancel')}
             </Button>
             <Button
               type="submit"
@@ -247,7 +277,7 @@ export function RegistryCredentials({
               variant="primary"
               busy={save.isPending}
             >
-              Salvar credencial
+              {t('registryCredentials.save')}
             </Button>
           </>
         }
@@ -262,15 +292,15 @@ export function RegistryCredentials({
             onDirtyChange={setDirty}
             onSubmit={(payload) => save.mutate(payload)}
             busy={save.isPending}
-            error={save.error}
+            error={save.error && localizeError(save.error)}
           />
         )}
       </Modal>
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar credencial?"
-        description="Os dados preenchidos ainda não foram salvos."
+        title={t('registryCredentials.discard')}
+        description={t('registryCredentials.discardDescription')}
         onConfirm={() => {
           setDiscard(false);
           setDirty(false);
@@ -286,12 +316,24 @@ export function RegistryCredentials({
             run.reset();
           }
         }}
-        title={`${action?.name === 'activate' ? 'Ativar' : action?.name === 'deactivate' ? 'Desativar' : 'Remover'} credencial?`}
-        description={`A operação afeta somente ${action?.resource.name || action?.resource.id || 'esta credencial'} no registry ${String(registry.serverAddress || registry.id)}. Novas operações com imagens podem depender dessa conta.`}
+        title={t(
+          action?.name === 'activate'
+            ? 'registryCredentials.activateTitle'
+            : action?.name === 'deactivate'
+              ? 'registryCredentials.deactivateTitle'
+              : 'registryCredentials.removeTitle',
+        )}
+        description={t('registryCredentials.actionDescription', {
+          credential:
+            action?.resource.name ||
+            action?.resource.id ||
+            t('registryCredentials.credentialFallback'),
+          registry: String(registry.serverAddress || registry.id),
+        })}
         busy={run.isPending}
         onConfirm={() => run.mutate()}
       />
-      {run.error && <Alert>{run.error.message}</Alert>}
+      {run.error && <Alert>{localizeError(run.error).message}</Alert>}
     </section>
   );
 }
