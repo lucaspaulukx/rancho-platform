@@ -1,0 +1,30 @@
+FROM golang:1.27.3-bookworm@sha256:d9b6a1beb9474adc2a1ce842573639b44b2a0dd49b6669f51d3821baf9ec37c9 AS build
+ENV GO111MODULE=off GOPATH=/go CGO_ENABLED=0
+ADD --checksum=sha256:b2885b826ede95a079f10c6f242f2306baade675417bf6eb6bf75e6ed39b9877 https://codeload.github.com/rancher/cni-driver/tar.gz/e4d2a5596a0a0126acbbb94e6ac5efe6530bb973 /tmp/cni-driver.tar.gz
+ADD --checksum=sha256:5f4494eb9fabdb1a9eefd0ff35b4814e65b261c8a2117e5d66e760ae7bd7e3ad https://codeload.github.com/rancher/rancher-cni-bridge/tar.gz/178c3c8ffcf76bdb45c2b1166dbeafb99acdf796 /tmp/rancher-cni-bridge.tar.gz
+ADD --checksum=sha256:0030f422e564b183a67191d3b58ed34d1a5276969e99b9f34f1bc1967eb901da https://codeload.github.com/rancher/rancher-cni-ipam/tar.gz/beb17a8ecc293e3dd47958ab561ceae6d61725ae /tmp/rancher-cni-ipam.tar.gz
+ADD --checksum=sha256:89018112857e4aa357b4402d7c0a9ecad34214ade14067149470ecaf39c54571 https://codeload.github.com/rancher/connectivity-check/tar.gz/86b52f3e21d056b47bd24d0a0277138d47d5c391 /tmp/connectivity-check.tar.gz
+RUN --network=none set -eu; \
+    build() { \
+        mkdir -p "/go/src/github.com/rancher/$1" "/out/licenses/$1"; \
+        cd "/go/src/github.com/rancher/$1"; \
+        tar -xzf "/tmp/$1.tar.gz" --strip-components=1; \
+        go build -trimpath -buildvcs=false -ldflags="-X main.VERSION=$3" -o "/out/$2" .; \
+        find . -type f \( -iname '*license*' -o -iname 'notice*' -o -iname 'copying*' -o -iname 'patents*' \) \
+            -exec cp --parents '{}' "/out/licenses/$1/" \;; \
+    }; \
+    build cni-driver rancher-cni-driver v0.1.0; \
+    build rancher-cni-bridge rancher-bridge v0.7.2; \
+    build rancher-cni-ipam rancher-cni-ipam v0.2.1; \
+    build connectivity-check connectivity-check v0.0.9
+
+FROM ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca17dcecaf5
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates iproute2 iptables util-linux && \
+    rm -rf /var/lib/apt/lists/*
+COPY --from=build /out/rancher-bridge /out/rancher-cni-ipam /opt/cni/bin/
+COPY --from=build /out/rancher-cni-driver /out/connectivity-check /usr/bin/
+COPY --from=build --chmod=0755 /go/src/github.com/rancher/cni-driver/package/start-cni-driver.sh /usr/bin/
+COPY --from=build /out/licenses/ /usr/share/doc/rancho-ipsec-cni/
+COPY --chmod=0755 modern-metadata-entry.sh /rancher-entrypoint.sh
+ENTRYPOINT ["/rancher-entrypoint.sh"]
+CMD ["start-cni-driver.sh"]
