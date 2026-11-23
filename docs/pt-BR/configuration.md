@@ -33,6 +33,12 @@ O destino precisa ser novo. Revise o diff antes de selecioná-lo para deploy. A 
 
 Use `moduleNames` e os rótulos de Sobre como inventário exato. Cada função verifica dependências e entradas de rota/ação. Alterar módulo visual não muda permissões nativas, grants existentes ou workloads armazenados.
 
+## Webhooks modernos para escala de serviços
+
+Defina `RANCHO_WEBHOOK_SERVICE_ENABLED=true` no arquivo de ambiente do Compose moderno para iniciar o listener nativo no loopback do contêiner Rancho. O perfil inicia com o serviço desativado. A console tem um controle independente em `modules.webhooks`. Use a URL HTTPS da console para chamadas de serviços externos e armazene a URL do receptor como credencial. Excluir o receptor revoga a URL.
+
+O serviço moderno disponibiliza `scaleService` para aumentar ou reduzir a escala de um serviço existente dentro dos limites configurados. Criar e excluir receptores exige uma função de escrita no environment selecionado. Usuários de somente leitura podem consultar o receptor sem receber a URL de invocação. Os receptores existentes de outros tipos permanecem no banco. A entrega de upgrade de serviço, escala de hosts e encaminhamento HTTP genérico ainda exige aceite separado.
+
 ## Dispositivos na criação e no upgrade de serviços
 
 `modules.workloadDeviceEditors` habilita um editor comum de dispositivos na criação de container avulso, launch config principal do serviço e sidecars. O default off mantém o formulário nativo genérico de lista de strings. O schema atual do escopo ainda precisa oferecer `devices: array[string]` com create habilitado. O contrato é relido antes do POST.

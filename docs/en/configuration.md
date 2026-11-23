@@ -33,6 +33,12 @@ The destination must be new. Review the diff before selecting it for deployment.
 
 Use `moduleNames` and the shared About labels as the exact inventory. Every feature checks its own dependencies and route/action entrypoints. Changing a UI module never changes native permissions, existing grants or stored workloads.
 
+## Modern service-scale webhook receivers
+
+Set `RANCHO_WEBHOOK_SERVICE_ENABLED=true` in the modern Compose environment to start the native listener on the Rancho container's loopback. The profile defaults to disabled. Console management uses the separate `modules.webhooks` setting. Use the HTTPS console URL for calls from external services and store each receiver URL as a credential. Deleting the receiver revokes its URL.
+
+This modern service advertises `scaleService` for increasing or decreasing an existing service within the configured bounds. Creation and removal require a write role in the selected environment. Read-only users can inspect the receiver without its invocation URL. Existing receivers of other types remain in the database. Delivery for service upgrades, host scaling and generic HTTP forwarding still requires separate acceptance.
+
 ## Device creation and service upgrade
 
 `modules.workloadDeviceEditors` enables a shared device-mapping editor in standalone container, primary service launch config and sidecar creation. It defaults off, retaining the generic native string-array form. The current scoped schema must still offer create-enabled `devices: array[string]`. The contract is reread before POST.
