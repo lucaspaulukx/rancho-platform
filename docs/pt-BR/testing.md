@@ -72,6 +72,8 @@ O helper de transporte do scheduler é diagnóstico limitado para a rede gerenci
 
 `sidecar_device_upgrade_acceptance.py` verifica o editor estruturado em serviço próprio com escala zero, incluindo flag desligada, campo ausente no schema atualizado do ambiente, retenção do rascunho, upgrade, reversão, conclusão e remoção explícita. Confere a preservação do mapeamento principal, a limpeza e a revogação da sessão.
 
+`physical_sidecar_device_upgrades.py` executa separadamente a estratégia nativa com uma réplica no host legado isolado. Confere os dois containers durante upgrade, reversão, conclusão e remoção do mapeamento. Verifica a configuração exata do Docker e a leitura de dispositivos de caractere depois que o relay temporário de alocação é removido. Na fixture, o Rancher substituiu os dois containers durante os upgrades e a reversão e preservou o mapeamento principal. O teste também confere a limpeza exata e a rejeição da sessão revogada. O escopo cobre as permissões solicitadas e a leitura dos aliases em um host.
+
 ### Inventário em alto volume
 
 Com o console compilado em localhost:18090 e o Chromium do Playwright disponível, rode este comando na raiz do repositório.
