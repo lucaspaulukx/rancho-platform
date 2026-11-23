@@ -815,4 +815,238 @@ export const jaJP = {
   'selectorRows.removeRow': 'ラベル {index} を削除',
   'selectorRows.remove': '削除',
   'selectorRows.add': 'ラベルを追加',
+  'serviceUpgradeForm.validation.contract': 'アップグレードの仕様を取得できません。',
+  'serviceUpgradeForm.validation.sidecarContract': 'サイドカーの仕様を取得できません。',
+  'serviceUpgradeForm.validation.image': '空白を含まない有効なイメージを入力してください。',
+  'serviceUpgradeForm.validation.batch': 'バッチサイズには 1 以上の整数を指定してください。',
+  'serviceUpgradeForm.validation.interval': '間隔には 100 ms 以上の整数を指定してください。',
+  'serviceUpgradeForm.validation.order': 'アップグレードの順序を確認してください。',
+  'serviceUpgradeForm.validation.differentImage': '現在とは異なるイメージを選択してください。',
+  'serviceUpgradeForm.validation.health': 'ヘルスチェックを確認してください。',
+  'serviceUpgradeForm.validation.healthContract': 'ヘルスチェックの仕様を取得できません。',
+  'serviceUpgradeForm.validation.ulimitContract': 'プロセス制限の仕様を取得できません。',
+  'serviceUpgradeForm.validation.securityContract': 'セキュリティの仕様を確認してください。',
+  'serviceUpgradeForm.validation.memory':
+    '上限と予約量を入力してください。明示的な値を解除するには 0 を指定してください。',
+  'serviceUpgradeForm.validation.cpuContract': 'CPU と I/O の仕様を取得できません。',
+  'serviceUpgradeForm.validation.schedulingContract': 'スケジューリングの仕様を取得できません。',
+  'serviceUpgradeForm.validation.sidecarUpgradeContract':
+    'サイドカーのアップグレード仕様を取得できません。',
+  'serviceUpgradeForm.review': 'アップグレードの内容を確認してください。',
+  'serviceUpgradeForm.limitsNotice':
+    '制限を変更すると、サービスのコンテナが置き換えられます。リストを空にすると明示的な制限が解除され、Docker の既定値が適用されます。',
+  'serviceUpgradeForm.securityNotice':
+    'セキュリティ設定を変更すると、サービスのコンテナが置き換えられます。確定する前に、ケーパビリティ、ホストへのアクセス、ファイルシステム設定を確認してください。',
+  'serviceUpgradeForm.batchNotice':
+    'バッチごとに最大 {batch} 個のコンテナをアップグレードし、バッチ間は {interval} ms 待機します。ポート、変数、ボリューム、サイドカーの設定は、上で明示的に変更した項目を除き維持されます。可用性は容量とアプリケーションのヘルスに依存します。',
+  'serviceUpgradeForm.follow':
+    'アップグレード後は、この画面で状態を確認できます。Rancher で操作が可能になると「アップグレードを完了」と「ロールバック」が表示されます。',
+  'serviceUpgradeForm.impact':
+    'サービス：{service}。公開ポートによってアクセスが変わる場合があります。マウントを変更すると既存データが利用できなくなる場合があります。サイドカーを編集または削除すると補助コンテナが置き換えられ、データやネットワークに影響することがあります。エンドポイントに障害があると、ヘルスチェックによってコンテナが再作成されたり、アップグレードが中断されたりする場合があります。Rancher は選択した方式でコンテナを置き換えます。確定前に各項目を確認してください。',
+  'serviceUpgradeForm.image': '新しいイメージ',
+  'serviceUpgradeForm.bindings': 'このアップグレードでポートとボリュームを編集',
+  'serviceUpgradeForm.health': 'このアップグレードでヘルスチェックを編集',
+  'serviceUpgradeForm.sidecars': 'このアップグレードでサイドカーを編集',
+  'serviceUpgradeForm.ulimits': 'このアップグレードでプロセス制限を編集',
+  'serviceUpgradeForm.security': 'このアップグレードでセキュリティ設定を編集',
+  'serviceUpgradeForm.privileged': '特権モード',
+  'serviceUpgradeForm.readOnly': '読み取り専用ファイルシステム',
+  'serviceUpgradeForm.memory': 'このアップグレードでメモリー設定を編集',
+  'serviceUpgradeForm.memoryLimit': 'メモリー上限',
+  'serviceUpgradeForm.memoryReservation': 'メモリー予約',
+  'serviceUpgradeForm.cpu': 'このアップグレードで CPU と I/O を編集',
+  'serviceUpgradeForm.affinity': 'このアップグレードでアフィニティを編集',
+  'serviceUpgradeForm.batch': 'バッチあたりのコンテナ数',
+  'serviceUpgradeForm.interval': 'バッチ間の間隔 (ms)',
+  'serviceUpgradeForm.configuration': '設定のアップグレード',
+  'serviceUpgradeForm.imageUpgrade': 'イメージのアップグレード',
+  'serviceUpgradeForm.currentImage': '現在のイメージ：',
+  'serviceUpgradeForm.capAdd': '追加するケーパビリティ',
+  'serviceUpgradeForm.capDrop': '削除するケーパビリティ',
+  'serviceUpgradeForm.startFirst': '現在のコンテナを停止する前に新しいコンテナを起動',
+  'serviceUpgradeForm.confirm': 'サービス設定をアップグレードしますか？',
+  'sidecarValidation.depth': 'サイドカー設定のネストが深すぎます。',
+  'sidecarValidation.fieldUnavailable':
+    'サイドカーのフィールド「{name}」を使用できません。パネルを開き直してください。',
+  'sidecarValidation.reviewItems': 'サイドカーの設定項目を確認してください。',
+  'sidecarValidation.fieldContract': 'サイドカーの「{name}」の仕様を取得できません。',
+  'sidecarValidation.limit': 'サイドカーは 50 個まで指定できます。',
+  'sidecarValidation.contract': 'サイドカーの仕様を取得できません。',
+  'sidecarValidation.review': 'サイドカーの設定を確認してください。',
+  'sidecarValidation.name':
+    'サービス名と異なる一意のサイドカー名を指定してください。英字、数字、ハイフンを使用でき、最大 63 文字です。',
+  'sidecarValidation.image': 'サイドカー「{name}」に有効なイメージを入力してください。',
+  'sidecarValidation.reservedImage':
+    'このイメージは Rancher の削除処理用に予約されています。「サイドカーを削除」を使用してください。',
+  'sidecarValidation.networkMode':
+    'このサービスの別のコンテナとネットワークを共有するには、ネットワークモードに container を指定してください。',
+  'sidecarValidation.links':
+    'サービス内のコンテナ間のネットワークとボリュームのリンクを確認してください。',
+  'sidecarValidation.cycle':
+    'サイドカー間のネットワークとボリュームのリンクを循環させることはできません。',
+  'workloadPolicyValidation.limit': 'アフィニティルールは 100 件まで指定できます。',
+  'workloadPolicyValidation.rule':
+    'アフィニティルールには、カンマや改行を含まない有効なキーと値を入力してください。',
+  'workloadPolicyValidation.map': 'スケジューリングラベルが無効です。',
+  'workloadPolicyValidation.text': 'ラベルにはテキストが必要です。',
+  'workloadPolicyValidation.global':
+    'グローバルスケジューリングでは、ホストラベルに対する必須ルールまたは除外ルールのみ使用できます。',
+  'workloadPolicyValidation.depth': '設定のネストが深すぎます。',
+  'workloadPolicyValidation.capabilities':
+    '現在の仕様に照らしてセキュリティのケーパビリティを確認してください。',
+  'serviceEditors.linkError.environment': 'サービスはこの環境に属していません。',
+  'serviceEditors.linkError.foreign': '一部のリンクは別の環境に属しています。',
+  'serviceEditors.linkError.changed':
+    '別のクライアントでリンクが変更されました。パネルを閉じて開き直してください。',
+  'serviceEditors.linkError.advanced':
+    '一部のリンクは詳細設定を使用しているか、移行中か、利用できない対象を参照しています。設定を保持するにはネイティブフォームを使用してください。',
+  'serviceEditors.linkError.unavailable': 'このコンテキストではリンクを編集できません。',
+  'serviceEditors.linkError.limit': '1 回の操作で編集できるリンクは 100 件までです。',
+  'serviceEditors.linkError.contract': 'リンクの仕様が変更されました。パネルを開き直してください。',
+  'serviceEditors.linkError.stack': 'この操作ではサービスのスタックを利用できません。',
+  'serviceEditors.linkError.target':
+    'この環境で利用できる、リンク元とは異なるアプリケーションサービスを選択してください。',
+  'serviceEditors.linkError.alias':
+    'エイリアスが無効です。英字、数字、ハイフン、ピリオド、アンダースコアを使用してください。',
+  'serviceEditors.linkError.duplicate':
+    'リスト内で対象やエイリアスが重複しないようにしてください。',
+  'serviceEditors.unsupported': 'これらのリンクは編集できません。',
+  'serviceEditors.reopen': 'リンクエディターを開き直してください。',
+  'serviceEditors.contract': 'サービスリンクの仕様を取得できません。',
+  'serviceEditors.changed': 'リンクの仕様が変更されました。パネルを開き直してください。',
+  'serviceEditors.confirmRemove': 'すべてのリンクを削除することを確認してください。',
+  'serviceEditors.sent': 'リンクを Rancher に送信しました。設定とトポロジーを確認してください。',
+  'serviceEditors.reviewLinks': 'リンクを確認してください。',
+  'serviceEditors.close': '閉じる',
+  'serviceEditors.review': '変更内容を確認',
+  'serviceEditors.linkInfo':
+    'このアプリケーションが利用するサービスを選択してください。任意のエイリアスで、ネイティブ設定内のリンク先を識別します。リストを変更すると、名前解決や接続に影響することがあります。',
+  'serviceEditors.denied': 'アカウントの権限または現在の状態により、リンクを変更できません。',
+  'serviceEditors.empty': 'このサービスから他のサービスへのリンクはありません。',
+  'serviceEditors.select': 'サービスを選択…',
+  'serviceEditors.aliasHint': '任意です。指定しない場合、Rancher はサービス名を使用します。',
+  'serviceEditors.add': 'リンクを追加',
+  'serviceEditors.acknowledge': 'このサービスからすべてのリンクを削除することを確認しました',
+  'serviceEditors.apply': 'サービスリンクを適用しますか？',
+  'serviceEditors.serviceName': 'サービス名',
+  'serviceEditors.discard': '保存していないリンクを破棄しますか？',
+  'serviceEditors.discardDescription': 'Rancher の設定はそのまま維持されます。',
+  'serviceEditors.context': 'コンテキストを切り替えますか？',
+  'serviceEditors.contextDescription':
+    '保存していないリンクがあります。送信中の場合は完了を待ってください。',
+  'serviceEditors.link': 'リンク {index}',
+  'serviceEditors.remove': 'リンク {index} を削除',
+  'serviceEditors.target': 'リンク先サービス {index}',
+  'serviceEditors.alias': 'リンクのエイリアス {index}',
+  'serviceEditors.targetMissing': '利用できないリンク先 ({id})',
+  'serviceEditors.title': 'リンク · {name}',
+  'serviceEditors.environment': '環境：{name}',
+  'serviceEditors.applyDescription':
+    '{environment} 環境内でのみ、{name} のリンク一覧が {count} 件のリンクに置き換えられます。',
+  'serviceEditors.before': '変更前 · {count} 件のリンク',
+  'serviceEditors.after': '変更後 · {count} 件のリンク',
+  'serviceEditors.summary': '{target} · エイリアス：{alias}',
+  'serviceEditors.scaleError.integer': 'コンテナ数を整数で入力してください。',
+  'serviceEditors.scaleError.range': 'スケールが Rancher の許容範囲外です。',
+  'serviceEditors.scaleError.unavailable': 'このリソースはスケールを変更できません。',
+  'serviceEditors.scaleError.changed':
+    '別のクライアントでスケールが変更されました。最新の値を取得するにはパネルを開き直してください。',
+  'serviceEditors.scaleError.unchanged': '現在のスケールと異なる値を入力してください。',
+  'serviceEditors.confirmZero':
+    'スケールを 0 にする前に、コンテナが停止することを確認してください。',
+  'serviceEditors.reviewScale': 'スケールを確認してください。',
+  'serviceEditors.quantity': '希望するコンテナ数',
+  'serviceEditors.scaleInfo':
+    'Rancher はサービスの実際のスケールを調整します。スケールを縮小するとコンテナが停止することがあります。拡大できるかは空き容量によります。稼働中のコンテナ数が設定値に達するまで時間がかかる場合があります。',
+  'serviceEditors.acknowledgeZero':
+    'スケールを 0 にすると、このサービスのコンテナが停止することを理解しました',
+  'serviceEditors.templateHint': 'この操作ではカタログテンプレートの回答が保持されます。',
+  'serviceEditors.currentScale': '現在のスケール設定：{scale}。',
+  'stackComposeUpgradePanel.dockerCompose': 'Docker Compose',
+  'stackComposeUpgradePanel.rancherCompose': 'Rancher Compose',
+  'stackComposeUpgradePanel.impact':
+    'アップグレードによってサービスが起動し、コンテナが置き換えられる場合があることを理解しました',
+  'stackComposeUpgradePanel.reviewTitle': 'Compose を使ってスタックをアップグレードしますか？',
+  'stackComposeUpgradePanel.reviewDescription':
+    '確認画面ではファイルを非表示にしています。送信前にスタックとエクスポート内容を再確認します。既存のパラメーターは保持されます。サーバーが YAML を検証し、アップグレードを実行します。',
+  'stackComposeUpgradePanel.discardTitle': 'Compose の変更を破棄しますか？',
+  'stackComposeUpgradePanel.discardDescription':
+    '編集したファイルはまだ Rancher に送信されていません。',
+  'stackComposeUpgradePanel.leaveTitle': 'Compose の変更を保留したまま移動しますか？',
+  'stackComposeUpgradePanel.leaveDescription':
+    'ファイルはまだ送信されていません。アップグレード中の場合は完了を待ってください。',
+  'stackComposeUpgradePanel.close': '閉じる',
+  'stackComposeUpgradePanel.review': 'アップグレード内容を確認',
+  'stackComposeUpgradePanel.warning':
+    'Compose のアップグレードによって、サービスが起動したりコンテナが再作成されたりすることがあります。Rancher は既存サービスのスケールを保持します。変更するには「サービスのスケールを変更」を使用してください。新しいサービスは、ファイルに scale: 0 と指定しても、スケール 1 で起動する場合があります。エクスポートには環境全体のバックアップは含まれません。続行前にスケールとファイルを確認してください。',
+  'stackComposeUpgradePanel.title': 'Compose のアップグレード · {name}',
+  'stackComposeUpgradePanel.description':
+    '環境：{name}。ファイルは現在の設定からエクスポートされたものです。',
+  'stackComposeUpgradePanel.saved':
+    'アップグレードの要求を受け付けました。スタックの状態を確認し、ネイティブ操作で完了またはロールバックを選択してください。',
+  'stackComposeUpgradePanel.unavailable': 'このスタックでは Compose エディターを利用できません。',
+  'stackComposeUpgradePanel.permission': 'エクスポートまたはアップグレードの権限がありません。',
+  'stackComposeUpgradePanel.loadFailed': 'Compose を利用できません。',
+  'stackComposeUpgradePanel.reopen': 'Compose エディターを開き直してください。',
+  'stackComposeUpgradePanel.requestFailed': 'Compose の操作を完了できませんでした。',
+  'stackComposeUpgradePanel.httpError':
+    'Compose の操作を完了できませんでした (HTTP {status})。ファイルまたはスタックのプロセスを確認してください。',
+  'stackComposeUpgradePanel.validation.stackUnavailable':
+    '現在の環境または状態ではスタックを利用できません。',
+  'stackComposeUpgradePanel.validation.noSource':
+    'このスタックには Compose のソースがありません。サービスエディターを使用してください。',
+  'stackComposeUpgradePanel.validation.actionUnavailable': 'スタックの操作を利用できません。',
+  'stackComposeUpgradePanel.validation.invalidTarget': 'スタックの操作対象が無効です。',
+  'stackComposeUpgradePanel.validation.invalidExport': 'Compose のエクスポートが無効です。',
+  'stackComposeUpgradePanel.validation.exportTooLarge':
+    'エクスポートがファイルごとの上限 512 KiB を超えています。',
+  'stackComposeUpgradePanel.validation.confirmImpact':
+    'スタックのアップグレードの影響を確認してください。',
+  'stackComposeUpgradePanel.validation.contractUnavailable':
+    'スタックのアップグレード仕様を取得できません。',
+  'stackComposeUpgradePanel.validation.stackChanged':
+    'スタックまたはそのサービスが変更されました。エディターを開き直してください。',
+  'stackComposeUpgradePanel.validation.changeRequired':
+    '送信前に Compose ファイルを変更してください。',
+  'stackComposeUpgradePanel.validation.fieldDenied':
+    'この Compose フィールドは許可されていません。',
+  'stackComposeUpgradePanel.validation.invalidFiles':
+    'Compose ファイルと UTF-8 での上限 512 KiB を確認してください。',
+  'stackComposeUpgradePanel.validation.preserveParameters':
+    '現在の仕様では既存のパラメーターを保持できません。',
+  'stackComposeUpgradePanel.validation.invalidParameter':
+    'スタックのパラメーターが仕様の範囲外です。',
+  'composeEditor.hideLabel': '{label}を非表示',
+  'composeEditor.showLabel': '{label}を表示',
+  'composeEditor.size': '{lines} 行 · {bytes} バイト',
+  'composeEditor.hide': '非表示',
+  'composeEditor.show': '表示',
+  'composeEditor.hint': '内容は変換せずに Rancher に送信されます。UTF-8 で最大 512 KiB です。',
+  'composeEditor.hidden': '内容は非表示です。編集するには「表示」を選択してください。',
+  'composeEditor.stackName': 'スタック名',
+  'composeEditor.nameHint': '英字、数字、ハイフンを使用できます。最大 63 文字です。',
+  'composeEditor.description': '説明',
+  'composeEditor.creationMode': 'スタックの作成方法',
+  'composeEditor.docker': 'Docker Compose',
+  'composeEditor.rancher': 'Rancher Compose（任意）',
+  'composeEditor.start': 'インポート後にサービスを起動',
+  'composeEditor.startDescription':
+    '選択した環境でコンテナを作成します。起動前にサービスを確認する場合は、選択を解除してください。',
+  'composeEditor.startWarning':
+    'インポートにより、選択した環境でコンテナが作成され、リソースが消費される場合があります。',
+  'composeEditor.startManually':
+    'サービスは自動起動せずにインポートされます。起動操作でサービスを開始できます。',
+  'composeEditor.empty': '空のスタック',
+  'composeEditor.import': 'Compose をインポート',
+  'composeEditor.compatibility':
+    'Rancher 1.6 に対応した形式を使用してください。サーバーがファイルを検証してインポートします。結果はスタックで確認してください。',
+  'composeEditor.variables': '補間変数',
+  'composeEditor.variablesNote':
+    'Rancher はファイルのインポート時にこれらの値を使用します。値はコンソールの設定には保存されません。',
+  'composeEditor.addVariable': '変数を追加',
+  'composeEditor.emptyHint': 'スタックを作成し、その行のメニューからサービスを追加します。',
+  'composeEditor.variableName': '変数名 {index}',
+  'composeEditor.variableValue': '変数の値 {index}',
+  'composeEditor.removeVariable': '変数 {index} を削除',
+  'composeEditor.review': 'スタックを確認してください。',
 } as const;

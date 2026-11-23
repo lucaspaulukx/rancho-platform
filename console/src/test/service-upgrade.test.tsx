@@ -14,6 +14,8 @@ import {
   supportsSchedulingUpgrade,
 } from '../service-upgrade';
 import { ServiceUpgradeForm } from '../components/ServiceUpgradeForm';
+import { frFR } from '../i18n/catalogs/fr-FR';
+import { I18nProvider, useI18n } from '../i18n/provider';
 
 const launchFields = {
   imageUuid: { type: 'string', create: true },
@@ -64,6 +66,71 @@ const healthSchemas = {
   },
 } as Record<string, Schema>;
 describe('Atualização contextual do serviço', () => {
+  it('reviews a port change in French while preserving the native upgrade draft', async () => {
+    const user = userEvent.setup();
+    const submit = vi.fn();
+    const current: Resource = {
+      ...resource,
+      name: 'web',
+      state: 'active',
+      actions: { upgrade: '/upgrade' },
+    };
+    function Editor() {
+      const { setLocale, t } = useI18n();
+      return (
+        <>
+          <button onClick={() => setLocale('fr-FR')}>Français</button>
+          <ServiceUpgradeForm
+            bindingsEnabled
+            resource={current}
+            schemas={schemas}
+            onSubmit={submit}
+            onDirtyChange={vi.fn()}
+            busy={false}
+            error={null}
+          />
+          <button type="submit" form="workspace-resource-form">
+            {t('serviceUpgradeForm.review')}
+          </button>
+        </>
+      );
+    }
+    render(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'fr-FR'],
+          selectable: true,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <Editor />
+      </I18nProvider>,
+    );
+    await user.click(screen.getByLabelText('Editar portas e volumes nesta atualização'));
+    const port = screen.getByRole('textbox', { name: 'Porta no host 1' });
+    await user.clear(port);
+    await user.type(port, '8081');
+    await user.click(screen.getByRole('button', { name: 'Français' }));
+    await user.click(
+      await screen.findByRole('button', { name: frFR['serviceUpgradeForm.review'] }),
+    );
+    const dialog = await screen.findByRole('dialog', { name: frFR['serviceUpgradeForm.confirm'] });
+    expect(dialog).toHaveTextContent(frFR['serviceUpgradeForm.impact'].replace('{service}', 'web'));
+    expect(submit).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: frFR['ui.confirm'] }));
+    expect(submit).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({
+        editBindings: true,
+        ports: ['8081:80/tcp'],
+        dataVolumes: ['store:/data'],
+        image: 'app:1',
+      }),
+    );
+  });
+
   it('upgrade de segurança preserva imagem/bindings e valida schema/valores/conflito/no-op', () => {
     const field = { type: 'array[enum]', create: true, options: ['ALL', 'NET_BIND_SERVICE'] };
     const native = {

@@ -1,4 +1,254 @@
 export const frFR = {
+  'composeEditor.hideLabel': 'Masquer {label}',
+  'composeEditor.showLabel': 'Afficher {label}',
+  'composeEditor.size': 'Lignes : {lines} · octets : {bytes}',
+  'composeEditor.hide': 'Masquer',
+  'composeEditor.show': 'Afficher',
+  'composeEditor.hint':
+    'Le contenu est envoyé à Rancher sans conversion. Limite de 512 KiB en UTF-8.',
+  'composeEditor.hidden': 'Le contenu est masqué. Sélectionnez « Afficher » pour le modifier.',
+  'composeEditor.stackName': 'Nom de la stack',
+  'composeEditor.nameHint': 'Lettres, chiffres et traits d’union. 63 caractères au maximum.',
+  'composeEditor.description': 'Description',
+  'composeEditor.creationMode': 'Mode de création de la stack',
+  'composeEditor.docker': 'Docker Compose',
+  'composeEditor.rancher': 'Rancher Compose (facultatif)',
+  'composeEditor.start': 'Démarrer les services après l’importation',
+  'composeEditor.startDescription':
+    'Crée des conteneurs dans l’environnement sélectionné. Laissez l’option décochée pour vérifier les services avant de les démarrer.',
+  'composeEditor.startWarning':
+    'L’importation peut créer des conteneurs et consommer des ressources dans l’environnement sélectionné.',
+  'composeEditor.startManually':
+    'Les services seront importés sans démarrer automatiquement. Vous pouvez les lancer avec l’action « Démarrer ».',
+  'composeEditor.empty': 'Stack vide',
+  'composeEditor.import': 'Importer Compose',
+  'composeEditor.compatibility':
+    'Utilisez un format compatible avec Rancher 1.6. Le serveur valide les fichiers et effectue l’importation. Suivez le résultat dans la stack.',
+  'composeEditor.variables': 'Variables d’interpolation',
+  'composeEditor.variablesNote':
+    'Rancher utilise ces valeurs à l’importation des fichiers. Elles ne sont pas enregistrées dans les préférences de la console.',
+  'composeEditor.addVariable': 'Ajouter une variable',
+  'composeEditor.emptyHint':
+    'Créez la stack, puis ajoutez des services depuis le menu de sa ligne.',
+  'composeEditor.variableName': 'Nom de la variable {index}',
+  'composeEditor.variableValue': 'Valeur de la variable {index}',
+  'composeEditor.removeVariable': 'Retirer la variable {index}',
+  'composeEditor.review': 'Vérifiez la stack.',
+
+  'serviceEditors.linkError.environment': 'Le service n’appartient pas à l’environnement.',
+  'serviceEditors.linkError.foreign': 'Certains liens appartiennent à un autre environnement.',
+  'serviceEditors.linkError.changed':
+    'Un autre client a modifié les liens. Fermez et rouvrez le panneau.',
+  'serviceEditors.linkError.advanced':
+    'Certains liens sont avancés, transitoires ou pointent vers des cibles indisponibles. Utilisez le formulaire natif pour conserver cette configuration.',
+  'serviceEditors.linkError.unavailable':
+    'La modification des liens est indisponible dans ce contexte.',
+  'serviceEditors.linkError.limit': 'Modifiez au plus 100 liens par opération.',
+  'serviceEditors.linkError.contract': 'Le contrat des liens a changé. Rouvrez le panneau.',
+  'serviceEditors.linkError.stack': 'La stack du service est indisponible pour cette opération.',
+  'serviceEditors.linkError.target':
+    'Choisissez dans cet environnement un service applicatif disponible et différent du service source.',
+  'serviceEditors.linkError.alias':
+    'Alias non valide. Utilisez des lettres, des chiffres, des traits d’union, des points ou des tirets bas.',
+  'serviceEditors.linkError.duplicate':
+    'Les cibles et les alias doivent être uniques dans la liste.',
+  'serviceEditors.unsupported': 'Ces liens ne peuvent pas être modifiés.',
+  'serviceEditors.reopen': 'Rouvrez l’éditeur de liens.',
+  'serviceEditors.contract': 'Le contrat des liens entre services est indisponible.',
+  'serviceEditors.changed': 'Le contrat des liens a changé. Rouvrez le panneau.',
+  'serviceEditors.confirmRemove': 'Confirmez le retrait de tous les liens.',
+  'serviceEditors.sent':
+    'Les liens ont été envoyés à Rancher. Suivez la configuration et la topologie.',
+  'serviceEditors.reviewLinks': 'Vérifiez les liens.',
+  'serviceEditors.close': 'Fermer',
+  'serviceEditors.review': 'Vérifier les modifications',
+  'serviceEditors.linkInfo':
+    'Choisissez les services utilisés par cette application. L’alias facultatif identifie la cible dans la configuration native. Modifier la liste peut affecter la résolution des noms et la connectivité.',
+  'serviceEditors.denied': 'Votre compte ou l’état actuel empêche la modification des liens.',
+  'serviceEditors.empty': 'Ce service n’a aucun lien sortant.',
+  'serviceEditors.select': 'Sélectionner un service…',
+  'serviceEditors.aliasHint': 'Facultatif. Sans alias, Rancher utilise le nom du service.',
+  'serviceEditors.add': 'Ajouter un lien',
+  'serviceEditors.acknowledge': 'Je confirme le retrait de tous les liens de ce service',
+  'serviceEditors.apply': 'Appliquer les liens entre services ?',
+  'serviceEditors.serviceName': 'nom du service',
+  'serviceEditors.discard': 'Abandonner les liens non enregistrés ?',
+  'serviceEditors.discardDescription': 'La configuration de Rancher restera telle quelle.',
+  'serviceEditors.context': 'Changer de contexte ?',
+  'serviceEditors.contextDescription':
+    'Des liens n’ont pas été enregistrés. Attendez la fin de tout envoi en cours.',
+  'serviceEditors.link': 'Lien {index}',
+  'serviceEditors.remove': 'Retirer le lien {index}',
+  'serviceEditors.target': 'Service cible {index}',
+  'serviceEditors.alias': 'Alias du lien {index}',
+  'serviceEditors.targetMissing': 'Cible indisponible ({id})',
+  'serviceEditors.title': 'Liens · {name}',
+  'serviceEditors.environment': 'Environnement : {name}',
+  'serviceEditors.applyDescription':
+    'La liste de {name} sera remplacée uniquement dans {environment}. Nouveau nombre de liens : {count}.',
+  'serviceEditors.before': 'Avant · Nombre de liens : {count}',
+  'serviceEditors.after': 'Après · Nombre de liens : {count}',
+  'serviceEditors.summary': '{target} · alias : {alias}',
+  'serviceEditors.scaleError.integer': 'Saisissez un nombre entier de conteneurs.',
+  'serviceEditors.scaleError.range':
+    'Le nombre de réplicas est hors des limites autorisées par Rancher.',
+  'serviceEditors.scaleError.unavailable':
+    'Le nombre de réplicas ne peut pas être ajusté pour cette ressource.',
+  'serviceEditors.scaleError.changed':
+    'Un autre client a modifié le nombre de réplicas. Rouvrez le panneau pour actualiser la valeur.',
+  'serviceEditors.scaleError.unchanged':
+    'Saisissez un nombre de réplicas différent de la valeur actuelle.',
+  'serviceEditors.confirmZero':
+    'Confirmez l’arrêt des conteneurs avant d’appliquer un nombre de réplicas égal à zéro.',
+  'serviceEditors.reviewScale': 'Vérifiez le nombre de réplicas.',
+  'serviceEditors.quantity': 'Nombre de conteneurs souhaité',
+  'serviceEditors.scaleInfo':
+    'Rancher ajustera le nombre effectif de réplicas du service. Le réduire peut entraîner l’arrêt de conteneurs. L’augmenter dépend de la capacité disponible. Le nombre de conteneurs en cours d’exécution peut mettre du temps à atteindre la valeur configurée.',
+  'serviceEditors.acknowledgeZero':
+    'Je comprends que régler le nombre de réplicas à zéro arrête les conteneurs de ce service',
+  'serviceEditors.templateHint': 'Cette opération conserve les réponses du modèle de catalogue.',
+  'serviceEditors.currentScale': 'Nombre de réplicas actuellement configuré : {scale}.',
+
+  'stackComposeUpgradePanel.dockerCompose': 'Docker Compose',
+  'stackComposeUpgradePanel.rancherCompose': 'Rancher Compose',
+  'stackComposeUpgradePanel.impact':
+    'Je comprends que la mise à niveau peut démarrer des services et remplacer des conteneurs',
+  'stackComposeUpgradePanel.reviewTitle': 'Mettre à niveau la stack avec Compose ?',
+  'stackComposeUpgradePanel.reviewDescription':
+    'Les fichiers sont masqués pendant la vérification. La stack et son export seront vérifiés de nouveau avant l’envoi. Les paramètres existants sont conservés. Le serveur valide le YAML et effectue la mise à niveau.',
+  'stackComposeUpgradePanel.discardTitle': 'Abandonner les modifications de Compose ?',
+  'stackComposeUpgradePanel.discardDescription':
+    'Les fichiers modifiés n’ont pas encore été envoyés à Rancher.',
+  'stackComposeUpgradePanel.leaveTitle': 'Quitter avec des modifications de Compose en attente ?',
+  'stackComposeUpgradePanel.leaveDescription':
+    'Les fichiers n’ont pas encore été envoyés. Attendez la fin de toute mise à niveau en cours.',
+  'stackComposeUpgradePanel.close': 'Fermer',
+  'stackComposeUpgradePanel.review': 'Vérifier la mise à niveau',
+  'stackComposeUpgradePanel.warning':
+    'La mise à niveau de Compose peut démarrer des services et recréer des conteneurs. Rancher conserve le nombre de réplicas des services existants. Utilisez « Ajuster le nombre de réplicas » pour le modifier. De nouveaux services peuvent démarrer avec 1 réplica, même si le fichier contient scale: 0. L’export ne constitue pas une sauvegarde complète de l’environnement. Vérifiez le nombre de réplicas et les fichiers avant de continuer.',
+  'stackComposeUpgradePanel.title': 'Mettre à niveau Compose · {name}',
+  'stackComposeUpgradePanel.description':
+    'Environnement : {name}. Fichiers exportés depuis la configuration actuelle.',
+  'stackComposeUpgradePanel.saved':
+    'Demande de mise à niveau reçue. Suivez l’état de la stack et utilisez les actions natives pour terminer la mise à niveau ou revenir à la version précédente.',
+  'stackComposeUpgradePanel.unavailable': 'L’éditeur Compose est indisponible pour cette stack.',
+  'stackComposeUpgradePanel.permission':
+    'Votre autorisation d’exporter ou de mettre à niveau est indisponible.',
+  'stackComposeUpgradePanel.loadFailed': 'Compose est indisponible.',
+  'stackComposeUpgradePanel.reopen': 'Rouvrez l’éditeur Compose.',
+  'stackComposeUpgradePanel.requestFailed': 'L’opération Compose n’a pas pu aboutir.',
+  'stackComposeUpgradePanel.httpError':
+    'L’opération Compose n’a pas abouti (HTTP {status}). Vérifiez le fichier ou les processus de la stack.',
+  'stackComposeUpgradePanel.validation.stackUnavailable':
+    'La stack est indisponible dans cet environnement ou dans cet état.',
+  'stackComposeUpgradePanel.validation.noSource':
+    'Cette stack n’a pas de source Compose. Utilisez les éditeurs de services.',
+  'stackComposeUpgradePanel.validation.actionUnavailable': 'L’action de la stack est indisponible.',
+  'stackComposeUpgradePanel.validation.invalidTarget': 'Cible de l’action de la stack non valide.',
+  'stackComposeUpgradePanel.validation.invalidExport': 'Export Compose non valide.',
+  'stackComposeUpgradePanel.validation.exportTooLarge':
+    'L’export dépasse la limite de 512 KiB par fichier.',
+  'stackComposeUpgradePanel.validation.confirmImpact':
+    'Confirmez l’impact de la mise à niveau de la stack.',
+  'stackComposeUpgradePanel.validation.contractUnavailable':
+    'Le contrat de mise à niveau de la stack est indisponible.',
+  'stackComposeUpgradePanel.validation.stackChanged':
+    'La stack ou ses services ont changé. Rouvrez l’éditeur.',
+  'stackComposeUpgradePanel.validation.changeRequired':
+    'Modifiez un fichier Compose avant l’envoi.',
+  'stackComposeUpgradePanel.validation.fieldDenied': 'Le champ Compose n’est pas autorisé.',
+  'stackComposeUpgradePanel.validation.invalidFiles':
+    'Vérifiez les fichiers Compose et la limite de 512 KiB en UTF-8.',
+  'stackComposeUpgradePanel.validation.preserveParameters':
+    'Les paramètres actuels ne peuvent pas être conservés avec ce contrat.',
+  'stackComposeUpgradePanel.validation.invalidParameter':
+    'Un paramètre de la stack n’est pas prévu par le contrat.',
+
+  'serviceUpgradeForm.validation.contract': 'Le contrat de mise à niveau est indisponible.',
+  'serviceUpgradeForm.validation.sidecarContract': 'Le contrat des sidecars est indisponible.',
+  'serviceUpgradeForm.validation.image': 'Saisissez une image valide, sans espaces.',
+  'serviceUpgradeForm.validation.batch': 'La taille du lot doit être un entier d’au moins 1.',
+  'serviceUpgradeForm.validation.interval': 'L’intervalle doit être un entier d’au moins 100 ms.',
+  'serviceUpgradeForm.validation.order': 'Vérifiez l’ordre de mise à niveau.',
+  'serviceUpgradeForm.validation.differentImage':
+    'Choisissez une image différente de l’image actuelle.',
+  'serviceUpgradeForm.validation.health': 'Vérifiez le contrôle d’état de santé.',
+  'serviceUpgradeForm.validation.healthContract':
+    'Le contrat du contrôle d’état de santé est indisponible.',
+  'serviceUpgradeForm.validation.ulimitContract':
+    'Le contrat des limites de processus est indisponible.',
+  'serviceUpgradeForm.validation.securityContract': 'Vérifiez le contrat de sécurité.',
+  'serviceUpgradeForm.validation.memory':
+    'Saisissez une limite et une réservation. Utilisez 0 pour supprimer une valeur explicite.',
+  'serviceUpgradeForm.validation.cpuContract': 'Le contrat du CPU et des E/S est indisponible.',
+  'serviceUpgradeForm.validation.schedulingContract': 'Le contrat de placement est indisponible.',
+  'serviceUpgradeForm.validation.sidecarUpgradeContract':
+    'Le contrat de mise à niveau des sidecars est indisponible.',
+  'serviceUpgradeForm.review': 'Vérifiez la mise à niveau.',
+  'serviceUpgradeForm.limitsNotice':
+    'La modification des limites remplace les conteneurs du service. Une liste vide supprime les limites explicites et applique les valeurs par défaut de Docker.',
+  'serviceUpgradeForm.securityNotice':
+    'Les modifications de sécurité remplacent les conteneurs du service. Vérifiez les capacités Linux, l’accès à l’hôte et les paramètres du système de fichiers avant de confirmer.',
+  'serviceUpgradeForm.batchNotice':
+    'Jusqu’à {batch} conteneurs seront mis à niveau par lot, avec {interval} ms entre les lots. Les ports, variables, volumes et sidecars conservent leurs réglages, sauf ceux modifiés explicitement ci-dessus. La disponibilité dépend de la capacité et de l’état de santé de l’application.',
+  'serviceUpgradeForm.follow':
+    'Après la mise à niveau, suivez son état ici. Les actions « Terminer la mise à niveau » et « Revenir à la version précédente » apparaissent lorsque Rancher les rend disponibles.',
+  'serviceUpgradeForm.impact':
+    'Service {service}. Les ports publiés peuvent modifier l’accès. La modification des montages peut rendre les données existantes indisponibles. Modifier ou supprimer des sidecars remplace les conteneurs auxiliaires et peut affecter les données ou le réseau. Les contrôles d’état de santé peuvent recréer des conteneurs ou interrompre la mise à niveau si le point de terminaison échoue. Rancher remplace les conteneurs selon la stratégie choisie. Vérifiez les champs avant de confirmer.',
+  'serviceUpgradeForm.image': 'Nouvelle image',
+  'serviceUpgradeForm.bindings': 'Modifier les ports et les volumes lors de cette mise à niveau',
+  'serviceUpgradeForm.health': 'Modifier le contrôle d’état de santé lors de cette mise à niveau',
+  'serviceUpgradeForm.sidecars': 'Modifier les sidecars lors de cette mise à niveau',
+  'serviceUpgradeForm.ulimits': 'Modifier les limites de processus lors de cette mise à niveau',
+  'serviceUpgradeForm.security': 'Modifier la sécurité lors de cette mise à niveau',
+  'serviceUpgradeForm.privileged': 'Mode privilégié',
+  'serviceUpgradeForm.readOnly': 'Système de fichiers en lecture seule',
+  'serviceUpgradeForm.memory': 'Modifier la mémoire lors de cette mise à niveau',
+  'serviceUpgradeForm.memoryLimit': 'Limite de mémoire',
+  'serviceUpgradeForm.memoryReservation': 'Réservation de mémoire',
+  'serviceUpgradeForm.cpu': 'Modifier le CPU et les E/S lors de cette mise à niveau',
+  'serviceUpgradeForm.affinity': 'Modifier les affinités lors de cette mise à niveau',
+  'serviceUpgradeForm.batch': 'Conteneurs par lot',
+  'serviceUpgradeForm.interval': 'Intervalle entre les lots (ms)',
+  'serviceUpgradeForm.configuration': 'Mise à niveau de la configuration',
+  'serviceUpgradeForm.imageUpgrade': 'Mise à niveau de l’image',
+  'serviceUpgradeForm.currentImage': 'Image actuelle :',
+  'serviceUpgradeForm.capAdd': 'Capacités ajoutées',
+  'serviceUpgradeForm.capDrop': 'Capacités retirées',
+  'serviceUpgradeForm.startFirst':
+    'Démarrer les nouveaux conteneurs avant d’arrêter les conteneurs actuels',
+  'serviceUpgradeForm.confirm': 'Mettre à niveau la configuration du service ?',
+  'sidecarValidation.depth':
+    'La configuration des sidecars comporte trop de niveaux d’imbrication.',
+  'sidecarValidation.fieldUnavailable':
+    'Le champ de sidecar {name} est indisponible. Rouvrez le panneau.',
+  'sidecarValidation.reviewItems': 'Vérifiez les éléments de configuration des sidecars.',
+  'sidecarValidation.fieldContract': 'Le contrat de sidecar pour {name} est indisponible.',
+  'sidecarValidation.limit': 'Utilisez une liste de 50 sidecars au maximum.',
+  'sidecarValidation.contract': 'Le contrat des sidecars est indisponible.',
+  'sidecarValidation.review': 'Vérifiez la configuration des sidecars.',
+  'sidecarValidation.name':
+    'Utilisez des noms de sidecars uniques et distincts du nom du service, comportant au plus 63 lettres, chiffres ou traits d’union.',
+  'sidecarValidation.image': 'Saisissez une image valide pour le sidecar {name}.',
+  'sidecarValidation.reservedImage':
+    'Cette image est réservée au contrat de retrait de Rancher. Utilisez « Retirer le sidecar ».',
+  'sidecarValidation.networkMode':
+    'Utilisez le mode réseau container pour partager le réseau d’un autre conteneur de ce service.',
+  'sidecarValidation.links':
+    'Vérifiez les liens réseau et de volume entre les conteneurs du service.',
+  'sidecarValidation.cycle':
+    'Les liens réseau et de volume entre sidecars ne peuvent pas former de cycles.',
+  'workloadPolicyValidation.limit': 'Utilisez au plus 100 règles d’affinité.',
+  'workloadPolicyValidation.rule':
+    'Saisissez des clés et des valeurs valides dans les règles d’affinité, sans virgules ni sauts de ligne.',
+  'workloadPolicyValidation.map': 'Étiquettes de placement non valides.',
+  'workloadPolicyValidation.text': 'Les étiquettes doivent contenir du texte.',
+  'workloadPolicyValidation.global':
+    'Le placement global accepte uniquement les étiquettes d’hôte avec des règles obligatoires ou d’exclusion.',
+  'workloadPolicyValidation.depth': 'La configuration comporte trop de niveaux d’imbrication.',
+  'workloadPolicyValidation.capabilities':
+    'Vérifiez les capacités de sécurité au regard du contrat actuel.',
+
   'bindingsEditor.portsTitle': 'Ports publiés',
   'bindingsEditor.volumesTitle': 'Volumes',
   'bindingsEditor.portsHint':

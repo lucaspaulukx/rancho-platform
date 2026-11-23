@@ -810,4 +810,230 @@ export const faIR = {
   'selectorRows.removeRow': 'حذف برچسب {index}',
   'selectorRows.remove': 'حذف',
   'selectorRows.add': 'افزودن برچسب',
+  'serviceUpgradeForm.validation.contract': 'قرارداد ارتقا در دسترس نیست.',
+  'serviceUpgradeForm.validation.sidecarContract': 'قرارداد کانتینرهای جانبی در دسترس نیست.',
+  'serviceUpgradeForm.validation.image': 'یک ایمیج معتبر و بدون فاصله وارد کنید.',
+  'serviceUpgradeForm.validation.batch': 'اندازهٔ دسته باید عدد صحیحی برابر با 1 یا بیشتر باشد.',
+  'serviceUpgradeForm.validation.interval': 'فاصله باید عدد صحیحی برابر با 100 ms یا بیشتر باشد.',
+  'serviceUpgradeForm.validation.order': 'ترتیب ارتقا را بررسی کنید.',
+  'serviceUpgradeForm.validation.differentImage': 'ایمیجی متفاوت با ایمیج فعلی انتخاب کنید.',
+  'serviceUpgradeForm.validation.health': 'بررسی سلامت را بازبینی کنید.',
+  'serviceUpgradeForm.validation.healthContract': 'قرارداد بررسی سلامت در دسترس نیست.',
+  'serviceUpgradeForm.validation.ulimitContract': 'قرارداد محدودیت‌های فرایند در دسترس نیست.',
+  'serviceUpgradeForm.validation.securityContract': 'قرارداد امنیتی را بررسی کنید.',
+  'serviceUpgradeForm.validation.memory':
+    'محدودیت و مقدار رزرو را وارد کنید. برای حذف مقدار صریح، صفر وارد کنید.',
+  'serviceUpgradeForm.validation.cpuContract': 'قرارداد CPU و ورودی/خروجی در دسترس نیست.',
+  'serviceUpgradeForm.validation.schedulingContract': 'قرارداد زمان‌بندی در دسترس نیست.',
+  'serviceUpgradeForm.validation.sidecarUpgradeContract':
+    'قرارداد ارتقای کانتینرهای جانبی در دسترس نیست.',
+  'serviceUpgradeForm.review': 'ارتقا را بازبینی کنید.',
+  'serviceUpgradeForm.limitsNotice':
+    'تغییر محدودیت‌ها باعث جایگزینی کانتینرهای سرویس می‌شود. فهرست خالی محدودیت‌های صریح را حذف می‌کند و پیش‌فرض‌های Docker اعمال می‌شوند.',
+  'serviceUpgradeForm.securityNotice':
+    'تغییر تنظیمات امنیتی باعث جایگزینی کانتینرهای سرویس می‌شود. پیش از تأیید، قابلیت‌ها، دسترسی به میزبان و تنظیمات سامانهٔ فایل را بررسی کنید.',
+  'serviceUpgradeForm.batchNotice':
+    'در هر دسته حداکثر {batch} کانتینر ارتقا می‌یابد و فاصلهٔ بین دسته‌ها {interval} ms است. درگاه‌ها، متغیرها، ولوم‌ها و کانتینرهای جانبی تنظیمات فعلی را حفظ می‌کنند، مگر مواردی که در بالا به‌صراحت ویرایش شده‌اند. دسترس‌پذیری به ظرفیت و سلامت برنامه بستگی دارد.',
+  'serviceUpgradeForm.follow':
+    'پس از ارتقا، وضعیت را در اینجا پیگیری کنید. وقتی Rancher عملیات مربوط را در دسترس قرار دهد، «تکمیل ارتقا» و «بازگردانی» نمایش داده می‌شوند.',
+  'serviceUpgradeForm.impact':
+    'سرویس {service}. درگاه‌های منتشرشده ممکن است دسترسی را تغییر دهند. تغییر اتصال‌های ذخیره‌سازی ممکن است داده‌های موجود را از دسترس خارج کند. ویرایش یا حذف کانتینرهای جانبی باعث جایگزینی کانتینرهای کمکی می‌شود و ممکن است بر داده‌ها یا شبکه اثر بگذارد. در صورت خرابی نقطهٔ پایانی، بررسی سلامت ممکن است کانتینرها را دوباره ایجاد کند یا ارتقا را متوقف کند. Rancher کانتینرها را بر اساس راهبرد انتخاب‌شده جایگزین می‌کند. پیش از تأیید، فیلدها را بررسی کنید.',
+  'serviceUpgradeForm.image': 'ایمیج جدید',
+  'serviceUpgradeForm.bindings': 'ویرایش درگاه‌ها و ولوم‌ها در این ارتقا',
+  'serviceUpgradeForm.health': 'ویرایش بررسی سلامت در این ارتقا',
+  'serviceUpgradeForm.sidecars': 'ویرایش کانتینرهای جانبی در این ارتقا',
+  'serviceUpgradeForm.ulimits': 'ویرایش محدودیت‌های فرایند در این ارتقا',
+  'serviceUpgradeForm.security': 'ویرایش تنظیمات امنیتی در این ارتقا',
+  'serviceUpgradeForm.privileged': 'حالت دارای دسترسی ویژه',
+  'serviceUpgradeForm.readOnly': 'سامانهٔ فایل فقط‌خواندنی',
+  'serviceUpgradeForm.memory': 'ویرایش حافظه در این ارتقا',
+  'serviceUpgradeForm.memoryLimit': 'محدودیت حافظه',
+  'serviceUpgradeForm.memoryReservation': 'رزرو حافظه',
+  'serviceUpgradeForm.cpu': 'ویرایش CPU و ورودی/خروجی در این ارتقا',
+  'serviceUpgradeForm.affinity': 'ویرایش قواعد هم‌مکانی در این ارتقا',
+  'serviceUpgradeForm.batch': 'تعداد کانتینر در هر دسته',
+  'serviceUpgradeForm.interval': 'فاصلهٔ بین دسته‌ها (ms)',
+  'serviceUpgradeForm.configuration': 'ارتقای پیکربندی',
+  'serviceUpgradeForm.imageUpgrade': 'ارتقای ایمیج',
+  'serviceUpgradeForm.currentImage': 'ایمیج فعلی:',
+  'serviceUpgradeForm.capAdd': 'قابلیت‌های افزوده‌شده',
+  'serviceUpgradeForm.capDrop': 'قابلیت‌های حذف‌شده',
+  'serviceUpgradeForm.startFirst': 'راه‌اندازی کانتینرهای جدید پیش از توقف کانتینرهای فعلی',
+  'serviceUpgradeForm.confirm': 'پیکربندی سرویس ارتقا داده شود؟',
+  'sidecarValidation.depth': 'عمق تودرتویی پیکربندی کانتینر جانبی بیش از حد مجاز است.',
+  'sidecarValidation.fieldUnavailable':
+    'فیلد «{name}» کانتینر جانبی در دسترس نیست. پنل را دوباره باز کنید.',
+  'sidecarValidation.reviewItems': 'موارد پیکربندی کانتینر جانبی را بررسی کنید.',
+  'sidecarValidation.fieldContract': 'قرارداد «{name}» کانتینر جانبی در دسترس نیست.',
+  'sidecarValidation.limit': 'حداکثر 50 کانتینر جانبی وارد کنید.',
+  'sidecarValidation.contract': 'قرارداد کانتینرهای جانبی در دسترس نیست.',
+  'sidecarValidation.review': 'پیکربندی کانتینرهای جانبی را بررسی کنید.',
+  'sidecarValidation.name':
+    'برای کانتینرهای جانبی نام‌های یکتا و متفاوت با نام سرویس وارد کنید. هر نام می‌تواند حداکثر 63 حرف، رقم یا خط تیره داشته باشد.',
+  'sidecarValidation.image': 'برای کانتینر جانبی «{name}» یک ایمیج معتبر وارد کنید.',
+  'sidecarValidation.reservedImage':
+    'این ایمیج برای عملیات حذف در Rancher رزرو شده است. از «حذف کانتینر جانبی» استفاده کنید.',
+  'sidecarValidation.networkMode':
+    'برای اشتراک شبکهٔ کانتینر دیگری در همین سرویس، حالت شبکهٔ container را انتخاب کنید.',
+  'sidecarValidation.links': 'پیوندهای شبکه و ولوم میان کانتینرهای سرویس را بررسی کنید.',
+  'sidecarValidation.cycle': 'پیوندهای شبکه و ولوم میان کانتینرهای جانبی نباید چرخه تشکیل دهند.',
+  'workloadPolicyValidation.limit': 'حداکثر 100 قاعدهٔ هم‌مکانی وارد کنید.',
+  'workloadPolicyValidation.rule':
+    'در قواعد هم‌مکانی، کلیدها و مقادیر معتبر و بدون ویرگول یا شکست خط وارد کنید.',
+  'workloadPolicyValidation.map': 'برچسب‌های زمان‌بندی نامعتبرند.',
+  'workloadPolicyValidation.text': 'برچسب‌ها باید متن داشته باشند.',
+  'workloadPolicyValidation.global':
+    'زمان‌بندی سراسری فقط قواعد تطابق الزامی یا منع تطابق را برای برچسب‌های میزبان می‌پذیرد.',
+  'workloadPolicyValidation.depth': 'عمق تودرتویی پیکربندی بیش از حد مجاز است.',
+  'workloadPolicyValidation.capabilities': 'قابلیت‌های امنیتی را بر اساس قرارداد فعلی بررسی کنید.',
+  'serviceEditors.linkError.environment': 'این سرویس به این محیط تعلق ندارد.',
+  'serviceEditors.linkError.foreign': 'برخی پیوندها به محیط دیگری تعلق دارند.',
+  'serviceEditors.linkError.changed':
+    'کلاینت دیگری پیوندها را تغییر داده است. پنل را ببندید و دوباره باز کنید.',
+  'serviceEditors.linkError.advanced':
+    'برخی پیوندها پیشرفته‌اند، در وضعیت گذار هستند یا به مقصدهای خارج از دسترس اشاره می‌کنند. برای حفظ این پیکربندی، از فرم بومی استفاده کنید.',
+  'serviceEditors.linkError.unavailable': 'ویرایش پیوندها در این زمینه در دسترس نیست.',
+  'serviceEditors.linkError.limit': 'در هر عملیات حداکثر 100 پیوند را ویرایش کنید.',
+  'serviceEditors.linkError.contract': 'قرارداد پیوند تغییر کرده است. پنل را دوباره باز کنید.',
+  'serviceEditors.linkError.stack': 'پشتهٔ سرویس برای این عملیات در دسترس نیست.',
+  'serviceEditors.linkError.target':
+    'یک سرویس برنامهٔ در دسترس در این محیط انتخاب کنید که با سرویس مبدأ متفاوت باشد.',
+  'serviceEditors.linkError.alias':
+    'نام مستعار نامعتبر است. از حروف، ارقام، خط تیره، نقطه یا زیرخط استفاده کنید.',
+  'serviceEditors.linkError.duplicate': 'مقصدها یا نام‌های مستعار را در فهرست تکرار نکنید.',
+  'serviceEditors.unsupported': 'این پیوندها قابل ویرایش نیستند.',
+  'serviceEditors.reopen': 'ویرایشگر پیوندها را دوباره باز کنید.',
+  'serviceEditors.contract': 'قرارداد پیوند سرویس در دسترس نیست.',
+  'serviceEditors.changed': 'قرارداد پیوند تغییر کرده است. پنل را دوباره باز کنید.',
+  'serviceEditors.confirmRemove': 'حذف همهٔ پیوندها را تأیید کنید.',
+  'serviceEditors.sent': 'پیوندها به Rancher ارسال شدند. پیکربندی و توپولوژی را پیگیری کنید.',
+  'serviceEditors.reviewLinks': 'پیوندها را بررسی کنید.',
+  'serviceEditors.close': 'بستن',
+  'serviceEditors.review': 'بازبینی تغییرات',
+  'serviceEditors.linkInfo':
+    'سرویس‌هایی را انتخاب کنید که این برنامه از آن‌ها استفاده می‌کند. نام مستعار اختیاری، مقصد را در پیکربندی بومی مشخص می‌کند. تغییر فهرست ممکن است بر تبدیل نام‌ها و اتصال شبکه اثر بگذارد.',
+  'serviceEditors.denied': 'حساب شما یا وضعیت فعلی اجازهٔ تغییر پیوندها را نمی‌دهد.',
+  'serviceEditors.empty': 'این سرویس پیوند خروجی ندارد.',
+  'serviceEditors.select': 'انتخاب سرویس…',
+  'serviceEditors.aliasHint':
+    'اختیاری است. اگر نام مستعار تعیین نشود، Rancher از نام سرویس استفاده می‌کند.',
+  'serviceEditors.add': 'افزودن پیوند',
+  'serviceEditors.acknowledge': 'حذف همهٔ پیوندهای این سرویس را تأیید می‌کنم',
+  'serviceEditors.apply': 'پیوندهای سرویس اعمال شوند؟',
+  'serviceEditors.serviceName': 'نام سرویس',
+  'serviceEditors.discard': 'پیوندهای ذخیره‌نشده کنار گذاشته شوند؟',
+  'serviceEditors.discardDescription': 'پیکربندی Rancher به همان شکل باقی می‌ماند.',
+  'serviceEditors.context': 'زمینه تغییر کند؟',
+  'serviceEditors.contextDescription':
+    'پیوندهای ذخیره‌نشده وجود دارند. اگر ارسالی در جریان است، منتظر پایان آن بمانید.',
+  'serviceEditors.link': 'پیوند {index}',
+  'serviceEditors.remove': 'حذف پیوند {index}',
+  'serviceEditors.target': 'سرویس مقصد {index}',
+  'serviceEditors.alias': 'نام مستعار پیوند {index}',
+  'serviceEditors.targetMissing': 'مقصد خارج از دسترس ({id})',
+  'serviceEditors.title': 'پیوندها · {name}',
+  'serviceEditors.environment': 'محیط: {name}',
+  'serviceEditors.applyDescription':
+    'فهرست {name} فقط در محیط {environment} با {count} پیوند جایگزین می‌شود.',
+  'serviceEditors.before': 'پیش از تغییر · {count} پیوند',
+  'serviceEditors.after': 'پس از تغییر · {count} پیوند',
+  'serviceEditors.summary': '{target} · نام مستعار: {alias}',
+  'serviceEditors.scaleError.integer': 'تعداد کانتینرها را به‌صورت عدد صحیح وارد کنید.',
+  'serviceEditors.scaleError.range': 'مقیاس خارج از محدودهٔ مجاز Rancher است.',
+  'serviceEditors.scaleError.unavailable': 'تغییر مقیاس برای این منبع در دسترس نیست.',
+  'serviceEditors.scaleError.changed':
+    'کلاینت دیگری مقیاس را تغییر داده است. برای دریافت مقدار جدید، پنل را دوباره باز کنید.',
+  'serviceEditors.scaleError.unchanged': 'مقیاسی متفاوت با مقیاس فعلی وارد کنید.',
+  'serviceEditors.confirmZero': 'پیش از اعمال مقیاس صفر، توقف کانتینرها را تأیید کنید.',
+  'serviceEditors.reviewScale': 'مقیاس را بررسی کنید.',
+  'serviceEditors.quantity': 'تعداد مطلوب کانتینرها',
+  'serviceEditors.scaleInfo':
+    'Rancher مقیاس واقعی سرویس را تنظیم می‌کند. کاهش مقیاس ممکن است کانتینرها را متوقف کند و افزایش آن به ظرفیت موجود بستگی دارد. ممکن است رسیدن تعداد کانتینرهای در حال اجرا به مقدار پیکربندی‌شده زمان ببرد.',
+  'serviceEditors.acknowledgeZero': 'می‌دانم که مقیاس صفر کانتینرهای این سرویس را متوقف می‌کند',
+  'serviceEditors.templateHint': 'این عملیات پاسخ‌های قالب کاتالوگ را حفظ می‌کند.',
+  'serviceEditors.currentScale': 'مقیاس پیکربندی‌شدهٔ فعلی: {scale}.',
+  'stackComposeUpgradePanel.dockerCompose': 'Docker Compose',
+  'stackComposeUpgradePanel.rancherCompose': 'Rancher Compose',
+  'stackComposeUpgradePanel.impact':
+    'می‌دانم که ارتقا ممکن است سرویس‌ها را راه‌اندازی کند و کانتینرها را جایگزین کند',
+  'stackComposeUpgradePanel.reviewTitle': 'پشته با Compose ارتقا داده شود؟',
+  'stackComposeUpgradePanel.reviewDescription':
+    'فایل‌ها هنگام بازبینی پنهان‌اند. پیش از ارسال، پشته و خروجی آن دوباره بررسی می‌شوند. پارامترهای موجود حفظ می‌شوند. سرور YAML را اعتبارسنجی و ارتقا را اجرا می‌کند.',
+  'stackComposeUpgradePanel.discardTitle': 'تغییرات Compose کنار گذاشته شوند؟',
+  'stackComposeUpgradePanel.discardDescription':
+    'فایل‌های ویرایش‌شده هنوز به Rancher ارسال نشده‌اند.',
+  'stackComposeUpgradePanel.leaveTitle': 'با وجود تغییرات در انتظار Compose خارج می‌شوید؟',
+  'stackComposeUpgradePanel.leaveDescription':
+    'فایل‌ها هنوز ارسال نشده‌اند. اگر ارتقایی در جریان است، منتظر پایان آن بمانید.',
+  'stackComposeUpgradePanel.close': 'بستن',
+  'stackComposeUpgradePanel.review': 'بازبینی ارتقا',
+  'stackComposeUpgradePanel.warning':
+    'ارتقای Compose ممکن است سرویس‌ها را راه‌اندازی کند و کانتینرها را دوباره ایجاد کند. Rancher مقیاس سرویس‌های موجود را حفظ می‌کند. برای تغییر آن از «تغییر مقیاس سرویس» استفاده کنید. سرویس‌های جدید ممکن است حتی با وجود scale: 0 در فایل، با مقیاس 1 راه‌اندازی شوند. خروجی، پشتیبان کامل محیط نیست. پیش از ادامه، مقیاس و فایل‌ها را بررسی کنید.',
+  'stackComposeUpgradePanel.title': 'ارتقای Compose · {name}',
+  'stackComposeUpgradePanel.description': 'محیط: {name}. فایل‌ها از پیکربندی فعلی استخراج شده‌اند.',
+  'stackComposeUpgradePanel.saved':
+    'درخواست ارتقا دریافت شد. وضعیت پشته را دنبال کنید و با عملیات بومی، تکمیل ارتقا یا بازگردانی را انتخاب کنید.',
+  'stackComposeUpgradePanel.unavailable': 'ویرایشگر Compose برای این پشته در دسترس نیست.',
+  'stackComposeUpgradePanel.permission': 'مجوز گرفتن خروجی یا انجام ارتقا را ندارید.',
+  'stackComposeUpgradePanel.loadFailed': 'Compose در دسترس نیست.',
+  'stackComposeUpgradePanel.reopen': 'ویرایشگر Compose را دوباره باز کنید.',
+  'stackComposeUpgradePanel.requestFailed': 'عملیات Compose کامل نشد.',
+  'stackComposeUpgradePanel.httpError':
+    'عملیات Compose کامل نشد (HTTP {status}). فایل یا فرایندهای پشته را بررسی کنید.',
+  'stackComposeUpgradePanel.validation.stackUnavailable':
+    'پشته در این محیط یا وضعیت در دسترس نیست.',
+  'stackComposeUpgradePanel.validation.noSource':
+    'این پشته فایل منبع Compose ندارد. از ویرایشگرهای سرویس استفاده کنید.',
+  'stackComposeUpgradePanel.validation.actionUnavailable': 'عملیات پشته در دسترس نیست.',
+  'stackComposeUpgradePanel.validation.invalidTarget': 'مقصد عملیات پشته نامعتبر است.',
+  'stackComposeUpgradePanel.validation.invalidExport': 'خروجی Compose نامعتبر است.',
+  'stackComposeUpgradePanel.validation.exportTooLarge':
+    'خروجی از حد 512 KiB برای هر فایل فراتر رفته است.',
+  'stackComposeUpgradePanel.validation.confirmImpact': 'اثر ارتقای پشته را تأیید کنید.',
+  'stackComposeUpgradePanel.validation.contractUnavailable': 'قرارداد ارتقای پشته در دسترس نیست.',
+  'stackComposeUpgradePanel.validation.stackChanged':
+    'پشته یا سرویس‌های آن تغییر کرده‌اند. ویرایشگر را دوباره باز کنید.',
+  'stackComposeUpgradePanel.validation.changeRequired':
+    'پیش از ارسال، یک فایل Compose را تغییر دهید.',
+  'stackComposeUpgradePanel.validation.fieldDenied': 'این فیلد Compose مجاز نیست.',
+  'stackComposeUpgradePanel.validation.invalidFiles':
+    'فایل‌های Compose و محدودیت 512 KiB با رمزگذاری UTF-8 را بررسی کنید.',
+  'stackComposeUpgradePanel.validation.preserveParameters':
+    'پارامترهای فعلی با این قرارداد قابل حفظ نیستند.',
+  'stackComposeUpgradePanel.validation.invalidParameter':
+    'یکی از پارامترهای پشته خارج از محدودهٔ قرارداد است.',
+  'composeEditor.hideLabel': 'پنهان کردن {label}',
+  'composeEditor.showLabel': 'نمایش {label}',
+  'composeEditor.size': '{lines} خط · {bytes} بایت',
+  'composeEditor.hide': 'پنهان کردن',
+  'composeEditor.show': 'نمایش',
+  'composeEditor.hint':
+    'محتوا بدون تبدیل به Rancher ارسال می‌شود. حداکثر 512 KiB با رمزگذاری UTF-8.',
+  'composeEditor.hidden': 'محتوا پنهان است. برای ویرایش، «نمایش» را انتخاب کنید.',
+  'composeEditor.stackName': 'نام پشته',
+  'composeEditor.nameHint': 'از حروف، ارقام و خط تیره استفاده کنید. حداکثر 63 نویسه.',
+  'composeEditor.description': 'توضیحات',
+  'composeEditor.creationMode': 'روش ایجاد پشته',
+  'composeEditor.docker': 'Docker Compose',
+  'composeEditor.rancher': 'Rancher Compose (اختیاری)',
+  'composeEditor.start': 'راه‌اندازی سرویس‌ها پس از وارد کردن',
+  'composeEditor.startDescription':
+    'کانتینرها را در محیط انتخاب‌شده ایجاد می‌کند. برای بررسی سرویس‌ها پیش از راه‌اندازی، این گزینه را انتخاب نکنید.',
+  'composeEditor.startWarning':
+    'وارد کردن فایل‌ها ممکن است در محیط انتخاب‌شده کانتینر ایجاد کند و منابع مصرف کند.',
+  'composeEditor.startManually':
+    'سرویس‌ها بدون راه‌اندازی خودکار وارد می‌شوند. می‌توانید آن‌ها را با عملیات راه‌اندازی فعال کنید.',
+  'composeEditor.empty': 'پشتهٔ خالی',
+  'composeEditor.import': 'وارد کردن Compose',
+  'composeEditor.compatibility':
+    'از قالب سازگار با Rancher 1.6 استفاده کنید. سرور فایل‌ها را اعتبارسنجی و فرایند وارد کردن را اجرا می‌کند. نتیجه را در پشته پیگیری کنید.',
+  'composeEditor.variables': 'متغیرهای جای‌گذاری',
+  'composeEditor.variablesNote':
+    'Rancher هنگام وارد کردن فایل‌ها از این مقادیر استفاده می‌کند. این مقادیر در ترجیحات کنسول ذخیره نمی‌شوند.',
+  'composeEditor.addVariable': 'افزودن متغیر',
+  'composeEditor.emptyHint': 'پشته را ایجاد کنید و سرویس‌ها را از منوی همان ردیف بیفزایید.',
+  'composeEditor.variableName': 'نام متغیر {index}',
+  'composeEditor.variableValue': 'مقدار متغیر {index}',
+  'composeEditor.removeVariable': 'حذف متغیر {index}',
+  'composeEditor.review': 'پشته را بررسی کنید.',
 } as const;

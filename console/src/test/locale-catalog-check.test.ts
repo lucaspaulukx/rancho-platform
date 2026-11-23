@@ -67,6 +67,7 @@ describe('Registered locale catalog gate', () => {
       'bindingsEditor',
       'bulkOperation',
       'common',
+      'composeEditor',
       'details',
       'deviceUpgrade',
       'deviceUpgradeForm',
@@ -86,10 +87,15 @@ describe('Registered locale catalog gate', () => {
       'runtime',
       'schedulingEditor',
       'selectorRows',
+      'serviceEditors',
+      'serviceUpgradeForm',
       'shell',
+      'sidecarValidation',
+      'stackComposeUpgradePanel',
       'topology',
       'ui',
       'workloadControls',
+      'workloadPolicyValidation',
       'workloadStreams',
     ]);
     const previewScope = Object.keys(englishMessages).filter(
