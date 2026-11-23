@@ -112,6 +112,8 @@ On a disposable QEMU Linux amd64 VM, Rancher 1.6.30 registered the original agen
 
 This rehearsal used static Docker binaries and one host-network service on a single VM. The distro package-manager path, VM reboot, existing managed IPsec networks, shared storage, and rollback of the upgraded VM still require separate validation. The Rancher database backup and the client volume backup are both needed for recovery.
 
+In a separate two-host lab, the existing IPsec stack carried HTTP between two Docker 29.9.2 workloads before the upgrade. A native service upgrade that changed the router sidekick attempted to replace the holder on the first host even though the holder image stayed the same. The replacement did not start. Cross-host traffic returned after manually starting the original holder and sidekicks, while the native service still reported `rolling-back`. Retain the original network and use a separate environment for the modern catalog until an in-place upgrade and rollback have passed.
+
 ## Identity, engine and cutover gates
 
 Keep direct grants until an explicit [access migration](access-migration.md). Test a new no-access user, readonly/member permissions, local/OIDC administration and recovery before exclusive login. Check the exact agent/Docker versions, Compose, network/LB/TLS/storage, logs/terminal and technical credentials.
