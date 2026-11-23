@@ -1,6 +1,7 @@
 {
   "catalogs": {
     "de-DE": {
+      "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -13,7 +14,7 @@
       "devices": "55dd5ac72dfa6830f24c8eabfdccebed77993a0635b285ddc5c6370d5c1830f2",
       "environment": "eda182a65b7c811585b1a1baab6426c36077dace80c297588447b321d0c641f2",
       "environmentEditor": "5442f5e21e6571c843600fae6e1c02e3077a29da5329e60fc2c1bb969204badd",
-      "groups": "136903fc881ebd183b839c89266dbef2a9141a4b43666c02009dc1bd3b138e8d",
+      "groups": "ff034c13b30f1b4899061345a6b4107952cb4d9f4ab10b05ba4cbd35b23e51fb",
       "healthCheckEditor": "432bb0d2510e91245f4aa7c6960fee3fa9a3a0643910d5ad39be2768c66968ca",
       "healthCheckValidation": "e3c9f002244ec3269e28380ae8bd39005383e8367420e7be9970003e88c235e2",
       "language": "0668bb6b9a8e8594b35603dc359b666127d580b702d734e104375490226ba664",
@@ -47,6 +48,7 @@
       "workloadsPage": "62d2a29ab10617071d31631756d1466d12d51fafcc16297696707f1aaf446d31"
     },
     "fa-IR": {
+      "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -59,7 +61,7 @@
       "devices": "55dd5ac72dfa6830f24c8eabfdccebed77993a0635b285ddc5c6370d5c1830f2",
       "environment": "eda182a65b7c811585b1a1baab6426c36077dace80c297588447b321d0c641f2",
       "environmentEditor": "5442f5e21e6571c843600fae6e1c02e3077a29da5329e60fc2c1bb969204badd",
-      "groups": "136903fc881ebd183b839c89266dbef2a9141a4b43666c02009dc1bd3b138e8d",
+      "groups": "ff034c13b30f1b4899061345a6b4107952cb4d9f4ab10b05ba4cbd35b23e51fb",
       "healthCheckEditor": "432bb0d2510e91245f4aa7c6960fee3fa9a3a0643910d5ad39be2768c66968ca",
       "healthCheckValidation": "e3c9f002244ec3269e28380ae8bd39005383e8367420e7be9970003e88c235e2",
       "language": "0668bb6b9a8e8594b35603dc359b666127d580b702d734e104375490226ba664",
@@ -93,6 +95,7 @@
       "workloadsPage": "62d2a29ab10617071d31631756d1466d12d51fafcc16297696707f1aaf446d31"
     },
     "fr-FR": {
+      "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -105,7 +108,7 @@
       "devices": "55dd5ac72dfa6830f24c8eabfdccebed77993a0635b285ddc5c6370d5c1830f2",
       "environment": "eda182a65b7c811585b1a1baab6426c36077dace80c297588447b321d0c641f2",
       "environmentEditor": "5442f5e21e6571c843600fae6e1c02e3077a29da5329e60fc2c1bb969204badd",
-      "groups": "136903fc881ebd183b839c89266dbef2a9141a4b43666c02009dc1bd3b138e8d",
+      "groups": "ff034c13b30f1b4899061345a6b4107952cb4d9f4ab10b05ba4cbd35b23e51fb",
       "healthCheckEditor": "432bb0d2510e91245f4aa7c6960fee3fa9a3a0643910d5ad39be2768c66968ca",
       "healthCheckValidation": "e3c9f002244ec3269e28380ae8bd39005383e8367420e7be9970003e88c235e2",
       "language": "0668bb6b9a8e8594b35603dc359b666127d580b702d734e104375490226ba664",
@@ -139,6 +142,7 @@
       "workloadsPage": "62d2a29ab10617071d31631756d1466d12d51fafcc16297696707f1aaf446d31"
     },
     "hu-HU": {
+      "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -151,7 +155,7 @@
       "devices": "55dd5ac72dfa6830f24c8eabfdccebed77993a0635b285ddc5c6370d5c1830f2",
       "environment": "eda182a65b7c811585b1a1baab6426c36077dace80c297588447b321d0c641f2",
       "environmentEditor": "5442f5e21e6571c843600fae6e1c02e3077a29da5329e60fc2c1bb969204badd",
-      "groups": "136903fc881ebd183b839c89266dbef2a9141a4b43666c02009dc1bd3b138e8d",
+      "groups": "ff034c13b30f1b4899061345a6b4107952cb4d9f4ab10b05ba4cbd35b23e51fb",
       "healthCheckEditor": "432bb0d2510e91245f4aa7c6960fee3fa9a3a0643910d5ad39be2768c66968ca",
       "healthCheckValidation": "e3c9f002244ec3269e28380ae8bd39005383e8367420e7be9970003e88c235e2",
       "language": "0668bb6b9a8e8594b35603dc359b666127d580b702d734e104375490226ba664",
@@ -185,6 +189,7 @@
       "workloadsPage": "62d2a29ab10617071d31631756d1466d12d51fafcc16297696707f1aaf446d31"
     },
     "ja-JP": {
+      "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -197,7 +202,7 @@
       "devices": "55dd5ac72dfa6830f24c8eabfdccebed77993a0635b285ddc5c6370d5c1830f2",
       "environment": "eda182a65b7c811585b1a1baab6426c36077dace80c297588447b321d0c641f2",
       "environmentEditor": "5442f5e21e6571c843600fae6e1c02e3077a29da5329e60fc2c1bb969204badd",
-      "groups": "136903fc881ebd183b839c89266dbef2a9141a4b43666c02009dc1bd3b138e8d",
+      "groups": "ff034c13b30f1b4899061345a6b4107952cb4d9f4ab10b05ba4cbd35b23e51fb",
       "healthCheckEditor": "432bb0d2510e91245f4aa7c6960fee3fa9a3a0643910d5ad39be2768c66968ca",
       "healthCheckValidation": "e3c9f002244ec3269e28380ae8bd39005383e8367420e7be9970003e88c235e2",
       "language": "0668bb6b9a8e8594b35603dc359b666127d580b702d734e104375490226ba664",
@@ -231,6 +236,7 @@
       "workloadsPage": "62d2a29ab10617071d31631756d1466d12d51fafcc16297696707f1aaf446d31"
     },
     "ru-RU": {
+      "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -243,7 +249,7 @@
       "devices": "55dd5ac72dfa6830f24c8eabfdccebed77993a0635b285ddc5c6370d5c1830f2",
       "environment": "eda182a65b7c811585b1a1baab6426c36077dace80c297588447b321d0c641f2",
       "environmentEditor": "5442f5e21e6571c843600fae6e1c02e3077a29da5329e60fc2c1bb969204badd",
-      "groups": "136903fc881ebd183b839c89266dbef2a9141a4b43666c02009dc1bd3b138e8d",
+      "groups": "ff034c13b30f1b4899061345a6b4107952cb4d9f4ab10b05ba4cbd35b23e51fb",
       "healthCheckEditor": "432bb0d2510e91245f4aa7c6960fee3fa9a3a0643910d5ad39be2768c66968ca",
       "healthCheckValidation": "e3c9f002244ec3269e28380ae8bd39005383e8367420e7be9970003e88c235e2",
       "language": "0668bb6b9a8e8594b35603dc359b666127d580b702d734e104375490226ba664",
@@ -277,6 +283,7 @@
       "workloadsPage": "62d2a29ab10617071d31631756d1466d12d51fafcc16297696707f1aaf446d31"
     },
     "uk-UA": {
+      "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -289,7 +296,7 @@
       "devices": "55dd5ac72dfa6830f24c8eabfdccebed77993a0635b285ddc5c6370d5c1830f2",
       "environment": "eda182a65b7c811585b1a1baab6426c36077dace80c297588447b321d0c641f2",
       "environmentEditor": "5442f5e21e6571c843600fae6e1c02e3077a29da5329e60fc2c1bb969204badd",
-      "groups": "136903fc881ebd183b839c89266dbef2a9141a4b43666c02009dc1bd3b138e8d",
+      "groups": "ff034c13b30f1b4899061345a6b4107952cb4d9f4ab10b05ba4cbd35b23e51fb",
       "healthCheckEditor": "432bb0d2510e91245f4aa7c6960fee3fa9a3a0643910d5ad39be2768c66968ca",
       "healthCheckValidation": "e3c9f002244ec3269e28380ae8bd39005383e8367420e7be9970003e88c235e2",
       "language": "0668bb6b9a8e8594b35603dc359b666127d580b702d734e104375490226ba664",
@@ -323,6 +330,7 @@
       "workloadsPage": "62d2a29ab10617071d31631756d1466d12d51fafcc16297696707f1aaf446d31"
     },
     "zh-Hans": {
+      "accessDiagnostics": "e43c0ec597c6e048dd57567c85c4c629a61d0c9980b64aa22aff9ec788b3dcd5",
       "auth": "43be3f1e3a3f52ff8de37d571c675a5f9509fb9011727a7a66d5cc5ee75d351a",
       "bindingsEditor": "493e39d5fcdb463c115c5f656ffacb556d5c41667bb2ed5be306c7ccf8e8b898",
       "bulkOperation": "c4d9c4d883d0d1b54dcea444d90a69a4b4c6d2fe5de36f00d2e4c0260a9ba5e2",
@@ -335,7 +343,7 @@
       "devices": "55dd5ac72dfa6830f24c8eabfdccebed77993a0635b285ddc5c6370d5c1830f2",
       "environment": "eda182a65b7c811585b1a1baab6426c36077dace80c297588447b321d0c641f2",
       "environmentEditor": "5442f5e21e6571c843600fae6e1c02e3077a29da5329e60fc2c1bb969204badd",
-      "groups": "136903fc881ebd183b839c89266dbef2a9141a4b43666c02009dc1bd3b138e8d",
+      "groups": "ff034c13b30f1b4899061345a6b4107952cb4d9f4ab10b05ba4cbd35b23e51fb",
       "healthCheckEditor": "432bb0d2510e91245f4aa7c6960fee3fa9a3a0643910d5ad39be2768c66968ca",
       "healthCheckValidation": "e3c9f002244ec3269e28380ae8bd39005383e8367420e7be9970003e88c235e2",
       "language": "0668bb6b9a8e8594b35603dc359b666127d580b702d734e104375490226ba664",
