@@ -23,7 +23,7 @@ python scripts/docs_languages.py --require-complete
 
 The upstream lock pins official commit identities. Build from those sources and the exported patches, not an untracked modified checkout. Preserve original licenses/NOTICE, reviewed lockfiles, immutable image identities and a recoverable previous artifact. Review images/configuration for private state before distribution.
 
-Source/console CI uses read-only repository permission, pinned actions and no lab secrets. It checks source/history, scanner contracts, locked install, formatting, frontend tests and TypeScript/Vite. It does not validate backend physical behavior, HA or migration by itself. Public-release documentation requires every active pt-BR/English pair reviewed, current and linked.
+Source/console CI uses read-only repository permission, pinned actions and no lab secrets. It checks source and history, scanner contracts, offline migration contracts, locked install, formatting, frontend tests and TypeScript/Vite. Physical backend, HA and end-to-end migration acceptance run separately. Public-release documentation requires every active pt-BR/English pair reviewed, current and linked.
 
 ## Artifact inventory
 

@@ -23,7 +23,7 @@ python scripts/docs_languages.py --require-complete
 
 O lock upstream fixa commits oficiais. Faça build desses fontes e patches exportados, não de checkout modificado fora do índice. Preserve licenças/NOTICE, lockfiles revisados, imagens imutáveis e artefato anterior recuperável. Confira estado privado em imagens/configuração antes de distribuir.
 
-CI de fontes/console usa permissão readonly, actions pinadas e nenhum secret de laboratório. Confere fonte/histórico, contratos dos scanners, instalação por lock, formatação, testes frontend e TypeScript/Vite. Não valida sozinho backend físico, HA ou migração. A documentação de release exige todos os pares ativos pt-BR/inglês revisados, atuais e ligados.
+CI de fontes/console usa permissão readonly, actions pinadas e nenhum secret de laboratório. Confere fonte e histórico, contratos dos scanners, contratos de migração offline, instalação por lock, formatação, testes frontend e TypeScript/Vite. O aceite de backend físico, HA e migração de ponta a ponta é separado. A documentação de release exige todos os pares ativos pt-BR/inglês revisados, atuais e ligados.
 
 ## Inventário de artefatos
 
