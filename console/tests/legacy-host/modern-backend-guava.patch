@@ -82,3 +82,14 @@
              }
 
              first = false;
+--- a/code/iaas/logic/src/main/java/io/cattle/platform/process/agent/AgentActivate.java
++++ b/code/iaas/logic/src/main/java/io/cattle/platform/process/agent/AgentActivate.java
+@@ -99,7 +99,7 @@
+                 } catch (Exception e) {
+                 }
+             }
+-        }, MoreExecutors.sameThreadExecutor());
++        }, MoreExecutors.directExecutor());
+
+
+         if (waitFor) {
