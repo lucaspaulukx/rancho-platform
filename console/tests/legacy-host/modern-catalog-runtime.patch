@@ -1,0 +1,15 @@
+--- a/infra-templates/healthcheck/7/docker-compose.yml
++++ b/infra-templates/healthcheck/7/docker-compose.yml
+@@ -3,2 +3,6 @@
+   healthcheck:
++    ulimits:
++      nofile:
++        soft: 32768
++        hard: 32768
+     labels:
+--- a/infra-templates/scheduler/13/docker-compose.yml
++++ b/infra-templates/scheduler/13/docker-compose.yml
+@@ -3,2 +3,3 @@
+   scheduler:
++    network_mode: bridge
+     image: rancher/scheduler:v0.8.6
