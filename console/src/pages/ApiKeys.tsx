@@ -23,7 +23,7 @@ import {
 } from '../api-keys';
 import {
   Alert,
-  Badge,
+  ResourceStateBadge,
   Button,
   CheckboxField,
   Confirm,
@@ -313,7 +313,7 @@ export function ApiKeys() {
             {
               key: 'state',
               label: t('apiKeys.state'),
-              render: (v) => <Badge state={v.state}>{v.state || '—'}</Badge>,
+              render: (v) => <ResourceStateBadge state={v.state} />,
             },
             {
               key: 'actions',

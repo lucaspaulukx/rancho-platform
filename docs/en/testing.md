@@ -92,6 +92,8 @@ node console/tests/e2e/high-volume-inventory.cjs
 
 Set `PLAYWRIGHT_MODULES` and `CHROMIUM_EXECUTABLE` if Playwright or Chromium are installed outside their default paths. The benchmark uses three fresh browser contexts and 20 synthetic environments with 20 stacks, 200 services and 2,000 containers each. It checks API pagination, a 50-row limit, local page changes, global search for the last container and scope resets across all environments. Separate smoke checks cover the continuous list with pagination off and paging at a 390 px viewport. The grouped check expands a synthetic stack tree, traverses its pages, and verifies the row bound, ancestor headings, search, collapse and the continuous tree with the setting off. Set `UX06_BASELINE=1` to measure an older unpaginated artifact. It records the entry asset, load and switch times, DOM size, long tasks and heap after garbage collection. The browser supplies the API responses without credentials or Rancher writes. Use the same browser, machine and build configuration for comparisons. Backend latency and long sessions require separate tests.
 
+Set `UX06_LAYOUT_ONLY=1` to run only the narrow and RTL layout checks. They exercise long environment and stack names in the flat Services and Containers views, and check the alignment of the tree toolbar and metric totals in Persian.
+
 Set `UX06_SOAK_SECONDS` to an integer from 60 to 900 to run only the inventory soak. In a visible Chromium tab it checks recurring refreshes and automatic recovery from two synthetic read failures. It reports post-GC heap, renderer task time, scope and row counts.
 
 ### Native host metrics soak

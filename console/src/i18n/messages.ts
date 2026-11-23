@@ -17,6 +17,7 @@ import { enDeviceUpgradeForm, ptDeviceUpgradeForm } from './domains/device-upgra
 import { enResourceDetails, ptResourceDetails } from './domains/resource-details';
 import { enWorkloadStreams, ptWorkloadStreams } from './domains/workload-streams';
 import { enOperations, ptOperations } from './domains/operations';
+import { enResourceStates, ptResourceStates } from './domains/resource-states';
 import { enResourceCreator, ptResourceCreator } from './domains/resource-creator';
 import { enBulkOperation, ptBulkOperation } from './domains/bulk-operation';
 import { enTopology, ptTopology } from './domains/topology';
@@ -85,6 +86,7 @@ export const englishMessages = {
   ...enResourceDetails,
   ...enWorkloadStreams,
   ...enOperations,
+  ...enResourceStates,
   ...enResourceCreator,
   ...enBulkOperation,
   ...enTopology,
@@ -175,6 +177,7 @@ export const portugueseMessages = {
   ...ptResourceDetails,
   ...ptWorkloadStreams,
   ...ptOperations,
+  ...ptResourceStates,
   ...ptResourceCreator,
   ...ptBulkOperation,
   ...ptTopology,

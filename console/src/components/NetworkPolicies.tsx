@@ -13,7 +13,17 @@ import {
   type PolicyAction,
   type PolicyDraft,
 } from '../network-policy';
-import { Alert, Badge, Button, Confirm, Empty, ErrorState, Field, Loading, Modal } from './ui';
+import {
+  Alert,
+  ResourceStateBadge,
+  Button,
+  Confirm,
+  Empty,
+  ErrorState,
+  Field,
+  Loading,
+  Modal,
+} from './ui';
 
 class NetworkPolicyPageError extends Error {
   constructor(readonly key: 'networkPoliciesPage.reopen' | 'networkPoliciesPage.contextChanged') {
@@ -175,7 +185,7 @@ function PolicyPanel({ project, onClose }: { project: Resource; onClose: () => v
               return (
                 <section key={resource.id} className="panel" style={{ marginTop: 20 }}>
                   <h3>
-                    {resource.name} <Badge state={resource.state}>{resource.state}</Badge>
+                    {resource.name} <ResourceStateBadge state={resource.state} />
                   </h3>
                   {!draft ? (
                     <Alert tone="info">{t('networkPoliciesPage.advancedNotice')}</Alert>

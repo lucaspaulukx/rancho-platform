@@ -23,7 +23,7 @@ import {
 } from '../machine-drivers';
 import {
   Alert,
-  Badge,
+  ResourceStateBadge,
   Button,
   CheckboxField,
   Confirm,
@@ -246,7 +246,7 @@ function DriverScope() {
             {
               key: 'state',
               label: t('machineDrivers.state'),
-              render: (v) => <Badge state={v.state}>{v.state || '—'}</Badge>,
+              render: (v) => <ResourceStateBadge state={v.state} />,
             },
             {
               key: 'origin',

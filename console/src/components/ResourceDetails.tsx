@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Copy } from 'lucide-react';
 import type { Resource, Schema } from '../api';
-import { Badge, Button, Tabs, useToast } from './ui';
+import { Badge, ResourceStateBadge, Button, Tabs, useToast } from './ui';
 import { fieldLabel, sensitiveField } from './SchemaForm';
 import { certificateValidity, formatResourceDate } from '../resource-format';
 import { useI18n } from '../i18n/provider';
@@ -88,7 +88,7 @@ export function ResourceDetails({ resource, schema }: { resource: Resource; sche
                   <dt>{t(`details.field.${key}`)}</dt>
                   <dd>
                     {key === 'state' ? (
-                      <Badge state={resource.state}>{resource.state}</Badge>
+                      <ResourceStateBadge state={resource.state} />
                     ) : validity ? (
                       <>
                         <span>{formatResourceDate(value, locale)}</span>{' '}

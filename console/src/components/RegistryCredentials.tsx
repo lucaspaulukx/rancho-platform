@@ -7,7 +7,7 @@ import { useApp, useDataKey } from '../state';
 import { canManageResource, useSchemas } from '../hooks/useSchemas';
 import {
   Alert,
-  Badge,
+  ResourceStateBadge,
   Button,
   Confirm,
   DataTable,
@@ -220,7 +220,7 @@ export function RegistryCredentials({
             {
               key: 'state',
               label: t('registryCredentials.state'),
-              render: (value) => <Badge state={value.state}>{value.state}</Badge>,
+              render: (value) => <ResourceStateBadge state={value.state} />,
             },
             {
               key: 'actions',

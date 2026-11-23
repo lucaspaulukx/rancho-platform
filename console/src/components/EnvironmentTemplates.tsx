@@ -7,7 +7,7 @@ import { allPages, api, type Resource, type Schema } from '../api';
 import { useApp } from '../state';
 import {
   Alert,
-  Badge,
+  ResourceStateBadge,
   Button,
   CheckboxField,
   Confirm,
@@ -308,7 +308,7 @@ export function EnvironmentTemplates({ schema, onClose }: { schema: Schema; onCl
               {
                 key: 'state',
                 label: t('environmentTemplates.state'),
-                render: (value) => <Badge state={value.state}>{value.state}</Badge>,
+                render: (value) => <ResourceStateBadge state={value.state} />,
               },
               {
                 key: 'stacks',

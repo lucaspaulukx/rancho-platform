@@ -8,6 +8,7 @@ import {
   validateBindingFields,
 } from '../workload-bindings';
 import { SchemaForm } from '../components/SchemaForm';
+import { I18nProvider, useI18n } from '../i18n/provider';
 import type { Schema } from '../api';
 const schema: Schema = {
   id: 'container',
@@ -185,6 +186,55 @@ describe('Bindings estruturados de workloads', () => {
     await user.type(screen.getByLabelText('Porta no host 1'), '8080');
     submitForm();
     expect(submit).toHaveBeenCalledWith({ ports: ['8080:80/tcp'] });
+  });
+  it('retranslates a binding validation error while keeping the native port draft', async () => {
+    function LanguageButton() {
+      const { setLocale } = useI18n();
+      return <button onClick={() => setLocale('en-US')}>English</button>;
+    }
+    const submit = vi.fn();
+    const user = userEvent.setup();
+    const native = '8000-8010:80-90/tcp';
+    render(
+      <I18nProvider
+        identity="bindings-test"
+        policy={{
+          enabled: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: true,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <LanguageButton />
+        <SchemaForm
+          schema={schema}
+          schemas={{}}
+          initialValues={{ ports: [native, '8080:80/udp'] }}
+          bindingEditors
+          onSubmit={submit}
+        />
+      </I18nProvider>,
+    );
+    const host = screen.getByLabelText('Porta no host 2');
+    await user.clear(host);
+    await user.type(host, '65536');
+    submitForm();
+    expect(screen.getByRole('alert')).toHaveTextContent('Revise portas inteiras');
+    expect(submit).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'English' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Check that ports are whole numbers');
+    expect(screen.getByLabelText('Host port 2')).toBe(host);
+    expect(host).toHaveValue('65536');
+    expect(screen.getByLabelText('Port protocol 2')).toHaveValue('udp');
+    expect(screen.getByText(native)).toBeInTheDocument();
+
+    await user.clear(host);
+    await user.type(host, '8081');
+    submitForm();
+    expect(submit).toHaveBeenCalledWith({ ports: [native, '8081:80/udp'] });
   });
   it('cria volume nomeado readonly e remove linha sem trocar os valores seguintes', async () => {
     const submit = mount(),

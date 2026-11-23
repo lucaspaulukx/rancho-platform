@@ -1,4 +1,5 @@
 import { useI18n } from '../i18n/provider';
+import { resourceStateLabel } from '../i18n/resource-state';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -16,7 +17,7 @@ import {
 } from '../workloads';
 import {
   Alert,
-  Badge,
+  ResourceStateBadge,
   Button,
   DataTable,
   Empty,
@@ -91,10 +92,10 @@ function WorkloadTable({
           sortValue: (row) => row.state || '',
           render: (row) => (
             <div>
-              <Badge state={row.state}>{row.state || '—'}</Badge>
+              <ResourceStateBadge state={row.state} />
               {typeof row.healthState === 'string' && (
                 <small className="health-label">
-                  {t('workloadsPage.health', { state: row.healthState })}
+                  {t('workloadsPage.health', { state: resourceStateLabel(t, row.healthState) })}
                 </small>
               )}
             </div>
@@ -254,7 +255,7 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
               <option value="">{t('workloadsPage.allStates')}</option>
               {states.map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {resourceStateLabel(t, value)}
                 </option>
               ))}
             </select>
@@ -281,7 +282,7 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
                   <span className="row-title-icon">
                     <Layers3 size={21} />
                   </span>
-                  <Badge state={stack.state}>{stack.state || '—'}</Badge>
+                  <ResourceStateBadge state={stack.state} />
                 </div>
                 <h2>
                   <Link to={`/stacks/${stack.id}?env=${app.project!.id}`}>
@@ -309,7 +310,9 @@ export function WorkloadList({ kind }: { kind: 'stacks' | 'services' | 'containe
                 <div className="stack-card-footer">
                   <span className="muted">
                     {t('workloadsPage.health', {
-                      state: String(stack.healthState || t('workloadsPage.unknownHealth')),
+                      state: stack.healthState
+                        ? resourceStateLabel(t, String(stack.healthState))
+                        : t('workloadsPage.unknownHealth'),
                     })}
                   </span>
                   <Link

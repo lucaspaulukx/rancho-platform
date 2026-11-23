@@ -6,10 +6,20 @@ import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
 import { api, allPages, type Resource, type Schema } from '../api';
 import { useActionScope } from '../hooks/useActionScope';
 import { useI18n } from '../i18n/provider';
+import { resourceStateLabel } from '../i18n/resource-state';
 import { ptSchemaForm } from '../i18n/domains/schema-form';
 import { useApp, useDataKey } from '../state';
 import { canManageResource, useSchemas } from '../hooks/useSchemas';
-import { Alert, Badge, Button, Confirm, ErrorState, Loading, Modal, useToast } from './ui';
+import {
+  Alert,
+  ResourceStateBadge,
+  Button,
+  Confirm,
+  ErrorState,
+  Loading,
+  Modal,
+  useToast,
+} from './ui';
 import { fieldLabel, SchemaForm } from './SchemaForm';
 import { ResourceDetails } from './ResourceDetails';
 import { ResourceStream } from './ResourceStream';
@@ -469,10 +479,12 @@ function ResourcePanelContext({
             {mode === 'detail' ? (
               <>
                 <div className="workspace-panel-status">
-                  <Badge state={resource.state}>{resource.state}</Badge>
+                  <ResourceStateBadge state={resource.state} />
                   {typeof resource.healthState === 'string' && (
                     <span className="muted">
-                      {t('resourcePanel.health', { state: resource.healthState })}
+                      {t('resourcePanel.health', {
+                        state: resourceStateLabel(t, resource.healthState),
+                      })}
                     </span>
                   )}
                   <Link
