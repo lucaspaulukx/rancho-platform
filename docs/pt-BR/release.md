@@ -175,6 +175,14 @@ docker build -f "$fixture/Dockerfile.modern-bootstrap" -t rancho-agent-modern-bo
 docker tag rancho-agent-modern-bootstrap:local rancher/agent:v1.2.11
 ```
 
+A imagem de bootstrap compila o utilitário de rede `r` a partir de fontes fixadas com CGO desativado. Ela inclui em `/usr/share/doc/rancho-bootstrap` os avisos de Weave, das dependências vinculadas, dos scripts de registro Rancher e dos clientes Python. Antes de registrar um host, verifique se o utilitário aguarda uma rota IPv4 padrão em um namespace Docker descartável.
+
+```sh
+docker run --rm -i --pull=never --network none --cap-drop ALL --cap-add NET_ADMIN \
+  --entrypoint /bin/sh rancho-agent-modern-bootstrap:local -s < \
+  console/tests/legacy-host/smoke-modern-bootstrap.sh
+```
+
 Prepare o catálogo no commit fixado do upstream, aplique o patch independente, faça commit apenas dos quatro templates modificados e crie um clone bare com a branch master. Defina `RANCHO_CATALOG_DIRECTORY` com o caminho absoluto desse clone no arquivo de ambiente do Compose. O override inicia a biblioteca local e o executor Compose. O gateway usa loopback por padrão. Para um host descartável remoto, use um endpoint HTTPS acessível com certificado confiável para o host descartável.
 
 ```sh
