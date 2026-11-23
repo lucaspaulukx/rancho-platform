@@ -169,6 +169,18 @@ class LanguageChecks(unittest.TestCase):
         file.write_bytes(file.read_bytes().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n'))
         self.assertEqual(languages.audit(self.data, {self.source, self.target})['errors'], [])
 
+    def test_alphanumeric_task_prefixes_cannot_be_dropped_or_renumbered(self):
+        originals = {name: (self.root / name).read_text(encoding='utf-8') for name in (self.source, self.target)}
+        for target_row in ('', '| I18N02 | Task |\n'):
+            with self.subTest(target_row=target_row):
+                self.write(self.source, originals[self.source]+'\n| I18N01 | Tarefa |\n')
+                self.write(self.target, originals[self.target]+'\n'+target_row)
+                with self.assertRaisesRegex(ValueError, 'task IDs'):
+                    languages.review(self.data, [self.source])
+        self.write(self.target, originals[self.target]+'\n| I18N01 | Task |\n')
+        languages.review(self.data, [self.source])
+        self.assertEqual(languages.audit(self.data, {self.source, self.target})['errors'], [])
+
 
 if __name__ == '__main__':
     unittest.main()
