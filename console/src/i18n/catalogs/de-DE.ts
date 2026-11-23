@@ -1,4 +1,177 @@
 export const deDE = {
+  'environmentEditor.resources': 'Ressourcen in dieser Umgebung',
+  'environmentEditor.openContext': 'Öffnen Sie einen Betriebsbereich im Kontext von {name}.',
+  'environmentEditor.groups': 'Zugriff über Gruppen verwalten',
+  'environmentEditor.loading': 'Rancher-Vorlagen werden geladen…',
+  'environmentEditor.selectTemplate':
+    'Wählen Sie eine Vorlage aus, um native Infrastruktur bereitzustellen, oder lassen Sie das Feld leer, um ohne Vorlage fortzufahren.',
+  'environmentEditor.infrastructure': 'Infrastruktur der Vorlage',
+  'environmentEditor.defaultDescription': 'Infrastruktur gemäß der Rancher-Vorlage.',
+  'environmentEditor.provisionNotice':
+    'Rancher stellt diese Stacks in der neuen Umgebung bereit. Die Ausführung hängt von den verfügbaren Hosts und Infrastrukturdiensten ab.',
+  'environmentEditor.accessNotice':
+    'Nach dem Erstellen können Sie den Gruppenzugriff auf der Seite „Gruppen“ konfigurieren.',
+
+  'registryCredentials.usernameLabel': 'Registry-Benutzername',
+  'registryCredentials.secretLabel': 'Passwort oder Token',
+  'registryCredentials.preserveSecret': 'Leer lassen, um das vorhandene Passwort beizubehalten.',
+  'registryCredentials.title': 'Registry-Anmeldedaten',
+  'registryCredentials.description':
+    'Verwalten Sie die Konten, die Images aus dieser Registry abrufen.',
+  'registryCredentials.add': 'Anmeldedaten hinzufügen',
+  'registryCredentials.noAccess':
+    'Ihr Konto hat keinen Zugriff auf die Anmeldedaten dieser Registry.',
+  'registryCredentials.empty': 'Keine Anmeldedaten hinterlegt',
+  'registryCredentials.emptyDescription':
+    'Hinterlegen Sie Anmeldedaten, wenn die Registry eine Authentifizierung erfordert. Öffentliche Registries können ohne Passwort verwendet werden.',
+  'registryCredentials.name': 'Name',
+  'registryCredentials.username': 'Benutzername',
+  'registryCredentials.state': 'Status',
+  'registryCredentials.actions': 'Aktionen',
+  'registryCredentials.edit': 'Bearbeiten',
+  'registryCredentials.activate': 'Aktivieren',
+  'registryCredentials.deactivate': 'Deaktivieren',
+  'registryCredentials.remove': 'Entfernen',
+  'registryCredentials.editTitle': 'Anmeldedaten bearbeiten',
+  'registryCredentials.cancel': 'Abbrechen',
+  'registryCredentials.save': 'Anmeldedaten speichern',
+  'registryCredentials.discard': 'Anmeldedaten verwerfen?',
+  'registryCredentials.discardDescription': 'Die eingegebenen Daten wurden noch nicht gespeichert.',
+  'registryCredentials.credentialFallback': 'diese Anmeldedaten',
+  'registryCredentials.saved':
+    'Anmeldedaten gespeichert. Das Passwort wird nicht erneut angezeigt.',
+  'registryCredentials.operationSent': 'Rancher hat den Vorgang entgegengenommen.',
+  'registryCredentials.context': 'Registry: {registry} · Umgebung: {environment}',
+  'registryCredentials.activateTitle': 'Anmeldedaten aktivieren?',
+  'registryCredentials.deactivateTitle': 'Anmeldedaten deaktivieren?',
+  'registryCredentials.removeTitle': 'Anmeldedaten entfernen?',
+  'registryCredentials.actionDescription':
+    'Der Vorgang betrifft ausschließlich {credential} in der Registry {registry}. Neue Image-Vorgänge können von diesem Konto abhängen.',
+  'registryCredentials.error.unavailable': 'Anmeldedaten sind in diesem Kontext nicht verfügbar.',
+  'registryCredentials.error.permission':
+    'Sie haben keine Berechtigung mehr, Änderungen vorzunehmen.',
+  'registryCredentials.error.registryMismatch':
+    'Die Anmeldedaten gehören nicht zu dieser Registry.',
+  'registryCredentials.error.actionUnavailable': 'Dieser Vorgang ist nicht verfügbar.',
+  'registryCredentials.error.actionChanged':
+    'Der Vorgang ist für diese Anmeldedaten nicht mehr verfügbar.',
+  'registryCredentials.error.save':
+    'Die Anmeldedaten konnten nicht gespeichert werden (HTTP {status}). Prüfen Sie die Daten und Ihre Berechtigungen.',
+
+  'resourcesPage.validation.registryRequired': 'Geben Sie die Registry-Adresse ein.',
+  'resourcesPage.validation.registryProtocol':
+    'Geben Sie eine Registry-Adresse mit HTTP oder HTTPS ein.',
+  'resourcesPage.validation.registryAddress': 'Geben Sie eine gültige Registry-Adresse ein.',
+  'resourcesPage.validation.registryCredentials':
+    'Geben Sie nur Server und Port ein. Die Adresse darf keine Anmeldedaten enthalten.',
+  'resourcesPage.validation.secretSize': 'Der Inhalt überschreitet das Größenlimit des Servers.',
+  'resourcesPage.validation.certificatePem': 'Geben Sie ein gültiges PEM-Zertifikat ein.',
+  'resourcesPage.validation.privateKeyPem':
+    'Geben Sie den unverschlüsselten privaten PEM-Schlüssel für dieses Zertifikat ein.',
+  'resourcesPage.secretContent': 'Secret-Inhalt',
+  'resourcesPage.secretContentHint':
+    'Der Text wird beim Übermitteln als UTF-8 codiert. Nach dem Speichern kann der Wert nicht mehr abgerufen werden.',
+  'resourcesPage.operation': 'Vorgang',
+  'resourcesPage.certificateUnavailable':
+    'Das aktuelle Zertifikat ist nicht verfügbar. Laden Sie die Ressource vor dem Bearbeiten neu.',
+  'resourcesPage.environmentHint':
+    'Ein Umgebungswechsel aktualisiert die Ressourcen, die in der Konsole angezeigt werden.',
+  'resourcesPage.emptyDescription':
+    'Hier werden Daten angezeigt, sobald Ressourcen in diesem Kontext verfügbar sind.',
+  'resourcesPage.unavailableDescription':
+    'Die API hat diese Ressource Ihrem Konto in diesem Kontext nicht bereitgestellt.',
+  'resourcesPage.noEnvironmentDescription':
+    'Die angezeigten Ressourcen richten sich nach Ihren Umgebungen und Berechtigungen.',
+  'resourcesPage.editModeDescription':
+    'Nicht gespeicherte Änderungen in diesem Formular werden verworfen.',
+  'resourcesPage.saved':
+    'Rancher hat die Änderung entgegengenommen. Verfolgen Sie den Status der Ressource.',
+  'resourcesPage.overviewDescription': 'Übersicht der Ressourcen in der ausgewählten Umgebung.',
+  'resourcesPage.selectDescription':
+    'Wählen Sie eine Umgebung aus, für die Sie berechtigt sind, um ihre Ressourcen anzuzeigen.',
+  'resourcesPage.operationReceived':
+    'Vorgang entgegengenommen. Der Server aktualisiert den Status.',
+  'resourcesPage.pendingDescription':
+    'Warten Sie auf die Antwort von Rancher, bevor Sie den Kontext wechseln.',
+  'resourcesPage.invalidRelated':
+    'Rancher hat keine gültige Ressource oder Sammlung zurückgegeben.',
+  'resourcesPage.operationUnavailable': 'Der Vorgang ist für diese Ressource nicht mehr verfügbar.',
+  'resourcesPage.permission': 'Sie haben keine Berechtigung mehr, Änderungen vorzunehmen.',
+  'resourcesPage.showVolumes': 'Auch Containerdatenträger und Bind-Mounts anzeigen',
+  'resourcesPage.leaveDescription': 'Änderungen in diesem Formular werden verworfen.',
+  'resourcesPage.relatedDescription': 'Zugehörige Ressourcen, die der Server zurückgegeben hat.',
+  'resourcesPage.notCollection': 'Dieser Link liefert keine Sammlung, die angezeigt werden kann.',
+  'resourcesPage.startDescription': 'Wählen oder erstellen Sie eine Umgebung, um zu beginnen.',
+  'resourcesPage.discardDescription': 'Es gibt noch nicht gespeicherte Änderungen.',
+  'resourcesPage.replaceCertificate': 'Zertifikat und privaten Schlüssel ersetzen',
+  'resourcesPage.permissionRules': 'Rancher-Regeln und lokale Gruppen',
+  'resourcesPage.noEnvironment': 'Keine Umgebungen verfügbar',
+  'resourcesPage.queryFailed': 'Abfrage fehlgeschlagen',
+  'resourcesPage.environmentResources': 'Ressourcen in dieser Umgebung',
+  'resourcesPage.selectEnvironment': 'Umgebung auswählen',
+  'resourcesPage.upgradeInfrastructure': 'Infrastruktur aktualisieren',
+  'resourcesPage.editMode': 'Bearbeitungsmodus wechseln?',
+  'resourcesPage.related': 'Zugehörige Ressourcen',
+  'resourcesPage.pending': 'Vorgang läuft',
+  'resourcesPage.stay': 'Auf dieser Seite bleiben',
+  'resourcesPage.environmentState': 'Umgebungsstatus',
+  'resourcesPage.permissionSource': 'Berechtigungsquelle',
+  'resourcesPage.unavailable': 'Ressource nicht verfügbar',
+  'resourcesPage.environmentContext': 'Umgebungskontext',
+  'resourcesPage.discard': 'Entwurf verwerfen?',
+  'resourcesPage.confirmOperation': 'Vorgang bestätigen',
+  'resourcesPage.openEnvironment': 'Umgebung öffnen',
+  'resourcesPage.moduleDisabled': 'Modul deaktiviert',
+  'resourcesPage.leave': 'Ohne Speichern verlassen?',
+  'resourcesPage.viewEnvironments': 'Umgebungen anzeigen',
+  'resourcesPage.refreshData': 'Daten aktualisieren',
+  'resourcesPage.loadMore': 'Weitere laden',
+  'resourcesPage.admin': 'Administrator',
+  'resourcesPage.console': 'Ihre Konsole',
+  'resourcesPage.overview': 'ÜBERSICHT',
+  'resourcesPage.commonName': 'Allgemeiner Name (CN)',
+  'resourcesPage.containers': 'Container',
+  'resourcesPage.profile': 'Ihre Rolle',
+  'resourcesPage.instance': 'Instanz',
+  'resourcesPage.instanceLower': 'Instanz',
+  'resourcesPage.templates': 'Vorlagen',
+  'resourcesPage.description': 'Beschreibung',
+  'resourcesPage.created': 'Erstellt',
+  'resourcesPage.refresh': 'Aktualisieren',
+  'resourcesPage.metrics': 'Metriken',
+  'resourcesPage.details': 'Details',
+  'resourcesPage.cancel': 'Abbrechen',
+  'resourcesPage.validity': 'Gültigkeit',
+  'resourcesPage.server': 'Server',
+  'resourcesPage.user': 'Benutzer',
+  'resourcesPage.back': 'Zurück',
+  'resourcesPage.edit': 'Bearbeiten',
+  'resourcesPage.state': 'Status',
+  'resourcesPage.save': 'Speichern',
+  'resourcesPage.driver': 'Treiber',
+  'resourcesPage.stacks': 'Stacks',
+  'resourcesPage.hosts': 'Hosts',
+  'resourcesPage.name': 'Name',
+  'resourcesPage.host': 'Host',
+  'resourcesPage.type': 'Typ',
+  'resourcesPage.id': 'ID',
+  'resourcesPage.moreInfo':
+    'Auf dem Server sind weitere Ergebnisse für diese Sammlung vorhanden. Die aktuelle Suche erfasst nur geladene Einträge.',
+  'resourcesPage.secretInfo':
+    'Der Wert eines Secrets wird nur bei der Erstellung festgelegt. Erstellen Sie für einen Ersatz ein neues Secret und aktualisieren Sie die Verweise der Dienste.',
+  'resourcesPage.registryInfo':
+    'Nach dem Speichern der Adresse können Sie im Registry-Panel Anmeldedaten hinterlegen.',
+  'resourcesPage.operationInfo':
+    'Rancher führt den Vorgang für diese Ressource aus. Verfolgen Sie das Ergebnis anhand des zurückgegebenen Status.',
+  'resourcesPage.saveFailed':
+    'Die Ressource konnte nicht gespeichert werden (HTTP {status}). Prüfen Sie die Felder und Ihre Berechtigungen.',
+  'resourcesPage.create': '{kind} erstellen',
+  'resourcesPage.emptyTitle': 'Keine Einträge in {title}',
+  'resourcesPage.open': '{name} öffnen',
+  'resourcesPage.editTitle': '{name} bearbeiten',
+  'resourcesPage.context': 'Kontext: {name}. Prüfen Sie die Felder vor dem Speichern.',
+  'resourcesPage.operationContext': 'Prüfen Sie das Ziel und die Auswirkungen. Kontext: {name}.',
+
   'schemaForm.section.name.title': 'Identifikation',
   'schemaForm.section.name.description': 'Name, Beschreibung und Stack-Zugehörigkeit.',
   'schemaForm.section.imageUuid.title': 'Container',
