@@ -13,3 +13,17 @@ Se houver falha, implementar revalidação sob flag independente, com encerramen
 ## Medição nativa — 04/11/2026
 
 Falha confirmada: handshake101, evento próprio antes da revogação recebido, nova requisição protegida401 após DELETE token/current, porém a conexão anterior permaneceu aberta e recebeu uma atualização posterior (após janela6s). Uma entrega antes e uma depois; nenhum payload persistido. Cleanup removeu a stack própria e preservou as anteriores. Resultado privado em `console/ws-revocation-results.json`; manifesto removido. O gate OBS02 permanece aberto e exige correção no servidor, não apenas desmontar o componente frontend.
+
+## Correção aceita no recorte de revogação de token
+
+`GuardedWebSocketSubscriptionHandler` envolve o writer de subscribe de sessões UI opacas. Antes de cada mensagem/ping, consulta token atual/expiração/provedor, valida JWE, conta ativa e perfil atual; para project compara papel efetivo atual ao inicial. Falha de consulta fecha sem expor motivo, token ou payload. Sessões sem cookie/atributo UI continuam no handler nativo: credenciais técnicas têm gate separado. O wrapper serializa check/write/close e não reabre após revogação.
+
+Flag `RANCHER_SUBSCRIPTION_SESSION_GUARD_ENABLED`: defaultfalse no backend/base, efetiva somente com customização ativa. Compose moderno assume true, com overridefalse disponível. Não altera intervalo de ping5s nem timeout do scheduler. Em repouso, fechamento depende do ping existente; validar latência sob carga em OBS03. Mensagens já enfileiradas antes da revogação são uma fronteira distinta, não há promessa de revogação retroativa.
+
+Contratos:128 assertions de configuração/64 combinações e10 do writer (negação, falha fechada, fechamento idempotente, impossibilidade de reabertura e ausência de payload posterior). Build Java aprovado. Frontend595/70 e TypeScript/Vite aprovados novamente.
+
+Matriz real no mesmo artefato: flag on→handshake101, evento anterior recebido, HTTP401 e nova conexão401 após revogação, socket anterior fechou1000 e zero evento posterior. Flag off→HTTP/nova conexão401, porém socket anterior aberto e um evento posterior; comportamento nativo preservado. Ambas as sessões próprias foram revogadas e cleanup conferiu todas as stacks anteriores. Relatórios `ws-revocation-flag-on-results.json` e `ws-revocation-flag-off-results.json`, ignorados no Git.
+
+Uma repetição intermediária foi invalidada: reinício do backend antes do fim do cleanup. Stack exata recuperada e baseline preservado, sem contar a tentativa como aceite. A limpeza de uma sessão controle perdida nessa interrupção não foi confirmada; não revogar sessões administrativas indistintamente para ocultar esse limite. Harness passou a registrar falha/cleanup e revogar sessões mesmo se a remoção atrasar.
+
+Ainda faltam: matriz real de remoção de grant/desativação/expiração local+OIDC, carga, API keys, logs/exec/métricas. OBS02 inteiro continua parcial.

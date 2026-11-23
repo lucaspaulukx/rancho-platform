@@ -168,3 +168,7 @@ Upgrade de segurança: workloadSecurityUpgrades=true, independente da criação,
 ## Versionamento da configuração pública
 
 Contrato vigente schemaVersion1: [migração, dry-run, checksums e rollback](53-versioned-console-configuration.md). Formato sem versão migra em memória com flags ausentes false. Formato versionado exige flags booleanas completas; versões futuras falham antes da autenticação. Ferramenta cria somente destino novo, sem substituir origem/JSON compartilhado. Toda mudança de requisito obrigatório deve incrementar versão com migração explícita.
+
+## Revalidação de subscribe — 04/11/2026
+
+`RANCHER_SUBSCRIPTION_SESSION_GUARD_ENABLED` defaultfalse no backend, efetiva somente com customização. Compose moderno assume true (overridefalse). Revalida token opaco/JWE, conta/perfil e papel por mensagem/ping do WebSocket subscribe; falha fecha a conexão. On/off e revogação de sessão própria aceitos73. Não representa aceite de API keys, logs, exec ou carga.

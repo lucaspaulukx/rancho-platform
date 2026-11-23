@@ -11,6 +11,7 @@ const labels: Record<string, string> = {
   ENV_CREATION_ADMIN_ONLY: 'Criação de environments somente por administradores',
   DISABLE_AUTO_ENVIRONMENT: 'Bloqueio de environment pessoal automático',
   SESSION_ACCOUNT_GUARD_ENABLED: 'Sessão vinculada ao estado e perfil atuais da conta',
+  SUBSCRIPTION_SESSION_GUARD_ENABLED: 'Revalidação de sessões no subscribe WebSocket',
   CATALOG_WRITE_GUARD_ENABLED: 'Proteção de escrita nos catálogos por perfil',
   OIDC_ENABLED: 'Autenticação OIDC',
   OIDC_LOGIN_PREFLIGHT_ENABLED: 'Verificação prévia do provedor de login',

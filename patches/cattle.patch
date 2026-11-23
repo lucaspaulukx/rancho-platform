@@ -26,6 +26,22 @@ index 42b2a92..219b649 100644
          authorize(method, requiredRoles, roles, methodRoles);
  
          if ("POST".equals(method) || "PUT".equals(method)) {
+diff --git a/code/iaas/auth-logic/pom.xml b/code/iaas/auth-logic/pom.xml
+index 585f732..5ecbbfb 100644
+--- a/code/iaas/auth-logic/pom.xml
++++ b/code/iaas/auth-logic/pom.xml
+@@ -9,6 +9,11 @@
+     </parent>
+     
+     <dependencies>
++        <dependency>
++            <groupId>io.cattle</groupId>
++            <artifactId>cattle-framework-api-pub-sub-jetty</artifactId>
++            <version>${project.version}</version>
++        </dependency>
+         <dependency>
+             <groupId>io.cattle</groupId>
+             <artifactId>cattle-framework-token</artifactId>
 diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java
 index 2cb2302..f00465f 100644
 --- a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/AbstractTokenUtil.java
@@ -254,6 +270,19 @@ index aec39a6..f2572fa 100644
          Map<String, Object> project = CollectionUtils.toMap(apiRequest.getRequestObject());
          if (authDao.getAccountById(policy.getAccountId()).getKind().equalsIgnoreCase(ProjectConstants.TYPE)) {
              throw new ClientVisibleException(ResponseCodes.FORBIDDEN);
+diff --git a/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java b/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
+index 40fe2eb..b7c2c10 100644
+--- a/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
++++ b/code/packaging/app-config/src/main/java/io/cattle/platform/app/ApiServerConfig.java
+@@ -150,7 +150,7 @@ public class ApiServerConfig {
+ 
+     @Bean
+     JettyWebSocketSubcriptionHandler JettyWebSocketSubcriptionHandler(@Qualifier("EventExecutorService") ExecutorService es) {
+-        io.cattle.platform.api.pubsub.subscribe.jetty.JettyWebSocketSubcriptionHandler handler = new JettyWebSocketSubcriptionHandler();
++        io.cattle.platform.api.pubsub.subscribe.jetty.JettyWebSocketSubcriptionHandler handler = new io.cattle.platform.iaas.api.auth.localrbac.GuardedWebSocketSubscriptionHandler();
+         handler.setExecutorService(es);
+         return handler;
+     }
 diff --git a/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java b/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java
 index e017f43..7b7586b 100644
 --- a/code/packaging/app-config/src/main/java/io/cattle/platform/app/IaasApiConfig.java
@@ -357,9 +386,9 @@ new file mode 100644
 +
 +    public CustomizationConfig(Map<String,String> env) {
 +        String[] names={"CUSTOMIZATION_ENABLED","LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED",
-+            "ENV_CREATION_ADMIN_ONLY","DISABLE_AUTO_ENVIRONMENT","CATALOG_WRITE_GUARD_ENABLED","SESSION_ACCOUNT_GUARD_ENABLED","OIDC_ENABLED","OIDC_LOGIN_PREFLIGHT_ENABLED","OIDC_ONLY","OIDC_AUTO_LOGIN","MODERN_UI_ENABLED"};
++            "ENV_CREATION_ADMIN_ONLY","DISABLE_AUTO_ENVIRONMENT","CATALOG_WRITE_GUARD_ENABLED","SESSION_ACCOUNT_GUARD_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED","OIDC_LOGIN_PREFLIGHT_ENABLED","OIDC_ONLY","OIDC_AUTO_LOGIN","MODERN_UI_ENABLED"};
 +        for (String name:names) {
-+            boolean fallback=!(name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
++            boolean fallback=!(name.equals("SUBSCRIPTION_SESSION_GUARD_ENABLED") || name.equals("OIDC_LOGIN_PREFLIGHT_ENABLED") || name.equals("OIDC_ONLY") || name.equals("OIDC_AUTO_LOGIN") || name.equals("MODERN_UI_ENABLED"));
 +            String value=env.get("RANCHER_"+name);
 +            if(value!=null && !value.equals("true") && !value.equals("false")) { throw new IllegalArgumentException("Invalid boolean: RANCHER_"+name); }
 +            requested.put(name,value==null?fallback:Boolean.valueOf(value));
@@ -388,7 +417,7 @@ new file mode 100644
 +        }
 +        effective.putAll(requested);
 +        boolean custom=requested.get("CUSTOMIZATION_ENABLED");
-+        for(String name:new String[]{"LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","OIDC_ENABLED"}) {
++        for(String name:new String[]{"LOCAL_RBAC_ENABLED","NO_ACCESS_VIEW_ENABLED","SUBSCRIPTION_SESSION_GUARD_ENABLED","OIDC_ENABLED"}) {
 +            effective.put(name,custom && requested.get(name));
 +        }
 +        effective.put("OIDC_ENABLED",effective.get("OIDC_ENABLED") && oidcConfigured);
@@ -410,6 +439,89 @@ new file mode 100644
 +        available.put("OIDC_LOGIN_PREFLIGHT_ENABLED",oidcConfigured);
 +        result.put("available",available);
 +        return result;
++    }
++}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/GuardedWebSocketSubscriptionHandler.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/GuardedWebSocketSubscriptionHandler.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/GuardedWebSocketSubscriptionHandler.java
+@@ -0,0 +1,78 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import io.cattle.platform.api.auth.Policy;
++import io.cattle.platform.api.pubsub.subscribe.MessageWriter;
++import io.cattle.platform.api.pubsub.subscribe.jetty.JettyWebSocketSubcriptionHandler;
++import io.cattle.platform.api.utils.ApiUtils;
++import io.cattle.platform.core.dao.AccountDao;
++import io.cattle.platform.core.model.Account;
++import io.cattle.platform.core.model.AuthToken;
++import io.cattle.platform.iaas.api.auth.SecurityConstants;
++import io.cattle.platform.iaas.api.auth.dao.AuthDao;
++import io.cattle.platform.iaas.api.auth.dao.AuthTokenDao;
++import io.cattle.platform.iaas.api.auth.dao.impl.AuthDaoImpl;
++import io.cattle.platform.iaas.api.auth.integration.local.LocalAuthConstants;
++import io.cattle.platform.token.TokenService;
++import io.github.ibuildthecloud.gdapi.request.ApiRequest;
++import java.io.IOException;
++import javax.inject.Inject;
++import javax.servlet.http.Cookie;
++
++/** Protects opaque UI sessions on subscribe. Agent/API-key transports remain separate gates. */
++public class GuardedWebSocketSubscriptionHandler extends JettyWebSocketSubcriptionHandler {
++    @Inject AuthTokenDao authTokenDao;
++    @Inject AuthDao authDao;
++    @Inject AccountDao accountDao;
++    @Inject TokenService tokenService;
++
++    private String role(long projectId, Policy policy) {
++        return AuthDaoImpl.resolveProjectRole(authDao.getProjectMembersByIdentity(projectId, policy.getIdentities()));
++    }
++
++    @Override
++    protected MessageWriter getMessageWriter(ApiRequest request) throws IOException {
++        if (!CustomizationConfig.CURRENT.enabled("SUBSCRIPTION_SESSION_GUARD_ENABLED")) {
++            return super.getMessageWriter(request);
++        }
++        Object attribute = request.getAttribute(LocalAuthConstants.JWT);
++        String value = attribute instanceof String ? (String)attribute : null;
++        if (value == null && request.getServletContext().getRequest().getCookies() != null) {
++            for (Cookie cookie : request.getServletContext().getRequest().getCookies()) {
++                if ("token".equals(cookie.getName())) { value = cookie.getValue(); break; }
++            }
++        }
++        if (value == null || value.trim().isEmpty()) { return super.getMessageWriter(request); }
++        if (value.regionMatches(true, 0, "Bearer ", 0, 7)) { value = value.substring(7).trim(); }
++        final String key = value;
++        final Policy policy = ApiUtils.getPolicy();
++        final long userId = policy.getAuthenticatedAsAccountId();
++        final long targetId = policy.getAccountId();
++        Account initial = authDao.getAccountById(userId);
++        Account target = authDao.getAccountById(targetId);
++        final String kind = initial == null ? null : initial.getKind();
++        final boolean project = target != null && "project".equals(target.getKind());
++        final String initialRole = project && !"admin".equals(kind) ? role(targetId, policy) : null;
++        MessageWriter delegate = super.getMessageWriter(request);
++        if (delegate == null) { return null; }
++        return new SessionGuardedWriter(delegate, new SessionGuardedWriter.Check() {
++            @Override
++            public boolean allowed() {
++                try {
++                    AuthToken token = authTokenDao.getTokenByKey(key);
++                    if (token == null || !SecurityConstants.AUTH_PROVIDER.get().equals(token.getProvider()) ||
++                        token.getAuthenticatedAsAccountId() == null || token.getAuthenticatedAsAccountId().longValue() != userId ||
++                        tokenService.getJsonPayload(token.getValue(), true) == null) { return false; }
++                    Account user = authDao.getAccountById(userId);
++                    if (user == null || !accountDao.isActiveAccount(user) || kind == null || !kind.equals(user.getKind())) { return false; }
++                    if (!project) { return true; }
++                    Account currentTarget = authDao.getAccountById(targetId);
++                    if (currentTarget == null || !accountDao.isActiveAccount(currentTarget)) { return false; }
++                    if ("admin".equals(kind)) { return true; }
++                    String currentRole = role(targetId, policy);
++                    return initialRole != null && initialRole.equals(currentRole) &&
++                        ("owner".equals(currentRole) || "member".equals(currentRole) || "readonly".equals(currentRole) || "restricted".equals(currentRole));
++                } catch (Exception unavailable) { return false; }
++            }
++        });
 +    }
 +}
 diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalAccess.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/LocalAccess.java
@@ -1079,6 +1191,48 @@ new file mode 100644
 +        Account account=authDao.getAccountById(accountId);
 +        if (account==null || !"active".equals(account.getState()) || account.getRemoved()!=null) { throw new ClientVisibleException(401,"InactiveAccount"); }
 +        return account;
++    }
++}
+diff --git a/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/SessionGuardedWriter.java b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/SessionGuardedWriter.java
+new file mode 100644
+--- /dev/null
++++ b/code/iaas/auth-logic/src/main/java/io/cattle/platform/iaas/api/auth/localrbac/SessionGuardedWriter.java
+@@ -0,0 +1,37 @@
++package io.cattle.platform.iaas.api.auth.localrbac;
++
++import io.cattle.platform.api.pubsub.subscribe.MessageWriter;
++import java.io.IOException;
++
++/** Check immediately before each payload/ping; failures close without disclosing a reason. */
++public final class SessionGuardedWriter implements MessageWriter {
++    public interface Check { boolean allowed(); }
++    private final MessageWriter delegate;
++    private final Check check;
++    private boolean closed;
++
++    public SessionGuardedWriter(MessageWriter delegate, Check check) {
++        this.delegate = delegate;
++        this.check = check;
++    }
++
++    @Override
++    public synchronized void write(String message, Object writeLock) throws IOException {
++        if (closed) { throw new IOException("Subscription closed"); }
++        boolean allowed = false;
++        try { allowed = check.allowed(); } catch (RuntimeException unavailable) { /* Fail closed. */ }
++        if (!allowed) {
++            close();
++            throw new IOException("Subscription authorization unavailable");
++        }
++        delegate.write(message, writeLock);
++    }
++
++    @Override
++    public synchronized void close() {
++        if (!closed) {
++            closed = true;
++            delegate.close();
++        }
 +    }
 +}
 diff --git a/resources/content/schema/base/localAccessReport.json b/resources/content/schema/base/localAccessReport.json

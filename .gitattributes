@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.png -text
+*.jpg -text
+*.ico -text
+*.woff2 -text
+*.patch -text

@@ -3,3 +3,11 @@ dist
 coverage
 .git
 *.log
+tests
+*-results.json
+*-fixture.json
+*-fixture.yaml
+*-contract.json
+*-failure.json
+*-diagnostic.json
+__pycache__
