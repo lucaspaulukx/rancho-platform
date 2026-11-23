@@ -17,8 +17,10 @@ import threading
 import time
 
 FORMAT = b'RANCHER-DB-GCM-1\n'
+MANIFEST_FORMAT = b'RANCHER-DB-MANIFEST-GCM-1\n'
 CORE = ('account', 'project_member', 'environment', 'service', 'instance', 'host', 'volume')
 MAX_BYTES = 256 * 1024 * 1024
+MAX_MANIFEST_BYTES = 1024 * 1024
 
 
 class MigrationError(Exception):
@@ -141,20 +143,20 @@ def key(password, salt):
     return Scrypt(salt=salt, length=32, n=2**15, r=8, p=1).derive(password.encode('utf-8'))
 
 
-def encrypt(data, password):
+def encrypt(data, password, *, format_header=FORMAT):
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
     if len(password) < 20:
         raise MigrationError('Use a backup passphrase of at least20 characters.')
     salt, nonce = secrets.token_bytes(16), secrets.token_bytes(12)
-    header = FORMAT + salt + nonce
+    header = format_header + salt + nonce
     return header + AESGCM(key(password, salt)).encrypt(nonce, data, header)
 
 
-def decrypt(data, password):
+def decrypt(data, password, *, format_header=FORMAT, max_bytes=MAX_BYTES + 1024):
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-    if len(data) > MAX_BYTES + 1024 or not data.startswith(FORMAT) or len(data) < len(FORMAT) + 44:
+    if len(data) > max_bytes or not data.startswith(format_header) or len(data) < len(format_header) + 44:
         raise MigrationError('Invalid or oversized encrypted backup.')
-    offset = len(FORMAT)
+    offset = len(format_header)
     salt, nonce = data[offset:offset+16], data[offset+16:offset+28]
     header = data[:offset+28]
     try:
@@ -182,13 +184,56 @@ def backup(db, directory, password):
         raise MigrationError('Only all-InnoDB MySQL5.5 internal snapshots are accepted by this rehearsal version.')
     data = db.dump()
     encrypted = encrypt(data, password)
-    write_new(directory / 'cattle.sql.enc', encrypted)
-    initial.update({'encryptedBackupSha256': hashlib.sha256(encrypted).hexdigest(),
+    initial.update({'formatVersion': 2,
+                    'encryptedBackupSha256': hashlib.sha256(encrypted).hexdigest(),
                     'plaintextDumpSha256': hashlib.sha256(data).hexdigest(),
                     'encryptedBytes': len(encrypted), 'completeRecoveryBackup': False})
+    manifest = (json.dumps(initial, indent=2) + '\n').encode()
+    if len(manifest) > MAX_MANIFEST_BYTES:
+        raise MigrationError('Backup manifest exceeds the supported limit.')
+    seal = encrypt(manifest, password, format_header=MANIFEST_FORMAT)
+    write_new(directory / 'cattle.sql.enc', encrypted)
+    write_new(directory / 'backup.json.enc', seal)
     # No dump, passwords, table contents or configuration are written into the report.
-    write_new(directory / 'backup.json', (json.dumps(initial, indent=2) + '\n').encode())
+    write_new(directory / 'backup.json', manifest)
     return initial
+
+
+def read_bundle_file(path, max_bytes):
+    if path.is_symlink() or not path.is_file():
+        raise MigrationError('Expected a regular backup file, not a symlink.')
+    with path.open('rb') as stream:
+        data = stream.read(max_bytes + 1)
+    if len(data) > max_bytes:
+        raise MigrationError('Backup file exceeds the supported limit.')
+    return data
+
+
+def read_backup_manifest(directory, password, trusted_legacy_metadata_sha256):
+    manifest = read_bundle_file(directory / 'backup.json', MAX_MANIFEST_BYTES)
+    try:
+        metadata = json.loads(manifest.decode('utf-8'))
+    except (UnicodeError, ValueError, RecursionError):
+        raise MigrationError('Invalid backup manifest.') from None
+    if not isinstance(metadata, dict):
+        raise MigrationError('Invalid backup manifest.')
+
+    seal_path = directory / 'backup.json.enc'
+    version = metadata.get('formatVersion', 1)
+    if type(version) is int and version == 2:
+        seal_limit = MAX_MANIFEST_BYTES + len(MANIFEST_FORMAT) + 44
+        seal = read_bundle_file(seal_path, seal_limit)
+        if decrypt(seal, password, format_header=MANIFEST_FORMAT, max_bytes=seal_limit) != manifest:
+            raise MigrationError('Backup manifest differs from its authenticated seal.')
+    elif type(version) is int and version == 1:
+        if seal_path.exists() or seal_path.is_symlink():
+            raise MigrationError('Legacy backup must not have a manifest seal.')
+        if (not isinstance(trusted_legacy_metadata_sha256, str) or
+                hashlib.sha256(manifest).hexdigest() != trusted_legacy_metadata_sha256.lower()):
+            raise MigrationError('Legacy backup requires a matching independently trusted metadata SHA-256.')
+    else:
+        raise MigrationError('Unsupported backup manifest version.')
+    return metadata
 
 
 def own_resource(kind, name, marker):
@@ -197,12 +242,11 @@ def own_resource(kind, name, marker):
     return run([*args, '--format', field, name]).decode().strip() == marker
 
 
-def rehearse(directory, password, *, _fixture_setup=None):
-    metadata = json.loads((directory / 'backup.json').read_text(encoding='utf-8'))
-    file = directory / 'cattle.sql.enc'
-    if file.stat().st_size > MAX_BYTES + 1024:
-        raise MigrationError('Encrypted backup exceeds the supported limit.')
-    encrypted = file.read_bytes()
+def rehearse(directory, password, *, trusted_legacy_metadata_sha256=None, _fixture_setup=None):
+    if directory.is_symlink() or not directory.is_dir():
+        raise MigrationError('Expected an existing private backup directory, not a symlink.')
+    metadata = read_backup_manifest(directory, password, trusted_legacy_metadata_sha256)
+    encrypted = read_bundle_file(directory / 'cattle.sql.enc', MAX_BYTES + 1024)
     if hashlib.sha256(encrypted).hexdigest() != metadata['encryptedBackupSha256']:
         raise MigrationError('Encrypted backup checksum differs; no restore attempted.')
     sql = decrypt(encrypted, password)  # Authenticate fully BEFORE creating resources or executing SQL.
@@ -310,11 +354,17 @@ def main(argv=None):
     parser.add_argument('--defaults-file', help='Existing MySQL client defaults file INSIDE source container; never a password argument.')
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--check-tables', action='store_true')
+    parser.add_argument('--trusted-legacy-metadata-sha256', help='Independently trusted SHA-256 of the exact legacy backup.json bytes.')
     args = parser.parse_args(argv)
     directory = args.output.resolve()
     allow_failure_report = False
     started = datetime.now(timezone.utc).isoformat()
     try:
+        trusted_legacy_digest = args.trusted_legacy_metadata_sha256
+        if trusted_legacy_digest is not None:
+            if args.command != 'rehearse-db' or not re.fullmatch(r'[a-fA-F0-9]{64}', trusted_legacy_digest):
+                raise MigrationError('Trusted legacy metadata SHA-256 requires rehearse-db and 64 hexadecimal digits.')
+            trusted_legacy_digest = trusted_legacy_digest.lower()
         if args.command == 'rehearse-db':
             if args.source_container or args.defaults_file:
                 raise MigrationError('Offline rehearsal does not accept a source connection.')
@@ -322,7 +372,7 @@ def main(argv=None):
                 raise MigrationError('Expected an existing private backup directory, not a symlink.')
             allow_failure_report = True
             password = os.environ.get('RANCHER_MIGRATION_BACKUP_PASSWORD') or getpass.getpass('Backup passphrase: ')
-            report = rehearse(directory, password)
+            report = rehearse(directory, password, trusted_legacy_metadata_sha256=trusted_legacy_digest)
         else:
             if not args.source_container:
                 raise MigrationError('An explicit source container is required.')

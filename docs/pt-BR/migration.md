@@ -39,7 +39,7 @@ Relatórios contêm contagens/resultados, não registros ou identidades de clien
 python -m migration.tool backup-db --source-container rancher-server --output migration-runs/backup-001
 ```
 
-Forneça senha de backup separada, mínimo20 caracteres, pelo prompt sem eco ou secret privado `RANCHER_MIGRATION_BACKUP_PASSWORD`. Guarde-a separada do backup. O dump lógico usa single-transaction/routines/events/triggers/hex-blob; todas as tabelas precisam ser InnoDB e não pode haver DDL concorrente. SQL plaintext fica em memória limitada. `cattle.sql.enc` usa AES-256-GCM com scrypt e salt/nonce aleatórios; metadados vinculam versão, imagem, tamanho e hashes. A autenticação é verificada antes de restaurar SQL.
+Forneça senha de backup separada, mínimo20 caracteres, pelo prompt sem eco ou secret privado `RANCHER_MIGRATION_BACKUP_PASSWORD`. Guarde-a separada do backup. O dump lógico usa single-transaction/routines/events/triggers/hex-blob; todas as tabelas precisam ser InnoDB e não pode haver DDL concorrente. SQL plaintext fica em memória limitada. `cattle.sql.enc` usa AES-256-GCM com scrypt e salt e nonce aleatórios. O selo separado `backup.json.enc` usa AES-GCM para autenticar os bytes exatos do `backup.json` legível, incluindo o ID da imagem de origem, as observações, o tamanho e os hashes do dump. Mantenha os três arquivos juntos e verifique-os com a mesma senha.
 
 Backup de banco não basta. Capture também estado criptográfico Rancher consistente, dados/configuração/chaves completos do IdP dedicado, compose/manifests, certificados e imagens imutáveis correspondentes. Mantenha cópias protegidas fora do host e teste recuperação. Não chame arquivo de datadir MySQL ativo de backup consistente nem substitua volumes por `docker commit`. Veja [recuperação](recovery.md).
 
@@ -50,6 +50,8 @@ python -m migration.tool rehearse-db --output migration-runs/backup-001
 ```
 
 O comando não conecta à origem. Autentica o bundle e inicia apenas cópia MySQL própria, network none, eventos SQL desligados, sem portas publicadas, mounts da origem, socket Docker ou engine Rancher. Restaura duas vezes, compara inventário/checksums, aplica migração aditiva versionada, verifica preservação/idempotência e restaura o backup novamente para provar rollback.
+
+A ferramenta verifica o selo do manifesto e o dump antes de criar recursos no Docker. Para um backup antigo sem selo, use `--trusted-legacy-metadata-sha256` apenas com o SHA-256 dos bytes originais do `backup.json`, obtido de um registro independente e confiável. Calcular um novo hash do arquivo recebido não comprova sua procedência. Se o hash confiável não estiver disponível, gere um novo backup da origem confiável.
 
 Recursos temporários têm identidades aleatórias e labels conferidas antes do cleanup. Não há prune global. Relatórios novos de operação/ensaio/falha excluem saída bruta do banco. Corrija a causa e repita com novo backup/diretório; não edite relatório para aprovar. Divergência entre observação da origem e dump pode refletir concorrência e não torna a origem quiescente.
 
