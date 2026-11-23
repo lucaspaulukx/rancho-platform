@@ -44,6 +44,22 @@ async function rows(endpoint) {
   return (await read(endpoint + '?limit=-1')).data.filter((v) => !v.removed);
 }
 function pythonHash(rows, fields) {
+  // This fingerprints public metadata for fixture cleanup, not authentication data.
+  // Never include password/secret values in this comparison or its persisted manifest.
+  const allowed = new Set([
+    'name',
+    'description',
+    'kind',
+    'state',
+    'externalId',
+    'externalIdType',
+    'accountId',
+    'publicValue',
+  ]);
+  assert.ok(
+    fields.every((field) => allowed.has(field)),
+    'Only public account metadata may be fingerprinted',
+  );
   return Object.fromEntries(
     rows.map((v) => {
       const value =
