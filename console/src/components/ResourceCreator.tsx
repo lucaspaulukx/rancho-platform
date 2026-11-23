@@ -4,6 +4,8 @@ import { useBlocker } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { allPages, api, type Resource, type Schema } from '../api';
 import { useActionScope } from '../hooks/useActionScope';
+import { ptResourceCreator } from '../i18n/domains/resource-creator';
+import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import { useSchemas } from '../hooks/useSchemas';
 import { Alert, Button, Confirm, ErrorState, Loading, Modal, useToast } from './ui';
@@ -16,14 +18,24 @@ export interface CreationSelection {
   kind: string;
   stack?: Resource;
 }
-export const creationLabels: Record<string, string> = {
-  stack: 'Stack',
-  service: 'Serviço',
-  loadBalancerService: 'Balanceador',
-  dnsService: 'Alias de serviço',
-  externalService: 'Serviço externo',
-  container: 'Container avulso',
-};
+const creationLabelKeys = {
+  stack: 'resourceCreator.kind.stack',
+  service: 'resourceCreator.kind.service',
+  loadBalancerService: 'resourceCreator.kind.loadBalancerService',
+  dnsService: 'resourceCreator.kind.dnsService',
+  externalService: 'resourceCreator.kind.externalService',
+  container: 'resourceCreator.kind.container',
+} as const;
+export const creationLabels: Record<string, string> = Object.fromEntries(
+  Object.entries(creationLabelKeys).map(([kind, key]) => [kind, ptResourceCreator[key]]),
+);
+export function getCreationLabel(kind: string, t: ReturnType<typeof useI18n>['t']) {
+  return t(
+    Object.hasOwn(creationLabelKeys, kind)
+      ? creationLabelKeys[kind as keyof typeof creationLabelKeys]
+      : 'resourceCreator.kind.resource',
+  );
+}
 export function ResourceCreator({
   selection,
   onClose,
@@ -34,6 +46,8 @@ export function ResourceCreator({
   references?: Record<string, Resource[]>;
 }) {
   const app = useApp();
+  const { t, locale } = useI18n();
+  const kindLabel = getCreationLabel(selection.kind, t);
   const scope = useActionScope();
   const client = useQueryClient();
   const toast = useToast();
@@ -62,19 +76,17 @@ export function ResourceCreator({
   const mutation = useMutation({
     gcTime: 0,
     mutationFn: async (payload: Record<string, unknown>) => {
-      if (!allowed || !schema?.links.collection)
-        throw new Error('A criação não está disponível neste contexto.');
+      if (!allowed || !schema?.links.collection) throw new Error(t('resourceCreator.unavailable'));
       const signal = scope.signal();
-      if (!schema.links.self) throw new Error('O schema de criação não está disponível.');
+      if (!schema.links.self) throw new Error(t('resourceCreator.schemaUnavailable'));
       const current = await api<Schema>(schema.links.self, undefined, undefined, signal);
       scope.assertCurrent();
       if (current.id !== schema.id || !current.collectionMethods?.includes('POST'))
-        throw new Error('Sua permissão de criar não está mais disponível.');
+        throw new Error(t('resourceCreator.permissionChanged'));
       if (selection.stack) {
         const stack = await api<Resource>(selection.stack.links.self, undefined, undefined, signal);
         scope.resource(stack, selection.stack);
-        if (stack.state !== 'active')
-          throw new Error('A stack não está disponível para receber serviços.');
+        if (stack.state !== 'active') throw new Error(t('resourceCreator.stackUnavailable'));
       }
       scope.assertCurrent();
       if (composeEditor) payload = validateStackCreation(current, payload);
@@ -95,8 +107,7 @@ export function ResourceCreator({
           ]),
         );
         scope.assertCurrent();
-        if (!refreshed[selection.kind])
-          throw new Error('O schema de criação não está mais disponível.');
+        if (!refreshed[selection.kind]) throw new Error(t('resourceCreator.schemaChanged'));
         payload = validateWorkloadCreation(
           refreshed[selection.kind],
           payload,
@@ -122,9 +133,7 @@ export function ResourceCreator({
       await client.invalidateQueries({
         queryKey: ['data', app.identity, 'project', app.project?.id],
       });
-      toast(
-        `${creationLabels[selection.kind] || 'Recurso'} ${resource.name || resource.id} criado. Acompanhe o estado na operação.`,
-      );
+      toast(t('resourceCreator.created', { kind: kindLabel, name: resource.name || resource.id }));
       onClose();
     },
   });
@@ -183,12 +192,19 @@ export function ResourceCreator({
         onOpenChange={(open) => {
           if (!open) close();
         }}
-        title={`Criar ${creationLabels[selection.kind]?.toLocaleLowerCase() || 'recurso'}`}
-        description={`Environment: ${app.project?.name}${selection.stack ? ' · Stack: ' + (selection.stack.name || selection.stack.id) : ''}`}
+        title={t('resourceCreator.title', { kind: kindLabel.toLocaleLowerCase(locale) })}
+        description={
+          selection.stack
+            ? t('resourceCreator.stackContext', {
+                environment: String(app.project?.name),
+                stack: selection.stack.name || selection.stack.id,
+              })
+            : t('environment.selected', { name: String(app.project?.name) })
+        }
         footer={
           <>
             <Button onClick={close} disabled={mutation.isPending}>
-              Cancelar
+              {t('ui.cancel')}
             </Button>
             <Button
               type="submit"
@@ -197,7 +213,7 @@ export function ResourceCreator({
               disabled={!allowed || schemas.isPending}
               busy={mutation.isPending}
             >
-              Criar
+              {t('resourceCreator.create')}
             </Button>
           </>
         }
@@ -207,10 +223,7 @@ export function ResourceCreator({
         ) : schemas.error ? (
           <ErrorState error={schemas.error} retry={() => void schemas.refetch()} />
         ) : !allowed || !formSchema ? (
-          <Alert>
-            Seu perfil ou o servidor não disponibiliza a criação deste recurso no environment
-            selecionado.
-          </Alert>
+          <Alert>{t('resourceCreator.creationDenied')}</Alert>
         ) : composeEditor ? (
           <StackComposeForm
             schema={formSchema}
@@ -244,8 +257,8 @@ export function ResourceCreator({
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar rascunho?"
-        description="O recurso ainda não foi criado. As informações preenchidas serão descartadas."
+        title={t('resourceCreator.discardTitle')}
+        description={t('resourceCreator.discardDescription')}
         onConfirm={onClose}
       />
       <Confirm
@@ -254,11 +267,9 @@ export function ResourceCreator({
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Mudar de contexto?"
+        title={t('resourceCreator.contextTitle')}
         description={
-          mutation.isPending
-            ? 'Aguarde a resposta do Rancher.'
-            : 'Há um rascunho que ainda não foi salvo.'
+          mutation.isPending ? t('resourceCreator.pending') : t('resourceCreator.unsaved')
         }
         onConfirm={() => {
           if (!mutation.isPending && blocker.state === 'blocked') blocker.proceed();

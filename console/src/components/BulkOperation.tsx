@@ -3,8 +3,14 @@ import { useBlocker } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Resource } from '../api';
 import { useApp } from '../state';
-import { executeBulk, resourceKey, type BulkAction, type BulkResult } from '../bulk-actions';
-import { fieldLabel } from './SchemaForm';
+import {
+  BulkOperationError,
+  executeBulk,
+  resourceKey,
+  type BulkAction,
+  type BulkResult,
+} from '../bulk-actions';
+import { useI18n } from '../i18n/provider';
 import { Alert, Badge, Button, DataTable, Field, Modal } from './ui';
 
 export interface BulkPlan {
@@ -13,11 +19,12 @@ export interface BulkPlan {
 }
 export function BulkOperation({ plan, onClose }: { plan: BulkPlan; onClose: () => void }) {
   const app = useApp();
+  const { t } = useI18n();
   const client = useQueryClient();
   const [running, setRunning] = useState(false);
   const [started, setStarted] = useState(false);
   const [results, setResults] = useState<BulkResult[]>([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<Error | null>(null);
   const [confirmation, setConfirmation] = useState('');
   const controller = useRef<AbortController | null>(null);
   const alive = useRef(true);
@@ -47,7 +54,7 @@ export function BulkOperation({ plan, onClose }: { plan: BulkPlan; onClose: () =
       return;
     setStarted(true);
     setRunning(true);
-    setError('');
+    setError(null);
     controller.current = new AbortController();
     try {
       await executeBulk(
@@ -62,7 +69,11 @@ export function BulkOperation({ plan, onClose }: { plan: BulkPlan; onClose: () =
       );
     } catch (failure) {
       if (alive.current)
-        setError(failure instanceof Error ? failure.message : 'Não foi possível iniciar o lote.');
+        setError(
+          failure instanceof Error
+            ? failure
+            : new BulkOperationError('bulkOperation.message.startFailed'),
+        );
     } finally {
       void client.invalidateQueries({
         queryKey: ['data', app.identity, 'project', app.project.id],
@@ -74,20 +85,24 @@ export function BulkOperation({ plan, onClose }: { plan: BulkPlan; onClose: () =
     resource,
     result: results.find((value) => value.id === resourceKey(resource)),
   }));
+  const count = plan.resources.length;
   return (
     <>
       <Modal
         open
         drawer
-        title={`${fieldLabel(plan.action)} em lote`}
-        description={`Environment: ${app.project?.name} · ${plan.resources.length} ${plan.resources.length === 1 ? 'recurso' : 'recursos'}`}
+        title={t('bulkOperation.title', { action: t(`operations.action.${plan.action}`) })}
+        description={t('bulkOperation.description', {
+          name: app.project?.name ?? '',
+          resources: t('bulkOperation.resources', { count }),
+        })}
         onOpenChange={(open) => {
           if (!open && !running) onClose();
         }}
         footer={
           <>
             <Button onClick={onClose} disabled={running}>
-              {started ? 'Fechar resultados' : 'Cancelar'}
+              {t(started ? 'bulkOperation.closeResults' : 'common.cancel')}
             </Button>
             {!started && (
               <Button
@@ -97,34 +112,22 @@ export function BulkOperation({ plan, onClose }: { plan: BulkPlan; onClose: () =
                 disabled={plan.action === 'remove' && confirmation !== app.project?.name}
                 onClick={() => void run()}
               >
-                Confirmar {plan.resources.length}{' '}
-                {plan.resources.length === 1 ? 'operação' : 'operações'}
+                {t('bulkOperation.confirm', { count })}
               </Button>
             )}
           </>
         }
       >
-        <Alert tone="warning">
-          A operação será aplicada a cada recurso listado. Uma falha não desfaz as operações já
-          recebidas pelo Rancher. Confira os alvos antes de confirmar.
-        </Alert>
+        <Alert tone="warning">{t('bulkOperation.warning')}</Alert>
         {plan.action === 'restart' &&
           plan.resources.some((resource) =>
             ['service', 'loadBalancerService'].includes(resource.type),
-          ) && (
-            <Alert>
-              O reinício dos serviços usa lotes de 1 container e intervalo de 2 segundos entre
-              lotes. O envio é acompanhado por recurso; confirme o estado final na operação.
-            </Alert>
-          )}
+          ) && <Alert>{t('bulkOperation.restartHint')}</Alert>}
         {plan.action === 'remove' && (
           <>
-            <Alert tone="warning">
-              A remoção pode encerrar containers e remover recursos dependentes pelo lifecycle do
-              Rancher. Não há desfazer automático.
-            </Alert>
+            <Alert tone="warning">{t('bulkOperation.removeWarning')}</Alert>
             {!started && (
-              <Field label="Confirme o nome do environment" hint={app.project?.name}>
+              <Field label={t('bulkOperation.confirmEnvironment')} hint={app.project?.name}>
                 {(id) => (
                   <input
                     id={id}
@@ -139,19 +142,23 @@ export function BulkOperation({ plan, onClose }: { plan: BulkPlan; onClose: () =
         )}
         {started && (
           <p role="status">
-            {running ? 'Enviando operações' : 'Envio encerrado'} · {results.length} de{' '}
-            {plan.resources.length} respostas. O estado final continua sendo acompanhado na tela de
-            operação.
+            {t('bulkOperation.progress', {
+              status: t(running ? 'bulkOperation.sending' : 'bulkOperation.finished'),
+              received: results.length,
+              total: count,
+            })}
           </p>
         )}
-        {error && <Alert>{error}</Alert>}
+        {error && (
+          <Alert>{error instanceof BulkOperationError ? t(error.messageKey) : error.message}</Alert>
+        )}
         <DataTable
           rows={rows}
           rowKey={(value) => resourceKey(value.resource)}
           columns={[
             {
               key: 'name',
-              label: 'Recurso',
+              label: t('bulkOperation.resource'),
               render: (value) => (
                 <>
                   <strong>{value.resource.name || value.resource.id}</strong>
@@ -163,7 +170,7 @@ export function BulkOperation({ plan, onClose }: { plan: BulkPlan; onClose: () =
             },
             {
               key: 'result',
-              label: 'Resultado',
+              label: t('bulkOperation.result'),
               render: (value) =>
                 value.result ? (
                   <>
@@ -176,16 +183,16 @@ export function BulkOperation({ plan, onClose }: { plan: BulkPlan; onClose: () =
                             : 'degraded'
                       }
                     >
-                      {value.result.status === 'accepted'
-                        ? 'Recebida'
-                        : value.result.status === 'failed'
-                          ? 'Falhou'
-                          : 'Verificar estado'}
+                      {t(`bulkOperation.status.${value.result.status}`)}
                     </Badge>
-                    <small className="health-label">{value.result.message}</small>
+                    <small className="health-label">
+                      {value.result.messageKey ? t(value.result.messageKey) : value.result.message}
+                    </small>
                   </>
                 ) : (
-                  <span className="muted">{started ? 'Aguardando envio' : 'A confirmar'}</span>
+                  <span className="muted">
+                    {t(started ? 'bulkOperation.queued' : 'bulkOperation.pending')}
+                  </span>
                 ),
             },
           ]}
@@ -197,15 +204,15 @@ export function BulkOperation({ plan, onClose }: { plan: BulkPlan; onClose: () =
         onOpenChange={(open) => {
           if (!open && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Operação em andamento"
-        description="Aguarde o envio do lote antes de trocar de tela ou environment."
+        title={t('bulkOperation.runningTitle')}
+        description={t('bulkOperation.runningDescription')}
         footer={
           <Button
             onClick={() => {
               if (blocker.state === 'blocked') blocker.reset();
             }}
           >
-            Permanecer nesta tela
+            {t('bulkOperation.stay')}
           </Button>
         }
       />

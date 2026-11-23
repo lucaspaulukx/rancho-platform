@@ -40,6 +40,8 @@ O painel compartilhado de detalhes segue o idioma ativo nas abas, nos rótulos, 
 
 A tela de operações e o seletor compartilhado de streams usam o idioma ativo na navegação, nos filtros e nos rótulos de ações. A troca de idioma preserva a visão atual dos workloads e os identificadores das ações nativas.
 
+O painel de criação de workloads e a confirmação de operações em lote usam o idioma compartilhado nos rótulos e nas orientações dos diálogos. O formulário de schema nativo e os editores especializados definem os próprios rótulos de campos.
+
 ## Dados e mutações
 
 Use schemas/action links atuais, sem inventar rotas ou supor igualdade entre schemas globais e do environment. Releia recurso, escopo e contrato relevante antes da mutação. Preserve configuração desconhecida e campos não selecionados; não transforme valores incompatíveis em defaults vazios silenciosamente.

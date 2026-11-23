@@ -46,12 +46,11 @@ import { ResourcePanel, type ResourceSelection } from '../components/ResourcePan
 import {
   ResourceCreator,
   creationLabels,
+  getCreationLabel,
   type CreationSelection,
 } from '../components/ResourceCreator';
-import { enOperations } from '../i18n/domains/operations';
 import { commonBulkActions, resourceKey } from '../bulk-actions';
 import { BulkOperation, type BulkPlan } from '../components/BulkOperation';
-type CreationMessageKey = Extract<keyof typeof enOperations, `operations.creation.${string}`>;
 
 const ServiceTopology = lazy(() => import('../components/ServiceTopology'));
 
@@ -317,9 +316,9 @@ export function OperationsPage({
                   {t('operations.create')}
                 </summary>
                 <div className="creation-options">
-                  {Object.entries(creationLabels)
-                    .filter(([kind]) => schemas.data?.[kind]?.collectionMethods?.includes('POST'))
-                    .map(([kind, label]) => (
+                  {Object.keys(creationLabels)
+                    .filter((kind) => schemas.data?.[kind]?.collectionMethods?.includes('POST'))
+                    .map((kind) => (
                       <button
                         key={kind}
                         onClick={(event) => {
@@ -328,9 +327,7 @@ export function OperationsPage({
                           setCreation({ kind });
                         }}
                       >
-                        {Object.hasOwn(enOperations, `operations.creation.${kind}`)
-                          ? t(`operations.creation.${kind}` as CreationMessageKey)
-                          : label}
+                        {getCreationLabel(kind, t)}
                       </button>
                     ))}
                 </div>

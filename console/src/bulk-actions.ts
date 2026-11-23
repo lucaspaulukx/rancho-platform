@@ -1,6 +1,15 @@
 import { api, ApiError, type Resource, type Schema } from './api';
 import { canManageResource } from './hooks/useSchemas';
 import { lifecyclePayload } from './lifecycle-actions';
+import { ptBulkOperation } from './i18n/domains/bulk-operation';
+
+type BulkMessageKey = Extract<keyof typeof ptBulkOperation, `bulkOperation.message.${string}`>;
+
+export class BulkOperationError extends Error {
+  constructor(readonly messageKey: BulkMessageKey) {
+    super(ptBulkOperation[messageKey]);
+  }
+}
 
 export const bulkActions = [
   'start',
@@ -31,6 +40,7 @@ export interface BulkResult {
   name: string;
   status: 'accepted' | 'failed' | 'unknown';
   message: string;
+  messageKey?: BulkMessageKey;
 }
 type Transport = (
   url: string,
@@ -49,11 +59,11 @@ export async function executeBulk(
   signal?: AbortSignal,
 ) {
   if (!bulkActions.includes(action) || !resources.length || resources.length > 100)
-    throw new Error('Selecione entre 1 e 100 recursos para uma operação válida.');
+    throw new BulkOperationError('bulkOperation.message.invalidSelection');
   if (new Set(resources.map(resourceKey)).size !== resources.length)
-    throw new Error('O lote contém recursos duplicados.');
+    throw new BulkOperationError('bulkOperation.message.duplicateResources');
   if (action === 'remove' && new Set(resources.map((resource) => resource.type)).size !== 1)
-    throw new Error('A remoção em lote exige recursos do mesmo tipo.');
+    throw new BulkOperationError('bulkOperation.message.mixedRemoval');
   for (const resource of resources) {
     if (signal?.aborted) return;
     let submitted = false;
@@ -67,33 +77,37 @@ export async function executeBulk(
         current.type !== resource.type ||
         current.accountId !== environment
       )
-        throw new Error('O recurso não pertence ao environment deste lote.');
+        throw new BulkOperationError('bulkOperation.message.wrongEnvironment');
       const url = current.actions?.[action];
-      if (!url)
-        throw new Error('A ação deixou de estar disponível. Revise o estado e suas permissões.');
+      if (!url) throw new BulkOperationError('bulkOperation.message.actionUnavailable');
       submitted = true;
       await transport(url, lifecyclePayload(current, action), requestSignal);
       onResult({
         id: resourceKey(resource),
         name: resource.name || resource.id,
         status: 'accepted',
-        message: 'Recebida pelo Rancher. Acompanhe o estado do recurso.',
+        message: ptBulkOperation['bulkOperation.message.accepted'],
+        messageKey: 'bulkOperation.message.accepted',
       });
     } catch (error) {
       const interrupted =
         error instanceof DOMException && ['AbortError', 'TimeoutError'].includes(error.name);
       const uncertain = submitted && !(error instanceof ApiError);
+      const messageKey = uncertain
+        ? 'bulkOperation.message.unknown'
+        : interrupted
+          ? 'bulkOperation.message.timeout'
+          : error instanceof BulkOperationError
+            ? error.messageKey
+            : error instanceof Error
+              ? undefined
+              : 'bulkOperation.message.failed';
       onResult({
         id: resourceKey(resource),
         name: resource.name || resource.id,
         status: uncertain ? 'unknown' : 'failed',
-        message: uncertain
-          ? 'Sem confirmação da resposta. Verifique o estado antes de tentar novamente.'
-          : interrupted
-            ? 'Não foi possível consultar o recurso a tempo.'
-            : error instanceof Error
-              ? error.message
-              : 'Não foi possível aplicar a operação.',
+        message: messageKey ? ptBulkOperation[messageKey] : (error as Error).message,
+        ...(messageKey ? { messageKey } : {}),
       });
     }
   }
