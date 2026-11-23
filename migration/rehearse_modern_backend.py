@@ -88,7 +88,7 @@ def inventory(name):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--backend-image", required=True, help="Local Debian/Java 17 candidate image"
+        "--backend-image", required=True, help="Local Java 17 candidate image"
     )
     args = parser.parse_args()
     app_image = image_id(args.backend_image)
