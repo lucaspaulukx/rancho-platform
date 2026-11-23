@@ -4,7 +4,7 @@ Roadmap completo e ordem de execução vigente: [Roadmap mestre](48-master-roadm
 
 Planejamento iniciado em 20/10/2026; documentação consolidada para handoff em 21/10/2026.
 
-**Leia primeiro:** [status atual](08-status.md) e [handoff vigente](../HANDOFF-2026-10-21.md). Último build frontend:639 testes/73 arquivos + TypeScript/Vite; recuperação76:36 testes Python e15 checks reais em cópias isoladas. Compose, checkboxes, vínculos e criação por seções foram entregues em recortes validados; os editores de balanceadores e bindings estão habilitados após aceite isolado; a migração completa permanece pendente.
+**Leia primeiro:** [status atual](08-status.md) e [handoff vigente](../HANDOFF-2026-10-21.md). Último build frontend:647 testes/74 arquivos + TypeScript/Vite; recuperação76:36 testes Python e15 checks reais em cópias isoladas. Compose, checkboxes, vínculos e criação por seções foram entregues em recortes validados; os editores de balanceadores e bindings estão habilitados após aceite isolado; a migração completa permanece pendente.
 
 ## Objetivo
 

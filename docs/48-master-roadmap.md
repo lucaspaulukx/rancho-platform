@@ -1,12 +1,12 @@
 # Roadmap mestre — Rancher Community Console
 
-Referência:05/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build628 testes/72 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
+Referência:05/11/2026. Este documento centraliza a execução restante e prevalece sobre prioridades históricas nos documentos antigos. O catálogo de telas03 define a experiência alvo; status08 e relatórios dos recortes12–47 comprovam o que passou. Último build647 testes/74 arquivos + TypeScript/Vite. Não converter contagem de testes em paridade. Estimativa anterior de70% é aproximada e não substitui os gates abaixo.
 
 ## Resultado esperado
 
 Console independente para Docker/Cattle Rancher1.6.30: ambiente→stack→serviço→container operáveis na mesma tela, menus contextuais, drawers e logs/terminal/métricas mantendo contexto. Rancher e assinatura comunitária visíveis; tokens próprios próximos ao Rancher escuros, tema claro/sistema/customizável. Shell, navbar, sidebar, seletores, tabelas, formulários e estados comuns. Grupos administrados localmente, OIDC/Keycloak opcional/exclusivo/autologin e novos usuários sem acesso nem environment automático.
 
-Desenvolvimento não altera Ember. Toda função nova tem flag e comportamento off documentados; flag não concede permissão. Valores privados fora de caches/evidências. Recursos e schemas atuais revalidados antes de mutações; conflitos preservam rascunhos. Sandbox autorizado, sem pedir confirmação entre tarefas. Produção/dump real/publicação/remoção do clássico continuam fora desta execução.
+Desenvolvimento não altera Ember. Toda função nova tem flag e comportamento off documentados; flag não concede permissão. Valores privados fora de caches/evidências. Recursos e schemas atuais revalidados antes de mutações; conflitos preservam rascunhos. Sandbox autorizado, sem pedir confirmação entre tarefas. Produção/dump real/releases públicas/remoção do clássico continuam fora desta execução.
 
 ## Estados de trabalho
 
@@ -200,3 +200,9 @@ Destino Git autorizado: https://github.com/lucaspaulukx/rancho-platform, inicial
 83: lease320s/quatro transportes/três réplicas e teto30s aprovados com controles/cleanup; HTTP continuou200 no prazo do socket, distinguindo prazo da conexão de expiração da chave. Comparações off pessoal/compartilhada no mesmo artefato reproduziram falha legada, com limpeza completa. Runtime local API-key on/teto86400s; default distribuído false. Alocação usou relay temporário85, removido antes dos streams; estabilidade CNI nativa continua aberta.
 
 84 implementou métricas contextuais por réplica, sem agregação inventada; Linux639 testes/73 arquivos + TypeScript/Vite passaram. Teste físico do menu real passou10 checks em três réplicas: CSV, seleção na mesma conexão, contraste claro/escuro, mobile e revogação1008 sem reconexão; quatro transportes com novos401/zero dados, controles e cleanup. Flag pública continua ausente/off, habilitável explicitamente pela configuração. Não declarar OPS13 completo: demais tipos/gráficos, escala e acessibilidade manual continuam no roadmap. Checkpoints seguintes são históricos; seus pendentes já resolvidos não prevalecem sobre este resumo.
+
+## Checkpoint87 — limites de processo na criação (05/11/2026)
+
+Nova flag opcional workloadUlimitEditors, ausente=false. Editor compartilhado de ulimits em container/launchConfig/sidecar, validação32bits/duplicatas/soft-hard e revalidação de schema antes do POST. Linux647 testes/74 arquivos + TypeScript/Vite passaram. Fixture real criou container pelo drawer: nofile1024/2048 confirmado na API, Docker e processo; identidade sem grant recebeu negação. Cleanup de recursos/identidade/sessão e desvio temporário completos, configurações/volumes anteriores preservados.
+
+Aceite físico restrito a container avulso Linux/nofile/um host. Serviços/sidecars têm testes de contrato/componente, sem aceite físico equivalente ainda. Upgrade/reset/rollback são recorte88; OPS11, CNI nativo, multi-host e release continuam abertos. Ver87 para falhas preservadas e limites. Código sob flag off no pacote; não houve mudança no Ember/backend.
