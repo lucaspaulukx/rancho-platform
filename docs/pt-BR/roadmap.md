@@ -152,6 +152,8 @@ O backend moderno de nó único registrou um host com Docker 29.9.2 após corre�
 
 Um backup lógico de MySQL 5.5 foi restaurado em um MariaDB 10.11 isolado. O novo backend aplicou a migração do schema e preservou a contagem de serviços após reiniciar. Esse backup tinha zero instâncias, hosts e volumes ativos. O ensaio com banco externo cobre o schema do Rancher. As tabelas de permissões do MySQL de origem ficam com o engine original.
 
+O overlay de pacotes modernos agora recompila o executor nativo do Compose a partir do código-fonte fixado. O teste de renderização paralela passou com o detector de condições de corrida do Go. No teste de catálogo isolado, o executor corrigido criou os serviços de sistema do Cattle e o registro da rede IPsec. Rede gerenciada ponta a ponta e DNS de serviços seguem pendentes. O scan da imagem do agente Docker encontrou 27 achados altos. As imagens legadas de rede, gerenciador de rede, DNS, scheduler, metadados e health check também apresentaram achados altos. Os scans do backend e da console cobrem apenas essas duas imagens.
+
 ## Ordem e domínios opcionais
 
 Conclua contratos/efeitos nativos de workloads, depois infraestrutura/dados/catálogo/integrações. Feche identidade técnica/streams e migração segura de grants, seguido de acessibilidade/performance e regressão final de configuração/recuperação/release. Gate falho retorna à implementação; não aumente timeouts ou esconda limites para obter aprovação.

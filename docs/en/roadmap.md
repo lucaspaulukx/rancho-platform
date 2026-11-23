@@ -152,6 +152,8 @@ The modern single-node backend registered a Docker 29.9.2 host after fixes to ag
 
 A separate isolated MySQL 5.5 logical backup restored its Rancher schema into MariaDB 10.11. The new backend applied the schema migration and preserved the existing service count across restart. This snapshot contained no live instances, hosts or volumes. The external database rehearsal covers the Rancher schema; the source MySQL grant tables stay with the original engine.
 
+The modern package overlay now rebuilds the native Compose executor from pinned source. Its parallel rendering regression passed under the Go race detector, and the corrected executor materialized Cattle system services and the IPsec network record in the isolated catalog test. End-to-end managed networking and service DNS remain open. The Docker host agent scan reported 27 high findings. The legacy network, network manager, DNS, scheduler, metadata and health-check images also reported high findings. The backend and console image scans do not cover those artifacts.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.
