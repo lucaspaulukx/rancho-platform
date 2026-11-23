@@ -1,7 +1,7 @@
 name: rancho-modern
 services:
   db:
-    image: mariadb:10.11@sha256:7d829180b5b2a9ba74f6242876ab401a0d7dd338a807e522ef92bc9698760f20
+    image: ${RANCHO_DATABASE_IMAGE:-mariadb:10.11@sha256:7d829180b5b2a9ba74f6242876ab401a0d7dd338a807e522ef92bc9698760f20}
     environment:
       MARIADB_DATABASE: cattle
       MARIADB_USER: cattle
