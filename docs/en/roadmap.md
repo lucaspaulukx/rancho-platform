@@ -154,6 +154,8 @@ A separate isolated MySQL 5.5 logical backup restored its Rancher schema into Ma
 
 The modern package overlay now rebuilds the native Compose executor from pinned source. Its parallel rendering regression passed under the Go race detector, and the corrected executor materialized Cattle system services and the IPsec network record in the isolated catalog test. End-to-end managed networking and service DNS remain open. The Docker host agent scan reported 27 high findings. The legacy network, network manager, DNS, scheduler, metadata and health-check images also reported high findings. The backend and console image scans do not cover those artifacts.
 
+With all seven legacy system images loaded into the Docker 29 VM, the node registered and the metadata and DNS containers started. The first managed workload timed out waiting for an IP address. Service discovery and traffic between workloads still need verification. An opt-in build in `console/tests/legacy-host/Dockerfile.modern-metadata` recompiles metadata v0.10.4 on Ubuntu 24.04. The offline HTTP smoke test passed. The scan reported zero high or critical findings for this build after 27 high findings in the legacy metadata image. The Cattle catalog still selects the legacy image. Subscription, DNS interoperability and TLS with a private CA still need end-to-end acceptance.
+
 ## Execution order and optional domains
 
 Finish remaining workload contracts/native effects, then infrastructure/data/catalog/integration acceptance. Complete technical identity/stream and direct-grant migration safety, followed by accessibility/performance and final configuration/recovery/release regression. A failed gate returns to implementation; do not extend timeouts or hide limitations to obtain green.
