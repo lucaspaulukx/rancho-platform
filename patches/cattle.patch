@@ -110,6 +110,88 @@ index 4bf09a1..b7ea0c2 100644
          }
      }
  }
+diff --git a/code/framework/java-server/pom.xml b/code/framework/java-server/pom.xml
+index 7a701cb..9521ee3 100644
+--- a/code/framework/java-server/pom.xml
++++ b/code/framework/java-server/pom.xml
+@@ -24,7 +24,7 @@
+         <dependency>
+             <groupId>commons-fileupload</groupId>
+             <artifactId>commons-fileupload</artifactId>
+-            <version>1.3.3</version>
++            <version>1.6.0</version>
+         </dependency>
+         <dependency>
+             <groupId>com.fasterxml.jackson.core</groupId>
+diff --git a/code/framework/java-server/src/main/java/io/github/ibuildthecloud/gdapi/request/parser/DefaultApiRequestParser.java b/code/framework/java-server/src/main/java/io/github/ibuildthecloud/gdapi/request/parser/DefaultApiRequestParser.java
+index 2d37502..052cb2c 100644
+--- a/code/framework/java-server/src/main/java/io/github/ibuildthecloud/gdapi/request/parser/DefaultApiRequestParser.java
++++ b/code/framework/java-server/src/main/java/io/github/ibuildthecloud/gdapi/request/parser/DefaultApiRequestParser.java
+@@ -21,6 +21,7 @@ import java.util.Set;
+ import javax.annotation.PostConstruct;
+ import javax.servlet.http.HttpServletRequest;
+ 
++import org.apache.commons.fileupload.FileCountLimitExceededException;
+ import org.apache.commons.fileupload.FileItem;
+ import org.apache.commons.fileupload.FileUploadBase;
+ import org.apache.commons.fileupload.FileUploadException;
+@@ -93,14 +94,14 @@ public class DefaultApiRequestParser implements ApiRequestParser {
+         return null;
+     }
+ 
+-    @SuppressWarnings("unchecked")
+     protected Map<String, Object> parseParams(ApiRequest apiRequest, HttpServletRequest request) throws IOException {
+         try {
+             Map<String, Object> multiPart = parseMultipart(request);
+ 
+-            return multiPart == null ? request.getParameterMap() : multiPart;
++            return multiPart == null ? new HashMap<String, Object>(request.getParameterMap()) : multiPart;
+         } catch (IOException e) {
+-            if (e.getCause() instanceof FileUploadBase.SizeLimitExceededException)
++            if (e.getCause() instanceof FileUploadBase.SizeLimitExceededException
++                    || e.getCause() instanceof FileCountLimitExceededException)
+                 throw new ClientVisibleException(ResponseCodes.REQUEST_ENTITY_TOO_LARGE);
+             throw e;
+         }
+@@ -369,6 +370,7 @@ public class DefaultApiRequestParser implements ApiRequestParser {
+         servletFileUpload = new ServletFileUpload(factory);
+         servletFileUpload.setFileSizeMax(maxUploadSize);
+         servletFileUpload.setSizeMax(maxUploadSize);
++        servletFileUpload.setFileCountMax(256);
+ 
+         if (allowedFormats == null) {
+             allowedFormats = new HashSet<String>();
+diff --git a/code/framework/java-server/src/main/java/io/github/ibuildthecloud/gdapi/servlet/ApiRequestFilterDelegate.java b/code/framework/java-server/src/main/java/io/github/ibuildthecloud/gdapi/servlet/ApiRequestFilterDelegate.java
+index 2a5b099..30c523b 100644
+--- a/code/framework/java-server/src/main/java/io/github/ibuildthecloud/gdapi/servlet/ApiRequestFilterDelegate.java
++++ b/code/framework/java-server/src/main/java/io/github/ibuildthecloud/gdapi/servlet/ApiRequestFilterDelegate.java
+@@ -2,6 +2,7 @@ package io.github.ibuildthecloud.gdapi.servlet;
+ 
+ import io.cattle.platform.util.type.CollectionUtils;
+ import io.github.ibuildthecloud.gdapi.context.ApiContext;
++import io.github.ibuildthecloud.gdapi.exception.ClientVisibleException;
+ import io.github.ibuildthecloud.gdapi.factory.SchemaFactory;
+ import io.github.ibuildthecloud.gdapi.id.IdFormatter;
+ import io.github.ibuildthecloud.gdapi.model.Schema;
+@@ -68,7 +69,17 @@ public class ApiRequestFilterDelegate {
+                 context.setIdFormatter(idFormatter);
+             }
+ 
+-            if (!parser.parse(apiRequest)) {
++            boolean parsed;
++            try {
++                parsed = parser.parse(apiRequest);
++            } catch (ClientVisibleException e) {
++                if (e.getStatus() != HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE) {
++                    throw e;
++                }
++                httpResponse.sendError(e.getStatus());
++                return null;
++            }
++            if (!parsed) {
+                 chain.doFilter(httpRequest, httpResponse);
+                 return null;
+             }
 diff --git a/code/framework/launcher/src/main/java/io/cattle/platform/launcher/Main.java b/code/framework/launcher/src/main/java/io/cattle/platform/launcher/Main.java
 index 40518b1..c91b82c 100644
 --- a/code/framework/launcher/src/main/java/io/cattle/platform/launcher/Main.java

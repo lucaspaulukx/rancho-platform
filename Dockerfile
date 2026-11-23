@@ -26,6 +26,7 @@ ADD --checksum=sha256:ef5aadd0e7456bee48828b5e4655645ac306f937a7ec47e31e3fa3507c
 ADD --checksum=sha256:9e44ba68ec9a3f21286fa2a8bbb003b735c0f69101bb43144b79f4f8aaa74709 https://repo.maven.apache.org/maven2/commons-beanutils/commons-beanutils/1.11.0/commons-beanutils-1.11.0.jar /beanutils/commons-beanutils-1.11.0.jar
 ADD --checksum=sha256:6d7a744e4027649fbb50895df9497d109f98c766a637062fe8d2eabbb3140ba4 https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.5/commons-logging-1.3.5.jar /beanutils/commons-logging-1.3.5.jar
 ADD --checksum=sha256:5a1ac2b5bbb8321a027e0615ca6dd1e8ba05e4ca063ac795572d676325c7fcdf https://repo.maven.apache.org/maven2/org/liquibase/liquibase-core/4.8.0/liquibase-core-4.8.0.jar /liquibase/liquibase-core-4.8.0.jar
+ADD --checksum=sha256:9383272c93569afeabedb16923a94a6dc8a5bd7a2f9f83bf326af4ee68434629 https://repo.maven.apache.org/maven2/commons-fileupload/commons-fileupload/1.6.0/commons-fileupload-1.6.0.jar /fileupload/commons-fileupload-1.6.0.jar
 
 FROM rancher/server:v1.6.30@sha256:95b55603122c28baea4e8d94663aa34ad770bbc624a9ed6ef986fb3ea5224d91
 COPY --from=stream-proxy /out/websocket-proxy /usr/bin/websocket-proxy
