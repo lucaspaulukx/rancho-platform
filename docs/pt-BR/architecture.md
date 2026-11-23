@@ -46,6 +46,8 @@ Os controles especializados de CPU, memória, capabilities, limites de processo 
 
 Os editores de agendamento, portas e montagens usam os catálogos compartilhados. Validadores de memória e limites de processo expõem chaves tipadas, e os erros exibidos nos editores acompanham a troca de idioma preservando o rascunho. Valores nativos de agendamento, protocolos de portas e modos de montagem mantêm a representação da API.
 
+Grupos, contas, diálogos de contas locais, diagnóstico de acesso efetivo, chaves de API, auditoria, configurações do servidor, processos, monitoramento do engine, drivers de máquinas e repositórios de catálogos usam rótulos registrados em pt-BR/en-US. Erros gerados localmente mantêm chaves tipadas e são traduzidos na renderização, incluindo erros já visíveis durante a troca de idioma. Erros nativos/de helpers mantêm a representação existente onde a extração está pendente. Trocar o idioma preserva rascunhos abertos de grupos e não altera escopo de consultas, privilégios ou identificadores de ações nativas.
+
 ## Dados e mutações
 
 Use schemas/action links atuais, sem inventar rotas ou supor igualdade entre schemas globais e do environment. Releia recurso, escopo e contrato relevante antes da mutação. Preserve configuração desconhecida e campos não selecionados; não transforme valores incompatíveis em defaults vazios silenciosamente.

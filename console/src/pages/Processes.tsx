@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type Resource, type Schema } from '../api';
 import { useApp } from '../state';
+import { useI18n } from '../i18n/provider';
 import { useSchemas } from '../hooks/useSchemas';
 import { useRequestScope } from '../hooks/useRequestScope';
 import { usePageLeaveGuard } from '../hooks/usePageLeaveGuard';
@@ -31,29 +32,38 @@ import { formatResourceDate } from '../resource-format';
 const Pools = lazy(() =>
   import('./EngineMonitoring').then((module) => ({ default: module.ProcessPools })),
 );
+class ProcessPageError extends Error {
+  constructor(
+    readonly key:
+      'processes.invalidResponse' | 'processes.replayUnavailable' | 'processes.reviewFilters',
+  ) {
+    super(key);
+  }
+}
 const initial: ProcessFilters = { state: 'all', process: '', resource: '', id: '' };
 export function Processes() {
   const app = useApp();
   return <ProcessViews key={app.identity} />;
 }
 function ProcessViews() {
+  const { t } = useI18n();
   const app = useApp(),
     [view, setView] = useState(0),
     pools = app.config.modules.processPools,
     selected = pools ? view : 0;
   if (!app.admin || !app.config.modules.processes)
-    return <Alert>Processos indisponíveis neste acesso.</Alert>;
+    return <Alert>{t('processes.unavailable')}</Alert>;
   return (
     <>
-      <PageHeader title="Processos" description="Execuções do engine e seus recursos de origem." />
+      <PageHeader title={t('processes.title')} description={t('processes.description')} />
       {pools && (
         <Tabs
-          labels={['Execuções', 'Pools do engine']}
+          labels={[t('processes.executions'), t('processes.pools')]}
           selected={selected}
           onChange={setView}
           idPrefix="process-view"
           panelId="process-view-panel"
-          label="Visão dos processos"
+          label={t('processes.view')}
         />
       )}
       <div
@@ -80,6 +90,9 @@ function ProcessViews() {
   );
 }
 function ProcessesScope({ active }: { active: boolean }) {
+  const { t, locale } = useI18n();
+  const errorText = (error: Error) =>
+    error instanceof ProcessPageError ? t(error.key) : error.message;
   const app = useApp(),
     client = useQueryClient(),
     toast = useToast(),
@@ -88,7 +101,7 @@ function ProcessesScope({ active }: { active: boolean }) {
   const [draft, setDraft] = useState(initial),
     [filters, setFilters] = useState(initial),
     [history, setHistory] = useState<string[]>([]),
-    [validation, setValidation] = useState('');
+    [validation, setValidation] = useState<Error | null>(null);
   const [selected, setSelected] = useState<ProcessRecord | null>(null),
     [replay, setReplay] = useState<ProcessRecord | null>(null);
   const path = history.at(-1) || processQuery(filters);
@@ -104,7 +117,7 @@ function ProcessesScope({ active }: { active: boolean }) {
         undefined,
         signal,
       );
-      if (!Array.isArray(page.data)) throw new Error('Resposta de processos inválida.');
+      if (!Array.isArray(page.data)) throw new ProcessPageError('processes.invalidResponse');
       return { rows: page.data.map(processMetadata), next: processNext(page.pagination?.next) };
     },
   });
@@ -118,7 +131,7 @@ function ProcessesScope({ active }: { active: boolean }) {
         !app.config.modules.processReplay ||
         !replay
       )
-        throw new Error('Replay indisponível neste acesso.');
+        throw new ProcessPageError('processes.replayUnavailable');
       const signal = scope.signal();
       const contract = await api<Schema>('schemas/processInstance', undefined, undefined, signal);
       scope.assertCurrent();
@@ -134,18 +147,18 @@ function ProcessesScope({ active }: { active: boolean }) {
       setReplay(null);
       setSelected(null);
       void client.invalidateQueries({ queryKey: ['data', app.identity, 'processes'] });
-      toast('Replay enviado ao engine. Acompanhe o estado retornado pelo servidor.');
+      toast(t('processes.sent'));
     },
   });
   usePageLeaveGuard(run.isPending, app.config.modules.unsavedChangesGuard);
   if (!app.admin || !app.config.modules.processes)
-    return <Alert>Processos indisponíveis neste acesso.</Alert>;
+    return <Alert>{t('processes.unavailable')}</Alert>;
   const detail = (selected && query.data?.rows.find((v) => v.id === selected.id)) || selected;
   return (
     <>
       <div className="row-actions audit-filter-actions">
         <Button onClick={() => void query.refetch()} disabled={query.isFetching}>
-          Atualizar
+          {t('processes.refresh')}
         </Button>
       </div>
       <form
@@ -156,14 +169,16 @@ function ProcessesScope({ active }: { active: boolean }) {
             processQuery(draft);
             setFilters({ ...draft });
             setHistory([]);
-            setValidation('');
+            setValidation(null);
           } catch (error) {
-            setValidation(error instanceof Error ? error.message : 'Revise os filtros.');
+            setValidation(
+              error instanceof Error ? error : new ProcessPageError('processes.reviewFilters'),
+            );
           }
         }}
       >
         <div className="form-grid">
-          <Field label="Situação dos processos">
+          <Field label={t('processes.status')}>
             {(id) => (
               <select
                 id={id}
@@ -172,24 +187,24 @@ function ProcessesScope({ active }: { active: boolean }) {
                   setDraft({ ...draft, state: e.target.value as ProcessFilters['state'] })
                 }
               >
-                <option value="all">Todos</option>
-                <option value="running">Em execução</option>
-                <option value="waiting">Aguardando execução</option>
-                <option value="completed">Concluídos</option>
+                <option value="all">{t('processes.all')}</option>
+                <option value="running">{t('processes.running')}</option>
+                <option value="waiting">{t('processes.waiting')}</option>
+                <option value="completed">{t('processes.completed')}</option>
               </select>
             )}
           </Field>
-          <Field label="Nome do processo">
+          <Field label={t('processes.name')}>
             {(id) => (
               <input
                 id={id}
                 value={draft.process}
                 onChange={(e) => setDraft({ ...draft, process: e.target.value })}
-                placeholder="Ex.: credential.update"
+                placeholder={t('processes.example')}
               />
             )}
           </Field>
-          <Field label="Tipo de recurso">
+          <Field label={t('processes.resourceType')}>
             {(id) => (
               <input
                 id={id}
@@ -198,7 +213,7 @@ function ProcessesScope({ active }: { active: boolean }) {
               />
             )}
           </Field>
-          <Field label="ID do recurso">
+          <Field label={t('processes.resourceId')}>
             {(id) => (
               <input
                 id={id}
@@ -209,28 +224,32 @@ function ProcessesScope({ active }: { active: boolean }) {
           </Field>
         </div>
         <div className="row-actions audit-filter-actions">
-          <Button type="submit">Aplicar filtros</Button>
+          <Button type="submit">{t('processes.apply')}</Button>
           <Button
             onClick={() => {
               setDraft(initial);
               setFilters(initial);
               setHistory([]);
-              setValidation('');
+              setValidation(null);
             }}
           >
-            Limpar filtros
+            {t('processes.clear')}
           </Button>
         </div>
-        {validation && <Alert>{validation}</Alert>}
+        {validation && <Alert>{errorText(validation)}</Alert>}
       </form>
-      <Alert tone="info">
-        Até 100 execuções por página; busca somente na página atual. Dados internos e resultados
-        livres do engine são omitidos. O replay pode repetir efeitos no recurso e exige revisão.
-      </Alert>
+      <Alert tone="info">{t('processes.listInfo')}</Alert>
       {query.isPending ? (
         <Loading />
       ) : query.error ? (
-        <ErrorState error={query.error} retry={() => void query.refetch()} />
+        <ErrorState
+          error={
+            query.error instanceof ProcessPageError
+              ? new Error(errorText(query.error))
+              : query.error
+          }
+          retry={() => void query.refetch()}
+        />
       ) : (
         <>
           <DataTable
@@ -243,7 +262,7 @@ function ProcessesScope({ active }: { active: boolean }) {
             columns={[
               {
                 key: 'process',
-                label: 'Processo',
+                label: t('processes.process'),
                 render: (v) => (
                   <>
                     <strong>{v.processName || '—'}</strong>
@@ -253,21 +272,25 @@ function ProcessesScope({ active }: { active: boolean }) {
               },
               {
                 key: 'resource',
-                label: 'Recurso',
+                label: t('processes.resource'),
                 render: (v) => `${v.resourceType} ${v.resourceId}`,
               },
-              { key: 'phase', label: 'Fase', render: (v) => v.phase || '—' },
-              { key: 'exit', label: 'Saída', render: (v) => v.exitReason || '—' },
-              { key: 'start', label: 'Início', render: (v) => formatResourceDate(v.startTime) },
+              { key: 'phase', label: t('processes.phase'), render: (v) => v.phase || '—' },
+              { key: 'exit', label: t('processes.exit'), render: (v) => v.exitReason || '—' },
+              {
+                key: 'start',
+                label: t('processes.start'),
+                render: (v) => formatResourceDate(v.startTime, locale),
+              },
               {
                 key: 'detail',
-                label: 'Detalhes',
+                label: t('processes.details'),
                 render: (v) => (
                   <Button
                     onClick={() => setSelected(v)}
-                    aria-label={`Detalhes do processo ${v.id}`}
+                    aria-label={t('processes.detailLabel', { id: v.id })}
                   >
-                    Ver detalhes
+                    {t('processes.viewDetails')}
                   </Button>
                 ),
               },
@@ -278,16 +301,16 @@ function ProcessesScope({ active }: { active: boolean }) {
               disabled={!history.length || query.isFetching}
               onClick={() => setHistory((v) => v.slice(0, -1))}
             >
-              Execuções anteriores
+              {t('processes.previous')}
             </Button>
-            <span aria-live="polite">Página {history.length + 1}</span>
+            <span aria-live="polite">{t('processes.page', { page: history.length + 1 })}</span>
             <Button
               disabled={!query.data?.next || query.isFetching}
               onClick={() => {
                 if (query.data?.next) setHistory((v) => [...v, query.data!.next!]);
               }}
             >
-              Mais execuções
+              {t('processes.more')}
             </Button>
           </div>
         </>
@@ -297,7 +320,7 @@ function ProcessesScope({ active }: { active: boolean }) {
         onOpenChange={(open) => {
           if (!open && !run.isPending) setSelected(null);
         }}
-        title="Detalhes do processo"
+        title={t('processes.detailTitle')}
         footer={
           detail &&
           app.config.modules.processReplay &&
@@ -308,7 +331,7 @@ function ProcessesScope({ active }: { active: boolean }) {
                 setReplay(detail);
               }}
             >
-              Reexecutar processo
+              {t('processes.rerun')}
             </Button>
           ) : undefined
         }
@@ -316,16 +339,16 @@ function ProcessesScope({ active }: { active: boolean }) {
         <dl className="details-grid">
           {detail &&
             Object.entries({
-              ID: detail.id,
-              Processo: detail.processName,
-              Recurso: `${detail.resourceType} ${detail.resourceId}`,
-              Conta: detail.accountId,
-              Fase: detail.phase,
-              'Motivo de saída': detail.exitReason,
-              Execuções: detail.executionCount,
-              Início: formatResourceDate(detail.startTime),
-              Fim: formatResourceDate(detail.endTime),
-              'Agendado para': formatResourceDate(detail.runAfter),
+              [t('processes.id')]: detail.id,
+              [t('processes.process')]: detail.processName,
+              [t('processes.resource')]: `${detail.resourceType} ${detail.resourceId}`,
+              [t('processes.account')]: detail.accountId,
+              [t('processes.phase')]: detail.phase,
+              [t('processes.exitReason')]: detail.exitReason,
+              [t('processes.executions')]: detail.executionCount,
+              [t('processes.start')]: formatResourceDate(detail.startTime, locale),
+              [t('processes.end')]: formatResourceDate(detail.endTime, locale),
+              [t('processes.scheduled')]: formatResourceDate(detail.runAfter, locale),
             }).map(([k, v]) => (
               <div key={k}>
                 <dt>{k}</dt>
@@ -339,12 +362,17 @@ function ProcessesScope({ active }: { active: boolean }) {
         onOpenChange={(open) => {
           if (!open && !run.isPending) setReplay(null);
         }}
-        title="Reexecutar processo?"
-        description={`Processo ${replay?.processName || ''} (${replay?.id || ''}) sobre ${replay?.resourceType || ''} ${replay?.resourceId || ''}. O engine pode repetir efeitos no recurso. A operação não pode ser desfeita pela console.`}
+        title={t('processes.rerunTitle')}
+        description={t('processes.replayDescription', {
+          name: replay?.processName || '',
+          id: replay?.id || '',
+          type: replay?.resourceType || '',
+          resource: replay?.resourceId || '',
+        })}
         busy={run.isPending}
         onConfirm={() => run.mutate()}
       >
-        {run.error && <Alert>{run.error.message}</Alert>}
+        {run.error && <Alert>{errorText(run.error)}</Alert>}
       </Confirm>
     </>
   );

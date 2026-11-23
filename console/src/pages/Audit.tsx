@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n/provider';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api, type Resource } from '../api';
@@ -14,18 +15,24 @@ import {
   PageHeader,
 } from '../components/ui';
 import { formatResourceDate } from '../resource-format';
+class AuditPageError extends Error {
+  constructor(readonly key: 'auditPage.invalidResponse' | 'auditPage.reviewFilters') {
+    super(key);
+  }
+}
 const initial: AuditFilters = { event: '', resource: '', account: '' };
 export function Audit() {
   const app = useApp();
   return <AuditScope key={app.identity} />;
 }
 function AuditScope() {
+  const { t, locale } = useI18n();
   const app = useApp();
   const [draft, setDraft] = useState(initial),
     [filters, setFilters] = useState(initial);
   const [history, setHistory] = useState<string[]>([]),
     [selected, setSelected] = useState<AuditEvent | null>(null),
-    [validation, setValidation] = useState('');
+    [validation, setValidation] = useState<Error | null>(null);
   const path = history.at(-1) || auditQuery(filters);
   const query = useQuery({
     queryKey: ['data', app.identity, 'administrative-audit', path],
@@ -38,7 +45,7 @@ function AuditScope() {
         undefined,
         signal,
       );
-      if (!Array.isArray(result.data)) throw new Error('Resposta de auditoria inválida.');
+      if (!Array.isArray(result.data)) throw new AuditPageError('auditPage.invalidResponse');
       return { rows: result.data.map(auditMetadata), next: auditNext(result.pagination?.next) };
     },
   });
@@ -49,81 +56,86 @@ function AuditScope() {
       setFilters({ ...draft });
       setHistory([]);
       setSelected(null);
-      setValidation('');
+      setValidation(null);
     } catch (e) {
-      setValidation(e instanceof Error ? e.message : 'Revise os filtros.');
+      setValidation(e instanceof Error ? e : new AuditPageError('auditPage.reviewFilters'));
     }
   }
-  if (!app.admin || !app.config.modules.audit)
-    return <Alert>Auditoria indisponível neste acesso.</Alert>;
+  if (!app.admin || !app.config.modules.audit) return <Alert>{t('auditPage.unavailable')}</Alert>;
   return (
     <>
       <PageHeader
-        title="Auditoria"
-        description="Eventos registrados pelo Rancher, com metadados de autoria, recurso e resultado."
+        title={t('auditPage.title')}
+        description={t('auditPage.description')}
         action={
           <Button onClick={() => void query.refetch()} disabled={query.isFetching}>
-            Atualizar
+            {t('auditPage.refresh')}
           </Button>
         }
       />
       <form className="panel" onSubmit={apply}>
         <div className="form-grid">
-          <Field label="Tipo de recurso">
+          <Field label={t('auditPage.resourceType')}>
             {(id) => (
               <input
                 id={id}
                 value={draft.resource}
                 onChange={(e) => setDraft({ ...draft, resource: e.target.value })}
-                placeholder="Ex.: service"
+                placeholder={t('auditPage.resourceExample')}
               />
             )}
           </Field>
-          <Field label="Tipo de evento">
+          <Field label={t('auditPage.eventType')}>
             {(id) => (
               <input
                 id={id}
                 value={draft.event}
                 onChange={(e) => setDraft({ ...draft, event: e.target.value })}
-                placeholder="Identificador nativo"
+                placeholder={t('auditPage.nativeIdentifier')}
               />
             )}
           </Field>
-          <Field label="Filtrar por conta autenticada">
+          <Field label={t('auditPage.filterAccount')}>
             {(id) => (
               <input
                 id={id}
                 value={draft.account}
                 onChange={(e) => setDraft({ ...draft, account: e.target.value })}
 
-                placeholder="Ex.: 1a1"
+                placeholder={t('auditPage.accountExample')}
               />
             )}
           </Field>
         </div>
         <div className="row-actions audit-filter-actions">
-          <Button type="submit">Aplicar filtros</Button>
+          <Button type="submit">{t('auditPage.apply')}</Button>
           <Button
             onClick={() => {
               setDraft(initial);
               setFilters(initial);
               setHistory([]);
-              setValidation('');
+              setValidation(null);
             }}
           >
-            Limpar filtros
+            {t('auditPage.clear')}
           </Button>
         </div>
-        {validation && <Alert>{validation}</Alert>}
+        {validation && (
+          <Alert>
+            {validation instanceof AuditPageError ? t(validation.key) : validation.message}
+          </Alert>
+        )}
       </form>
-      <Alert tone="info">
-        Até 100 eventos por página. A busca abaixo consulta somente esta página. Corpos de
-        requisição/resposta e descrições livres são omitidos para proteger dados sensíveis.
-      </Alert>
+      <Alert tone="info">{t('auditPage.privacy')}</Alert>
       {query.isPending ? (
         <Loading />
       ) : query.error ? (
-        <ErrorState error={query.error} retry={() => void query.refetch()} />
+        <ErrorState
+          error={
+            query.error instanceof AuditPageError ? new Error(t(query.error.key)) : query.error
+          }
+          retry={() => void query.refetch()}
+        />
       ) : (
         <>
           <DataTable
@@ -134,45 +146,52 @@ function AuditScope() {
               `${v.id} ${v.eventType} ${v.resourceType} ${v.resourceId} ${v.accountId} ${v.authenticatedAsAccountId} ${v.responseCode ?? ''}`
             }
             columns={[
-              { key: 'created', label: 'Data', render: (v) => formatResourceDate(v.created) },
-              { key: 'event', label: 'Evento', render: (v) => v.eventType || '—' },
+              {
+                key: 'created',
+                label: t('auditPage.date'),
+                render: (v) => formatResourceDate(v.created, locale),
+              },
+              { key: 'event', label: t('auditPage.event'), render: (v) => v.eventType || '—' },
               {
                 key: 'resource',
-                label: 'Recurso',
+                label: t('auditPage.resource'),
                 render: (v) => `${v.resourceType || '—'} ${v.resourceId}`,
               },
               {
                 key: 'actor',
-                label: 'Conta autenticada',
+                label: t('auditPage.authenticatedAccount'),
                 render: (v) => v.authenticatedAsAccountId || '—',
               },
-              { key: 'status', label: 'HTTP', render: (v) => v.responseCode ?? '—' },
+              { key: 'status', label: t('auditPage.http'), render: (v) => v.responseCode ?? '—' },
               {
                 key: 'detail',
-                label: 'Detalhes',
+                label: t('auditPage.details'),
                 render: (v) => (
-                  <Button onClick={() => setSelected(v)} aria-label={`Detalhes do evento ${v.id}`}>
-                    Ver detalhes
+                  <Button
+                    onClick={() => setSelected(v)}
+                    aria-label={t('auditPage.eventDetailsLabel', { event: v.id })}
+                  >
+                    {t('auditPage.viewDetails')}
                   </Button>
                 ),
               },
             ]}
           />
-          <div className="row-actions audit-pagination" aria-label="Paginação da auditoria">
+          <div className="row-actions audit-pagination" aria-label={t('auditPage.pagination')}>
             <Button
               disabled={!history.length || query.isFetching}
               onClick={() => setHistory((v) => v.slice(0, -1))}
             >
-              Eventos anteriores
+              {t('auditPage.previous')}
             </Button>
-            <span aria-live="polite">Página {history.length + 1}</span>
+            <span aria-live="polite">{t('auditPage.page', { page: history.length + 1 })}</span>
             <Button
               disabled={!query.data?.next || query.isFetching}
               onClick={() => {
                 if (query.data?.next) setHistory((v) => [...v, query.data!.next!]);
               }}
             >
-              Mais eventos
+              {t('auditPage.more')}
             </Button>
           </div>
         </>
@@ -182,21 +201,21 @@ function AuditScope() {
         onOpenChange={(open) => {
           if (!open) setSelected(null);
         }}
-        title="Detalhes do evento"
+        title={t('auditPage.eventDetails')}
       >
         <dl className="details-grid">
           {selected &&
             Object.entries({
               ID: selected.id,
-              Data: formatResourceDate(selected.created),
-              Evento: selected.eventType,
-              'Tipo de recurso': selected.resourceType,
-              'ID do recurso': selected.resourceId,
-              'Conta do registro': selected.accountId,
-              'Conta autenticada': selected.authenticatedAsAccountId,
-              'Identidade autenticada': selected.authenticatedAsIdentityId,
-              Autenticação: selected.authType,
-              'Código HTTP': selected.responseCode,
+              [t('auditPage.date')]: formatResourceDate(selected.created, locale),
+              [t('auditPage.event')]: selected.eventType,
+              [t('auditPage.resourceType')]: selected.resourceType,
+              [t('auditPage.resourceId')]: selected.resourceId,
+              [t('auditPage.recordAccount')]: selected.accountId,
+              [t('auditPage.authenticatedAccount')]: selected.authenticatedAsAccountId,
+              [t('auditPage.identity')]: selected.authenticatedAsIdentityId,
+              [t('auditPage.authentication')]: selected.authType,
+              [t('auditPage.httpCode')]: selected.responseCode,
             }).map(([label, value]) => (
               <div key={label}>
                 <dt>{label}</dt>

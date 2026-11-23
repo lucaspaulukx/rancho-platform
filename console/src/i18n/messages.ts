@@ -19,6 +19,17 @@ import { enResourceLimits, ptResourceLimits } from './domains/resource-limits';
 import { enResourceValidation, ptResourceValidation } from './domains/resource-validation';
 import { enSchedulingEditor, ptSchedulingEditor } from './domains/scheduling-editor';
 import { enBindingsEditor, ptBindingsEditor } from './domains/bindings-editor';
+import { enUsers, ptUsers } from './domains/users';
+import { enGroups, ptGroups } from './domains/groups';
+import { enApiKeys, ptApiKeys } from './domains/api-keys';
+import { enLocalAccountPanel, ptLocalAccountPanel } from './domains/local-account-panel';
+import { enAccessDiagnostics, ptAccessDiagnostics } from './domains/access-diagnostics';
+import { enSettings, ptSettings } from './domains/settings';
+import { enAuditPage, ptAuditPage } from './domains/audit-page';
+import { enProcesses, ptProcesses } from './domains/processes';
+import { enEngineMonitoring, ptEngineMonitoring } from './domains/engine-monitoring';
+import { enMachineDrivers, ptMachineDrivers } from './domains/machine-drivers';
+import { enCatalogRepositories, ptCatalogRepositories } from './domains/catalog-repositories';
 
 // Initial shared domain only. These catalogs do not represent full interface coverage.
 export const englishMessages = {
@@ -42,6 +53,17 @@ export const englishMessages = {
   ...enResourceValidation,
   ...enSchedulingEditor,
   ...enBindingsEditor,
+  ...enUsers,
+  ...enGroups,
+  ...enApiKeys,
+  ...enLocalAccountPanel,
+  ...enAccessDiagnostics,
+  ...enSettings,
+  ...enAuditPage,
+  ...enProcesses,
+  ...enEngineMonitoring,
+  ...enMachineDrivers,
+  ...enCatalogRepositories,
   'common.cancel': 'Cancel',
   'common.close': 'Close',
   'common.save': 'Save',
@@ -96,6 +118,17 @@ export const portugueseMessages = {
   ...ptResourceValidation,
   ...ptSchedulingEditor,
   ...ptBindingsEditor,
+  ...ptUsers,
+  ...ptGroups,
+  ...ptApiKeys,
+  ...ptLocalAccountPanel,
+  ...ptAccessDiagnostics,
+  ...ptSettings,
+  ...ptAuditPage,
+  ...ptProcesses,
+  ...ptEngineMonitoring,
+  ...ptMachineDrivers,
+  ...ptCatalogRepositories,
   'common.cancel': 'Cancelar',
   'common.close': 'Fechar',
   'common.save': 'Salvar',

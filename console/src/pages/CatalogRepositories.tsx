@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError, type Resource, type Schema } from '../api';
+import { useI18n } from '../i18n/provider';
 import { useApp } from '../state';
 import { useSchemas } from '../hooks/useSchemas';
 import { useRequestScope } from '../hooks/useRequestScope';
@@ -26,15 +27,25 @@ import {
   PageHeader,
   useToast,
 } from '../components/ui';
+class CatalogRepositoryError extends Error {
+  constructor(
+    readonly key:
+      | 'catalogRepositories.httpError'
+      | 'catalogRepositories.requestError'
+      | 'catalogRepositories.configurationUnavailable'
+      | 'catalogRepositories.reopen',
+    readonly params?: { status: number },
+  ) {
+    super(key);
+  }
+}
 async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
   try {
     return await api<T>(path, body, method, signal);
   } catch (e) {
-    throw new Error(
-      e instanceof ApiError
-        ? `Operação de catálogo não concluída (HTTP ${e.status}).`
-        : 'Não foi possível concluir a operação de catálogo.',
-    );
+    throw e instanceof ApiError
+      ? new CatalogRepositoryError('catalogRepositories.httpError', { status: e.status })
+      : new CatalogRepositoryError('catalogRepositories.requestError');
   }
 }
 export function CatalogRepositories() {
@@ -42,6 +53,13 @@ export function CatalogRepositories() {
   return <RepositoryScope key={app.identity} />;
 }
 function RepositoryScope() {
+  const { t } = useI18n();
+  function errorText(error: Error) {
+    if (!(error instanceof CatalogRepositoryError)) return error.message;
+    return error.key === 'catalogRepositories.httpError'
+      ? t(error.key, { status: error.params!.status })
+      : t(error.key);
+  }
   const app = useApp(),
     scope = useRequestScope(app.identity + ':catalog-repositories'),
     schemas = useSchemas(false),
@@ -55,7 +73,7 @@ function RepositoryScope() {
     [discard, setDiscard] = useState(false),
     [empty, setEmpty] = useState(false),
     [opening, setOpening] = useState(false),
-    [error, setError] = useState('');
+    [error, setError] = useState<Error | null>(null);
   const query = useQuery({
     queryKey: ['data', app.identity, 'catalog-repositories'],
     enabled,
@@ -70,7 +88,7 @@ function RepositoryScope() {
   const dirty = !!editor && JSON.stringify(rows) !== JSON.stringify(editor.entries);
   async function open() {
     setOpening(true);
-    setError('');
+    setError(null);
     try {
       const snapshot = repositoryDocument(
         await request<Resource>('settings/catalog.url', undefined, undefined, scope.signal()),
@@ -81,7 +99,11 @@ function RepositoryScope() {
       setRevealed(false);
       setEmpty(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Configuração indisponível.');
+      setError(
+        e instanceof Error
+          ? e
+          : new CatalogRepositoryError('catalogRepositories.configurationUnavailable'),
+      );
     } finally {
       setOpening(false);
     }
@@ -90,7 +112,7 @@ function RepositoryScope() {
     retry: false,
     gcTime: 0,
     mutationFn: async () => {
-      if (!enabled || !editor) throw new Error('Reabra o editor.');
+      if (!enabled || !editor) throw new CatalogRepositoryError('catalogRepositories.reopen');
       const signal = scope.signal(),
         schema = await request<Schema>('schemas/setting', undefined, undefined, signal);
       scope.assertCurrent();
@@ -105,9 +127,7 @@ function RepositoryScope() {
     onSuccess: () => {
       clear();
       void client.invalidateQueries({ queryKey: ['data', app.identity] });
-      toast(
-        'Configuração salva. O clone e a sincronização dos repositórios são executados pelo serviço de catálogo.',
-      );
+      toast(t('catalogRepositories.saved'));
     },
   });
   const blocker = useBlocker(dirty || write.isPending);
@@ -128,67 +148,73 @@ function RepositoryScope() {
   function change(key: string, field: 'name' | 'url' | 'branch', value: string) {
     setRows((v) => v.map((r) => (r.key === key ? { ...r, [field]: value } : r)));
   }
-  if (!enabled) return <Alert>Repositórios indisponíveis neste acesso.</Alert>;
+  if (!enabled) return <Alert>{t('catalogRepositories.unavailable')}</Alert>;
   return (
     <>
       <PageHeader
-        title="Repositórios de catálogo"
-        description="Configuração global de fontes Git. Alterações podem afetar todos os environments."
+        title={t('catalogRepositories.title')}
+        description={t('catalogRepositories.description')}
         action={
           <>
             <Button onClick={() => void query.refetch()} disabled={query.isFetching}>
-              Atualizar listagem
+              {t('catalogRepositories.refresh')}
             </Button>
             <Button
               onClick={() => void open()}
               disabled={opening || !schemas.data?.setting?.resourceFields.value?.update}
             >
-              Configurar repositórios
+              {t('catalogRepositories.configure')}
             </Button>
           </>
         }
       />
-      <Alert tone="info">
-        A lista mostra a configuração do servidor, sem comprovar clone, commit ou sincronização. Os
-        catálogos próprios de cada environment não são alterados aqui.
-      </Alert>
-      {error && <Alert>{error}</Alert>}
+      <Alert tone="info">{t('catalogRepositories.notice')}</Alert>
+      {error && <Alert>{errorText(error)}</Alert>}
       {query.isPending ? (
         <Loading />
       ) : query.error ? (
-        <ErrorState error={query.error} retry={() => void query.refetch()} />
+        query.error instanceof CatalogRepositoryError ? (
+          <div className="error-state">
+            <Alert>{errorText(query.error)}</Alert>
+            <Button onClick={() => void query.refetch()}>{t('catalogRepositories.retry')}</Button>
+          </div>
+        ) : (
+          <ErrorState error={query.error} retry={() => void query.refetch()} />
+        )
       ) : (
         <>
           <p className="muted">
-            Origem: {query.data.source}.{' '}
-            {query.data.inDb ? 'Override no banco de dados.' : 'Sem override no banco de dados.'}
+            {t('catalogRepositories.source', { source: query.data.source })}{' '}
+            {query.data.inDb
+              ? t('catalogRepositories.override')
+              : t('catalogRepositories.noOverride')}
           </p>
           <DataTable
-            label="Repositórios globais configurados"
+            label={t('catalogRepositories.tableLabel')}
             rows={query.data.entries}
             rowKey={(v) => v.name}
             searchText={(v) => `${v.name} ${v.branch}`}
             columns={[
-              { key: 'name', label: 'Repositório', render: (v) => v.name },
-              { key: 'branch', label: 'Branch configurada', render: (v) => v.branch },
+              { key: 'name', label: t('catalogRepositories.repository'), render: (v) => v.name },
+              { key: 'branch', label: t('catalogRepositories.branch'), render: (v) => v.branch },
             ]}
-            emptyTitle="Nenhum repositório global configurado"
-            emptyDescription="Fontes específicas de environments podem continuar disponíveis."
+            emptyTitle={t('catalogRepositories.emptyTitle')}
+            emptyDescription={t('catalogRepositories.emptyDescription')}
           />
         </>
       )}
       <Modal
         open={!!editor}
         drawer
-        title="Configurar repositórios globais"
-        description="As entradas deste formulário afetam a instância inteira. URLs ficam protegidas por padrão."
+        title={t('catalogRepositories.editorTitle')}
+        description={t('catalogRepositories.editorDescription')}
         onOpenChange={(o) => {
           if (!o) close();
         }}
         footer={
           <>
             <Button onClick={close} disabled={write.isPending}>
-              Cancelar
+              {t('catalogRepositories.cancel')}
             </Button>
             <Button
               onClick={() => {
@@ -197,20 +223,20 @@ function RepositoryScope() {
               }}
               disabled={!dirty}
             >
-              Revisar repositórios
+              {t('catalogRepositories.review')}
             </Button>
           </>
         }
       >
         <CheckboxField
-          label="Mostrar URLs dos repositórios"
+          label={t('catalogRepositories.showUrls')}
           checked={revealed}
           onChange={(e) => setRevealed(e.target.checked)}
         />
         {rows.map((row, index) => (
           <fieldset key={row.key} className="form-fieldset nested-fields">
-            <legend>Repositório {index + 1}</legend>
-            <Field label={`Nome do repositório ${index + 1}`}>
+            <legend>{t('catalogRepositories.repositoryIndex', { index: index + 1 })}</legend>
+            <Field label={t('catalogRepositories.nameLabel', { index: index + 1 })}>
               {(id) => (
                 <input
                   id={id}
@@ -221,8 +247,8 @@ function RepositoryScope() {
               )}
             </Field>
             <Field
-              label={`URL do repositório ${index + 1}`}
-              hint="Git, SSH, HTTP ou HTTPS. Credenciais não devem ser incluídas em URLs HTTP."
+              label={t('catalogRepositories.urlLabel', { index: index + 1 })}
+              hint={t('catalogRepositories.urlHint')}
             >
               {(id, description) => (
                 <input
@@ -237,8 +263,8 @@ function RepositoryScope() {
               )}
             </Field>
             <Field
-              label={`Branch do repositório ${index + 1}`}
-              hint="Em branco mantém o padrão do servidor."
+              label={t('catalogRepositories.branchLabel', { index: index + 1 })}
+              hint={t('catalogRepositories.branchHint')}
             >
               {(id, description) => (
                 <input
@@ -252,9 +278,9 @@ function RepositoryScope() {
             </Field>
             <Button
               onClick={() => setRows((v) => v.filter((r) => r.key !== row.key))}
-              aria-label={`Remover repositório ${index + 1}`}
+              aria-label={t('catalogRepositories.removeLabel', { index: index + 1 })}
             >
-              Remover repositório
+              {t('catalogRepositories.remove')}
             </Button>
           </fieldset>
         ))}
@@ -266,11 +292,11 @@ function RepositoryScope() {
             ])
           }
         >
-          Adicionar repositório
+          {t('catalogRepositories.add')}
         </Button>
         {!rows.length && (
           <CheckboxField
-            label="Confirmo remover todos os repositórios globais"
+            label={t('catalogRepositories.confirmEmpty')}
             checked={empty}
             onChange={(e) => setEmpty(e.target.checked)}
           />
@@ -281,18 +307,18 @@ function RepositoryScope() {
         onOpenChange={(o) => {
           if (!write.isPending) setReview(o);
         }}
-        title="Salvar repositórios globais?"
-        description={`Serão configurados ${rows.length} repositórios globais. O servidor poderá acessar essas URLs e executar clones Git; salvar não comprova sincronização. URLs ficam protegidas nesta revisão.`}
+        title={t('catalogRepositories.saveTitle')}
+        description={t('catalogRepositories.reviewDescription', { count: rows.length })}
         busy={write.isPending}
         onConfirm={() => write.mutate()}
       >
-        {write.error && <Alert>{write.error.message}</Alert>}
+        {write.error && <Alert>{errorText(write.error)}</Alert>}
       </Confirm>
       <Confirm
         open={discard}
         onOpenChange={setDiscard}
-        title="Descartar alterações dos repositórios?"
-        description="As alterações ainda não foram enviadas ao servidor."
+        title={t('catalogRepositories.discardTitle')}
+        description={t('catalogRepositories.discardDescription')}
         onConfirm={() => {
           setDiscard(false);
           clear();
@@ -303,8 +329,8 @@ function RepositoryScope() {
         onOpenChange={(o) => {
           if (!o && blocker.state === 'blocked') blocker.reset();
         }}
-        title="Sair com alteração pendente?"
-        description="Os repositórios ainda não foram salvos. Aguarde qualquer envio em andamento."
+        title={t('catalogRepositories.leaveTitle')}
+        description={t('catalogRepositories.leaveDescription')}
         busy={write.isPending}
         onConfirm={() => {
           if (!write.isPending && blocker.state === 'blocked') {
