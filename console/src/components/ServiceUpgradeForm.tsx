@@ -71,7 +71,7 @@ export function ServiceUpgradeForm({
   const [intervalMillis, setInterval] = useState('2000');
   const [startFirst, setFirst] = useState(false);
   const [validation, setValidation] = useState<
-    string | DeviceValidationError | DeviceUpgradeValidationError
+    string | DeviceValidationError | DeviceUpgradeValidationError | null
   >('');
   const launch = resource.launchConfig as Record<string, unknown>;
   const available = bindingsEnabled && supportsConfigurationUpgrade(resource, schemas);
@@ -152,7 +152,7 @@ export function ServiceUpgradeForm({
           ? caught
           : caught instanceof Error
             ? caught.message
-            : 'Revise a atualização.',
+            : null,
       );
     }
   }
@@ -161,12 +161,16 @@ export function ServiceUpgradeForm({
       <form id="workspace-resource-form" onSubmit={submit} onChange={() => onDirtyChange(true)}>
         <fieldset disabled={busy} className="form-fieldset">
           <legend>
-            {editingConfiguration ? 'Atualização da configuração' : 'Atualização da imagem'}
+            {t(
+              editingConfiguration
+                ? 'serviceUpgradeForm.configuration'
+                : 'serviceUpgradeForm.imageUpgrade',
+            )}
           </legend>
           <p className="muted">
-            Imagem atual: <code>{current}</code>
+            {t('serviceUpgradeForm.currentImage')} <code>{current}</code>
           </p>
-          <Field label="Nova imagem">
+          <Field label={t('serviceUpgradeForm.image')}>
             {(id) => (
               <input
                 id={id}
@@ -179,7 +183,7 @@ export function ServiceUpgradeForm({
           </Field>
           {available && (
             <CheckboxField
-              label="Editar portas e volumes nesta atualização"
+              label={t('serviceUpgradeForm.bindings')}
               checked={editBindings}
               onChange={(e) => {
                 setEditBindings(e.target.checked);
@@ -209,7 +213,7 @@ export function ServiceUpgradeForm({
           )}
           {healthAvailable && (
             <CheckboxField
-              label="Editar verificação de saúde nesta atualização"
+              label={t('serviceUpgradeForm.health')}
               checked={editHealthCheck}
               onChange={(e) => {
                 setEditHealthCheck(e.target.checked);
@@ -230,7 +234,7 @@ export function ServiceUpgradeForm({
           )}
           {sidecarsAvailable && (
             <CheckboxField
-              label="Editar sidecars nesta atualização"
+              label={t('serviceUpgradeForm.sidecars')}
               checked={editSidecars}
               onChange={(e) => {
                 setEditSidecars(e.target.checked);
@@ -240,7 +244,7 @@ export function ServiceUpgradeForm({
           )}
           {ulimitsAvailable && (
             <CheckboxField
-              label="Editar limites de processo nesta atualização"
+              label={t('serviceUpgradeForm.ulimits')}
               checked={editUlimits}
               onChange={(event) => {
                 setEditUlimits(event.target.checked);
@@ -250,10 +254,7 @@ export function ServiceUpgradeForm({
           )}
           {ulimitsAvailable && editUlimits && (
             <>
-              <Alert tone="info">
-                Alterar limites substitui os containers do serviço. Uma lista vazia retira os
-                limites explícitos e passa a herdar o Docker.
-              </Alert>
+              <Alert tone="info">{t('serviceUpgradeForm.limitsNotice')}</Alert>
               <UlimitEditor
                 value={ulimits}
                 onChange={(value) => {
@@ -298,7 +299,7 @@ export function ServiceUpgradeForm({
           )}
           {securityAvailable && (
             <CheckboxField
-              label="Editar segurança nesta atualização"
+              label={t('serviceUpgradeForm.security')}
               checked={editSecurity}
               onChange={(e) => {
                 setEditSecurity(e.target.checked);
@@ -308,12 +309,9 @@ export function ServiceUpgradeForm({
           )}
           {securityAvailable && editSecurity && (
             <>
-              <Alert tone="info">
-                Mudanças de segurança substituem os containers do serviço. Revise capabilities,
-                acesso ao host e sistema de arquivos antes de confirmar.
-              </Alert>
+              <Alert tone="info">{t('serviceUpgradeForm.securityNotice')}</Alert>
               <CheckboxField
-                label="Modo privilegiado"
+                label={t('serviceUpgradeForm.privileged')}
                 checked={security.privileged === true}
                 onChange={(e) => {
                   setSecurity({ ...security, privileged: e.target.checked });
@@ -321,7 +319,7 @@ export function ServiceUpgradeForm({
                 }}
               />
               <CheckboxField
-                label="Sistema de arquivos somente leitura"
+                label={t('serviceUpgradeForm.readOnly')}
                 checked={security.readOnly === true}
                 onChange={(e) => {
                   setSecurity({ ...security, readOnly: e.target.checked });
@@ -331,7 +329,9 @@ export function ServiceUpgradeForm({
               {(['capAdd', 'capDrop'] as const).map((key) => (
                 <CapabilityEditor
                   key={key}
-                  label={key === 'capAdd' ? 'Capabilities adicionais' : 'Capabilities removidas'}
+                  label={t(
+                    key === 'capAdd' ? 'serviceUpgradeForm.capAdd' : 'serviceUpgradeForm.capDrop',
+                  )}
                   value={security[key]}
                   options={schemas.launchConfig.resourceFields[key].options!}
                   onChange={(v) => {
@@ -344,7 +344,7 @@ export function ServiceUpgradeForm({
           )}
           {resourceAvailable && (
             <CheckboxField
-              label="Editar memória nesta atualização"
+              label={t('serviceUpgradeForm.memory')}
               checked={editResources}
               onChange={(e) => {
                 setEditResources(e.target.checked);
@@ -355,7 +355,7 @@ export function ServiceUpgradeForm({
           {resourceAvailable && editResources && (
             <>
               <MemoryEditor
-                label="Limite de memória"
+                label={t('serviceUpgradeForm.memoryLimit')}
                 value={memory}
                 onChange={(v) => {
                   setMemory(v);
@@ -363,7 +363,7 @@ export function ServiceUpgradeForm({
                 }}
               />
               <MemoryEditor
-                label="Reserva de memória"
+                label={t('serviceUpgradeForm.memoryReservation')}
                 value={reservation}
                 onChange={(v) => {
                   setReservation(v);
@@ -374,7 +374,7 @@ export function ServiceUpgradeForm({
           )}
           {cpuAvailable && (
             <CheckboxField
-              label="Editar CPU e I/O nesta atualização"
+              label={t('serviceUpgradeForm.cpu')}
               checked={editCpuResources}
               onChange={(event) => {
                 setEditCpuResources(event.target.checked);
@@ -400,7 +400,7 @@ export function ServiceUpgradeForm({
             ))}
           {schedulingAvailable && (
             <CheckboxField
-              label="Editar afinidades nesta atualização"
+              label={t('serviceUpgradeForm.affinity')}
               checked={editScheduling}
               onChange={(e) => {
                 setEditScheduling(e.target.checked);
@@ -436,7 +436,7 @@ export function ServiceUpgradeForm({
             />
           )}
           <div className="form-grid">
-            <Field label="Containers por lote">
+            <Field label={t('serviceUpgradeForm.batch')}>
               {(id) => (
                 <input
                   id={id}
@@ -449,7 +449,7 @@ export function ServiceUpgradeForm({
                 />
               )}
             </Field>
-            <Field label="Intervalo entre lotes (ms)">
+            <Field label={t('serviceUpgradeForm.interval')}>
               {(id) => (
                 <input
                   id={id}
@@ -469,28 +469,27 @@ export function ServiceUpgradeForm({
               checked={startFirst}
               onChange={(event) => setFirst(event.target.checked)}
             />
-            Iniciar novos containers antes de parar os atuais
+            {t('serviceUpgradeForm.startFirst')}
           </label>
           <Alert>
-            Serão atualizados até {batchSize || '—'} containers por lote, com intervalo de{' '}
-            {intervalMillis || '—'} ms. Portas, variáveis, volumes e sidecars seguem a configuração
-            atual do serviço, exceto as opções explicitamente editadas acima. A disponibilidade
-            depende da capacidade e da saúde da aplicação.
+            {t('serviceUpgradeForm.batchNotice', {
+              batch: batchSize || '—',
+              interval: intervalMillis || '—',
+            })}
           </Alert>
-          <p className="muted">
-            Após a troca, acompanhe o estado nesta tela. Concluir atualização e Reverter atualização
-            aparecem conforme as ações disponíveis no Rancher.
-          </p>
-          {(validation || error) && (
+          <p className="muted">{t('serviceUpgradeForm.follow')}</p>
+          {(validation !== '' || error) && (
             <Alert tone="danger">
               {validation instanceof DeviceValidationError ||
               validation instanceof DeviceUpgradeValidationError
                 ? t(validation.key)
-                : validation ||
-                  (error instanceof DeviceValidationError ||
-                  error instanceof DeviceUpgradeValidationError
-                    ? t(error.key)
-                    : error?.message)}
+                : validation === null
+                  ? t('serviceUpgradeForm.review')
+                  : validation ||
+                    (error instanceof DeviceValidationError ||
+                    error instanceof DeviceUpgradeValidationError
+                      ? t(error.key)
+                      : error?.message)}
             </Alert>
           )}
         </fieldset>
@@ -503,12 +502,12 @@ export function ServiceUpgradeForm({
         title={
           review?.editDevices === true
             ? t('deviceUpgradeForm.confirmTitle')
-            : 'Atualizar configuração do serviço?'
+            : t('serviceUpgradeForm.confirm')
         }
         description={
           review?.editDevices === true
             ? t('deviceUpgradeForm.confirmDescription', { service: resource.name || resource.id })
-            : `Serviço ${resource.name || resource.id}. Portas publicadas podem mudar o acesso; alterar montagens pode tornar dados anteriores indisponíveis. Editar ou remover sidecars substitui containers auxiliares e pode afetar dados/rede. Verificações de saúde podem recriar containers ou interromper a atualização se o endpoint falhar. O Rancher substituirá containers conforme a estratégia escolhida. Revise os campos antes de confirmar.`
+            : t('serviceUpgradeForm.impact', { service: resource.name || resource.id })
         }
         busy={busy}
         onConfirm={() => {
