@@ -8,8 +8,15 @@ BASE='projects/1a12/'
 
 class RelayAllocationWindow:
  def __init__(self, admin, label_key, label_value):
-  assert label_key in ('rancher.console.scheduler-relay','rancher.console.stream-fixture','rancher.console.ulimits-fixture','rancher.console.devices-fixture')
-  assert re.fullmatch(r'(?:community-scheduler-relay-|console-host-stream-|console-ulimits-|console-devices-)[a-f0-9]{12}',label_value)
+  prefixes = {
+   'rancher.console.scheduler-relay': 'community-scheduler-relay-',
+   'rancher.console.stream-fixture': 'console-host-stream-',
+   'rancher.console.ulimits-fixture': 'console-ulimits-',
+   'rancher.console.devices-fixture': 'console-devices-',
+   'rancher.console.security-options-fixture': 'console-security-options-',
+  }
+  assert label_key in prefixes
+  assert re.fullmatch(re.escape(prefixes[label_key]) + r'[a-f0-9]{12}', label_value)
   self.admin=admin
   self.label_key,self.label_value=label_key,label_value
   self.marker='community-scheduler-relay-'+secrets.token_hex(6)

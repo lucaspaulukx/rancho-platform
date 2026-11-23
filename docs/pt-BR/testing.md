@@ -56,6 +56,8 @@ O helper de transporte do scheduler é diagnóstico limitado para a rede gerenci
 
 ## Evidências e escopo
 
+`physical_security_options.py` compara um container com a opção nativa `no-new-privileges` com um controle equivalente. Exige Docker no host legado isolado original e compara os valores da API do ambiente, as opções de segurança do Docker e `NoNewPrivs` nos processos em execução. O teste cobre uma opção e um runtime.
+
 `physical_devices.py` exercita separadamente o editor default off pela criação real de container avulso, verificando mapeamento nativo/Docker exato, modo não privilegiado, leitura de dispositivo char e resultado real de abertura para escrita. Confere negação ao membro revogado e limpeza exata. A fixture /dev/null não certifica isolamento de escrita pelas permissões padrão nativas; upgrades de serviços, sidecars físicos e outros dispositivos/runtimes exigem aceites separados.
 
 `device_upgrade_acceptance.py` exercita upgrade contextual, reversão, conclusão e remoção explícita em um serviço de teste com escala zero. Confere autorização após revogação e limpeza exata. `physical_device_upgrades.py` usa separadamente uma réplica para verificar o mapeamento nativo, a configuração do Docker e a leitura dos dispositivos nos containers substituídos. Rode esses testes em sequência no sandbox nomeado. Sidecars físicos e comportamento em múltiplos hosts exigem fixtures próprias.

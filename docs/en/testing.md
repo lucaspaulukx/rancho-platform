@@ -56,6 +56,8 @@ The scheduler transport helper is a bounded diagnostic for the legacy managed-ne
 
 ## Evidence and scope
 
+`physical_security_options.py` compares a native `no-new-privileges` container with an otherwise identical control. It requires Docker on the original isolated legacy host, then compares scoped API values, Docker's security options and `NoNewPrivs` in the running processes. The test is limited to one option and one runtime.
+
 `physical_devices.py` separately exercises the default-off editor through real standalone creation, then verifies exact native/Docker mapping, nonprivileged mode, character-device read and the actual write-open outcome. It verifies revoked-member denial and exact cleanup. The /dev/null fixture does not certify write isolation because of native default allowlists; service upgrades, physical sidecars and other devices/runtimes need separate acceptance.
 
 `device_upgrade_acceptance.py` exercises the contextual upgrade, rollback, finish and empty reset against an owned service at scale zero. It checks authorization after revocation and exact cleanup. `physical_device_upgrades.py` separately uses one replica to check native mappings, Docker configuration and readable device aliases through replacement. Run these harnesses serially in the named sandbox. Physical sidecars and multi-host device behavior require their own fixtures.
