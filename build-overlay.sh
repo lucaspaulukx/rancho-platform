@@ -18,6 +18,9 @@ install -m 0644 /lab/runtime-jars/freemarker/freemarker-2.3.35.jar "$LIB/"
 test -f "$LIB/nimbus-jose-jwt-4.12.jar"
 rm "$LIB/nimbus-jose-jwt-4.12.jar"
 install -m 0644 /lab/runtime-jars/nimbus/nimbus-jose-jwt-9.37.4.jar "$LIB/"
+test -f "$LIB/postgresql-9.4.1208.jre7.jar"
+rm "$LIB/postgresql-9.4.1208.jre7.jar"
+install -m 0644 /lab/runtime-jars/postgresql/postgresql-42.7.14.jar "$LIB/"
 mkdir -p /lab/classes
 find "$AUTH/io/cattle/platform/iaas/api/auth/localrbac" -name '*.java' > /lab/sources
 printf '%s\n' "$ROOT/code/framework/token/src/main/java/io/cattle/platform/token/impl/JwtTokenServiceImpl.java" >> /lab/sources
