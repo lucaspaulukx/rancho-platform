@@ -4,7 +4,7 @@
 
 O projeto estende um runtime legado Rancher1.6. Não há certificação para produção. Gates abertos de segurança e recuperação estão em [roadmap](roadmap.md).
 
-Não envie credenciais, dumps, certificados, tokens ou dados de clientes em issues/PRs. Descreva a suspeita de vulnerabilidade sem payloads privados e combine um canal privado com os mantenedores antes de transmitir detalhes sensíveis. Um contato dedicado precisa ser configurado antes da publicação pública.
+Reporte suspeitas de vulnerabilidade pelo [formulário privado do GitHub](https://github.com/lucaspaulukx/rancho-platform/security/advisories/new). Mantenha credenciais, dumps, certificados, tokens e dados de clientes fora de issues e pull requests públicos.
 
 Credenciais locais são geradas em arquivos ignorados. Mantenha backups criptografados fora do Git, teste a restauração e retenha imagem/configuração originais antes de qualquer migração. Nunca execute dois engines Rancher sobre o mesmo banco.
 

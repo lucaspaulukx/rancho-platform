@@ -2,11 +2,11 @@
 
 [English](CONTRIBUTING.md) | [Português (Brasil)](docs/pt-BR/contributing.md)
 
-Rancho is an independent community initiative for Rancher 1.6 Docker/Cattle. The repository is currently private and the roadmap is unfinished. Preparing a PR does not authorize public release, production changes or merge.
+Rancho is an independent community initiative for Rancher 1.6 Docker/Cattle. The roadmap tracks remaining work for the community alpha. Preparing a PR does not authorize public release, production changes or merge.
 
 ## Start with the current scope
 
-Read the relevant [roadmap](docs/en/roadmap.md) task, [architecture](docs/en/architecture.md) and [testing guide](docs/en/testing.md). Discuss a concrete trigger and expected result; keep unrelated changes separate. If repository write access is unavailable, request access while private or use a fork when public contribution becomes available.
+Read the relevant [roadmap](docs/en/roadmap.md) task, [architecture](docs/en/architecture.md) and [testing guide](docs/en/testing.md). Discuss a concrete trigger and expected result; keep unrelated changes separate. Use a fork if you do not have write access to the repository.
 
 Requirements: Git, Python 3, Node 24 and Linux-container Docker for lab/backend work. PowerShell 7 is used by the lab bootstrap. Install only tools relevant to the change.
 

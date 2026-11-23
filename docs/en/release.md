@@ -7,7 +7,7 @@
 
 ## Current boundary
 
-The repository remains private during preparation. Source availability, a green CI run or an accepted feature slice does not authorize changing visibility, publishing a package, merging a PR or production cutover. Release acceptance is tracked by capability and risk in the [roadmap](roadmap.md), not by accumulated test counts.
+The community alpha provides source code for isolated lab evaluation. Source availability, a green CI run or an accepted feature slice does not authorize changing visibility, publishing a package, merging a PR or production cutover. Release acceptance is tracked by capability and risk in the [roadmap](roadmap.md), not by accumulated test counts.
 
 Distributable contents are application/extension source, pinned patches, tests, configuration templates, licenses and maintained documentation. Keep consultation clones, installed dependencies, lab credentials/realms, dumps, session evidence, fixture state, backups and machine-specific notes outside the tracked package. Git preserves prior versions; they are not onboarding instructions.
 
