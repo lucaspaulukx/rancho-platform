@@ -61,6 +61,21 @@ python -m scripts.release_artifact_rehearsal --backend-image rancho-backend:loca
 
 For the [synthetic upgrade and backend rollback rehearsal](testing.md#original-engine-upgrade-and-rollback), pass the `images.backend` ID from the combined report as `--backend-image`. Compare it with `images.candidateBackend` in the engine report before grouping the evidence. The engine rehearsal requires the named local lab and a maintenance window for cold capture.
 
+## Experimental single-node installation
+
+Build the runtime and console from the same checkout. Run the pinned upstream preparation above before building the root Dockerfile.
+
+```sh
+docker build -t rancho-backend-legacy-build:local .
+docker build -f console/tests/legacy-host/Dockerfile.java17 --build-arg BACKEND_IMAGE=rancho-backend-legacy-build:local -t rancho-backend-java17:local console/tests/legacy-host
+docker build -f console/tests/legacy-host/Dockerfile.modern-backend -t rancho-backend-modern-runtime:local console/tests/legacy-host
+docker build -f console/tests/legacy-host/Dockerfile.modern-packages --build-arg BACKEND_IMAGE=rancho-backend-modern-runtime:local -t rancho-backend-modern:local console/tests/legacy-host
+docker build -t rancho-console:local console
+docker compose -f compose.modern.yaml --env-file <local-env-file> up -d --pull never
+```
+
+Set a unique `RANCHO_DB_PASSWORD` in the local env file and protect that file. The console is available on loopback at `http://localhost:18090/console/`. On a fresh database, initialize local administrator authentication before exposing the console through a network proxy. OIDC starts disabled. To enable it, set the issuer, client ID, client secret and callback, and register the callback at the console origin in the identity provider. Use HTTPS for network access. Run the deployment with one Rancher server replica.
+
 ## Final acceptance
 
 Use one identified release candidate for authentication/RBAC/streams, contextual operations, accessibility/performance, classic compatibility, fresh installation, upgrade and full recovery/rollback. Record limits and supported topologies. Configure a private security-reporting channel before going public. Keep [migration](migration.md) and [recovery](recovery.md) procedures matched to the artifact; do not infer a universal migration guarantee from synthetic tests.
