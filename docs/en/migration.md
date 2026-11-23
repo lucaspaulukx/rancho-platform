@@ -120,6 +120,17 @@ Restoring the pre-upgrade disk and matching database at the original server addr
 
 In a separate two-host lab, the existing IPsec stack carried HTTP between two Docker 29.9.2 workloads before the upgrade. A native service upgrade that changed the router sidekick attempted to replace the holder on the first host even though the holder image stayed the same. The replacement did not start. Cross-host traffic returned after manually starting the original holder and sidekicks, while the native service still reported `rolling-back`. Retain the original network and use a separate environment for the modern catalog until an in-place upgrade and rollback have passed.
 
+#### Cutover through a separate environment
+
+A four-VM rehearsal kept the original catalog environment and a fresh modern catalog environment online. Each had two Docker 29.9.2 hosts. In each environment, a managed client reached an HTTP workload on the other host and the routers reported IPsec packet counters. One private Nginx endpoint switched from the original workloads to the modern workloads, back to the original, then to the modern workloads again. Each switch returned the expected environment's response within three seconds of the Nginx reload. This timing describes the synthetic requests in that topology.
+
+1. Bring up the target environment on separate hosts with the modern catalog. Leave the original environment and its IPsec services running.
+2. Recreate the application stack on the target. Restore persistent state separately and validate writes, service discovery, cross-host traffic and the application's health checks before routing clients. For shared NFS data, use the [storage recovery procedure](recovery.md#shared-nfs-storage-rehearsal).
+3. Switch the ingress target during the change window. Check responses through the same client endpoint and monitor application errors and both networks. Keep the old ingress configuration available until the rollback window closes.
+4. If validation fails, switch the ingress back to the original environment and verify it from the same client endpoint. If the target accepted writes, reconcile them before returning traffic to a writable original environment.
+
+The lab used a stateless HTTP fixture and a controlled ingress reload. Stateful cutover, DNS propagation and site-specific availability budgets require checks for the application being migrated.
+
 ## Identity, engine and cutover gates
 
 Keep direct grants until an explicit [access migration](access-migration.md). Test a new no-access user, readonly/member permissions, local/OIDC administration and recovery before exclusive login. Check the exact agent/Docker versions, Compose, network/LB/TLS/storage, logs/terminal and technical credentials.

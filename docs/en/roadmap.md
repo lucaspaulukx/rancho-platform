@@ -178,7 +178,7 @@ The isolated two-host environment also accepted the rebuilt IPsec router prototy
 
 Both Docker 29.9.2 guests registered with the modern bootstrap and started the eight rebuilt Cattle system images from a fresh catalog template. All four infrastructure stacks and six services reported healthy. A managed container on one guest fetched the HTTP fixture from the other guest; both IPsec routers reported nonzero XFRM packet counters. The Trivy scan of these eight images and the bootstrap reported zero critical and zero high findings against the November 13, 2026 advisory database. This confirms fresh provisioning. Existing IPsec stacks require their own upgrade and rollback rehearsal.
 
-The existing-IPsec rehearsal passed its traffic baseline across two hosts. A router-only service upgrade replaced the deployment unit on the first host, including the holder, and stalled. Manually starting the original unit restored workload traffic, but the native rollback did not finish. In-place IPsec upgrade remains a release gate. See the [existing host migration procedure](migration.md#existing-hosts-and-docker-versions).
+The existing-IPsec rehearsal passed its traffic baseline across two hosts. A router-only service upgrade replaced the deployment unit on the first host, including the holder, and stalled. Manually starting the original unit restored workload traffic, but the native rollback did not finish. In a separate four-host rehearsal, one private ingress switched between the original and modern environments in both directions. See the [separate-environment cutover](migration.md#cutover-through-a-separate-environment). The in-place path remains unverified.
 
 ## Execution order and optional domains
 
