@@ -1,5 +1,7 @@
 # Rancho Platform
 
+<p align="center"><img src="console/public/brand/rancho-platform.png" width="560" alt="Rancho Platform"></p>
+
 [🇺🇸 English](README.md) · [🇧🇷 Português (Brasil)](docs/pt-BR/overview.md)
 
 [![Console validation](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)

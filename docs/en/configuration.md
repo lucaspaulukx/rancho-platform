@@ -23,7 +23,7 @@ The destination must be new. Review the diff before selecting it for deployment.
 | Configuration | Purpose |
 |---|---|
 | `enabled`, `classicUrl` | Console availability and classic fallback |
-| `branding` | Optional community signature; Rancher identity remains |
+| `branding` | Rancho Platform bull logo, page title and favicon; disabled restores Rancher branding. Rancher 1.6.30 attribution remains visible |
 | `themeDefault`, `themeSelectable`, `customTheme` | Dark/light/system default, user choice and validated token overrides |
 | `modules.workloads`, `contextActions` | Workload workspace and contextual menus |
 | `modules.workload*` | Independent creation/upgrade editors and lifecycle capabilities |

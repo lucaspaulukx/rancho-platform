@@ -7,7 +7,7 @@
 
 ## Layout and identity
 
-Use `AppShell` and `AuthLayout` in `console/src/layouts.tsx`. Authenticated pages share sidebar/navbar and environment context; login and no-access use the same visual language. Maintain Rancher marks and attribution with the optional Rancho community signature. New references to unrelated visual identities do not belong in the product.
+Use `AppShell` and `AuthLayout` in `console/src/layouts.tsx`. Authenticated pages share sidebar/navbar and environment context; login and no-access use the same visual language. With `branding` enabled, use the shared Rancho Platform bull lockup and the isolated bull for collapsed navigation and the favicon. The monochrome mark follows the Rancher blue palette and uses a white treatment on dark surfaces. Keep Rancher 1.6.30 attribution visible; disabling `branding` restores the original Rancher marks. New references to unrelated visual identities do not belong in the product.
 
 The current shell uses a 224px sidebar, 80px collapsed width, 260px mobile panel and 767px breakpoint; navbar heights are 68px desktop and 72px mobile. Navigation scrolls inside its own region. Use the existing preference hook and accessibility state rather than duplicating navigation. Treat these values as current tokens/layout contracts and verify layout when changing them.
 

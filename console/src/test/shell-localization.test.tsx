@@ -134,7 +134,7 @@ describe('Localized shared shell', () => {
     expect(screen.getByRole('button', { name: 'Use dark theme' })).toBeInTheDocument();
     expect(screen.getByLabelText('Account draft')).toBe(input);
     expect(input).toHaveValue('existing-user');
-    expect(screen.getByRole('img', { name: 'Rancher' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Rancho Platform' })).toBeInTheDocument();
   });
 
   it('preserves the open environment search and focus across a locale change, selecting only the native ID', async () => {

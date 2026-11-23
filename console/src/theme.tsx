@@ -27,7 +27,14 @@ export function ThemeProvider({
 }) {
   const key = `rancher.console.preferences.${identity}`;
   useEffect(() => {
-    document.title = config.branding ? 'Rancher Community Console' : 'Rancher Console';
+    document.title = config.branding ? 'Rancho Platform' : 'Rancher Console';
+    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (icon) {
+      icon.href = config.branding
+        ? '/console/brand/rancho-bull.png'
+        : '/console/brand/rancher-favicon.ico';
+      icon.type = config.branding ? 'image/png' : 'image/x-icon';
+    }
   }, [config.branding]);
   const [mode, setMode] = useState<ThemeMode>(config.themeDefault);
   const [dense, setDense] = useState(false);

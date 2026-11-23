@@ -23,7 +23,7 @@ O destino precisa ser novo. Revise o diff antes de selecioná-lo para deploy. A 
 | Configuração | Finalidade |
 |---|---|
 | `enabled`, `classicUrl` | Disponibilidade da console e fallback clássico |
-| `branding` | Assinatura comunitária opcional; identidade Rancher permanece |
+| `branding` | Logo do touro, título e favicon do Rancho Platform; desativado restaura a identidade Rancher. A atribuição ao Rancher 1.6.30 permanece visível |
 | `themeDefault`, `themeSelectable`, `customTheme` | Default escuro/claro/sistema, escolha do usuário e overrides validados |
 | `modules.workloads`, `contextActions` | Workspace e menus contextuais de workloads |
 | `modules.workload*` | Editores independentes de criação/upgrade e capacidades de lifecycle |
