@@ -86,6 +86,7 @@ export const ukUA = {
   'requestError.paginationCycle': 'API повернув цикл розбиття на сторінки.',
   'requestError.paginationLimit': 'Колекція завелика. Уточніть фільтри.',
   'requestError.invalidCollection': 'API повернув недійсну колекцію.',
+  'requestError.failed': 'Не вдалося виконати запит.',
 
   'bulkOperation.title': 'Групова дія — {action}',
   'bulkOperation.resources': {

@@ -1,4 +1,5 @@
 export const enRequestErrors = {
+  'requestError.failed': 'The request could not be completed.',
   'requestError.scopeChanged': 'The context changed. Reopen the panel before continuing.',
   'requestError.resourceOutOfScope': 'The resource is unavailable in this environment.',
   'requestError.unsafeUrl': 'The server returned a disallowed API address.',
@@ -8,6 +9,7 @@ export const enRequestErrors = {
 } as const;
 
 export const ptRequestErrors = {
+  'requestError.failed': 'Não foi possível concluir a solicitação.',
   'requestError.scopeChanged': 'O contexto mudou. Reabra o painel antes de continuar.',
   'requestError.resourceOutOfScope': 'O recurso não está disponível neste environment.',
   'requestError.unsafeUrl': 'O servidor retornou um endereço de API não permitido.',

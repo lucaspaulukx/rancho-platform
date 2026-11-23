@@ -2305,6 +2305,7 @@ export const huHU = {
   'requestError.paginationCycle': 'Az API lapozási ciklust adott vissza.',
   'requestError.paginationLimit': 'A gyűjtemény túl nagy. Szűkítse a szűrési feltételeket.',
   'requestError.invalidCollection': 'Az API érvénytelen gyűjteményt adott vissza.',
+  'requestError.failed': 'A kérést nem sikerült végrehajtani.',
 
   'resourceCreator.kind.stack': 'Stack',
   'resourceCreator.kind.service': 'Szolgáltatás',

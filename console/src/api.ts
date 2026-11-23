@@ -1,5 +1,6 @@
-import { ConsoleRequestError } from './request-errors';
+import { ApiError, ConsoleRequestError } from './request-errors';
 import { navigateBrowser } from './browser-navigation';
+export { ApiError } from './request-errors';
 export interface Policy {
   enabled: boolean;
   only: boolean;
@@ -50,14 +51,6 @@ export interface GroupInput {
   members?: string[];
   grants?: Record<string, Role>;
   delete?: boolean;
-}
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
 }
 export const sessionUnauthorizedEvent = 'rancher.console.unauthorized';
 function csrf() {
@@ -115,10 +108,10 @@ export async function api<T>(
       sessionCookie === document.cookie.split('; ').find((cookie) => cookie.startsWith('token='))
     )
       window.dispatchEvent(new Event(sessionUnauthorizedEvent));
-    throw new ApiError(
-      response.status,
-      data.message || data.code || 'Não foi possível concluir a solicitação.',
+    const detail = [data?.message, data?.code].find(
+      (value): value is string => typeof value === 'string' && Boolean(value.trim()),
     );
+    throw new ApiError(response.status, detail);
   }
   return data;
 }
