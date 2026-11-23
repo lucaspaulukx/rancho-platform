@@ -1,7 +1,13 @@
 ARG BACKEND_JAVA17_IMAGE=rancho-backend-java17:local
+FROM scratch AS logging-jars
+ADD --checksum=sha256:5230217ccba7a9d31dda1dd878e5606037a7972282c7d3f8eac1efa80e9463d9 https://repo.maven.apache.org/maven2/ch/qos/logback/logback-classic/1.6.6/logback-classic-1.6.6.jar /logback-classic-1.6.6.jar
+ADD --checksum=sha256:5458415d5d58a97ab670632f9b2bdac2d6f7e0e11455b45dd4e64e90d12670ab https://repo.maven.apache.org/maven2/ch/qos/logback/logback-core/1.6.6/logback-core-1.6.6.jar /logback-core-1.6.6.jar
+ADD --checksum=sha256:e91ff6d720609e7a194ffe758c3ed5c84e798617ae07b0a0f6a4fe229741b4bb https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/2.0.19/slf4j-api-2.0.19.jar /slf4j-api-2.0.19.jar
+ADD --checksum=sha256:7d5be917811ee275929a608d51e0f6a9eb8d17b25460ecb160e81e9ee23538c0 https://repo.maven.apache.org/maven2/org/slf4j/log4j-over-slf4j/2.0.19/log4j-over-slf4j-2.0.19.jar /log4j-over-slf4j-2.0.19.jar
+
 FROM ${BACKEND_JAVA17_IMAGE} AS cattle
-COPY modern-backend-single-node.patch modern-backend-servlet.patch ServletApplicationContext.java configure-modern-servlets.py /tmp/modern-backend/
-RUN --network=none set -eu; \
+COPY modern-backend-single-node.patch modern-backend-servlet.patch modern-backend-logback.patch ServletApplicationContext.java configure-modern-servlets.py /tmp/modern-backend/
+RUN --network=none --mount=from=logging-jars,target=/tmp/logging-jars set -eu; \
     cd /lab/cattle; \
     git apply --ignore-space-change /tmp/modern-backend/*.patch; \
     cp -aL /usr/share/cattle/war /opt/war; \
@@ -9,7 +15,12 @@ RUN --network=none set -eu; \
     lib=/opt/war/WEB-INF/lib; \
     rm "$lib/h2-1.4.187.jar" "$lib/hazelcast-3.8.jar" "$lib/spring-web-5.3.39.jar" \
         "$lib/cattle-hazelcast-eventing-0.5.0-SNAPSHOT.jar" \
-        "$lib/cattle-hazelcast-lock-0.5.0-SNAPSHOT.jar"; \
+        "$lib/cattle-hazelcast-lock-0.5.0-SNAPSHOT.jar" \
+        "$lib/logback-classic-1.2.3.jar" "$lib/logback-core-1.2.3.jar" \
+        "$lib/slf4j-api-1.7.5.jar" "$lib/log4j-over-slf4j-1.7.5.jar"; \
+    install -m 0644 /tmp/logging-jars/*.jar "$lib/"; \
+    /usr/lib/jvm/zulu-8-amd64/bin/jar uf "$lib/cattle-framework-logback-0.5.0-SNAPSHOT.jar" \
+        -C code/framework/logback/src/main/resources logback; \
     mkdir /tmp/single-node; \
     /usr/lib/jvm/zulu-8-amd64/bin/javac -encoding UTF-8 \
         -cp "/opt/war:$lib/*:/opt/war/WEB-INF/jetty/*" -d /tmp/single-node \
