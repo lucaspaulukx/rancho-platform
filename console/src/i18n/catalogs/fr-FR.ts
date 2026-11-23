@@ -267,7 +267,10 @@ export const frFR = {
   'operations.create': 'Créer',
   'operations.refresh': 'Actualiser',
   'operations.bulkActions': 'Actions groupées',
-  'operations.selection': 'Ressources sélectionnées : {count} · limite de 100',
+  'operations.selection': {
+    one: '{count} ressource sélectionnée · limite de 100',
+    other: '{count} ressources sélectionnées · limite de 100',
+  },
   'operations.selectedAction': 'Action sélectionnée : {action}',
   'operations.noCommonAction':
     'Aucune action commune n’est disponible pour les ressources sélectionnées.',

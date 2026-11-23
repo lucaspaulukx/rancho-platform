@@ -253,7 +253,7 @@ export const huHU = {
   'operations.create': 'Létrehozás',
   'operations.refresh': 'Frissítés',
   'operations.bulkActions': 'Tömeges műveletek',
-  'operations.selection': '{count} kijelölt erőforrás · legfeljebb 100',
+  'operations.selection': { other: '{count} kijelölt erőforrás · legfeljebb 100' },
   'operations.selectedAction': 'Kiválasztott művelet: {action}',
   'operations.noCommonAction': 'A kijelölt erőforrásokhoz nincs közös művelet.',
   'operations.clearSelection': 'Kijelölés törlése',

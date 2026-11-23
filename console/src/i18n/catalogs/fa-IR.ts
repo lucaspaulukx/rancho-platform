@@ -135,7 +135,7 @@ export const faIR = {
   'operations.create': 'ایجاد',
   'operations.refresh': 'تازه‌سازی',
   'operations.bulkActions': 'عملیات گروهی',
-  'operations.selection': '{count} منبع انتخاب شده است · سقف ۱۰۰ منبع',
+  'operations.selection': { other: '{count} منبع انتخاب شده است · سقف ۱۰۰ منبع' },
   'operations.selectedAction': '«{action}» انتخاب شد',
   'operations.noCommonAction': 'هیچ عملیات مشترکی برای منابع انتخاب‌شده در دسترس نیست.',
   'operations.clearSelection': 'پاک کردن انتخاب',

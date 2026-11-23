@@ -135,7 +135,7 @@ export const jaJP = {
   'operations.create': '作成',
   'operations.refresh': '更新',
   'operations.bulkActions': '一括操作',
-  'operations.selection': '選択したリソース：{count} 件 · 上限 100 件',
+  'operations.selection': { other: '選択したリソース：{count} 件 · 上限 100 件' },
   'operations.selectedAction': '{action} を選択しました',
   'operations.noCommonAction': '選択したすべてのリソースに共通して実行できる操作はありません。',
   'operations.clearSelection': '選択を解除',

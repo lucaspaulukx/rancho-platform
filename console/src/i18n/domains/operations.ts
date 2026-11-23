@@ -31,7 +31,10 @@ export const enOperations = {
   'operations.emptyHint':
     'Check the search, state, or infrastructure option. Resources are scoped to the selected environment.',
   'operations.bulkActions': 'Bulk actions',
-  'operations.selection': '{count} selected resources · limit 100',
+  'operations.selection': {
+    one: '{count} selected resource · limit 100',
+    other: '{count} selected resources · limit 100',
+  },
   'operations.selectedAction': '{action} selected',
   'operations.noCommonAction': 'The selected resources have no common action available.',
   'operations.clearSelection': 'Clear selection',
@@ -125,7 +128,10 @@ export const ptOperations = {
   'operations.emptyHint':
     'Revise a busca, o estado ou a opção de infraestrutura. Os recursos continuam restritos ao environment selecionado.',
   'operations.bulkActions': 'Ações em lote',
-  'operations.selection': '{count} recursos selecionados · limite 100',
+  'operations.selection': {
+    one: '{count} recurso selecionado · limite 100',
+    other: '{count} recursos selecionados · limite 100',
+  },
   'operations.selectedAction': '{action} selecionados',
   'operations.noCommonAction': 'Os recursos selecionados não têm uma ação em comum disponível.',
   'operations.clearSelection': 'Limpar seleção',
@@ -183,4 +189,8 @@ export const ptOperations = {
   'operations.action.remove': 'Remover',
   'operations.action.purge': 'Excluir definitivamente',
   'operations.action.setservicelinks': 'Gerenciar vínculos de serviços',
-} satisfies Record<keyof typeof enOperations, string>;
+} satisfies {
+  [Key in keyof typeof enOperations]: (typeof enOperations)[Key] extends string
+    ? string
+    : { one: string; other: string };
+};

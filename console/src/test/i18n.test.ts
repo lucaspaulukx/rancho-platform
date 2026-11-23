@@ -177,6 +177,20 @@ describe('Typed message catalogs', () => {
       'Термін дії спливає через 5 днів',
     ]);
   });
+  it('uses Russian and Ukrainian agreement for the Operations selection count', () => {
+    const ru = createTranslator('ru-RU', ruRU);
+    const uk = createTranslator('uk-UA', ukUA);
+    expect([1, 2, 5].map((count) => ru.t('operations.selection', { count }))).toEqual([
+      'Выбран 1 ресурс · максимум 100',
+      'Выбрано 2 ресурса · максимум 100',
+      'Выбрано 5 ресурсов · максимум 100',
+    ]);
+    expect([1, 2, 5].map((count) => uk.t('operations.selection', { count }))).toEqual([
+      'Вибрано 1 ресурс · максимум 100',
+      'Вибрано 2 ресурси · максимум 100',
+      'Вибрано 5 ресурсів · максимум 100',
+    ]);
+  });
   it('rejects corrupted catalog shapes, unknown keys, empty text and changed placeholders', () => {
     for (const value of [
       null,

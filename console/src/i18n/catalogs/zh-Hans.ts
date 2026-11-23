@@ -124,7 +124,7 @@ export const zhHans = {
   'operations.create': '创建',
   'operations.refresh': '刷新',
   'operations.bulkActions': '批量操作',
-  'operations.selection': '已选 {count} 个资源 · 上限 100 个',
+  'operations.selection': { other: '已选 {count} 个资源 · 上限 100 个' },
   'operations.selectedAction': '已选择{action}',
   'operations.noCommonAction': '所选资源没有可共同执行的操作。',
   'operations.clearSelection': '清除选择',
