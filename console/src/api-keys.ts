@@ -1,4 +1,14 @@
 import { safeApiUrl, type Resource, type Schema } from './api';
+import { ptApiKeys } from './i18n/domains/api-keys';
+
+type KeyValidationKey = Extract<keyof typeof ptApiKeys, `apiKeys.validation.${string}`>;
+
+export class KeyValidationError extends Error {
+  constructor(readonly key: KeyValidationKey) {
+    super(ptApiKeys[key]);
+  }
+}
+
 export const keyActions = ['activate', 'deactivate', 'remove', 'purge'] as const;
 export type KeyAction = (typeof keyActions)[number];
 export function keyMetadata(value: Resource): Resource {
@@ -50,12 +60,12 @@ function fields(schema: Schema, name: string, description: string) {
     title.length > (schema.resourceFields.name?.maxLength ?? 255) ||
     /[\x00-\x1f\x7f]/.test(title)
   )
-    throw new Error('Informe um nome válido para identificar a chave.');
+    throw new KeyValidationError('apiKeys.validation.name');
   if (
     description.length > (schema.resourceFields.description?.maxLength ?? 1024) ||
     description.includes('\0')
   )
-    throw new Error('A descrição excede os limites do servidor.');
+    throw new KeyValidationError('apiKeys.validation.description');
   return { name: title, description };
 }
 export function prepareKeyCreate(
@@ -65,8 +75,9 @@ export function prepareKeyCreate(
   project?: string,
 ) {
   if (!canCreateKey(schema, project) || !schema.resourceFields.description?.create)
-    throw new Error('A criação de chaves não está disponível neste escopo.');
-  if (project && !/^1a[1-9]\d*$/.test(project)) throw new Error('Selecione um environment válido.');
+    throw new KeyValidationError('apiKeys.validation.createUnavailable');
+  if (project && !/^1a[1-9]\d*$/.test(project))
+    throw new KeyValidationError('apiKeys.validation.invalidEnvironment');
   return {
     ...fields(schema, name, description),
     ...(project && schema.resourceFields.accountId?.create ? { accountId: project } : {}),
@@ -80,7 +91,7 @@ export function assertKeyScope(value: Resource, project?: string, expected?: Res
     (project && value.accountId !== project) ||
     (expected && (value.id !== expected.id || value.accountId !== expected.accountId))
   )
-    throw new Error('A chave não está disponível neste escopo.');
+    throw new KeyValidationError('apiKeys.validation.unavailable');
 }
 export function prepareKeyEdit(
   schema: Schema,
@@ -97,9 +108,9 @@ export function prepareKeyEdit(
     !schema.resourceFields.name?.update ||
     !schema.resourceFields.description?.update
   )
-    throw new Error('A edição de chaves não está mais disponível.');
+    throw new KeyValidationError('apiKeys.validation.editUnavailable');
   if (['name', 'description', 'state'].some((k) => (before[k] ?? '') !== (fresh[k] ?? '')))
-    throw new Error('A chave foi alterada por outro cliente. Reabra o editor.');
+    throw new KeyValidationError('apiKeys.validation.changed');
   return fields(schema, name, description);
 }
 export function keyActionTarget(
@@ -135,6 +146,6 @@ export function keySecret(value: Resource) {
     typeof value.secretValue !== 'string' ||
     !value.secretValue
   )
-    throw new Error('O Rancher não retornou a credencial completa. Revogue a chave e crie outra.');
+    throw new KeyValidationError('apiKeys.validation.incompleteCredential');
   return { publicValue: value.publicValue, secretValue: value.secretValue };
 }

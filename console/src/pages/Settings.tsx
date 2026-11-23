@@ -12,6 +12,7 @@ import {
   settingSnapshot,
   settingWritable,
   prepareSetting,
+  SettingValidationError,
   type SettingMetadata,
   type SettingSnapshot,
 } from '../server-settings';
@@ -53,7 +54,9 @@ function SettingsScope() {
       ? error.status !== undefined
         ? t('settings.httpFailed', { status: error.status })
         : t(error.key)
-      : error.message;
+      : error instanceof SettingValidationError
+        ? t(error.key)
+        : error.message;
   async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
     try {
       return await api<T>(path, body, method, signal);
@@ -175,7 +178,7 @@ function SettingsScope() {
         <DataTable
           rows={query.data || []}
           rowKey={(v) => v.name}
-          searchText={(v) => `${v.name} ${v.source}`}
+          searchText={(v) => `${v.name} ${v.source ?? t('settings.unknown')}`}
           columns={[
             { key: 'name', label: t('settings.setting'), render: (v) => v.name },
             {

@@ -16,6 +16,7 @@ import {
   customDriver,
   sameDriver,
   emptyDriver,
+  DriverValidationError,
   type DriverFields,
   type DriverSnapshot,
   type DriverMetadata,
@@ -63,7 +64,9 @@ function DriverScope() {
       ? error.status !== undefined
         ? t('machineDrivers.httpFailed', { status: error.status })
         : t(error.key)
-      : error.message;
+      : error instanceof DriverValidationError
+        ? t(error.key)
+        : error.message;
   async function request<T>(path: string, body?: unknown, method?: string, signal?: AbortSignal) {
     try {
       return await api<T>(path, body, method, signal);

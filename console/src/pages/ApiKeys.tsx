@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, Eye, EyeOff, Plus, RefreshCw } from 'lucide-react';
-import { allPages, api, type Resource, type Schema } from '../api';
+import { allPages, api, ApiError, type Resource, type Schema } from '../api';
 import { useApp } from '../state';
 import { useI18n } from '../i18n/provider';
 import type { MessageKey } from '../i18n/messages';
@@ -17,6 +17,7 @@ import {
   keyActions,
   keyMetadata,
   keySecret,
+  KeyValidationError,
   prepareKeyCreate,
   prepareKeyEdit,
   type KeyAction,
@@ -42,16 +43,35 @@ type KeyPageErrorKey = Extract<
   | 'apiKeys.reopenOperation'
   | 'apiKeys.actionUnavailable'
   | 'apiKeys.reviewFields'
+  | 'apiKeys.requestFailed'
 >;
 class KeyPageError extends Error {
-  constructor(readonly key: KeyPageErrorKey) {
+  constructor(
+    readonly key: KeyPageErrorKey,
+    readonly status?: number,
+  ) {
     super(key);
+  }
+}
+async function keyRequest<T>(request: Promise<T>) {
+  try {
+    return await request;
+  } catch (error) {
+    throw new KeyPageError(
+      'apiKeys.requestFailed',
+      error instanceof ApiError ? error.status : undefined,
+    );
   }
 }
 export function ApiKeys() {
   const { t } = useI18n();
-  const errorText = (error: Error) =>
-    error instanceof KeyPageError ? t(error.key) : error.message;
+  function errorText(error: Error) {
+    if (error instanceof KeyValidationError) return t(error.key);
+    const status =
+      error instanceof ApiError || error instanceof KeyPageError ? error.status : undefined;
+    if (status !== undefined) return t('apiKeys.httpFailed', { status });
+    return t(error instanceof KeyPageError ? error.key : 'apiKeys.requestFailed');
+  }
   const labels: Record<KeyAction, string> = {
     activate: t('apiKeys.activate'),
     deactivate: t('apiKeys.deactivate'),
@@ -95,7 +115,7 @@ export function ApiKeys() {
       const path =
         schema!.links.collection +
         (removed ? '?_removed=true&removed_notnull=true&limit=100' : '?limit=100');
-      return (await allPages<Resource>(path, signal)).map(keyMetadata);
+      return (await keyRequest(allPages<Resource>(path, signal))).map(keyMetadata);
     },
     gcTime: 0,
     refetchInterval: 10000,
@@ -120,7 +140,9 @@ export function ApiKeys() {
     setValidation(null);
   }
   async function freshSchema(signal: AbortSignal) {
-    const contract = await api<Schema>(base + 'schemas/apiKey', undefined, undefined, signal);
+    const contract = await keyRequest(
+      api<Schema>(base + 'schemas/apiKey', undefined, undefined, signal),
+    );
     scope.assertCurrent();
     return contract;
   }
@@ -134,7 +156,9 @@ export function ApiKeys() {
         contract = await freshSchema(signal);
       if (editor === 'new') {
         const payload = prepareKeyCreate(contract, name, description, project);
-        const value = await api<Resource>(contract.links.collection, payload, 'POST', signal);
+        const value = await keyRequest(
+          api<Resource>(contract.links.collection, payload, 'POST', signal),
+        );
         scope.assertCurrent();
         assertKeyScope(value, project);
         const credential = keySecret(value);
@@ -143,10 +167,12 @@ export function ApiKeys() {
         setSaved(false);
         return keyMetadata(value);
       }
-      const fresh = await api<Resource>(editor.links.self, undefined, undefined, signal);
+      const fresh = await keyRequest(
+        api<Resource>(editor.links.self, undefined, undefined, signal),
+      );
       scope.assertCurrent();
       const payload = prepareKeyEdit(contract, editor, fresh, name, description, project);
-      const value = await api<Resource>(fresh.links.self, payload, 'PUT', signal);
+      const value = await keyRequest(api<Resource>(fresh.links.self, payload, 'PUT', signal));
       scope.assertCurrent();
       return keyMetadata(value);
     },
@@ -165,7 +191,9 @@ export function ApiKeys() {
       if (!action || !app.config.modules.apiKeys) throw new KeyPageError('apiKeys.reopenOperation');
       const signal = scope.signal(),
         contract = await freshSchema(signal),
-        fresh = await api<Resource>(action.row.links.self, undefined, undefined, signal);
+        fresh = await keyRequest(
+          api<Resource>(action.row.links.self, undefined, undefined, signal),
+        );
       scope.assertCurrent();
       if (
         fresh.type !== 'apiKey' ||
@@ -176,11 +204,8 @@ export function ApiKeys() {
       )
         throw new KeyPageError('apiKeys.actionUnavailable');
       const target = keyActionTarget(contract, fresh, action.kind)!;
-      await api<unknown>(
-        target.url,
-        target.method === 'POST' ? {} : undefined,
-        target.method,
-        signal,
+      await keyRequest(
+        api<unknown>(target.url, target.method === 'POST' ? {} : undefined, target.method, signal),
       );
       scope.assertCurrent();
     },
@@ -277,7 +302,7 @@ export function ApiKeys() {
         <Loading />
       ) : query.error || schemas.error ? (
         <ErrorState
-          error={query.error || schemas.error}
+          error={new Error(errorText((query.error || schemas.error)!))}
           retry={() => {
             void query.refetch();
             void schemas.refetch();
