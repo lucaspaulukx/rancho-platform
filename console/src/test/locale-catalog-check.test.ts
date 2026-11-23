@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
-import { englishMessages, portugueseMessages, validateCatalog } from '../i18n/messages';
+import {
+  englishMessages,
+  portugueseMessages,
+  previewCatalogs,
+  validateCatalog,
+} from '../i18n/messages';
 import { localeInventory } from '../i18n/locales';
 
 // The CLI is an ES module; a computed URL avoids claiming a generated declaration exists.
@@ -10,7 +15,13 @@ const root = process.cwd();
 const { checkRegisteredCatalogs } = await import(
   /* @vite-ignore */ pathToFileURL(resolve(root, 'scripts/check-locales.mjs')).href
 );
-const inputs = { englishMessages, portugueseMessages, validateCatalog, localeInventory };
+const inputs = {
+  englishMessages,
+  portugueseMessages,
+  previewCatalogs,
+  validateCatalog,
+  localeInventory,
+};
 
 describe('Registered locale catalog gate', () => {
   it('checks equal registered catalogs without claiming complete interface translation', () => {
@@ -20,6 +31,14 @@ describe('Registered locale catalog gate', () => {
     expect(report.registeredEnglishKeys).toBe(Object.keys(englishMessages).length);
     expect(report.registeredPortugueseKeys).toBe(report.registeredEnglishKeys);
     expect(report.checkedCatalogLocales).toEqual(['en-US', 'pt-BR']);
+    const frenchScope = Object.keys(englishMessages).filter(
+      (key) =>
+        /^(auth|ui|common|language|runtime)\./.test(key) ||
+        key === 'environment.selected' ||
+        key === 'selection.count',
+    );
+    expect(Object.keys(previewCatalogs['fr-FR']!).sort()).toEqual(frenchScope.sort());
+    expect(report.previewCatalogKeyCounts).toEqual({ 'fr-FR': frenchScope.length });
     expect(report.pendingCatalogLocales).toEqual([
       'de-DE',
       'fr-FR',
@@ -33,6 +52,15 @@ describe('Registered locale catalog gate', () => {
     expect(report.interfaceCoverage).toBe('not-measured');
     expect(report.allRoutesTranslated).toBe(false);
     expect(report.failures).toEqual([]);
+  });
+  it('reports invalid preview structure without exposing submitted content', () => {
+    const report = checkRegisteredCatalogs({
+      ...inputs,
+      previewCatalogs: { 'fr-FR': { 'environment.selected': 'private-preview' } },
+    });
+    expect(report.status).toBe('failed');
+    expect(report.failures).toContain('invalid-preview-message-structure');
+    expect(JSON.stringify(report)).not.toContain('private-preview');
   });
 
   it('fails when a Portuguese key is missing or an unregistered key is added', () => {

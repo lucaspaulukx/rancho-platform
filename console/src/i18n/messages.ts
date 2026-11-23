@@ -1,4 +1,5 @@
 import { localeDirection, localeFormats, type Locale } from './locales';
+import { frFR } from './catalogs/fr-FR';
 import { enAuth, ptAuth } from './domains/auth';
 import { enUi, ptUi } from './domains/ui';
 import { enShell, ptShell } from './domains/shell';
@@ -227,6 +228,10 @@ export const portugueseMessages = {
   'selection.count': { one: '{count} item selecionado', other: '{count} itens selecionados' },
 } satisfies MessageCatalog;
 
+export const previewCatalogs: Readonly<Partial<Record<Locale, MessageCatalog>>> = {
+  'fr-FR': frFR,
+};
+
 function record(value: unknown): value is Record<string, unknown> {
   return (
     !!value &&
@@ -283,7 +288,11 @@ export function createTranslator(locale: Locale, translation?: unknown) {
   localeDirection(locale);
   const catalog = validateCatalog(
     translation ??
-      (locale === 'pt-BR' ? portugueseMessages : locale === 'en-US' ? englishMessages : {}),
+      (locale === 'pt-BR'
+        ? portugueseMessages
+        : locale === 'en-US'
+          ? englishMessages
+          : (previewCatalogs[locale] ?? {})),
   );
   function source(key: MessageKey): { message: string | PluralMessage; locale: Locale } {
     if (!Object.hasOwn(englishMessages, key)) throw new Error('Unknown message key.');

@@ -126,7 +126,7 @@ describe('Typed message catalogs', () => {
     expect(validateCatalog(portugueseMessages)).toEqual(portugueseMessages);
   });
   it('reports fallback and applies the fallback grammar rather than the requested locale grammar', () => {
-    const french = createTranslator('fr-FR');
+    const french = createTranslator('fr-FR', {});
     expect(french.translatedKeys).toEqual([]);
     expect(french.resolvedLocale('selection.count')).toBe('en-US');
     expect(french.t('selection.count', { count: 0 })).toBe('0 selected items');
@@ -135,6 +135,15 @@ describe('Typed message catalogs', () => {
     expect(partial.resolvedLocale('common.cancel')).toBe('fr-FR');
     expect(partial.t('common.save')).toBe('Save');
     expect(partial.translatedKeys).toEqual(['common.cancel']);
+  });
+  it('uses registered French preview messages with English fallback outside the preview', () => {
+    const french = createTranslator('fr-FR');
+    expect(french.t('common.cancel')).toBe('Annuler');
+    expect(french.resolvedLocale('selection.count')).toBe('fr-FR');
+    expect(french.resolvedLocale('shell.nav.stacks.title')).toBe('en-US');
+    expect(french.t('shell.nav.stacks.title')).toBe(
+      createTranslator('en-US').t('shell.nav.stacks.title'),
+    );
   });
   it('supports language-specific plural forms and requires an other form', () => {
     const russian = createTranslator('ru-RU', {
