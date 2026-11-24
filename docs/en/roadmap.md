@@ -115,7 +115,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 | OBS03 | Final-build soak | Six-minute native tests verified host reconnect and a five-stream browser soak on one console image and one legacy host. Logs, terminal and host/container/service metrics ran concurrently with bounded CSV history and exact cleanup. Service metrics were enabled in the test browser. Acceptance with deployed flags and final topology remains |
 | ADM01 | Local accounts/profile/password/lifecycle | Implemented; final concurrency/OIDC-admin/technical matrix remains |
 | ADM02 | Audit/settings/process/replay | Implemented slices; final permission/privacy/error/native-effect regression remains |
-| ADM03 | HA/pools | Monitoring implemented; physical configuration/failover remains |
+| ADM03 | HA/pools | Monitoring implemented. The modern backend explicitly rejects cluster eventing, locking and custom cluster configuration. Complete HA support requires backend changes and a physical failover rehearsal that verifies event delivery and lock ownership across nodes. Artifact rehearsal checks the single-node boundary. |
 | ADM04 | Machine/catalog drivers | CRUD implemented; isolated provisioning/reactivation remains |
 | INT01 | API keys | Management implemented; full technical scope/expiry acceptance remains |
 | INT02 | Webhooks/receivers | Modern Compose opt-in for service scaling. Physical delivery increased a Docker 29 service from 1 to 2 replicas and returned it to 1. Invalid, revoked and cross-environment keys were denied. Retry behavior and delivery for the other drivers remain open |

@@ -10,6 +10,7 @@ from migration.test_fresh_install_lab import image_id
 
 
 ROOT = Path(__file__).resolve().parents[1]
+CLUSTER_PROFILES = ('EVENTING', 'LOCK', 'CONFIG_CUSTOM')
 
 
 def run_check(arguments):
@@ -22,6 +23,21 @@ def run_check(arguments):
         errors='replace',
         check=True,
     ).stdout
+
+
+def check_single_node_boundary(backend_image):
+    """Verify the modern backend refuses cluster profiles with networking disabled."""
+    for prefix in ('CATTLE', 'DEFAULT_CATTLE'):
+        for profile in CLUSTER_PROFILES:
+            flag = f'{prefix}_MODULE_PROFILE_HAZELCAST_{profile}'
+            result = subprocess.run([
+                'docker', 'run', '--rm', '--pull', 'never', '--network', 'none',
+                '-e', 'CATTLE_DB_CATTLE_MYSQL_HOST=isolated-fixture',
+                '-e', f'{flag}=true', backend_image,
+            ], cwd=ROOT, capture_output=True, timeout=30)
+            if (result.returncode != 2
+                    or b'backend supports single-node mode only.' not in result.stderr):
+                raise RuntimeError(f'The backend did not reject unsupported cluster flag: {flag}')
 
 
 def rehearse(backend, previous, candidate, chromium, report, *, configuration_reversal=False,
@@ -44,6 +60,10 @@ def rehearse(backend, previous, candidate, chromium, report, *, configuration_re
         report['scope'] = 'isolated first-start migration, database rollback and frontend rollback'
         report['firstStartMigrationPassed'] = False
         report['databaseRollbackPassed'] = False
+        report['singleNodeBoundaryPassed'] = False
+        report['stage'] = 'single-node-boundary'
+        check_single_node_boundary(images['backend'])
+        report['singleNodeBoundaryPassed'] = True
         report['stage'] = 'first-start-migration'
         run_check([
             '-m', 'migration.test_first_start_lab',
