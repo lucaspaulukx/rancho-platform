@@ -95,6 +95,47 @@ function setup(
   return { fetcher, client, view };
 }
 describe('Configuração e escopo da console', () => {
+  it('uses the configured language while checking the session and when the request fails', async () => {
+    let rejectSession: (response: Response) => void = () => {};
+    const pendingSession = new Promise<Response>((resolve) => {
+      rejectSession = resolve;
+    });
+    const fetcher = vi.fn(async (input: string) => {
+      if (input === '/v2-beta/token') return pendingSession;
+      throw new Error('Unexpected request: ' + input);
+    });
+    vi.stubGlobal('fetch', fetcher);
+    const client = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } });
+    client.setQueryData(['configuration'], {
+      console: {
+        ...configuration,
+        localization: {
+          enabled: true,
+          defaultLocale: 'en-US',
+          availableLocales: ['en-US'],
+          preview: true,
+        },
+      },
+      server: {},
+    });
+    const view = render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <AppProvider>Authenticated content</AppProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    try {
+      expect(screen.getByRole('status')).toHaveTextContent('Loading data…');
+      rejectSession(Response.json({}, { status: 503 }));
+      await screen.findByText('The request could not be completed.');
+      expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
+      expect(screen.queryByText('Authenticated content')).not.toBeInTheDocument();
+    } finally {
+      view.unmount();
+      client.clear();
+    }
+  });
   it('usa self autenticado pelo backend mesmo com accountId nulo no token GET', async () => {
     const { fetcher, client, view } = setup(true, false, false, {
       groups: true,

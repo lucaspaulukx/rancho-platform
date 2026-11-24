@@ -135,17 +135,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       client,
     ],
   );
+  let content: ReactNode;
   if (
     configuration.isPending ||
     (configuration.data?.console.enabled &&
       (session.isPending || (authenticated && projects.isPending)))
   )
-    return <Loading label="Preparando sua console…" />;
-  if (
+    content = <Loading />;
+  else if (
     configuration.error ||
     (configuration.data?.console.enabled && (session.error || projects.error))
   )
-    return (
+    content = (
       <ErrorState
         error={configuration.error || session.error || projects.error}
         retry={() => {
@@ -155,14 +156,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }}
       />
     );
-  return (
-    <AppContext value={value}>
-      <I18nProvider policy={value.config.localization} identity={identity}>
+  else
+    content = (
+      <AppContext value={value}>
         <ThemeProvider config={value.config} identity={identity}>
           {children}
         </ThemeProvider>
-      </I18nProvider>
-    </AppContext>
+      </AppContext>
+    );
+  return (
+    <I18nProvider policy={configuration.data?.console.localization} identity={identity}>
+      {content}
+    </I18nProvider>
   );
 }
 export function useApp() {
