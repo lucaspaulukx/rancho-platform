@@ -152,8 +152,18 @@ async function main() {
   check('public selector exposes explicit incomplete-translation preview',
     await publicPage.getByText('Preview · translations incomplete', { exact: true }).isVisible());
   check('public document language updates', await publicPage.locator('html').getAttribute('lang') === 'en-US');
+  const englishSelector = publicPage.getByRole('combobox', { name: 'Language', exact: true });
+  for (const width of [320, 1440]) {
+    await publicPage.setViewportSize({ width, height: 900 });
+    for (const theme of ['light', 'dark']) {
+      await publicPage.emulateMedia({ colorScheme: theme });
+      await publicPage.waitForFunction((expected) => document.documentElement.dataset.theme === expected, theme);
+      check(`public selector is readable and fits at ${width}px in ${theme}`,
+        await insideViewport(englishSelector) && await contrast(englishSelector) >= 4.5 &&
+        await englishSelector.evaluate((control) => getComputedStyle(control).colorScheme) === theme);
+    }
+  }
   await publicPage.setViewportSize({ width: 390, height: 844 });
-  check('public mobile selector stays in viewport', await insideViewport(publicPage.getByRole('combobox', { name: 'Language', exact: true })));
   async function loginFitsMobile() {
     let fits = true;
     for (const width of [320, 390]) {
