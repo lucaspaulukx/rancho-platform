@@ -80,7 +80,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m scripts.publish_registry_image --input "$RUNNER_TEMP/runtime" +            --commit "$RELEASE_COMMIT" --component "$COMPONENT" --version "$RELEASE_VERSION" +            --output "$RUNNER_TEMP/registry-${COMPONENT}.json"
+          python3 -m scripts.publish_registry_image --input "$RUNNER_TEMP/runtime" \
+            --commit "$RELEASE_COMMIT" --component "$COMPONENT" --version "$RELEASE_VERSION" \
+            --output "$RUNNER_TEMP/registry-${COMPONENT}.json"
           jq -r '"digest=" + .digest' "$RUNNER_TEMP/registry-${COMPONENT}.json" >> "$GITHUB_OUTPUT"
 
       - name: Attest the registry manifest
