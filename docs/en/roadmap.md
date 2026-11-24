@@ -28,6 +28,8 @@ Statuses below describe maintained capabilities and remaining acceptance, not an
 
 ## Interface languages and original Rancher parity
 
+The Console built from `fca42e7` passed 210 Chromium checks against an isolated backend with its local catalog enabled. The run included 24 axe scans across six administration routes, two viewport widths and both themes. No scan reported a violation. The public login also passed a separate ten-language check at 320 and 1440 px in both themes, including direction, viewport fit and 4.5:1 selector text contrast. Full linguistic review, remaining interface text extraction and final candidate acceptance are still open.
+
 The console defaults to pt-BR. Optional preview localizes the shared shell, login/no-access, shared controls and contextual recovery in pt-BR/en-US; complete page/validation extraction remains unfinished. Bilingual project documentation does not provide interface localization. The reference is [Rancher server v1.6.30](https://github.com/rancher/rancher/blob/v1.6.30/server/Dockerfile), which selects UI1.6.52. Its [translation catalog](https://github.com/rancher/ui/tree/v1.6.52/translations) and [locale discovery](https://github.com/rancher/ui/blob/v1.6.52/config/environment.js) define the production language inventory below. The `none` diagnostic locale is excluded from production; existing translation files do not prove that every original message was translated.
 
 | Original locale | Console locale target | Language | Direction |

@@ -28,6 +28,8 @@ Estados descrevem capacidades mantidas e aceites restantes, não diário de exec
 
 ## Idiomas da interface e paridade com o Rancher original
 
+O Console compilado de `fca42e7` passou em 210 verificações no Chromium contra um backend isolado com catálogo local habilitado. A execução incluiu 24 varreduras do axe em seis rotas administrativas, duas larguras de tela e nos dois temas. Nenhuma varredura reportou violação. O login também passou em uma verificação separada com os dez idiomas a 320 e 1440 px, nos dois temas, incluindo direção do texto, encaixe na tela e contraste de 4,5:1 no seletor. A revisão linguística completa, a extração dos textos restantes e o aceite do candidato final seguem em aberto.
+
 O console usa pt-BR por padrão. Prévia opcional localiza shell, login/sem-acesso, controles comuns e recuperação contextual em pt-BR/en-US; a extração completa de páginas/validações segue pendente. Documentação bilingue do projeto não fornece localização da interface. A referência é o [Rancher server v1.6.30](https://github.com/rancher/rancher/blob/v1.6.30/server/Dockerfile), que seleciona a UI1.6.52. Seu [catálogo de traduções](https://github.com/rancher/ui/tree/v1.6.52/translations) e a [descoberta de locales](https://github.com/rancher/ui/blob/v1.6.52/config/environment.js) definem o inventário de idiomas de produção abaixo. O locale diagnóstico `none` fica fora da produção; arquivos de tradução existentes não comprovam que toda mensagem original estava traduzida.
 
 | Locale original | Locale alvo do console | Idioma | Direção |
