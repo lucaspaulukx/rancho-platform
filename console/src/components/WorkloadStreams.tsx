@@ -18,7 +18,7 @@ export function WorkloadStreams({
   onClose: () => void;
 }) {
   const app = useApp();
-  const { t } = useI18n();
+  const { t, formats } = useI18n();
   const choices = containers
     .filter(
       (value) => value.accountId === app.project?.id && !value.removed && value.actions?.[mode],
@@ -31,6 +31,12 @@ export function WorkloadStreams({
   const [selected, setSelected] = useState(choices[0]?.id || '');
   if (!app.config.modules.observability) return null;
   const resource = choices.find((value) => value.id === selected) || choices[0];
+  // Reorder the options without changing the default target of an open stream.
+  const displayChoices = [...choices].sort(
+    (a, b) =>
+      Number(b.state === 'running') - Number(a.state === 'running') ||
+      formats.compare(a.name || a.id, b.name || b.id),
+  );
   if (!resource)
     return (
       <Modal
@@ -67,7 +73,7 @@ export function WorkloadStreams({
                 value={resource.id}
                 onChange={(event) => setSelected(event.target.value)}
               >
-                {choices.map((value) => (
+                {displayChoices.map((value) => (
                   <option key={value.id} value={value.id}>
                     {value.name || value.id} · {resourceStateLabel(t, value.state)}
                   </option>

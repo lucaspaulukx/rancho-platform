@@ -248,6 +248,10 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
     };
   }, [resource.id, app.identity, app.project?.id, enabled, usePayload, paused, attempt, service]);
   const target = targets.find((item) => item.id === targetId) || targets[0];
+  // Locale changes affect only presentation, not the target or the socket.
+  const displayTargets = [...targets].sort(
+    (a, b) => formats.compare(a.name, b.name) || a.id.localeCompare(b.id),
+  );
   const points = service ? (target && series.get(target.id)) || [] : individualPoints;
   const latest = points.at(-1);
   function download() {
@@ -358,7 +362,7 @@ function MetricsSession({ resource, onClose }: MetricsProps) {
                   value={target?.id || ''}
                   onChange={(event) => setTargetId(event.target.value)}
                 >
-                  {targets.map((item) => (
+                  {displayTargets.map((item) => (
                     <option key={item.id} value={item.id}>
                       {item.name}
                     </option>

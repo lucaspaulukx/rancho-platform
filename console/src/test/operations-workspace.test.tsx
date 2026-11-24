@@ -6,6 +6,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { OperationsPage } from '../pages/Operations';
 import type { Resource } from '../api';
 import { I18nProvider, useI18n } from '../i18n/provider';
+import { WorkloadStreams } from '../components/WorkloadStreams';
 
 const fixture = vi.hoisted(() => ({
   project: { id: 'p1', name: 'Laboratório' },
@@ -155,6 +156,7 @@ afterEach(() => {
   fixture.schemaError = null;
   fixture.retryInventory.mockClear();
   fixture.retrySchemas.mockClear();
+  localStorage.removeItem('rancho.console.locale.anonymous');
 });
 function addContainers(length = 50) {
   fixture.extraContainers = Array.from({ length }, (_, index) => ({
@@ -170,6 +172,55 @@ function addContainers(length = 50) {
 }
 
 describe('Workspace unificado', () => {
+  it('orders log options naturally and keeps the selected stream when switching language', async () => {
+    const containers: Resource[] = ['web-10', 'web-2'].map((name, index) => ({
+      id: `c${index}`,
+      type: 'container',
+      accountId: 'p1',
+      name,
+      links: {},
+      state: 'running',
+      actions: { logs: 'logs' },
+    }));
+    function SwitchLanguage() {
+      const { setLocale } = useI18n();
+      return <button onClick={() => setLocale('en-US')}>English</button>;
+    }
+    render(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          preview: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'en-US'],
+          selectable: true,
+          detectBrowser: false,
+        }}
+      >
+        <SwitchLanguage />
+        <WorkloadStreams
+          parent={{ id: 's1', type: 'service', name: 'web', links: {} }}
+          containers={containers}
+          mode="logs"
+          onClose={vi.fn()}
+        />
+      </I18nProvider>,
+    );
+    const selector = within(screen.getByRole('dialog')).getByRole('combobox');
+    expect(
+      within(selector)
+        .getAllByRole('option')
+        .map((option) => option.getAttribute('value')),
+    ).toEqual(['c1', 'c0']);
+    await userEvent.selectOptions(selector, 'c1');
+    fixture.unmounted.length = 0;
+    await userEvent.click(screen.getByRole('button', { name: 'English' }));
+    expect(screen.getByRole('dialog', { name: 'Logs de web-2' })).toBeVisible();
+    const activeSelector = within(screen.getByRole('dialog')).getByRole('combobox');
+    expect(within(activeSelector).getByRole('option', { name: 'web-2 · Running' })).toBeVisible();
+    expect(activeSelector).toHaveValue('c1');
+    expect(fixture.unmounted).toEqual([]);
+  });
   it('keeps the environment heading and offers a retry when schemas fail before inventory loads', () => {
     fixture.inventoryPending = true;
     fixture.schemaError = new Error('Fixture schema unavailable');
