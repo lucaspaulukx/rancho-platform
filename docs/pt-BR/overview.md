@@ -4,17 +4,22 @@
 
 **Um console moderno para Docker/Cattle, baseado no Rancher 1.6.30.** Gerencie containers no contexto da stack e do ambiente, com logs, terminal, métricas e ações ao alcance.
 
-[🇧🇷 Português (Brasil)](overview.md) · [🇺🇸 English](../../README.md)
+**Escolha o idioma da documentação** · [🇧🇷 Português (Brasil)](overview.md) · [🇺🇸 English](../../README.md)
 
 [![Versão estável](https://img.shields.io/github/v/release/lucaspaulukx/rancho-platform)](https://github.com/lucaspaulukx/rancho-platform/releases/latest)
 [![CI do console](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)
 [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-2563eb)](../../LICENSE)
 
-[Instalação](#instale-com-docker-compose) · [Migração do Rancher](migration.md) · [Imagens no GHCR](https://github.com/users/lucaspaulukx/packages/container/package/rancho-platform) · [Documentação](#documentação)
+## Sumário
+
+- [O que você pode fazer](#o-que-você-pode-fazer)
+- [Instale com Docker Compose](#instale-com-docker-compose)
+- [Compatibilidade e segurança](#compatibilidade-e-segurança)
+- [Documentação](#documentação)
 
 ![Console do Rancho em português mostrando ambientes, stacks e ações de serviços](../images/console-pt-br.png)
 
-*Console em português com dados de demonstração. [Veja o ensaio de migração](migration-evidence.md).*
+*Console em português executando a v0.1.0 em um ambiente local de demonstração. [Veja o ensaio de migração](migration-evidence.md).*
 
 ## O que você pode fazer
 
@@ -58,7 +63,7 @@ A varredura da candidata à v0.1.0 reportou **zero achados altos ou críticos e 
 
 | Quero… | Consulte |
 |---|---|
-| Instalar e verificar imagens de uma release | [Guia de release](release.md) |
+| Instalar e verificar imagens de uma release | [Guia de release](release.md) · [Imagens no GHCR](https://github.com/users/lucaspaulukx/packages/container/package/rancho-platform) |
 | Migrar uma instalação existente do Rancher | [Migração](migration.md) · [Recuperação](recovery.md) |
 | Configurar OIDC, permissões ou o console | [Configuração](configuration.md) |
 | Conhecer o projeto ou contribuir | [Arquitetura](architecture.md) · [Contribuição](contributing.md) · [Testes](testing.md) |
