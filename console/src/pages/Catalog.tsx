@@ -111,22 +111,13 @@ function CatalogContext() {
         description={t('catalogPage.selectEnvironmentDescription')}
       />
     );
-  if (query.isPending) return <Loading />;
-  if (query.error) return <ErrorState error={query.error} retry={() => void query.refetch()} />;
-  const templates = query.data.templates.filter(
-    (template) =>
-      (!source || template.catalogId === source) &&
-      (!category || categories(template).includes(category)) &&
-      (!template.templateBase || (includeInfra && template.templateBase === 'infra')),
-  );
-  const categoryOptions = [...new Set(query.data.templates.flatMap(categories))].sort();
-  return (
-    <>
-      <PageHeader
-        title={t('catalogPage.title')}
-        eyebrow={app.project.name}
-        description={t('catalogPage.description')}
-        action={
+  const header = (
+    <PageHeader
+      title={t('catalogPage.title')}
+      eyebrow={app.project.name}
+      description={t('catalogPage.description')}
+      action={
+        query.data && !query.error ? (
           <>
             {repositoryAccess.allowed && (
               <Button onClick={() => setRepositories(true)}>{t('catalogPage.sources')}</Button>
@@ -136,8 +127,31 @@ function CatalogContext() {
               {t('catalogPage.refresh')}
             </Button>
           </>
-        }
-      />
+        ) : undefined
+      }
+    />
+  );
+  if (query.error || !query.data)
+    return (
+      <>
+        {header}
+        {query.error ? (
+          <ErrorState error={query.error} retry={() => void query.refetch()} />
+        ) : (
+          <Loading />
+        )}
+      </>
+    );
+  const templates = query.data.templates.filter(
+    (template) =>
+      (!source || template.catalogId === source) &&
+      (!category || categories(template).includes(category)) &&
+      (!template.templateBase || (includeInfra && template.templateBase === 'infra')),
+  );
+  const categoryOptions = [...new Set(query.data.templates.flatMap(categories))].sort();
+  return (
+    <>
+      {header}
       {!cattle && <Alert tone="info">{t('catalogPage.cattleInfo')}</Alert>}
       <div className="catalog-filters">
         <Field label={t('catalogPage.title')}>
