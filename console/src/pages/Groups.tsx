@@ -70,7 +70,7 @@ export function GroupEditor({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, formats } = useI18n();
   const [name, setName] = useState(group?.name || '');
   const [nameError, setNameError] = useState('');
   const [members, setMembers] = useState(new Set(group?.members || []));
@@ -363,11 +363,11 @@ export function GroupEditor({
               <div className="review-list">
                 <div>
                   <span>{t('groups.selectedMembers')}</span>
-                  <strong>{members.size}</strong>
+                  <strong>{formats.number(members.size)}</strong>
                 </div>
                 <div>
                   <span>{t('groups.accessEnvironments')}</span>
-                  <strong>{Object.keys(grants).length}</strong>
+                  <strong>{formats.number(Object.keys(grants).length)}</strong>
                 </div>
               </div>
               <p className="muted" style={{ fontSize: 12 }}>
@@ -431,7 +431,7 @@ export function GroupEditor({
 }
 
 export function Groups() {
-  const { t } = useI18n();
+  const { t, formats } = useI18n();
   const app = useApp();
   const client = useQueryClient();
   const toast = useToast();
@@ -460,8 +460,22 @@ export function Groups() {
     },
   });
 
-  if (query.isPending) return <Loading />;
-  if (query.error) return <ErrorState error={query.error} retry={() => void query.refetch()} />;
+  const pageHeading = {
+    title: t('groups.title'),
+    description: t('groups.description'),
+    eyebrow: t('groups.eyebrow'),
+  };
+  if (query.error || query.isPending)
+    return (
+      <>
+        <PageHeader {...pageHeading} />
+        {query.error ? (
+          <ErrorState error={query.error} retry={() => void query.refetch()} />
+        ) : (
+          <Loading />
+        )}
+      </>
+    );
 
   const { groups, users, projects } = query.data;
 
@@ -471,9 +485,7 @@ export function Groups() {
   return (
     <>
       <PageHeader
-        title={t('groups.title')}
-        description={t('groups.description')}
-        eyebrow={t('groups.eyebrow')}
+        {...pageHeading}
         action={
           <>
             <Button onClick={() => setHistory(null)}>
@@ -491,7 +503,7 @@ export function Groups() {
         <div className="metric">
           <div>
             <p>{t('groups.localGroups')}</p>
-            <strong>{groups.length}</strong>
+            <strong>{formats.number(groups.length)}</strong>
             <small>{t('groups.managedHere')}</small>
           </div>
           <div className="metric-icon">
@@ -501,7 +513,7 @@ export function Groups() {
         <div className="metric">
           <div>
             <p>{t('groups.linkedMembers')}</p>
-            <strong>{memberCount}</strong>
+            <strong>{formats.number(memberCount)}</strong>
             <small>{t('groups.distinctUsers')}</small>
           </div>
           <div className="metric-icon">
@@ -511,7 +523,7 @@ export function Groups() {
         <div className="metric">
           <div>
             <p>{t('groups.grantedEnvironments')}</p>
-            <strong>{environmentCount}</strong>
+            <strong>{formats.number(environmentCount)}</strong>
             <small>{t('groups.groupLinks')}</small>
           </div>
           <div className="metric-icon">

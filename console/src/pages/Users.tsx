@@ -83,28 +83,42 @@ export function Users() {
       />
     );
   }
-  if (query.isPending) return <Loading />;
-  if (query.error) return <ErrorState error={query.error} retry={() => void query.refetch()} />;
+  const user = id ? query.data?.users.find((user) => user.id === id) : undefined;
+  const pageHeading = {
+    title: user?.name || id || t('users.title'),
+    description: id ? t('users.detailDescription') : t('users.description'),
+    eyebrow: t('users.eyebrow'),
+  };
+  const back = id ? (
+    <Link className="button secondary" to="/users">
+      <ArrowLeft size={16} />
+      {t('users.back')}
+    </Link>
+  ) : null;
+  if (query.error || query.isPending || (id && !user))
+    return (
+      <>
+        <PageHeader {...pageHeading} action={back} />
+        {query.error ? (
+          <ErrorState error={query.error} retry={() => void query.refetch()} />
+        ) : query.isPending ? (
+          <Loading />
+        ) : (
+          <Empty title={t('users.notFound')} description={t('users.notFoundDescription')} />
+        )}
+      </>
+    );
   const { users, groups, projects, groupsEnabled } = query.data;
-  const user = id ? users.find((user) => user.id === id) : undefined;
-  if (id && !user)
-    return <Empty title={t('users.notFound')} description={t('users.notFoundDescription')} />;
   const memberships = user ? groups.filter((group) => group.members.includes(rawId(user.id))) : [];
   return (
     <>
       <PageHeader
-        title={user?.name || (user ? user.id : t('users.title'))}
-        description={user ? t('users.detailDescription') : t('users.description')}
-        eyebrow={t('users.eyebrow')}
+        {...pageHeading}
         action={
-          user ? (
-            <Link className="button secondary" to="/users">
-              <ArrowLeft size={16} />
-              {t('users.back')}
-            </Link>
-          ) : accountAdministration ? (
+          back ||
+          (accountAdministration ? (
             <Button onClick={() => setManagement({ mode: 'create' })}>{t('users.create')}</Button>
-          ) : undefined
+          ) : undefined)
         }
       />
       {user ? (
