@@ -60,9 +60,13 @@ jobs:
           [[ "$RELEASE_COMMIT" =~ ^[a-f0-9]{40}$ ]]
           python3 -c 'import os; from scripts.publish_registry_image import verify_candidate; verify_candidate(os.environ["RELEASE_COMMIT"])'
           [[ "$RUNTIME_RUN" =~ ^[1-9][0-9]+$ ]]
-          gh run view "$RUNTIME_RUN" --repo "$GITHUB_REPOSITORY" --json headSha,conclusion,workflowName |
-            jq -e --arg commit "$RELEASE_COMMIT" '.headSha == $commit and .conclusion == "success" and .workflowName == "Runtime image provenance"'
-          gh run download "$RUNTIME_RUN" --repo "$GITHUB_REPOSITORY" +            --name "runtime-${COMPONENT}-${RELEASE_COMMIT}" --dir "$RUNNER_TEMP/runtime"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUNTIME_RUN" |
+            jq -e --arg commit "$RELEASE_COMMIT" '
+              .head_sha == $commit and .head_branch == "main" and .conclusion == "success"
+              and .path == ".github/workflows/runtime-provenance.yml"
+            '
+          gh run download "$RUNTIME_RUN" --repo "$GITHUB_REPOSITORY" \
+            --name "runtime-${COMPONENT}-${RELEASE_COMMIT}" --dir "$RUNNER_TEMP/runtime"
 
       - name: Authenticate the repository publisher
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v3
