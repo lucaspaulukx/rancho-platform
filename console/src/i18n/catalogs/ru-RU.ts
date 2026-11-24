@@ -939,6 +939,10 @@ export const ruRU = {
   'selectorRows.removeRow': 'Удалить метку {index}',
   'selectorRows.remove': 'Удалить',
   'selectorRows.add': 'Добавить метку',
+  'serviceUpgradeForm.validation.unavailable': 'Для этой службы нельзя обновить конфигурацию.',
+  'serviceUpgradeForm.validation.conflict':
+    'Другой клиент изменил конфигурацию. Откройте окно обновления заново.',
+  'serviceUpgradeForm.validation.noChange': 'Перед обновлением измените образ или конфигурацию.',
   'serviceUpgradeForm.validation.contract': 'Контракт обновления недоступен.',
   'serviceUpgradeForm.validation.sidecarContract':
     'Контракт вспомогательных контейнеров недоступен.',

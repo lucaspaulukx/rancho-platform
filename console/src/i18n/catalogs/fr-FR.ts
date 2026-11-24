@@ -2006,6 +2006,12 @@ export const frFR = {
   'stackComposeUpgradePanel.validation.invalidParameter':
     'Un paramètre de la stack n’est pas prévu par le contrat.',
 
+  'serviceUpgradeForm.validation.unavailable':
+    'La mise à niveau de la configuration est indisponible pour ce service.',
+  'serviceUpgradeForm.validation.conflict':
+    'Un autre client a modifié la configuration. Rouvrez la mise à niveau.',
+  'serviceUpgradeForm.validation.noChange':
+    'Modifiez l’image ou la configuration avant la mise à niveau.',
   'serviceUpgradeForm.validation.contract': 'Le contrat de mise à niveau est indisponible.',
   'serviceUpgradeForm.validation.sidecarContract': 'Le contrat des sidecars est indisponible.',
   'serviceUpgradeForm.validation.image': 'Saisissez une image valide, sans espaces.',

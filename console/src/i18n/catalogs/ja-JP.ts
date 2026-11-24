@@ -816,6 +816,12 @@ export const jaJP = {
   'selectorRows.removeRow': 'ラベル {index} を削除',
   'selectorRows.remove': '削除',
   'selectorRows.add': 'ラベルを追加',
+  'serviceUpgradeForm.validation.unavailable':
+    'このサービスでは設定のアップグレードを利用できません。',
+  'serviceUpgradeForm.validation.conflict':
+    '別のクライアントが設定を変更しました。アップグレード画面を開き直してください。',
+  'serviceUpgradeForm.validation.noChange':
+    'アップグレードする前にイメージまたは設定を変更してください。',
   'serviceUpgradeForm.validation.contract': 'アップグレードの仕様を取得できません。',
   'serviceUpgradeForm.validation.sidecarContract': 'サイドカーの仕様を取得できません。',
   'serviceUpgradeForm.validation.image': '空白を含まない有効なイメージを入力してください。',

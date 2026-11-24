@@ -1,4 +1,9 @@
 export const enServiceUpgradeForm = {
+  'serviceUpgradeForm.validation.unavailable':
+    'Configuration upgrades are unavailable for this service.',
+  'serviceUpgradeForm.validation.conflict':
+    'Another client changed the configuration. Reopen the upgrade.',
+  'serviceUpgradeForm.validation.noChange': 'Change the image or configuration before upgrading.',
   'serviceUpgradeForm.validation.contract': 'The upgrade contract is unavailable.',
   'serviceUpgradeForm.validation.sidecarContract': 'The sidecar contract is unavailable.',
   'serviceUpgradeForm.validation.image': 'Enter a valid image without spaces.',
@@ -52,6 +57,11 @@ export const enServiceUpgradeForm = {
 } as const;
 
 export const ptServiceUpgradeForm = {
+  'serviceUpgradeForm.validation.unavailable':
+    'A atualização de configuração não está disponível neste serviço.',
+  'serviceUpgradeForm.validation.conflict':
+    'A configuração foi alterada por outro cliente. Reabra o upgrade.',
+  'serviceUpgradeForm.validation.noChange': 'Altere a imagem ou a configuração antes de atualizar.',
   'serviceUpgradeForm.validation.contract': 'O contrato de atualização não está disponível.',
   'serviceUpgradeForm.validation.sidecarContract': 'O contrato dos sidecars não está disponível.',
   'serviceUpgradeForm.validation.image': 'Informe uma imagem válida, sem espaços.',

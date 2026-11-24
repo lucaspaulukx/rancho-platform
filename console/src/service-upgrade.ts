@@ -315,7 +315,7 @@ export function configurationUpgradePayload(
   )
     throw deviceEditing
       ? new DeviceUpgradeValidationError('deviceUpgrade.error.unavailable')
-      : new Error('A atualização de configuração não está disponível neste serviço.');
+      : new ServiceUpgradeValidationError('serviceUpgradeForm.validation.unavailable');
   if (
     bindingsSnapshot(before) !== bindingsSnapshot(fresh) ||
     ((values.editHealthCheck === true ||
@@ -331,7 +331,7 @@ export function configurationUpgradePayload(
   )
     throw deviceEditing
       ? new DeviceUpgradeValidationError('deviceUpgrade.error.conflict')
-      : new Error('A configuração foi alterada por outro cliente. Reabra o upgrade.');
+      : new ServiceUpgradeValidationError('serviceUpgradeForm.validation.conflict');
   const launch = fresh.launchConfig as Record<string, unknown>;
   const editBindings =
     values.editBindings === true ||
@@ -476,7 +476,7 @@ export function configurationUpgradePayload(
   )
     throw deviceEditing
       ? new DeviceUpgradeValidationError('deviceUpgrade.error.noChange')
-      : new Error('Altere a imagem ou a configuração antes de atualizar.');
+      : new ServiceUpgradeValidationError('serviceUpgradeForm.validation.noChange');
   const result = upgradePayload(
     {
       ...fresh,
