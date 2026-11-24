@@ -18,8 +18,8 @@
         "en": "README.md",
         "pt-BR": "docs/pt-BR/overview.md"
       },
-      "reviewedSourceSha256": "5c75fb3c73fc59b52464e9885c24551b42246950bfb538fc83deeef148b8eaff",
-      "reviewedTranslationSha256": "787abf503a30060e9b9aa2d17204c1790a90905da84ccda90774f3b304e7c534"
+      "reviewedSourceSha256": "558a91af337bc45b6b5d6d6515d5986f579d0a01016c17dc383117016e07e918",
+      "reviewedTranslationSha256": "182f7c8d1ac6bd615764546bd815e18bf1bbdd7cc5fd479d0d74ac79665350aa"
     },
     {
       "source": "SECURITY.md",
@@ -88,8 +88,8 @@
         "en": "docs/en/migration-evidence.md",
         "pt-BR": "docs/pt-BR/migration-evidence.md"
       },
-      "reviewedSourceSha256": "3ecdba5c7be55b67ee12c1e6b0088446eeee670cd26aa11253406cedc54319be",
-      "reviewedTranslationSha256": "7cf6c1db7edb4892d625dc854a0c5f88255368eeaca3706ac8cc6544aff2fcc4"
+      "reviewedSourceSha256": "e1bf3ebb5dad5eab66bbc371807229fea33343366116d79c84beac9e19735858",
+      "reviewedTranslationSha256": "065bec23418116f2fab25195d3f1a162902b979095f977e960c7d2118da56522"
     },
     {
       "source": "docs/pt-BR/migration.md",

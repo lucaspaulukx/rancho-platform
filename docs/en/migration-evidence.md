@@ -13,7 +13,7 @@ The two screenshots show the same synthetic `Acme Production` environment before
 
 ## After on Rancho
 
-![Rancho Console showing the restored application stacks](../images/migration-after.png)
+[View the original capture of the restored stacks (Português do Brasil)](../images/migration-after.png).
 
 | Check | Before | After |
 |---|---|---|
