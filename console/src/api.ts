@@ -1,4 +1,4 @@
-import { ApiError, ConsoleRequestError } from './request-errors';
+import { ApiError, AuthenticationError, ConsoleRequestError } from './request-errors';
 import { navigateBrowser } from './browser-navigation';
 export { ApiError } from './request-errors';
 export interface Policy {
@@ -117,12 +117,12 @@ export async function api<T>(
 }
 export async function policy(): Promise<Policy> {
   const r = await fetch('/oidc/status', { cache: 'no-store' });
-  if (!r.ok) throw new Error('Não foi possível carregar a configuração de login.');
+  if (!r.ok) throw new AuthenticationError('auth.methodsUnavailable');
   return r.json();
 }
 const legacyKeys = ['user', 'userType', 'accountId', 'userIdentity', 'backTo'];
 export function acceptToken(token: Token) {
-  if (!token.jwt) throw new Error('O servidor não retornou uma sessão válida.');
+  if (!token.jwt) throw new AuthenticationError('auth.entryFailed');
   document.cookie = `token=${encodeURIComponent(token.jwt)}; Path=/; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
   legacyKeys.forEach((key) => localStorage.removeItem(key));
   Object.entries({
@@ -235,7 +235,7 @@ export async function checkOidcProvider(signal?: AbortSignal) {
   const response = await fetch('/oidc/readiness', { cache: 'no-store', signal });
   const result = await response.json().catch(() => ({}));
   if (!response.ok || result.ready !== true)
-    throw new Error('Não foi possível acessar o provedor de login. Tente novamente.');
+    throw new AuthenticationError('auth.providerUnavailable');
 }
 export async function oidcLogin(preflight = false, signal?: AbortSignal) {
   const currentSession = () =>
