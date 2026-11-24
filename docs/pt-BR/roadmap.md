@@ -115,7 +115,7 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 | OBS03 | Soak do build final | Testes nativos de seis minutos verificaram a reconexão do host e cinco streams concorrentes no navegador com uma imagem do console e um host legado. Logs, terminal e métricas de host, container e serviço rodaram juntos com histórico CSV limitado e limpeza confirmada. As métricas de serviço foram ativadas no navegador de teste. Falta o aceite com flags servidas e topologia final |
 | ADM01 | Contas locais/perfil/senha/lifecycle | Implementado; falta matriz final concorrência/admin OIDC/técnicos |
 | ADM02 | Auditoria/settings/processos/replay | Recortes implementados; falta regressão final permissão/privacidade/erro/efeito nativo |
-| ADM03 | HA/pools | Monitor implementado; falta configuração/failover físico |
+| ADM03 | HA/pools | Monitoramento implementado. O backend moderno rejeita explicitamente a configuração de eventos, locks e opções personalizadas de cluster. Suporte completo a HA exige mudanças no backend e um ensaio físico de failover que verifique a entrega de eventos e a titularidade dos locks entre nós. O ensaio dos artefatos verifica a recusa no perfil de nó único. |
 | ADM04 | Drivers de máquinas/catálogos | CRUD implementado; falta provisionamento/reativação isolados |
 | INT01 | API keys | Gestão implementada; falta aceite técnico completo de escopo/expiração |
 | INT02 | Webhooks/receivers | Opção no Compose moderno para escala de serviços. A entrega física aumentou um serviço Docker 29 de 1 para 2 réplicas e voltou para 1. Chaves inválidas, revogadas e de outro environment foram recusadas. Retentativas e entrega dos outros drivers seguem pendentes |
