@@ -57,38 +57,49 @@ function HostsContext() {
         description={t('hostsPage.environmentDescription')}
       />
     );
-  if (query.isPending || schemas.isPending) return <Loading />;
-  if (query.error || schemas.error)
+  const host = id ? query.data?.hosts.find((value) => value.id === id) : undefined;
+  const suffix = `?env=${encodeURIComponent(app.project.id)}`;
+  const pageHeading = {
+    title: id ? String(host?.name || host?.hostname || id) : t('hostsPage.title'),
+    eyebrow: app.project.name,
+    description: t('hostsPage.description'),
+  };
+  const back = id ? (
+    <Link className="button" to={`/hosts${suffix}`}>
+      {t('hostsPage.back')}
+    </Link>
+  ) : null;
+  const loadError = query.error || schemas.error;
+  if (loadError || query.isPending || schemas.isPending)
     return (
-      <ErrorState
-        error={query.error || schemas.error}
-        retry={() => {
-          void query.refetch();
-          void schemas.refetch();
-        }}
-      />
+      <>
+        <PageHeader {...pageHeading} action={back} />
+        {loadError ? (
+          <ErrorState
+            error={loadError}
+            retry={() => {
+              void query.refetch();
+              void schemas.refetch();
+            }}
+          />
+        ) : (
+          <Loading />
+        )}
+      </>
     );
-  const host = id ? query.data.hosts.find((value) => value.id === id) : undefined;
   const filtered = query.data.hosts.filter((value) =>
     `${value.name || ''} ${value.hostname || ''} ${value.agentIpAddress || ''} ${value.state || ''}`
       .toLocaleLowerCase(locale)
       .includes(search.toLocaleLowerCase(locale)),
   );
   const writable = canManageResource(schemas.data?.host);
-  const suffix = `?env=${encodeURIComponent(app.project.id)}`;
   return (
     <>
       <PageHeader
-        title={id ? String(host?.name || host?.hostname || id) : t('hostsPage.title')}
-        eyebrow={app.project.name}
-        description={t('hostsPage.description')}
+        {...pageHeading}
         action={
           <>
-            {id && (
-              <Link className="button" to={`/hosts${suffix}`}>
-                {t('hostsPage.back')}
-              </Link>
-            )}
+            {back}
             {!id && schemas.data?.registrationToken?.collectionMethods?.includes('POST') && (
               <Button variant="primary" onClick={() => setRegistration(true)}>
                 <Plus size={16} />

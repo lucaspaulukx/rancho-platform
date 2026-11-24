@@ -11,6 +11,10 @@ const fixture = vi.hoisted(() => ({
   project: { id: 'p1', name: 'Laboratório' },
   identity: 'admin',
   readonly: false,
+  inventoryPending: false,
+  schemaError: null as Error | null,
+  retryInventory: vi.fn(),
+  retrySchemas: vi.fn(),
   config: {
     workloadInventoryPagination: false,
     workloadTreePagination: false,
@@ -32,6 +36,8 @@ vi.mock('../hooks/useSchemas', () => ({
     !!schema?.resourceMethods?.includes('PUT'),
   useSchemas: () => ({
     isPending: false,
+    error: fixture.schemaError,
+    refetch: fixture.retrySchemas,
     data: Object.fromEntries(
       ['stack', 'service', 'container'].map((kind) => [
         kind,
@@ -48,9 +54,9 @@ vi.mock('../hooks/useSchemas', () => ({
 }));
 vi.mock('../pages/Workloads', () => ({
   useWorkloadInventory: () => ({
-    isPending: false,
+    isPending: fixture.inventoryPending,
     isFetching: false,
-    refetch: vi.fn(),
+    refetch: fixture.retryInventory,
     data: {
       stacks: [
         { id: 'st1', type: 'stack', accountId: 'p1', name: 'Loja', links: {}, state: 'active' },
@@ -145,6 +151,10 @@ afterEach(() => {
   fixture.config.workloadTreePagination = false;
   fixture.extraContainers = [];
   fixture.readonly = false;
+  fixture.inventoryPending = false;
+  fixture.schemaError = null;
+  fixture.retryInventory.mockClear();
+  fixture.retrySchemas.mockClear();
 });
 function addContainers(length = 50) {
   fixture.extraContainers = Array.from({ length }, (_, index) => ({
@@ -160,6 +170,17 @@ function addContainers(length = 50) {
 }
 
 describe('Workspace unificado', () => {
+  it('keeps the environment heading and offers a retry when schemas fail before inventory loads', () => {
+    fixture.inventoryPending = true;
+    fixture.schemaError = new Error('Fixture schema unavailable');
+    const router = mount();
+    expect(screen.getByRole('heading', { name: 'Laboratório', level: 1 })).toBeVisible();
+    expect(screen.getByRole('alert')).toHaveTextContent('Fixture schema unavailable');
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+    expect(fixture.retryInventory).toHaveBeenCalledOnce();
+    expect(fixture.retrySchemas).toHaveBeenCalledOnce();
+    router.dispose();
+  });
   it('bounds an expanded stack while keeping context and selection across pages', () => {
     fixture.config.workloadTreePagination = true;
     addContainers(105);

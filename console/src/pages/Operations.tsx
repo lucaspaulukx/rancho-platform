@@ -169,16 +169,28 @@ export function OperationsPage({
         description={t('operations.selectEnvironmentHint')}
       />
     );
-  if (query.isPending || schemas.isPending) return <Loading />;
-  if (query.error || schemas.error)
+  const pageHeading = {
+    title: app.project.name,
+    eyebrow: t('operations.eyebrow'),
+    description: t('operations.description'),
+  };
+  const loadError = query.error || schemas.error;
+  if (loadError || query.isPending || schemas.isPending)
     return (
-      <ErrorState
-        error={query.error || schemas.error}
-        retry={() => {
-          void query.refetch();
-          void schemas.refetch();
-        }}
-      />
+      <>
+        <PageHeader {...pageHeading} />
+        {loadError ? (
+          <ErrorState
+            error={loadError}
+            retry={() => {
+              void query.refetch();
+              void schemas.refetch();
+            }}
+          />
+        ) : (
+          <Loading />
+        )}
+      </>
     );
   const inventory = query.data!;
   const selected = [...inventory.stacks, ...inventory.services, ...inventory.containers].filter(
@@ -344,9 +356,7 @@ export function OperationsPage({
   return (
     <>
       <PageHeader
-        title={app.project.name}
-        eyebrow={t('operations.eyebrow')}
-        description={t('operations.description')}
+        {...pageHeading}
         action={
           <>
             {Object.keys(creationLabels).some((kind) =>
