@@ -9,7 +9,7 @@ As duas capturas mostram o mesmo environment sintético `Acme Production` antes 
 
 ## Antes no Rancher 1.6.30
 
-![Rancher clássico mostrando as stacks observability e storefront](../images/migration-before.png)
+[Veja a captura original do Rancher clássico com as stacks observability e storefront (English)](../images/migration-before.png).
 
 ## Depois no Rancho
 

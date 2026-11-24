@@ -1,64 +1,74 @@
 # Rancho Platform
 
-<p align="center"><img src="console/public/brand/rancho-platform.png" width="560" alt="Rancho Platform"></p>
+<p align="center"><img src="console/public/brand/rancho-platform.png" width="420" alt="Rancho Platform"></p>
+
+**A modern Docker/Cattle console built on Rancher 1.6.30.** Operate containers in the context of their stack and environment, with logs, terminal, metrics and lifecycle actions close at hand.
 
 [🇺🇸 English](README.md) · [🇧🇷 Português (Brasil)](docs/pt-BR/overview.md)
 
-[![Console validation](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)
+[![Stable release](https://img.shields.io/github/v/release/lucaspaulukx/rancho-platform)](https://github.com/lucaspaulukx/rancho-platform/releases/latest)
+[![Console CI](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)
 [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-2563eb)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/lucaspaulukx/rancho-platform?include_prereleases)](https://github.com/lucaspaulukx/rancho-platform/releases)
 
-Operate Rancher 1.6 Docker/Cattle stacks, services and containers in one workspace, with logs, terminal and metrics in context.
+[Install](#install-with-docker-compose) · [Migrate from Rancher](docs/en/migration.md) · [Browse images on GHCR](https://github.com/users/lucaspaulukx/packages/container/package/rancho-platform) · [Documentation](#documentation)
 
-[Releases](https://github.com/lucaspaulukx/rancho-platform/releases) · [Migration](docs/en/migration.md) · [Roadmap](docs/en/roadmap.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+![Rancho Console in English showing environments, stacks and service actions](docs/images/console-en-us.png)
 
-> [!IMPORTANT]
-> Rancho is an independent community project built on the Rancher 1.6 engine. The documented Linux amd64 profile uses a single Rancho server, MariaDB 10.11 and Docker 29 Cattle hosts. Rancher and its original contributors retain full credit for the base platform.
+*English console with sample workloads. [See the migration rehearsal](docs/en/migration-evidence.md).*
 
-![Rancho Console showing stacks and services in one workspace](docs/images/migration-after.png)
+## What you can do
 
-Migration evidence captured before the Rancho branding refresh; the current logo is shown above.
+- **Operate workloads.** Browse environments, stacks, services and containers. Open logs, a terminal or metrics and run available actions from the same workspace.
+- **Control access.** Manage local groups and assign permissions by environment. Connect an existing OIDC provider for sign-in. New users without grants see an access message.
+- **Rehearse a migration.** Check the source database, take an encrypted backup and practice restore and rollback on an isolated copy.
 
-[See the migration before and after](docs/en/migration-evidence.md)
+## Install with Docker Compose
 
-## Image security progress
+The [v0.1.0 release](https://github.com/lucaspaulukx/rancho-platform/releases/tag/v0.1.0) includes public images for Linux amd64. This quick start uses one Rancho server, MariaDB 10.11 and Docker Compose v2. Python 3.10+ runs the first administrator setup.
 
-Trivy 0.74.0 scans of the initial lab images and subsequent candidates on November 13, 2026 reported the following critical and high package findings.
+1. Check out the release.
 
-| Image | Initial critical / high | Candidate critical / high |
-|---|---:|---:|
-| Backend on the legacy base | 30 / 88 | 5 / 22 |
-| Experimental single-node backend on Ubuntu 24.04 | — | 0 / 0 |
-| Console gateway | 3 / 73 | 0 / 0 |
-| Optional Keycloak | 8 / 101 | 0 / 6 |
-| Experimental Docker host bootstrap agent | 0 / 27 | 0 / 0 |
+   ```sh
+   git clone --branch v0.1.0 --depth 1 https://github.com/lucaspaulukx/rancho-platform.git
+   cd rancho-platform
+   ```
 
-The initial column shows earlier scans of the corresponding components. Counts depend on the advisory database. The legacy backend base has reached end of support. The separately scanned legacy Cattle system images each reported 27 to 29 high findings. The rebuilt bootstrap and all eight rebuilt Cattle system images reported 0 critical and 0 high in the same advisory database. The derived MariaDB image reduced findings from 1 critical and 25 high to 0 and 0. The optional Keycloak lab image is outside the distributed beta runtime. See the [security roadmap](docs/en/roadmap.md#beta-image-security-gate).
+2. In the repository root, create a private `.env` file with `RANCHO_DB_PASSWORD` set to a strong, unique password. Then pull and start the stack.
 
-## Features
+   ```sh
+   docker compose -f compose.modern.yaml -f compose.registry.yaml pull
+   docker compose -f compose.modern.yaml -f compose.registry.yaml up -d --wait --no-build
+   ```
 
-- **Workload operations** · Inspect stacks and containers, open streams and run available Rancher actions from the same workspace.
-- **Access management** · Assign environment permissions through local groups and optionally sign in with an existing OIDC provider.
-- **Migration rehearsal** · Check the source database, back it up and rehearse restore and rollback in isolation. [Migration guide](docs/en/migration.md)
+3. On a **fresh database**, create the first local administrator. The script prompts for a password. Then open [the local console](http://localhost:18090/console/).
+
+   ```sh
+   python3 scripts/bootstrap_admin.py --origin http://localhost:18090 --username admin
+   ```
+
+[Pin images by digest](docs/en/release.md#install-prebuilt-release-images) or [configure an OIDC provider](docs/en/configuration.md#external-openid-connect-provider). If you already run Rancher 1.6, start with the [migration guide](docs/en/migration.md) and use the administrator from the restored database.
+
+## Compatibility and security
+
+The validated profile uses Linux amd64, a single server and Docker 29 Cattle hosts. The [roadmap](docs/en/roadmap.md) tracks acceptance for HA and in-place upgrades of existing IPsec stacks.
+
+The v0.1.0 candidate scan reported **zero high or critical findings and zero detected secrets** across the 13 published images with the Trivy database used for that scan. The [security roadmap](docs/en/roadmap.md#beta-image-security-gate) records earlier scans, including 30 critical and 88 high findings on the legacy backend base. To report a vulnerability, follow the [security policy](SECURITY.md).
 
 ## Documentation
 
-Choose a language for every maintained guide: [English](docs/en/README.md) · [Português (Brasil)](docs/pt-BR/README.md).
+| I want to… | Read |
+|---|---|
+| Install and verify release images | [Release guide](docs/en/release.md) |
+| Move an existing Rancher installation | [Migration](docs/en/migration.md) · [Recovery](docs/en/recovery.md) |
+| Set up OIDC, permissions or the console | [Configuration](docs/en/configuration.md) |
+| Understand or contribute to the project | [Architecture](docs/en/architecture.md) · [Contributing](CONTRIBUTING.md) · [Testing](docs/en/testing.md) |
 
-Start with [architecture](docs/en/architecture.md), [contributing](CONTRIBUTING.md), [configuration](docs/en/configuration.md), [testing](docs/en/testing.md) and [migration](docs/en/migration.md). Reporting guidance is in [SECURITY.md](SECURITY.md).
-
-## Quick start
-
-```sh
-git clone https://github.com/lucaspaulukx/rancho-platform.git
-cd rancho-platform
-git switch --detach v0.1.0
-```
+[English documentation index](docs/en/README.md) · [Índice em português](docs/pt-BR/README.md)
 
 <details>
 <summary>Build and test the frontend</summary>
 
-For the frontend checks, install Git and Node 24. The backend lab also requires Python 3.10+, Docker in Linux-container mode and PowerShell 7.
+With Node 24 installed, run:
 
 ```sh
 cd console
@@ -67,32 +77,8 @@ npm test
 npm run build
 ```
 
-Official sources are pinned in `upstream.json`; changes live in `patches/`. Ignored source checkouts are generated build inputs, not bundled consultation repositories. The original Ember checkout is not required for frontend builds.
+For backend tests and comparison with classic Rancher, see the [sandbox testing guide](docs/en/testing.md).
 
 </details>
 
-## Install a release
-
-Use the [prebuilt GHCR image guide](docs/en/release.md#install-prebuilt-release-images) for a published runtime version. The Compose stack downloads the server, Console and database images without a local build. Source-only prereleases do not include a runtime image publication. Build instructions remain available in the [single-server guide](docs/en/release.md#experimental-single-node-installation). Follow the [migration guide](docs/en/migration.md) before restoring a Rancher 1.6 database.
-
-## Run the legacy comparison lab
-
-```powershell
-./Start-Lab.ps1 -PlanOnly
-./Start-Lab.ps1
-```
-
-Review the plan and [migration/recovery boundaries](docs/en/migration.md) first. Existing credentials/realm are preserved; generated credentials remain in ignored `.env`. Do not connect a disposable lab to production data or agents.
-
-For a fresh disposable lab, run `python tests/integration.py --local-auth-only` to initialize local authentication. The [external OIDC guide](docs/en/configuration.md#external-openid-connect-provider) explains how to configure SSO. Sign in to the console as `labadmin` using `RANCHER_ADMIN_PASSWORD` from your local `.env`.
-
-- Modern console: http://localhost:18090/console/
-- Classic Rancher: http://localhost:18080/
-
-See the [console guide](console/README.md) for development and [recovery](docs/en/recovery.md) for maintenance. A frontend build does not prove physical effects or complete migration recovery.
-
-## Contribution and license
-
-Use focused branches, relevant validation and reviewable PRs. [AGENTS.md](AGENTS.md) and the optional repository skill provide common AI guidance; AI tools are not required. Update both documentation languages with behavior changes.
-
-Apache-2.0; preserve [LICENSE](LICENSE), [NOTICE](NOTICE), Rancher attribution and dependency notices. Dependency/license/security review and public release remain separate [release gates](docs/en/release.md). Never commit secrets, dumps, private realms, fixture state or session evidence.
+Rancho Platform is an independent community project. Rancher and its contributors are credited for the upstream platform. [Apache-2.0 license](LICENSE) · [Notices](NOTICE)
