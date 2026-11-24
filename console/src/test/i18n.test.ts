@@ -161,6 +161,27 @@ describe('Typed message catalogs', () => {
     expect(russian.t('selection.count', { count: 5 })).toBe('5 элементов');
     expect(() => validateCatalog({ 'selection.count': { one: '{count} item' } })).toThrow();
   });
+  it('uses the correct group member forms in Russian and Ukrainian', () => {
+    const counts = [0, 1, 2, 5, 21, 22];
+    const ru = createTranslator('ru-RU', ruRU);
+    const uk = createTranslator('uk-UA', ukUA);
+    expect(counts.map((count) => ru.t('groups.memberCount', { count }))).toEqual([
+      '0 пользователей',
+      '1 пользователь',
+      '2 пользователя',
+      '5 пользователей',
+      '21 пользователь',
+      '22 пользователя',
+    ]);
+    expect(counts.map((count) => uk.t('groups.memberCount', { count }))).toEqual([
+      '0 користувачів',
+      '1 користувач',
+      '2 користувачі',
+      '5 користувачів',
+      '21 користувач',
+      '22 користувачі',
+    ]);
+  });
   it('uses the one, few and many certificate expiry forms in Russian and Ukrainian previews', () => {
     const ru = createTranslator('ru-RU', ruRU);
     const uk = createTranslator('uk-UA', ukUA);

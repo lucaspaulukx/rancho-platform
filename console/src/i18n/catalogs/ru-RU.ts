@@ -1609,8 +1609,12 @@ export const ruRU = {
     'Разрешение сохранено: {role}. Если оно больше не нужно, удалите связь.',
   'groups.changes':
     'Добавлено участников: {added} · Удалено: {removed} · Изменено разрешений: {changed}',
-  'groups.oneUser': '{count} пользователь',
-  'groups.manyUsers': 'Пользователи: {count}',
+  'groups.memberCount': {
+    one: '{count} пользователь',
+    few: '{count} пользователя',
+    many: '{count} пользователей',
+    other: '{count} пользователя',
+  },
   'groups.deleteTitle': 'Удалить {name}?',
   'groups.groupFallback': 'группу',
   'accessDiagnostics.description': 'Разрешения и роль, определённые сервером Rancher.',

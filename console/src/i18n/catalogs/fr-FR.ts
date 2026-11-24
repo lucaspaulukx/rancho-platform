@@ -1399,8 +1399,7 @@ export const frFR = {
     'Autorisation conservée : {role}. Retirez le lien si vous souhaitez la révoquer.',
   'groups.changes':
     'Membres ajoutés : {added} · retirés : {removed} · autorisations modifiées : {changed}',
-  'groups.oneUser': '{count} utilisateur',
-  'groups.manyUsers': '{count} utilisateurs',
+  'groups.memberCount': { one: '{count} utilisateur', other: '{count} utilisateurs' },
   'groups.deleteTitle': 'Supprimer {name} ?',
   'groups.groupFallback': 'groupe',
 

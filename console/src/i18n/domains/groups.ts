@@ -85,8 +85,7 @@ export const enGroups = {
   'groups.preservedPermission':
     'Permission preserved: {role}. Remove the link if it should not remain.',
   'groups.changes': '{added} members added · {removed} removed · {changed} permissions changed',
-  'groups.oneUser': '{count} user',
-  'groups.manyUsers': '{count} users',
+  'groups.memberCount': { one: '{count} user', other: '{count} users' },
   'groups.deleteTitle': 'Delete {name}?',
   'groups.groupFallback': 'group',
 } as const;
@@ -179,8 +178,7 @@ export const ptGroups = {
     'Permissão preservada: {role}. Remova o vínculo se ele não deve permanecer.',
   'groups.changes':
     '{added} membros adicionados · {removed} removidos · {changed} permissões alteradas',
-  'groups.oneUser': '{count} usuário',
-  'groups.manyUsers': '{count} usuários',
+  'groups.memberCount': { one: '{count} usuário', other: '{count} usuários' },
   'groups.deleteTitle': 'Excluir {name}?',
   'groups.groupFallback': 'grupo',
 } as const;

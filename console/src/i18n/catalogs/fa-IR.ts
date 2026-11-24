@@ -1534,8 +1534,7 @@ export const faIR = {
   'groups.preservedPermission':
     'مجوز حفظ شد: {role}. اگر دیگر به آن نیازی نیست، پیوند را حذف کنید.',
   'groups.changes': '{added} عضو اضافه شد · {removed} عضو حذف شد · {changed} مجوز تغییر کرد',
-  'groups.oneUser': '{count} کاربر',
-  'groups.manyUsers': '{count} کاربر',
+  'groups.memberCount': { other: '{count} کاربر' },
   'groups.deleteTitle': '{name} حذف شود؟',
   'groups.groupFallback': 'گروه',
   'accessDiagnostics.description': 'مجوزها و نقشی که بخش پشتیبان Rancher محاسبه کرده است.',

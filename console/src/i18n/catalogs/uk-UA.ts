@@ -1601,8 +1601,12 @@ export const ukUA = {
   'groups.preservedPermission':
     'Дозвіл збережено: {role}. Якщо він більше не потрібен, видаліть зв’язок.',
   'groups.changes': 'Додано учасників: {added} · Видалено: {removed} · Змінено дозволів: {changed}',
-  'groups.oneUser': '{count} користувач',
-  'groups.manyUsers': 'Користувачі: {count}',
+  'groups.memberCount': {
+    one: '{count} користувач',
+    few: '{count} користувачі',
+    many: '{count} користувачів',
+    other: '{count} користувача',
+  },
   'groups.deleteTitle': 'Видалити {name}?',
   'groups.groupFallback': 'групу',
   'accessDiagnostics.description': 'Дозволи й роль, визначені сервером Rancher.',

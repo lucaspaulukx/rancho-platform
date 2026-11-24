@@ -561,7 +561,7 @@ export function Groups() {
             sortValue: (g) => g.members.length,
             render: (g) => (
               <span>
-                {t(g.members.length === 1 ? 'groups.oneUser' : 'groups.manyUsers', {
+                {t('groups.memberCount', {
                   count: g.members.length,
                 })}
               </span>
