@@ -811,6 +811,10 @@ export const faIR = {
   'selectorRows.removeRow': 'حذف برچسب {index}',
   'selectorRows.remove': 'حذف',
   'selectorRows.add': 'افزودن برچسب',
+  'serviceUpgradeForm.validation.unavailable': 'ارتقای پیکربندی برای این سرویس در دسترس نیست.',
+  'serviceUpgradeForm.validation.conflict':
+    'کارخواه دیگری پیکربندی را تغییر داده است. پنجرهٔ ارتقا را دوباره باز کنید.',
+  'serviceUpgradeForm.validation.noChange': 'پیش از ارتقا، ایمیج یا پیکربندی را تغییر دهید.',
   'serviceUpgradeForm.validation.contract': 'قرارداد ارتقا در دسترس نیست.',
   'serviceUpgradeForm.validation.sidecarContract': 'قرارداد کانتینرهای جانبی در دسترس نیست.',
   'serviceUpgradeForm.validation.image': 'یک ایمیج معتبر و بدون فاصله وارد کنید.',

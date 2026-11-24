@@ -931,6 +931,11 @@ export const ukUA = {
   'selectorRows.removeRow': 'Видалити мітку {index}',
   'selectorRows.remove': 'Видалити',
   'selectorRows.add': 'Додати мітку',
+  'serviceUpgradeForm.validation.unavailable':
+    'Для цього сервісу недоступне оновлення конфігурації.',
+  'serviceUpgradeForm.validation.conflict':
+    'Інший клієнт змінив конфігурацію. Відкрийте вікно оновлення знову.',
+  'serviceUpgradeForm.validation.noChange': 'Перед оновленням змініть образ або конфігурацію.',
   'serviceUpgradeForm.validation.contract': 'Контракт оновлення недоступний.',
   'serviceUpgradeForm.validation.sidecarContract': 'Контракт допоміжних контейнерів недоступний.',
   'serviceUpgradeForm.validation.image': 'Укажіть допустимий образ без пробілів.',

@@ -1994,6 +1994,12 @@ export const huHU = {
   'stackComposeUpgradePanel.validation.invalidParameter':
     'Az egyik stackparaméter kívül esik a szerződésen.',
 
+  'serviceUpgradeForm.validation.unavailable':
+    'A konfiguráció frissítése nem érhető el ehhez a szolgáltatáshoz.',
+  'serviceUpgradeForm.validation.conflict':
+    'Egy másik kliens módosította a konfigurációt. Nyissa meg újra a frissítést.',
+  'serviceUpgradeForm.validation.noChange':
+    'Frissítés előtt módosítsa a lemezképet vagy a konfigurációt.',
   'serviceUpgradeForm.validation.contract': 'A frissítési szerződés nem érhető el.',
   'serviceUpgradeForm.validation.sidecarContract': 'A sidecar-szerződés nem érhető el.',
   'serviceUpgradeForm.validation.image': 'Adjon meg érvényes konténerképet szóközök nélkül.',

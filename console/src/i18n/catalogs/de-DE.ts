@@ -2041,6 +2041,12 @@ export const deDE = {
   'stackComposeUpgradePanel.validation.invalidParameter':
     'Ein Stack-Parameter liegt außerhalb des Vertrags.',
 
+  'serviceUpgradeForm.validation.unavailable':
+    'Konfigurations-Upgrades sind für diesen Dienst nicht verfügbar.',
+  'serviceUpgradeForm.validation.conflict':
+    'Ein anderer Client hat die Konfiguration geändert. Öffnen Sie das Upgrade erneut.',
+  'serviceUpgradeForm.validation.noChange':
+    'Ändern Sie vor dem Upgrade das Image oder die Konfiguration.',
   'serviceUpgradeForm.validation.contract': 'Der Aktualisierungsvertrag ist nicht verfügbar.',
   'serviceUpgradeForm.validation.sidecarContract': 'Der Sidecar-Vertrag ist nicht verfügbar.',
   'serviceUpgradeForm.validation.image': 'Geben Sie ein gültiges Image ohne Leerzeichen ein.',
