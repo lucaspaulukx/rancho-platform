@@ -17,6 +17,8 @@ Opere stacks, serviços e containers do Rancher 1.6 Docker/Cattle em uma só tel
 
 ![Console Rancho mostrando stacks e serviços em uma tela](../images/migration-after.png)
 
+Evidência de migração capturada antes da atualização da identidade Rancho; a logo atual aparece acima.
+
 [Veja o antes e depois da migração](migration-evidence.md)
 
 ## Evolução da segurança das imagens
@@ -50,7 +52,7 @@ Comece por [arquitetura](architecture.md), [contribuição](contributing.md), [c
 ```sh
 git clone https://github.com/lucaspaulukx/rancho-platform.git
 cd rancho-platform
-git switch --detach v0.1.0-beta.1
+git switch --detach v0.1.0
 ```
 
 <details>
