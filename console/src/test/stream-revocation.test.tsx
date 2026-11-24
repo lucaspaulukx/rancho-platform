@@ -89,6 +89,7 @@ function response(data: unknown, status = 200) {
   return { ok: status >= 200 && status < 300, status, json: async () => data } as Response;
 }
 afterEach(() => {
+  localStorage.removeItem('rancho.console.locale.anonymous');
   vi.useRealTimers();
   vi.unstubAllGlobals();
   context.identity = 'fixture';
@@ -102,7 +103,14 @@ afterEach(() => {
 describe('Revogação de conexões já abertas', () => {
   it.each([
     ['en-US', 'Filter logs'],
+    ['de-DE', 'Logs filtern'],
+    ['fr-FR', 'Filtrer les journaux'],
+    ['hu-HU', 'Naplók szűrése'],
+    ['ja-JP', 'ログを絞り込む'],
     ['fa-IR', 'فیلتر کردن لاگ‌ها'],
+    ['ru-RU', 'Фильтровать журналы'],
+    ['uk-UA', 'Фільтрувати журнали'],
+    ['zh-Hans', '筛选日志'],
   ] as const)(
     'preserva a conexão de logs e o filtro ao trocar para %s',
     async (locale, filterLabel) => {
@@ -114,7 +122,12 @@ describe('Revogação de conexões já abertas', () => {
             resource={resource}
             mode="logs"
             onClose={vi.fn()}
-            context={<button onClick={() => setLocale(locale)}>Change language</button>}
+            context={
+              <>
+                <button onClick={() => setLocale(locale)}>Change language</button>
+                <button onClick={() => setLocale('pt-BR')}>Return to Portuguese</button>
+              </>
+            }
           />
         );
       }
@@ -148,9 +161,56 @@ describe('Revogação de conexões já abertas', () => {
       expect(fetcher).not.toHaveBeenCalled();
       expect(screen.getByRole('log')).toHaveAttribute('dir', 'ltr');
       expect(document.documentElement.dir).toBe(locale === 'fa-IR' ? 'rtl' : 'ltr');
+      fireEvent.click(screen.getByRole('button', { name: 'Return to Portuguese' }));
+      expect(await screen.findByRole('textbox', { name: 'Filtrar logs' })).toBe(filter);
+      expect(filter).toHaveValue('fixture');
+      expect(Socket.instances).toEqual([socket]);
       view.unmount();
     },
   );
+  it('keeps an open terminal and its direction when switching to Persian', async () => {
+    const fetcher = setup();
+    function Viewer() {
+      const { setLocale } = useI18n();
+      return (
+        <ResourceStream
+          resource={resource}
+          mode="execute"
+          onClose={vi.fn()}
+          context={<button onClick={() => setLocale('fa-IR')}>Persian</button>}
+        />
+      );
+    }
+    render(
+      <I18nProvider
+        policy={{
+          enabled: true,
+          defaultLocale: 'pt-BR',
+          availableLocales: ['pt-BR', 'fa-IR'],
+          selectable: true,
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <Viewer />
+      </I18nProvider>,
+    );
+    const terminal = screen.getByLabelText('Terminal do container');
+    fireEvent.click(screen.getByRole('button', { name: 'Conectar ao container' }));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(Socket.instances).toHaveLength(1));
+    const [socket] = Socket.instances;
+    fetcher.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'Persian' }));
+    expect(await screen.findByLabelText('ترمینال کانتینر')).toBe(terminal);
+    expect(terminal).toHaveAttribute('dir', 'ltr');
+    expect(document.documentElement.dir).toBe('rtl');
+    expect(Socket.instances).toEqual([socket]);
+    expect(socket.close).not.toHaveBeenCalled();
+    expect(fetcher).not.toHaveBeenCalled();
+  });
   it('updates the metrics panel language without reopening the connection', async () => {
     const fetcher = setup();
     function Viewer() {
