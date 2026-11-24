@@ -7,6 +7,8 @@
 
 ## Scope and acceptance
 
+The published v0.1.0 has been reclassified as a prerelease. Stable publication requires completion of the full roadmap, including interface language coverage and review, final visual acceptance, successful applicable tests, release publication and anonymous access to the tested GHCR images. Passing an image scan or migration rehearsal completes only that check. Keep the translation preview warning while language acceptance remains open.
+
 The target is Rancher1.6 Docker/Cattle operated through a shared contextual console, optional local groups/OIDC and a recoverable migration path. The project is under development, not production-certified. A feature implemented in tested slices is not an accepted entire phase. Unit-test counts do not measure parity.
 
 Statuses below describe maintained capabilities and remaining acceptance, not an execution diary. Keep stable task IDs when opening issues/PRs. Changes require explicit flag/default/off behavior, current contracts, relevant tests, documentation in both languages and cleanup. Provider-specific acceptance may be conditional; do not replace missing physical evidence with mocks and mark it complete.

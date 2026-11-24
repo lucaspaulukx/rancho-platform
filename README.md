@@ -6,7 +6,7 @@
 
 **Choose your documentation language** · [🇺🇸 English](README.md) · [🇧🇷 Português (Brasil)](docs/pt-BR/overview.md)
 
-[![Stable release](https://img.shields.io/github/v/release/lucaspaulukx/rancho-platform)](https://github.com/lucaspaulukx/rancho-platform/releases/latest)
+[![Preview release](https://img.shields.io/github/v/release/lucaspaulukx/rancho-platform?include_prereleases)](https://github.com/lucaspaulukx/rancho-platform/releases)
 [![Console CI](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml/badge.svg?branch=main)](https://github.com/lucaspaulukx/rancho-platform/actions/workflows/console-validation.yml)
 [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-2563eb)](LICENSE)
 
@@ -28,6 +28,9 @@
 - **Rehearse a migration.** Check the source database, take an encrypted backup and practice restore and rollback on an isolated copy.
 
 ## Install with Docker Compose
+
+> [!WARNING]
+> The published v0.1.0 is a preview. Stable status was withdrawn while language completion, visual acceptance and the remaining roadmap work are completed. Follow the [acceptance roadmap](docs/en/roadmap.md).
 
 The [v0.1.0 release](https://github.com/lucaspaulukx/rancho-platform/releases/tag/v0.1.0) includes public images for Linux amd64. This quick start uses one Rancho server, MariaDB 10.11 and Docker Compose v2. Python 3.10+ runs the first administrator setup.
 

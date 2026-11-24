@@ -3060,6 +3060,28 @@ input[type='checkbox']:focus-visible {
   inline-size: auto;
   max-inline-size: 180px;
   min-block-size: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.language-selector select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.language-selector select option {
+  background: var(--surface);
+  color: var(--text);
+}
+:root[data-theme='dark'] .language-selector select {
+  color-scheme: dark;
+}
+:root[data-theme='light'] .language-selector select {
+  color-scheme: light;
 }
 .language-selector > .muted {
   flex-basis: 100%;

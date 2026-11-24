@@ -7,6 +7,8 @@
 
 ## Escopo e aceite
 
+A v0.1.0 publicada foi reclassificada como pré-release. A publicação estável exige a conclusão de todo o roadmap, incluindo cobertura e revisão dos idiomas da interface, aceite visual final, testes aplicáveis aprovados, release publicada e acesso anônimo às imagens testadas no GHCR. Uma varredura de imagens ou um ensaio de migração aprovado conclui apenas aquela verificação. Mantenha o aviso de prévia das traduções enquanto o aceite dos idiomas estiver pendente.
+
 O alvo é Rancher1.6 Docker/Cattle operado por console contextual comum, grupos locais/OIDC opcionais e migração recuperável. O projeto está em desenvolvimento, sem certificação produtiva. Função implementada em recortes testados não encerra fase inteira. Contagem de testes não mede paridade.
 
 Estados descrevem capacidades mantidas e aceites restantes, não diário de execução. Preserve IDs ao abrir issues/PRs. Mudanças exigem flag/default/off explícitos, contratos atuais, testes pertinentes, docs nos dois idiomas e cleanup. Aceite dependente de provedor pode ser condicional; não substitua prova física por mock para marcar conclusão.
