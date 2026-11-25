@@ -118,7 +118,9 @@ A restauração do disco anterior e do banco correspondente no endereço origina
 
 ### Redes IPsec existentes
 
-Em um laboratório separado com dois hosts, a stack IPsec existente transportou tráfego HTTP entre dois workloads no Docker 29.9.2 antes da atualização. A atualização nativa do sidekick do roteador tentou substituir o holder no primeiro host, embora a imagem do holder fosse a mesma. O substituto ficou sem iniciar. O tráfego entre hosts voltou após a inicialização manual do holder e dos sidekicks originais, enquanto o serviço ainda informava `rolling-back`. Preserve a rede original e use um environment separado para o catálogo moderno até validar a atualização e a reversão no próprio ambiente.
+Em um laboratório separado com dois hosts, a stack IPsec existente transportou tráfego HTTP entre dois workloads no Docker 29.9.2 antes da atualização. A primeira solicitação de upgrade nativo incluiu o sidekick do roteador e a configuração primária inalterada. O Cattle atribuiu uma nova versão de configuração ao holder e tentou substituí-lo no primeiro host. O substituto ficou sem iniciar. O tráfego entre hosts voltou após a inicialização manual do holder e dos sidekicks originais, enquanto o serviço ainda informava `rolling-back`. Um ensaio seguinte enviou apenas a configuração secundária modificada. Em um serviço com escala zero, o upgrade parcial e o rollback preservaram as versões das configurações do container primário e do outro sidekick. O ensaio com dois hosts usou as imagens atestadas do backend e do roteador do commit `cf49b7c` e confirmou tráfego HTTP e atividade XFRM antes da troca. Os dois holders continuavam em execução quando o primeiro roteador novo passou para `starting`. O serviço ficou em `upgrading` durante a janela do teste, que encerrou antes do rollback físico.
+
+Preserve a rede original e use um environment separado para o catálogo moderno até validar a atualização e a reversão no próprio ambiente.
 
 #### Troca de tráfego para um environment separado
 
