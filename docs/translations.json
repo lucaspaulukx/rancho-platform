@@ -98,8 +98,8 @@
         "pt-BR": "docs/pt-BR/migration.md",
         "en": "docs/en/migration.md"
       },
-      "reviewedSourceSha256": "cfe3a1fa39bc95c459bd46fbd678323cabd90ca96b0ec0ba44d2f95385cb2630",
-      "reviewedTranslationSha256": "8344774c844377d2d94f0b1f44e877f4571ac1eb2bf759443659dd14766dd5d3"
+      "reviewedSourceSha256": "4bf8c2dae4ffeb421b72f30c4979205457f7b2c6e791c465d0648e0eafd859b0",
+      "reviewedTranslationSha256": "9cad46538c38bef35da56be14dd0475dd6df9fd812f69f3e43159367d966e745"
     },
     {
       "source": "docs/pt-BR/recovery.md",
@@ -128,8 +128,8 @@
         "pt-BR": "docs/pt-BR/roadmap.md",
         "en": "docs/en/roadmap.md"
       },
-      "reviewedSourceSha256": "2fd37e19bd1d2b3b0600bec7bfc5d16fc72ad2613862bbff32016e17de8d9f75",
-      "reviewedTranslationSha256": "71d557b2c1ca31bc808e6f9086440ac40ad39a17d1a325d8df9df5b97cc8d95e"
+      "reviewedSourceSha256": "f6bc90b535545d69b1ec01c2824ccefaeb8f247b50a95b2b885e5bdfe843fcdd",
+      "reviewedTranslationSha256": "52694ec16225433926ae3de8e67c770030fcfce77e02c505a90076469d6c8006"
     },
     {
       "source": "docs/pt-BR/security-model.md",
