@@ -99,8 +99,16 @@ export async function api<T>(
       ...headers,
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
+  }).catch((error: unknown) => {
+    if (signal?.aborted) throw error;
+    throw new ConsoleRequestError('requestError.failed');
   });
-  const data = await response.json().catch(() => ({}));
+  const data = await response.json().catch((error: unknown) => {
+    if (signal?.aborted) throw error;
+    if (response.ok && error instanceof TypeError)
+      throw new ConsoleRequestError('requestError.failed');
+    return {};
+  });
   if (!response.ok) {
     if (
       response.status === 401 &&

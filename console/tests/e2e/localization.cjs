@@ -589,6 +589,27 @@ async function main() {
     failedInventory.url() === hostsUrl &&
     !(await inventoryAlert.textContent()).includes('synthetic-private-pagination') &&
     result.blockedRequests === 0);
+  result.stage = 'inventory-transport-retry';
+  const unavailableInventory = await page(authenticated);
+  const hostsEndpoint = origin + '/v2-beta/projects/1a12/hosts?limit=100';
+  await unavailableInventory.route(hostsEndpoint, (route) => route.abort('connectionreset'));
+  await unavailableInventory.goto(hostsUrl);
+  await unavailableInventory.locator('.language-selector select').selectOption('en-US');
+  const transportAlert = unavailableInventory.locator('main .error-state').getByRole('alert');
+  await transportAlert.getByText('The request could not be completed.', { exact: true }).waitFor();
+  await unavailableInventory.locator('.language-selector select').selectOption('fa-IR');
+  await transportAlert.getByText('انجام درخواست ممکن نبود.', { exact: true }).waitFor();
+  check('an interrupted API connection keeps the environment and translates the visible error',
+    unavailableInventory.url() === hostsUrl &&
+    await unavailableInventory.getByRole('heading', { name: 'میزبان‌ها', exact: true }).isVisible());
+  await unavailableInventory.unroute(hostsEndpoint);
+  await unavailableInventory.getByRole('button', { name: 'تلاش دوباره', exact: true }).click();
+  await unavailableInventory.getByRole('heading', { name: 'میزبانی یافت نشد', exact: true }).waitFor();
+  check('retry fetches the real inventory in the same language and environment',
+    unavailableInventory.url() === hostsUrl &&
+    await unavailableInventory.locator('html').getAttribute('lang') === 'fa-IR' &&
+    !await transportAlert.isVisible());
+  await unavailableInventory.close();
   result.stage = 'group-role-translation';
   const groupPage = await page(authenticated);
   const groupsUrl = origin + '/console/groups?env=1a12';
