@@ -269,24 +269,57 @@ function ResourceContext({ item }: { item: NavItem }) {
         description={t('resourcesPage.selectDescription')}
       />
     );
-  if (schemas.isPending || (query.isPending && !!collection && (!!params.id || !workloadKind)))
-    return <Loading />;
-  if (schemas.error || query.error)
+  const pageHeading = {
+    title: resource?.name || resource?.id || params.id || pageItem.title,
+    description: params.id
+      ? `${pageItem.title} · ${(scoped && app.project?.name) || t('resourcesPage.instance')}`
+      : pageItem.description,
+    eyebrow: scoped ? app.project?.name : undefined,
+  };
+  const back = params.id ? (
+    <Button
+      onClick={() =>
+        navigate({
+          pathname: item.path,
+          search: scoped && app.project ? `?env=${encodeURIComponent(app.project.id)}` : '',
+        })
+      }
+    >
+      <ArrowLeft size={16} />
+      {t('resourcesPage.back')}
+    </Button>
+  ) : null;
+  const loadError = schemas.error || query.error;
+  if (
+    loadError ||
+    schemas.isPending ||
+    (query.isPending && !!collection && (!!params.id || !workloadKind))
+  )
     return (
-      <ErrorState
-        error={schemas.error || query.error}
-        retry={() => {
-          void schemas.refetch();
-          void query.refetch();
-        }}
-      />
+      <>
+        <PageHeader {...pageHeading} action={back} />
+        {loadError ? (
+          <ErrorState
+            error={loadError}
+            retry={() => {
+              if (schemas.error) void schemas.refetch();
+              if (query.error && collection) void query.refetch();
+            }}
+          />
+        ) : (
+          <Loading />
+        )}
+      </>
     );
   if (!schema || !collection)
     return (
-      <Empty
-        title={t('resourcesPage.unavailable')}
-        description={t('resourcesPage.unavailableDescription')}
-      />
+      <>
+        <PageHeader {...pageHeading} action={back} />
+        <Empty
+          title={t('resourcesPage.unavailable')}
+          description={t('resourcesPage.unavailableDescription')}
+        />
+      </>
     );
   const rows = !params.id ? (query.data as Collection<Resource> | undefined)?.data || [] : [];
   const actionSchema = action
@@ -298,13 +331,7 @@ function ResourceContext({ item }: { item: NavItem }) {
   return (
     <>
       <PageHeader
-        title={resource?.name || resource?.id || pageItem.title}
-        description={
-          resource
-            ? `${pageItem.title} · ${scoped ? app.project?.name || t('resourcesPage.instance') : t('resourcesPage.instance')}`
-            : pageItem.description
-        }
-        eyebrow={scoped ? app.project?.name : undefined}
+        {...pageHeading}
         action={
           <>
             {!resource &&
@@ -317,10 +344,7 @@ function ResourceContext({ item }: { item: NavItem }) {
               )}
             {resource ? (
               <>
-                <Button onClick={() => navigate(item.path)}>
-                  <ArrowLeft size={16} />
-                  {t('resourcesPage.back')}
-                </Button>
+                {back}
                 {item.schema === 'project' && (
                   <Button
                     variant="primary"
