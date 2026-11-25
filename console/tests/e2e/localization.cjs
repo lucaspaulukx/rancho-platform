@@ -172,8 +172,27 @@ async function main() {
     }
     return fits;
   }
-  await publicPage.getByRole('combobox', { name: 'Language', exact: true }).selectOption('fr-FR');
+  result.stage = 'retry-language-download';
+  let frenchRequests = 0;
+  await publicPage.route(/\/console\/assets\/fr-FR-[^/]+\.js$/, async (route) => {
+    frenchRequests++;
+    if (frenchRequests === 1)
+      await route.fulfill({ status: 503, body: 'Temporary fixture failure' });
+    else await route.continue();
+  });
+  const englishLanguage = publicPage.getByRole('combobox', { name: 'Language', exact: true });
+  await englishLanguage.selectOption('fr-FR');
+  const languageRetry = publicPage.locator('.language-selector').getByRole('button', { name: 'Try again', exact: true });
+  await languageRetry.waitFor();
+  check('failed catalog leaves the current language active',
+    await publicPage.locator('html').getAttribute('lang') === 'en-US' &&
+    await englishLanguage.inputValue() === 'en-US');
+  await languageRetry.press('Enter');
   await publicPage.getByRole('heading', { name: 'Accédez à votre environnement', exact: true }).waitFor();
+  check('keyboard retry fetches the catalog again and keeps focus in the selector',
+    frenchRequests === 2 &&
+    await publicPage.getByRole('combobox', { name: 'Langue', exact: true })
+      .evaluate((selector) => selector === document.activeElement));
   check('French preview translates sign-in while preserving both drafts and the URL',
     await loginFitsMobile() &&
     await publicPage.locator('html').getAttribute('lang') === 'fr-FR' &&
