@@ -530,6 +530,7 @@ export const ruRU = {
   'shell.navigation.close': 'Закрыть навигацию',
   'shell.navigation.main': 'Основная навигация',
   'shell.navigation.home': 'Главная страница',
+  'shell.breadcrumb.root': 'Консоль',
   'shell.navigation.expand': 'Развернуть меню',
   'shell.navigation.collapse': 'Свернуть меню',
   'shell.navigation.open': 'Открыть навигацию',

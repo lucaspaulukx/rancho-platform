@@ -403,6 +403,7 @@ export const jaJP = {
   'shell.navigation.close': 'ナビゲーションを閉じる',
   'shell.navigation.main': 'メインナビゲーション',
   'shell.navigation.home': 'ホームページ',
+  'shell.breadcrumb.root': 'コンソール',
   'shell.navigation.expand': 'メニューを展開',
   'shell.navigation.collapse': 'メニューを折りたたむ',
   'shell.navigation.open': 'ナビゲーションを開く',

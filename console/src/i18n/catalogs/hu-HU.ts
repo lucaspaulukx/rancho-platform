@@ -2895,6 +2895,7 @@ export const huHU = {
   'shell.navigation.close': 'Navigáció bezárása',
   'shell.navigation.main': 'Fő navigáció',
   'shell.navigation.home': 'Kezdőlap',
+  'shell.breadcrumb.root': 'Konzol',
   'shell.navigation.expand': 'Menü kibontása',
   'shell.navigation.collapse': 'Menü összecsukása',
   'shell.navigation.open': 'Navigáció megnyitása',

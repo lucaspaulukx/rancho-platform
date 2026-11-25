@@ -2926,6 +2926,7 @@ export const frFR = {
   'shell.navigation.close': 'Fermer la navigation',
   'shell.navigation.main': 'Navigation principale',
   'shell.navigation.home': 'Page d’accueil',
+  'shell.breadcrumb.root': 'Console',
   'shell.navigation.expand': 'Développer le menu',
   'shell.navigation.collapse': 'Réduire le menu',
   'shell.navigation.open': 'Ouvrir la navigation',

@@ -426,10 +426,11 @@ async function main() {
     await about.getByText('Rancher 1.6.30', { exact: true }).isVisible());
   await about.getByRole('button', { name: 'Close dialog', exact: true }).click();
   result.stage = 'authenticated-rtl';
-  for (const [locale, stacks, active] of [
-    ['de-DE', 'Stacks', 'Aktiv'], ['fr-FR', 'Stacks', 'Actif'], ['ja-JP', 'スタック', 'アクティブ'],
-    ['zh-Hans', '堆栈', '已激活'], ['ru-RU', 'Стеки', 'Активно'], ['uk-UA', 'Стеки', 'Активно'],
-    ['hu-HU', 'Stackek', 'Aktív'], ['fa-IR', 'پشته‌ها', 'فعال'],
+  for (const [locale, stacks, active, consoleLabel] of [
+    ['de-DE', 'Stacks', 'Aktiv', 'Konsole'], ['fr-FR', 'Stacks', 'Actif', 'Console'],
+    ['ja-JP', 'スタック', 'アクティブ', 'コンソール'], ['zh-Hans', '堆栈', '已激活', '控制台'],
+    ['ru-RU', 'Стеки', 'Активно', 'Консоль'], ['uk-UA', 'Стеки', 'Активно', 'Консоль'],
+    ['hu-HU', 'Stackek', 'Aktív', 'Konzol'], ['fa-IR', 'پشته‌ها', 'فعال', 'کنسول'],
   ]) {
     await workspace.locator('.language-selector select').selectOption(locale);
     await workspace.locator(`html[lang="${locale}"]`).waitFor();
@@ -441,6 +442,11 @@ async function main() {
     const state = workspace.locator('.resource-summary .badge').getByText(active, { exact: true });
     await state.waitFor();
     check(`${locale} translates the native environment state badge`, await state.isVisible());
+    const breadcrumbs = workspace.locator('.breadcrumbs');
+    check(`${locale} translates the shared breadcrumb and marks the current page`,
+      await breadcrumbs.getByText(consoleLabel, { exact: true }).isVisible() &&
+      await breadcrumbs.locator('[aria-current="page"]').textContent() ===
+        await workspace.locator('.sidebar a.active').textContent());
   }
   await workspace.locator('.language-selector select').selectOption('fa-IR');
   await workspace.getByRole('combobox', { name: 'زبان', exact: true }).waitFor();

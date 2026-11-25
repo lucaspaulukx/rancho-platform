@@ -2963,6 +2963,7 @@ export const deDE = {
   'shell.navigation.close': 'Navigation schließen',
   'shell.navigation.main': 'Hauptnavigation',
   'shell.navigation.home': 'Startseite',
+  'shell.breadcrumb.root': 'Konsole',
   'shell.navigation.expand': 'Menü erweitern',
   'shell.navigation.collapse': 'Menü reduzieren',
   'shell.navigation.open': 'Navigation öffnen',
