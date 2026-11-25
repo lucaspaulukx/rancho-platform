@@ -1,10 +1,12 @@
 import { Languages } from 'lucide-react';
-import { useId } from 'react';
+import { useId, useRef } from 'react';
 import { useI18n } from '../i18n/provider';
 import { localeInventory, type Locale } from '../i18n/locales';
 
 export function LanguageSelector() {
   const id = useId();
+  const select = useRef<HTMLSelectElement>(null);
+  const status = useRef<HTMLSpanElement>(null);
   const { policy, locale, setLocale, preview, catalogFailed, retryLocale, t } = useI18n();
   if (!policy.enabled) return null;
   const selectable = policy.selectable && policy.availableLocales.length > 1;
@@ -18,6 +20,7 @@ export function LanguageSelector() {
             {t('language.label')}
           </label>
           <select
+            ref={select}
             id={id}
             value={locale}
             onChange={(event) => setLocale(event.target.value as Locale)}
@@ -38,11 +41,18 @@ export function LanguageSelector() {
           {t('language.preview')}
         </span>
       )}
-      <span className="muted language-status" role="status">
+      <span ref={status} tabIndex={-1} className="muted language-status" role="status">
         {catalogFailed ? t('localeLoad.failed') : null}
       </span>
       {catalogFailed && (
-        <button type="button" className="button secondary" onClick={retryLocale}>
+        <button
+          type="button"
+          className="button secondary"
+          onClick={() => {
+            (select.current ?? status.current)?.focus({ preventScroll: true });
+            retryLocale();
+          }}
+        >
           {t('ui.retry')}
         </button>
       )}
