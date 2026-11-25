@@ -120,7 +120,9 @@ A restauração do disco anterior e do banco correspondente no endereço origina
 
 Em um laboratório separado com dois hosts, a stack IPsec existente transportou tráfego HTTP entre dois workloads no Docker 29.9.2 antes da atualização. A primeira solicitação de upgrade nativo incluiu o sidekick do roteador e a configuração primária inalterada. O Cattle atribuiu uma nova versão de configuração ao holder e tentou substituí-lo no primeiro host. O substituto ficou sem iniciar. O tráfego entre hosts voltou após a inicialização manual do holder e dos sidekicks originais, enquanto o serviço ainda informava `rolling-back`. Um ensaio seguinte enviou apenas a configuração secundária modificada. Em um serviço com escala zero, o upgrade parcial e o rollback preservaram as versões das configurações do container primário e do outro sidekick. O ensaio com dois hosts usou as imagens atestadas do backend e do roteador do commit `cf49b7c` e confirmou tráfego HTTP e atividade XFRM antes da troca. Os dois holders continuavam em execução quando o primeiro roteador novo passou para `starting`. O serviço ficou em `upgrading` durante a janela do teste, que encerrou antes do rollback físico.
 
-Preserve a rede original e use um environment separado para o catálogo moderno até validar a atualização e a reversão no próprio ambiente.
+Uma nova execução do mesmo upgrade restrito ao roteador chegou a `upgraded` nos dois hosts e voltou a `active` com o roteador original após o rollback. Os dois holders mantiveram seus IDs de container Docker e a versão da configuração primária. Os workloads mantiveram seus IDs de container e trocaram HTTP após as duas transições, com pacotes registrados pelo XFRM nos dois hosts. A interrupção da execução anterior deixa a repetibilidade em aberto. As imagens do holder e do CNI permaneceram nas versões originais neste ensaio.
+
+Use o procedimento de environment separado abaixo para adotar o catálogo moderno completo. A migração de toda a stack no próprio ambiente ainda precisa de validação.
 
 #### Troca de tráfego para um environment separado
 
