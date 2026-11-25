@@ -108,6 +108,8 @@ Implementar primeiro o contrato compartilhado, depois configuração/seleção e
 
 ## Observabilidade, administração e integrações
 
+Nas imagens atestadas de `cf49b7c`, o Chromium recebeu novas linhas de um workload real em Docker 29 ao trocar o idioma com o painel de logs aberto, de português para inglês, depois persa e de volta para português. O navegador preservou a conexão, o filtro e a URL do environment. As linhas permaneceram da esquerda para a direita, e Escape devolveu o foco à ação de logs. Isso confirma a troca de idioma com logs reais nesse perfil. Terminal e métricas ainda precisam da validação nativa final de troca de idioma.
+
 | ID | Capacidade | Estado e gate restante |
 |---|---|---|
 | OBS01 | Logs/terminal/métricas contextuais | Recortes reais implementados; falta regressão final foco/resize/buffer/environment |
