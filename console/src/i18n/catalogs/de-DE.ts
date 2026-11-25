@@ -1428,8 +1428,7 @@ export const deDE = {
     'Berechtigung beibehalten: {role}. Entfernen Sie die Zuordnung, wenn sie entfallen soll.',
   'groups.changes':
     'Mitglieder hinzugefügt: {added} · entfernt: {removed} · Berechtigungen geändert: {changed}',
-  'groups.oneUser': '{count} Benutzer',
-  'groups.manyUsers': '{count} Benutzer',
+  'groups.memberCount': { other: '{count} Benutzer' },
   'groups.deleteTitle': '{name} löschen?',
   'groups.groupFallback': 'Gruppe',
 

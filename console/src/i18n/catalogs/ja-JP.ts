@@ -1550,8 +1550,7 @@ export const jaJP = {
   'groups.preservedPermission':
     '権限は保持されています：{role}。不要な場合は関連付けを削除してください。',
   'groups.changes': 'メンバー {added} 人を追加 · {removed} 人を削除 · 権限 {changed} 件を変更',
-  'groups.oneUser': 'ユーザー {count} 人',
-  'groups.manyUsers': 'ユーザー {count} 人',
+  'groups.memberCount': { other: 'ユーザー {count} 人' },
   'groups.deleteTitle': '{name} を削除しますか？',
   'groups.groupFallback': 'グループ',
   'accessDiagnostics.description': 'Rancher のバックエンドが算出した付与権限とロールです。',

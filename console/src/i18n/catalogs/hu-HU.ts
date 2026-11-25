@@ -1391,8 +1391,7 @@ export const huHU = {
     'A jogosultság megmaradt: {role}. A visszavonáshoz távolítsa el a kapcsolatot.',
   'groups.changes':
     '{added} tag hozzáadva · {removed} eltávolítva · {changed} jogosultság módosult',
-  'groups.oneUser': '{count} felhasználó',
-  'groups.manyUsers': '{count} felhasználó',
+  'groups.memberCount': { other: '{count} felhasználó' },
   'groups.deleteTitle': 'Törli a következőt: {name}?',
   'groups.groupFallback': 'csoport',
 
