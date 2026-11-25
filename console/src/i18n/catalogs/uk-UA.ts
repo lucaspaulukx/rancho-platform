@@ -529,6 +529,7 @@ export const ukUA = {
   'shell.navigation.close': 'Закрити навігацію',
   'shell.navigation.main': 'Основна навігація',
   'shell.navigation.home': 'Головна сторінка',
+  'shell.breadcrumb.root': 'Консоль',
   'shell.navigation.expand': 'Розгорнути меню',
   'shell.navigation.collapse': 'Згорнути меню',
   'shell.navigation.open': 'Відкрити навігацію',

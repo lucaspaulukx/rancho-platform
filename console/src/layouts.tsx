@@ -296,9 +296,9 @@ export function AppShell() {
               <Menu size={22} />
             </Button>
             <div className="breadcrumbs">
-              <span>Console</span>
-              <span>/</span>
-              <strong>
+              <span>{t('shell.breadcrumb.root')}</span>
+              <span aria-hidden="true">/</span>
+              <strong aria-current="page">
                 {pathname === '/no-access'
                   ? t('shell.access.pending')
                   : current?.title || t('shell.nav.overview.title')}

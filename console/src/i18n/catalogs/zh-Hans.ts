@@ -381,6 +381,7 @@ export const zhHans = {
   'shell.navigation.close': '关闭导航',
   'shell.navigation.main': '主导航',
   'shell.navigation.home': '主页',
+  'shell.breadcrumb.root': '控制台',
   'shell.navigation.expand': '展开菜单',
   'shell.navigation.collapse': '收起菜单',
   'shell.navigation.open': '打开导航',

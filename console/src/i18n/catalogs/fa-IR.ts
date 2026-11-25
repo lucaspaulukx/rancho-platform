@@ -402,6 +402,7 @@ export const faIR = {
   'shell.navigation.close': 'بستن پیمایش',
   'shell.navigation.main': 'پیمایش اصلی',
   'shell.navigation.home': 'صفحهٔ اصلی',
+  'shell.breadcrumb.root': 'کنسول',
   'shell.navigation.expand': 'باز کردن منو',
   'shell.navigation.collapse': 'جمع کردن منو',
   'shell.navigation.open': 'باز کردن پیمایش',
