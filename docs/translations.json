@@ -148,8 +148,8 @@
         "pt-BR": "docs/pt-BR/testing.md",
         "en": "docs/en/testing.md"
       },
-      "reviewedSourceSha256": "0e414087762133ba4af13ba57c215b240ae3e82e2e76ea030613f2d6a0641642",
-      "reviewedTranslationSha256": "187220d68e8d1416b1d92eee7f67d7dbe1279acb19e45f499d6b24ec99219593"
+      "reviewedSourceSha256": "1426beaf85f7d6449c14897d75a282bc7e2723f2b51f9dcb1863f0909a7c3158",
+      "reviewedTranslationSha256": "1474b1d5775f609d84817f28aa46a34319a1bcc5bd90a111e886b96539e186d8"
     },
     {
       "source": "docs/pt-BR/ui-guidelines.md",
