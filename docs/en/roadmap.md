@@ -108,7 +108,7 @@ Implement the shared contract first, then configuration/selection and full pt-BR
 
 ## Observability, administration and integrations
 
-On the attested `cf49b7c` image set, Chromium received new lines from a real Docker 29 workload after switching an open log panel from Portuguese to English, then Persian and back to Portuguese. The browser retained the same connection, filter and environment URL. Log contents stayed left to right, and Escape returned focus to the log action. This confirms language switching for live logs in that profile. Terminal and metrics still need their final native language-switch review.
+On the attested `cf49b7c` image set, Chromium received new lines from a real Docker 29 workload after switching an open log panel from Portuguese to English, then Persian and back to Portuguese. The browser retained the same connection, filter and environment URL. Log contents stayed left to right, and Escape returned focus to the log action. The native terminal returned fresh command output after a switch to Persian without reconnecting and kept its left-to-right direction. Native container metrics continued receiving timestamped samples after a switch to English on the same connection. The remaining soak, deployment topology and final artifact checks stay open.
 
 | ID | Capability | State and remaining gate |
 |---|---|---|
