@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run check:locales
+RUN npm run check:locales && npm run check:ui-literals
 RUN npm test
 RUN npm run build
 

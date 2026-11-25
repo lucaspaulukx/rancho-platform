@@ -78,8 +78,8 @@
         "pt-BR": "docs/pt-BR/documentation.md",
         "en": "docs/en/documentation.md"
       },
-      "reviewedSourceSha256": "dbd800597a1d2e501c70031cf366be66726dfd5ee4a02f523ed645ad5097cdf6",
-      "reviewedTranslationSha256": "ef20451bfee97247dc87026a0f6e1cefb9249c12a4d9555bd3cf92241e314c80"
+      "reviewedSourceSha256": "7523592cf6d2957e895b5718362d0c1dec98f1dad25581b5c2a8ce35e9d38169",
+      "reviewedTranslationSha256": "1cf38a5c9384c4bde326741a42fa7d8813a9226903bfced9607411a46d697b8a"
     },
     {
       "source": "docs/pt-BR/migration-evidence.md",

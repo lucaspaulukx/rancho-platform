@@ -31,7 +31,6 @@ export function Brand({ compact = false }: { compact?: boolean; inverse?: boolea
         </span>
         <img className="rancher-wordmark" src="/console/brand/rancher-wordmark.svg" alt="Rancher" />
       </div>
-      {config.branding && <span className="community-signature">Community Console</span>}
     </div>
   );
 }

@@ -61,6 +61,9 @@ jobs:
       - name: Check registered translation catalogs
         working-directory: console
         run: npm run check:locales
+      - name: Check direct JSX interface strings
+        working-directory: console
+        run: npm run check:ui-literals
       - name: Run console component and contract tests
         working-directory: console
         run: npm test
