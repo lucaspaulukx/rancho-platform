@@ -17,7 +17,7 @@ Statuses below describe maintained capabilities and remaining acceptance, not an
 
 | ID | Capability | State and remaining gate |
 |---|---|---|
-| UX01 | Shell, branding, navigation, environment selector, login/no-access | Implemented; the shared header wraps action buttons on narrow screens. A browser check covers all 21 primary navigation routes in English and Persian at 320 and 390 px. Final all-route/theme regression remains |
+| UX01 | Shell, branding, navigation, environment selector, login/no-access | Implemented; the shared header wraps action buttons on narrow screens. Chromium checks all 21 primary navigation routes at 320 px in all ten locales and at 390 px in English and Persian. The check covers page and action overflow and retention of the environment URL. Final regression across all routes and themes remains |
 | UX02 | Tables, filters, selection, menus, drawers, review/drafts | Implemented slices. Mobile keyboard navigation through the Operations menu and detail drawer verifies disabled-action skipping and focus restoration. The remaining keyboard, partial-error and context matrix is pending |
 | UX03 | Theme tokens and overrides | Implemented; verify effective contrast across final routes |
 | UX04 | Old-tab/chunk recovery and retained assets | Old tabs fetched their original lazy chunks during an isolated frontend upgrade and rollback. A fresh document loaded the restored image. Final release artifact and topology acceptance remain |

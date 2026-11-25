@@ -70,6 +70,19 @@ async function insideViewport(select) {
   return !!box && box.x >= 0 && box.x + box.width <= width + 1 && box.width > 0;
 }
 
+async function routeFitsViewport(page) {
+  return page.evaluate(() => {
+    const main = document.querySelector('main');
+    const actions = main?.querySelectorAll('.page-actions > .button') ?? [];
+    return main && main.scrollWidth <= main.clientWidth + 1 &&
+      document.documentElement.scrollWidth <= innerWidth + 1 &&
+      [...actions].every((action) => {
+        const box = action.getBoundingClientRect();
+        return box.left >= -1 && box.right <= innerWidth + 1;
+      });
+  });
+}
+
 async function contrast(select) {
   return select.evaluate((node) => {
     const style = getComputedStyle(node);
@@ -388,19 +401,18 @@ async function main() {
         await workspace.setViewportSize({ width, height: 844 });
         result.stage = 'navigation-layout-' + routeName + '-' + locale + '-' + width;
         await workspace.locator('main .loading:visible').waitFor({ state: 'hidden' });
-        const fits = await workspace.evaluate(() => {
-          const main = document.querySelector('main');
-          const actions = main?.querySelectorAll('.page-actions > .button') ?? [];
-          return main && main.scrollWidth <= main.clientWidth + 1 &&
-            document.documentElement.scrollWidth <= innerWidth + 1 &&
-            [...actions].every((action) => {
-              const box = action.getBoundingClientRect();
-              return box.left >= -1 && box.right <= innerWidth + 1;
-            });
-        });
-        assert(fits);
+        assert(await routeFitsViewport(workspace));
         check(routeName + ' fits the viewport in ' + locale + ' at ' + width + ' px');
       }
+    }
+    await workspace.setViewportSize({ width: 320, height: 844 });
+    for (const locale of ['pt-BR', 'de-DE', 'fr-FR', 'hu-HU', 'ja-JP', 'ru-RU', 'uk-UA', 'zh-Hans']) {
+      result.stage = 'navigation-layout-' + routeName + '-' + locale + '-320';
+      await workspace.locator('.language-selector select').selectOption(locale);
+      await workspace.locator(`html[lang="${locale}"][dir="ltr"]`).waitFor();
+      check(routeName + ' fits the viewport in ' + locale + ' at 320 px',
+        await routeFitsViewport(workspace) &&
+        new URL(workspace.url()).searchParams.get('env') === '1a12');
     }
     await workspace.locator('.language-selector select').selectOption('en-US');
     await workspace.locator('html[lang="en-US"]').waitFor();
