@@ -56,6 +56,54 @@ describe('Transporte e paginação', () => {
       fetcher.mockRestore();
     }
   });
+  it('localizes failed API transports without exposing the browser diagnostic', async () => {
+    const fetcher = vi
+      .spyOn(globalThis, 'fetch')
+      .mockRejectedValueOnce(new TypeError('synthetic diagnostic address'));
+    try {
+      const error = await api('projects').catch((failure: unknown) => failure);
+      expect(error).toMatchObject({ key: 'requestError.failed' });
+      expect(requestErrorText(error as Error, createTranslator('en-US').t)).toBe(
+        'The request could not be completed.',
+      );
+      expect(requestErrorText(error as Error, createTranslator('pt-BR').t)).toBe(
+        'Não foi possível concluir a solicitação.',
+      );
+      expect(String(error)).not.toContain('synthetic diagnostic address');
+    } finally {
+      fetcher.mockRestore();
+    }
+  });
+  it('preserves an intentional abort during fetch or body transfer', async () => {
+    for (const phase of ['fetch', 'body']) {
+      const controller = new AbortController();
+      const abort = new DOMException('Test cancellation', 'AbortError');
+      const canceled = async () => {
+        controller.abort(abort);
+        throw abort;
+      };
+      const response = Response.json({ data: [] });
+      if (phase === 'body') vi.spyOn(response, 'json').mockImplementationOnce(canceled);
+      const fetcher = vi
+        .spyOn(globalThis, 'fetch')
+        .mockImplementationOnce(phase === 'body' ? async () => response : canceled);
+      try {
+        await expect(api('projects', undefined, undefined, controller.signal)).rejects.toBe(abort);
+      } finally {
+        fetcher.mockRestore();
+      }
+    }
+  });
+  it('reports an interrupted successful response body as a failed network request', async () => {
+    const response = Response.json({ data: [] });
+    vi.spyOn(response, 'json').mockRejectedValueOnce(new TypeError('changed stream'));
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(response);
+    try {
+      await expect(api('projects')).rejects.toMatchObject({ key: 'requestError.failed' });
+    } finally {
+      fetcher.mockRestore();
+    }
+  });
   it('permite apenas APIs conhecidas da mesma origem', () => {
     expect(safeApiUrl('projects?limit=20')).toBe('/v2-beta/projects?limit=20');
     expect(safeApiUrl('/v1-catalog/templates')).toBe('/v1-catalog/templates');
