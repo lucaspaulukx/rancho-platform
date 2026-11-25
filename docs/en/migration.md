@@ -120,7 +120,9 @@ Restoring the pre-upgrade disk and matching database at the original server addr
 
 In a separate two-host lab, the existing IPsec stack carried HTTP between two Docker 29.9.2 workloads before the upgrade. The first native upgrade request included the router sidekick and the unchanged primary launch configuration. Cattle assigned the holder a new launch version and attempted to replace it on the first host. The replacement did not start. Cross-host traffic returned after manually starting the original holder and sidekicks, while the native service still reported `rolling-back`. A follow-up submitted just the modified secondary launch configuration. A scale-zero service verified that the partial upgrade and rollback preserved the launch versions of the primary container and the other sidekick. The two-host rehearsal with attested Rancho backend and router images from `cf49b7c` confirmed HTTP traffic and XFRM activity before the change. Both holders were still running when the first new router reported `starting`. The service stayed `upgrading` through the test window, so the rehearsal did not reach physical rollback.
 
-Retain the original network and use a separate environment for the modern catalog until an in-place upgrade and rollback have passed.
+A repeat of the same router-only upgrade reached `upgraded` on both hosts and returned to `active` with the original router after rollback. The two holders retained their Docker container IDs and the primary launch version. The workloads retained their Docker container IDs and exchanged HTTP after both transitions, with packets recorded by XFRM on both hosts. The earlier stall leaves repeatability open. The holder and CNI images stayed at their original versions in this trial.
+
+Use the separate-environment procedure below for the full modern catalog. An in-place migration of the entire stack remains unverified.
 
 #### Cutover through a separate environment
 
