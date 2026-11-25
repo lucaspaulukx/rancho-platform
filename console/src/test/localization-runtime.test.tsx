@@ -61,7 +61,7 @@ it('keeps the visible language on a catalog failure and ignores a stale retry', 
     expect(status).toBeVisible();
     expect(status).toHaveAttribute('role', 'status');
     expect(screen.getByTestId('locale')).toHaveTextContent('pt-BR');
-    fireEvent.click(persian);
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
     await waitFor(() => expect(load).toHaveBeenCalledTimes(2));
     fireEvent.click(screen.getByRole('button', { name: 'English' }));
     await act(async () => completeRetry());
