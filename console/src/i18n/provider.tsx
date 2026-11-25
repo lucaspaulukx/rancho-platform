@@ -52,6 +52,7 @@ const defaultState = {
   policy: defaultPolicy,
   preview: false,
   catalogFailed: false,
+  retryLocale: () => {},
   direction: localeDirection(defaultLocale),
   formats: localeFormats(defaultLocale),
   setLocale: (_locale: Locale) => {},
@@ -155,6 +156,10 @@ export function I18nProvider({
       policy,
       preview: policy.enabled && policy.preview,
       catalogFailed: failedCatalog === requestedLocale && locale !== requestedLocale,
+      retryLocale() {
+        if (failedCatalog === requestedLocale && locale !== requestedLocale)
+          retryCatalog((previous) => previous + 1);
+      },
       direction,
       formats: localeFormats(locale),
       setLocale(next: Locale) {

@@ -5,10 +5,10 @@ import { localeInventory, type Locale } from '../i18n/locales';
 
 export function LanguageSelector() {
   const id = useId();
-  const { policy, locale, setLocale, preview, catalogFailed, t } = useI18n();
+  const { policy, locale, setLocale, preview, catalogFailed, retryLocale, t } = useI18n();
   if (!policy.enabled) return null;
   const selectable = policy.selectable && policy.availableLocales.length > 1;
-  if (!selectable && !preview) return null;
+  if (!selectable && !preview && !catalogFailed) return null;
   return (
     <div className="language-selector">
       {selectable && (
@@ -41,6 +41,11 @@ export function LanguageSelector() {
       <span className="muted language-status" role="status">
         {catalogFailed ? t('localeLoad.failed') : null}
       </span>
+      {catalogFailed && (
+        <button type="button" className="button secondary" onClick={retryLocale}>
+          {t('ui.retry')}
+        </button>
+      )}
     </div>
   );
 }
