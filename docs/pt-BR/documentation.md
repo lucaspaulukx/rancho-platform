@@ -32,6 +32,8 @@ Substitua a fonte pelos caminhos canônicos afetados; `--review` aceita vários 
 
 ## Revisão das traduções da interface
 
+`npm run check:ui-literals` verifica textos diretos em JSX e atributos visíveis ao usuário em busca de strings fora dos catálogos. Marcas, protocolos e unidades técnicas têm exceções específicas. O CI de fontes e o build da imagem executam a checagem. Revise separadamente os textos gerados por funções auxiliares, pelo backend e por provedores externos.
+
 Os catálogos de prévia em `console/src/i18n/catalogs/` acompanham o texto original em inglês por domínio de mensagens em `console/src/i18n/preview-sources.json`. Execute `npm run check:locales` dentro de `console/`. Alterar o texto ou os parâmetros de um domínio traduzido exige revisar cada idioma afetado. O gate também roda no CI e no build da imagem.
 
 Após revisar e atualizar um idioma, registre a fonte atual com `node scripts/check-locales.mjs --record-preview-source fr-FR`, substituindo o locale conforme necessário. Versione o catálogo e o manifesto de fontes juntos. Esse registro reconhece a versão da fonte usada pelo catálogo. Revisão linguística e cobertura completa da interface continuam como requisitos de aceite separados. Registrar outro locale atualiza somente os hashes daquele idioma.

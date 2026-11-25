@@ -3027,20 +3027,6 @@ input[type='checkbox']:focus-visible {
   line-height: 20px;
 }
 
-.community-signature {
-  color: var(--muted);
-  font-size: 10px;
-  letter-spacing: 1.2px;
-}
-.sidebar-collapsed .community-signature {
-  display: none;
-}
-@media (max-width: 767px) {
-  .sidebar-collapsed .community-signature {
-    display: inline;
-  }
-}
-
 /* Theme tokens change atomically; hover transitions resume after the new palette is painted. */
 .language-selector {
   display: flex;

@@ -203,7 +203,6 @@ export function ServiceUpgradeForm({
                 value={image}
                 required
                 onChange={(event) => setImage(event.target.value)}
-                placeholder="registry/aplicacao:versao"
               />
             )}
           </Field>
