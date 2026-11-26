@@ -122,7 +122,7 @@ Em um laboratório separado com dois hosts, a stack IPsec existente transportou 
 
 Uma nova execução do mesmo upgrade restrito ao roteador chegou a `upgraded` nos dois hosts e voltou a `active` com o roteador original após o rollback. Os dois holders mantiveram seus IDs de container Docker e a versão da configuração primária. Os workloads mantiveram seus IDs de container e trocaram HTTP após as duas transições, com pacotes registrados pelo XFRM nos dois hosts. A interrupção da execução anterior deixa a repetibilidade em aberto. As imagens do holder e do CNI permaneceram nas versões originais neste ensaio.
 
-Use o procedimento de environment separado abaixo para adotar o catálogo moderno completo. A migração de toda a stack no próprio ambiente ainda precisa de validação.
+Outro ensaio em dois hosts usou o upgrade nativo para mover o scheduler original para a rede bridge do Docker. Depois de verificar upgrade, rollback e confirmação definitiva do roteador, o teste atualizou e reverteu o holder e o verificador de conectividade em conjunto. Em seguida, atualizou e reverteu o serviço separado do driver CNI. O tráfego HTTP entre hosts e os contadores XFRM passaram após cada transição. Os workloads mantiveram seus IDs Docker, IPs gerenciados e contagens de inicialização. Esse ensaio verificou o tráfego após cada transição. Disponibilidade contínua, estado final com todos os componentes modernos e ambientes com outras revisões do catálogo exigem validação própria. Use o procedimento de environment separado abaixo para adotar o catálogo moderno completo.
 
 #### Troca de tráfego para um environment separado
 
