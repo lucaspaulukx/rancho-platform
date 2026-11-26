@@ -1,4 +1,4 @@
-"""Exercise automatic backend crash recovery in an owned single-node Compose stack."""
+"""Rehearse backend crash recovery and cold handoff in an owned Compose stack."""
 
 import argparse
 import http.cookiejar
@@ -26,7 +26,7 @@ kill -KILL "$1"
 """
 
 
-def exercise(images, port):
+def exercise(images, port, *, cold_handoff=False):
     project = f'rancho-crash-recovery-{secrets.token_hex(10)}'
     base = f'http://127.0.0.1:{port}'
     environment = dict(os.environ, RANCHO_DB_PASSWORD=secrets.token_urlsafe(32),
@@ -53,8 +53,11 @@ def exercise(images, port):
 
     with tempfile.TemporaryDirectory(prefix='rancho-crash-recovery-') as folder:
         override = Path(folder) / 'fixture.yaml'
-        override.write_text('services:\n  rancho:\n    environment:\n      CATTLE_CATALOG_EXECUTE: "false"\n',
-                            encoding='utf-8')
+        backend_override = {'environment': {'CATTLE_CATALOG_EXECUTE': 'false'}}
+        fixture_config = {'services': {'rancho': backend_override}}
+        override.write_text(json.dumps(fixture_config), encoding='utf-8')
+        handoff_seconds = None
+        original_state_volume = None
 
         def compose(*args):
             return docker('compose', '-p', project, '-f', 'compose.modern.yaml', '-f', str(override),
@@ -134,13 +137,67 @@ def exercise(images, port):
             require(service_id('db') == database and record(database, 'db')['State']['StartedAt']
                     == db_started, 'MariaDB stayed running')
             require(schema_record() == schema, 'Preserve the schema migration record')
+            if cold_handoff:
+                handoff_started = time.monotonic()
+                compose('stop', '-t', '20', 'rancho')
+                stopped = record(backend, 'rancho')
+                require(not stopped['State']['Running'] and not stopped['State']['Restarting'],
+                        'Confirm the source backend is stopped before copying its state')
+                mount = next(item for item in stopped['Mounts'] if item['Destination'] == '/var/lib/cattle')
+                source_volume = mount['Name']
+                target_volume = f'{project}_handoff'
+                source = json.loads(docker('volume', 'inspect', source_volume).stdout)[0]
+                require(source['Labels'].get('com.docker.compose.project') == project, 'Verify original state ownership')
+                original_state_volume = source_volume
+                require(docker('volume', 'inspect', target_volume, check=False).returncode != 0,
+                        'Require a fresh destination state volume')
+                fixture_config['volumes'] = {'state': {}, 'handoff': {}}
+                backend_override['volumes'] = ['handoff:/var/lib/cattle']
+                override.write_text(json.dumps(fixture_config), encoding='utf-8')
+                docker('volume', 'create', '--label', f'com.docker.compose.project={project}',
+                       '--label', 'com.docker.compose.volume=handoff', target_volume)
+                docker('run', '--rm', '--pull', 'never', '--network', 'none',
+                       '--mount', f'type=volume,src={source_volume},dst=/source,readonly',
+                       '--mount', f'type=volume,src={target_volume},dst=/target',
+                       '--entrypoint', '/bin/sh', images['backend'],
+                       '-ec', 'test -s /source/keys.properties; cp -a /source/. /target/')
+                compose('rm', '-f', 'rancho')
+                require(docker('inspect', backend, check=False).returncode != 0,
+                        'Remove the stopped source before starting its replacement')
+                compose('up', '-d', '--no-deps', '--no-build', '--pull', 'never', '--wait',
+                        '--wait-timeout', '150', 'rancho')
+                replacement = service_id('rancho')
+                require(replacement != backend, 'Start a distinct backend container')
+                require(any(item.get('Name') == target_volume and item['Destination'] == '/var/lib/cattle'
+                            for item in record(replacement, 'rancho')['Mounts']), 'Use the independent state copy')
+                wait_for(environment_ready, 'The original session and environment did not recover after handoff')
+                require(service_id('console') == console and record(console, 'console')['State']['StartedAt']
+                        == console_started, 'Console stayed running during handoff')
+                require(service_id('db') == database and record(database, 'db')['State']['StartedAt']
+                        == db_started, 'MariaDB stayed running during handoff')
+                require(schema_record() == schema, 'Preserve the schema migration record through handoff')
+                handoff_seconds = round(time.monotonic() - handoff_started, 2)
         finally:
             compose('down', '--volumes', '--timeout', '20')
             require(not compose('ps', '-aq').stdout.strip(), 'Remove owned Compose containers')
+            # Compose may ignore a volume no longer mounted by an active service.
+            if original_state_volume:
+                remaining = docker('volume', 'inspect', original_state_volume, check=False)
+                if remaining.returncode == 0:
+                    volume = json.loads(remaining.stdout)[0]
+                    require(volume['Labels'].get('com.docker.compose.project') == project,
+                            'Verify detached source volume ownership again')
+                    docker('volume', 'rm', original_state_volume)
+            require(not docker('volume', 'ls', '-q', '--filter',
+                               f'label=com.docker.compose.project={project}').stdout.strip(),
+                    'Remove owned Compose volumes')
 
-    return {'status': 'passed', 'automaticRestart': True, 'sameAuthenticatedSession': True,
-            'environmentPreserved': True, 'schemaRecordPreserved': True, 'restartAndReadSeconds': elapsed,
-            'consoleRestarted': False, 'databaseRestarted': False, 'cleanupComplete': True}
+    report = {'status': 'passed', 'automaticRestart': True, 'sameAuthenticatedSession': True,
+              'environmentPreserved': True, 'schemaRecordPreserved': True, 'restartAndReadSeconds': elapsed,
+              'consoleRestarted': False, 'databaseRestarted': False, 'cleanupComplete': True}
+    if cold_handoff:
+        report.update(coldHandoffPassed=True, handoffAndReadSeconds=handoff_seconds)
+    return report
 
 
 def main():
@@ -148,10 +205,11 @@ def main():
     for component in ('backend', 'console', 'database'):
         parser.add_argument(f'--{component}-image', required=True)
     parser.add_argument('--port', type=int, default=18158)
+    parser.add_argument('--cold-handoff', action='store_true')
     args = parser.parse_args()
     try:
         images = {name: image_id(getattr(args, name + '_image')) for name in ('backend', 'console', 'database')}
-        print(json.dumps(exercise(images, args.port)))
+        print(json.dumps(exercise(images, args.port, cold_handoff=args.cold_handoff)))
     except RehearsalError as error:
         print(json.dumps({'status': 'failed', 'stage': str(error)}))
         return 1

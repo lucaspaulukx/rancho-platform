@@ -112,7 +112,7 @@ def rehearse(backend, previous, candidate, chromium, report, *, configuration_re
         report['backendProcessRecoveryPassed'] = False
         recovery = json.loads(run_check([
             '-m', 'migration.test_backend_crash_recovery', '--backend-image', images['backend'],
-            '--console-image', images['candidateConsole'], '--database-image', images['database'],
+            '--console-image', images['candidateConsole'], '--database-image', images['database'], '--cold-handoff',
         ]))
         if (recovery.get('status') != 'passed' or recovery.get('cleanupComplete') is not True
                 or recovery.get('automaticRestart') is not True
@@ -122,6 +122,9 @@ def rehearse(backend, previous, candidate, chromium, report, *, configuration_re
                 or recovery.get('consoleRestarted') is not False or recovery.get('databaseRestarted') is not False):
             raise RuntimeError('Single-node backend did not recover automatically after a process crash')
         report['backendProcessRecoveryPassed'] = True
+        report['backendColdHandoffPassed'] = recovery.get('coldHandoffPassed') is True
+        if not report['backendColdHandoffPassed']:
+            raise RuntimeError('Stopped backend state could not be used by a replacement')
     report['cleanupComplete'] = True
     report.update(status='passed', stage='complete')
 

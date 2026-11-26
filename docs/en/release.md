@@ -181,6 +181,8 @@ Use the isolated rehearsal to check the policy with your chosen images. It start
 python -m migration.test_backend_crash_recovery --backend-image rancho-backend-modern:local --console-image rancho-console:local --database-image rancho-mariadb:local
 ```
 
+Add `--cold-handoff` to the rehearsal to stop the active backend, copy its state volume to an independent volume and start a replacement connected to the same MariaDB. The combined modern release rehearsal includes this step. The test uses two containers on one Docker host and measures recovery of the original session and environment. Before performing an operator-led handoff between hosts, confirm the old backend is stopped and prevent it from restarting, then transfer its protected state to the replacement. Promotion during a network partition and automatic failover between hosts require separate implementation and validation.
+
 ## Experimental single-node installation
 
 For an existing Rancher installation, review [existing hosts and Docker versions](migration.md#existing-hosts-and-docker-versions) before selecting the modern Cattle catalog.

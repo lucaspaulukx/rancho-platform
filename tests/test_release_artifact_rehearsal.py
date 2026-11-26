@@ -12,7 +12,7 @@ GATEWAY = {'status': 'passed', 'cleanupComplete': True, 'backendAddressChanged':
 
 RECOVERY = {'status': 'passed', 'cleanupComplete': True, 'automaticRestart': True,
             'sameAuthenticatedSession': True, 'environmentPreserved': True, 'schemaRecordPreserved': True,
-            'consoleRestarted': False, 'databaseRestarted': False}
+            'consoleRestarted': False, 'databaseRestarted': False, 'coldHandoffPassed': True}
 
 
 class ReleaseArtifactRehearsalTest(unittest.TestCase):
@@ -58,8 +58,9 @@ class ReleaseArtifactRehearsalTest(unittest.TestCase):
         self.assertTrue(report['gatewayBackendReplacementPassed'])
         self.assertEqual(recovery, ['-m', 'migration.test_backend_crash_recovery',
                                     '--backend-image', 'backend-id', '--console-image', 'candidate-id',
-                                    '--database-image', 'database-id'])
+                                    '--database-image', 'database-id', '--cold-handoff'])
         self.assertTrue(report['backendProcessRecoveryPassed'])
+        self.assertTrue(report['backendColdHandoffPassed'])
         self.assertTrue(report['firstStartMigrationPassed'])
         self.assertTrue(report['databaseRollbackPassed'])
         boundary.assert_called_once_with('backend-id')
