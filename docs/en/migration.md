@@ -122,7 +122,7 @@ In a separate two-host lab, the existing IPsec stack carried HTTP between two Do
 
 A repeat of the same router-only upgrade reached `upgraded` on both hosts and returned to `active` with the original router after rollback. The two holders retained their Docker container IDs and the primary launch version. The workloads retained their Docker container IDs and exchanged HTTP after both transitions, with packets recorded by XFRM on both hosts. The earlier stall leaves repeatability open. The holder and CNI images stayed at their original versions in this trial.
 
-Use the separate-environment procedure below for the full modern catalog. An in-place migration of the entire stack remains unverified.
+A further two-host rehearsal first used the native upgrade to move the stock scheduler to Docker bridge mode. After the router-only upgrade, rollback and finish passed, the test upgraded and rolled back the holder and connectivity check together, then upgraded and rolled back the separate CNI driver service. Cross-host HTTP and XFRM checks passed after each transition. Both workloads retained their Docker IDs, managed IPs and start counts. This trial checked traffic after each transition. Continuous availability, a final commit with all the modern components and existing deployments with other catalog revisions require separate validation. Use the separate-environment procedure below for the full modern catalog.
 
 #### Cutover through a separate environment
 
