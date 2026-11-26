@@ -56,14 +56,14 @@ export const enAccessDiagnostics = {
 } as const;
 
 export const ptAccessDiagnostics = {
-  'accessDiagnostics.description': 'Grants e papel calculados pelo backend Rancher.',
+  'accessDiagnostics.description': 'Permissões e papel calculados pelo backend Rancher.',
   'accessDiagnostics.environment': 'Environment',
   'accessDiagnostics.noEnvironment': 'Nenhum environment',
   'accessDiagnostics.refresh': 'Atualizar acesso efetivo',
   'accessDiagnostics.noEnvironmentDescription': 'Não há environment disponível para consultar.',
   'accessDiagnostics.undetermined': 'Não determinado',
   'accessDiagnostics.noAccess': 'Sem acesso',
-  'accessDiagnostics.noLocalGrant': 'Nenhum grant local',
+  'accessDiagnostics.noLocalGrant': 'Nenhuma permissão local',
   'accessDiagnostics.noLocalGrantDescription':
     'Não há fonte de acesso local para esta conta neste environment.',
   'accessDiagnostics.origin': 'Origem',
@@ -103,7 +103,7 @@ export const ptAccessDiagnostics = {
   'accessDiagnostics.name': 'Nome',
   'accessDiagnostics.revision': 'Revisão',
   'accessDiagnostics.members': 'Membros',
-  'accessDiagnostics.grants': 'Grants',
+  'accessDiagnostics.grants': 'Permissões concedidas',
   'accessDiagnostics.title': 'Acesso efetivo · {name}',
   'accessDiagnostics.auditTitle': 'Histórico · {name}',
   'accessDiagnostics.reviewEvent': 'Revisar evento {id}',
