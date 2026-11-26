@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { allPages, api, ApiError, safeApiUrl, type Resource, type Schema } from '../api';
 import { createTranslator } from '../i18n/messages';
 import { requestErrorText } from '../request-errors';
-import { validateConfig } from '../config';
+import { loadConfig, validateConfig } from '../config';
 import config from '../../public/console-config.json';
 import { preparePayload } from '../components/SchemaForm';
 import { groupChanges } from '../pages/Groups';
@@ -28,6 +28,40 @@ describe('Configuração pública e temas', () => {
       validateConfig({ ...config, customTheme: { light: { primary: '#002532' } } }).customTheme
         .light?.primary,
     ).toBe('#002532'));
+  it.each([
+    null,
+    [],
+    { version: 2, effective: {}, available: {} },
+    { version: 1, effective: [], available: {} },
+    { version: 1, effective: { LOCAL_RBAC_ENABLED: 'true' }, available: {} },
+    { version: 1, effective: {}, available: null },
+    { version: 1, effective: {}, available: {}, requested: { OIDC_ENABLED: 1 } },
+  ])('rejects an invalid backend configuration (%j)', async (backend) => {
+    const fetcher = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(Response.json(config))
+      .mockResolvedValueOnce(Response.json(backend));
+    try {
+      await expect(loadConfig()).rejects.toMatchObject({
+        key: 'requestError.failed',
+        localization: validateConfig(config).localization,
+      });
+    } finally {
+      fetcher.mockRestore();
+    }
+  });
+  it('accepts version 1 with optional requested flags and unknown boolean capabilities', async () => {
+    const backend = { version: 1, effective: { FUTURE_CAPABILITY: true }, available: {} };
+    const fetcher = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(Response.json(config))
+      .mockResolvedValueOnce(Response.json(backend));
+    try {
+      expect((await loadConfig()).server).toEqual(backend);
+    } finally {
+      fetcher.mockRestore();
+    }
+  });
   it('rejeita tema com texto ilegível', () =>
     expect(() =>
       validateConfig({ ...config, customTheme: { light: { text: '#ffffff' } } }),

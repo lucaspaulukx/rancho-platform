@@ -188,13 +188,41 @@ async function configurationJson(path: string, signal?: AbortSignal): Promise<un
   throw new ConfigurationLoadError();
 }
 
+function booleanFlags(value: unknown): value is Record<string, boolean> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    Object.values(value).every((flag) => typeof flag === 'boolean')
+  );
+}
+
+function validateServerConfig(value: unknown): ServerConfig {
+  if (value === null || typeof value !== 'object' || Array.isArray(value))
+    throw new ConfigurationLoadError();
+  const config = value as Record<string, unknown>;
+  if (
+    config.version !== 1 ||
+    !booleanFlags(config.effective) ||
+    !booleanFlags(config.available) ||
+    (config.requested !== undefined && !booleanFlags(config.requested))
+  )
+    throw new ConfigurationLoadError();
+  return {
+    ...config,
+    version: config.version,
+    effective: config.effective,
+    available: config.available,
+  };
+}
+
 export async function loadConfig(signal?: AbortSignal) {
   const [frontend, backend] = await Promise.allSettled([
     configurationJson('/console/console-config.json', signal).then(validateConfig),
-    configurationJson('/oidc/config', signal),
+    configurationJson('/oidc/config', signal).then(validateServerConfig),
   ]);
   signal?.throwIfAborted();
   if (frontend.status === 'rejected') throw frontend.reason;
   if (backend.status === 'rejected') throw new ConfigurationLoadError(frontend.value.localization);
-  return { console: frontend.value, server: backend.value as ServerConfig };
+  return { console: frontend.value, server: backend.value };
 }
