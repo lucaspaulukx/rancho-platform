@@ -36,6 +36,19 @@ python -m migration.recovery rehearse-modern --output migration-runs/modern-cold
 
 Verify that a local administrator is available before taking the backup. The rehearsal asks for that administrator's password separately from the backup passphrase. It restores to new volumes, starts the recorded images on an isolated Docker 29 bridge with no published ports and verifies MariaDB integrity, inventory counts and every Cattle table checksum before booting Rancho. It then checks local administrator login and environment visibility through the console. The isolated copy disables OIDC and catalog execution. Store the catalog, any custom mounts, workload storage and identity-provider configuration and data using their own backups. Plan and test their recovery before any cutover.
 
+## Active/passive backend handoff
+
+Keep the standby backend stopped until an independent host or hypervisor confirms the previous backend cannot run. A failed ping, unreachable Docker daemon or stale database heartbeat is insufficient evidence to promote. Disable independent Docker autostart on backends governed by an external failover controller. Only the controller responsible for fencing may promote the replacement.
+
+Prepare the standby with the same verified image revision and protect the backend signing keys throughout their transfer. The test uses the same MariaDB primary and the signing keys from the original backend while giving the standby an independent local volume and cluster identity. A copied `cluster-id` makes the two processes register the same logical member. Preserve the ID only for a cold replacement after the original backend has been fenced.
+
+1. Stop or fence the primary and verify through the host or hypervisor that it cannot continue running or restart on its own.
+2. Start the standby against the same database only after the fence is confirmed. Keep it out of the public endpoint until its readiness and database access pass.
+3. Route the existing Console and agent endpoint to the replacement. Verify session, environment and grant access before enabling mutations again.
+4. Keep the former primary stopped when it returns. Run the same fencing and readiness checks before switching back.
+
+In the isolated two-guest QEMU rehearsal, the controller refused to start the replacement while the primary VM was running or paused. After the hypervisor confirmed that the former primary had exited, the replacement started with a separate local state volume and the copied signing keys. The original local session read the same environment through the unchanged Console gateway. MariaDB stayed running. The first authenticated read took 121.78 seconds from the fence command, including emulated JVM startup. The two guests shared one physical host. Agent reconnection, physical host loss, automatic production fencing and failback were outside this test.
+
 ## Cold capture and restart
 
 `--quiesce` is mandatory for backup: it stops only the selected supported services, captures cold data and attempts to restart the same previously active IDs in reverse order, including after partial stop failure. It never starts a shared baseline or removes source volumes. A successful start command does not prove HTTP/login health; verify service recovery.

@@ -108,8 +108,8 @@
         "pt-BR": "docs/pt-BR/recovery.md",
         "en": "docs/en/recovery.md"
       },
-      "reviewedSourceSha256": "816ad0cc4b3a81ed250aa8b1f543481d7e6afb9083627a03f13a9011794227df",
-      "reviewedTranslationSha256": "328a581b1bacca6489480c6f9e05fa70bcd277618f8fdda9a697fc5330e37ef3"
+      "reviewedSourceSha256": "72dc65e869bdf730c9ae0753e1de7dd800e91a8cb046a735e603698bddf02222",
+      "reviewedTranslationSha256": "6297525f5dee8cd9302d7489eafb50bf73d819d4a0e9d964def329b028fd727c"
     },
     {
       "source": "docs/pt-BR/release.md",
