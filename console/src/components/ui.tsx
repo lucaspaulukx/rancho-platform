@@ -302,6 +302,8 @@ export function Tabs({
   idPrefix: string;
   label: string;
 }) {
+  const { direction } = useI18n();
+  const rightStep = direction === 'rtl' ? -1 : 1;
   return (
     <div role="tablist" aria-label={label} className="tabs">
       {labels.map((text, index) => (
@@ -316,8 +318,10 @@ export function Tabs({
           onClick={() => onChange(index)}
           onKeyDown={(event) => {
             let next = index;
-            if (event.key === 'ArrowRight') next = (index + 1) % labels.length;
-            else if (event.key === 'ArrowLeft') next = (index + labels.length - 1) % labels.length;
+            if (event.key === 'ArrowRight')
+              next = (index + labels.length + rightStep) % labels.length;
+            else if (event.key === 'ArrowLeft')
+              next = (index + labels.length - rightStep) % labels.length;
             else if (event.key === 'Home') next = 0;
             else if (event.key === 'End') next = labels.length - 1;
             else return;

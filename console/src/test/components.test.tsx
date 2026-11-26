@@ -460,6 +460,51 @@ describe('Interações e temas compartilhados', () => {
     await user.keyboard('{Home}');
     expect(screen.getByRole('tab', { name: 'Membros' })).toHaveFocus();
   });
+  it('segue a direção visual das abas em persa e preserva Home e End', async () => {
+    function Example() {
+      const [selected, setSelected] = useState(0);
+      return (
+        <Tabs
+          labels={['Primeira', 'Segunda', 'Terceira']}
+          selected={selected}
+          onChange={setSelected}
+          panelId="rtl-panel"
+          idPrefix="rtl-tab"
+          label="Abas"
+        />
+      );
+    }
+    const user = userEvent.setup();
+    render(
+      <I18nProvider
+        identity="rtl-tabs"
+        policy={{
+          enabled: true,
+          selectable: false,
+          defaultLocale: 'fa-IR',
+          availableLocales: ['fa-IR'],
+          detectBrowser: false,
+          preview: true,
+        }}
+      >
+        <Example />
+      </I18nProvider>,
+    );
+    await waitFor(() => expect(document.documentElement.dir).toBe('rtl'));
+    const first = screen.getByRole('tab', { name: 'Primeira' });
+    const second = screen.getByRole('tab', { name: 'Segunda' });
+    const last = screen.getByRole('tab', { name: 'Terceira' });
+    await user.click(first);
+    await user.keyboard('{ArrowLeft}');
+    expect(second).toHaveFocus();
+    expect(second).toHaveAttribute('aria-selected', 'true');
+    await user.keyboard('{ArrowRight}{ArrowRight}');
+    expect(last).toHaveFocus();
+    await user.keyboard('{Home}');
+    expect(first).toHaveFocus();
+    await user.keyboard('{End}');
+    expect(last).toHaveFocus();
+  });
   it('preferência de sidebar é persistida e isolada por usuário', async () => {
     function Example({ identity }: { identity: string }) {
       const sidebar = useSidebarPreference(identity);

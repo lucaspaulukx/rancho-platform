@@ -659,6 +659,19 @@ async function main() {
   check('Persian preview translates the grant label and retains the readonly value',
     await persianPermission.inputValue() === 'readonly' &&
     await groupPage.locator('html').getAttribute('dir') === 'rtl');
+  result.stage = 'persian-group-tabs';
+  const grantsTab = groupEditor.getByRole('tab', { name: /^محیط‌ها/ });
+  const membersTab = groupEditor.getByRole('tab', { name: /^اعضا/ });
+  await grantsTab.press('ArrowRight');
+  check('right arrow selects and focuses the visually adjacent Persian tab',
+    await membersTab.getAttribute('aria-selected') === 'true' &&
+    await membersTab.evaluate((tab) => tab === document.activeElement));
+  await membersTab.press('ArrowLeft');
+  check('left arrow returns to the grants tab without losing the draft grant',
+    await grantsTab.getAttribute('aria-selected') === 'true' &&
+    await grantsTab.evaluate((tab) => tab === document.activeElement) &&
+    await persianPermission.inputValue() === 'readonly' &&
+    groupPage.url() === groupsUrl);
   if (axe) {
     result.stage = 'accessibility-results';
     check('axe checks for six routes in both themes on mobile and desktop',
