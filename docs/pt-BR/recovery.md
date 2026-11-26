@@ -36,6 +36,19 @@ python -m migration.recovery rehearse-modern --output migration-runs/modern-cold
 
 Antes do backup, verifique se há um administrador local disponível. O ensaio pede a senha desse administrador separadamente da senha do backup. Restaura em novos volumes, inicia as imagens registradas em uma bridge isolada do Docker 29 sem portas publicadas e valida a integridade do MariaDB, as contagens do inventário e os checksums de todas as tabelas Cattle antes de iniciar o Rancho. Em seguida, verifica o login do administrador local e a visibilidade dos environments pela console. A cópia isolada desativa o OIDC e a execução do catálogo. Faça backups próprios do catálogo, das montagens personalizadas, do armazenamento dos workloads e da configuração e dos dados do provedor de identidade. Planeje e teste a recuperação deles antes da troca.
 
+## Troca do backend ativo para o servidor de espera
+
+Mantenha o backend de espera parado até um host ou hipervisor independente confirmar que o backend anterior não consegue mais executar. Um ping sem resposta, um daemon Docker inacessível ou um heartbeat atrasado no banco são evidências insuficientes para promover o substituto. Desative o início automático independente do Docker nos backends gerenciados por um controlador externo. Somente o controlador responsável pelo isolamento do servidor antigo pode promover o substituto.
+
+Prepare o servidor de espera com a mesma revisão verificada da imagem e proteja as chaves de assinatura do backend durante a transferência. O teste usa o mesmo primário MariaDB e as chaves de assinatura do backend original, com volume local e identidade de cluster próprios para o servidor de espera. Copiar o `cluster-id` faz os dois processos registrarem o mesmo membro lógico. Preserve esse ID apenas em uma substituição a frio, depois de isolar o backend original.
+
+1. Pare ou isole o primário e confirme pelo host ou hipervisor que ele não pode continuar em execução nem reiniciar sozinho.
+2. Inicie o servidor de espera no mesmo banco só depois dessa confirmação. Mantenha-o fora do endpoint público até que a prontidão e o acesso ao banco estejam validados.
+3. Encaminhe o endpoint existente do console e dos agentes ao substituto. Verifique a sessão, os environments e as permissões antes de reabrir as operações de escrita.
+4. Mantenha o antigo primário parado quando ele voltar. Repita as verificações de isolamento e prontidão antes de voltar a atendê-lo.
+
+No ensaio isolado com duas VMs QEMU, o controlador recusou iniciar o substituto enquanto a VM primária estava em execução ou pausada. Depois que o hipervisor confirmou seu desligamento, o substituto iniciou com volume local próprio e uma cópia das chaves de assinatura. A sessão local original consultou o mesmo environment pelo gateway do Console, que permaneceu em execução junto com o MariaDB. A primeira leitura autenticada levou 121,78 segundos a partir do comando de isolamento, incluindo a inicialização da JVM emulada. As duas VMs compartilhavam um host físico. Reconexão dos agentes, perda do host físico, isolamento automático em produção e retorno ao servidor original ficaram fora do teste.
+
 ## Captura fria e retomada
 
 `--quiesce` é obrigatório no backup: para somente os serviços selecionados/suportados, captura dados frios e tenta retomar os mesmos IDs previamente ativos em ordem inversa, inclusive após parada parcial. Não inicia baseline compartilhado nem remove volumes da origem. Comando start aprovado não prova HTTP/login; confira a recuperação dos serviços.
