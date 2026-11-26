@@ -32,12 +32,12 @@
 > [!WARNING]
 > A v0.1.0 publicada é uma prévia. A classificação de estável foi retirada enquanto são concluídos os idiomas, o aceite visual e as demais pendências do roadmap. Acompanhe o [roadmap de aceite](roadmap.md).
 
-A [versão v0.1.0](https://github.com/lucaspaulukx/rancho-platform/releases/tag/v0.1.0) inclui imagens públicas para Linux amd64. Este início rápido usa um servidor Rancho, MariaDB 10.11 e Docker Compose v2. A criação do primeiro administrador usa Python 3.10+.
+A [prévia arquivada v0.1.0](https://github.com/lucaspaulukx/rancho-platform-archive/releases/tag/v0.1.0) inclui imagens públicas para Linux amd64. Este início rápido usa um servidor Rancho, MariaDB 10.11 e Docker Compose v2. A criação do primeiro administrador usa Python 3.10+.
 
 1. Faça checkout da versão.
 
    ```sh
-   git clone --branch v0.1.0 --depth 1 https://github.com/lucaspaulukx/rancho-platform.git
+   git clone --branch v0.1.0 --depth 1 https://github.com/lucaspaulukx/rancho-platform-archive.git
    cd rancho-platform
    ```
 
