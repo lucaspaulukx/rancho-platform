@@ -1,3 +1,4 @@
+import { ConsoleRequestError } from './request-errors';
 import { checkThemeContrast, type ThemeOverrides } from './themes/contrast';
 import { normalizeLocalizationPolicy, type LocalizationPolicy } from './i18n/policy';
 export const moduleNames = [
@@ -171,14 +172,29 @@ export function validateConfig(value: unknown): ConsoleConfig {
   checkThemeContrast(c.customTheme);
   return c;
 }
+export class ConfigurationLoadError extends ConsoleRequestError {
+  constructor(readonly localization?: LocalizationPolicy) {
+    super('requestError.failed');
+  }
+}
+
+async function configurationJson(path: string, signal?: AbortSignal): Promise<unknown> {
+  try {
+    const response = await fetch(path, { cache: 'no-store', signal });
+    if (response.ok) return await response.json();
+  } catch (error) {
+    if (signal?.aborted) throw error;
+  }
+  throw new ConfigurationLoadError();
+}
+
 export async function loadConfig(signal?: AbortSignal) {
-  const [frontend, backend] = await Promise.all([
-    fetch('/console/console-config.json', { cache: 'no-store', signal }),
-    fetch('/oidc/config', { cache: 'no-store', signal }),
+  const [frontend, backend] = await Promise.allSettled([
+    configurationJson('/console/console-config.json', signal).then(validateConfig),
+    configurationJson('/oidc/config', signal),
   ]);
-  if (!frontend.ok || !backend.ok) throw new Error('Não foi possível carregar a configuração.');
-  return {
-    console: validateConfig(await frontend.json()),
-    server: (await backend.json()) as ServerConfig,
-  };
+  signal?.throwIfAborted();
+  if (frontend.status === 'rejected') throw frontend.reason;
+  if (backend.status === 'rejected') throw new ConfigurationLoadError(frontend.value.localization);
+  return { console: frontend.value, server: backend.value as ServerConfig };
 }

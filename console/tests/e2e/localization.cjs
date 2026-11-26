@@ -22,7 +22,7 @@ async function closeContext(value) {
   result.contextsClosed++;
 }
 
-async function context({ authenticated = false, enabled = true, extraLocales = [] } = {}) {
+async function context({ authenticated = false, enabled = true, extraLocales = [], defaultLocale = 'pt-BR' } = {}) {
   const value = await browser.newContext({
     viewport: { width: 1440, height: 1000 }, locale: 'pt-BR', colorScheme: 'dark',
   });
@@ -45,7 +45,7 @@ async function context({ authenticated = false, enabled = true, extraLocales = [
     assert.equal(response.status(), 200);
     const config = await response.json();
     config.localization = {
-      enabled, defaultLocale: 'pt-BR', availableLocales: ['pt-BR', 'en-US', ...extraLocales],
+      enabled, defaultLocale, availableLocales: ['pt-BR', 'en-US', ...extraLocales],
       selectable: true, detectBrowser: false, preview: true,
     };
     // Theme variation is local to this browser context, never the deployed JSON.
@@ -137,6 +137,31 @@ async function main() {
   await disabledPage.getByRole('heading', { name: 'Acesse seu ambiente', exact: true }).waitFor();
   check('flag off retains Portuguese login and hides selector', await disabledPage.locator('.language-selector').count() === 0);
   await closeContext(disabled);
+
+  result.stage = 'bootstrap-configuration-retry';
+  const bootstrapContext = await context({ defaultLocale: 'en-US' });
+  const bootstrapPage = await page(bootstrapContext);
+  const backendConfig = origin + '/oidc/config';
+  let sessionRequests = 0;
+  bootstrapPage.on('request', (request) => {
+    if (request.url() === origin + '/v2-beta/token') sessionRequests++;
+  });
+  await bootstrapPage.route(backendConfig, (route) =>
+    route.fulfill({ status: 503, body: 'synthetic configuration diagnostic' }),
+  );
+  await bootstrapPage.goto(loginUrl, { waitUntil: 'domcontentloaded' });
+  const bootstrapAlert = bootstrapPage.getByRole('alert');
+  await bootstrapAlert.getByText('The request could not be completed.', { exact: true }).waitFor();
+  check('backend configuration errors use the validated frontend locale before session discovery',
+    sessionRequests === 0 &&
+    await bootstrapPage.locator('html').getAttribute('lang') === 'en-US' &&
+    !(await bootstrapAlert.textContent()).includes('synthetic configuration diagnostic'));
+  await bootstrapPage.unroute(backendConfig);
+  await bootstrapPage.getByRole('button', { name: 'Try again', exact: true }).click();
+  await bootstrapPage.getByRole('heading', { name: 'Access your environment', exact: true }).waitFor();
+  check('retry loads the session only after bootstrap recovery and preserves the login URL',
+    sessionRequests >= 1 && bootstrapPage.url() === loginUrl);
+  await closeContext(bootstrapContext);
 
   result.stage = 'public-login-drafts';
   const publicContext = await context({ extraLocales: ['fr-FR', 'de-DE', 'ja-JP', 'zh-Hans', 'hu-HU', 'ru-RU', 'uk-UA', 'fa-IR'] });

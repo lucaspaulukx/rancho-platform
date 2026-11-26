@@ -10,7 +10,12 @@ import {
   type Project,
   type Token,
 } from './api';
-import { loadConfig, type ConsoleConfig, type ServerConfig } from './config';
+import {
+  ConfigurationLoadError,
+  loadConfig,
+  type ConsoleConfig,
+  type ServerConfig,
+} from './config';
 import { ErrorState, Loading } from './components/ui';
 import { ThemeProvider } from './theme';
 import { I18nProvider } from './i18n/provider';
@@ -151,8 +156,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         error={configuration.error || session.error || projects.error}
         retry={() => {
           void configuration.refetch();
-          void session.refetch();
-          void projects.refetch();
+          if (configuration.data?.console.enabled) {
+            void session.refetch();
+            if (authenticated) void projects.refetch();
+          }
         }}
       />
     );
@@ -164,8 +171,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         </ThemeProvider>
       </AppContext>
     );
+  const localization =
+    configuration.data?.console.localization ??
+    (configuration.error instanceof ConfigurationLoadError
+      ? configuration.error.localization
+      : undefined);
   return (
-    <I18nProvider policy={configuration.data?.console.localization} identity={identity}>
+    <I18nProvider policy={localization} identity={identity}>
       {content}
     </I18nProvider>
   );

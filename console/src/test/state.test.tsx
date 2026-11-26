@@ -136,6 +136,63 @@ describe('Configuração e escopo da console', () => {
       client.clear();
     }
   });
+  it('uses the configured locale while backend settings are unavailable and waits for recovery before loading the session', async () => {
+    let recovered = false;
+    const fetcher = vi.fn(async (url: string) => {
+      if (url === '/console/console-config.json')
+        return Response.json({
+          ...configuration,
+          localization: {
+            enabled: true,
+            defaultLocale: 'en-US',
+            availableLocales: ['en-US'],
+            preview: true,
+          },
+        });
+      if (url === '/oidc/config')
+        return recovered
+          ? Response.json({ version: 1, effective: {}, available: {} })
+          : new Response('synthetic private configuration diagnostic', { status: 503 });
+      if (url === '/v2-beta/token') return Response.json({ data: [{}] });
+      throw new Error('Unexpected fetch URL');
+    });
+    vi.stubGlobal('fetch', fetcher);
+    const client = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } });
+    const view = render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <AppProvider>Console ready</AppProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    try {
+      await screen.findByText('The request could not be completed.');
+      expect(
+        screen.queryByText('synthetic private configuration diagnostic'),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Console ready')).not.toBeInTheDocument();
+      expect(fetcher.mock.calls.map(([url]) => url)).not.toContain('/v2-beta/token');
+      const backendAttempts = () =>
+        fetcher.mock.calls.filter(([url]) => url === '/oidc/config').length;
+      const initialAttempts = backendAttempts();
+      await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+      await waitFor(() => {
+        expect(backendAttempts()).toBe(initialAttempts + 2);
+        expect(client.getQueryState(['configuration'])?.fetchStatus).toBe('idle');
+      });
+      await screen.findByText('The request could not be completed.');
+      expect(fetcher.mock.calls.map(([url]) => url)).not.toContain('/v2-beta/token');
+
+      recovered = true;
+      await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+      await screen.findByText('Console ready');
+      expect(fetcher.mock.calls.map(([url]) => url)).toContain('/v2-beta/token');
+      expect(fetcher.mock.calls.some(([url]) => url.startsWith('/v2-beta/projects'))).toBe(false);
+    } finally {
+      view.unmount();
+      client.clear();
+    }
+  });
   it('usa self autenticado pelo backend mesmo com accountId nulo no token GET', async () => {
     const { fetcher, client, view } = setup(true, false, false, {
       groups: true,
