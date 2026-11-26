@@ -163,13 +163,23 @@ python -m scripts.release_artifact_rehearsal --backend-image rancho-backend:loca
 
 For the [synthetic upgrade and backend rollback rehearsal](testing.md#original-engine-upgrade-and-rollback), pass the `images.backend` ID from the combined report as `--backend-image`. Compare it with `images.candidateBackend` in the engine report before grouping the evidence. The engine rehearsal requires the named local lab and a maintenance window for cold capture.
 
-For the modern MariaDB profile, add the two arguments below. The command pins all selected images and runs first-start import, repeated startup, rejection of a different backup, database rollback to Rancher 1.6.30, and the browser rollback. The source Rancher image must already be available locally. The modern profile uses loopback ports 18119 and 18091.
+For the modern MariaDB profile, add the two arguments below. The command pins all selected images and runs first-start import, repeated startup, rejection of a different backup, database rollback to Rancher 1.6.30, and the browser rollback. The source Rancher image must already be available locally. The modern profile also checks automatic single-node process recovery. It uses loopback ports 18119, 18091 and 18158.
 
 ```sh
 python -m scripts.release_artifact_rehearsal --backend-image rancho-backend-modern:local --previous-console-image rancho-console:previous --candidate-console-image rancho-console:local --modern-database-image rancho-mariadb:local --restore-image rancho-migration-restore:local
 ```
 
 The first-start restore helper uses a pinned Python 3.13 Alpine base. It verifies hashes for the importer wheels and checks the OpenSSL version loaded by `cryptography` at build time. The wheel for `cryptography` 50.0.2 includes OpenSSL 4.0.3. A package scan of the image can omit this bundled library, so also read the [OpenSSL advisories](https://openssl-library.org/news/vulnerabilities-4.0/) for the reported version. Trivy 0.74.0 with the November 13, 2026 advisory database reported 2 critical and 81 high package/advisory matches on the previous Debian-based helper and zero of either severity on the Alpine build. The MariaDB client connects to `db` on the private Compose network and allows that database's default self-signed certificate. Keep this one-shot helper on the internal database network defined in `compose.migrate.yaml`.
+
+## Single-node process recovery
+
+The modern Compose profile defaults to `RANCHO_BACKEND_RESTART_POLICY=no`. Set `RANCHO_BACKEND_RESTART_POLICY=on-failure:3` in the Compose environment to let Docker restart the backend after a process crash, with a bounded retry count. An intentional stop still leaves the backend stopped. This recovery uses the existing backend container, its state volume and the existing database. A host or database outage still needs a separate recovery strategy.
+
+Use the isolated rehearsal to check the policy with your chosen images. It starts a disposable Compose project on loopback port 18158. The test terminates the JVM in that project, waits for Docker to bring it back and checks the original local session, environment and schema record. The console and MariaDB stay running.
+
+```sh
+python -m migration.test_backend_crash_recovery --backend-image rancho-backend-modern:local --console-image rancho-console:local --database-image rancho-mariadb:local
+```
 
 ## Experimental single-node installation
 

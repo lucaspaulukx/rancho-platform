@@ -18,6 +18,7 @@ services:
 
   rancho:
     image: ${RANCHO_BACKEND_IMAGE:-rancho-backend-modern:local}
+    restart: "${RANCHO_BACKEND_RESTART_POLICY:-no}"
     environment:
       CATTLE_DB_CATTLE_MYSQL_HOST: db
       CATTLE_DB_CATTLE_USERNAME: cattle

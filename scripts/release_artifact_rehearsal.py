@@ -107,6 +107,21 @@ def rehearse(backend, previous, candidate, chromium, report, *, configuration_re
             or gateway.get('consoleRestarted') is not False):
         raise RuntimeError('Gateway did not recover after the upstream address changed')
     report['gatewayBackendReplacementPassed'] = True
+    if modern_database:
+        report['stage'] = 'backend-process-recovery'
+        report['backendProcessRecoveryPassed'] = False
+        recovery = json.loads(run_check([
+            '-m', 'migration.test_backend_crash_recovery', '--backend-image', images['backend'],
+            '--console-image', images['candidateConsole'], '--database-image', images['database'],
+        ]))
+        if (recovery.get('status') != 'passed' or recovery.get('cleanupComplete') is not True
+                or recovery.get('automaticRestart') is not True
+                or recovery.get('sameAuthenticatedSession') is not True
+                or recovery.get('environmentPreserved') is not True
+                or recovery.get('schemaRecordPreserved') is not True
+                or recovery.get('consoleRestarted') is not False or recovery.get('databaseRestarted') is not False):
+            raise RuntimeError('Single-node backend did not recover automatically after a process crash')
+        report['backendProcessRecoveryPassed'] = True
     report['cleanupComplete'] = True
     report.update(status='passed', stage='complete')
 

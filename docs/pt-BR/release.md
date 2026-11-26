@@ -163,13 +163,23 @@ python -m scripts.release_artifact_rehearsal --backend-image rancho-backend:loca
 
 Para o [ensaio sintético de upgrade e rollback do backend](testing.md#upgrade-e-rollback-do-engine-original), passe o ID `images.backend` do relatório combinado como `--backend-image`. Compare esse ID com `images.candidateBackend` no relatório do engine antes de reunir as evidências. O ensaio do engine exige o laboratório local indicado e uma janela de manutenção para a captura a frio.
 
-Para o perfil moderno com MariaDB, acrescente os dois argumentos abaixo. O comando fixa o ID de cada imagem e valida a importação no primeiro início, a repetição do comando, a rejeição de outro backup, o rollback do banco para Rancher 1.6.30 e o rollback no navegador. A imagem original do Rancher deve estar disponível localmente. O perfil moderno usa as portas de loopback 18119 e 18091.
+Para o perfil moderno com MariaDB, acrescente os dois argumentos abaixo. O comando fixa o ID de cada imagem e valida a importação no primeiro início, a repetição do comando, a rejeição de outro backup, o rollback do banco para Rancher 1.6.30 e o rollback no navegador. A imagem original do Rancher deve estar disponível localmente. O perfil moderno também verifica a recuperação automática do processo em nó único. Usa as portas de loopback 18119, 18091 e 18158.
 
 ```sh
 python -m scripts.release_artifact_rehearsal --backend-image rancho-backend-modern:local --previous-console-image rancho-console:previous --candidate-console-image rancho-console:local --modern-database-image rancho-mariadb:local --restore-image rancho-migration-restore:local
 ```
 
 O importador usa uma base Python 3.13 Alpine fixada. O build verifica os hashes das wheels e a versão do OpenSSL carregada pelo `cryptography`. A wheel do `cryptography` 50.0.2 inclui OpenSSL 4.0.3. A análise dos pacotes da imagem pode omitir essa biblioteca incorporada; confira também os [avisos do OpenSSL](https://openssl-library.org/news/vulnerabilities-4.0/) para a versão reportada. Trivy 0.74.0 com a base de avisos de 13 de novembro de 2026 reportou 2 ocorrências críticas e 81 altas por pacote e aviso na imagem anterior, baseada em Debian, e zero ocorrências dessas severidades na imagem Alpine. O cliente MariaDB se conecta a `db` na rede privada do Compose e aceita o certificado autoassinado padrão desse banco. Mantenha o auxiliar na rede interna de banco definida em `compose.migrate.yaml`.
+
+## Recuperação do processo em nó único
+
+O perfil moderno do Compose usa `RANCHO_BACKEND_RESTART_POLICY=no` por padrão. Defina `RANCHO_BACKEND_RESTART_POLICY=on-failure:3` no ambiente do Compose para o Docker reiniciar o backend após uma falha do processo, com limite de tentativas. Uma parada intencional mantém o backend parado. Essa recuperação usa o mesmo container do backend, seu volume de estado e o banco existente. Uma falha do host ou do banco ainda exige uma estratégia de recuperação própria.
+
+Use o ensaio isolado para verificar a política com as imagens escolhidas. Ele inicia um projeto temporário do Compose na porta local 18158. O teste encerra a JVM nesse projeto, aguarda o reinício pelo Docker e confere a sessão local original, o environment e o registro de migração do esquema. O console e o MariaDB continuam em execução.
+
+```sh
+python -m migration.test_backend_crash_recovery --backend-image rancho-backend-modern:local --console-image rancho-console:local --database-image rancho-mariadb:local
+```
 
 ## Instalação experimental de nó único
 
