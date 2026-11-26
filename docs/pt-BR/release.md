@@ -181,6 +181,8 @@ Use o ensaio isolado para verificar a política com as imagens escolhidas. Ele i
 python -m migration.test_backend_crash_recovery --backend-image rancho-backend-modern:local --console-image rancho-console:local --database-image rancho-mariadb:local
 ```
 
+Acrescente `--cold-handoff` ao ensaio para parar o backend ativo, copiar seu volume de estado para um volume independente e iniciar um substituto conectado ao mesmo MariaDB. O ensaio combinado da release moderna inclui essa etapa. O teste usa dois containers em um só host Docker e mede a recuperação da sessão e do environment originais. Antes de uma troca entre hosts conduzida por um operador, confirme que o backend anterior parou e impeça seu reinício. Em seguida, transfira seu estado protegido ao substituto. A promoção durante uma partição de rede e o failover automático entre hosts exigem implementação e validação próprias.
+
 ## Instalação experimental de nó único
 
 Para uma instalação Rancher existente, consulte [hosts existentes e versões do Docker](migration.md#hosts-existentes-e-versões-do-docker) antes de escolher o catálogo Cattle moderno.
