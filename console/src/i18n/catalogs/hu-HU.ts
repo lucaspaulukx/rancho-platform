@@ -2375,6 +2375,9 @@ export const huHU = {
     'A konzol a kiválasztott konténerben futtatja a parancsokat a Rancher által megadott jogosultságokkal.',
   'resourceStream.connect': 'Kapcsolódás a konténerhez',
   'resourceStream.terminal': 'A konténer terminálja',
+  'resourceStream.terminalInput': 'Terminálbemenet',
+  'resourceStream.terminalOverflow':
+    'Túl sok a felolvasandó kimenet. A tartalom elolvasásához lépkedjen a terminál sorai között.',
   'resourceStream.filter': 'Naplók szűrése',
   'resourceStream.filterPlaceholder': 'Beérkezett sorok szűrése…',
   'resourceStream.resume': 'Görgetés folytatása',

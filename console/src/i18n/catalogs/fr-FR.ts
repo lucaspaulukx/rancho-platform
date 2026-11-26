@@ -2393,6 +2393,9 @@ export const frFR = {
     'La console exécute des commandes dans le conteneur sélectionné avec les autorisations accordées par Rancher.',
   'resourceStream.connect': 'Se connecter au conteneur',
   'resourceStream.terminal': 'Terminal du conteneur',
+  'resourceStream.terminalInput': 'Saisie du terminal',
+  'resourceStream.terminalOverflow':
+    'Le terminal a produit trop de texte pour tout annoncer. Parcourez ses lignes pour lire la sortie.',
   'resourceStream.filter': 'Filtrer les journaux',
   'resourceStream.filterPlaceholder': 'Filtrer les lignes reçues…',
   'resourceStream.resume': 'Reprendre le défilement',

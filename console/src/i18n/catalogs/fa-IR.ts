@@ -125,6 +125,9 @@ export const faIR = {
     'کنسول فرمان‌ها را در کانتینر انتخاب‌شده با مجوزهایی که Rancher داده است اجرا می‌کند.',
   'resourceStream.connect': 'اتصال به کانتینر',
   'resourceStream.terminal': 'ترمینال کانتینر',
+  'resourceStream.terminalInput': 'ورودی ترمینال',
+  'resourceStream.terminalOverflow':
+    'خروجی برای خواندن خودکار بیش از حد طولانی است. برای خواندن آن بین سطرهای ترمینال جابه‌جا شوید.',
   'resourceStream.filter': 'فیلتر کردن لاگ‌ها',
   'resourceStream.filterPlaceholder': 'فیلتر کردن سطرهای دریافت‌شده…',
   'resourceStream.resume': 'ادامهٔ پیمایش',

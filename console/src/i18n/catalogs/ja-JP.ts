@@ -126,6 +126,9 @@ export const jaJP = {
     'コンソールは、Rancher から付与された権限で、選択したコンテナ内でコマンドを実行します。',
   'resourceStream.connect': 'コンテナに接続',
   'resourceStream.terminal': 'コンテナのターミナル',
+  'resourceStream.terminalInput': 'ターミナル入力',
+  'resourceStream.terminalOverflow':
+    '読み上げる出力が多すぎます。ターミナルの行を移動して内容を確認してください。',
   'resourceStream.filter': 'ログを絞り込む',
   'resourceStream.filterPlaceholder': '受信した行を絞り込む…',
   'resourceStream.resume': 'スクロールを再開',

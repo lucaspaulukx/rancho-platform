@@ -236,6 +236,9 @@ export const ukUA = {
     'Консоль виконує команди у вибраному контейнері з дозволами, наданими Rancher.',
   'resourceStream.connect': 'Підключитися до контейнера',
   'resourceStream.terminal': 'Термінал контейнера',
+  'resourceStream.terminalInput': 'Введення в терміналі',
+  'resourceStream.terminalOverflow':
+    'Забагато рядків для озвучення. Переходьте між рядками термінала, щоб прочитати вивід.',
   'resourceStream.filter': 'Фільтрувати журнали',
   'resourceStream.filterPlaceholder': 'Фільтрувати отримані рядки…',
   'resourceStream.resume': 'Відновити прокручування',

@@ -238,6 +238,9 @@ export const ruRU = {
     'Консоль выполняет команды в выбранном контейнере с разрешениями, предоставленными Rancher.',
   'resourceStream.connect': 'Подключиться к контейнеру',
   'resourceStream.terminal': 'Терминал контейнера',
+  'resourceStream.terminalInput': 'Ввод в терминале',
+  'resourceStream.terminalOverflow':
+    'Слишком много строк для озвучивания. Перемещайтесь по строкам терминала, чтобы прочитать вывод.',
   'resourceStream.filter': 'Фильтровать журналы',
   'resourceStream.filterPlaceholder': 'Фильтровать полученные строки…',
   'resourceStream.resume': 'Возобновить прокрутку',

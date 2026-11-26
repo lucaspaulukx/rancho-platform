@@ -115,6 +115,8 @@ export const zhHans = {
   'resourceStream.warning': '控制台使用 Rancher 授予的权限在所选容器中执行命令。',
   'resourceStream.connect': '连接到容器',
   'resourceStream.terminal': '容器终端',
+  'resourceStream.terminalInput': '终端输入',
+  'resourceStream.terminalOverflow': '输出过多，无法全部播报。请逐行浏览终端以阅读输出。',
   'resourceStream.filter': '筛选日志',
   'resourceStream.filterPlaceholder': '筛选收到的日志行…',
   'resourceStream.resume': '恢复滚动',

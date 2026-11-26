@@ -2432,6 +2432,9 @@ export const deDE = {
     'Die Konsole führt Befehle im ausgewählten Container mit den von Rancher erteilten Berechtigungen aus.',
   'resourceStream.connect': 'Mit Container verbinden',
   'resourceStream.terminal': 'Container-Terminal',
+  'resourceStream.terminalInput': 'Terminaleingabe',
+  'resourceStream.terminalOverflow':
+    'Zu viel Ausgabe für die Sprachausgabe. Navigieren Sie durch die Terminalzeilen, um den Inhalt zu lesen.',
   'resourceStream.filter': 'Logs filtern',
   'resourceStream.filterPlaceholder': 'Empfangene Zeilen filtern…',
   'resourceStream.resume': 'Scrollen fortsetzen',

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import type { ILocalizableStrings, Terminal } from '@xterm/xterm';
 import { Download, Pause, Play, X } from 'lucide-react';
 import { api, type Resource } from '../api';
 import { useApp } from '../state';
@@ -32,6 +33,20 @@ interface StreamProps {
   onClose: () => void;
   context?: ReactNode;
 }
+interface TerminalAccessibility {
+  terminal: Terminal;
+  strings: ILocalizableStrings;
+}
+
+function applyTerminalLanguage(
+  binding: TerminalAccessibility,
+  { promptLabel, tooMuchOutput }: ILocalizableStrings,
+) {
+  binding.terminal.textarea?.setAttribute('aria-label', promptLabel);
+  // xterm shares this announcement across terminals in the same Console document.
+  binding.strings.tooMuchOutput = tooMuchOutput;
+}
+
 export function ResourceStream(props: StreamProps) {
   const app = useApp();
   return (
@@ -55,6 +70,16 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
   const terminalHost = useRef<HTMLDivElement>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const environment = app.project?.id;
+  const promptLabel = t('resourceStream.terminalInput');
+  const tooMuchOutput = t('resourceStream.terminalOverflow');
+  const terminalText = useRef({ promptLabel, tooMuchOutput });
+  const terminalAccessibility = useRef<TerminalAccessibility | null>(null);
+
+  useLayoutEffect(() => {
+    terminalText.current = { promptLabel, tooMuchOutput };
+    if (terminalAccessibility.current)
+      applyTerminalLanguage(terminalAccessibility.current, terminalText.current);
+  }, [promptLabel, tooMuchOutput]);
 
   useEffect(() => {
     if (!started || !app.config.modules.observability) return;
@@ -65,7 +90,7 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
     }
     let disposed = false;
     let socket: WebSocket | undefined;
-    let terminal: import('@xterm/xterm').Terminal | undefined;
+    let terminal: Terminal | undefined;
     let observer: ResizeObserver | undefined;
     let heartbeat: ReturnType<typeof setInterval> | undefined;
     const controller = new AbortController();
@@ -109,6 +134,8 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
           const fit = new FitAddon();
           terminal.loadAddon(fit);
           terminal.open(terminalHost.current);
+          terminalAccessibility.current = { terminal, strings: Terminal.strings };
+          applyTerminalLanguage(terminalAccessibility.current, terminalText.current);
           observer = new ResizeObserver(() => {
             fit.fit();
             if (socket?.readyState === WebSocket.OPEN)
@@ -185,6 +212,8 @@ function StreamSession({ resource, mode, onClose, context }: StreamProps) {
       if (heartbeat) clearInterval(heartbeat);
       observer?.disconnect();
       socket?.close();
+      if (terminalAccessibility.current?.terminal === terminal)
+        terminalAccessibility.current = null;
       terminal?.dispose();
       socketRef.current = null;
     };
