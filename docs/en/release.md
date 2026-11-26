@@ -153,7 +153,7 @@ Add `--configuration-reversal` to exercise customization on, off and on again wi
 
 ## Rehearsal with one pinned artifact
 
-Run the combined gate with three local images and Playwright Chromium available in the Python environment. Leave loopback port 18091 free for the owned rollback proxy. The tool resolves the image IDs once, runs fresh installation and frontend upgrade/rollback on the same console candidate, and reports the selected IDs, configuration digest and cleanup. The report covers these two checks. The remaining release gates must be recorded separately.
+Run the combined gate with three local images and Playwright Chromium available in the Python environment. Leave loopback port 18091 free for the owned rollback proxy. The tool resolves the image IDs once, runs fresh installation and frontend upgrade/rollback on the same console candidate, and reports the selected IDs, configuration digest and cleanup. The report also checks that the Compose gateway uses a new backend IP after Docker changes the service address. The isolated test preserves the request query and keeps the gateway container running. The remaining release gates must be recorded separately.
 
 Pass `--configuration-reversal` here too to include the runtime flag reversal in the same report.
 

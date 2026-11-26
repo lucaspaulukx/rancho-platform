@@ -6,6 +6,10 @@ from unittest.mock import patch
 from scripts import release_artifact_rehearsal as rehearsal
 
 
+GATEWAY = {'status': 'passed', 'cleanupComplete': True, 'backendAddressChanged': True,
+           'queryPreserved': True, 'consoleRestarted': False}
+
+
 class ReleaseArtifactRehearsalTest(unittest.TestCase):
     def test_cluster_flags_must_be_explicitly_rejected_without_a_network(self):
         rejection = CompletedProcess([], 2, b'', b'The experimental backend supports single-node mode only.')
@@ -34,16 +38,19 @@ class ReleaseArtifactRehearsalTest(unittest.TestCase):
         with (patch.object(rehearsal, 'image_id', side_effect=[
             'backend-id', 'previous-id', 'candidate-id', 'database-id', 'restore-id',
         ]), patch.object(rehearsal, 'check_single_node_boundary') as boundary,
-              patch.object(rehearsal, 'run_check', side_effect=['', '', json.dumps(rollback)]) as check):
+              patch.object(rehearsal, 'run_check', side_effect=['', '', json.dumps(rollback), json.dumps(GATEWAY)]) as check):
             rehearsal.rehearse('backend:tag', 'previous:tag', 'candidate:tag', None, report,
                                modern_database='db:tag', restore_image='restore:tag')
-        first, database, frontend = (call.args[0] for call in check.call_args_list)
+        first, database, frontend, gateway = (call.args[0] for call in check.call_args_list)
         self.assertEqual(first, ['-m', 'migration.test_first_start_lab',
                                 '--backend-image', 'backend-id', '--console-image', 'candidate-id',
                                 '--database-image', 'database-id', '--restore-image', 'restore-id'])
         self.assertEqual(database, ['-m', 'migration.rehearse_modern_backend',
                                    '--backend-image', 'backend-id', '--database-image', 'database-id'])
         self.assertEqual(frontend[-2:], ['--candidate-image', 'candidate-id'])
+        self.assertEqual(gateway, ['console/tests/gateway_backend_replacement.py',
+                                   '--gateway-image', 'candidate-id', '--fixture-image', 'candidate-id'])
+        self.assertTrue(report['gatewayBackendReplacementPassed'])
         self.assertTrue(report['firstStartMigrationPassed'])
         self.assertTrue(report['databaseRollbackPassed'])
         boundary.assert_called_once_with('backend-id')
@@ -57,7 +64,7 @@ class ReleaseArtifactRehearsalTest(unittest.TestCase):
             'configurationSha256': 'a' * 64,
         }
         with (patch.object(rehearsal, 'image_id', side_effect=['backend-id', 'previous-id', 'candidate-id']),
-              patch.object(rehearsal, 'run_check', side_effect=['', json.dumps(rollback)]) as check):
+              patch.object(rehearsal, 'run_check', side_effect=['', json.dumps(rollback), json.dumps(GATEWAY)]) as check):
             rehearsal.rehearse('backend:tag', 'previous:tag', 'candidate:tag', None, report,
                                configuration_reversal=True)
         self.assertEqual(check.call_args_list[0].args[0][-3:],

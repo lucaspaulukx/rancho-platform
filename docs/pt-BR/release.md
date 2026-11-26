@@ -153,7 +153,7 @@ Adicione `--configuration-reversal` para ativar, desativar e reativar a customiz
 
 ## Ensaio com um artefato fixado
 
-Execute o teste combinado com três imagens locais e o Chromium do Playwright disponível no ambiente Python. Deixe a porta local 18091 livre para o proxy temporário de rollback. A ferramenta resolve os IDs das imagens uma vez, executa a instalação limpa e o upgrade/rollback do frontend com a mesma imagem candidata e registra os IDs, o hash da configuração e a limpeza. O relatório cobre essas duas verificações. Registre separadamente os demais critérios de release.
+Execute o teste combinado com três imagens locais e o Chromium do Playwright disponível no ambiente Python. Deixe a porta local 18091 livre para o proxy temporário de rollback. A ferramenta resolve os IDs das imagens uma vez, executa a instalação limpa e o upgrade/rollback do frontend com a mesma imagem candidata e registra os IDs, o hash da configuração e a limpeza. O relatório também verifica se o gateway do Compose usa o novo IP do backend quando o Docker muda o endereço do serviço. O teste isolado preserva a query da requisição e mantém o container do gateway em execução. Registre separadamente os demais critérios de release.
 
 Passe `--configuration-reversal` também nesse comando para registrar a reversão de flags em execução no mesmo relatório.
 
