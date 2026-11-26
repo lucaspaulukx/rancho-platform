@@ -96,6 +96,17 @@ def rehearse(backend, previous, candidate, chromium, report, *, configuration_re
         raise RuntimeError('Rollback evidence does not match the selected images')
     report['frontendRollbackPassed'] = True
     report['frontendConfigurationSha256'] = rollback['configurationSha256']
+    report['stage'] = 'gateway-backend-replacement'
+    report['gatewayBackendReplacementPassed'] = False
+    gateway = json.loads(run_check([
+        'console/tests/gateway_backend_replacement.py', '--gateway-image', images['candidateConsole'],
+        '--fixture-image', images['candidateConsole'],
+    ]))
+    if (gateway.get('status') != 'passed' or gateway.get('cleanupComplete') is not True
+            or gateway.get('backendAddressChanged') is not True or gateway.get('queryPreserved') is not True
+            or gateway.get('consoleRestarted') is not False):
+        raise RuntimeError('Gateway did not recover after the upstream address changed')
+    report['gatewayBackendReplacementPassed'] = True
     report['cleanupComplete'] = True
     report.update(status='passed', stage='complete')
 
