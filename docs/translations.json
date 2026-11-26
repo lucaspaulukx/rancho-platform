@@ -118,8 +118,8 @@
         "pt-BR": "docs/pt-BR/release.md",
         "en": "docs/en/release.md"
       },
-      "reviewedSourceSha256": "3aebc7fd917945acf1c67c1b87e0c2d2a01768e6824a70e0c3dd4b450e5ad01d",
-      "reviewedTranslationSha256": "a6d7f838984209e2674d503080fe867589e278bbf7a66735eaead3f6354250a2"
+      "reviewedSourceSha256": "b0a61c37d175f9705abfbe9c24f32e021a33f1383d6b9f052fc481d7cf394c7a",
+      "reviewedTranslationSha256": "b3e768c7c9d27a09eb8a3aeed74c1be792c25245d363e97bcaf6b04fd0863ce4"
     },
     {
       "source": "docs/pt-BR/roadmap.md",

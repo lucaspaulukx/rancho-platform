@@ -10,6 +10,11 @@ GATEWAY = {'status': 'passed', 'cleanupComplete': True, 'backendAddressChanged':
            'queryPreserved': True, 'consoleRestarted': False}
 
 
+RECOVERY = {'status': 'passed', 'cleanupComplete': True, 'automaticRestart': True,
+            'sameAuthenticatedSession': True, 'environmentPreserved': True, 'schemaRecordPreserved': True,
+            'consoleRestarted': False, 'databaseRestarted': False}
+
+
 class ReleaseArtifactRehearsalTest(unittest.TestCase):
     def test_cluster_flags_must_be_explicitly_rejected_without_a_network(self):
         rejection = CompletedProcess([], 2, b'', b'The experimental backend supports single-node mode only.')
@@ -38,10 +43,10 @@ class ReleaseArtifactRehearsalTest(unittest.TestCase):
         with (patch.object(rehearsal, 'image_id', side_effect=[
             'backend-id', 'previous-id', 'candidate-id', 'database-id', 'restore-id',
         ]), patch.object(rehearsal, 'check_single_node_boundary') as boundary,
-              patch.object(rehearsal, 'run_check', side_effect=['', '', json.dumps(rollback), json.dumps(GATEWAY)]) as check):
+              patch.object(rehearsal, 'run_check', side_effect=['', '', json.dumps(rollback), json.dumps(GATEWAY), json.dumps(RECOVERY)]) as check):
             rehearsal.rehearse('backend:tag', 'previous:tag', 'candidate:tag', None, report,
                                modern_database='db:tag', restore_image='restore:tag')
-        first, database, frontend, gateway = (call.args[0] for call in check.call_args_list)
+        first, database, frontend, gateway, recovery = (call.args[0] for call in check.call_args_list)
         self.assertEqual(first, ['-m', 'migration.test_first_start_lab',
                                 '--backend-image', 'backend-id', '--console-image', 'candidate-id',
                                 '--database-image', 'database-id', '--restore-image', 'restore-id'])
@@ -51,6 +56,10 @@ class ReleaseArtifactRehearsalTest(unittest.TestCase):
         self.assertEqual(gateway, ['console/tests/gateway_backend_replacement.py',
                                    '--gateway-image', 'candidate-id', '--fixture-image', 'candidate-id'])
         self.assertTrue(report['gatewayBackendReplacementPassed'])
+        self.assertEqual(recovery, ['-m', 'migration.test_backend_crash_recovery',
+                                    '--backend-image', 'backend-id', '--console-image', 'candidate-id',
+                                    '--database-image', 'database-id'])
+        self.assertTrue(report['backendProcessRecoveryPassed'])
         self.assertTrue(report['firstStartMigrationPassed'])
         self.assertTrue(report['databaseRollbackPassed'])
         boundary.assert_called_once_with('backend-id')
