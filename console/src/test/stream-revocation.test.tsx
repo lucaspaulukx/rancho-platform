@@ -25,6 +25,7 @@ vi.mock('../state', () => ({
 }));
 vi.mock('@xterm/xterm', () => ({
   Terminal: class {
+    static strings = { promptLabel: 'Terminal input', tooMuchOutput: 'Too much output' };
     cols = 80;
     rows = 24;
     loadAddon() {}

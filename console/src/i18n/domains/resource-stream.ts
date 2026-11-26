@@ -19,6 +19,9 @@ export const enResourceStream = {
     'The console runs commands inside the selected container with the permissions granted by Rancher.',
   'resourceStream.connect': 'Connect to container',
   'resourceStream.terminal': 'Container terminal',
+  'resourceStream.terminalInput': 'Terminal input',
+  'resourceStream.terminalOverflow':
+    'Too much output to announce. Navigate the terminal rows to read it.',
   'resourceStream.filter': 'Filter logs',
   'resourceStream.filterPlaceholder': 'Filter received lines…',
   'resourceStream.resume': 'Resume scrolling',
@@ -49,6 +52,9 @@ export const ptResourceStream = {
     'A console executa comandos dentro do container selecionado com as permissões concedidas pelo Rancher.',
   'resourceStream.connect': 'Conectar ao container',
   'resourceStream.terminal': 'Terminal do container',
+  'resourceStream.terminalInput': 'Entrada do terminal',
+  'resourceStream.terminalOverflow':
+    'Há muitas linhas para anunciar. Navegue pelas linhas do terminal para lê-las.',
   'resourceStream.filter': 'Filtrar logs',
   'resourceStream.filterPlaceholder': 'Filtrar linhas recebidas…',
   'resourceStream.resume': 'Retomar rolagem',

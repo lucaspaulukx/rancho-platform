@@ -128,6 +128,15 @@ describe('Typed message catalogs', () => {
     expect(pt.t('selection.count', { count: 0 })).toBe('0 item selecionado');
     expect(validateCatalog(portugueseMessages)).toEqual(portugueseMessages);
   });
+  it('uses Portuguese permission terminology in access diagnostics and group audit snapshots', () => {
+    const { t } = createTranslator('pt-BR');
+    expect(t('accessDiagnostics.description')).toBe(
+      'Permissões e papel calculados pelo backend Rancher.',
+    );
+    expect(t('accessDiagnostics.noLocalGrant')).toBe('Nenhuma permissão local');
+    expect(t('accessDiagnostics.grants')).toBe('Permissões concedidas');
+    expect(createTranslator('en-US').t('accessDiagnostics.grants')).toBe('Grants');
+  });
   it('reports fallback and applies the fallback grammar rather than the requested locale grammar', () => {
     const french = createTranslator('fr-FR', {});
     expect(french.translatedKeys).toEqual([]);
