@@ -15,7 +15,7 @@ export const enNetworkPoliciesPage = {
   'networkPoliciesPage.view': 'View network policies',
   'networkPoliciesPage.close': 'Close',
   'networkPoliciesPage.managerWarning':
-    'The network-policy-manager is not active and healthy. Rules can be viewed; changes remain unavailable until this infrastructure is validated.',
+    'The network-policy-manager is not active and healthy. Rules can be viewed; edits become available once the manager is active and healthy.',
   'networkPoliciesPage.advancedNotice':
     'This network has advanced or unrecognized rules. The simplified editor does not replace them.',
   'networkPoliciesPage.allowOption': 'Allow',
@@ -61,7 +61,7 @@ export const ptNetworkPoliciesPage = {
   'networkPoliciesPage.view': 'Consultar políticas de rede',
   'networkPoliciesPage.close': 'Fechar',
   'networkPoliciesPage.managerWarning':
-    'O network-policy-manager não está ativo e saudável. As regras podem ser consultadas; alterações ficam indisponíveis até validar essa infraestrutura.',
+    'O network-policy-manager não está ativo e saudável. As regras podem ser consultadas; a edição fica disponível quando o gerenciador estiver ativo e saudável.',
   'networkPoliciesPage.advancedNotice':
     'Esta rede possui regras avançadas ou não reconhecidas. O editor simplificado não as substitui.',
   'networkPoliciesPage.allowOption': 'Permitir',

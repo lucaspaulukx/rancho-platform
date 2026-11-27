@@ -106,6 +106,8 @@ The localization harness injects a synthetic cross-origin pagination link on the
 
 On the native stream fixture, confirm the connection is open, set a filter for the synthetic marker and wait for a new matching line. When checking a locale change, keep the panel open and verify that the filter persists while output continues. [Reproduce the live log walkthrough](../../console/README.md#inspect-live-container-logs).
 
+The browser also tests a temporary offline transition at sign-in. An already loaded locale stays available, an unloaded locale keeps the current language and both drafts, and retry loads the requested catalog once the connection returns.
+
 ### Optional automated accessibility checks
 
 Run the owned-browser localization test with `--accessibility` and the console development dependencies installed. It runs axe on Groups, Users, API Keys, Settings, Audit and Environments at 390 and 1440 px in dark and light themes. The gate reports rule IDs and counts. Review the separate manual-check entries and exercise critical workflows with a keyboard and screen reader before release.

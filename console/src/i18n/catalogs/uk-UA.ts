@@ -865,7 +865,7 @@ export const ukUA = {
   'healthCheckEditor.version': 'Версія HTTP',
   'healthCheckEditor.path': 'Шлях HTTP-перевірки',
   'healthCheckEditor.pathHint': 'Приклад: /health. Виберіть кінцеву точку, яка не змінює дані.',
-  'healthCheckEditor.host': 'Хост HTTP (необов’язково)',
+  'healthCheckEditor.host': 'Заголовок HTTP Host (необов’язково)',
   'healthCheckEditor.advanced': 'Інтервали й політика відновлення',
   'healthCheckEditor.strategy': 'Дія в разі недоступності',
   'healthCheckEditor.strategy.none': 'Лише повідомити',
@@ -2645,7 +2645,7 @@ export const ukUA = {
   'networkPoliciesPage.view': 'Переглянути мережеві політики',
   'networkPoliciesPage.close': 'Закрити',
   'networkPoliciesPage.managerWarning':
-    'Компонент network-policy-manager неактивний або непрацездатний. Правила можна переглядати. Зміни стануть доступними після перевірки інфраструктури.',
+    'Компонент network-policy-manager неактивний або непрацездатний. Правила можна переглядати. Зміни стануть доступними, коли компонент буде активним і справним.',
   'networkPoliciesPage.advancedNotice':
     'У цій мережі є розширені або невідомі правила. Спрощений редактор їх не замінює.',
   'networkPoliciesPage.allowOption': 'Дозволити',
