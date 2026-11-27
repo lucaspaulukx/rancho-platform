@@ -178,6 +178,22 @@ export class ConfigurationLoadError extends ConsoleRequestError {
   }
 }
 
+function validateFrontendConfig(value: unknown): ConsoleConfig {
+  try {
+    return validateConfig(value);
+  } catch {
+    let localization: LocalizationPolicy | undefined;
+    if (value && typeof value === 'object' && !Array.isArray(value) && 'localization' in value) {
+      try {
+        localization = normalizeLocalizationPolicy(value.localization);
+      } catch {
+        // An invalid policy cannot select the language used on the error page.
+      }
+    }
+    throw new ConfigurationLoadError(localization);
+  }
+}
+
 async function configurationJson(path: string, signal?: AbortSignal): Promise<unknown> {
   try {
     const response = await fetch(path, { cache: 'no-store', signal });
@@ -218,7 +234,7 @@ function validateServerConfig(value: unknown): ServerConfig {
 
 export async function loadConfig(signal?: AbortSignal) {
   const [frontend, backend] = await Promise.allSettled([
-    configurationJson('/console/console-config.json', signal).then(validateConfig),
+    configurationJson('/console/console-config.json', signal).then(validateFrontendConfig),
     configurationJson('/oidc/config', signal).then(validateServerConfig),
   ]);
   signal?.throwIfAborted();

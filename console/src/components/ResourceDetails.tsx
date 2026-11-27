@@ -5,18 +5,29 @@ import { Badge, ResourceStateBadge, Button, Tabs, useToast } from './ui';
 import { fieldLabel, sensitiveField } from './SchemaForm';
 import { certificateValidity, formatResourceDate } from '../resource-format';
 import { useI18n } from '../i18n/provider';
+import { ptResourceDetails } from '../i18n/domains/resource-details';
+import { resourceStateLabel } from '../i18n/resource-state';
 
-export function safeConfiguration(value: unknown, depth = 0): unknown {
-  if (depth > 8) return '[profundidade limitada]';
+const defaultRedactionLabels = {
+  redacted: ptResourceDetails['details.redacted'],
+  depthLimit: ptResourceDetails['details.depthLimit'],
+};
+
+export function safeConfiguration(
+  value: unknown,
+  labels: { redacted: string; depthLimit: string } = defaultRedactionLabels,
+  depth = 0,
+): unknown {
+  if (depth > 8) return labels.depthLimit;
   if (Array.isArray(value))
-    return value.slice(0, 500).map((item) => safeConfiguration(item, depth + 1));
+    return value.slice(0, 500).map((item) => safeConfiguration(item, labels, depth + 1));
   if (value && typeof value === 'object')
     return Object.fromEntries(
       Object.entries(value)
         .filter(([key]) => !['actions', 'links'].includes(key))
         .map(([key, item]) => [
           key,
-          sensitiveField(key) ? '[protegido]' : safeConfiguration(item, depth + 1),
+          sensitiveField(key) ? labels.redacted : safeConfiguration(item, labels, depth + 1),
         ]),
     );
   return value;
@@ -61,7 +72,8 @@ export function ResourceDetails({ resource, schema }: { resource: Resource; sche
         !['actions', 'links', 'hasComposeSource'].includes(key),
     ),
   );
-  const json = JSON.stringify(safeConfiguration(configuration), null, 2);
+  const redactionLabels = { redacted: t('details.redacted'), depthLimit: t('details.depthLimit') };
+  const json = JSON.stringify(safeConfiguration(configuration, redactionLabels), null, 2);
   return (
     <section className="panel resource-details">
       <Tabs
@@ -89,6 +101,8 @@ export function ResourceDetails({ resource, schema }: { resource: Resource; sche
                   <dd>
                     {key === 'state' ? (
                       <ResourceStateBadge state={resource.state} />
+                    ) : key === 'healthState' && typeof value === 'string' ? (
+                      resourceStateLabel(t, value)
                     ) : validity ? (
                       <>
                         <span>{formatResourceDate(value, locale)}</span>{' '}
@@ -99,7 +113,7 @@ export function ResourceDetails({ resource, schema }: { resource: Resource; sche
                     ) : key === 'type' ? (
                       fieldLabel(String(resource[key]), t)
                     ) : typeof resource[key] === 'object' ? (
-                      JSON.stringify(safeConfiguration(resource[key]))
+                      JSON.stringify(safeConfiguration(value, redactionLabels))
                     ) : typeof value === 'number' ? (
                       formats.number(value)
                     ) : (

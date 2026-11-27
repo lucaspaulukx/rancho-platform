@@ -17,7 +17,7 @@ Maintained guides cover architecture, configuration, development, testing, secur
 
 ## Console walkthroughs / Fluxos no console
 
-These figures show the running console on candidate `1ef1211` in an isolated Docker Compose lab with synthetic resources. The language selector has preview enabled for the walkthroughs. No group grant was saved in the capture. / As figuras mostram o console em execução na candidata `1ef1211`, em laboratório Docker Compose com recursos sintéticos. A prévia de idiomas está ativa nos exemplos. A permissão de grupo exibida ficou em rascunho.
+These figures show the running console built from the console source at `81fd28c` in an isolated Docker Compose lab with synthetic resources. The language selector has preview enabled for the walkthroughs. No group grant was saved in the capture. / As figuras mostram o console em execução com o código do console em `81fd28c`, em laboratório Docker Compose com recursos sintéticos. A prévia de idiomas está ativa nos exemplos. A permissão de grupo exibida ficou em rascunho.
 
 | Screen / Tela | English capture | Captura em português |
 | --- | --- | --- |
@@ -27,4 +27,4 @@ These figures show the running console on candidate `1ef1211` in an isolated Doc
 | Group grant draft / Rascunho de permissão de grupo | [Read-only grant](images/guide-group-permissions-en-US.png) | [Permissão somente leitura](images/guide-group-permissions-pt-BR.png) |
 | Server settings / Configuração do servidor | [Setting sources](images/guide-settings-en-US.png) | [Origens das configurações](images/guide-settings-pt-BR.png) |
 
-[Persian mobile visual check at 320 px / Verificação visual em persa a 320 px](images/guide-workloads-fa-IR-mobile.png).
+[Persian mobile visual check at 320 px / Verificação visual em persa a 320 px](images/guide-workloads-fa-IR-mobile.png) (`1ef1211`).

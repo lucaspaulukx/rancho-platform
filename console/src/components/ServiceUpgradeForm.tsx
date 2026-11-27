@@ -68,7 +68,7 @@ export function ServiceUpgradeForm({
   busy: boolean;
   error: Error | null;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const current = imageName((resource.launchConfig as Record<string, unknown>)?.imageUuid);
   const [image, setImage] = useState(current);
   const [batchSize, setBatch] = useState('1');
@@ -83,7 +83,7 @@ export function ServiceUpgradeForm({
       value instanceof ResourceValidationError
     )
       return t(value.key);
-    return workloadValidationMessage(value, t);
+    return workloadValidationMessage(value, t, locale);
   }
   const launch = resource.launchConfig as Record<string, unknown>;
   const available = bindingsEnabled && supportsConfigurationUpgrade(resource, schemas);

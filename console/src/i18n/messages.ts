@@ -329,7 +329,9 @@ export function createTranslator(locale: Locale, translation?: unknown) {
       const template =
         typeof message === 'string'
           ? message
-          : (message[formats.plural(params.count as number)] ?? message.other);
+          : ((params.count === 0 ? message.zero : undefined) ??
+            message[formats.plural(params.count as number)] ??
+            message.other);
       return template.replace(/\{([a-zA-Z][a-zA-Z0-9]*)\}/g, (_, name: string) => {
         const value = params[name];
         return typeof value === 'number' ? formats.number(value) : String(value);

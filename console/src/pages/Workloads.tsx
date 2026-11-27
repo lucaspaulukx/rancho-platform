@@ -64,7 +64,9 @@ function WorkloadTable({
     <DataTable
       rows={rows}
       rowKey={(row) => row.id}
-      searchText={(row) => `${row.name || ''} ${row.id} ${imageName(row)} ${row.state || ''}`}
+      searchText={(row) =>
+        `${row.name || ''} ${row.id} ${imageName(row)} ${row.state || ''} ${row.state ? resourceStateLabel(t, row.state) : ''}`
+      }
       emptyTitle={
         kind === 'services' ? t('workloadsPage.noServices') : t('workloadsPage.noContainers')
       }

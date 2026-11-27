@@ -21,6 +21,7 @@ const resource = {
   type: 'service',
   links: {},
   name: 'Serviço existente',
+  healthState: 'unhealthy',
   created: '2026-10-21T00:00:00Z',
   expiresAt: '2020-10-21T00:00:00Z',
   launchConfig: { imageUuid: 'docker:alpine:3.20', password: 'fixture-redacted' },
@@ -48,24 +49,26 @@ it('changes details labels and regional formats while keeping the open sanitized
   );
   expect(screen.getByText(formatResourceDate(resource.created, 'pt-BR'))).toBeInTheDocument();
   expect(screen.getByText('Expirado')).toBeInTheDocument();
+  expect(screen.getByText('Com falha')).toBeInTheDocument();
   await user.click(screen.getByRole('tab', { name: 'Configuração' }));
   const configuration = screen.getByLabelText('Configuração sanitizada');
   expect(configuration).not.toHaveTextContent('fixture-redacted');
   expect(configuration).toHaveTextContent('[protegido]');
-  const nativeText = configuration.textContent;
+  const nativeText = configuration.textContent ?? '';
   await user.click(screen.getByRole('button', { name: 'English' }));
   expect(screen.getByRole('tab', { name: 'Configuration', selected: true })).toBeInTheDocument();
   expect(screen.getByLabelText('Sanitized configuration')).toBe(configuration);
-  expect(configuration.textContent).toBe(nativeText);
+  expect(configuration.textContent).toBe(nativeText.replace('[protegido]', '[redacted]'));
   await user.click(screen.getByRole('button', { name: 'Français' }));
   expect(await screen.findByLabelText('Configuration expurgée')).toBe(configuration);
   expect(screen.getByRole('tab', { name: 'Configuration', selected: true })).toBeInTheDocument();
-  expect(configuration.textContent).toBe(nativeText);
+  expect(configuration.textContent).toBe(nativeText.replace('[protegido]', '[masqué]'));
   await user.click(screen.getByRole('tab', { name: 'Résumé' }));
   expect(screen.getByText('Serviço existente')).toBeInTheDocument();
   expect(screen.getByText(formatResourceDate(resource.created, 'fr-FR'))).toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: 'English' }));
   expect(screen.getByRole('tab', { name: 'Summary', selected: true })).toBeInTheDocument();
   expect(screen.getByText('Expired')).toBeInTheDocument();
+  expect(screen.getByText('Unhealthy')).toBeInTheDocument();
   expect(screen.getByText(formatResourceDate(resource.created, 'en-US'))).toBeInTheDocument();
 });

@@ -1,4 +1,5 @@
 import { useI18n } from '../i18n/provider';
+import { resourceStateLabel } from '../i18n/resource-state';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -88,7 +89,7 @@ function HostsContext() {
       </>
     );
   const filtered = query.data.hosts.filter((value) =>
-    `${value.name || ''} ${value.hostname || ''} ${value.agentIpAddress || ''} ${value.state || ''}`
+    `${value.name || ''} ${value.hostname || ''} ${value.agentIpAddress || ''} ${value.state || ''} ${value.state ? resourceStateLabel(t, value.state) : ''}`
       .toLocaleLowerCase(locale)
       .includes(search.toLocaleLowerCase(locale)),
   );

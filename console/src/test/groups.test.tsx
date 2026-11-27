@@ -223,7 +223,9 @@ describe('Manutenção de vínculos de grupos', () => {
     const readOnly = within(permission).getByRole('option', { name: 'Somente leitura' });
     expect(readOnly).toHaveValue('readonly');
     await userEvent.selectOptions(permission, readOnly);
+    expect(screen.getByText('0 membros · 1 environment')).toBeInTheDocument();
     switchLocale('en-US');
+    expect(screen.getByText('0 members · 1 environment')).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'Permission in Operações' })).toBe(permission);
     expect(permission).toHaveValue('readonly');
     expect(within(permission).getByRole('option', { name: 'Read Only' })).toHaveValue('readonly');

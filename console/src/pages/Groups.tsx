@@ -152,8 +152,10 @@ export function GroupEditor({
           <>
             <span className="muted" style={{ marginRight: 'auto', fontSize: 11 }}>
               {t('groups.selectionSummary', {
-                members: members.size,
-                environments: Object.keys(grants).length,
+                members: t('groups.memberSelectionCount', { count: members.size }),
+                environments: t('groups.environmentSelectionCount', {
+                  count: Object.keys(grants).length,
+                }),
               })}
             </span>
             <Button onClick={close} disabled={save.isPending}>

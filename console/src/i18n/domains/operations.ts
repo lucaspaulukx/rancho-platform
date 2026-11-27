@@ -20,10 +20,19 @@ export const enOperations = {
   'operations.services': 'Services',
   'operations.containers': 'Containers',
   'operations.view': 'Operations view',
-  'operations.visibleServices': '{count} visible services',
-  'operations.visibleContainers': '{count} matching containers',
-  'operations.visibleStacks': '{count} visible stacks',
-  'operations.hiddenSystem': ' · {count} infrastructure stacks hidden',
+  'operations.visibleServices': {
+    one: '{count} visible service',
+    other: '{count} visible services',
+  },
+  'operations.visibleContainers': {
+    one: '{count} matching container',
+    other: '{count} matching containers',
+  },
+  'operations.visibleStacks': { one: '{count} visible stack', other: '{count} visible stacks' },
+  'operations.hiddenSystem': {
+    one: ' · {count} infrastructure stack hidden',
+    other: ' · {count} infrastructure stacks hidden',
+  },
   'operations.expandAll': 'Expand all',
   'operations.collapseAll': 'Collapse all',
   'operations.topology': 'Topology',
@@ -41,7 +50,7 @@ export const enOperations = {
   'operations.stackName': 'Stack {name}',
   'operations.collapseStack': 'Collapse stack {name}',
   'operations.expandStack': 'Expand stack {name}',
-  'operations.serviceCount': '{count} services',
+  'operations.serviceCount': { one: '{count} service', other: '{count} services' },
   'operations.system': ' · infrastructure',
   'operations.emptyStack': 'No services or containers in this stack match the current filters.',
   'operations.orphanServices': 'Services without an available stack',
@@ -52,7 +61,10 @@ export const enOperations = {
   'operations.collapseContainers': 'Collapse containers for {name}',
   'operations.expandContainers': 'Expand containers for {name}',
   'operations.noStack': 'No stack',
-  'operations.containerCount': '{count} containers · scale {scale}',
+  'operations.containerCount': {
+    one: '{count} container · scale {scale}',
+    other: '{count} containers · scale {scale}',
+  },
   'operations.emptyService': 'No containers in this service match the current filters.',
   'operations.selectResource': 'Select {name}',
   'operations.resourceActions': 'Actions for {name}',
@@ -75,7 +87,10 @@ export const enOperations = {
   'operations.balancer': 'Configure load balancer',
   'operations.createService': 'Add service',
   'operations.upgradeStack': 'Upgrade stack',
-  'operations.restartServices': 'Restart services ({count})',
+  'operations.restartServices': {
+    one: 'Restart service ({count})',
+    other: 'Restart services ({count})',
+  },
   'operations.restartLimit': 'Select up to 100 services for this operation.',
   'operations.action.start': 'Start',
   'operations.action.activate': 'Activate',
@@ -117,10 +132,26 @@ export const ptOperations = {
   'operations.services': 'Serviços',
   'operations.containers': 'Containers',
   'operations.view': 'Visão da operação',
-  'operations.visibleServices': '{count} serviços visíveis',
-  'operations.visibleContainers': '{count} containers nos resultados',
-  'operations.visibleStacks': '{count} stacks visíveis',
-  'operations.hiddenSystem': ' · {count} de infraestrutura ocultas',
+  'operations.visibleServices': {
+    zero: '{count} serviços visíveis',
+    one: '{count} serviço visível',
+    other: '{count} serviços visíveis',
+  },
+  'operations.visibleContainers': {
+    zero: '{count} containers nos resultados',
+    one: '{count} container nos resultados',
+    other: '{count} containers nos resultados',
+  },
+  'operations.visibleStacks': {
+    zero: '{count} stacks visíveis',
+    one: '{count} stack visível',
+    other: '{count} stacks visíveis',
+  },
+  'operations.hiddenSystem': {
+    zero: ' · {count} stacks de infraestrutura ocultas',
+    one: ' · {count} stack de infraestrutura oculta',
+    other: ' · {count} stacks de infraestrutura ocultas',
+  },
   'operations.expandAll': 'Expandir tudo',
   'operations.collapseAll': 'Recolher tudo',
   'operations.topology': 'Topologia',
@@ -138,7 +169,11 @@ export const ptOperations = {
   'operations.stackName': 'Stack {name}',
   'operations.collapseStack': 'Recolher stack {name}',
   'operations.expandStack': 'Expandir stack {name}',
-  'operations.serviceCount': '{count} serviços',
+  'operations.serviceCount': {
+    zero: '{count} serviços',
+    one: '{count} serviço',
+    other: '{count} serviços',
+  },
   'operations.system': ' · infraestrutura',
   'operations.emptyStack': 'Nenhum serviço ou container nesta stack com os filtros atuais.',
   'operations.orphanServices': 'Serviços sem stack disponível',
@@ -149,7 +184,11 @@ export const ptOperations = {
   'operations.collapseContainers': 'Recolher containers de {name}',
   'operations.expandContainers': 'Expandir containers de {name}',
   'operations.noStack': 'Sem stack',
-  'operations.containerCount': '{count} containers · escala {scale}',
+  'operations.containerCount': {
+    zero: '{count} containers · escala {scale}',
+    one: '{count} container · escala {scale}',
+    other: '{count} containers · escala {scale}',
+  },
   'operations.emptyService': 'Nenhum container neste serviço com os filtros atuais.',
   'operations.selectResource': 'Selecionar {name}',
   'operations.resourceActions': 'Ações de {name}',
@@ -171,7 +210,11 @@ export const ptOperations = {
   'operations.balancer': 'Configurar balanceador',
   'operations.createService': 'Adicionar serviço',
   'operations.upgradeStack': 'Atualizar stack',
-  'operations.restartServices': 'Reiniciar serviços ({count})',
+  'operations.restartServices': {
+    zero: 'Reiniciar serviços ({count})',
+    one: 'Reiniciar serviço ({count})',
+    other: 'Reiniciar serviços ({count})',
+  },
   'operations.restartLimit': 'Selecione até 100 serviços para esta operação.',
   'operations.action.start': 'Iniciar',
   'operations.action.activate': 'Ativar',
@@ -192,5 +235,5 @@ export const ptOperations = {
 } satisfies {
   [Key in keyof typeof enOperations]: (typeof enOperations)[Key] extends string
     ? string
-    : { one: string; other: string };
+    : { zero?: string; one: string; other: string };
 };
