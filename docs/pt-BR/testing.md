@@ -193,3 +193,16 @@ python console/tests/concurrent_streams_soak.py --seconds 360
 ```
 
 Separe unitário/componente, build limpo, renderização browser, comportamento nativo real e CI remoto. Registre identidade do artefato, flags, escopo, controles, resultados medidos e cleanup; publique somente resumos sanitizados. Teste `nofile` em um host não valida todos os limites ou multi-host. Probe curto de WebSocket não prova estabilidade do scheduler/soak. Restore offline de DB não prova recuperação de engine/IdP/workloads. Aceites restantes ficam no [roadmap](roadmap.md).
+
+## Como ler o relatório de ensaio da release
+
+Comece com as verificações de código-fonte e depois use um backend isolado para os testes de autorização e navegador. Execute a migração e o rollback sobre estado recém-restaurado e com os IDs exatos das imagens que serão lançadas. Registre a revisão, o arquivo de código-fonte e a procedência dos artefatos junto aos resultados para que outro mantenedor consiga reproduzir o ensaio.
+
+| Verificação | O que conferir no relatório |
+| --- | --- |
+| Primeira inicialização e rollback do banco | `firstStartMigrationPassed` e `databaseRollbackPassed` estão como `true` |
+| Rollback do frontend e substituição do gateway para o novo backend | `frontendRollbackPassed` e `gatewayBackendReplacementPassed` estão como `true` |
+| Recuperação do backend quando o perfil é testado | `backendProcessRecoveryPassed` e `backendColdHandoffPassed` estão como `true` |
+| Remoção do laboratório | `cleanupComplete` está como `true` |
+
+O ensaio de artefatos registra `completeReleaseAccepted: false` porque seu escopo cobre os cenários acima. Guarde junto as evidências de navegador, acessibilidade e publicação de artefatos. Compare o inventário de stacks restaurado nas capturas de antes e depois, depois confira os efeitos nativos e o resultado do rollback no relatório do teste. [Executor do ensaio de release](../../scripts/release_artifact_rehearsal.py) · [Evidências da migração](migration-evidence.md) · [Guia de releases](release.md)

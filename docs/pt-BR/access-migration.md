@@ -23,6 +23,28 @@ O planner exige schema MySQL/InnoDB suportado e lê contas, membros e grupos na 
 
 O plano é somente coexistência: grants diretos não mudam e não existe comando público apply/remove/cutover. Plano vazio não é conversão concluída. O plano não substitui [backup de recuperação](recovery.md).
 
+### Exemplo com dois ambientes
+
+No cenário sintético, Alex e Sam têm o papel de leitura em um ambiente e o papel de membro em outro. Os conjuntos completos de acesso coincidem, então o planejador propõe um grupo, dois membros e dois vínculos entre ambiente e papel. O resumo deve apresentar estes campos.
+
+~~~json
+{
+  "proposedGroups": 1,
+  "proposedMembers": 2,
+  "proposedEnvironmentRoleBindings": 2,
+  "sourceModified": false,
+  "cutoverAccepted": false
+}
+~~~
+
+Se Alex e Sam têm acesso a ambientes diferentes, mantenha os conjuntos de acesso separados. Se o resumo apresentar conflito ou colisão de nome, examine o plano criptografado em privado e resolva os registros envolvidos antes de qualquer alteração. Os testes do repositório cobrem esses três casos. [Cenários de teste do planejamento de acesso](../../migration/test_grants.py)
+
+O editor de grupos mostra onde o administrador pode preparar um vínculo de papel para um único ambiente. Compare o ambiente e o papel selecionados com o plano antes de salvar qualquer alteração no laboratório.
+
+![Editor de grupos com um papel de ambiente ainda não salvo](../images/guide-group-permissions-pt-BR.png)
+
+*O grupo sintético tem um papel de ambiente em edição. O editor mostra o escopo proposto antes de o administrador salvar.*
+
 ## Desenho de coexistência e cutover
 
 Antes de escrever, capture recuperação correspondente e revalide drift, capacidades do backend, atores e escopo. Use APIs nativas/auditoria, não UPDATE/DELETE direto em tabelas de membros. Compare acesso efetivo de cada identidade/environment antes/depois de coexistência, retirada e rollback. Teste escrita permitida como member, negações readonly/admin e revogação de associação, com controles positivos.

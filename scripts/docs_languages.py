@@ -262,8 +262,8 @@ def audit(data, names=None):
 def catalog(data, language):
     portuguese = language == 'pt-BR'
     title = '# Documentação do Rancho Platform' if portuguese else '# Rancho Platform documentation'
-    intro = ('Escolha o idioma de cada documento. Traduções pendentes são indicadas; não representam documentação integral em inglês.' if portuguese
-             else 'Choose a language for each document. Pending translations are explicit; this is not yet complete English documentation.')
+    intro = ('Abra cada guia no idioma de sua preferência.' if portuguese
+             else 'Open each guide in your preferred language.')
     root = path(PORTALS[language]).parent
     report = audit(data)
     lines = [title, '', '[Português (Brasil)](../pt-BR/README.md) | [English](../en/README.md)', '', intro, '',

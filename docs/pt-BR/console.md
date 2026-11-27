@@ -29,3 +29,16 @@ Reuse shell e drawers contextuais. Preserve environment, filtros e rascunhos. N�
 O Dockerfile instala o lockfile, testa o frontend e faz build TypeScript/Vite para nginx. Retenção de assets suporta abas antigas; rollback final/compatibilidade clássica continuam gates. Unitários/componentes ficam em `src/test/`; harnesses nativos/browser em `tests/` exigem sandbox dedicado documentado.
 
 Siga [contribuição](contributing.md) e mantenha os dois idiomas. Dependências, dist, estado de fixtures e relatórios são dados gerados/ignorados, não fontes entregáveis.
+
+## Acompanhe um workload pelo console
+
+Use um environment descartável com uma stack chamada `documentation-demo` e um serviço chamado `web`. Em **Operações → Stacks**, selecione esse environment, busque a stack e expanda a linha. Um serviço com escala zero aparece na árvore da stack sem iniciar um container. A aba **Serviços** mostra o mesmo serviço no environment selecionado.
+
+![Console em português mostrando a stack documentation-demo e o serviço web](../images/guide-workloads-pt-BR.png)
+
+1. Abra os detalhes do serviço pelo menu de ações.
+2. Pressione Escape para fechar o painel. O foco deve voltar ao controle que o abriu.
+3. Recarregue a página. Confira se a URL mantém o environment selecionado e se a busca e os filtros continuam aplicados nas telas que os guardam.
+4. Para testar logs ou o terminal de verdade, use um laboratório separado com um host Docker registrado e um container em execução. O [guia de testes](testing.md) descreve as verificações com workloads reais.
+
+Execute `npm run check:locales` e `npm run check:ui-literals` após alterar um rótulo visível. O primeiro verifica os catálogos de mensagens registradas. O segundo verifica texto direto no JSX e atributos selecionados. Consulte as [boas práticas de frontend](ui-guidelines.md) para verificar teclado, temas e layout.

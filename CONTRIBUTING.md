@@ -96,3 +96,14 @@ gh pr create --repo lucaspaulukx/rancho-platform --base main --head feat/my-chan
 Use [AGENTS.md](AGENTS.md) as the shared guidance. Repository adapters for Claude, Gemini, Copilot and Cursor refer to that file. The optional [rancho-contribute skill](.agents/skills/rancho-contribute/SKILL.md) helps prepare a scoped change and reviewable PR; it does not authenticate accounts or authorize external actions. Authors remain responsible for checking generated code, claims, licenses and validation. AI tools are optional; ordinary Git contributions follow the same process.
 
 Client integration details vary; check the official instructions for [Claude](https://code.claude.com/docs/en/memory), [Gemini CLI](https://geminicli.com/docs/cli/gemini-md/), [GitHub Copilot](https://docs.github.com/en/copilot/concepts/prompting-and-context/custom-instructions?tool=vscode) and [Cursor](https://prod.cursor.com/docs/rules). Verify that your tool actually reads the repository guidance; supplying files does not prove that every client is configured.
+
+## Example documentation pull request
+
+When updating one operational step, submit the change in both language versions and point the reviewer to the guide, the behavior you verified and the expected result. If the workflow changed on screen, attach a capture from the real console with synthetic data and the matching locale. Use the PR template for the verification and scope. [Pull request template](.github/PULL_REQUEST_TEMPLATE.md) · [Documentation guide](docs/en/documentation.md#capture-screenshots-in-the-application)
+
+~~~sh
+python -m unittest discover -s tests -p test_docs_languages.py
+python scripts/docs_languages.py --require-complete
+~~~
+
+After recording the bilingual review as described in the documentation guide, expect both commands to exit successfully. A mechanical check can catch broken links and stale review hashes. Verify the actual steps in the guide before requesting review.

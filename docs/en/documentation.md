@@ -43,3 +43,12 @@ After reviewing and updating one locale, record its current source with `node sc
 Use relative links that work in the repository, exact command/API names and clear evidence boundaries. Keep raw errors, credentials, dumps, local reports and customer information outside Git. Reference maintained test entrypoints instead of embedding one operator's run log. Manual screen-reader review, native effects and recovery cannot be replaced by a documentation checker.
 
 Update [the roadmap](roadmap.md) when a capability or acceptance boundary changes. A completed documentation pair does not make the product production-ready. Public release remains a separate maintainer decision governed by the [release guide](release.md).
+
+## Capture screenshots in the application
+
+1. Start the revision being documented with disposable fixture data. Open the actual route, pick the document language and sign in with the role required by the example.
+2. Reproduce the steps in the guide and capture the result in the browser. Use synthetic names, and check the frame and visible URLs for credentials, internal hostnames, emails or customer data.
+3. Add concise alternative text and a caption that says what the reader should see. Review each published image at its display size and confirm its locale matches the document around it.
+4. Keep full execution reports in private evidence storage. Put the sanitized screenshot and enough context to interpret it in the guide.
+
+For example, the console screenshot shows the English Stacks workspace with the navigation, environment selector and stack inventory in view. The migration evidence page captions its captures with the restored fixture and the scope of the visual comparison. [English console capture](../images/console-en-us.png) · [Migration screenshots](migration-evidence.md)

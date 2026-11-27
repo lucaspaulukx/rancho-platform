@@ -193,3 +193,16 @@ python console/tests/concurrent_streams_soak.py --seconds 360
 ```
 
 Distinguish unit/component, clean build, browser rendering, real native behavior and remote CI. Record artifact identity, flags, scope, controls, measured results and cleanup; publish only sanitized summaries. A one-host `nofile` test does not validate all limits or multi-host operation. A short WebSocket probe does not prove scheduler stability or soak. An offline DB restore does not prove engine/IdP/workload recovery. Remaining acceptance belongs in the [roadmap](roadmap.md).
+
+## Read a release rehearsal report
+
+Start with the source checks, then use an isolated backend for authorization and browser tests. Run migration and rollback against freshly restored state and the exact image IDs intended for release. Record the revision, source archive and artifact provenance next to the results so another maintainer can reproduce the run.
+
+| Check | What to verify in the report |
+| --- | --- |
+| First start and database rollback | `firstStartMigrationPassed` and `databaseRollbackPassed` are `true` |
+| Frontend rollback and gateway replacement | `frontendRollbackPassed` and `gatewayBackendReplacementPassed` are `true` |
+| Backend recovery when the profile is exercised | `backendProcessRecoveryPassed` and `backendColdHandoffPassed` are `true` |
+| Lab removal | `cleanupComplete` is `true` |
+
+A release artifact rehearsal records `completeReleaseAccepted: false` because its scope is the scenarios above. Keep browser, accessibility and artifact publication evidence alongside it. Compare the restored stack inventory in the before-and-after captures, then inspect the test report for native effects and rollback results. [Release rehearsal runner](../../scripts/release_artifact_rehearsal.py) · [Migration evidence](migration-evidence.md) · [Release guide](release.md)

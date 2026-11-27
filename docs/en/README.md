@@ -2,7 +2,7 @@
 
 [Português (Brasil)](../pt-BR/README.md) | [English](../en/README.md)
 
-Choose a language for each document. Pending translations are explicit; this is not yet complete English documentation.
+Open each guide in your preferred language.
 
 Reviewed pairs: 16/16. Bilingual instruction/template files: 9.
 

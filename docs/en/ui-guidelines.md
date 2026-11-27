@@ -31,6 +31,21 @@ Keep integer bounds and units explicit. Memory/reservation, CPU/IO, capabilities
 
 Bound incoming frames and retained samples. Service metrics maintain independent per-container counters and series; unrelated identities are ignored. Display coverage and gaps honestly instead of presenting unsynchronized counters as a service total. Reset/close on identity or environment changes; permission closure must not start an automatic reconnect loop. CSV includes only the intended series and no capabilities.
 
+## Rehearse a workspace change
+
+![English stack workspace showing environment selection, search, and expanded services](../images/guide-workloads-en-US.png)
+
+*Capture from the synthetic lab with the language preview enabled. The header shows `UI-OPS-LAB`. The expanded `documentation-demo` stack and its `web` service at scale 0 appear in the workspace.*
+
+In an isolated environment with a test stack and a running container:
+
+1. Select the environment, open **Stacks**, expand a stack and search by service name. Open the container's **…** menu and choose its logs. Confirm that the log panel appears within the workspace and the environment and search stay in context.
+2. Close the panel with **Escape**. Verify that focus returns to the control that opened it. Use **Tab** to move through the environment selector, search, active view tab and menus. Move between view tabs with the horizontal arrow keys. At 320 px, confirm the page fits and the mobile sidebar can be dismissed with **Escape**.
+3. Switch between dark and light themes with the search populated. In a deployment with the [preview language policy](configuration.md#interface-language-policy), change the language while a draft is open. Confirm the draft and environment selection are preserved. In Persian, verify that the layout mirrors while terminal and Compose source stay left-to-right. Compare the layout at 320 px with the [Persian mobile capture](../images/guide-workloads-fa-IR-mobile.png).
+4. With an account that only has read access, verify the available actions. Use a disposable writer account to exercise save and cancellation in a draft. Check that the backend denies a write by the reader even if the client tries to issue it.
+
+Record the image revision, locale, viewport and theme beside any screenshot from the exercise. See the [testing guide](testing.md) for the automated and native checks.
+
 ## Acceptance
 
 Verify desktop/mobile, keyboard focus/return, loading/empty/error/partial states, both themes, dirty-draft behavior and cleanup. Unit tests and axe do not replace manual screen-reader review, high-volume measurement or actual native effects. Keep incomplete gates in the [roadmap](roadmap.md), with feature defaults documented in [configuration](configuration.md).

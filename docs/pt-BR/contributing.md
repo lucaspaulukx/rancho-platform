@@ -96,3 +96,14 @@ gh pr create --repo lucaspaulukx/rancho-platform --base main --head feat/my-chan
 Use [AGENTS.md](../../AGENTS.md) como orientação compartilhada. Adapters de Claude, Gemini, Copilot e Cursor apontam para esse arquivo. A [skill rancho-contribute](../../.agents/skills/rancho-contribute/SKILL.md) é opcional e ajuda a preparar mudanças no escopo e PRs revisáveis; não autentica contas nem autoriza ações externas. Quem contribui continua responsável por conferir código gerado, alegações, licenças e validação. Ferramentas de IA são opcionais; contribuições comuns por Git seguem o mesmo processo.
 
 A integração varia conforme o cliente; consulte a documentação oficial de [Claude](https://code.claude.com/docs/en/memory), [Gemini CLI](https://geminicli.com/docs/cli/gemini-md/), [GitHub Copilot](https://docs.github.com/en/copilot/concepts/prompting-and-context/custom-instructions?tool=vscode) e [Cursor](https://prod.cursor.com/docs/rules). Confira se a ferramenta realmente leu as instruções do repositório; fornecer os arquivos não prova a configuração de todos os clientes.
+
+## Exemplo de pull request de documentação
+
+Ao atualizar um passo operacional, envie a mudança nos dois idiomas e indique ao revisor o guia, o comportamento verificado e o resultado esperado. Se o fluxo mudou na tela, anexe uma captura do console real com dados sintéticos e no idioma correspondente. Use o modelo de PR para informar o escopo e as verificações. [Modelo de pull request](../../.github/PULL_REQUEST_TEMPLATE.md) · [Guia de documentação](documentation.md#capture-as-telas-na-aplicação)
+
+~~~sh
+python -m unittest discover -s tests -p test_docs_languages.py
+python scripts/docs_languages.py --require-complete
+~~~
+
+Depois de registrar a revisão bilíngue conforme o guia de documentação, os dois comandos devem terminar com sucesso. A verificação automática pode detectar links quebrados e hashes de revisão desatualizados. Valide os passos reais do guia antes de solicitar a revisão.
