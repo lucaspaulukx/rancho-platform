@@ -7,7 +7,7 @@
 
 ## Fronteira atual
 
-O perfil de instalação documentado usa Linux amd64 com um servidor Rancho, MariaDB 10.11 externo e hosts Cattle Docker 29. A distribuição de código inclui as receitas de build e os avisos de licença. Valide sua instalação isoladamente antes do corte. Certificação de produção, alta disponibilidade e substituição direta de stacks IPsec existentes ficam fora do escopo aceito desse perfil. O [roadmap](roadmap.md) registra a validação e as capacidades pendentes.
+O perfil de instalação documentado usa Linux amd64 com um servidor Rancho, MariaDB 10.11 externo e hosts Cattle Docker 29. A distribuição de código inclui as receitas de build e os avisos de licença. Valide sua instalação isoladamente antes do corte. Esse é o perfil de implantação da primeira versão estável. Failover automático do backend e alta disponibilidade do banco continuam no roadmap para uma versão futura. Certificação de produção e substituição direta de stacks IPsec existentes ficam fora do escopo aceito desse perfil. O [roadmap](roadmap.md) registra a validação e as capacidades pendentes.
 
 O pacote contém fontes de aplicação/extensões, patches pinados, testes, templates, licenças e documentação mantida. Clones de consulta, dependências instaladas, credenciais/realms locais, dumps, evidências de sessão, estado de fixtures, backups e notas de máquina ficam fora do versionamento. Git preserva versões anteriores; elas não são instruções de onboarding.
 
