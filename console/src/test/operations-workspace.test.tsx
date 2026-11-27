@@ -381,6 +381,10 @@ describe('Workspace unificado', () => {
   });
   it('abre logs pelo menu do serviço e troca container sem mudar URL ou perder a lista', async () => {
     const router = mount();
+    expect(screen.getByText(/1 stack visível/)).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('region', { name: 'Stack Loja' })).getByText('1 serviço'),
+    ).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Ações de web' }));
     await userEvent.click(screen.getByRole('menuitem', { name: 'Ver logs' }));
     expect(screen.getByRole('dialog', { name: 'Logs de web-1' })).toBeInTheDocument();

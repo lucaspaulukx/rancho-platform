@@ -220,6 +220,38 @@ describe('Typed message catalogs', () => {
       'Вибрано 5 ресурсів · максимум 100',
     ]);
   });
+  it('uses singular, zero and plural forms in counted Operations labels', () => {
+    const en = createTranslator('en-US');
+    const pt = createTranslator('pt-BR');
+    const fr = createTranslator('fr-FR', frFR);
+    const ru = createTranslator('ru-RU', ruRU);
+    const uk = createTranslator('uk-UA', ukUA);
+    expect(en.t('operations.visibleStacks', { count: 1 })).toBe('1 visible stack');
+    expect(en.t('operations.visibleContainers', { count: 2 })).toBe('2 matching containers');
+    expect(pt.t('operations.visibleStacks', { count: 0 })).toBe('0 stacks visíveis');
+    expect(pt.t('operations.visibleServices', { count: 1 })).toBe('1 serviço visível');
+    expect(pt.t('operations.serviceCount', { count: 1 })).toBe('1 serviço');
+    expect(pt.t('operations.containerCount', { count: 1, scale: 2 })).toBe(
+      '1 container · escala 2',
+    );
+    expect(pt.t('operations.hiddenSystem', { count: 1 })).toBe(
+      ' · 1 stack de infraestrutura oculta',
+    );
+    expect(fr.t('operations.restartServices', { count: 1 })).toBe('Redémarrer le service (1)');
+    expect(ru.t('operations.visibleStacks', { count: 22 })).toBe('22 видимых стека');
+    expect(uk.t('operations.serviceCount', { count: 5 })).toBe('5 сервісів');
+  });
+  it('inflects group member and environment counts independently', () => {
+    const en = createTranslator('en-US');
+    const pt = createTranslator('pt-BR');
+    const ru = createTranslator('ru-RU', ruRU);
+    expect(en.t('groups.memberSelectionCount', { count: 1 })).toBe('1 member');
+    expect(en.t('groups.environmentSelectionCount', { count: 2 })).toBe('2 environments');
+    expect(pt.t('groups.memberSelectionCount', { count: 0 })).toBe('0 membros');
+    expect(pt.t('groups.environmentSelectionCount', { count: 1 })).toBe('1 environment');
+    expect(ru.t('groups.memberSelectionCount', { count: 21 })).toBe('21 участник');
+    expect(ru.t('groups.environmentSelectionCount', { count: 5 })).toBe('5 сред');
+  });
   it('inflects each workload inventory count independently', () => {
     const ru = createTranslator('ru-RU', ruRU);
     const uk = createTranslator('uk-UA', ukUA);
