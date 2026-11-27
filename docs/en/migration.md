@@ -57,6 +57,10 @@ docker compose -p rancho-rehearsal --env-file .env.rancho-migration \
 
 [See screenshots and results from the migration rehearsal](migration-evidence.md).
 
+![Rancho Console after restoring the synthetic inventory](../images/guide-migration-after-en-US.png)
+
+After the importer succeeds, sign in with the restored administrator and compare the stack names and service counts against your source inventory. This screenshot shows the synthetic Rancher 1.6.30 rehearsal. [See the before-and-after captures](migration-evidence.md).
+
 ## Read-only diagnosis
 
 Replace `rancher-server` with the correct database container. The default MySQL client uses local root without a password, suitable only for compatible local setups. Otherwise supply `--defaults-file /run/private/mysql-client.cnf`, a protected file already inside that container. The tool does not create it on the source; never put passwords in arguments.

@@ -57,6 +57,10 @@ docker compose -p rancho-rehearsal --env-file .env.rancho-migration \
 
 [Veja as capturas e os resultados do ensaio de migração](migration-evidence.md).
 
+![Console do Rancho após restaurar o inventário sintético](../images/guide-migration-after-pt-BR.png)
+
+Depois que o importador concluir, entre com o administrador restaurado e compare os nomes das stacks e a quantidade de serviços com o inventário de origem. Esta captura mostra o ensaio sintético com Rancher 1.6.30. [Veja as capturas de antes e depois](migration-evidence.md).
+
 ## Diagnóstico somente leitura
 
 Substitua `rancher-server` pelo container de banco correto. O cliente MySQL padrão usa root local sem senha, adequado apenas a configurações locais compatíveis. Nos demais casos, use `--defaults-file /run/private/mysql-client.cnf`, arquivo protegido já existente dentro do container. A ferramenta não o cria na origem; não coloque senhas nos argumentos.

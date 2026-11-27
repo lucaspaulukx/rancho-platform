@@ -25,6 +25,10 @@ Use three separate test identities and two disposable environments. Confirm the 
 
 Capture the actor role, requested scope and result code in the report. Before testing revocation, establish a working stream for the assigned reader. With compatible session guards enabled, it should close after revocation. The gateway suite documents the two-environment fixture and authorization assertions. [Gateway authorization checks](../../console/tests/gateway_authorization.py)
 
+![Draft granting Read Only on a single test environment](../images/guide-group-permissions-en-US.png)
+
+Before saving the lab grant, verify the selected role on the target environment and leave the others at **No access**. Sign in as the reader and compare the visible list and API responses against the test matrix above.
+
 ## Sessions and capabilities
 
 HTTP sessions, subscription sockets and logs/exec/metrics capabilities have distinct validation paths. Optional session guards bind compatible streams to the current identity/account/role/scope and close on revocation or expiry. A permission-related close must not trigger an automatic reconnect loop.

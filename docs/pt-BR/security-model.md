@@ -25,6 +25,10 @@ Use três identidades de teste separadas e dois ambientes descartáveis. Confirm
 
 Registre no relatório o papel do usuário, o escopo solicitado e o código de resposta. Antes de testar a revogação, abra um fluxo funcional com o usuário de leitura. Com as proteções de sessão compatíveis habilitadas, o fluxo deve fechar após a revogação. A suíte do gateway documenta o cenário com dois ambientes e as verificações de autorização. [Verificações de autorização do gateway](../../console/tests/gateway_authorization.py)
 
+![Rascunho de permissão Somente leitura para um único environment de teste](../images/guide-group-permissions-pt-BR.png)
+
+Antes de salvar a permissão no laboratório, confira a função selecionada no environment de destino e deixe os demais como **Sem acesso**. Entre com a conta leitora e compare a lista visível e as respostas da API com a matriz de testes acima.
+
 ## Sessões e capacidades
 
 Sessões HTTP, sockets de subscription e capacidades de logs/exec/métricas têm validações distintas. Guardas opcionais ligam streams compatíveis a identidade/conta/papel/escopo atuais e fecham após revogação ou expiração. Fechamento por permissão não deve iniciar reconexão automática.

@@ -96,6 +96,12 @@ The named synthetic lab can rehearse hybrid and exclusive OIDC on two independen
 python -m migration.test_engine_recovery_lab --quiesce --backend-image rancho-backend:candidate --exclusive-oidc
 ```
 
+### Check the recovered inventory in the browser
+
+With the isolated copy running, select the recovered environment and expand each application stack. Compare service names and replica targets with the pre-backup inventory. The screenshot shows the expected inventory view in the separate migration fixture. Run host and volume checks separately to verify workload recovery.
+
+![Restored synthetic stacks in the English console](../images/guide-migration-after-en-US.png)
+
 ## Rollback and limits
 
 Recover database, Rancher cryptographic state, IdP and image/configuration as a matching set. Stop the replacement engine before restoring the previous set. Do not run old and new engines against shared storage or assume disabling a schema flag reverses DDL. Preserve sanitized error/cleanup/restart results and treat failed recovery as a failed gate. See [migration](migration.md), [access migration](access-migration.md) and [roadmap](roadmap.md).

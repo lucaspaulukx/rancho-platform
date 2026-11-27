@@ -30,6 +30,10 @@ O inicializador pede a senha do administrador sem exibi-la. Só aceita endereço
 
 Altere `RANCHO_VERSION` ao adotar outra release publicada. Para instalações imutáveis, defina `RANCHO_BACKEND_IMAGE`, `RANCHO_CONSOLE_IMAGE` e `RANCHO_DATABASE_IMAGE` com as referências por digest registradas na release; elas têm prioridade sobre as tags de versão. Na migração no primeiro boot, selecione também a imagem publicada `restore-VERSAO` por `RANCHO_MIGRATION_RESTORE_IMAGE` e use o overlay de migração conforme documentado.
 
+![Login local de uma implantação descartável do console](../images/guide-login-pt-BR.png)
+
+No teste de instalação nova, confira se a página de login veio do serviço do console, entre com o novo administrador e abra o seletor de environment. A figura mostra o login local em um laboratório separado com o seletor de idiomas ativo. Consulte o relatório de teste da release para obter os digests exatos.
+
 ### Publicar imagens aceitas no registry
 
 O workflow `Publish verified runtime images`, iniciado manualmente, promove os arquivos exatos de uma execução bem-sucedida de `Runtime image provenance`. Seu commit precisa coincidir com a revisão da `main` selecionada na execução ou ser um ancestral aceito seguido apenas por mudanças de documentação e de controle da publicação. Qualquer alteração em arquivos de runtime, dependências, configuração de build ou outros caminhos exige uma nova candidata e testes. Ele verifica as atestações dos arquivos e checksums, confere a identidade carregada, publica uma tag de versão, baixa o digest do registry e compara a configuração da imagem e as camadas do sistema de arquivos. Também atesta esse manifesto e preserva uma referência JSON por componente, registrando os commits de runtime e de publicação. Não recompila durante a promoção nem publica uma tag mutável `latest`.
