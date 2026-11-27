@@ -7,7 +7,7 @@
 
 ## Current boundary
 
-The documented installation profile targets Linux amd64 with a single Rancho server, an external MariaDB 10.11 database and Docker 29 Cattle hosts. The source distribution includes the build recipes and notices. Validate your deployment in isolation before cutover. Production certification, HA and in-place replacement of existing IPsec stacks remain outside this profile's accepted scope. The [roadmap](roadmap.md) records validation and remaining capabilities.
+The documented installation profile targets Linux amd64 with a single Rancho server, an external MariaDB 10.11 database and Docker 29 Cattle hosts. The source distribution includes the build recipes and notices. Validate your deployment in isolation before cutover. This is the deployment profile for the first stable release. Automatic backend failover and database HA remain roadmap work for a later release. Production certification and in-place replacement of existing IPsec stacks remain outside the accepted profile. The [roadmap](roadmap.md) records validation and remaining capabilities.
 
 Distributable contents are application/extension source, pinned patches, tests, configuration templates, licenses and maintained documentation. Keep consultation clones, installed dependencies, lab credentials/realms, dumps, session evidence, fixture state, backups and machine-specific notes outside the tracked package. Git preserves prior versions; they are not onboarding instructions.
 
