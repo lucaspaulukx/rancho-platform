@@ -96,6 +96,12 @@ O laboratório sintético indicado pode testar o modo híbrido e o OIDC exclusiv
 python -m migration.test_engine_recovery_lab --quiesce --backend-image rancho-backend:candidate --exclusive-oidc
 ```
 
+### Confira o inventário recuperado no navegador
+
+Com a cópia isolada em execução, selecione o environment restaurado e expanda cada stack de aplicação. Compare os nomes dos serviços e a escala configurada com o inventário anterior ao backup. A captura mostra a tela esperada no ensaio separado de migração. Execute também as verificações de host e volume para confirmar a recuperação dos workloads.
+
+![Stacks sintéticas restauradas no console em português](../images/guide-migration-after-pt-BR.png)
+
 ## Rollback e limites
 
 Recupere banco, estado criptográfico Rancher, IdP e imagem/configuração correspondentes. Pare o engine novo antes de restaurar o conjunto anterior. Não execute engines antigo/novo sobre storage compartilhado nem suponha que desligar schema desfaz DDL. Preserve resultados sanitizados de erro/cleanup/retomada e trate recuperação falha como gate reprovado. Veja [migração](migration.md), [migração de acesso](access-migration.md) e [roadmap](roadmap.md).

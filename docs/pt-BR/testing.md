@@ -102,6 +102,10 @@ O helper de transporte do scheduler é diagnóstico limitado para a rede gerenci
 
 O teste de localização injeta um link sintético de paginação de outra origem na página de Hosts. Ele confere se o link continua bloqueado e se a mensagem visível muda de idioma sem revelar o endereço.
 
+![Logs do container conectados e filtrados por um marcador sintético](../images/guide-logs-pt-BR.png)
+
+No ensaio de streams nativos, confirme a conexão, filtre pelo marcador sintético e aguarde uma nova linha correspondente. Ao testar a troca de idioma, mantenha o painel aberto e confira se o filtro permanece e se os logs continuam chegando. [Reproduza o exemplo de logs ao vivo](console.md#consulte-os-logs-ao-vivo-do-container).
+
 ### Verificações automatizadas de acessibilidade
 
 Execute o teste de localização no navegador com `--accessibility` e as dependências de desenvolvimento do console instaladas. Ele usa axe em Grupos, Usuários, Chaves de API, Configurações, Auditoria e Ambientes a 390 e 1440 px nos temas escuro e claro. O teste reporta identificadores de regras e contagens. Revise as verificações manuais indicadas no relatório e exercite os fluxos críticos com teclado e leitor de tela antes da release.

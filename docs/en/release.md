@@ -30,6 +30,10 @@ The initializer prompts for the administrator password without echo. It only acc
 
 Change `RANCHO_VERSION` when moving to another published release. For immutable deployments, set `RANCHO_BACKEND_IMAGE`, `RANCHO_CONSOLE_IMAGE` and `RANCHO_DATABASE_IMAGE` to the digest references recorded by that release; they take priority over version tags. For first-start migration, also select the published `restore-VERSION` image through `RANCHO_MIGRATION_RESTORE_IMAGE` and use the migration overlay as documented.
 
+![Local sign-in from a disposable console deployment](../images/guide-login-en-US.png)
+
+During a fresh-install check, confirm the sign-in page loads from the console service, sign in with the new administrator and open the environment picker. The figure shows the local-login path in a separate lab with the language selector enabled. Use the release test report for the exact image digests.
+
 ### Publish accepted registry images
 
 The manually dispatched `Publish verified runtime images` workflow promotes the exact archives from a successful `Runtime image provenance` run. Its commit must be the dispatched `main` revision or an accepted ancestor followed only by documentation and publisher bookkeeping changes. Any change to runtime files, dependencies, build configuration or other paths requires a new candidate and tests. It verifies the archive and checksum attestations, checks the loaded identity, publishes a version tag, pulls the registry digest back and compares the image configuration and filesystem layers. It attests that manifest and retains one JSON reference per component, recording both the runtime and publisher commits. It never rebuilds during promotion or publishes a mutable `latest` tag.
