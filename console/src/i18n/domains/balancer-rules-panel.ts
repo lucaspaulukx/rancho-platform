@@ -123,7 +123,7 @@ export const enBalancerRulesPanel = {
   'balancerRulesPanel.remove': 'Remove rule {index}',
   'balancerRulesPanel.protocol': 'Protocol {index}',
   'balancerRulesPanel.access': 'Access {index}',
-  'balancerRulesPanel.sourcePort': 'Source port {index}',
+  'balancerRulesPanel.sourcePort': 'Listener port {index}',
   'balancerRulesPanel.targetPort': 'Target port {index}',
   'balancerRulesPanel.target': 'Target service {index}',
   'balancerRulesPanel.hostname': 'Hostname {index}',

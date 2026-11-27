@@ -707,7 +707,7 @@ export const ukUA = {
   'resourcePanel.bindingsDisabled': 'Редагування портів і томів вимкнено.',
   'resourcePanel.healthCheckDisabled': 'Редагування перевірок справності вимкнено.',
   'resourcePanel.sidecarsDisabled': 'Редагування допоміжних контейнерів (sidecar) вимкнено.',
-  'resourcePanel.schedulingDisabled': 'Редагування правил прив’язки вимкнено.',
+  'resourcePanel.schedulingDisabled': 'Редагування правил розміщення вимкнено.',
   'resourcePanel.memoryDisabled': 'Оновлення налаштувань пам’яті вимкнено.',
   'resourcePanel.cpuDisabled': 'Оновлення налаштувань ЦП і вводу-виводу вимкнено.',
   'resourcePanel.securityDisabled': 'Оновлення налаштувань безпеки вимкнено.',
@@ -793,13 +793,13 @@ export const ukUA = {
   'workloadControls.milliCpuReservation.hint':
     'Резерв під час планування: 1 000 міліядер = 1 ЦП. Додатне значення також замінює вагу ЦП (250 міліядер → вага 256). Квота на час роботи не встановлюється.',
   'workloadControls.capabilityHint':
-    'Виберіть лише потрібні можливості (capabilities). ALL означає всі доступні варіанти. Налаштування застосує Docker.',
+    'Виберіть лише потрібні привілеї Linux (capabilities). ALL означає всі доступні варіанти. Налаштування застосує Docker.',
   'workloadControls.unknownCapability':
     'Значення не передбачено поточним контрактом: {value}. Перевірте його перед створенням.',
-  'workloadControls.capabilityLabel': '{label}: можливість {index}',
+  'workloadControls.capabilityLabel': '{label}: привілей Linux {index}',
   'workloadControls.select': 'Вибрати…',
   'workloadControls.removeLabel': 'Видалити «{label}» {index}',
-  'workloadControls.removeCapability': 'Видалити можливість',
+  'workloadControls.removeCapability': 'Видалити привілей Linux',
   'workloadControls.addLabel': 'Додати «{label}»',
   'workloadControls.cpuInteger':
     'Укажіть ціле число без дробової частини й експоненційного запису.',
@@ -1013,7 +1013,7 @@ export const ukUA = {
   'serviceUpgradeForm.limitsNotice':
     'Зміна обмежень призводить до заміни контейнерів сервісу. Порожній список видаляє явні обмеження й відновлює типові значення Docker.',
   'serviceUpgradeForm.securityNotice':
-    'Зміни параметрів безпеки призводять до заміни контейнерів сервісу. Перед підтвердженням перевірте можливості, доступ до хоста й налаштування файлової системи.',
+    'Зміни параметрів безпеки призводять до заміни контейнерів сервісу. Перед підтвердженням перевірте привілеї Linux, доступ до хоста й налаштування файлової системи.',
   'serviceUpgradeForm.batchNotice':
     'За один раз буде оновлено до {batch} контейнерів з інтервалом {interval} мс між партіями. Для портів, змінних, томів і допоміжних контейнерів застосовуються поточні налаштування з урахуванням змін вище. Доступність залежить від ресурсів і працездатності застосунку.',
   'serviceUpgradeForm.follow':
@@ -1069,7 +1069,7 @@ export const ukUA = {
   'workloadPolicyValidation.global':
     'Для глобального розміщення допустимі лише мітки хостів з обов’язковими правилами або правилами виключення.',
   'workloadPolicyValidation.depth': 'У конфігурації забагато рівнів вкладеності.',
-  'workloadPolicyValidation.capabilities': 'Звірте можливості безпеки з поточним контрактом.',
+  'workloadPolicyValidation.capabilities': 'Звірте привілеї Linux із поточним контрактом.',
   'serviceEditors.linkError.environment': 'Сервіс не належить до цього середовища.',
   'serviceEditors.linkError.foreign': 'Деякі зв’язки належать до іншого середовища.',
   'serviceEditors.linkError.changed':
@@ -1711,9 +1711,9 @@ export const ukUA = {
   'accessDiagnostics.none': 'Немає',
   'accessDiagnostics.close': 'Закрити',
   'accessDiagnostics.partialWarning':
-    'Часткова діагностика: посвідчення зовнішнього постачальника можуть надати додатковий доступ. Фактичну роль визначити не вдалося.',
+    'Часткова діагностика: ідентифікатори користувачів зовнішнього постачальника можуть надавати додатковий доступ. Фактичну роль визначити не вдалося.',
   'accessDiagnostics.effectiveRole': 'Фактична роль',
-  'accessDiagnostics.identityScope': 'Область дії посвідчення',
+  'accessDiagnostics.identityScope': 'Область дії ідентифікатора',
   'accessDiagnostics.snapshotsNotice':
     'Докладні знімки доступні лише для змін після ввімкнення аудиту. Попередні записи збережено.',
   'accessDiagnostics.beforeAfter': 'До й після',
@@ -1803,7 +1803,7 @@ export const ukUA = {
   'localAccountPanel.newPassword': 'Новий локальний пароль',
   'localAccountPanel.confirmPassword': 'Підтвердьте локальний пароль',
   'localAccountPanel.passwordNotice':
-    'Зміна стосується лише локальних облікових даних. Зміна пароля не відкликає раніше видані сеанси JWT. Щоб заблокувати використання облікового запису, деактивуйте його. Паролями Keycloak керує постачальник посвідчень.',
+    'Зміна стосується лише локальних облікових даних. Зміна пароля не відкликає раніше видані сеанси JWT. Щоб заблокувати використання облікового запису, деактивуйте його. Обліковими даними для федеративного входу керує постачальник посвідчень.',
   'localAccountPanel.deactivateNotice':
     'Обліковий запис більше не зможе пройти автентифікацію. Наступна перевірка його сеансу завершиться відмовою. Поточні групи й дозволи буде збережено.',
   'localAccountPanel.removeNotice':
@@ -1840,7 +1840,7 @@ export const ukUA = {
   'localAccountPanel.error.notCreated': 'Обліковий запис не створено.',
   'localAccountPanel.error.reopen': 'Відкрийте панель облікового запису знову.',
   'localAccountPanel.error.credentialCount':
-    'Цей обліковий запис має мати рівно один активний локальний засіб входу. Обліковими даними OIDC керує постачальник посвідчень.',
+    'Кількість активних локальних облікових даних для цього облікового запису відрізняється від одного. Обліковими даними OIDC керує постачальник посвідчень.',
   'localAccountPanel.error.credential': 'Недопустимі облікові дані.',
   'localAccountPanel.error.changedOperation': 'Операція змінилася. Відкрийте панель знову.',
   'localAccountPanel.error.http': 'Операцію з обліковим записом не завершено (HTTP {status}).',
@@ -2173,7 +2173,7 @@ export const ukUA = {
   'settings.leaveDescription':
     'Налаштування ще не збережено. Дочекайтеся завершення поточного надсилання.',
   'settings.changeDescription':
-    'Нове значення захищене під час перевірки й може вплинути на весь екземпляр.',
+    'Нове значення приховано під час перевірки й може вплинути на весь екземпляр.',
   'settings.sent': 'Налаштування надіслано до Rancher. Перевірте чинне значення ще раз.',
   'settings.discardDescription': 'Введене значення буде скасовано без надсилання на сервер.',
   'settings.operationFailed': 'Не вдалося виконати операцію з налаштуваннями.',
@@ -2299,7 +2299,7 @@ export const ukUA = {
   'auditPage.eventDetails': 'Відомості про подію',
   'auditPage.resourceId': 'ID ресурсу',
   'auditPage.recordAccount': 'Обліковий запис із запису аудиту',
-  'auditPage.identity': 'Посвідчення, що пройшло автентифікацію',
+  'auditPage.identity': 'Ідентифікатор автентифікованого суб’єкта',
   'auditPage.authentication': 'Автентифікація',
   'auditPage.httpCode': 'Код HTTP',
   'auditPage.invalidResponse': 'Недопустима відповідь журналу аудиту.',
@@ -2353,7 +2353,7 @@ export const ukUA = {
   'catalogPage.confirmImpact': 'Підтвердьте наслідки оновлення перед надсиланням.',
   'catalogPage.discardDescription': 'Введені параметри ще не збережено.',
   'catalogPage.upgradeState': 'Оновлення недоступне в цьому стані.',
-  'catalogPage.leaveDescription': 'Параметри шаблону буде скасовано.',
+  'catalogPage.leaveDescription': 'Введені параметри шаблону не буде збережено.',
   'catalogPage.defaultDescription': 'Версії та конфігурація застосунку.',
   'catalogPage.includeInfra': 'Включити шаблони інфраструктури',
   'catalogPage.startServices': 'Запустити сервіси після створення стека',
@@ -2457,7 +2457,7 @@ export const ukUA = {
   'catalogRepositories.retry': 'Повторити спробу',
   'catalogRepositories.validation.configuration': 'Недопустима конфігурація каталогу.',
   'catalogRepositories.validation.jsonRequired':
-    'Редактору потрібен catalog.url у форматі JSON. Збережіть поточне значення й використовуйте налаштування сервера для застарілих форматів.',
+    'Редактору потрібен catalog.url у форматі JSON. Залиште поточне значення без змін і скористайтеся налаштуваннями сервера для застарілих форматів.',
   'catalogRepositories.validation.document': 'Документ каталогу не підтримується.',
   'catalogRepositories.validation.entry': 'Запис каталогу не підтримується.',
   'catalogRepositories.validation.limit': 'Забагато репозиторіїв.',
@@ -2519,7 +2519,8 @@ export const ukUA = {
   'environmentCatalogs.error.reopen': 'Відкрийте редактор знову.',
   'environmentCatalogs.error.http': 'Операцію з каталогом не завершено (HTTP {status}).',
   'environmentCatalogs.access.disabled': 'Керування джерелами каталогу вимкнено.',
-  'environmentCatalogs.access.identityChanged': 'Посвідчення поточного сеансу змінилося.',
+  'environmentCatalogs.access.identityChanged':
+    'У поточному сеансі змінився автентифікований користувач.',
   'environmentCatalogs.access.denied':
     'Ваші права не дають змоги керувати джерелами в цьому середовищі.',
   'environmentCatalogs.access.http':
@@ -2567,7 +2568,7 @@ export const ukUA = {
   'balancerRulesPanel.remove': 'Видалити правило {index}',
   'balancerRulesPanel.protocol': 'Протокол {index}',
   'balancerRulesPanel.access': 'Доступ {index}',
-  'balancerRulesPanel.sourcePort': 'Вихідний порт {index}',
+  'balancerRulesPanel.sourcePort': 'Вхідний порт {index}',
   'balancerRulesPanel.targetPort': 'Цільовий порт {index}',
   'balancerRulesPanel.target': 'Цільовий сервіс {index}',
   'balancerRulesPanel.hostname': 'Ім’я хоста {index}',
@@ -2581,7 +2582,7 @@ export const ukUA = {
   'balancerRulesPanel.before': 'До зміни · Правил: {count}',
   'balancerRulesPanel.after': 'Після зміни · Правил: {count}',
   'balancerRulesPanel.preservation':
-    '{reason} Поточну конфігурацію збережено. Закрийте панель і виберіть «Оновити конфігурацію», щоб скористатися формою Rancher.',
+    '{reason} Поточну конфігурацію збережено. Закрийте панель і виберіть «Редагувати конфігурацію», щоб скористатися формою Rancher.',
   'balancerRulesPanel.validation.configuration':
     'Конфігурація балансувальника навантаження недоступна.',
   'balancerRulesPanel.validation.changed':
@@ -2917,11 +2918,11 @@ export const ukUA = {
   'aboutPage.capabilities': 'Можливості',
   'aboutPage.consoleInfo': 'Відомості про консоль',
   'aboutPage.modernConsole': 'Сучасна консоль',
-  'aboutPage.labBase': 'Лабораторна база',
+  'aboutPage.labBase': 'Версія вихідного проєкту',
   'aboutPage.operations':
     'Керуйте стеками, сервісами й контейнерами з централізованим доступом і автентифікацією OIDC. Rancher зберігає власну ідентичність і правила авторизації на сервері.',
   'aboutPage.migration':
-    'Міграція триває. Доступні модулі залежать від прапорців функцій і дозволів вашого облікового запису. Функції, які ще перевіряються, вимкнено.',
+    'Доступні модулі залежать від прапорців функцій і дозволів вашого облікового запису. Функції, які ще перевіряються, вимкнено.',
   'aboutPage.attribution':
     'Ця консоль є незалежною розробкою. Торговельні марки позначають відповідні продукти й організації та не означають офіційної сертифікації чи схвалення Rancher.',
   'aboutPage.classic': 'Відкрити класичний Rancher',

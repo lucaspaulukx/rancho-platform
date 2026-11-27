@@ -22,7 +22,7 @@ export const enLocalAccountPanel = {
   'localAccountPanel.newPassword': 'New local password',
   'localAccountPanel.confirmPassword': 'Confirm local password',
   'localAccountPanel.passwordNotice':
-    'This change only affects the local credential. Previously issued JWT sessions are not revoked by a password change. Deactivate the account to block its use. Keycloak passwords are managed by the provider.',
+    'This change only affects the local credential. Previously issued JWT sessions are not revoked by a password change. Deactivate the account to block its use. The identity provider manages federated sign-in credentials.',
   'localAccountPanel.deactivateNotice':
     'The account will stop authenticating and its next session check will be rejected. Existing groups and access will be preserved.',
   'localAccountPanel.removeNotice':
@@ -108,7 +108,7 @@ export const ptLocalAccountPanel = {
   'localAccountPanel.newPassword': 'Nova senha local',
   'localAccountPanel.confirmPassword': 'Confirmar senha local',
   'localAccountPanel.passwordNotice':
-    'A troca altera apenas a credencial local. Sessões JWT já emitidas não são revogadas pela troca de senha. Para bloquear o uso da conta, desative-a. Senhas do Keycloak são gerenciadas no provedor.',
+    'A troca altera apenas a credencial local. Sessões JWT já emitidas não são revogadas pela troca de senha. Para bloquear o uso da conta, desative-a. O provedor de identidade gerencia as credenciais do login federado.',
   'localAccountPanel.deactivateNotice':
     'A conta deixará de autenticar e a próxima consulta de sessão será recusada. Grupos e acessos cadastrados serão preservados.',
   'localAccountPanel.removeNotice':

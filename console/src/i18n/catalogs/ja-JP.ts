@@ -670,7 +670,7 @@ export const jaJP = {
   'schedulingEditor.global':
     'グローバルサービスでは、ホストラベルに対する必須ルールまたは除外ルールのみを使用してください。グローバルスケールは維持されます。',
   'schedulingEditor.legacy':
-    'このエディターで解釈できない旧形式のルールがあります。ネイティブラベルを編集するか、構造化エディターを無効にしてください。ルールはまだ変換されていません。',
+    'このエディターで解釈できない旧形式のルールがあります。ネイティブラベルを編集するか、構造化エディターを無効にしてください。既存のルールは変更されていません。',
   'schedulingEditor.rule': 'アフィニティ {index}',
   'schedulingEditor.target': 'アフィニティの対象',
   'schedulingEditor.condition': 'アフィニティの条件',
@@ -678,7 +678,7 @@ export const jaJP = {
   'schedulingEditor.kind.container_label': 'コンテナラベル',
   'schedulingEditor.kind.container': 'コンテナ名',
   'schedulingEditor.mode.required': '一致が必須',
-  'schedulingEditor.mode.exclude': '一致を除外',
+  'schedulingEditor.mode.exclude': '不一致が必須',
   'schedulingEditor.mode.prefer': '一致を優先',
   'schedulingEditor.mode.avoid': '不一致を優先',
   'schedulingEditor.key': 'ラベルのキー',
@@ -851,7 +851,7 @@ export const jaJP = {
   'serviceUpgradeForm.securityNotice':
     'セキュリティ設定を変更すると、サービスのコンテナが置き換えられます。確定する前に、ケーパビリティ、ホストへのアクセス、ファイルシステム設定を確認してください。',
   'serviceUpgradeForm.batchNotice':
-    'バッチごとに最大 {batch} 個のコンテナをアップグレードし、バッチ間は {interval} ms 待機します。ポート、変数、ボリューム、サイドカーの設定は、上で明示的に変更した項目を除き維持されます。可用性は容量とアプリケーションのヘルスに依存します。',
+    'バッチごとに最大 {batch} 個のコンテナをアップグレードし、バッチ間は {interval} ms 待機します。ポート、変数、ボリューム、サイドカーの設定は、上で明示的に変更した項目を除き維持されます。可用性は利用可能なリソースとアプリケーションの正常性に依存します。',
   'serviceUpgradeForm.follow':
     'アップグレード後は、この画面で状態を確認できます。Rancher で操作が可能になると「アップグレードを完了」と「ロールバック」が表示されます。',
   'serviceUpgradeForm.impact':
@@ -912,7 +912,7 @@ export const jaJP = {
   'serviceEditors.linkError.changed':
     '別のクライアントでリンクが変更されました。パネルを閉じて開き直してください。',
   'serviceEditors.linkError.advanced':
-    '一部のリンクは詳細設定を使用しているか、移行中か、利用できない対象を参照しています。設定を保持するにはネイティブフォームを使用してください。',
+    '一部のリンクは詳細設定を使用しているか、状態の変更中か、利用できない対象を参照しています。設定を保持するにはネイティブフォームを使用してください。',
   'serviceEditors.linkError.unavailable': 'このコンテキストではリンクを編集できません。',
   'serviceEditors.linkError.limit': '1 回の操作で編集できるリンクは 100 件までです。',
   'serviceEditors.linkError.contract': 'リンクの仕様が変更されました。パネルを開き直してください。',
@@ -970,7 +970,7 @@ export const jaJP = {
   'serviceEditors.reviewScale': 'スケールを確認してください。',
   'serviceEditors.quantity': '希望するコンテナ数',
   'serviceEditors.scaleInfo':
-    'Rancher はサービスの実際のスケールを調整します。スケールを縮小するとコンテナが停止することがあります。拡大できるかは空き容量によります。稼働中のコンテナ数が設定値に達するまで時間がかかる場合があります。',
+    'Rancher はサービスの実際のスケールを調整します。スケールを縮小するとコンテナが停止することがあります。コンテナを増やせるかどうかは、利用可能なリソースによります。稼働中のコンテナ数が設定値に達するまで時間がかかる場合があります。',
   'serviceEditors.acknowledgeZero':
     'スケールを 0 にすると、このサービスのコンテナが停止することを理解しました',
   'serviceEditors.templateHint': 'この操作ではカタログテンプレートの回答が保持されます。',
@@ -1255,7 +1255,7 @@ export const jaJP = {
   'schemaForm.label.stdinOpen': '標準入力を開いたままにする',
   'schemaForm.label.tty': 'ターミナル (TTY) を割り当てる',
   'schemaForm.label.domainName': 'ドメイン',
-  'schemaForm.label.expose': '公開対象のポート',
+  'schemaForm.label.expose': 'コンテナの公開ポート宣言（EXPOSE）',
   'schemaForm.label.dns': 'DNS サーバー',
   'schemaForm.label.dnsSearch': 'DNS 検索ドメイン',
   'schemaForm.label.networkIds': 'ネットワーク',
@@ -1528,7 +1528,7 @@ export const jaJP = {
   'groups.accessEnvironments': 'アクセスできる環境',
   'groups.noEnvironmentAccess': 'このグループはどの環境にもアクセス権を付与しません。',
   'groups.removalWarning':
-    'メンバーを削除すると、既存のセッションを含め、以降のリクエストではこのグループが付与したアクセス権が取り消されます。',
+    'メンバーをこのグループから外すと、既存のセッションを含め、以降のリクエストではこのグループが付与したアクセス権が取り消されます。',
   'groups.conflict':
     '入力内容は保持されています。再試行する前にエディターを閉じてグループを再読み込みし、最新の内容を確認してください。',
   'groups.audit': 'グループの監査',
@@ -1686,7 +1686,7 @@ export const jaJP = {
   'localAccountPanel.newPassword': '新しいローカルパスワード',
   'localAccountPanel.confirmPassword': 'ローカルパスワードの確認',
   'localAccountPanel.passwordNotice':
-    'この変更はローカルの認証情報にのみ適用されます。パスワードを変更しても、発行済みの JWT セッションは失効しません。アカウントの使用を停止するには無効化してください。Keycloak のパスワードはプロバイダーが管理します。',
+    'この変更はローカルの認証情報にのみ適用されます。パスワードを変更しても、発行済みの JWT セッションは失効しません。アカウントの使用を停止するには無効化してください。フェデレーションログインの認証情報は ID プロバイダーが管理します。',
   'localAccountPanel.deactivateNotice':
     'アカウントで認証できなくなり、次回のセッション確認は拒否されます。既存のグループとアクセス権は保持されます。',
   'localAccountPanel.removeNotice':
@@ -2191,7 +2191,7 @@ export const jaJP = {
   'auditPage.eventDetailsLabel': 'イベント {event} の詳細',
   'auditPage.page': 'ページ {page}',
   'catalogPage.validation.route': 'カタログが無効なルートを返しました。',
-  'catalogPage.validation.questions': 'テンプレートの質問が無効です。',
+  'catalogPage.validation.questions': 'テンプレートの入力項目の定義が無効です。',
   'catalogPage.validation.variables': 'テンプレートに無効または重複した変数があります。',
   'catalogPage.validation.type':
     'フィールド「{label}」ではサポートされていない型 {type} が使用されています。',
@@ -2453,7 +2453,7 @@ export const jaJP = {
   'balancerRulesPanel.remove': 'ルール {index} を削除',
   'balancerRulesPanel.protocol': 'プロトコル {index}',
   'balancerRulesPanel.access': 'アクセス {index}',
-  'balancerRulesPanel.sourcePort': '送信元ポート {index}',
+  'balancerRulesPanel.sourcePort': '待ち受けポート {index}',
   'balancerRulesPanel.targetPort': 'ターゲットポート {index}',
   'balancerRulesPanel.target': 'ターゲットサービス {index}',
   'balancerRulesPanel.hostname': 'ホスト名 {index}',
@@ -2799,11 +2799,11 @@ export const jaJP = {
   'aboutPage.capabilities': '機能',
   'aboutPage.consoleInfo': 'コンソールの情報',
   'aboutPage.modernConsole': '新しいコンソール',
-  'aboutPage.labBase': 'ラボのベース',
+  'aboutPage.labBase': '上流のバージョン',
   'aboutPage.operations':
     'アクセスを一元管理し、OIDC 認証を使用してスタック、サービス、コンテナを管理できます。Rancher の製品としての独自性とサーバー側の認可ルールは維持されます。',
   'aboutPage.migration':
-    '移行作業は進行中です。利用できるモジュールは機能フラグとアカウント権限によって異なります。検証中の機能は無効のままです。',
+    '利用できるモジュールは機能フラグとアカウント権限によって異なります。検証中の機能は無効のままです。',
   'aboutPage.attribution':
     'このコンソールは独立したカスタマイズです。商標はそれぞれの製品と組織を示すものであり、Rancher の公式認定や推奨を意味しません。',
   'aboutPage.classic': 'クラシック Rancher を開く',

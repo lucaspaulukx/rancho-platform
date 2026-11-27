@@ -83,11 +83,11 @@ export const enAboutPage = {
   'aboutPage.capabilities': 'Capabilities',
   'aboutPage.consoleInfo': 'Console information',
   'aboutPage.modernConsole': 'Modern console',
-  'aboutPage.labBase': 'Lab base',
+  'aboutPage.labBase': 'Upstream version',
   'aboutPage.operations':
     'Manage stacks, services, and containers with centralized access and OIDC authentication. Rancher retains its identity and server authorization rules.',
   'aboutPage.migration':
-    'Migration is in progress. Available modules depend on feature flags and your account permissions. Features still undergoing validation remain disabled.',
+    'Available modules depend on feature flags and your account permissions. Features still undergoing validation remain disabled.',
   'aboutPage.attribution':
     'This console is an independent customization. Trademarks identify their respective products and organizations and do not imply official Rancher certification or endorsement.',
   'aboutPage.classic': 'Open classic Rancher',
@@ -189,11 +189,11 @@ export const ptAboutPage = {
   'aboutPage.capabilities': 'Capacidades',
   'aboutPage.consoleInfo': 'Informações do console',
   'aboutPage.modernConsole': 'Console moderno',
-  'aboutPage.labBase': 'Base do laboratório',
+  'aboutPage.labBase': 'Versão de origem',
   'aboutPage.operations':
     'Operação de stacks, serviços e containers com acesso centralizado e autenticação OIDC. O Rancher mantém sua identidade e as regras de autorização do servidor.',
   'aboutPage.migration':
-    'A migração está em andamento. Os módulos disponíveis dependem das flags e das permissões da sua conta. Funções ainda em validação permanecem desativadas.',
+    'Os módulos disponíveis dependem das flags e das permissões da sua conta. Funções ainda em validação permanecem desativadas.',
   'aboutPage.attribution':
     'Este console é uma customização independente. As marcas identificam os respectivos produtos e organizações; não indicam certificação ou endosso oficial do Rancher.',
   'aboutPage.classic': 'Abrir Rancher clássico',

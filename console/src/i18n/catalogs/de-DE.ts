@@ -86,11 +86,11 @@ export const deDE = {
   'aboutPage.capabilities': 'Funktionen',
   'aboutPage.consoleInfo': 'Informationen zur Konsole',
   'aboutPage.modernConsole': 'Moderne Konsole',
-  'aboutPage.labBase': 'Laborbasis',
+  'aboutPage.labBase': 'Upstream-Version',
   'aboutPage.operations':
     'Verwalten Sie Stacks, Dienste und Container mit zentraler Zugriffsverwaltung und OIDC-Authentifizierung. Rancher behält seine Identität und seine serverseitigen Autorisierungsregeln.',
   'aboutPage.migration':
-    'Die Migration läuft. Verfügbare Module hängen von Funktionsschaltern und Ihren Kontoberechtigungen ab. Funktionen, die noch geprüft werden, bleiben deaktiviert.',
+    'Verfügbare Module hängen von Funktionsschaltern und Ihren Kontoberechtigungen ab. Funktionen, die noch geprüft werden, bleiben deaktiviert.',
   'aboutPage.attribution':
     'Diese Konsole ist eine unabhängige Anpassung. Marken kennzeichnen die jeweiligen Produkte und Organisationen und bedeuten keine offizielle Zertifizierung oder Unterstützung durch Rancher.',
   'aboutPage.classic': 'Klassisches Rancher öffnen',
@@ -354,7 +354,7 @@ export const deDE = {
   'balancerRulesPanel.remove': 'Regel {index} entfernen',
   'balancerRulesPanel.protocol': 'Protokoll {index}',
   'balancerRulesPanel.access': 'Zugriff {index}',
-  'balancerRulesPanel.sourcePort': 'Quellport {index}',
+  'balancerRulesPanel.sourcePort': 'Listener-Port {index}',
   'balancerRulesPanel.targetPort': 'Zielport {index}',
   'balancerRulesPanel.target': 'Zieldienst {index}',
   'balancerRulesPanel.hostname': 'Hostname {index}',
@@ -1218,7 +1218,7 @@ export const deDE = {
   'localAccountPanel.newPassword': 'Neues lokales Passwort',
   'localAccountPanel.confirmPassword': 'Lokales Passwort bestätigen',
   'localAccountPanel.passwordNotice':
-    'Diese Änderung betrifft nur die lokalen Anmeldedaten. Eine Passwortänderung widerruft bereits ausgestellte JWT-Sitzungen nicht. Deaktivieren Sie das Konto, um seine Nutzung zu sperren. Keycloak-Passwörter werden vom Anbieter verwaltet.',
+    'Diese Änderung betrifft nur die lokalen Anmeldedaten. Eine Passwortänderung widerruft bereits ausgestellte JWT-Sitzungen nicht. Deaktivieren Sie das Konto, um seine Nutzung zu sperren. Der Identitätsanbieter verwaltet die Anmeldedaten für die föderierte Anmeldung.',
   'localAccountPanel.deactivateNotice':
     'Das Konto kann sich nicht mehr authentifizieren. Die nächste Sitzungsprüfung wird abgelehnt. Bestehende Gruppenmitgliedschaften und Zugriffsrechte bleiben erhalten.',
   'localAccountPanel.removeNotice':
