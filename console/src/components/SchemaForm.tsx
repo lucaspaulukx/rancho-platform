@@ -982,7 +982,7 @@ export function SchemaForm({
     window.addEventListener('beforeunload', unload);
     return () => window.removeEventListener('beforeunload', unload);
   }, [dirty]);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [validation, setValidation] = useState<Error | 'review' | null>(null);
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -1029,7 +1029,7 @@ export function SchemaForm({
   function describeError(value?: Error | null) {
     if (value instanceof DeviceValidationError || value instanceof ResourceValidationError)
       return t(value.key);
-    return schemaPayloadValidationMessage(value, t) ?? workloadValidationMessage(value, t);
+    return schemaPayloadValidationMessage(value, t) ?? workloadValidationMessage(value, t, locale);
   }
   const validationText =
     validation === 'review' ? t('schemaForm.review') : describeError(validation);

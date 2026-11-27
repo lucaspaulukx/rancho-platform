@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { parseCpuResource, CpuValidationError, type CpuField } from '../cpu-resources';
+import {
+  cpuValidationMessage,
+  parseCpuResource,
+  CpuValidationError,
+  type CpuErrorCode,
+  type CpuField,
+} from '../cpu-resources';
 import { useI18n } from '../i18n/provider';
 import { Field } from './ui';
 
@@ -15,20 +21,12 @@ export function CpuResourceEditor({
   const { t, locale } = useI18n();
   const input = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(String(value ?? ''));
-  const [errorCode, setError] = useState('');
+  const [errorCode, setError] = useState<CpuErrorCode | null>(null);
   const label = t(`workloadControls.${name}.label`);
   const hint = t(`workloadControls.${name}.hint`);
-  const error = !errorCode
-    ? ''
-    : errorCode === 'cpuInteger'
-      ? t('workloadControls.cpuInteger')
-      : errorCode === 'cpuSafeInteger'
-        ? t('workloadControls.cpuSafeInteger')
-        : errorCode === 'cpuIndices'
-          ? t('workloadControls.cpuIndices')
-          : errorCode === 'cpuRanges'
-            ? t('workloadControls.cpuRanges')
-            : t('workloadControls.cpuReview', { label: label.toLocaleLowerCase(locale), hint });
+  const error = errorCode
+    ? cpuValidationMessage({ code: errorCode, issue: { field: name } }, t, locale)
+    : '';
   useEffect(() => {
     input.current?.setCustomValidity(error);
   }, [error]);
@@ -47,7 +45,7 @@ export function CpuResourceEditor({
             try {
               const next = parseCpuResource(name, event.target.value);
               event.target.setCustomValidity('');
-              setError('');
+              setError(null);
               onChange(next);
             } catch (error) {
               setError(error instanceof CpuValidationError ? error.code : 'cpuReview');

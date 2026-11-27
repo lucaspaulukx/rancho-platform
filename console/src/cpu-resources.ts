@@ -1,14 +1,33 @@
+import type { Locale } from './i18n/locales';
+import type { createTranslator } from './i18n/messages';
+
+type CpuFieldIssue = { field: CpuField; required?: true };
+
 export type CpuErrorCode =
   'cpuInteger' | 'cpuSafeInteger' | 'cpuIndices' | 'cpuRanges' | 'cpuReview';
 export class CpuValidationError extends Error {
   constructor(
     message: string,
     public readonly code: CpuErrorCode = 'cpuReview',
+    public readonly issue?: CpuFieldIssue,
   ) {
     super(message);
     this.name = 'CpuValidationError';
   }
 }
+export function cpuValidationMessage(
+  { code, issue }: Pick<CpuValidationError, 'code' | 'issue'>,
+  t: ReturnType<typeof createTranslator>['t'],
+  locale: Locale,
+): string {
+  if (code !== 'cpuReview') return t(`workloadControls.${code}`);
+  if (!issue) return t('schemaForm.review');
+  const label = t(`workloadControls.${issue.field}.label`);
+  const hint = t(`workloadControls.${issue.field}.hint`);
+  if (issue.required) return `${t('schemaForm.validation.required', { field: label })} ${hint}`;
+  return t('workloadControls.cpuReview', { label: label.toLocaleLowerCase(locale), hint });
+}
+
 export const cpuFields = {
   cpuShares: {
     label: 'Peso de CPU',
@@ -59,6 +78,8 @@ export function validatedCpuResources(value: unknown): Record<string, unknown> {
     )
       throw new CpuValidationError(
         'Informe os valores de CPU e I/O; use zero para retirar o valor explícito.',
+        'cpuReview',
+        { field: name, required: true },
       );
     validateCpuResource(name, data[name]);
   }
@@ -98,6 +119,8 @@ export function validateCpuResource(name: CpuField, value: unknown) {
   if ((name === 'cpuShares' || name === 'milliCpuReservation') && number >= 0) return;
   throw new CpuValidationError(
     `Revise ${cpuFields[name].label.toLowerCase()}. ${cpuFields[name].hint}`,
+    'cpuReview',
+    { field: name },
   );
 }
 export function parseCpuResource(name: CpuField, text: string): unknown {
