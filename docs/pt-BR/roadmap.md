@@ -17,6 +17,8 @@ Abra os [fluxos do console](../README.md#console-walkthroughs--fluxos-no-console
 
 O código do console em `510063b` passou em 1.362 verificações de layout e interação no Chromium e 24 análises do axe sem violações reportadas. O ensaio completo cobriu 21 rotas principais, dez idiomas, três larguras e os dois temas. Com o mesmo código do console, o backend verificado e um host Docker 29 descartável, a troca entre os dez idiomas manteve abertas as conexões de logs, terminal e métricas de container. Cada conexão entregou dados novos após cada troca. O [exemplo de logs ao vivo](console.md#consulte-os-logs-ao-vivo-do-container) mostra o workload de teste. A revisão dos textos e o aceite dos artefatos de release continuam separadamente.
 
+A candidata `44e20d4` passou na verificação de checksums e proveniência de 41 arquivos, incluindo o ZIP de código-fonte e as 13 imagens Linux amd64. O Trivy reportou zero achados altos ou críticos e zero segredos detectados com a base de vulnerabilidades de 27 de novembro UTC. Os mesmos IDs de imagem passaram na migração no primeiro início, nos rollbacks de banco e navegador, na recuperação do gateway após troca de IP do backend, no reinício do processo do backend e na troca a frio. [Build do código-fonte](https://github.com/lucaspaulukx/rancho-platform/actions/runs/46016602845) · [Build das imagens](https://github.com/lucaspaulukx/rancho-platform/actions/runs/46016609586)
+
 ## Fundação e experiência
 
 | ID | Capacidade | Estado e gate restante |
