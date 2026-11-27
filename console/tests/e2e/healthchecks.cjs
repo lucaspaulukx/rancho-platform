@@ -53,7 +53,7 @@ async function fill(dialog, mode) {
     if (mode === 'http') {
       await dialog.getByLabel('Caminho da verificação HTTP', { exact: true }).fill('/ready');
       await dialog.getByLabel('Versão HTTP', { exact: true }).selectOption('HTTP/1.1');
-      await dialog.getByLabel('Host HTTP (opcional)', { exact: true }).fill('health.invalid');
+      await dialog.getByLabel('Cabeçalho HTTP Host (opcional)', { exact: true }).fill('health.invalid');
     }
     await dialog.getByText('Tempos e política de recuperação', { exact: true }).click();
   }

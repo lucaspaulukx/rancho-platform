@@ -56,7 +56,7 @@ async function draft() {
   await page.getByLabel('Porta da verificação', { exact: true }).fill('8080');
   await page.getByLabel('Caminho da verificação HTTP', { exact: true }).fill('/ready');
   await page.getByLabel('Versão HTTP', { exact: true }).selectOption('HTTP/1.1');
-  await page.getByLabel('Host HTTP (opcional)', { exact: true }).fill('health.invalid');
+  await page.getByLabel('Cabeçalho HTTP Host (opcional)', { exact: true }).fill('health.invalid');
 }
 async function closeDraft() {
   await page.getByRole('button', { name: 'Fechar', exact: true }).click();
@@ -219,7 +219,7 @@ async function native(label) {
     'existing HTTP configuration is decoded without resetting path or host',
     (await page.getByLabel('Caminho da verificação HTTP', { exact: true }).inputValue()) ===
       '/ready' &&
-      (await page.getByLabel('Host HTTP (opcional)', { exact: true }).inputValue()) ===
+      (await page.getByLabel('Cabeçalho HTTP Host (opcional)', { exact: true }).inputValue()) ===
         'health.invalid',
   );
   await page.getByLabel('Tipo de verificação', { exact: true }).selectOption('none');

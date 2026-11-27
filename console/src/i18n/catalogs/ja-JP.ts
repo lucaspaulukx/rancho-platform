@@ -702,7 +702,7 @@ export const jaJP = {
   'healthCheckEditor.path': 'HTTP チェックのパス',
   'healthCheckEditor.pathHint':
     '例：/health。データへの書き込みが発生しないエンドポイントを選択してください。',
-  'healthCheckEditor.host': 'HTTP ホスト（任意）',
+  'healthCheckEditor.host': 'HTTP Host ヘッダー（任意）',
   'healthCheckEditor.advanced': '時間設定と復旧ポリシー',
   'healthCheckEditor.strategy': '利用できない場合の操作',
   'healthCheckEditor.strategy.none': '報告のみ',
@@ -2527,7 +2527,7 @@ export const jaJP = {
   'networkPoliciesPage.view': 'ネットワークポリシーを表示',
   'networkPoliciesPage.close': '閉じる',
   'networkPoliciesPage.managerWarning':
-    'network-policy-manager が稼働中かつ正常な状態ではありません。ルールは表示できます。このインフラストラクチャーの検証が完了するまで変更できません。',
+    'network-policy-manager が稼働中かつ正常な状態ではありません。ルールは表示できます。マネージャーが稼働中かつ正常になると変更できます。',
   'networkPoliciesPage.advancedNotice':
     'このネットワークには、詳細ルールまたは認識できないルールがあります。簡易エディターはそれらを置き換えません。',
   'networkPoliciesPage.allowOption': '許可',

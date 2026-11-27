@@ -106,6 +106,8 @@ O teste de localização injeta um link sintético de paginação de outra orige
 
 No ensaio de streams nativos, confirme a conexão, filtre pelo marcador sintético e aguarde uma nova linha correspondente. Ao testar a troca de idioma, mantenha o painel aberto e confira se o filtro permanece e se os logs continuam chegando. [Reproduza o exemplo de logs ao vivo](console.md#consulte-os-logs-ao-vivo-do-container).
 
+O navegador também testa uma perda temporária de conexão no login. Um idioma já carregado continua disponível. Ao escolher um idioma ainda indisponível, a tela preserva o idioma atual e os dois campos preenchidos. Ao reconectar, tente novamente para carregar o catálogo solicitado.
+
 ### Verificações automatizadas de acessibilidade
 
 Execute o teste de localização no navegador com `--accessibility` e as dependências de desenvolvimento do console instaladas. Ele usa axe em Grupos, Usuários, Chaves de API, Configurações, Auditoria e Ambientes a 390 e 1440 px nos temas escuro e claro. O teste reporta identificadores de regras e contagens. Revise as verificações manuais indicadas no relatório e exercite os fluxos críticos com teclado e leitor de tela antes da release.

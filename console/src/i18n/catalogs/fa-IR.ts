@@ -302,7 +302,7 @@ export const faIR = {
   'auth.password': 'گذرواژه',
   'auth.localLogin': 'ورود با حساب محلی',
   'auth.localRejected': 'ورود ممکن نشد. اطلاعات ورود را بررسی کنید و دوباره تلاش کنید.',
-  'auth.pendingStill': 'درخواست دسترسی شما همچنان در انتظار تأیید است.',
+  'auth.pendingStill': 'دسترسی شما هنوز تأیید نشده است.',
   'auth.accessCheckFailed': 'بررسی دسترسی ممکن نشد. دوباره تلاش کنید.',
   'auth.accessTitle': 'دسترسی شما',
   'auth.accessDescription': 'هویت حساب شما تأیید شده است. محیط‌های قابل دسترسی هنوز مشخص نشده‌اند.',
@@ -699,7 +699,7 @@ export const faIR = {
   'healthCheckEditor.path': 'مسیر بررسی HTTP',
   'healthCheckEditor.pathHint':
     'برای نمونه، /health. نقطهٔ پایانی‌ای انتخاب کنید که عملیات نوشتن انجام ندهد.',
-  'healthCheckEditor.host': 'میزبان HTTP (اختیاری)',
+  'healthCheckEditor.host': 'سرآیند HTTP Host (اختیاری)',
   'healthCheckEditor.advanced': 'زمان‌بندی و سیاست بازیابی',
   'healthCheckEditor.strategy': 'اقدام در صورت عدم دسترسی',
   'healthCheckEditor.strategy.none': 'فقط گزارش',
@@ -2493,7 +2493,7 @@ export const faIR = {
   'networkPoliciesPage.view': 'مشاهدهٔ سیاست‌های شبکه',
   'networkPoliciesPage.close': 'بستن',
   'networkPoliciesPage.managerWarning':
-    'network-policy-manager فعال و سالم نیست. قواعد قابل مشاهده‌اند، اما تا تأیید این زیرساخت نمی‌توان آن‌ها را تغییر داد.',
+    'network-policy-manager فعال و سالم نیست. قواعد قابل مشاهده‌اند، اما تنها پس از فعال و سالم شدن مدیر سیاست شبکه می‌توان آن‌ها را تغییر داد.',
   'networkPoliciesPage.advancedNotice':
     'این شبکه قواعد پیشرفته یا ناشناخته دارد. ویرایشگر ساده آن‌ها را جایگزین نمی‌کند.',
   'networkPoliciesPage.allowOption': 'مجاز',

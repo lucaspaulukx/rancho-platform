@@ -287,7 +287,7 @@ export const deDE = {
   'networkPoliciesPage.view': 'Netzwerkrichtlinien anzeigen',
   'networkPoliciesPage.close': 'Schließen',
   'networkPoliciesPage.managerWarning':
-    'Der network-policy-manager ist nicht aktiv oder nicht funktionsfähig. Die Regeln können angezeigt werden. Änderungen sind erst möglich, wenn diese Infrastruktur geprüft wurde.',
+    'Der network-policy-manager ist nicht aktiv oder nicht funktionsfähig. Die Regeln können angezeigt werden. Änderungen sind erst möglich, wenn der Manager aktiv und funktionsfähig ist.',
   'networkPoliciesPage.advancedNotice':
     'Dieses Netzwerk enthält erweiterte oder nicht erkannte Regeln. Der vereinfachte Editor ersetzt sie nicht.',
   'networkPoliciesPage.allowOption': 'Zulassen',
@@ -2292,7 +2292,7 @@ export const deDE = {
   'healthCheckEditor.path': 'HTTP-Prüfpfad',
   'healthCheckEditor.pathHint':
     'Beispiel: /health. Wählen Sie einen Endpunkt, der keine Schreibvorgänge auslöst.',
-  'healthCheckEditor.host': 'HTTP-Host (optional)',
+  'healthCheckEditor.host': 'HTTP-Header Host (optional)',
   'healthCheckEditor.advanced': 'Zeitsteuerung und Wiederherstellungsrichtlinie',
   'healthCheckEditor.strategy': 'Aktion bei Nichtverfügbarkeit',
   'healthCheckEditor.strategy.none': 'Nur melden',

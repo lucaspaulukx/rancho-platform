@@ -291,7 +291,7 @@ export const frFR = {
   'networkPoliciesPage.view': 'Voir les politiques réseau',
   'networkPoliciesPage.close': 'Fermer',
   'networkPoliciesPage.managerWarning':
-    'Le network-policy-manager est inactif ou défaillant. Les règles restent consultables. Les modifications sont indisponibles jusqu’à la validation de cette infrastructure.',
+    'Le network-policy-manager est inactif ou défaillant. Les règles restent consultables. La modification redevient disponible lorsque le gestionnaire est actif et opérationnel.',
   'networkPoliciesPage.advancedNotice':
     'Ce réseau contient des règles avancées ou non reconnues. L’éditeur simplifié ne les remplace pas.',
   'networkPoliciesPage.allowOption': 'Autoriser',
@@ -2238,7 +2238,7 @@ export const frFR = {
   'schedulingEditor.kind.container_label': 'Étiquette de conteneur',
   'schedulingEditor.kind.container': 'Nom du conteneur',
   'schedulingEditor.mode.required': 'Correspondance obligatoire',
-  'schedulingEditor.mode.exclude': 'Correspondance exclue',
+  'schedulingEditor.mode.exclude': 'Ne doit pas correspondre',
   'schedulingEditor.mode.prefer': 'Correspondance souhaitée',
   'schedulingEditor.mode.avoid': 'Correspondance à éviter',
   'schedulingEditor.key': 'Clé de l’étiquette',
@@ -2263,7 +2263,7 @@ export const frFR = {
   'healthCheckEditor.path': 'Chemin HTTP du contrôle',
   'healthCheckEditor.pathHint':
     'Exemple : /health. Choisissez un point de terminaison qui n’effectue aucune écriture.',
-  'healthCheckEditor.host': 'Hôte HTTP (facultatif)',
+  'healthCheckEditor.host': 'En-tête HTTP Host (facultatif)',
   'healthCheckEditor.advanced': 'Délais et politique de récupération',
   'healthCheckEditor.strategy': 'Action en cas d’indisponibilité',
   'healthCheckEditor.strategy.none': 'Signaler uniquement',

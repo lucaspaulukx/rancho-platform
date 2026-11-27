@@ -654,7 +654,7 @@ export const zhHans = {
   'healthCheckEditor.version': 'HTTP 版本',
   'healthCheckEditor.path': 'HTTP 检查路径',
   'healthCheckEditor.pathHint': '例如 /health。请选择不会执行写入操作的端点。',
-  'healthCheckEditor.host': 'HTTP 主机（可选）',
+  'healthCheckEditor.host': 'HTTP Host 请求头（可选）',
   'healthCheckEditor.advanced': '时间设置和恢复策略',
   'healthCheckEditor.strategy': '不可用时的操作',
   'healthCheckEditor.strategy.none': '仅报告',
@@ -2304,7 +2304,7 @@ export const zhHans = {
   'networkPoliciesPage.view': '查看网络策略',
   'networkPoliciesPage.close': '关闭',
   'networkPoliciesPage.managerWarning':
-    'network-policy-manager 未处于运行且健康的状态。可以查看规则，但须验证该基础设施后才能更改规则。',
+    'network-policy-manager 未处于运行且健康的状态。可以查看规则，管理器恢复运行且状态正常后即可编辑规则。',
   'networkPoliciesPage.advancedNotice':
     '此网络包含高级规则或无法识别的规则。简化编辑器不会替换它们。',
   'networkPoliciesPage.allowOption': '允许',

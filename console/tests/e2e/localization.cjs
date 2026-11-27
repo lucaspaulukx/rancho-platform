@@ -240,6 +240,28 @@ async function main() {
     await publicPage.getByText('Aperçu · traductions incomplètes', { exact: true }).isVisible() &&
     await username.inputValue() === 'localization-draft-only' &&
     await password.inputValue() === 'not-a-real-password' && publicPage.url() === loginUrl);
+
+  result.stage = 'offline-language-switch';
+  await publicContext.setOffline(true);
+  await publicPage.locator('.language-selector select').selectOption('en-US');
+  await publicPage.locator('html[lang="en-US"]').waitFor();
+  await publicPage.locator('.language-selector select').selectOption('fr-FR');
+  await publicPage.locator('html[lang="fr-FR"]').waitFor();
+  check('loaded catalogs switch offline without replacing either form draft',
+    await username.inputValue() === 'localization-draft-only' &&
+    await password.inputValue() === 'not-a-real-password' && publicPage.url() === loginUrl);
+  await publicPage.locator('.language-selector select').selectOption('de-DE');
+  const offlineRetry = publicPage.locator('.language-selector').getByRole('button');
+  await offlineRetry.waitFor();
+  check('first catalog load offline leaves loaded locale and input drafts intact',
+    await publicPage.locator('html').getAttribute('lang') === 'fr-FR' &&
+    await username.inputValue() === 'localization-draft-only' &&
+    await password.inputValue() === 'not-a-real-password');
+  await publicContext.setOffline(false);
+  await offlineRetry.click();
+  await publicPage.locator('html[lang="de-DE"]').waitFor();
+  check('retry loads the requested catalog after reconnecting', publicPage.url() === loginUrl);
+
   for (const [locale, title, label, notice] of [
     ['de-DE', 'Auf Ihre Umgebung zugreifen', 'Sprache', 'Vorschau · Übersetzungen unvollständig'],
     ['ja-JP', '環境にアクセス', '言語', 'プレビュー · 一部未翻訳'],

@@ -472,7 +472,7 @@ export const ruRU = {
   'auth.password': 'Пароль',
   'auth.localLogin': 'Войти с локальной учётной записью',
   'auth.localRejected': 'Не удалось войти. Проверьте учётные данные и повторите попытку.',
-  'auth.pendingStill': 'Ваш запрос на доступ всё ещё ожидает одобрения.',
+  'auth.pendingStill': 'Доступ для вашей учётной записи ещё не одобрен.',
   'auth.accessCheckFailed': 'Не удалось проверить доступ. Повторите попытку.',
   'auth.accessTitle': 'Ваш доступ',
   'auth.accessDescription':
@@ -870,7 +870,7 @@ export const ruRU = {
   'healthCheckEditor.path': 'Путь HTTP-проверки',
   'healthCheckEditor.pathHint':
     'Пример: /health. Выберите конечную точку, которая не изменяет данные.',
-  'healthCheckEditor.host': 'Хост HTTP (необязательно)',
+  'healthCheckEditor.host': 'Заголовок HTTP Host (необязательно)',
   'healthCheckEditor.advanced': 'Интервалы и политика восстановления',
   'healthCheckEditor.strategy': 'Действие при недоступности',
   'healthCheckEditor.strategy.none': 'Только сообщить',
@@ -2185,7 +2185,7 @@ export const ruRU = {
     'Будет удалено только переопределение в базе данных. Действующее значение может поступать из другого источника.',
   'settings.leaveDescription': 'Настройка ещё не сохранена. Дождитесь завершения текущей отправки.',
   'settings.changeDescription':
-    'Новое значение защищено при проверке и может затронуть весь экземпляр.',
+    'Новое значение скрыто при проверке и может затронуть весь экземпляр.',
   'settings.sent': 'Настройка отправлена в Rancher. Проверьте действующее значение ещё раз.',
   'settings.discardDescription': 'Введённое значение будет сброшено без отправки на сервер.',
   'settings.operationFailed': 'Не удалось выполнить операцию с настройками.',
@@ -2593,7 +2593,7 @@ export const ruRU = {
   'balancerRulesPanel.before': 'До изменения · Правил: {count}',
   'balancerRulesPanel.after': 'После изменения · Правил: {count}',
   'balancerRulesPanel.preservation':
-    '{reason} Текущая конфигурация сохранена. Закройте панель и выберите «Обновить конфигурацию», чтобы использовать форму Rancher.',
+    '{reason} Текущая конфигурация сохранена. Закройте панель и выберите «Изменить конфигурацию», чтобы использовать форму Rancher.',
   'balancerRulesPanel.validation.configuration': 'Конфигурация балансировщика нагрузки недоступна.',
   'balancerRulesPanel.validation.changed':
     'Другой клиент изменил балансировщик нагрузки. Закройте и снова откройте панель.',
@@ -2654,7 +2654,7 @@ export const ruRU = {
   'networkPoliciesPage.view': 'Просмотреть сетевые политики',
   'networkPoliciesPage.close': 'Закрыть',
   'networkPoliciesPage.managerWarning':
-    'Компонент network-policy-manager не активен или неработоспособен. Правила можно просматривать. Изменения станут доступны после проверки инфраструктуры.',
+    'Компонент network-policy-manager не активен или неработоспособен. Правила можно просматривать. Изменения станут доступны, когда компонент снова будет активен и работоспособен.',
   'networkPoliciesPage.advancedNotice':
     'В этой сети есть расширенные или неизвестные правила. Упрощённый редактор их не заменяет.',
   'networkPoliciesPage.allowOption': 'Разрешить',
