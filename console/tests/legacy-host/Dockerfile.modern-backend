@@ -159,7 +159,9 @@ COPY --from=cattle /opt/rancho-java17 /opt/rancho-java17
 COPY --from=jetty /opt/war /opt/cattle
 COPY --from=cattle /usr/share/cattle/artifacts /usr/share/cattle/artifacts
 COPY --from=cattle /usr/share/cattle/env_vars /usr/share/cattle/env_vars
-COPY --from=cattle /usr/bin/rancher-* /usr/bin/docker-machine* /usr/bin/compose /usr/bin/websocket-proxy /usr/bin/
+COPY --from=cattle /usr/bin/rancher-auth-service /usr/bin/rancher-catalog-service /usr/bin/rancher-catalog-service-sqlite /usr/bin/rancher-compose-executor /usr/bin/docker-machine /usr/bin/compose /usr/bin/websocket-proxy /usr/bin/
+# Keep optional provider plugins from the legacy base outside the supported runtime.
+RUN --network=none test ! -e /usr/bin/docker-machine-driver-packet
 COPY --from=cattle /lab/cattle/LICENSE /usr/share/doc/rancho-cattle/LICENSE
 COPY --from=cattle /usr/share/doc/community-websocket-proxy /usr/share/doc/community-websocket-proxy
 COPY --from=webhook /out/webhook-service /usr/bin/webhook-service

@@ -152,6 +152,8 @@ Public CycloneDX projections allow package identities/versions/hashes/licenses a
 
 The modern backend includes the Cattle license under `/usr/share/doc/rancho-cattle` and the WebSocket proxy's upstream and bundled notices under `/usr/share/doc/community-websocket-proxy`. Check those directories on the final runtime image during the dependency review.
 
+The modern backend copies inherited utilities by exact filename. It excludes the old bundled Packet Machine driver. The supported profile registers existing Docker hosts manually. Operators who enable external machine provisioning supply and review their chosen provider binary separately.
+
 The console build includes the license texts from installed production dependencies in `dist/licenses/npm`. The shipped `/console/licenses/npm/index.json` lists the versions, license declarations and notice files. When a published package omits its license text, the build requires an explicitly reviewed notice for that version.
 
 The Console preserves the upstream package notice and adds the complete NGINX 1.30.7 copyright and license from the [signed NGINX source archive](https://nginx.org/download/nginx-1.30.7.tar.gz) under `/usr/share/licenses/nginx/`. The restore image includes the license from the [OpenSSL 4.0.3 source archive](https://github.com/openssl/openssl/releases/tag/openssl-4.0.3) under `/usr/share/licenses/rancho-restore/`. Both builds verify the shipped notices against their source digests and check the NGINX and OpenSSL runtime versions.
