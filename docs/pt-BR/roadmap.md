@@ -15,6 +15,8 @@ Estados descrevem capacidades mantidas e aceites restantes, não diário de exec
 
 Abra os [fluxos do console](../README.md#console-walkthroughs--fluxos-no-console) para ver as telas testadas de login, seleção de environment, árvore de workloads, permissões de grupo e configurações. O [guia de testes](testing.md) explica como reproduzir as verificações.
 
+O código do console em `510063b` passou em 1.362 verificações de layout e interação no Chromium e 24 análises do axe sem violações reportadas. O ensaio completo cobriu 21 rotas principais, dez idiomas, três larguras e os dois temas. Com o mesmo código do console, o backend verificado e um host Docker 29 descartável, a troca entre os dez idiomas manteve abertas as conexões de logs, terminal e métricas de container. Cada conexão entregou dados novos após cada troca. O [exemplo de logs ao vivo](console.md#consulte-os-logs-ao-vivo-do-container) mostra o workload de teste. A revisão dos textos e o aceite dos artefatos de release continuam separadamente.
+
 ## Fundação e experiência
 
 | ID | Capacidade | Estado e gate restante |

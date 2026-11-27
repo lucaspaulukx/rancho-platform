@@ -393,20 +393,18 @@ export function OperationsPage({
         }
       />
       <div className="operation-metrics">
-        {[
-          [Layers3, inventory.stacks.length, t('operations.stackMetric')],
-          [Network, inventory.services.length, t('operations.serviceMetric')],
-          [Box, inventory.containers.length, t('operations.containerMetric')],
-        ].map(([Icon, count, label]) => {
-          const Symbol = Icon as typeof Box;
-          return (
-            <div key={String(label)}>
-              <Symbol size={18} />
-              <strong>{String(count)}</strong>
-              <span>{String(label)}</span>
-            </div>
-          );
-        })}
+        {(
+          [
+            { Icon: Layers3, count: inventory.stacks.length, key: 'operations.stackMetric' },
+            { Icon: Network, count: inventory.services.length, key: 'operations.serviceMetric' },
+            { Icon: Box, count: inventory.containers.length, key: 'operations.containerMetric' },
+          ] as const
+        ).map(({ Icon, count, key }) => (
+          <div key={key}>
+            <Icon size={18} />
+            <strong>{t(key, { count })}</strong>
+          </div>
+        ))}
         <span className="muted">{t('operations.totals')}</span>
       </div>
       <div className="operation-toolbar">

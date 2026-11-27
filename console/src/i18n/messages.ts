@@ -230,8 +230,8 @@ export const portugueseMessages = {
   'language.preview': 'Prévia · traduções incompletas',
   'localeLoad.failed':
     'Não foi possível carregar o idioma selecionado. O idioma atual continua ativo.',
-  'runtime.disabledTitle': 'Console desativada',
-  'runtime.disabledDescription': 'Esta console está desativada na configuração da instância.',
+  'runtime.disabledTitle': 'Console desativado',
+  'runtime.disabledDescription': 'Este console está desativado na configuração da instância.',
   'runtime.classic': 'Abrir Rancher clássico',
   'environment.selected': 'Environment: {name}',
   'selection.count': { one: '{count} item selecionado', other: '{count} itens selecionados' },

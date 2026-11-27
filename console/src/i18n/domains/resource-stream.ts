@@ -49,7 +49,7 @@ export const ptResourceStream = {
   'resourceStream.description': 'Environment: {name} · {status}',
   'resourceStream.close': 'Fechar conexão',
   'resourceStream.warning':
-    'A console executa comandos dentro do container selecionado com as permissões concedidas pelo Rancher.',
+    'O console executa comandos dentro do container selecionado com as permissões concedidas pelo Rancher.',
   'resourceStream.connect': 'Conectar ao container',
   'resourceStream.terminal': 'Terminal do container',
   'resourceStream.terminalInput': 'Entrada do terminal',

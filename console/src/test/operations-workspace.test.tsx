@@ -172,6 +172,13 @@ function addContainers(length = 50) {
 }
 
 describe('Workspace unificado', () => {
+  it('flexiona a contagem total de stacks, serviços e containers', () => {
+    mount();
+    const metrics = document.querySelector<HTMLElement>('.operation-metrics')!;
+    expect(within(metrics).getByText('1 stack')).toBeVisible();
+    expect(within(metrics).getByText('1 serviço')).toBeVisible();
+    expect(within(metrics).getByText('2 containers')).toBeVisible();
+  });
   it('orders log options naturally and keeps the selected stream when switching language', async () => {
     const containers: Resource[] = ['web-10', 'web-2'].map((name, index) => ({
       id: `c${index}`,

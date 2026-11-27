@@ -26,5 +26,8 @@ These figures show the running console built from the console source at `81fd28c
 | Stack and service tree / Árvore de stack e serviço | [Workloads](images/guide-workloads-en-US.png) | [Workloads](images/guide-workloads-pt-BR.png) |
 | Group grant draft / Rascunho de permissão de grupo | [Read-only grant](images/guide-group-permissions-en-US.png) | [Permissão somente leitura](images/guide-group-permissions-pt-BR.png) |
 | Server settings / Configuração do servidor | [Setting sources](images/guide-settings-en-US.png) | [Origens das configurações](images/guide-settings-pt-BR.png) |
+| Live container logs / Logs ao vivo do container | [Connected log panel](images/guide-logs-en-US.png) | [Painel de logs conectado](images/guide-logs-pt-BR.png) |
+
+The live log captures use Console source `510063b` and a disposable Docker 29 host. / As capturas de logs ao vivo usam o código do console em `510063b` e um host Docker 29 descartável.
 
 [Persian mobile visual check at 320 px / Verificação visual em persa a 320 px](images/guide-workloads-fa-IR-mobile.png) (`1ef1211`).

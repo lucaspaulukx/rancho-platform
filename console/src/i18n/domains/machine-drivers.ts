@@ -132,7 +132,7 @@ export const ptMachineDrivers = {
   'machineDrivers.actions': 'Ações',
   'machineDrivers.httpFailed': 'Operação de driver não concluída (HTTP {status}).',
   'machineDrivers.info':
-    'O cadastro solicita um driver inativo. O registro e a edição podem baixar e executar o binário no servidor. A URL de interface é armazenada, mas seu código não é carregado nesta console.',
+    'O cadastro solicita um driver inativo. O registro e a edição podem baixar e executar o binário no servidor. A URL de interface é armazenada, mas seu código não é carregado neste console.',
   'machineDrivers.actionLabel': '{action} driver',
   'machineDrivers.rowActions': 'Ações do driver {name}',
   'machineDrivers.actionTitle': '{action} driver?',

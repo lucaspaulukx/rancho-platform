@@ -2699,9 +2699,9 @@ export const frFR = {
   'operations.action.purge': 'Supprimer définitivement',
   'operations.action.setservicelinks': 'Gérer les liens entre services',
 
-  'operations.stackMetric': 'stacks',
-  'operations.serviceMetric': 'services',
-  'operations.containerMetric': 'conteneurs',
+  'operations.stackMetric': { one: '{count} stack', other: '{count} stacks' },
+  'operations.serviceMetric': { one: '{count} service', other: '{count} services' },
+  'operations.containerMetric': { one: '{count} conteneur', other: '{count} conteneurs' },
   'operations.totals': 'Totaux de l’environnement · actualisés toutes les 15 s',
   'operations.visibleStacks': { one: '{count} stack visible', other: '{count} stacks visibles' },
   'operations.visibleServices': {
@@ -2840,7 +2840,7 @@ export const frFR = {
   'auth.password': 'Mot de passe',
   'auth.localLogin': 'Se connecter avec un compte local',
   'auth.localRejected': 'Impossible de se connecter. Vérifiez vos identifiants et réessayez.',
-  'auth.pendingStill': 'Votre demande d’accès est toujours en attente d’approbation.',
+  'auth.pendingStill': 'Votre accès est toujours en attente d’approbation.',
   'auth.accessCheckFailed': 'Impossible de vérifier l’accès. Réessayez.',
   'auth.accessTitle': 'Votre accès',
   'auth.accessDescription':

@@ -41,4 +41,12 @@ Use um environment descartável com uma stack chamada `documentation-demo` e um 
 3. Recarregue a página. Confira se a URL mantém o environment selecionado e se a busca e os filtros continuam aplicados nas telas que os guardam.
 4. Para testar logs ou o terminal de verdade, use um laboratório separado com um host Docker registrado e um container em execução. O [guia de testes](testing.md) descreve as verificações com workloads reais.
 
+### Consulte os logs ao vivo do container
+
+Em um environment com um host registrado, abra **Containers**, selecione um container em execução e escolha **Ver logs** nas ações. Digite um trecho da saída do workload em **Filtrar logs**. O painel mantém o container e o environment no contexto. **Baixar** salva a parte retida no buffer do navegador. Pressione Escape para fechar o painel e devolver o foco à ação de logs.
+
+![Console do Rancho mostrando o painel de logs conectado com linhas filtradas](../images/guide-logs-pt-BR.png)
+
+A captura mostra a saída real de um container descartável em um host Docker 29 de teste. O workload emitia uma linha de teste a cada três segundos.
+
 Execute `npm run check:locales` e `npm run check:ui-literals` após alterar um rótulo visível. O primeiro verifica os catálogos de mensagens registradas. O segundo verifica texto direto no JSX e atributos selecionados. Consulte as [boas práticas de frontend](ui-guidelines.md) para verificar teclado, temas e layout.

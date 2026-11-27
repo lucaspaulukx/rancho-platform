@@ -13,7 +13,7 @@ export const ptRecovery = {
   'recovery.moduleTitle': 'Não foi possível carregar esta página',
   'recovery.renderTitle': 'Não foi possível abrir esta página',
   'recovery.moduleDescription':
-    'A console pode ter sido atualizada ou a conexão foi interrompida. Recarregue para buscar a versão atual. Alterações não salvas nesta aba podem ser perdidas.',
+    'O console pode ter sido atualizado ou a conexão foi interrompida. Recarregue para buscar a versão atual. Alterações não salvas nesta aba podem ser perdidas.',
   'recovery.renderDescription':
     'Ocorreu uma falha na interface. Você pode acessar outra seção ou recarregar esta página. Alterações não salvas nesta aba podem ser perdidas.',
   'recovery.reload': 'Recarregar console',

@@ -790,7 +790,10 @@ async function run(
     assert.match(initialRender.assetEntry, /^\/console\/assets\/[A-Za-z0-9_.-]+\.js$/);
     assert.equal(initialRender.renderedRows, expectedRows);
     const summary = await page.locator('.operation-metrics strong').allTextContents();
-    assert.deepEqual(summary.map(Number), Object.values(counts));
+    const amounts = new Intl.NumberFormat('pt-BR');
+    const labels = [['stack', 'stacks'], ['serviço', 'serviços'], ['container', 'containers']];
+    assert.deepEqual(summary, Object.values(counts).map((count, index) =>
+      `${amounts.format(count)} ${labels[index][count === 1 ? 0 : 1]}`));
     const firstPage = await checkScope(page, first, expectedRows);
     const previous = page.getByRole('button', { name: 'Página anterior', exact: true });
     const next = page.getByRole('button', { name: 'Próxima página', exact: true });

@@ -15,6 +15,8 @@ Statuses below describe maintained capabilities and remaining acceptance, not an
 
 Open the [console walkthroughs](../README.md#console-walkthroughs--fluxos-no-console) for the tested login, environment selection, workload tree, group grant and settings screens. The [testing guide](testing.md) shows how to reproduce the checks.
 
+The Console source at `510063b` passed 1,362 Chromium layout and interaction checks and 24 axe scans with no reported violations. The full layout run used 21 primary routes, ten locales, three viewport widths and both themes. On the same Console source with the verified backend and a disposable Docker 29 host, switching through all ten locale selections kept the log, terminal and container metrics connections open. Each stream delivered fresh output after each switch. The [live log walkthrough](../../console/README.md#inspect-live-container-logs) shows the test workload. Copy review and release-artifact acceptance continue separately.
+
 ## Foundation and experience
 
 | ID | Capability | State and remaining gate |

@@ -80,7 +80,7 @@ export const ptUsers = {
   'users.adminNotice':
     'Esta conta tem privilégios administrativos globais. Participação em grupos não reduz esses privilégios.',
   'users.membership': 'Participação em grupos',
-  'users.groupsDisabled': 'O gerenciamento de grupos está desativado nesta console ou no servidor.',
+  'users.groupsDisabled': 'O gerenciamento de grupos está desativado neste console ou no servidor.',
   'users.emptyGroups': 'Nenhum grupo local',
   'users.emptyGroupsDescription': 'Crie um grupo para organizar os acessos da equipe.',
   'users.group': 'Grupo',

@@ -17,9 +17,10 @@ Distributable contents are application/extension source, pinned patches, tests, 
 
 Published runtime versions use the GHCR package `ghcr.io/lucaspaulukx/rancho-platform`, with tags such as `backend-0.1.0`, `console-0.1.0` and `database-0.1.0`. Use a version only after its release lists the accepted registry digests. Source-only prereleases do not imply that these images are available.
 
-Check out the matching release, create a private `.env` containing a strong `RANCHO_DB_PASSWORD`, and keep that file out of Git. The registry overlay requires no local builds:
+Check out the matching release and create a private `.env` containing a strong `RANCHO_DB_PASSWORD` and the published `RANCHO_VERSION` without the leading `v`. Keep the file out of Git. Check the resolved image names before pulling. The three images should come from the declared registry and match the version or digests listed by the release. The registry overlay uses prebuilt images.
 
 ```sh
+docker compose -f compose.modern.yaml -f compose.registry.yaml config --images
 docker compose -f compose.modern.yaml -f compose.registry.yaml pull
 docker compose -f compose.modern.yaml -f compose.registry.yaml up -d --wait
 python scripts/bootstrap_admin.py --origin http://localhost:18090 --username admin
@@ -27,7 +28,7 @@ python scripts/bootstrap_admin.py --origin http://localhost:18090 --username adm
 
 The initializer prompts for the administrator password without echo. It only accepts loopback origins, bypasses HTTP proxies, refuses redirects and refuses to overwrite an already configured authentication provider. Run it only on a fresh installation. For a restored database, use the existing administrator and the [migration procedure](migration.md). Open `http://localhost:18090/console/` after setup.
 
-Set `RANCHO_VERSION` to select another published version. For immutable deployments, set `RANCHO_BACKEND_IMAGE`, `RANCHO_CONSOLE_IMAGE` and `RANCHO_DATABASE_IMAGE` to the digest references recorded by that release; they take priority over version tags. For first-start migration, also select the published `restore-VERSION` image through `RANCHO_MIGRATION_RESTORE_IMAGE` and use the migration overlay as documented.
+Change `RANCHO_VERSION` when moving to another published release. For immutable deployments, set `RANCHO_BACKEND_IMAGE`, `RANCHO_CONSOLE_IMAGE` and `RANCHO_DATABASE_IMAGE` to the digest references recorded by that release; they take priority over version tags. For first-start migration, also select the published `restore-VERSION` image through `RANCHO_MIGRATION_RESTORE_IMAGE` and use the migration overlay as documented.
 
 ### Publish accepted registry images
 

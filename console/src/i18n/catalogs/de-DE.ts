@@ -2727,9 +2727,9 @@ export const deDE = {
   'operations.action.purge': 'Endgültig löschen',
   'operations.action.setservicelinks': 'Dienstverknüpfungen verwalten',
 
-  'operations.stackMetric': 'Stacks',
-  'operations.serviceMetric': 'Dienste',
-  'operations.containerMetric': 'Container',
+  'operations.stackMetric': { one: '{count} Stack', other: '{count} Stacks' },
+  'operations.serviceMetric': { one: '{count} Dienst', other: '{count} Dienste' },
+  'operations.containerMetric': { one: '{count} Container', other: '{count} Container' },
   'operations.totals': 'Gesamtzahlen der Umgebung · alle 15 s aktualisiert',
   'operations.visibleStacks': {
     one: '{count} sichtbarer Stack',

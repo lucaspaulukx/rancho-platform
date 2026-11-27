@@ -57,7 +57,7 @@ export const ptAuth = {
   'auth.loginDescription':
     'Entre com sua conta para gerenciar os recursos aos quais você tem acesso.',
   'auth.providerLogoutWarning':
-    'Você saiu desta console. Não foi possível confirmar a saída do provedor de login.',
+    'Você saiu deste console. Não foi possível confirmar a saída do provedor de login.',
   'auth.serverLogoutWarning':
     'A sessão foi removida deste navegador, mas não foi possível confirmar o encerramento no servidor.',
   'auth.methodsUnavailable': 'Não foi possível verificar os métodos de login.',
@@ -83,7 +83,7 @@ export const ptAuth = {
   'auth.accountHint': 'Informe sua conta: {account}.',
   'auth.groupAccess': 'Receba acesso pelo seu grupo',
   'auth.groupAccessDescription': 'As permissões são definidas e gerenciadas no Rancher.',
-  'auth.returnConsole': 'Volte para sua console',
+  'auth.returnConsole': 'Volte para o seu console',
   'auth.returnConsoleDescription':
     'Depois da liberação, verifique novamente para carregar seus ambientes.',
   'auth.checkAccess': 'Verificar acesso',
@@ -91,8 +91,8 @@ export const ptAuth = {
   'auth.moduleDisabled': 'Módulo desativado',
   'auth.accessRestricted': 'Acesso restrito',
   'auth.notFound': 'Página não encontrada',
-  'auth.moduleDisabledDescription': 'Este módulo está desativado na configuração da console.',
+  'auth.moduleDisabledDescription': 'Este módulo está desativado na configuração do console.',
   'auth.accessRestrictedDescription': 'Sua conta não tem permissão para acessar esta área.',
-  'auth.notFoundDescription': 'O endereço pode ter mudado ou não estar disponível nesta console.',
+  'auth.notFoundDescription': 'O endereço pode ter mudado ou não estar disponível neste console.',
   'auth.backHome': 'Voltar ao início',
 } as const satisfies Record<keyof typeof enAuth, string>;

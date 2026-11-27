@@ -248,9 +248,24 @@ export const ukUA = {
     'У буфері зберігається до 2 000 останніх рядків загальним обсягом не більше ніж 512 КБ. Пошук і завантаження охоплюють лише вміст, отриманий на цій панелі.',
   'resourceStream.logLabel': 'Журнали контейнера',
 
-  'operations.stackMetric': 'стеки',
-  'operations.serviceMetric': 'сервіси',
-  'operations.containerMetric': 'контейнери',
+  'operations.stackMetric': {
+    one: '{count} стек',
+    few: '{count} стеки',
+    many: '{count} стеків',
+    other: '{count} стека',
+  },
+  'operations.serviceMetric': {
+    one: '{count} сервіс',
+    few: '{count} сервіси',
+    many: '{count} сервісів',
+    other: '{count} сервісу',
+  },
+  'operations.containerMetric': {
+    one: '{count} контейнер',
+    few: '{count} контейнери',
+    many: '{count} контейнерів',
+    other: '{count} контейнера',
+  },
   'operations.totals': 'Підсумки середовища · оновлення кожні 15 с',
   'operations.visibleStacks': {
     one: '{count} видимий стек',
@@ -435,7 +450,7 @@ export const ukUA = {
 
   'auth.entryFailed': 'Не вдалося завершити автентифікацію. Увійдіть знову.',
   'auth.providerUnavailable':
-    'Не вдалося підключитися до постачальника послуг входу. Спробуйте ще раз.',
+    'Не вдалося підключитися до постачальника послуг автентифікації. Спробуйте ще раз.',
   'auth.ticketRejected': 'Термін дії запиту на вхід минув або запит відхилено. Увійдіть знову.',
   'auth.completingLogin': 'Завершення входу…',
   'auth.welcome': 'ВІТАЄМО В КОНСОЛІ',
@@ -467,7 +482,7 @@ export const ukUA = {
   'auth.contactAdmin': 'Зверніться до адміністратора',
   'auth.accountHint': 'Укажіть свій обліковий запис: {account}.',
   'auth.groupAccess': 'Отримайте доступ через свою групу',
-  'auth.groupAccessDescription': 'Дозволи налаштовуються та керуються в Rancher.',
+  'auth.groupAccessDescription': 'Дозволами керують у Rancher.',
   'auth.returnConsole': 'Поверніться до консолі',
   'auth.returnConsoleDescription':
     'Після схвалення знову перевірте доступ, щоб завантажити свої середовища.',
@@ -1023,8 +1038,8 @@ export const ukUA = {
   'serviceUpgradeForm.configuration': 'Оновлення конфігурації',
   'serviceUpgradeForm.imageUpgrade': 'Оновлення образу',
   'serviceUpgradeForm.currentImage': 'Поточний образ:',
-  'serviceUpgradeForm.capAdd': 'Додані можливості',
-  'serviceUpgradeForm.capDrop': 'Видалені можливості',
+  'serviceUpgradeForm.capAdd': 'Додавані привілеї Linux',
+  'serviceUpgradeForm.capDrop': 'Вилучувані привілеї Linux',
   'serviceUpgradeForm.startFirst': 'Запускати нові контейнери перед зупинкою поточних',
   'serviceUpgradeForm.confirm': 'Оновити конфігурацію сервісу?',
   'sidecarValidation.depth': 'У конфігурації допоміжних контейнерів забагато рівнів вкладеності.',
@@ -1352,8 +1367,8 @@ export const ukUA = {
   'schemaForm.label.volumeDriver': 'Драйвер тому',
   'schemaForm.label.storageOpt': 'Параметри сховища',
   'schemaForm.label.readOnly': 'Файлова система лише для читання',
-  'schemaForm.label.capAdd': 'Додані можливості',
-  'schemaForm.label.capDrop': 'Видалені можливості',
+  'schemaForm.label.capAdd': 'Додавані привілеї Linux',
+  'schemaForm.label.capDrop': 'Вилучувані привілеї Linux',
   'schemaForm.label.securityOpt': 'Параметри безпеки',
   'schemaForm.label.devices': 'Пристрої',
   'schemaForm.mapKey': '{name}: ключ {index}',

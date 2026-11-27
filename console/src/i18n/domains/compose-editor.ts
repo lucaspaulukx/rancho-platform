@@ -61,7 +61,7 @@ export const ptComposeEditor = {
     'Use o formato compatível com Rancher 1.6. O servidor valida os arquivos e processa a importação; acompanhe o resultado na stack.',
   'composeEditor.variables': 'Variáveis de interpolação',
   'composeEditor.variablesNote':
-    'Valores usados pelo Rancher ao importar os arquivos. Não são guardados nas preferências da console.',
+    'Valores usados pelo Rancher ao importar os arquivos. Não são guardados nas preferências do console.',
   'composeEditor.addVariable': 'Adicionar variável',
   'composeEditor.emptyHint': 'Crie a stack e adicione serviços pelo menu da própria linha.',
   'composeEditor.variableName': 'Nome da variável {index}',

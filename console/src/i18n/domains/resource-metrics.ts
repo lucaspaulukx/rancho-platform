@@ -69,7 +69,7 @@ export const enResourceMetrics = {
 
 export const ptResourceMetrics = {
   'resourceMetrics.disabled': 'Métricas desativadas',
-  'resourceMetrics.enable': 'Ative o módulo de métricas na configuração da console.',
+  'resourceMetrics.enable': 'Ative o módulo de métricas na configuração do console.',
   'resourceMetrics.paused': 'Pausado',
   'resourceMetrics.live': 'Ao vivo',
   'resourceMetrics.stale': 'Sem novas amostras',
