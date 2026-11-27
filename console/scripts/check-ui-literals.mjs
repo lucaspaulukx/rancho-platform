@@ -9,6 +9,7 @@ const visibleAttributes = new Set([
   'aria-label',
   'aria-roledescription',
   'aria-valuetext',
+  'ariaLabel',
   'cancelLabel',
   'description',
   'emptyText',
@@ -21,7 +22,10 @@ const visibleAttributes = new Set([
   'title',
 ]);
 
-// Product names, technical units, version markers, keycaps and native protocol tokens.
+const visibleProperties = new Set(['ariaLabel', 'description', 'hint', 'label', 'title']);
+const visibleCalls = new Set(['alert', 'confirm', 'setCustomValidity', 'toast']);
+
+// Product names, technical units, version markers, protocol tokens and typed catalog keys.
 const technicalText = new Map(
   Object.entries({
     'components/About.tsx': ['Rancher 1.6.30'],
@@ -29,6 +33,7 @@ const technicalText = new Map(
     'components/Brand.tsx': ['Rancho Platform', 'Rancher'],
     'components/EnvironmentSwitcher.tsx': ['Cattle', 'Esc'],
     'components/HealthCheckEditor.tsx': ['HTTP/1.0', 'HTTP/1.1'],
+    'components/LocalAccountPanel.tsx': ['localAccountPanel.description'],
     'components/WorkloadBindingsEditor.tsx': ['TCP', 'UDP'],
     'layouts.tsx': [
       'Rancher 1.6.30',
@@ -83,6 +88,18 @@ export function inlineInterfaceLiterals(filename, contents) {
     if (node.type === 'JSXAttribute' && visibleAttributes.has(node.name.name))
       for (const literal of directStrings(node.value?.expression ?? node.value))
         record(literal.node, literal.text, node.name.name);
+    if (node.type === 'Property' && !node.computed) {
+      const key = node.key.name ?? node.key.value;
+      if (visibleProperties.has(key))
+        for (const literal of directStrings(node.value))
+          record(literal.node, literal.text, `property ${key}`);
+    }
+    if (node.type === 'CallExpression') {
+      const call = node.callee.name ?? node.callee.property?.name;
+      if (visibleCalls.has(call))
+        for (const literal of directStrings(node.arguments[0]))
+          record(literal.node, literal.text, `argument to ${call}`);
+    }
     for (const [key, child] of Object.entries(node)) {
       if (key === 'comments' || key === 'tokens') continue;
       if (Array.isArray(child)) child.forEach((item) => visit(item, node));
@@ -110,7 +127,7 @@ function main() {
       );
   }
   if (failingFiles) return 1;
-  console.log(`Checked direct JSX interface literals in ${files.length} files.`);
+  console.log(`Checked JSX and selected interface literals in ${files.length} files.`);
   return 0;
 }
 

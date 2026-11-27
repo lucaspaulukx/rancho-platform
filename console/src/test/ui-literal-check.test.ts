@@ -31,6 +31,24 @@ describe('Inline interface literal check', () => {
     expect(JSON.stringify(findings)).not.toContain('Static hint');
   });
 
+  it('reports strings supplied through interface properties and feedback calls', () => {
+    const findings = inlineInterfaceLiterals(
+      'Demo.tsx',
+      [
+        'const spec = { title: "Indirect title", type: "container", label: t("label") };',
+        'const action = { ariaLabel: t("caption") || "Open details" };',
+        'toast(isReady ? t("saved") : "Operation pending");',
+        'input.setCustomValidity("Required field");',
+      ].join('\n'),
+    );
+    expect(findings.map(({ surface }: { surface: string }) => surface)).toEqual([
+      'property title',
+      'property ariaLabel',
+      'argument to toast',
+      'argument to setCustomValidity',
+    ]);
+  });
+
   it('accepts translated labels, native values and scoped technical text', () => {
     const source = '<select aria-label={t("protocol")}><option value="tcp">TCP</option></select>';
     expect(inlineInterfaceLiterals('components/WorkloadBindingsEditor.tsx', source)).toEqual([]);

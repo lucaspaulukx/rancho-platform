@@ -153,9 +153,9 @@ describe('Gestao nativa de templates', () => {
   it('nao transfere um rascunho numerico vazio para a stack seguinte ao remover uma linha', async () => {
     const { writes } = managerFixture({ twoStacks: true });
     await userEvent.click(await screen.findByRole('button', { name: 'Abrir template Cattle' }));
-    await userEvent.clear(await screen.findByLabelText('Parametro fixture_number da stack 1'));
-    await userEvent.click(screen.getByRole('button', { name: 'Remover stack 1' }));
-    expect(screen.getByLabelText('Parametro fixture_number da stack 1')).toHaveValue(3);
+    await userEvent.clear(await screen.findByLabelText('Parâmetro fixture_number da stack 1'));
+    await userEvent.click(screen.getByRole('button', { name: 'Remover stack 1 do template' }));
+    expect(screen.getByLabelText('Parâmetro fixture_number da stack 1')).toHaveValue(3);
     expect(screen.getByLabelText('Nome da stack 1')).toHaveValue('second');
     await userEvent.click(screen.getByRole('button', { name: 'Salvar template' }));
     await waitFor(() => expect(writes).toHaveLength(1));
@@ -166,7 +166,7 @@ describe('Gestao nativa de templates', () => {
   it('nao grava zero ao apagar um parametro numerico e aceita um decimal negativo', async () => {
     const { writes } = managerFixture();
     await userEvent.click(await screen.findByRole('button', { name: 'Abrir template Cattle' }));
-    const input = await screen.findByLabelText('Parametro fixture_number da stack 1');
+    const input = await screen.findByLabelText('Parâmetro fixture_number da stack 1');
     await userEvent.clear(input);
     expect(input).toHaveValue(null);
     await userEvent.click(screen.getByRole('button', { name: 'Salvar template' }));
@@ -220,7 +220,7 @@ describe('Gestao nativa de templates', () => {
     const { writes } = managerFixture();
     await userEvent.click(await screen.findByRole('button', { name: 'Criar template' }));
     await userEvent.type(screen.getByLabelText('Nome do template *'), 'New');
-    await userEvent.click(screen.getByRole('button', { name: 'Adicionar stack do catalogo' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Adicionar stack do catálogo' }));
     await userEvent.selectOptions(
       await screen.findByLabelText('Template de infraestrutura'),
       'fixture:infra*test',
@@ -275,7 +275,7 @@ describe('Gestao nativa de templates', () => {
     await userEvent.type(screen.getByLabelText('Nome do template *'), 'Unsaved');
     await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
     expect(
-      await screen.findByRole('heading', { name: 'Descartar alteracoes?' }),
+      await screen.findByRole('heading', { name: 'Descartar alterações?' }),
     ).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
     expect(screen.getByLabelText('Nome do template *')).toHaveValue('Unsaved');
@@ -289,7 +289,7 @@ describe('Gestao nativa de templates', () => {
     const { client, writes, full } = managerFixture();
     await userEvent.click(await screen.findByRole('button', { name: 'Abrir template Cattle' }));
     const name = await screen.findByLabelText('Nome do template *');
-    expect(screen.getByLabelText('Parametro privateFixture da stack 1')).toHaveAttribute(
+    expect(screen.getByLabelText('Parâmetro privateFixture da stack 1')).toHaveAttribute(
       'type',
       'password',
     );
@@ -336,7 +336,7 @@ describe('Gestao nativa de templates', () => {
       await screen.findByLabelText('Nome do template *');
       await userEvent.click(screen.getByRole('button', { name: 'Salvar template' }));
       expect(await screen.findByRole('alert')).toHaveTextContent(
-        reason === 'conflict' ? 'alterado por outra operacao' : 'nao esta mais disponivel',
+        reason === 'conflict' ? 'alterado por outra operação' : 'não está mais disponível',
       );
       expect(writes).toEqual([]);
     },
@@ -422,7 +422,7 @@ describe('Editor de environments com templates nativos', () => {
         { name: 'same', templateId: 'a' },
         { name: 'same', templateId: 'b' },
       ]),
-    ).toThrow('unicos');
+    ).toThrow('únicos');
   });
   it('retém somente a apresentação do template antes de colocá-lo no cache', () => {
     const metadata = environmentTemplateMetadata(template);

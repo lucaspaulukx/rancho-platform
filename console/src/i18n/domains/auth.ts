@@ -52,7 +52,7 @@ export const ptAuth = {
   'auth.providerUnavailable': 'Não foi possível acessar o provedor de login. Tente novamente.',
   'auth.ticketRejected': 'O login expirou ou foi recusado. Inicie uma nova autenticação.',
   'auth.completingLogin': 'Concluindo seu login…',
-  'auth.welcome': 'BEM-VINDO À CONSOLE',
+  'auth.welcome': 'BEM-VINDO AO CONSOLE',
   'auth.loginTitle': 'Acesse seu ambiente',
   'auth.loginDescription':
     'Entre com sua conta para gerenciar os recursos aos quais você tem acesso.',

@@ -42,7 +42,7 @@ export const ptTopology = {
   'topology.unresolved':
     '{count} vínculos apontam para serviços fora deste inventário. A topologia está incompleta.',
   'topology.limit':
-    'A topologia excede o limite de 500 serviços ou 2.000 vínculos. Use a operação em lista.',
+    'A topologia excede o limite de 500 serviços ou 2.000 vínculos. Use a visualização em lista.',
   'topology.wrongEnvironment': 'A topologia contém recursos de outro environment.',
   'topology.duplicateServices': 'O inventário contém serviços duplicados.',
   'topology.region': 'Topologia de serviços do environment',

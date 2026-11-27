@@ -334,7 +334,7 @@ export const jaJP = {
   'common.retry': '再試行',
   'common.loading': '読み込み中…',
   'language.label': '言語',
-  'language.preview': 'プレビュー · 一部未翻訳',
+  'language.preview': '言語のプレビュー',
   'runtime.disabledTitle': 'コンソールが無効です',
   'runtime.disabledDescription': 'このコンソールはインスタンスの設定で無効になっています。',
   'runtime.classic': '従来の Rancher を開く',
@@ -719,7 +719,7 @@ export const jaJP = {
   'healthCheckEditor.number.unhealthyThreshold': '利用不可と判定するまでの失敗回数',
   'healthCheckValidation.request': 'ヘルスチェックの HTTP リクエストを確認してください。',
   'healthCheckValidation.requestFormat':
-    '/ で始まり、空白、引用符、改行を含まない HTTP パスと、有効な Host を指定してください。',
+    'HTTP パスは / で始め、空白、引用符、改行を含めないでください。HTTP/1.1 では、有効な Host ヘッダーを任意で指定できます。',
   'healthCheckValidation.contract': 'ヘルスチェックの仕様を取得できません。',
   'healthCheckValidation.field':
     'ヘルスチェックのフィールド「{name}」を使用できません。パネルを開き直してください。',

@@ -60,8 +60,8 @@ async function main(){
  await dialog.getByText('Recursos',{exact:true}).click();
  await dialog.getByRole('button',{name:'Adicionar limite de processo'}).click();
  await dialog.getByLabel('Recurso do limite 1',{exact:true}).selectOption('nofile');
- await dialog.getByLabel('Limite inicial 1',{exact:true}).fill('1024');
- await dialog.getByLabel('Limite máximo 1',{exact:true}).fill('2048');
+ await dialog.getByLabel('Limite flexível (soft) 1',{exact:true}).fill('1024');
+ await dialog.getByLabel('Limite rígido (hard) 1',{exact:true}).fill('2048');
  const pending=page.waitForResponse((r)=>r.request().method()==='POST' && new URL(r.url()).pathname==='/v2-beta/projects/1a12/containers');
  await dialog.getByRole('button',{name:'Criar',exact:true}).click();
  const response=await pending;assert.equal(response.status(),201);

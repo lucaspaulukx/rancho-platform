@@ -2260,7 +2260,7 @@ export const huHU = {
 
   'healthCheckValidation.request': 'Ellenőrizze az állapot-ellenőrzés HTTP-kérését.',
   'healthCheckValidation.requestFormat':
-    'Adjon meg / jellel kezdődő HTTP-útvonalat szóközök, idézőjelek és sortörések nélkül, valamint érvényes Host értéket.',
+    'Adjon meg / jellel kezdődő HTTP-útvonalat szóközök, idézőjelek és sortörések nélkül. HTTP/1.1 esetén az érvényes Host fejléc nem kötelező.',
   'healthCheckValidation.contract': 'Az állapot-ellenőrzési szerződés nem érhető el.',
   'healthCheckValidation.field':
     'Az állapot-ellenőrzés {name} mezője nem érhető el. Nyissa meg újra a panelt.',
@@ -2826,7 +2826,7 @@ export const huHU = {
   'common.retry': 'Újrapróbálkozás',
   'common.loading': 'Betöltés…',
   'language.label': 'Nyelv',
-  'language.preview': 'Előnézet · hiányos fordítások',
+  'language.preview': 'Nyelvi előnézet',
   'runtime.disabledTitle': 'A konzol le van tiltva',
   'runtime.disabledDescription': 'Ez a konzol le van tiltva a példány beállításaiban.',
   'runtime.classic': 'A klasszikus Rancher megnyitása',

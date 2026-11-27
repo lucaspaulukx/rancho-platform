@@ -15,5 +15,5 @@ export const ptDeviceUpgradeForm = {
   'deviceUpgradeForm.reset': 'Remover todos os mapeamentos explícitos',
   'deviceUpgradeForm.confirmTitle': 'Atualizar dispositivos do serviço?',
   'deviceUpgradeForm.confirmDescription':
-    'Serviço {service}. Mapeamentos de dispositivos alteram o acesso ao host e substituem containers do serviço. Uma lista vazia retira os mapeamentos explícitos; as permissões padrão de dispositivos do runtime permanecem. Outras opções selecionadas nesta atualização podem afetar portas, montagens, sidecars e saúde. Revise todas as alterações selecionadas antes de confirmar.',
+    'Serviço {service}. Os mapeamentos alteram o acesso aos dispositivos do host e substituem os containers do serviço. Uma lista vazia retira os mapeamentos explícitos; as permissões padrão de dispositivos do runtime permanecem. Outras opções selecionadas nesta atualização podem afetar portas, montagens, sidecars e saúde. Revise todas as alterações selecionadas antes de confirmar.',
 } as const satisfies Record<keyof typeof enDeviceUpgradeForm, string>;

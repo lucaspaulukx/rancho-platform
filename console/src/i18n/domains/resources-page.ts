@@ -117,7 +117,7 @@ export const ptResourcesPage = {
   'resourcesPage.validation.secretSize': 'O conteúdo excede o tamanho permitido pelo servidor.',
   'resourcesPage.validation.certificatePem': 'Informe um certificado PEM válido.',
   'resourcesPage.validation.privateKeyPem':
-    'Informe a chave privada PEM sem senha correspondente ao certificado.',
+    'Informe a chave privada PEM não criptografada correspondente ao certificado.',
   'resourcesPage.secretContent': 'Conteúdo do secret',
   'resourcesPage.secretContentHint':
     'Texto codificado em UTF-8 no envio. O valor não será recuperado após salvar.',

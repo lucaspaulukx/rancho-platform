@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider, useI18n } from '../i18n/provider';
 import { normalizeLocalizationPolicy, type LocalizationPolicy } from '../i18n/policy';
 import { LanguageSelector } from '../components/LanguageSelector';
+import { localeInventory } from '../i18n/locales';
 import { previewLoaders } from '../i18n/preview-loaders';
 import { validateConfig } from '../config';
 import config from '../../public/console-config.json';
@@ -81,16 +82,18 @@ it('keeps the visible language on a catalog failure and ignores a stale retry', 
 
 describe('Optional locale configuration', () => {
   it('upgrades old configuration without activation or mutation and round-trips normalized policy', () => {
-    const before = JSON.stringify(config);
-    const next = validateConfig(config);
+    const { localization: shippedPolicy, ...olderConfiguration } = config;
+    const before = JSON.stringify(olderConfiguration);
+    const next = validateConfig(olderConfiguration);
+    expect(shippedPolicy.enabled).toBe(true);
     expect(next.localization).toEqual(normalizeLocalizationPolicy());
     expect(next.localization?.enabled).toBe(false);
     expect(validateConfig(next)).toEqual(next);
-    expect(JSON.stringify(config)).toBe(before);
+    expect(JSON.stringify(olderConfiguration)).toBe(before);
     const value = { ...config, localization: preview };
     expect(validateConfig(value).localization).toEqual(preview);
   });
-  it('rejects incomplete production catalogs, invalid lists, wrong types and unknown settings', () => {
+  it('rejects invalid lists, wrong types and unknown settings', () => {
     for (const invalid of [
       null,
       [],
@@ -102,7 +105,6 @@ describe('Optional locale configuration', () => {
       { availableLocales: ['pt-BR', 'pt-BR'] },
       { availableLocales: ['none', 'pt-BR'] },
       { availableLocales: ['en-US'], defaultLocale: 'pt-BR', preview: true },
-      { availableLocales: ['pt-BR', 'en-US'] },
       { preview: 'true' },
       { detectBrowser: 1 },
     ])
@@ -112,6 +114,23 @@ describe('Optional locale configuration', () => {
       enabled: true,
     });
   });
+});
+
+it('exposes every shipped Rancher language without a preview notice', async () => {
+  const policy = validateConfig(config).localization!;
+  render(
+    <I18nProvider policy={policy}>
+      <Probe />
+    </I18nProvider>,
+  );
+  expect(screen.getByRole('combobox', { name: 'Idioma' })).toBeVisible();
+  expect(screen.getAllByRole('option').map((option) => option.getAttribute('value'))).toEqual(
+    localeInventory.map(({ code }) => code),
+  );
+  await userEvent.selectOptions(screen.getByRole('combobox'), 'fa-IR');
+  await waitFor(() => expect(document.documentElement.dir).toBe('rtl'));
+  expect(screen.queryByText('پیش‌نمایش زبان')).not.toBeInTheDocument();
+  expect(policy.preview).toBe(false);
 });
 
 describe('Locale provider lifetime and policy', () => {
@@ -151,7 +170,7 @@ describe('Locale provider lifetime and policy', () => {
     expect(mounted).toHaveBeenCalledTimes(1);
     expect(document.documentElement.lang).toBe('en-US');
     expect(localStorage.getItem(key('1a99'))).toBe(JSON.stringify({ version: 1, locale: 'en-US' }));
-    expect(screen.getByText('Preview · translations incomplete')).toBeInTheDocument();
+    expect(screen.getByText('Language preview')).toBeInTheDocument();
     await user.click(screen.getByText('Persian', { exact: true }));
     expect(screen.getByTestId('locale')).toHaveTextContent('en-US');
   });

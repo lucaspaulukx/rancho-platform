@@ -585,7 +585,7 @@ describe('Drawer de métricas de serviço', () => {
     const select = screen.getByLabelText('Container do serviço');
     const memory = screen.getByRole('heading', { name: 'Memória' }).closest('section');
     expect(memory).toHaveTextContent('4MiB');
-    expect(screen.getByText(/2 de 2 com amostras/)).toBeInTheDocument();
+    expect(screen.getByText(/2 de 2 containers têm amostras/)).toBeInTheDocument();
     fireEvent.change(select, { target: { value: '1i2' } });
     expect(memory).toHaveTextContent('9MiB');
     expect(Socket.instances).toHaveLength(1);

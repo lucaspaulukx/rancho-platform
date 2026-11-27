@@ -68,7 +68,7 @@ describe('Process limits creation', () => {
         onChange={vi.fn()}
       />,
     );
-    expect(screen.getByLabelText('Limite inicial 1')).toHaveValue('1024');
+    expect(screen.getByLabelText('Limite flexível (soft) 1')).toHaveValue('1024');
   });
 
   it('keeps 32-bit bounds, zero and unlimited without precision loss', () => {
@@ -161,10 +161,10 @@ describe('Process limits creation', () => {
     const user = userEvent.setup();
     render(<Controlled />);
     await user.click(screen.getByRole('button', { name: 'Adicionar limite de processo' }));
-    expect(screen.getByLabelText('Limite inicial 1')).toHaveValue('');
+    expect(screen.getByLabelText('Limite flexível (soft) 1')).toHaveValue('');
     await user.selectOptions(screen.getByLabelText('Recurso do limite 1'), 'nofile');
-    await user.type(screen.getByLabelText('Limite inicial 1'), '1024');
-    await user.type(screen.getByLabelText('Limite máximo 1'), '2048');
+    await user.type(screen.getByLabelText('Limite flexível (soft) 1'), '1024');
+    await user.type(screen.getByLabelText('Limite rígido (hard) 1'), '2048');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Remover limite 1' }));
     expect(screen.queryByLabelText('Recurso do limite 1')).not.toBeInTheDocument();

@@ -139,7 +139,7 @@ export const ptMachineDrivers = {
   'machineDrivers.actionDescription': '{name}. {effect}',
   'machineDrivers.validation.resource': 'Driver inválido.',
   'machineDrivers.validation.reference': 'Referência de driver inválida.',
-  'machineDrivers.validation.actionLink': 'Ação de driver inválida.',
+  'machineDrivers.validation.actionLink': 'Link inválido para a ação do driver.',
   'machineDrivers.validation.fields': 'Configuração de driver inválida.',
   'machineDrivers.validation.changed': 'O driver mudou. Atualize e reabra o painel.',
   'machineDrivers.validation.operation': 'Operação indisponível.',

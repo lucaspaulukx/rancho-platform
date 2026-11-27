@@ -55,10 +55,10 @@ export const ptUsers = {
   'users.password': 'Redefinir senha local',
   'users.activate': 'Ativar conta',
   'users.deactivate': 'Desativar conta',
-  'users.deactivateReason': 'Use outro administrador para desativar sua conta.',
+  'users.deactivateReason': 'Use outra conta de administrador para desativar sua conta.',
   'users.remove': 'Excluir conta',
   'users.removeReason':
-    'Desative a conta antes de excluí-la; use outro administrador para sua própria conta.',
+    'Desative a conta antes de excluí-la. Para excluir sua própria conta, use outra conta de administrador.',
   'users.notFound': 'Usuário não encontrado',
   'users.notFoundDescription': 'Esta conta não está disponível na instância.',
   'users.title': 'Usuários',

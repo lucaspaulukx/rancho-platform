@@ -49,4 +49,4 @@ In an environment with a registered host, open **Containers**, select a running 
 
 The capture shows real output from a disposable container on a Docker 29 test host. The workload emitted a new test line every three seconds.
 
-Run `npm run check:locales` and `npm run check:ui-literals` after changing a visible label. The first checks the registered message catalogs. The second checks direct JSX text and selected attributes. Consult the [UI guide](../docs/en/ui-guidelines.md) for keyboard, theme and layout checks.
+Run `npm run check:locales` and `npm run check:ui-literals` after changing a visible label. The first checks the registered message catalogs. The second checks JSX text, interface properties and feedback calls. Consult the [UI guide](../docs/en/ui-guidelines.md) for keyboard, theme and layout checks.

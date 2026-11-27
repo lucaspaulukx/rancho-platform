@@ -20,7 +20,7 @@
 
 ![Console do Rancho em português mostrando ambientes, stacks e ações de serviços](../images/guide-workloads-pt-BR.png)
 
-*O console em português mostra o ambiente sintético `UI-OPS-LAB` com a prévia de idiomas habilitada. A stack `documentation-demo` está expandida e seu serviço `web` está em escala 0. [Veja o ensaio separado de migração](migration-evidence.md).*
+*O console em português mostra o ambiente sintético `UI-OPS-LAB` com o seletor de idiomas distribuído. A stack `documentation-demo` está expandida e seu serviço `web` está em escala 0. [Veja o ensaio separado de migração](migration-evidence.md).*
 
 ## O que você pode fazer
 
@@ -30,21 +30,19 @@
 
 ## Instale com Docker Compose
 
-> [!WARNING]
-> A v0.1.0 publicada é uma prévia. A classificação de estável foi retirada enquanto são concluídos os idiomas, o aceite visual e as demais pendências do roadmap. Acompanhe o [roadmap de aceite](roadmap.md).
+Escolha uma [release publicada](https://github.com/lucaspaulukx/rancho-platform/releases) que liste os digests das imagens no registry. O início rápido usa Linux amd64, um servidor Rancho, MariaDB 10.11, Docker Compose v2 e Python 3.10+ para criar o primeiro administrador. A [prévia v0.1.0](https://github.com/lucaspaulukx/rancho-platform-archive/releases/tag/v0.1.0) permanece disponível no repositório arquivado.
 
-A [prévia arquivada v0.1.0](https://github.com/lucaspaulukx/rancho-platform-archive/releases/tag/v0.1.0) inclui imagens públicas para Linux amd64. Este início rápido usa um servidor Rancho, MariaDB 10.11 e Docker Compose v2. A criação do primeiro administrador usa Python 3.10+.
-
-1. Faça checkout da versão.
+1. Defina `RANCHO_TAG` com a tag publicada que você escolheu e faça checkout dessa tag.
 
    ```sh
-   git clone --branch v0.1.0 --depth 1 https://github.com/lucaspaulukx/rancho-platform-archive.git rancho-platform
+   git clone --branch "$RANCHO_TAG" --depth 1 https://github.com/lucaspaulukx/rancho-platform.git rancho-platform
    cd rancho-platform
    ```
 
-2. Na raiz do repositório, crie um arquivo `.env` privado e defina `RANCHO_DB_PASSWORD` com uma senha forte e exclusiva. Baixe as imagens e suba os serviços.
+2. Na raiz do repositório, crie um arquivo `.env` privado. Defina `RANCHO_VERSION` com a versão escolhida sem o `v` inicial e `RANCHO_DB_PASSWORD` com uma senha forte e exclusiva. Confira as imagens resolvidas antes de baixá-las e subir os serviços.
 
    ```sh
+   docker compose -f compose.modern.yaml -f compose.registry.yaml config --images
    docker compose -f compose.modern.yaml -f compose.registry.yaml pull
    docker compose -f compose.modern.yaml -f compose.registry.yaml up -d --wait --no-build
    ```

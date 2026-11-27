@@ -1,5 +1,5 @@
 export const frFR = {
-  'aboutPage.flag.API_KEY_STREAM_GUARD_ENABLED': 'Nouvelle validation des clés API dans les flux',
+  'aboutPage.flag.API_KEY_STREAM_GUARD_ENABLED': 'Revalidation des clés API dans les flux',
   'aboutPage.flag.AUDIT_CREDENTIAL_REDACTION_ENABLED': 'Protection des identifiants dans l’audit',
   'aboutPage.flag.CUSTOMIZATION_ENABLED': 'Personnalisation de l’instance',
   'aboutPage.flag.SCHEMA_MIGRATIONS_ENABLED': 'Gestion des versions des tables communautaires',
@@ -14,9 +14,9 @@ export const frFR = {
   'aboutPage.flag.METRICS_PAYLOAD_TRANSPORT_ENABLED':
     'Négociation des métriques volumineuses sur WebSocket',
   'aboutPage.flag.HOST_STREAM_SESSION_GUARD_ENABLED':
-    'Nouvelle validation des sessions de journaux, terminaux et métriques',
+    'Revalidation des sessions de journaux, de terminaux et de métriques',
   'aboutPage.flag.SUBSCRIPTION_SESSION_GUARD_ENABLED':
-    'Nouvelle validation des sessions pour les abonnements WebSocket',
+    'Revalidation des sessions pour les abonnements WebSocket',
   'aboutPage.flag.CATALOG_WRITE_GUARD_ENABLED': 'Protection en écriture du catalogue selon le rôle',
   'aboutPage.flag.OIDC_ENABLED': 'Authentification OIDC',
   'aboutPage.flag.OIDC_LOGIN_PREFLIGHT_ENABLED':
@@ -250,7 +250,7 @@ export const frFR = {
   'machineDrivers.actions': 'Actions',
   'machineDrivers.httpFailed': 'L’opération sur le pilote n’a pas abouti (HTTP {status}).',
   'machineDrivers.info':
-    'L’enregistrement demande un pilote inactif. L’enregistrement et la modification peuvent télécharger et exécuter le binaire sur le serveur. L’URL de l’interface est enregistrée. Cette console ne charge pas son code.',
+    'La demande d’enregistrement spécifie que le pilote doit être créé à l’état inactif. L’enregistrement et la modification peuvent télécharger et exécuter le binaire sur le serveur. L’URL de l’interface est enregistrée. Cette console ne charge pas son code.',
   'machineDrivers.actionLabel': '{action} le pilote',
   'machineDrivers.rowActions': 'Actions du pilote {name}',
   'machineDrivers.actionTitle': '{action} le pilote ?',
@@ -702,7 +702,7 @@ export const frFR = {
   'processes.end': 'Fin',
   'processes.id': 'ID',
   'processes.listInfo':
-    'Jusqu’à 100 exécutions par page. La recherche porte uniquement sur la page actuelle. Les données internes et les résultats en texte libre du moteur sont masqués. La réexécution peut reproduire les effets sur la ressource et nécessite une vérification.',
+    'Jusqu’à 100 exécutions par page. La recherche porte uniquement sur la page actuelle. Les données internes et les résultats en texte libre du moteur ne sont pas inclus. La réexécution peut reproduire les effets sur la ressource et nécessite une vérification.',
   'processes.detailLabel': 'Détails du processus {id}',
   'processes.page': 'Page {page}',
   'processes.replayDescription':
@@ -722,7 +722,7 @@ export const frFR = {
   'auditPage.clear': 'Effacer les filtres',
   'auditPage.unavailable': 'L’audit est indisponible avec ces droits d’accès.',
   'auditPage.privacy':
-    'Jusqu’à 100 événements par page. La recherche ci-dessous porte uniquement sur cette page. Les corps des requêtes et des réponses, ainsi que les descriptions en texte libre, sont masqués pour protéger les données sensibles.',
+    'Jusqu’à 100 événements par page. La recherche ci-dessous porte uniquement sur cette page. Les corps des requêtes et des réponses, ainsi que les descriptions en texte libre, ne sont pas inclus afin de protéger les données sensibles.',
   'auditPage.date': 'Date',
   'auditPage.event': 'Événement',
   'auditPage.resource': 'Ressource',
@@ -1199,7 +1199,7 @@ export const frFR = {
   'localAccountPanel.deactivateNotice':
     'Le compte ne pourra plus s’authentifier et sa prochaine vérification de session sera rejetée. Les groupes et accès existants seront conservés.',
   'localAccountPanel.removeNotice':
-    'Le compte doit être inactif. Rancher effectue une suppression logique. Cet écran ne supprime définitivement ni le compte ni les données des environnements.',
+    'Le compte doit être inactif. Rancher effectue une suppression logique. Cet écran ne purge pas le compte et ne supprime aucune donnée des environnements.',
   'localAccountPanel.activateNotice':
     'Le compte pourra de nouveau s’authentifier et pourra retrouver ses accès directs et ses accès de groupe existants.',
   'localAccountPanel.reviewTitle': 'Appliquer la modification du compte ?',
@@ -1232,7 +1232,7 @@ export const frFR = {
   'localAccountPanel.error.notCreated': 'Le compte n’a pas été créé.',
   'localAccountPanel.error.reopen': 'Rouvrez le panneau du compte.',
   'localAccountPanel.error.credentialCount':
-    'Ce compte doit avoir un seul jeu d’identifiants locaux actifs. Les identifiants OIDC sont gérés par le fournisseur.',
+    'Ce compte ne possède pas exactement un jeu d’identifiants locaux actif. Les identifiants OIDC sont gérés par le fournisseur.',
   'localAccountPanel.error.credential': 'Identifiants non valides.',
   'localAccountPanel.error.changedOperation': 'L’opération a changé. Rouvrez le panneau.',
   'localAccountPanel.error.http': 'L’opération sur le compte n’a pas abouti (HTTP {status}).',
@@ -1784,7 +1784,7 @@ export const frFR = {
   'workloadsPage.stack': 'Stack',
   'workloadsPage.noStack': 'Sans stack',
   'workloadsPage.image': 'Image',
-  'workloadsPage.scale': 'Conteneurs / échelle',
+  'workloadsPage.scale': 'Conteneurs / nombre de réplicas',
   'workloadsPage.host': 'Hôte',
   'workloadsPage.details': 'Détails',
   'workloadsPage.refresh': 'Actualiser l’inventaire',
@@ -1945,7 +1945,7 @@ export const frFR = {
   'serviceEditors.scaleError.unchanged':
     'Saisissez un nombre de réplicas différent de la valeur actuelle.',
   'serviceEditors.confirmZero':
-    'Confirmez l’arrêt des conteneurs avant d’appliquer un nombre de réplicas égal à zéro.',
+    'Avant de définir le nombre de réplicas à zéro, confirmez que cette opération arrêtera les conteneurs.',
   'serviceEditors.reviewScale': 'Vérifiez le nombre de réplicas.',
   'serviceEditors.quantity': 'Nombre de conteneurs souhaité',
   'serviceEditors.scaleInfo':
@@ -2281,7 +2281,7 @@ export const frFR = {
 
   'healthCheckValidation.request': 'Vérifiez la requête HTTP du contrôle d’état de santé.',
   'healthCheckValidation.requestFormat':
-    'Utilisez un chemin HTTP commençant par /, sans espaces, guillemets ni sauts de ligne, et une valeur Host valide.',
+    'Utilisez un chemin HTTP commençant par /, sans espaces, guillemets ni sauts de ligne. Avec HTTP/1.1, un en-tête Host valide est facultatif.',
   'healthCheckValidation.contract': 'Le contrat du contrôle d’état de santé est indisponible.',
   'healthCheckValidation.field':
     'Le champ {name} du contrôle d’état de santé est indisponible. Rouvrez le panneau.',
@@ -2410,7 +2410,7 @@ export const frFR = {
     'Le tampon est limité aux 2 000 dernières lignes et à 512 Ko. La recherche et le téléchargement portent uniquement sur le contenu reçu dans ce panneau.',
   'resourceStream.logLabel': 'Journaux du conteneur',
 
-  'resourcePanel.upgradeStack': 'Mettre à niveau le stack',
+  'resourcePanel.upgradeStack': 'Mettre à niveau la stack',
   'resourcePanel.saved': 'Rancher a reçu l’opération. Suivez son état sur cet écran.',
   'resourcePanel.save': 'Enregistrer les modifications',
   'resourcePanel.applyScale': 'Appliquer le nombre de réplicas',
@@ -2873,7 +2873,7 @@ export const frFR = {
   'common.retry': 'Réessayer',
   'common.loading': 'Chargement…',
   'language.label': 'Langue',
-  'language.preview': 'Aperçu · traductions incomplètes',
+  'language.preview': 'Aperçu des langues',
   'runtime.disabledTitle': 'Console désactivée',
   'runtime.disabledDescription':
     'Cette console est désactivée dans la configuration de l’instance.',

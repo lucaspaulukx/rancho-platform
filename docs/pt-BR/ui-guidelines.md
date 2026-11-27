@@ -35,13 +35,13 @@ Limite frames de entrada e amostras retidas. Métricas de serviço mantêm conta
 
 ![Tela de stacks em português com seleção de ambiente, busca e serviços expandidos](../images/guide-workloads-pt-BR.png)
 
-*Captura do laboratório sintético com a prévia de idiomas habilitada. O cabeçalho mostra `UI-OPS-LAB` e a tela exibe a stack `documentation-demo` expandida e seu serviço `web` em escala 0.*
+*Captura do laboratório sintético com o seletor de idiomas distribuído. O cabeçalho mostra `UI-OPS-LAB` e a tela exibe a stack `documentation-demo` expandida e seu serviço `web` em escala 0.*
 
 Em um ambiente isolado com uma stack de teste e um container em execução:
 
 1. Selecione o ambiente, abra **Stacks**, expanda uma stack e busque pelo nome do serviço. Abra o menu **…** do container e escolha os logs. Confirme que o painel abre na mesma tela e mantém o contexto do ambiente e da busca.
 2. Feche o painel com **Escape**. Verifique se o foco retorna ao controle que o abriu. Use **Tab** para percorrer o seletor de ambiente, a busca, a aba ativa e os menus. Use as setas horizontais para mudar de aba. Em 320 px, confira se a página cabe na tela e se **Escape** fecha a navegação móvel.
-3. Alterne entre os temas claro e escuro com a busca preenchida. Em uma implantação com a [política de idiomas em prévia](configuration.md#política-de-idiomas-da-interface), troque o idioma com um rascunho aberto. Confirme se o rascunho e o ambiente selecionado foram preservados. Em persa, confira se o layout é espelhado e se o terminal e o código Compose continuam da esquerda para a direita. Compare o layout em 320 px com a [captura móvel em persa](../images/guide-workloads-fa-IR-mobile.png).
+3. Alterne entre os temas claro e escuro com a busca preenchida. Em uma implantação com a [política de idiomas](configuration.md#política-de-idiomas-da-interface), troque o idioma com um rascunho aberto. Confirme se o rascunho e o ambiente selecionado foram preservados. Em persa, confira se o layout é espelhado e se o terminal e o código Compose continuam da esquerda para a direita. Compare o layout em 320 px com a [captura móvel em persa](../images/guide-workloads-fa-IR-mobile.png).
 4. Com uma conta que só tem acesso de leitura, verifique as ações oferecidas. Use uma conta temporária com permissão de escrita para testar salvamento e cancelamento de um rascunho. Confira se o backend recusa uma operação de escrita do leitor mesmo que o cliente tente enviá-la.
 
 Registre a revisão da imagem, o idioma, o tamanho da janela e o tema ao lado de cada captura do ensaio. Consulte o [guia de testes](testing.md) para as verificações automatizadas e nativas.

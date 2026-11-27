@@ -57,7 +57,7 @@ export const ptServiceEditors = {
     'A escala foi alterada por outro cliente. Reabra o painel para atualizar.',
   'serviceEditors.scaleError.unchanged': 'Informe uma escala diferente da atual.',
   'serviceEditors.confirmZero':
-    'Confirme o encerramento dos containers antes de aplicar escala zero.',
+    'Antes de aplicar a escala zero, confirme que os containers do serviço serão parados.',
   'serviceEditors.reviewScale': 'Revise a escala.',
   'serviceEditors.quantity': 'Quantidade desejada de containers',
   'serviceEditors.scaleInfo':

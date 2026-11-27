@@ -18,8 +18,8 @@
         "en": "README.md",
         "pt-BR": "docs/pt-BR/overview.md"
       },
-      "reviewedSourceSha256": "eb4639ea594fd74d80c6ebff2e500f86fd3a87550e748563d4b262a1c09ed9da",
-      "reviewedTranslationSha256": "4c273fbe9a976214ba395e196f95f54071aebb6753cae8f210d188421797d23a"
+      "reviewedSourceSha256": "129a3e48cdcf0a19fc51aa232d7da1ca68765eb201a23b62fd129a9a3180584c",
+      "reviewedTranslationSha256": "33ebe898156a4ad105f2d3a4a1046d7a406df44ac863cffdfedc7195f8996a5d"
     },
     {
       "source": "SECURITY.md",
@@ -38,8 +38,8 @@
         "en": "console/README.md",
         "pt-BR": "docs/pt-BR/console.md"
       },
-      "reviewedSourceSha256": "068ff4efe29bb7e63db936ffea1e08d287e64a54464c06302c759214ac4a3908",
-      "reviewedTranslationSha256": "a1d2b35eacf0c473d4ab05ebe77601c62d6284e1dacd0ed91de28a8aaa490068"
+      "reviewedSourceSha256": "b82a486f6fd7d9e52fbd38a777338bfc1b6b4efa44fad053ef9d3ead72ea6a7c",
+      "reviewedTranslationSha256": "644056fa214e9f868a75e0b1505c32a550f85caab28f867e54fb62fb3cd42794"
     },
     {
       "source": "docs/pt-BR/access-migration.md",
@@ -58,8 +58,8 @@
         "pt-BR": "docs/pt-BR/architecture.md",
         "en": "docs/en/architecture.md"
       },
-      "reviewedSourceSha256": "039ed07cbd4b1338895e6a80db3a11d64b3d7083a44d65ec1664af2ca35ec135",
-      "reviewedTranslationSha256": "b9003d093eec70462cffe8714615fab555603d6de3ae47044323f183c3435366"
+      "reviewedSourceSha256": "85e66b43279b1b31ff391468846fbae0f59771c514a7a0d258085cec1e9bb8c3",
+      "reviewedTranslationSha256": "0668692e684e88f54660641adeaf6d955b3775612373b418e4c0588578504fcc"
     },
     {
       "source": "docs/pt-BR/configuration.md",
@@ -68,8 +68,8 @@
         "pt-BR": "docs/pt-BR/configuration.md",
         "en": "docs/en/configuration.md"
       },
-      "reviewedSourceSha256": "770594f06bb9196db6c3ea470b8bd9d6e56312d0d8d945becde17484101113ab",
-      "reviewedTranslationSha256": "8892ee9669aa34a5e7ae24236066f19b9ed637d67bb369fbe51637c04ca70b0a"
+      "reviewedSourceSha256": "c4f640183270b5bba4c06a90693157b0c9a3dc68bfe6a3fa70dfdfdea5248331",
+      "reviewedTranslationSha256": "7a4c62ca561aaea2764e48f7886547c9c2c2ac113b844699c0deb82ad7b0fbcb"
     },
     {
       "source": "docs/pt-BR/documentation.md",
@@ -78,8 +78,8 @@
         "pt-BR": "docs/pt-BR/documentation.md",
         "en": "docs/en/documentation.md"
       },
-      "reviewedSourceSha256": "3fc22f890b43d2007433d3af68415892f4a9cbbd27bdcc7dd154b53a7edb9229",
-      "reviewedTranslationSha256": "39fbfa6200485c80f4b0ee8f56dd654ebc08cd234dc68793ec9feabb572e796c"
+      "reviewedSourceSha256": "e95ba1e22049449f842397255228e6841e3bb2e758232f3735fe94110156badd",
+      "reviewedTranslationSha256": "42c62b388691937caff59fd2a2aff60e47275b2fa78a78a6118e79c95b4c3d34"
     },
     {
       "source": "docs/pt-BR/migration-evidence.md",
@@ -128,8 +128,8 @@
         "pt-BR": "docs/pt-BR/roadmap.md",
         "en": "docs/en/roadmap.md"
       },
-      "reviewedSourceSha256": "3941c51238917a7879c292d82b741bf8c5db93f09230f4422a27edc02995e218",
-      "reviewedTranslationSha256": "4896acd0587134a97d805c9106b0ea04b1fde71d2f592d92eaa8692f68029833"
+      "reviewedSourceSha256": "690448813703f76b9f3c9ff659800f9ddbc216cf0400a7d86fbb020099826bad",
+      "reviewedTranslationSha256": "cf433f24deb61a01d493a46c1dd6b2e8ccbb87023296a4619bcbbb066088c1ad"
     },
     {
       "source": "docs/pt-BR/security-model.md",
@@ -158,8 +158,8 @@
         "pt-BR": "docs/pt-BR/ui-guidelines.md",
         "en": "docs/en/ui-guidelines.md"
       },
-      "reviewedSourceSha256": "fcb8e03fd6cb619e5973cc35133283552279938c1dd8538dc2dbcab4d6b2fdc9",
-      "reviewedTranslationSha256": "788460d84651dd75182025a31dfd6329612f28ed421272e5bc27bbf92cf06caf"
+      "reviewedSourceSha256": "f0e447b2bc249361e6eb599b378ed68e38a549616d4d1aaf87fb32e57ab304eb",
+      "reviewedTranslationSha256": "79efa87cd350533671d9d1c523e07fc058d7c8a57528eb0d951aa596e329757a"
     }
   ],
   "shared": {

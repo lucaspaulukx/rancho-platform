@@ -52,7 +52,7 @@ export const ptDevices = {
     'Esta lista de dispositivos tem formato legado incompatível ou excede o limite deste editor. Use o editor nativo para preservá-la.',
   'devices.error.list': 'Configure uma lista de até 32 mapeamentos de dispositivos.',
   'devices.error.format':
-    'Informe host, container e permissões explícitos para cada mapeamento de dispositivo.',
+    'Informe um caminho explícito no host, um caminho explícito no container e as permissões de cada mapeamento de dispositivo.',
   'devices.error.path':
     'Caminhos de dispositivos precisam ser absolutos, não conter caracteres de controle e respeitar o limite deste editor.',
   'devices.error.permissions':

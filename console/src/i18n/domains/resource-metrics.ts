@@ -128,7 +128,7 @@ export const ptResourceMetrics = {
   'resourceMetrics.title': 'Métricas · {name}',
   'resourceMetrics.description': 'Environment: {name} · amostras em tempo real do Rancher',
   'resourceMetrics.containerHint':
-    '{sampled} de {total} com amostras nesta conexão. O CSV exporta o container selecionado.',
+    '{sampled} de {total} containers têm amostras nesta conexão. O CSV exporta as métricas do container selecionado.',
   'resourceMetrics.lastSample': 'última amostra às {time}',
   'resourceMetrics.memoryLimit': 'Limite reportado: {limit} MiB.',
   'resourceMetrics.chartLabel': '{title}: evolução das amostras recebidas',

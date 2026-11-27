@@ -193,7 +193,8 @@ export const ptSchemaForm = {
   'schemaForm.section.name.title': 'Identificação',
   'schemaForm.section.name.description': 'Nome, descrição e vínculo com a stack.',
   'schemaForm.section.imageUuid.title': 'Container',
-  'schemaForm.section.imageUuid.description': 'Imagem, argumentos e variáveis do processo.',
+  'schemaForm.section.imageUuid.description':
+    'Imagem, argumentos e variáveis de ambiente do processo.',
   'schemaForm.section.secondaryLaunchConfigs.title': 'Sidecars',
   'schemaForm.section.secondaryLaunchConfigs.description':
     'Containers auxiliares que acompanham cada instância do serviço.',

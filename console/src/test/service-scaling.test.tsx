@@ -106,9 +106,11 @@ describe('Escala efetiva de serviços', () => {
     await userEvent.type(input, '0');
     await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
     expect(submit).not.toHaveBeenCalled();
-    await screen.findByText(/Confirme o encerramento/);
+    await screen.findByText(/confirme que os containers do serviço serão parados/);
     await userEvent.click(screen.getByRole('checkbox', { name: /Entendo que escala zero/ }));
-    expect(screen.queryByText(/Confirme o encerramento/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/confirme que os containers do serviço serão parados/),
+    ).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
     expect(submit).toHaveBeenCalledExactlyOnceWith({ scale: 0 });
     expect(dirty).toHaveBeenCalledWith(true);

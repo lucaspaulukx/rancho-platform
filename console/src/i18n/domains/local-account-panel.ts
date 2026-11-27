@@ -143,7 +143,7 @@ export const ptLocalAccountPanel = {
   'localAccountPanel.error.notCreated': 'A conta não foi criada.',
   'localAccountPanel.error.reopen': 'Reabra o painel da conta.',
   'localAccountPanel.error.credentialCount':
-    'Esta conta não possui uma única credencial local ativa. Credenciais OIDC são gerenciadas no provedor.',
+    'Esta conta tem zero ou mais de uma credencial local ativa. O provedor de identidade gerencia as credenciais OIDC.',
   'localAccountPanel.error.credential': 'Credencial inválida.',
   'localAccountPanel.error.changedOperation': 'A operação mudou. Reabra o painel.',
   'localAccountPanel.error.http': 'Operação de conta não concluída (HTTP {status}).',
@@ -152,7 +152,7 @@ export const ptLocalAccountPanel = {
   'localAccountPanel.validation.invalidAccount': 'Conta inválida.',
   'localAccountPanel.validation.accountChanged': 'A conta mudou. Reabra o painel.',
   'localAccountPanel.validation.selfAdministration':
-    'Use outro administrador para alterar os privilégios ou desativar sua própria conta.',
+    'Use outra conta de administrador para alterar seus privilégios ou desativar sua conta.',
   'localAccountPanel.validation.lastAdmin': 'Mantenha pelo menos um administrador ativo.',
   'localAccountPanel.validation.deactivateFirst': 'Desative a conta antes de excluí-la.',
   'localAccountPanel.validation.actionUnavailable':

@@ -41,7 +41,8 @@ export const deDE = {
   'aboutPage.module.workloadHealthChecks': 'Zustandsprüfungen beim Erstellen',
   'aboutPage.module.workloadHealthCheckUpgrades': 'Aktualisierung von Zustandsprüfungen',
   'aboutPage.module.workloadSidecars': 'Sidecars beim Erstellen von Diensten',
-  'aboutPage.module.workloadSecurityUpgrades': 'Kontextbezogene Sicherheitsaktualisierungen',
+  'aboutPage.module.workloadSecurityUpgrades':
+    'Sicherheitseinstellungen bei Dienstaktualisierungen',
   'aboutPage.module.workloadSecurityEditors': 'Sicherheits-Capabilities beim Erstellen',
   'aboutPage.module.workloadResourceUpgrades':
     'Kontextbezogene Aktualisierung von Arbeitsspeicher, CPU und E/A',
@@ -74,7 +75,8 @@ export const deDE = {
   'aboutPage.module.webhooks': 'Native Webhooks',
   'aboutPage.module.catalogRepositories': 'Globale Katalog-Repositories',
   'aboutPage.module.environmentCatalogs': 'Repositories nach Umgebung',
-  'aboutPage.module.environmentCatalogDelegation': 'Delegation von Katalogquellen nach Umgebung',
+  'aboutPage.module.environmentCatalogDelegation':
+    'Delegierte Verwaltung von Katalogquellen pro Umgebung',
   'aboutPage.module.machineDrivers': 'Maschinentreiber',
   'aboutPage.module.driverActivation': 'Treiberaktivierung',
   'aboutPage.module.clusterMonitoring': 'Mitglieder des HA-Clusters',
@@ -331,7 +333,7 @@ export const deDE = {
   'balancerRulesPanel.discardDescription': 'Die Rancher-Konfiguration bleibt unverändert.',
   'balancerRulesPanel.confirmPorts': 'Bestätigen Sie die Auswirkungen der veröffentlichten Ports.',
   'balancerRulesPanel.hostnameHint':
-    'Optional. Lassen Sie das Feld leer, um beliebige Hostnamen zuzulassen.',
+    'Optional. Wenn das Feld leer bleibt, trifft die Regel auf jeden Hostnamen zu.',
   'balancerRulesPanel.advanced': 'Ziel aus der erweiterten Konfiguration',
   'balancerRulesPanel.reopen': 'Öffnen Sie den Load-Balancer-Editor erneut.',
   'balancerRulesPanel.apply': 'Load-Balancer-Regeln anwenden?',
@@ -1564,7 +1566,7 @@ export const deDE = {
   'resourcesPage.admin': 'Administrator',
   'resourcesPage.console': 'Ihre Konsole',
   'resourcesPage.overview': 'ÜBERSICHT',
-  'resourcesPage.commonName': 'Allgemeiner Name (CN)',
+  'resourcesPage.commonName': 'Common Name (CN)',
   'resourcesPage.containers': 'Container',
   'resourcesPage.profile': 'Ihre Rolle',
   'resourcesPage.instance': 'Instanz',
@@ -1704,7 +1706,7 @@ export const deDE = {
   'schemaForm.label.issuedAt': 'Ausgestellt am',
   'schemaForm.label.issuer': 'Aussteller',
   'schemaForm.label.certFingerprint': 'Fingerabdruck',
-  'schemaForm.label.CN': 'Allgemeiner Name (CN)',
+  'schemaForm.label.CN': 'Common Name (CN)',
   'schemaForm.label.sizeMb': 'Angeforderte Kapazität (MiB)',
   'schemaForm.label.driverOpts': 'Treiberoptionen',
   'schemaForm.label.storageDriverId': 'Speichertreiber',
@@ -1740,7 +1742,7 @@ export const deDE = {
   'schemaForm.label.stdinOpen': 'Standardeingabe offen halten',
   'schemaForm.label.tty': 'Terminal zuweisen (TTY)',
   'schemaForm.label.domainName': 'Domäne',
-  'schemaForm.label.expose': 'Freigegebene Ports',
+  'schemaForm.label.expose': 'Interne Ports',
   'schemaForm.label.dns': 'DNS-Server',
   'schemaForm.label.dnsSearch': 'DNS-Suchdomänen',
   'schemaForm.label.networkIds': 'Netzwerke',
@@ -1841,7 +1843,7 @@ export const deDE = {
     'Geben Sie einen nichtnegativen Speicherwert ohne Exponentialschreibweise ein.',
   'resourceValidation.memoryRange': 'Der Speicherwert liegt außerhalb der zulässigen Grenzen.',
   'resourceValidation.memoryBytes':
-    'Der Speicherwert muss in ganzen Bytes im sicheren Wertebereich liegen.',
+    'Der Arbeitsspeicherwert muss einer ganzen, exakt darstellbaren Anzahl von Bytes entsprechen.',
   'resourceValidation.depth': 'Die Konfiguration ist zu tief verschachtelt.',
   'resourceValidation.memoryValues':
     'Speicher und Reservierung müssen in nichtnegativen ganzen Bytes angegeben werden.',
@@ -1974,7 +1976,7 @@ export const deDE = {
   'serviceEditors.scaleError.unchanged':
     'Geben Sie einen anderen Skalierungswert als den aktuellen ein.',
   'serviceEditors.confirmZero':
-    'Bestätigen Sie das Stoppen der Container, bevor Sie auf 0 skalieren.',
+    'Bestätigen Sie, dass die Container beim Skalieren auf 0 gestoppt werden.',
   'serviceEditors.reviewScale': 'Prüfen Sie die Skalierung.',
   'serviceEditors.quantity': 'Gewünschte Containeranzahl',
   'serviceEditors.scaleInfo':
@@ -2062,7 +2064,8 @@ export const deDE = {
     'Der Vertrag für die Zustandsprüfung ist nicht verfügbar.',
   'serviceUpgradeForm.validation.ulimitContract':
     'Der Vertrag für Prozesslimits ist nicht verfügbar.',
-  'serviceUpgradeForm.validation.securityContract': 'Prüfen Sie den Sicherheitsvertrag.',
+  'serviceUpgradeForm.validation.securityContract':
+    'Prüfen Sie, welche Sicherheitseinstellungen die Rancher-API unterstützt.',
   'serviceUpgradeForm.validation.memory':
     'Geben Sie ein Limit und eine Reservierung ein. Mit 0 entfernen Sie einen expliziten Wert.',
   'serviceUpgradeForm.validation.cpuContract': 'Der Vertrag für CPU und E/A ist nicht verfügbar.',
@@ -2115,7 +2118,7 @@ export const deDE = {
     'Verwenden Sie eindeutige Sidecar-Namen, die sich vom Dienstnamen unterscheiden und höchstens 63 Buchstaben, Ziffern oder Bindestriche enthalten.',
   'sidecarValidation.image': 'Geben Sie ein gültiges Image für Sidecar {name} ein.',
   'sidecarValidation.reservedImage':
-    'Dieses Image ist für den Rancher-Vertrag zum Entfernen reserviert. Verwenden Sie „Sidecar entfernen“.',
+    'Rancher verwendet dieses Image zum Entfernen von Sidecars. Wählen Sie „Sidecar entfernen“.',
   'sidecarValidation.networkMode':
     'Verwenden Sie den Netzwerkmodus container, um das Netzwerk eines anderen Containers dieses Dienstes zu nutzen.',
   'sidecarValidation.links':
@@ -2131,7 +2134,7 @@ export const deDE = {
     'Die globale Platzierung akzeptiert nur Host-Labels mit zwingenden Regeln oder Ausschlussregeln.',
   'workloadPolicyValidation.depth': 'Die Konfiguration hat zu viele Verschachtelungsebenen.',
   'workloadPolicyValidation.capabilities':
-    'Prüfen Sie die Sicherheits-Capabilities anhand des aktuellen Vertrags.',
+    'Prüfen Sie, welche Capabilities die Rancher-API für diese Sicherheitskonfiguration unterstützt.',
 
   'bindingsEditor.portsTitle': 'Veröffentlichte Ports',
   'bindingsEditor.volumesTitle': 'Volumes',
@@ -2313,13 +2316,14 @@ export const deDE = {
 
   'healthCheckValidation.request': 'Prüfen Sie die HTTP-Anfrage der Zustandsprüfung.',
   'healthCheckValidation.requestFormat':
-    'Verwenden Sie einen HTTP-Pfad, der mit / beginnt und keine Leerzeichen, Anführungszeichen oder Zeilenumbrüche enthält, sowie einen gültigen Host.',
-  'healthCheckValidation.contract': 'Der Vertrag für die Zustandsprüfung ist nicht verfügbar.',
+    'Verwenden Sie einen HTTP-Pfad, der mit / beginnt und keine Leerzeichen, Anführungszeichen oder Zeilenumbrüche enthält. Bei HTTP/1.1 ist ein gültiger Host-Header optional.',
+  'healthCheckValidation.contract':
+    'Das Rancher-API-Schema für die Zustandsprüfung ist nicht verfügbar.',
   'healthCheckValidation.field':
     'Das Feld {name} der Zustandsprüfung ist nicht verfügbar. Öffnen Sie das Panel erneut.',
   'healthCheckValidation.integer': '{label} muss eine ganze Zahl zwischen {min} und {max} sein.',
   'healthCheckValidation.strategy': 'Die Strategie für die Zustandsprüfung ist nicht verfügbar.',
-  'healthCheckValidation.quorum': 'Der Vertrag für das Quorum ist nicht verfügbar.',
+  'healthCheckValidation.quorum': 'Das Rancher-API-Schema für das Quorum ist nicht verfügbar.',
   'healthCheckValidation.depth': 'Die Konfiguration der Zustandsprüfung ist zu tief verschachtelt.',
 
   'workloadControls.cpuShares.label': 'CPU-Gewichtung',
@@ -2343,7 +2347,7 @@ export const deDE = {
   'workloadControls.capabilityHint':
     'Wählen Sie nur die benötigten Capabilities aus. ALL steht für alle Optionen. Docker wendet die Konfiguration an.',
   'workloadControls.unknownCapability':
-    'Der Wert {value} ist im aktuellen Vertrag nicht vorgesehen. Prüfen Sie ihn vor dem Erstellen.',
+    'Die Rancher-API unterstützt den Wert {value} in dieser Konfiguration nicht. Prüfen Sie ihn vor dem Erstellen.',
   'workloadControls.capabilityLabel': '{label}: Capability {index}',
   'workloadControls.select': 'Auswählen…',
   'workloadControls.removeLabel': '{label} {index} entfernen',
@@ -2517,7 +2521,7 @@ export const deDE = {
   'details.field.orchestration': 'Orchestrator',
   'details.field.created': 'Erstellt am',
   'details.field.serverAddress': 'Registry-Adresse',
-  'details.field.CN': 'Allgemeiner Name',
+  'details.field.CN': 'Common Name (CN)',
   'details.field.expiresAt': 'Gültig bis',
   'details.field.issuedAt': 'Ausgestellt am',
   'details.field.certFingerprint': 'Fingerabdruck',
@@ -2580,7 +2584,7 @@ export const deDE = {
     'Der Verlauf bleibt erhalten, solange dieses Fenster geöffnet ist. Die Berechtigungen werden alle 15 Sekunden erneut geprüft.',
   'resourceMetrics.wrongEnvironment': 'Die Ressource gehört nicht zur ausgewählten Umgebung.',
   'resourceMetrics.resourceDenied':
-    'Die Metrikerfassung wurde beendet, weil die Ressource nicht mehr verfügbar ist oder die Berechtigung fehlt.',
+    'Der Metrikstream wurde beendet, weil die Ressource nicht mehr verfügbar ist oder die Berechtigung fehlt.',
   'resourceMetrics.serviceUnavailable':
     'Der Server stellt für diesen Dienst keine Metriken bereit.',
   'resourceMetrics.serviceLinkMismatch': 'Die Metrikadresse gehört nicht zum ausgewählten Dienst.',
@@ -2599,7 +2603,7 @@ export const deDE = {
   'resourceMetrics.connectionFailed':
     'Die Metrikverbindung ist fehlgeschlagen. Versuchen Sie, die Verbindung erneut herzustellen.',
   'resourceMetrics.sessionDenied':
-    'Die Metrikerfassung wurde beendet, weil Ihre Sitzung nicht mehr verfügbar ist oder Ihnen die Berechtigung fehlt.',
+    'Der Metrikstream wurde beendet, weil Ihre Sitzung nicht mehr verfügbar ist oder Ihnen die Berechtigung fehlt.',
   'resourceMetrics.membershipChanged':
     'Die Container des Dienstes haben sich geändert. Stellen Sie die Verbindung erneut her, um die Metriken zu aktualisieren.',
   'resourceMetrics.failed':
@@ -2820,7 +2824,7 @@ export const deDE = {
   'resourceState.activating': 'Wird aktiviert',
   'resourceState.deactivating': 'Wird deaktiviert',
   'resourceState.upgrading': 'Upgrade läuft',
-  'resourceState.upgraded': 'Upgrade abgeschlossen',
+  'resourceState.upgraded': 'Aktualisiert',
   'resourceState.updating-active': 'Wird aktualisiert',
   'resourceState.rolling-back': 'Rollback läuft',
   'resourceState.disconnected': 'Getrennt',
@@ -2908,7 +2912,7 @@ export const deDE = {
   'common.retry': 'Erneut versuchen',
   'common.loading': 'Wird geladen…',
   'language.label': 'Sprache',
-  'language.preview': 'Vorschau · Übersetzungen unvollständig',
+  'language.preview': 'Sprachvorschau',
   'runtime.disabledTitle': 'Konsole deaktiviert',
   'runtime.disabledDescription': 'Diese Konsole ist in der Konfiguration der Instanz deaktiviert.',
   'runtime.classic': 'Klassische Rancher-Oberfläche öffnen',

@@ -76,7 +76,7 @@ export const ptBindingsEditor = {
   'bindingsEditor.validation.volumes': 'Revise origem, destino absoluto e acesso de cada volume.',
   'bindingsEditor.validation.ipNeedsHostPort': 'Um IP de publicação exige porta no host.',
   'bindingsEditor.validation.portConflict':
-    'Há publicações conflitantes na mesma porta e protocolo.',
+    'Há publicações conflitantes na mesma porta do host e com o mesmo protocolo.',
   'bindingsEditor.validation.duplicateTarget': 'Não repita o destino de montagem de um volume.',
   'bindingsEditor.validation.depth': 'A configuração tem níveis demais.',
 } as const satisfies Record<keyof typeof enBindingsEditor, string>;

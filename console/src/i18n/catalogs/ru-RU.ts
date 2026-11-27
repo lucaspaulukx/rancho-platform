@@ -414,8 +414,8 @@ export const ruRU = {
   'resourceState.restarting': 'Перезапуск',
   'resourceState.activating': 'Активация',
   'resourceState.deactivating': 'Деактивация',
-  'resourceState.upgrading': 'Обновление версии',
-  'resourceState.upgraded': 'Версия обновлена',
+  'resourceState.upgrading': 'Обновление',
+  'resourceState.upgraded': 'Обновлено',
   'resourceState.updating-active': 'Обновление',
   'resourceState.rolling-back': 'Откат',
   'resourceState.disconnected': 'Отключено',
@@ -504,7 +504,7 @@ export const ruRU = {
   'common.retry': 'Повторить попытку',
   'common.loading': 'Загрузка…',
   'language.label': 'Язык',
-  'language.preview': 'Предварительная версия · перевод неполный',
+  'language.preview': 'Предварительный просмотр языков',
   'runtime.disabledTitle': 'Консоль отключена',
   'runtime.disabledDescription': 'Эта консоль отключена в конфигурации экземпляра.',
   'runtime.classic': 'Открыть классический Rancher',
@@ -889,7 +889,7 @@ export const ruRU = {
     'Число неудачных проверок для признания недоступным',
   'healthCheckValidation.request': 'Проверьте HTTP-запрос для проверки работоспособности.',
   'healthCheckValidation.requestFormat':
-    'Укажите путь HTTP, начинающийся с /, без пробелов, кавычек и переносов строк, а также допустимый Host.',
+    'Укажите путь HTTP, начинающийся с /, без пробелов, кавычек и переносов строк. В HTTP/1.1 допустимый заголовок Host можно указать по желанию.',
   'healthCheckValidation.contract': 'Контракт проверки работоспособности недоступен.',
   'healthCheckValidation.field':
     'Поле проверки работоспособности {name} недоступно. Откройте панель заново.',
@@ -928,7 +928,7 @@ export const ruRU = {
   'bindingsEditor.portRow': 'Порт {index}',
   'bindingsEditor.volumeRow': 'Том {index}',
   'bindingsEditor.removePort': 'Удалить порт {index}',
-  'bindingsEditor.removeVolume': 'Удалить том {index}',
+  'bindingsEditor.removeVolume': 'Удалить подключение тома {index}',
   'bindingsEditor.addPort': 'Добавить порт',
   'bindingsEditor.addVolume': 'Добавить том',
   'bindingsEditor.validation.limit': 'Допускается до 100 исходных записей в каждом поле.',
@@ -970,7 +970,7 @@ export const ruRU = {
   'devices.write': 'Устройство {index}: запись (w)',
   'devices.mknod': 'Устройство {index}: создание узлов устройств (m)',
   'devices.add': 'Добавить устройство',
-  'devices.remove': 'Удалить устройство {index}',
+  'devices.remove': 'Удалить сопоставление устройства {index}',
   'devices.rawValue': 'Исходное значение устройства {index}',
   'devices.legacy':
     'Исходное значение сохраняется в черновике без изменений, но этот редактор не может его отправить. Откройте форму Rancher, чтобы отправить значение в этом формате, или удалите эту строку вручную.',
@@ -1137,7 +1137,7 @@ export const ruRU = {
     'Другой клиент изменил масштаб. Откройте панель заново, чтобы обновить данные.',
   'serviceEditors.scaleError.unchanged': 'Укажите масштаб, отличный от текущего.',
   'serviceEditors.confirmZero':
-    'Подтвердите остановку контейнеров перед применением нулевого масштаба.',
+    'Перед применением масштаба 0 подтвердите, что контейнеры сервиса остановятся.',
   'serviceEditors.reviewScale': 'Проверьте масштаб.',
   'serviceEditors.quantity': 'Желаемое число контейнеров',
   'serviceEditors.scaleInfo':
@@ -1161,7 +1161,7 @@ export const ruRU = {
   'stackComposeUpgradePanel.close': 'Закрыть',
   'stackComposeUpgradePanel.review': 'Проверить обновление',
   'stackComposeUpgradePanel.warning':
-    'Обновление Compose может запустить сервисы и пересоздать контейнеры. Rancher сохраняет масштаб существующих сервисов. Чтобы изменить его, используйте действие «Масштабировать сервис». Новые сервисы могут запуститься с масштабом 1, даже если в файле указано scale: 0. Экспорт содержит только часть данных среды. Проверьте масштаб и файлы перед продолжением.',
+    'Обновление Compose может запустить сервисы и пересоздать контейнеры. Rancher сохраняет масштаб существующих сервисов. Чтобы изменить его, используйте действие «Масштабировать сервис». Новые сервисы могут запуститься с масштабом 1, даже если в файле указано scale: 0. Экспорт Compose не заменяет полную резервную копию среды. Проверьте масштаб и файлы перед продолжением.',
   'stackComposeUpgradePanel.title': 'Обновление Compose · {name}',
   'stackComposeUpgradePanel.description':
     'Среда: {name}. Файлы экспортированы из текущей конфигурации.',
@@ -1851,7 +1851,7 @@ export const ruRU = {
   'localAccountPanel.error.notCreated': 'Учётная запись не создана.',
   'localAccountPanel.error.reopen': 'Откройте панель учётной записи заново.',
   'localAccountPanel.error.credentialCount':
-    'У этой учётной записи должно быть ровно одно действующее локальное средство входа. Учётными данными OIDC управляет поставщик удостоверений.',
+    'У этой учётной записи либо нет активных локальных учётных данных, либо их несколько. Учётными данными OIDC управляет поставщик удостоверений.',
   'localAccountPanel.error.credential': 'Недопустимые учётные данные.',
   'localAccountPanel.error.changedOperation': 'Операция изменилась. Откройте панель заново.',
   'localAccountPanel.error.http': 'Операция с учётной записью не завершена (HTTP {status}).',
@@ -1999,7 +1999,7 @@ export const ruRU = {
   'webhooksPage.mostRecent': 'Самый новый',
   'webhooksPage.title': 'Вебхуки',
   'webhooksPage.description':
-    'Вебхуки по средам. Создание, просмотр и удаление не отправляют событие.',
+    'Вебхуки по средам. Создание, просмотр и удаление вебхука не запускают связанную операцию.',
   'webhooksPage.name': 'Имя',
   'webhooksPage.function': 'Функция',
   'webhooksPage.target': 'Цель',
@@ -2141,8 +2141,7 @@ export const ruRU = {
   'secretField.reveal': 'Показать',
   'secretField.copied': 'Скопировано',
   'secretField.copy': 'Скопировать',
-  'engineMonitoring.clusterUnavailable':
-    'Ваши права не позволяют просматривать данные мониторинга кластера.',
+  'engineMonitoring.clusterUnavailable': 'Мониторинг кластера недоступен в текущем контексте.',
   'engineMonitoring.clusterTitle': 'Высокая доступность (HA) и участники кластера',
   'engineMonitoring.clusterDescription':
     'Участники, о которых сообщил сервер, и их последние сигналы активности.',
@@ -2163,7 +2162,7 @@ export const ruRU = {
   'engineMonitoring.yes': 'Да',
   'engineMonitoring.no': 'Нет',
   'engineMonitoring.heartbeat': 'Последний сигнал активности',
-  'engineMonitoring.poolsUnavailable': 'Ваши права не позволяют просматривать данные пулов.',
+  'engineMonitoring.poolsUnavailable': 'Пулы Engine недоступны в текущем контексте.',
   'engineMonitoring.poolsTitle': 'Пулы Engine',
   'engineMonitoring.refreshPools': 'Обновить пулы',
   'engineMonitoring.autoPools': 'Автоматически обновлять пулы (каждые 5 с)',
@@ -2190,7 +2189,7 @@ export const ruRU = {
   'settings.discardDescription': 'Введённое значение будет сброшено без отправки на сервер.',
   'settings.operationFailed': 'Не удалось выполнить операцию с настройками.',
   'settings.loadFailed': 'Не удалось загрузить имена настроек.',
-  'settings.accessUnavailable': 'Ваши права не позволяют просматривать настройки.',
+  'settings.accessUnavailable': 'Настройки недоступны в текущем контексте.',
   'settings.changed': 'Настройка изменилась. Обновите список.',
   'settings.discardTitle': 'Отменить изменение настройки?',
   'settings.restoreTitle': 'Восстановить значение по умолчанию?',
@@ -2234,8 +2233,8 @@ export const ruRU = {
   'processes.sent':
     'Повторный запуск передан в Engine. Отслеживайте состояние, возвращаемое сервером.',
   'processes.description': 'Выполнения Engine и исходные ресурсы.',
-  'processes.unavailable': 'Ваши права не позволяют просматривать процессы.',
-  'processes.replayUnavailable': 'Ваши права не позволяют повторно запускать процессы.',
+  'processes.unavailable': 'Процессы недоступны в текущем контексте.',
+  'processes.replayUnavailable': 'Повторный запуск процесса недоступен в текущем контексте.',
   'processes.invalidResponse': 'Недопустимый ответ о процессе.',
   'processes.status': 'Состояние процесса',
   'processes.example': 'Например: credential.update',
@@ -2295,7 +2294,7 @@ export const ruRU = {
   'auditPage.accountExample': 'Например: 1a1',
   'auditPage.apply': 'Применить фильтры',
   'auditPage.clear': 'Сбросить фильтры',
-  'auditPage.unavailable': 'Ваши права не позволяют просматривать аудит.',
+  'auditPage.unavailable': 'Журнал аудита недоступен в текущем контексте.',
   'auditPage.privacy':
     'До 100 событий на страницу. Поиск ниже охватывает только эту страницу. Тела запросов и ответов, а также произвольные текстовые описания скрыты для защиты конфиденциальных данных.',
   'auditPage.date': 'Дата',
@@ -2443,7 +2442,7 @@ export const ruRU = {
   'catalogRepositories.leaveTitle': 'Выйти, пока изменение не завершено?',
   'catalogRepositories.leaveDescription':
     'Репозитории ещё не сохранены. Дождитесь завершения текущей отправки.',
-  'catalogRepositories.unavailable': 'Ваши права не позволяют просматривать репозитории.',
+  'catalogRepositories.unavailable': 'Репозитории каталога недоступны в текущем контексте.',
   'catalogRepositories.refresh': 'Обновить список',
   'catalogRepositories.configure': 'Настроить репозитории',
   'catalogRepositories.notice':
@@ -2701,7 +2700,7 @@ export const ruRU = {
   'machineDrivers.discardDescription': 'Поля ещё не отправлены на сервер.',
   'machineDrivers.auto': 'Автоматически обновлять драйверы (каждые 5 с)',
   'machineDrivers.loadFailed': 'Не удалось загрузить драйверы.',
-  'machineDrivers.driversUnavailable': 'Ваши права не позволяют просматривать драйверы.',
+  'machineDrivers.driversUnavailable': 'Драйверы машин недоступны в текущем контексте.',
   'machineDrivers.changed': 'Драйвер изменился. Обновите список.',
   'machineDrivers.activationDisabled': 'Активация драйвера отключена.',
   'machineDrivers.discardTitle': 'Отменить изменения драйвера?',
@@ -2813,7 +2812,7 @@ export const ruRU = {
   'environmentTemplates.editorTitle': 'Шаблон · {name}',
   'environmentTemplates.removeDescription': 'Удалить {name} действием Rancher?',
   'environmentTemplates.stackIndex': 'Стек {index}',
-  'environmentTemplates.removeStackLabel': 'Удалить стек {index}',
+  'environmentTemplates.removeStackLabel': 'Удалить стек {index} из шаблона',
   'environmentTemplates.stackName': 'Имя стека {index}',
   'environmentTemplates.dockerCompose': 'Docker Compose для стека {index}',
   'environmentTemplates.rancherCompose': 'Rancher Compose для стека {index}',

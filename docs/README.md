@@ -17,7 +17,7 @@ Maintained guides cover architecture, configuration, development, testing, secur
 
 ## Console walkthroughs / Fluxos no console
 
-These figures show the running console built from the console source at `81fd28c` in an isolated Docker Compose lab with synthetic resources. The language selector has preview enabled for the walkthroughs. No group grant was saved in the capture. / As figuras mostram o console em execução com o código do console em `81fd28c`, em laboratório Docker Compose com recursos sintéticos. A prévia de idiomas está ativa nos exemplos. A permissão de grupo exibida ficou em rascunho.
+The login, environment picker, stacks, permissions and settings captures show Rancho Console 0.1.1 running with the shipped language policy in an isolated Docker Compose lab. Test resources are synthetic and the group permission stayed in draft. / As capturas de login, seletor de environment, stacks, permissões e configurações mostram o Rancho Console 0.1.1 com a política de idiomas distribuída, em um laboratório Docker Compose isolado. Os recursos são sintéticos e a permissão de grupo ficou em rascunho.
 
 | Screen / Tela | English capture | Captura em português |
 | --- | --- | --- |
@@ -30,4 +30,4 @@ These figures show the running console built from the console source at `81fd28c
 
 The live log captures use Console source `510063b` and a disposable Docker 29 host. / As capturas de logs ao vivo usam o código do console em `510063b` e um host Docker 29 descartável.
 
-[Persian mobile visual check at 320 px / Verificação visual em persa a 320 px](images/guide-workloads-fa-IR-mobile.png) (`1ef1211`).
+[Persian mobile visual check at 320 px / Verificação visual em persa a 320 px](images/guide-workloads-fa-IR-mobile.png).

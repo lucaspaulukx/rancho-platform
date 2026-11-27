@@ -49,7 +49,7 @@ A configuração fornecida habilita `workloadInventoryPagination`. Se a flag est
 
 `modules.workloadDeviceUpgrades` é uma flag independente e fica desligada quando ausente. Com `modules.workloadUpgrades` habilitada, ela oferece seleção explícita e confirmação para dispositivos na configuração principal de um serviço nativo. Com `modules.workloadSidecarUpgrades` também habilitada, o editor de sidecars oferece mapeamentos estruturados de dispositivos independentes da seleção de dispositivos do principal. Uma lista vazia remove os mapeamentos explícitos. O console relê o serviço e os schemas de upgrade e verifica alterações na configuração principal e nos sidecars antes do envio. O Rancher aplica as mudanças recriando containers, com as ações nativas de reversão e conclusão. Uma edição de dispositivos apenas no sidecar pode recriar o container principal e preservar o mapeamento dele. Edições estruturadas de dispositivos dos sidecars usam um marcador separado na solicitação, validam mapeamentos alterados, preservam mapeamentos nativos intocados e revalidam a coleção completa de schemas do environment. PUT de container avulso continua fora deste editor.
 
-Cada novo mapeamento informa caminho absoluto no host, caminho absoluto no container e permissões r/w/m distintas. O editor local permite até32 mapeamentos, recusa linhas incompletas/caracteres de controle/destinos duplicados e preserva strings aceitas exatamente até edição explícita. Strings legadas opacas continuam visíveis no rascunho e não são reescritas silenciosamente; enviar formatos incompatíveis exige retornar ao formulário nativo com o editor desligado. O frontend não comprova que um caminho existe ou é dispositivo permitido no host; autorização nativa e Docker continuam decidindo.
+Cada novo mapeamento informa caminho absoluto no host, caminho absoluto no container e permissões r/w/m distintas. O editor local permite até 32 mapeamentos, recusa linhas incompletas/caracteres de controle/destinos duplicados e preserva strings aceitas exatamente até edição explícita. Strings legadas opacas continuam visíveis no rascunho e não são reescritas silenciosamente; enviar formatos incompatíveis exige retornar ao formulário nativo com o editor desligado. O frontend não comprova que um caminho existe ou é dispositivo permitido no host; autorização nativa e Docker continuam decidindo.
 
 Permissões pedidas pelo mapeamento não substituem a lista padrão de dispositivos do runtime. No Docker19.03.15, os [defaults do Moby](https://github.com/moby/moby/blob/v19.03.15/oci/defaults.go) incluem /dev/null rwm, e a [configuração de dispositivos](https://github.com/moby/moby/blob/v19.03.15/daemon/oci_linux.go) adiciona as regras solicitadas. Um mapeamento de /dev/null com r pode persistir corretamente enquanto abrir para escrita continua permitido. Não afirme negação efetiva com base somente em HostConfig ou UI. Teste o processo real no runtime desejado antes de depender de uma restrição.
 
@@ -59,20 +59,20 @@ O objeto raiz opcional `localization` é aditivo na schemaVersion1. Ausente, pre
 
 | Campo | Default e comportamento |
 |---|---|
-| `localization.enabled` | `false`; off fixa a interface em pt-BR |
+| `localization.enabled` | true no arquivo distribuído, false fixa a interface em pt-BR |
 | `localization.defaultLocale` | `pt-BR`; locale canônico do inventário do roadmap, obrigatório na lista disponível |
-| `localization.availableLocales` | `["pt-BR"]`; lista não vazia, sem duplicatas, limitada aos dez locales conhecidos |
-| `localization.selectable` | `false`; política bloqueada impõe o padrão administrativo e ignora escolhas salvas/do navegador |
+| `localization.availableLocales` | os dez idiomas do Rancher no arquivo distribuído, com opção de restringir a um subconjunto sem duplicatas |
+| `localization.selectable` | true no arquivo distribuído, false fixa o padrão do administrador e ignora preferências salvas ou do navegador |
 | `localization.detectBrowser` | `false`; quando selecionável, negocia idiomas permitidos do navegador após preferências salvas |
-| `localization.preview` | `false`; atualmente obrigatório para configurar locale não pt-BR, pois extração/revisão completas seguem pendentes |
+| `localization.preview` | false, defina true para identificar uma configuração como prévia de idiomas |
 
-Para prévia inglesa isolada, acrescente um objeto `localization` à configuração completa existente com `enabled`, `selectable` e `preview` true, `defaultLocale` pt-BR e `availableLocales` contendo pt-BR/en-US. Valide antes do deploy. Campos desconhecidos, switches não booleanos, locales não canônicos, duplicatas e padrão fora da lista são recusados. O aviso de prévia permanece visível mesmo com idioma bloqueado; o seletor exige ao menos dois locales selecionáveis. Prévia não representa tradução concluída nem aceite de release. As prévias dos oito idiomas adicionais cobrem autenticação, controles compartilhados, navegação, seleção de environments, menus da conta e mensagens de recuperação da interface. Mensagens registradas sem tradução usam o inglês, e páginas não extraídas mantêm o texto original. Para testar, adicione o código desejado (de-DE, fr-FR, hu-HU, ja-JP, fa-IR, ru-RU, uk-UA ou zh-Hans) à lista explícita de idiomas disponíveis.
+O console distribuído oferece os dez idiomas e usa português do Brasil por padrão. Para restringir a escolha, forneça os códigos canônicos permitidos em `availableLocales` e inclua o idioma padrão. O console recusa campos desconhecidos, opções não booleanas, códigos inválidos, duplicatas e padrão fora da lista. Arquivos personalizados antigos sem o bloco de idiomas continuam em pt-BR até você incluí-lo.
 
 Preferências contêm apenas versão e locale, na chave de navegador `rancho.console.locale.*` por conta. A escolha salva da conta precede a escolha anônima do login, depois idiomas permitidos do navegador e o padrão configurado. Escolher antes do login pode fornecer o idioma inicial de uma conta sem preferência própria. Falha no armazenamento mantém a escolha utilizável em memória; reconfiguração não relacionada preserva uma escolha explícita ainda permitida. Trocas de identidade, bloqueio/remoção/off da política e mudanças entre abas reaplicam a política. Credenciais, rascunhos de workload e dados API não entram nessa preferência. Trocar locale atualiza contexto e lang/direção do documento sem remontar o shell nem mudar environment/rota.
 
 ### Aplique uma configuração do console em um Compose isolado
 
-Use a configuração da revisão de imagem que está executando. No clone dessa revisão, copie `console/public/console-config.json` para `console-config.site.json` na raiz do repositório. Mantenha o arquivo completo e altere somente os valores que deseja testar. Por exemplo, adicione este campo na raiz da cópia para usar português por padrão e oferecer as prévias em inglês e persa.
+Use a configuração da revisão de imagem que está executando. No clone dessa revisão, copie `console/public/console-config.json` para `console-config.site.json` na raiz do repositório. Mantenha o arquivo completo e altere somente os valores que deseja testar. Por exemplo, substitua este campo na raiz da cópia para oferecer só português, inglês e persa, com português como padrão.
 
 ```json
 {
@@ -82,7 +82,7 @@ Use a configuração da revisão de imagem que está executando. No clone dessa 
     "availableLocales": ["pt-BR", "en-US", "fa-IR"],
     "selectable": true,
     "detectBrowser": false,
-    "preview": true
+    "preview": false
   }
 }
 ```
@@ -104,7 +104,7 @@ docker compose -f compose.modern.yaml -f compose.registry.yaml \
 curl -fsS http://127.0.0.1:18090/console/console-config.json
 ```
 
-A resposta HTTP mostra a lista de idiomas configurada. Abra o console em um contexto novo do navegador e mude o **Idioma**. Os rótulos da navegação mudam e o ambiente selecionado permanece na URL. O persa muda a direção da página para RTL. A [captura da prévia em português](../images/guide-workloads-pt-BR.png) mostra o seletor e o aviso no cabeçalho do laboratório sintético. Se o seletor sumir, confira se a resposta HTTP contém `enabled: true`, `selectable: true` e pelo menos dois idiomas disponíveis. Para voltar à configuração da imagem, retire o arquivo de configuração da chamada Compose e recrie somente `console`. O banco e suas permissões são preservados.
+A resposta HTTP mostra a lista de idiomas configurada. Abra o console em um contexto novo do navegador e mude o **Idioma**. Os rótulos da navegação mudam e o ambiente selecionado permanece na URL. O persa muda a direção da página para RTL. A [captura de workloads em português](../images/guide-workloads-pt-BR.png) mostra o seletor no cabeçalho do laboratório sintético. Se o seletor sumir, confira se a resposta HTTP contém `enabled: true`, `selectable: true` e pelo menos dois idiomas disponíveis. Para voltar à configuração da imagem, retire o arquivo de configuração da chamada Compose e recrie somente `console`. O banco e suas permissões são preservados.
 
 ## Política de backend
 

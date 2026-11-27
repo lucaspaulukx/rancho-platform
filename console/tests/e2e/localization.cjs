@@ -22,7 +22,7 @@ async function closeContext(value) {
   result.contextsClosed++;
 }
 
-async function context({ authenticated = false, enabled = true, extraLocales = [], defaultLocale = 'pt-BR' } = {}) {
+async function context({ authenticated = false, enabled = true, extraLocales = [], defaultLocale = 'pt-BR', preview = true } = {}) {
   const value = await browser.newContext({
     viewport: { width: 1440, height: 1000 }, locale: 'pt-BR', colorScheme: 'dark',
   });
@@ -46,7 +46,7 @@ async function context({ authenticated = false, enabled = true, extraLocales = [
     const config = await response.json();
     config.localization = {
       enabled, defaultLocale, availableLocales: ['pt-BR', 'en-US', ...extraLocales],
-      selectable: true, detectBrowser: false, preview: true,
+      selectable: true, detectBrowser: false, preview,
     };
     // Theme variation is local to this browser context, never the deployed JSON.
     config.themeDefault = 'system';
@@ -190,8 +190,8 @@ async function main() {
   check('public language switch preserves username/password drafts and URL',
     await username.inputValue() === 'localization-draft-only' &&
     await password.inputValue() === 'not-a-real-password' && publicPage.url() === loginUrl);
-  check('public selector exposes explicit incomplete-translation preview',
-    await publicPage.getByText('Preview · translations incomplete', { exact: true }).isVisible());
+  check('public selector exposes the explicit preview policy',
+    await publicPage.getByText('Language preview', { exact: true }).isVisible());
   check('public document language updates', await publicPage.locator('html').getAttribute('lang') === 'en-US');
   const englishSelector = publicPage.getByRole('combobox', { name: 'Language', exact: true });
   for (const width of [320, 1440]) {
@@ -237,7 +237,7 @@ async function main() {
   check('French preview translates sign-in while preserving both drafts and the URL',
     await loginFitsMobile() &&
     await publicPage.locator('html').getAttribute('lang') === 'fr-FR' &&
-    await publicPage.getByText('Aperçu · traductions incomplètes', { exact: true }).isVisible() &&
+    await publicPage.getByText('Aperçu des langues', { exact: true }).isVisible() &&
     await username.inputValue() === 'localization-draft-only' &&
     await password.inputValue() === 'not-a-real-password' && publicPage.url() === loginUrl);
 
@@ -263,13 +263,13 @@ async function main() {
   check('retry loads the requested catalog after reconnecting', publicPage.url() === loginUrl);
 
   for (const [locale, title, label, notice] of [
-    ['de-DE', 'Auf Ihre Umgebung zugreifen', 'Sprache', 'Vorschau · Übersetzungen unvollständig'],
-    ['ja-JP', '環境にアクセス', '言語', 'プレビュー · 一部未翻訳'],
-    ['zh-Hans', '访问您的环境', '语言', '预览 · 翻译尚未完成'],
-    ['hu-HU', 'Hozzáférés a környezetéhez', 'Nyelv', 'Előnézet · hiányos fordítások'],
-    ['ru-RU', 'Войдите в свою среду', 'Язык', 'Предварительная версия · перевод неполный'],
-    ['uk-UA', 'Отримайте доступ до свого середовища', 'Мова', 'Попередня версія · переклад неповний'],
-    ['fa-IR', 'به محیط خود دسترسی پیدا کنید', 'زبان', 'پیش‌نمایش · ترجمه‌ها کامل نیستند'],
+    ['de-DE', 'Auf Ihre Umgebung zugreifen', 'Sprache', 'Sprachvorschau'],
+    ['ja-JP', '環境にアクセス', '言語', '言語のプレビュー'],
+    ['zh-Hans', '访问您的环境', '语言', '语言预览'],
+    ['hu-HU', 'Hozzáférés a környezetéhez', 'Nyelv', 'Nyelvi előnézet'],
+    ['ru-RU', 'Войдите в свою среду', 'Язык', 'Предварительный просмотр языков'],
+    ['uk-UA', 'Отримайте доступ до свого середовища', 'Мова', 'Попередній перегляд мов'],
+    ['fa-IR', 'به محیط خود دسترسی پیدا کنید', 'زبان', 'پیش‌نمایش زبان'],
   ]) {
     await publicPage.locator('.language-selector select').selectOption(locale);
     await publicPage.getByRole('heading', { name: title, exact: true }).waitFor();
@@ -301,7 +301,7 @@ async function main() {
   await closeContext(publicContext);
 
   result.stage = 'authenticated-shell';
-  const authenticated = await context({ authenticated: true, extraLocales: ['fr-FR', 'de-DE', 'ja-JP', 'zh-Hans', 'hu-HU', 'ru-RU', 'uk-UA', 'fa-IR'] });
+  const authenticated = await context({ authenticated: true, preview: false, extraLocales: ['fr-FR', 'de-DE', 'ja-JP', 'zh-Hans', 'hu-HU', 'ru-RU', 'uk-UA', 'fa-IR'] });
   const workspace = await page(authenticated);
   const workspaceUrl = origin + '/console/stacks?env=1a12&q=localization-acceptance';
   await workspace.goto(workspaceUrl, { waitUntil: 'domcontentloaded' });
