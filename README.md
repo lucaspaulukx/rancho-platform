@@ -14,12 +14,13 @@
 
 - [What you can do](#what-you-can-do)
 - [Install with Docker Compose](#install-with-docker-compose)
+- [Verify your first login](#verify-your-first-login)
 - [Compatibility and security](#compatibility-and-security)
 - [Documentation](#documentation)
 
-![Rancho Console in English showing environments, stacks and service actions](docs/images/console-en-us.png)
+![Rancho Console in English showing environments, stacks and service actions](docs/images/guide-workloads-en-US.png)
 
-*English console running v0.1.0 in a local demo environment. [See the migration rehearsal](docs/en/migration-evidence.md).*
+*The English console shows the synthetic `UI-OPS-LAB` environment with the language preview enabled. The `documentation-demo` stack is expanded and its `web` service is at scale 0. [See the separate migration rehearsal](docs/en/migration-evidence.md).*
 
 ## What you can do
 
@@ -37,7 +38,7 @@ The [archived v0.1.0 preview](https://github.com/lucaspaulukx/rancho-platform-ar
 1. Check out the release.
 
    ```sh
-   git clone --branch v0.1.0 --depth 1 https://github.com/lucaspaulukx/rancho-platform-archive.git
+   git clone --branch v0.1.0 --depth 1 https://github.com/lucaspaulukx/rancho-platform-archive.git rancho-platform
    cd rancho-platform
    ```
 
@@ -56,6 +57,14 @@ The [archived v0.1.0 preview](https://github.com/lucaspaulukx/rancho-platform-ar
 
 [Pin images by digest](docs/en/release.md#install-prebuilt-release-images) or [configure an OIDC provider](docs/en/configuration.md#external-openid-connect-provider). If you already run Rancher 1.6, start with the [migration guide](docs/en/migration.md) and use the administrator from the restored database.
 
+## Verify your first login
+
+1. Run `docker compose -f compose.modern.yaml -f compose.registry.yaml ps` from the checkout. Look for a healthy `db` and `rancho` and a running `console` with port 18090 on loopback.
+2. Sign in using the local administrator you just configured. Open **Environments** and select one you can access. Open **Stacks** and confirm that the header still shows the selected environment.
+3. If the environment is empty, the workspace shows no workloads. If it has a stack, expand a service and open its **…** menu to see the actions available for that resource. Compare the hierarchy with the demo screenshot above.
+
+Use the [configuration guide](docs/en/configuration.md) to adjust the console and the [testing guide](docs/en/testing.md) for a synthetic workload lab.
+
 ## Compatibility and security
 
 The validated profile uses Linux amd64, a single server and Docker 29 Cattle hosts. The [roadmap](docs/en/roadmap.md) tracks acceptance for HA and in-place upgrades of existing IPsec stacks.
@@ -69,6 +78,7 @@ The v0.1.0 candidate scan reported **zero high or critical findings and zero det
 | Install and verify release images | [Release guide](docs/en/release.md) · [GHCR images](https://github.com/users/lucaspaulukx/packages/container/package/rancho-platform) |
 | Move an existing Rancher installation | [Migration](docs/en/migration.md) · [Recovery](docs/en/recovery.md) |
 | Set up OIDC, permissions or the console | [Configuration](docs/en/configuration.md) |
+| Verify the workload workspace and keyboard navigation | [Frontend practices](docs/en/ui-guidelines.md#rehearse-a-workspace-change) |
 | Understand or contribute to the project | [Architecture](docs/en/architecture.md) · [Contributing](CONTRIBUTING.md) · [Testing](docs/en/testing.md) |
 
 [English documentation index](docs/en/README.md) · [Índice em português](docs/pt-BR/README.md)

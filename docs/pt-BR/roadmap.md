@@ -13,6 +13,8 @@ O alvo é Rancher1.6 Docker/Cattle operado por console contextual comum, grupos 
 
 Estados descrevem capacidades mantidas e aceites restantes, não diário de execução. Preserve IDs ao abrir issues/PRs. Mudanças exigem flag/default/off explícitos, contratos atuais, testes pertinentes, docs nos dois idiomas e cleanup. Aceite dependente de provedor pode ser condicional; não substitua prova física por mock para marcar conclusão.
 
+Abra os [fluxos do console](../README.md#console-walkthroughs--fluxos-no-console) para ver as telas testadas de login, seleção de environment, árvore de workloads, permissões de grupo e configurações. O [guia de testes](testing.md) explica como reproduzir as verificações.
+
 ## Fundação e experiência
 
 | ID | Capacidade | Estado e gate restante |

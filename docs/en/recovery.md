@@ -36,6 +36,10 @@ python -m migration.recovery rehearse-modern --output migration-runs/modern-cold
 
 Verify that a local administrator is available before taking the backup. The rehearsal asks for that administrator's password separately from the backup passphrase. It restores to new volumes, starts the recorded images on an isolated Docker 29 bridge with no published ports and verifies MariaDB integrity, inventory counts and every Cattle table checksum before booting Rancho. It then checks local administrator login and environment visibility through the console. The isolated copy disables OIDC and catalog execution. Store the catalog, any custom mounts, workload storage and identity-provider configuration and data using their own backups. Plan and test their recovery before any cutover.
 
+For the three-container example above, the read-only `plan` reports three selected containers and three local volumes. Check `database.coldVolumeRecoverySupported` before starting the cold backup. After backup, `backupComplete` confirms the capture and `sourceRestartCommandsSucceeded` confirms the restart commands. Sign in to the original console to confirm service recovery.
+
+The isolated `rehearse-modern` result should include `modernEngineRecoveryAccepted`, `localAdminLogin`, `inventoryAndGrantsPreserved` and `cleanupComplete` set to `true`, with `publishedPorts` set to `0`. Compare the result with the recovered environment inventory and preserve the sealed backup. Review the [migration evidence](migration-evidence.md) for a separate logical-restore example with screenshots.
+
 ## Active/passive backend handoff
 
 Keep the standby backend stopped until an independent host or hypervisor confirms the previous backend cannot run. A failed ping, unreachable Docker daemon or stale database heartbeat is insufficient evidence to promote. Disable independent Docker autostart on backends governed by an external failover controller. Only the controller responsible for fencing may promote the replacement.

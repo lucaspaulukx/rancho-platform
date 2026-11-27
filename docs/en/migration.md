@@ -42,6 +42,19 @@ docker compose -p rancho-rehearsal --env-file .env.rancho-migration -f compose.m
 
 Compose starts MariaDB, runs the restore image, and starts the backend only after the import succeeds. The restore image authenticates the bundle, imports the SQL, verifies inventory and installs the encrypted server identity when present. The backend applies its versioned schema automatically. Open `http://localhost:18090/console/`. For an existing authenticated installation use its original local Rancher login. Repeat the same Compose command to verify that the backup is skipped. The restore log reports `already-applied`. To inspect that log, use the same Compose project and files with `logs restore-backup`. The importer checks the backup identity against markers on both volumes. A different backup or a partially imported destination requires a new project and volumes. Keep the failure logs and original backup. The isolated profile disables OIDC, catalog execution and database events. Host Engine upgrades, volume copies and production networking require their own procedure.
 
+**Check the restored copy.** Use the same project name, environment file and Compose files throughout the rehearsal.
+
+```sh
+docker compose -p rancho-rehearsal --env-file .env.rancho-migration \
+  -f compose.modern.yaml -f compose.migrate.yaml ps --all
+docker compose -p rancho-rehearsal --env-file .env.rancho-migration \
+  -f compose.modern.yaml -f compose.migrate.yaml logs --no-color restore-backup
+```
+
+1. The first startup should log `{"databaseImport":"applied"}`. The one-shot `restore-backup` service should exit successfully while `db`, `rancho` and `console` run.
+2. Sign in with the original local administrator and select the restored environment. Open **Stacks**, clear any search or state filters and expand the relevant stacks. Compare application stacks and services with the source. The [Acme Production example](migration-evidence.md) has two application stacks and five services.
+3. Start the same project again. Expect `{"databaseImport":"already-applied"}` and unchanged environment and application inventory. A changed list warrants checking the selected environment and filters first. A failed import warrants inspecting the restore log and starting the next attempt in a new isolated project with fresh volumes.
+
 [See screenshots and results from the migration rehearsal](migration-evidence.md).
 
 ## Read-only diagnosis

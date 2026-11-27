@@ -2,7 +2,7 @@
 
 [Português (Brasil)](../pt-BR/README.md) | [English](../en/README.md)
 
-Escolha o idioma de cada documento. Traduções pendentes são indicadas; não representam documentação integral em inglês.
+Abra cada guia no idioma de sua preferência.
 
 Pares revisados: 16/16. Arquivos de instrução/template bilingues: 9.
 

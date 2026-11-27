@@ -14,12 +14,13 @@
 
 - [O que você pode fazer](#o-que-você-pode-fazer)
 - [Instale com Docker Compose](#instale-com-docker-compose)
+- [Verifique o primeiro login](#verifique-o-primeiro-login)
 - [Compatibilidade e segurança](#compatibilidade-e-segurança)
 - [Documentação](#documentação)
 
-![Console do Rancho em português mostrando ambientes, stacks e ações de serviços](../images/console-pt-br.png)
+![Console do Rancho em português mostrando ambientes, stacks e ações de serviços](../images/guide-workloads-pt-BR.png)
 
-*Console em português executando a v0.1.0 em um ambiente local de demonstração. [Veja o ensaio de migração](migration-evidence.md).*
+*O console em português mostra o ambiente sintético `UI-OPS-LAB` com a prévia de idiomas habilitada. A stack `documentation-demo` está expandida e seu serviço `web` está em escala 0. [Veja o ensaio separado de migração](migration-evidence.md).*
 
 ## O que você pode fazer
 
@@ -37,7 +38,7 @@ A [prévia arquivada v0.1.0](https://github.com/lucaspaulukx/rancho-platform-arc
 1. Faça checkout da versão.
 
    ```sh
-   git clone --branch v0.1.0 --depth 1 https://github.com/lucaspaulukx/rancho-platform-archive.git
+   git clone --branch v0.1.0 --depth 1 https://github.com/lucaspaulukx/rancho-platform-archive.git rancho-platform
    cd rancho-platform
    ```
 
@@ -56,6 +57,14 @@ A [prévia arquivada v0.1.0](https://github.com/lucaspaulukx/rancho-platform-arc
 
 [Fixe as imagens por digest](release.md#instalar-imagens-prontas-de-uma-release) ou [configure um provedor OIDC](configuration.md#provedor-openid-connect-externo). Se você já usa Rancher 1.6, comece pelo [guia de migração](migration.md) e use o administrador do banco restaurado.
 
+## Verifique o primeiro login
+
+1. Execute `docker compose -f compose.modern.yaml -f compose.registry.yaml ps` no clone. Confira se `db` e `rancho` estão saudáveis e se `console` está em execução com a porta 18090 no endereço de loopback.
+2. Entre com o administrador local que você acabou de configurar. Abra **Ambientes** e selecione um ao qual tenha acesso. Abra **Stacks** e confirme se o cabeçalho ainda mostra o ambiente selecionado.
+3. Se o ambiente estiver vazio, a tela não mostra workloads. Se houver uma stack, expanda um serviço e abra seu menu **…** para ver as ações disponíveis para aquele recurso. Compare a hierarquia com a captura de demonstração acima.
+
+Use o [guia de configuração](configuration.md) para ajustar o console e o [guia de testes](testing.md) para montar um laboratório com workloads sintéticos.
+
 ## Compatibilidade e segurança
 
 O perfil validado usa Linux amd64, um servidor e hosts Cattle com Docker 29. O [roadmap](roadmap.md) acompanha o aceite de alta disponibilidade e da atualização direta de stacks IPsec existentes.
@@ -69,6 +78,7 @@ A varredura da candidata à v0.1.0 reportou **zero achados altos ou críticos e 
 | Instalar e verificar imagens de uma release | [Guia de release](release.md) · [Imagens no GHCR](https://github.com/users/lucaspaulukx/packages/container/package/rancho-platform) |
 | Migrar uma instalação existente do Rancher | [Migração](migration.md) · [Recuperação](recovery.md) |
 | Configurar OIDC, permissões ou o console | [Configuração](configuration.md) |
+| Verificar a tela de workloads e a navegação por teclado | [Boas práticas de frontend](ui-guidelines.md#ensaie-uma-mudança-na-tela-de-workloads) |
 | Conhecer o projeto ou contribuir | [Arquitetura](architecture.md) · [Contribuição](contributing.md) · [Testes](testing.md) |
 
 [Índice em português](README.md) · [English documentation index](../en/README.md)

@@ -47,6 +47,18 @@ O lock upstream fixa commits oficiais. Faça build desses fontes e patches expor
 
 CI de fontes/console usa permissão readonly, actions pinadas e nenhum secret de laboratório. Confere fonte e histórico, contratos dos scanners, contratos de migração offline, instalação por lock, formatação, testes frontend e TypeScript/Vite. O aceite de backend físico, HA e migração de ponta a ponta é separado. A documentação de release exige todos os pares ativos pt-BR/inglês revisados, atuais e ligados.
 
+**Verifique a referência publicada.** O workflow recebe `commit` com o SHA completo aceito, `runtime_run` com o ID da execução aprovada de proveniência de runtime e `version` com a versão imutável sem o prefixo `v`. Cada componente aprovado gera `registry-COMPONENT.json`. Confira se `commit` e `version` correspondem à seleção, se `registryReadbackPassed` vale `true` e se `reference` termina com o `digest` OCI informado.
+
+Por exemplo, execute o comando num shell com Docker e jq, no diretório que contém o relatório da console. O novo diretório de configuração do Docker está vazio. Repita a verificação para os 13 componentes antes de subir o perfil Compose fixado.
+
+```sh
+reference=$(jq -er '.reference' registry-console.json) || exit
+anonymous_config=$(mktemp -d) || exit
+docker --config "$anonymous_config" image pull "$reference"
+```
+
+O pull bem-sucedido retorna o digest exato da referência. Use o [guia de migração](migration.md#restauração-automática-no-primeiro-início) para verificar a primeira inicialização ao importar um backup selado. Use o [guia de recuperação](recovery.md#compose-moderno-com-mariadb) para validar separadamente a recuperação de um snapshot.
+
 ## Verificar um pacote de código-fonte
 
 Antes de publicar, execute as duas verificações de privacidade com `--require-policy`. Mantenha o `private-policy.json` do responsável pela release no diretório retornado por `git rev-parse --git-common-dir`, com um array `retiredTerms` não vazio contendo os nomes de organizações que não podem ser distribuídos. Não versione a política nem seus termos. Worktrees vinculadas usam essa mesma política privada. A verificação falha quando a política obrigatória está ausente ou vazia.

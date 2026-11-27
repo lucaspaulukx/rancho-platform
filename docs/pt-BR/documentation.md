@@ -43,3 +43,12 @@ Após revisar e atualizar um idioma, registre a fonte atual com `node scripts/ch
 Use links relativos válidos, nomes exatos de comandos/APIs e limites claros de evidência. Erros brutos, credenciais, dumps, relatórios locais e dados de clientes ficam fora do Git. Referencie entrypoints de teste mantidos, sem colar o log de execução de um operador. Leitor de tela manual, efeitos nativos e recuperação não são substituídos por verificador documental.
 
 Atualize o [roadmap](roadmap.md) ao mudar capacidade ou aceite. Par documental completo não torna o produto pronto para produção. Publicação permanece decisão separada do mantenedor conforme o [guia de release](release.md).
+
+## Capture as telas na aplicação
+
+1. Inicie a revisão documentada com dados descartáveis de teste. Abra a rota real, escolha o idioma do documento e entre com o papel exigido pelo exemplo.
+2. Reproduza os passos do guia e capture o resultado no navegador. Use nomes sintéticos e confira se a imagem e as URLs visíveis contêm credenciais, nomes de hosts internos, e-mails ou dados de clientes.
+3. Adicione texto alternativo conciso e uma legenda que explique o que o leitor deve ver. Revise cada imagem publicada no tamanho de exibição e confira se o idioma acompanha o restante do documento.
+4. Guarde os relatórios completos em um espaço privado para evidências. Coloque no guia a captura sanitizada e o contexto necessário para interpretá-la.
+
+Por exemplo, a captura do console mostra a área de Stacks em português, com navegação, seletor de ambiente e inventário de stacks à vista. A página de evidências da migração identifica nas legendas os dados de teste restaurados e o alcance da comparação visual. [Captura do console em português](../images/console-pt-br.png) · [Capturas da migração](migration-evidence.md)

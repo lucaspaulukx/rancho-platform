@@ -42,6 +42,19 @@ docker compose -p rancho-rehearsal --env-file .env.rancho-migration -f compose.m
 
 O Compose inicia o MariaDB, executa a imagem de restauração e só inicia o backend após a importação bem-sucedida. A imagem autentica o backup, importa o SQL, confere o inventário e instala a identidade criptografada do servidor quando presente. O backend aplica o schema versionado automaticamente. Acesse `http://localhost:18090/console/`. Se o Rancher de origem tinha autenticação, use a credencial local original. Repita o mesmo comando Compose para verificar que a importação foi pulada. O log registra `already-applied`. Para consultá-lo, use o mesmo projeto e arquivos Compose com `logs restore-backup`. O importador confere a identidade do backup em marcadores nos dois volumes. Um backup diferente ou um destino parcialmente importado exige projeto e volumes novos. Preserve os logs da falha e o backup original. O perfil isolado desliga OIDC, execução de catálogo e eventos do banco. Atualização do Docker dos hosts, cópia de volumes de workload e rede de produção exigem procedimentos próprios.
 
+**Confira a cópia restaurada.** Use o mesmo nome de projeto, arquivo de ambiente e arquivos Compose em todo o ensaio.
+
+```sh
+docker compose -p rancho-rehearsal --env-file .env.rancho-migration \
+  -f compose.modern.yaml -f compose.migrate.yaml ps --all
+docker compose -p rancho-rehearsal --env-file .env.rancho-migration \
+  -f compose.modern.yaml -f compose.migrate.yaml logs --no-color restore-backup
+```
+
+1. A primeira inicialização deve registrar `{"databaseImport":"applied"}`. O serviço de execução única `restore-backup` deve encerrar com sucesso enquanto `db`, `rancho` e `console` permanecem em execução.
+2. Entre com o administrador local original e selecione o environment restaurado. Abra **Stacks**, limpe os filtros de busca e estado e expanda as stacks relevantes. Compare as stacks de aplicação e os serviços com a origem. O [exemplo Acme Production](migration-evidence.md) tem duas stacks de aplicação e cinco serviços.
+3. Inicie o mesmo projeto novamente. Espere `{"databaseImport":"already-applied"}` e o mesmo inventário de environments e aplicações. Se a lista mudar, confira primeiro o environment selecionado e os filtros. Se a importação falhar, confira o log da restauração e use um novo projeto isolado com volumes novos na tentativa seguinte.
+
 [Veja as capturas e os resultados do ensaio de migração](migration-evidence.md).
 
 ## Diagnóstico somente leitura

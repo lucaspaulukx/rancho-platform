@@ -13,6 +13,8 @@ The target is Rancher1.6 Docker/Cattle operated through a shared contextual cons
 
 Statuses below describe maintained capabilities and remaining acceptance, not an execution diary. Keep stable task IDs when opening issues/PRs. Changes require explicit flag/default/off behavior, current contracts, relevant tests, documentation in both languages and cleanup. Provider-specific acceptance may be conditional; do not replace missing physical evidence with mocks and mark it complete.
 
+Open the [console walkthroughs](../README.md#console-walkthroughs--fluxos-no-console) for the tested login, environment selection, workload tree, group grant and settings screens. The [testing guide](testing.md) shows how to reproduce the checks.
+
 ## Foundation and experience
 
 | ID | Capability | State and remaining gate |

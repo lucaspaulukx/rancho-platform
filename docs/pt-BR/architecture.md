@@ -11,6 +11,30 @@ Rancho oferece uma console independente React/TypeScript para Rancher 1.6 Docker
 
 [upstream.json](../../upstream.json) fixa os fontes oficiais e [patches](../../patches/) contém as alterações do projeto. `cattle/` e `websocket-proxy/` são checkouts gerados e ignorados, não material de consulta incorporado. `legacy-ui/` é a extensão isolada de compatibilidade necessária à imagem. Preserve licenças upstream e identidade Rancher.
 
+## Siga uma requisição no Compose
+
+No perfil moderno do Compose, somente o gateway do Console é publicado por padrão na porta de loopback 18090. O gateway serve o frontend em `/console/` e encaminha as rotas da API do Rancher, do OIDC e dos streams para `rancho:8080` na rede de aplicação. O serviço `rancho` também se conecta à rede privada do banco para acessar o MariaDB. O serviço `db` fica nessa rede privada.
+
+```mermaid
+flowchart LR
+    Browser["HTTP / WebSocket"]
+    Console["console"]
+    Rancho["rancho"]
+    Database["db"]
+    Browser --> Console
+    Console -->|app| Rancho
+    Rancho -->|database| Database
+```
+
+Em uma instância isolada em execução, use duas consultas para verificar essa divisão.
+
+```sh
+curl -fsS http://127.0.0.1:18090/console/console-config.json
+curl -fsS http://127.0.0.1:18090/oidc/config
+```
+
+A primeira retorna a configuração do frontend. A segunda chega ao backend e retorna a versão 1 com mapas de capacidades efetivas e disponíveis. Quando presente, o mapa solicitado registra a configuração anterior às verificações de dependências. Por exemplo, uma flag de backend pode ser solicitada e estar indisponível na imagem em execução. Habilitar o módulo de apresentação não concede acesso. Consulte o [guia de configuração](configuration.md#política-de-backend) para o contrato de cada flag.
+
 ## Estrutura do frontend
 
 | Responsabilidade | Fonte |
@@ -25,6 +49,8 @@ Rancho oferece uma console independente React/TypeScript para Rancher 1.6 Docker
 | Testes unitários/componentes e harnesses nativos | `console/src/test/`, `console/tests/` |
 
 Páginas são renderizadas no shell comum. Ações contextuais abrem drawers compartilhados, evitando trocar de página para operar a mesma stack. Parâmetros da URL preservam environment, visão e filtros. Flag de UI controla apresentação, nunca acesso ao backend.
+
+Para um exemplo concreto, veja a [captura de Stacks em português](../images/guide-workloads-pt-BR.png) do laboratório sintético com a prévia de idiomas habilitada. O cabeçalho identifica `UI-OPS-LAB`, a stack `documentation-demo` contém o serviço `web` e os menus ficam ao lado dos recursos. Ao reproduzir a tela com seu ambiente de teste, mantenha a rota e o contexto do ambiente ao abrir uma ação. A ação continua sujeita ao schema e à autorização atuais do backend. O [ensaio da tela de workloads](ui-guidelines.md#ensaie-uma-mudança-na-tela-de-workloads) descreve o que verificar no foco, no contexto e na autorização.
 
 ## Limite da localização
 

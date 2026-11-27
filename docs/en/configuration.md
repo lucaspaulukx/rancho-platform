@@ -70,6 +70,42 @@ For an isolated English preview, merge a `localization` object into an existing 
 
 Preferences contain only version and locale, under the account-scoped `rancho.console.locale.*` browser key. A stored account choice takes precedence over the anonymous login choice, then permitted browser languages, then the configured default. Choosing before login can supply the initial language of an account without its own saved choice. Storage failure leaves the choice usable in memory; unrelated reconfiguration preserves an explicit allowed choice. Identity changes, policy locks/removals/off and cross-tab preference changes reapply the policy. No credentials, workload drafts or API data enter this preference. Switching locale updates context and document lang/direction without remounting the shell or changing environment/route.
 
+### Apply a console configuration in an isolated Compose deployment
+
+Use the configuration shipped with the image revision you are running. In that revision's checkout, copy `console/public/console-config.json` to `console-config.site.json` at the repository root. Keep the full file and change only the values you want to test. For example, add this root field to the copy for a Portuguese default and optional English and Persian previews.
+
+```json
+{
+  "localization": {
+    "enabled": true,
+    "defaultLocale": "pt-BR",
+    "availableLocales": ["pt-BR", "en-US", "fa-IR"],
+    "selectable": true,
+    "detectBrowser": false,
+    "preview": true
+  }
+}
+```
+
+From `console/`, run `npm ci` if needed and then `npm run config:migrate -- --check ../console-config.site.json`. A valid configuration returns `"status": "valid"` and `"schemaVersion": 1`. From the repository root, create `compose.console-config.yaml` with this read-only mount.
+
+```yaml
+services:
+  console:
+    volumes:
+      - ./console-config.site.json:/usr/share/nginx/html/console/console-config.json:ro
+```
+
+For the prebuilt registry profile, apply the change only to the console. Keep the active Compose project name and any other deployment overrides in both the apply and rollback commands.
+
+```sh
+docker compose -f compose.modern.yaml -f compose.registry.yaml \
+  -f compose.console-config.yaml up -d --no-build --no-deps --force-recreate console
+curl -fsS http://127.0.0.1:18090/console/console-config.json
+```
+
+The HTTP response shows the configured language list. Open the console in a fresh browser context and change **Language**. Navigation labels change while the selected environment stays in the URL. Persian sets the page direction to RTL. The English [preview capture](../images/guide-workloads-en-US.png) shows the header selector and notice in the synthetic lab. If the selector is missing, verify that the HTTP response contains `enabled: true`, `selectable: true` and at least two available locales. Remove the configuration overlay from the Compose command and recreate only `console` to restore the image's bundled configuration. This leaves the database and its grants in place.
+
 ## Backend policy
 
 Compose variables configure the backend; `/oidc/config` exposes requested/effective/available capabilities. Inspect effective capability, not only an environment-variable value. The master customization switch and artifact/proxy compatibility can make a requested feature ineffective.

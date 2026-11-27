@@ -47,6 +47,18 @@ The upstream lock pins official commit identities. Build from those sources and 
 
 Source/console CI uses read-only repository permission, pinned actions and no lab secrets. It checks source and history, scanner contracts, offline migration contracts, locked install, formatting, frontend tests and TypeScript/Vite. Physical backend, HA and end-to-end migration acceptance run separately. Public-release documentation requires every active pt-BR/English pair reviewed, current and linked.
 
+**Verify the published reference.** The workflow takes `commit` for the full accepted Git SHA, `runtime_run` for the successful runtime provenance run and `version` for the immutable version without the leading `v`. Each successful component writes `registry-COMPONENT.json`. Check that `commit` and `version` match your selection, `registryReadbackPassed` is `true` and `reference` ends with the reported OCI `digest`.
+
+For example, run this from a shell with Docker and jq in the directory containing the console component report. The new Docker configuration directory is empty. Run the same check for all 13 components before deploying the pinned Compose profile.
+
+```sh
+reference=$(jq -er '.reference' registry-console.json) || exit
+anonymous_config=$(mktemp -d) || exit
+docker --config "$anonymous_config" image pull "$reference"
+```
+
+A successful pull returns the exact digest from the reference. Use the [rehearsal guide](migration.md#automated-restore-on-first-startup) to verify first startup when importing a sealed backup, and the [recovery guide](recovery.md#modern-compose-with-mariadb) to validate snapshot recovery separately.
+
 ## Verify a source package
 
 Before publishing, run both privacy gates with `--require-policy`. Keep the release owner's `private-policy.json` in the directory returned by `git rev-parse --git-common-dir`, with a nonempty `retiredTerms` array containing the organization labels that must not be distributed. Do not commit the policy or its terms. Linked worktrees use this same private policy. A missing or empty required policy fails the check.

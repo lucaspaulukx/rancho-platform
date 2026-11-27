@@ -11,6 +11,20 @@ The backend owns authorization. Every route, mutation, stream target and adminis
 
 Groups are stored and managed in Rancher. OIDC identifies the user; Keycloak group claims do not silently grant environment access. Identity links use issuer/subject, not email/name inference. New users have no environment access and no automatic environment under the enabled backend policy. Global administration requires explicit provisioning and a tested recovery path.
 
+### Exercise the boundary in a lab
+
+Use three separate test identities and two disposable environments. Confirm the administrator can read both environments before checking denial. This gives you a positive control for wrong-environment and absent-grant cases.
+
+| Identity | Action | Expected result |
+| --- | --- | --- |
+| Administrator | List stacks in both environments | Both requests succeed |
+| Reader assigned to RBAC-DEV | List stacks in RBAC-DEV | The request succeeds |
+| Reader assigned to RBAC-DEV | Request the RBAC-PROD stack list directly | HTTP 403 or 404 |
+| Reader assigned to RBAC-DEV | Attempt to create a named disposable stack in RBAC-DEV | HTTP 403 or 405 and no stack is created |
+| Unassigned user | Sign in and request the RBAC-DEV stack list | The console shows the no-access state and the direct request returns HTTP 403 or 404 |
+
+Capture the actor role, requested scope and result code in the report. Before testing revocation, establish a working stream for the assigned reader. With compatible session guards enabled, it should close after revocation. The gateway suite documents the two-environment fixture and authorization assertions. [Gateway authorization checks](../../console/tests/gateway_authorization.py)
+
 ## Sessions and capabilities
 
 HTTP sessions, subscription sockets and logs/exec/metrics capabilities have distinct validation paths. Optional session guards bind compatible streams to the current identity/account/role/scope and close on revocation or expiry. A permission-related close must not trigger an automatic reconnect loop.

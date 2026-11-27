@@ -23,6 +23,28 @@ The planner requires the supported MySQL/InnoDB schema and reads accounts, membe
 
 The plan is coexistence-only: direct grants are unchanged and no public apply/remove/cutover command is provided. An empty proposal set is not a completed conversion. The plan is not a [recovery backup](recovery.md).
 
+### Worked example with two environments
+
+In a synthetic fixture, Alex and Sam each have the read-only role in one environment and the member role in another. The complete access vectors match, so the planner proposes one group, two members and two environment-role bindings. The summary should show these fields.
+
+~~~json
+{
+  "proposedGroups": 1,
+  "proposedMembers": 2,
+  "proposedEnvironmentRoleBindings": 2,
+  "sourceModified": false,
+  "cutoverAccepted": false
+}
+~~~
+
+If Alex and Sam have access to different environments, keep their access vectors separate. If the summary reports a conflict or a name collision, inspect the encrypted plan privately and resolve the underlying records before any change. The repository tests cover these three cases. [Access-planning fixtures](../../migration/test_grants.py)
+
+The group editor shows where an administrator can draft a role binding for a single environment. Compare the selected environment and role with the plan before saving anything in the lab.
+
+![Group editor with an unsaved environment role](../images/guide-group-permissions-en-US.png)
+
+*The synthetic group has a draft environment role. The editor shows the proposed scope before the administrator saves it.*
+
 ## Coexistence and cutover design
 
 Before any write, capture matching recovery state, revalidate baseline drift, backend capabilities, actors and environment scope. Use native APIs and audit, not direct UPDATE/DELETE of membership tables. Compare effective access for every affected identity/environment before and after coexistence, removal and rollback. Test allowed member writes, denied readonly/admin actions and revoked membership with positive controls.

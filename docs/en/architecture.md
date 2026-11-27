@@ -11,6 +11,30 @@ Rancho provides an independent React/TypeScript console for Rancher 1.6 Docker/C
 
 The root [upstream.json](../../upstream.json) pins official sources and [patches](../../patches/) contain project changes. `cattle/` and `websocket-proxy/` are generated, ignored checkouts, not vendored consultation material. `legacy-ui/` is the isolated compatibility extension needed by the image. Preserve upstream licenses and Rancher identity.
 
+## Follow a request through Compose
+
+The modern Compose profile publishes only the Console gateway on loopback port 18090 by default. The gateway serves the frontend under `/console/` and proxies Rancher API, OIDC and stream routes to `rancho:8080` on the application network. The `rancho` service also joins the private database network to reach MariaDB. The `db` service stays on that private network.
+
+```mermaid
+flowchart LR
+    Browser["HTTP / WebSocket"]
+    Console["console"]
+    Rancho["rancho"]
+    Database["db"]
+    Browser --> Console
+    Console -->|app| Rancho
+    Rancho -->|database| Database
+```
+
+Use two reads to see the boundary in a running isolated instance.
+
+```sh
+curl -fsS http://127.0.0.1:18090/console/console-config.json
+curl -fsS http://127.0.0.1:18090/oidc/config
+```
+
+The first returns the frontend configuration. The second reaches the backend and returns version 1 with effective and available capability maps. When present, the requested map records the configuration before dependency checks. For example, a backend flag can be requested but unavailable for the running image. Enabling its presentation module cannot grant access. See the [configuration guide](configuration.md#backend-policy) for the individual flags.
+
 ## Frontend structure
 
 | Responsibility | Source |
@@ -25,6 +49,8 @@ The root [upstream.json](../../upstream.json) pins official sources and [patches
 | Unit/component tests and native harnesses | `console/src/test/`, `console/tests/` |
 
 Pages render inside the shared shell. Contextual actions open shared drawers instead of moving users between separate pages for the same stack. URL parameters retain environment, view and filters. A UI flag controls presentation, never backend access.
+
+For a concrete example, see the [English Stacks capture](../images/guide-workloads-en-US.png) from the synthetic lab with the language preview enabled. The header identifies `UI-OPS-LAB`, the `documentation-demo` stack contains the `web` service, and the action menus stay beside the resources. When reproducing this view with your own fixture, use the workspace route and environment context while opening the resource action. The action still depends on the backend's current schema and authorization. The [workspace exercise](ui-guidelines.md#rehearse-a-workspace-change) gives the expected outcomes for focus, context and authorization.
 
 ## Localization boundary
 

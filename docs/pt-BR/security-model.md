@@ -11,6 +11,20 @@ O backend impõe autorização. Rotas, mutações, targets de streams e capacida
 
 Grupos são armazenados e administrados no Rancher. OIDC identifica a pessoa; claims de grupos Keycloak não concedem acesso implicitamente. Vínculos de identidade usam issuer/subject, não inferência por email/nome. Novos usuários ficam sem acesso nem environment automático sob a política habilitada. Administração global exige provisionamento explícito e recuperação testada.
 
+### Exercite as permissões em laboratório
+
+Use três identidades de teste separadas e dois ambientes descartáveis. Confirme que o administrador consegue ler os dois ambientes antes de testar as recusas. Esse é o controle positivo para os casos de ambiente fora do escopo e ausência de permissão.
+
+| Identidade | Ação | Resultado esperado |
+| --- | --- | --- |
+| Administrador | Listar stacks nos dois ambientes | As duas requisições são bem-sucedidas |
+| Usuário de leitura vinculado ao RBAC-DEV | Listar as stacks do RBAC-DEV | A requisição é bem-sucedida |
+| Usuário de leitura vinculado ao RBAC-DEV | Solicitar diretamente a lista de stacks do RBAC-PROD | HTTP 403 ou 404 |
+| Usuário de leitura vinculado ao RBAC-DEV | Tentar criar uma stack descartável com nome definido no RBAC-DEV | HTTP 403 ou 405 e nenhuma stack é criada |
+| Usuário sem vínculo | Entrar e solicitar a lista de stacks do RBAC-DEV | O console exibe a tela sem acesso e a requisição direta retorna HTTP 403 ou 404 |
+
+Registre no relatório o papel do usuário, o escopo solicitado e o código de resposta. Antes de testar a revogação, abra um fluxo funcional com o usuário de leitura. Com as proteções de sessão compatíveis habilitadas, o fluxo deve fechar após a revogação. A suíte do gateway documenta o cenário com dois ambientes e as verificações de autorização. [Verificações de autorização do gateway](../../console/tests/gateway_authorization.py)
+
 ## Sessões e capacidades
 
 Sessões HTTP, sockets de subscription e capacidades de logs/exec/métricas têm validações distintas. Guardas opcionais ligam streams compatíveis a identidade/conta/papel/escopo atuais e fecham após revogação ou expiração. Fechamento por permissão não deve iniciar reconexão automática.
