@@ -49,7 +49,7 @@ This modern service advertises `scaleService` for increasing or decreasing an ex
 
 `modules.workloadDeviceUpgrades` is a separate flag that defaults off when absent. With `modules.workloadUpgrades` enabled, it exposes an explicit selection and confirmation for devices in the primary launch configuration of a native service. With `modules.workloadSidecarUpgrades` also enabled, the sidecar editor offers structured device mappings independently of the primary device selection. An empty list removes explicit mappings. The console rereads the service and upgrade schemas and checks for drift in the primary and sidecar configurations before submission. Rancher applies changes through container replacement, with its native rollback and finish actions. A sidecar-only device edit can replace the primary container while preserving its device mapping. Structured sidecar device edits use a separate request marker, validate changed mappings, preserve untouched native mappings and revalidate the full scoped schema collection. Standalone container PUT remains outside this editor.
 
-Each new mapping explicitly supplies an absolute host path, absolute container path and distinct r/w/m permissions. The local editor allows at most32 mappings, rejects incomplete rows/control characters/duplicate target paths, and preserves accepted mapping strings exactly until an explicit edit. Opaque legacy strings remain visible in the draft and are not silently rewritten; submitting unsupported formats requires returning to the native form with this editor off. The frontend does not prove a path exists or is an allowed device on a host; native authorization and Docker still decide.
+Each new mapping explicitly supplies an absolute host path, absolute container path and distinct r/w/m permissions. The local editor allows at most 32 mappings, rejects incomplete rows/control characters/duplicate target paths, and preserves accepted mapping strings exactly until an explicit edit. Opaque legacy strings remain visible in the draft and are not silently rewritten; submitting unsupported formats requires returning to the native form with this editor off. The frontend does not prove a path exists or is an allowed device on a host; native authorization and Docker still decide.
 
 Requested mapping permissions do not replace the runtime's default device allowlist. In Docker19.03.15, [Moby's defaults](https://github.com/moby/moby/blob/v19.03.15/oci/defaults.go) include /dev/null rwm, and the [device setup](https://github.com/moby/moby/blob/v19.03.15/daemon/oci_linux.go) adds requested rules. A /dev/null mapping with r can persist correctly while write-open remains allowed. Do not claim effective write denial from HostConfig or the UI alone. Test the actual process behavior on the intended runtime before relying on a restriction.
 
@@ -59,20 +59,20 @@ The optional root `localization` object is additive in schemaVersion1. An absent
 
 | Field | Default and behavior |
 |---|---|
-| `localization.enabled` | `false`; off fixes the interface to pt-BR |
+| `localization.enabled` | true in the shipped file; false fixes the interface to pt-BR |
 | `localization.defaultLocale` | `pt-BR`; canonical locale from the roadmap inventory, required in the available list |
-| `localization.availableLocales` | `["pt-BR"]`; nonempty, unique, at most the ten known locales |
-| `localization.selectable` | `false`; locked policy enforces the administrator's default and ignores stored/browser choices |
+| `localization.availableLocales` | the ten Rancher locales in the shipped file; supply a unique, nonempty subset to restrict it |
+| `localization.selectable` | true in the shipped file; false locks the administrator’s default and ignores stored/browser choices |
 | `localization.detectBrowser` | `false`; when selectable, negotiates permitted browser languages after stored choices |
-| `localization.preview` | `false`; currently required to configure any non-pt-BR locale because full extraction/review remains unfinished |
+| `localization.preview` | false; explicitly set true to mark a configuration as a language preview |
 
-For an isolated English preview, merge a `localization` object into an existing complete configuration with `enabled`, `selectable` and `preview` true, `defaultLocale` pt-BR and `availableLocales` containing pt-BR/en-US. Validate it before deploying. Unknown fields, nonboolean switches, noncanonical locales, duplicates and a default outside the list are rejected. A preview notice remains visible even for a locked language; the selector itself requires at least two selectable locales. Preview is not a completed translation or release acceptance. All eight additional locale previews cover authentication, shared controls, navigation, environment selection, account menus and interface recovery messages. Missing registered messages fall back to English, and unextracted pages keep their original text. Add the desired code (de-DE, fr-FR, hu-HU, ja-JP, fa-IR, ru-RU, uk-UA or zh-Hans) to the explicit available locale list.
+The shipped console offers all ten locales and defaults to Brazilian Portuguese. To restrict the choice, supply the permitted canonical codes in `availableLocales` and include the default. Unknown fields, nonboolean switches, noncanonical locales, duplicates and a default outside the list are rejected. Existing custom files without a localization block stay on pt-BR until you add one.
 
 Preferences contain only version and locale, under the account-scoped `rancho.console.locale.*` browser key. A stored account choice takes precedence over the anonymous login choice, then permitted browser languages, then the configured default. Choosing before login can supply the initial language of an account without its own saved choice. Storage failure leaves the choice usable in memory; unrelated reconfiguration preserves an explicit allowed choice. Identity changes, policy locks/removals/off and cross-tab preference changes reapply the policy. No credentials, workload drafts or API data enter this preference. Switching locale updates context and document lang/direction without remounting the shell or changing environment/route.
 
 ### Apply a console configuration in an isolated Compose deployment
 
-Use the configuration shipped with the image revision you are running. In that revision's checkout, copy `console/public/console-config.json` to `console-config.site.json` at the repository root. Keep the full file and change only the values you want to test. For example, add this root field to the copy for a Portuguese default and optional English and Persian previews.
+Use the configuration shipped with the image revision you are running. In that revision's checkout, copy `console/public/console-config.json` to `console-config.site.json` at the repository root. Keep the full file and change only the values you want to test. For example, replace this root field in the copy to offer only Portuguese, English and Persian, with Portuguese as the default.
 
 ```json
 {
@@ -82,7 +82,7 @@ Use the configuration shipped with the image revision you are running. In that r
     "availableLocales": ["pt-BR", "en-US", "fa-IR"],
     "selectable": true,
     "detectBrowser": false,
-    "preview": true
+    "preview": false
   }
 }
 ```
@@ -104,7 +104,7 @@ docker compose -f compose.modern.yaml -f compose.registry.yaml \
 curl -fsS http://127.0.0.1:18090/console/console-config.json
 ```
 
-The HTTP response shows the configured language list. Open the console in a fresh browser context and change **Language**. Navigation labels change while the selected environment stays in the URL. Persian sets the page direction to RTL. The English [preview capture](../images/guide-workloads-en-US.png) shows the header selector and notice in the synthetic lab. If the selector is missing, verify that the HTTP response contains `enabled: true`, `selectable: true` and at least two available locales. Remove the configuration overlay from the Compose command and recreate only `console` to restore the image's bundled configuration. This leaves the database and its grants in place.
+The HTTP response shows the configured language list. Open the console in a fresh browser context and change **Language**. Navigation labels change while the selected environment stays in the URL. Persian sets the page direction to RTL. The English [workloads capture](../images/guide-workloads-en-US.png) shows the header selector in the synthetic lab. If the selector is missing, verify that the HTTP response contains `enabled: true`, `selectable: true` and at least two available locales. Remove the configuration overlay from the Compose command and recreate only `console` to restore the image's bundled configuration. This leaves the database and its grants in place.
 
 ## Backend policy
 

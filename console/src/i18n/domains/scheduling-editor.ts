@@ -47,7 +47,7 @@ export const ptSchedulingEditor = {
   'schedulingEditor.mode.avoid': 'Preferir evitar',
   'schedulingEditor.key': 'Chave da label',
   'schedulingEditor.serviceHint':
-    'Para um serviço: io.rancher.stack_service.name; valor: stack/serviço.',
+    'Para um serviço, use a chave io.rancher.stack_service.name e o valor no formato stack/service.',
   'schedulingEditor.container': 'Nome do container de referência',
   'schedulingEditor.value': 'Valor da label',
   'schedulingEditor.remove': 'Remover afinidade {index}',

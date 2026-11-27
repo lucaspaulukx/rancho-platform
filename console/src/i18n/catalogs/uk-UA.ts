@@ -503,7 +503,7 @@ export const ukUA = {
   'common.retry': 'Спробувати ще раз',
   'common.loading': 'Завантаження…',
   'language.label': 'Мова',
-  'language.preview': 'Попередня версія · переклад неповний',
+  'language.preview': 'Попередній перегляд мов',
   'runtime.disabledTitle': 'Консоль вимкнено',
   'runtime.disabledDescription': 'Цю консоль вимкнено в налаштуваннях екземпляра.',
   'runtime.classic': 'Відкрити класичний Rancher',
@@ -884,7 +884,7 @@ export const ukUA = {
     'Кількість невдалих перевірок для визнання недоступним',
   'healthCheckValidation.request': 'Перевірте HTTP-запит для перевірки працездатності.',
   'healthCheckValidation.requestFormat':
-    'Укажіть шлях HTTP, що починається з /, без пробілів, лапок і переносів рядків, а також допустимий Host.',
+    'Укажіть шлях HTTP, що починається з /, без пробілів, лапок і переносів рядків. У HTTP/1.1 допустимий заголовок Host можна вказати за потреби.',
   'healthCheckValidation.contract': 'Контракт перевірки працездатності недоступний.',
   'healthCheckValidation.field':
     'Поле перевірки працездатності {name} недоступне. Відкрийте панель знову.',

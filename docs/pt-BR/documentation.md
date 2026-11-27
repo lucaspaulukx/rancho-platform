@@ -32,7 +32,7 @@ Substitua a fonte pelos caminhos canônicos afetados; `--review` aceita vários 
 
 ## Revisão das traduções da interface
 
-`npm run check:ui-literals` verifica textos diretos em JSX e atributos visíveis ao usuário em busca de strings fora dos catálogos. Marcas, protocolos e unidades técnicas têm exceções específicas. O CI de fontes e o build da imagem executam a checagem. Revise separadamente os textos gerados por funções auxiliares, pelo backend e por provedores externos.
+`npm run check:ui-literals` verifica textos em JSX, propriedades selecionadas de interface e chamadas diretas de feedback em busca de strings fora dos catálogos. Marcas, protocolos e unidades técnicas têm exceções específicas. O CI de fontes e o build da imagem executam a checagem. Revise separadamente os textos gerados por funções auxiliares, pelo backend e por provedores externos.
 
 Os catálogos de prévia em `console/src/i18n/catalogs/` acompanham o texto original em inglês por domínio de mensagens em `console/src/i18n/preview-sources.json`. Execute `npm run check:locales` dentro de `console/`. Alterar o texto ou os parâmetros de um domínio traduzido exige revisar cada idioma afetado. O gate também roda no CI e no build da imagem.
 

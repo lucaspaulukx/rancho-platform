@@ -1,7 +1,7 @@
 export const enHealthCheckValidation = {
   'healthCheckValidation.request': 'Review the health check HTTP request.',
   'healthCheckValidation.requestFormat':
-    'Use an HTTP path starting with /, without spaces, quotes, or line breaks, and a valid Host.',
+    'Use an HTTP path starting with /, without spaces, quotes or line breaks. A valid Host header is optional with HTTP/1.1.',
   'healthCheckValidation.contract': 'The health check contract is unavailable.',
   'healthCheckValidation.field': 'Health check field {name} is unavailable. Reopen the panel.',
   'healthCheckValidation.integer': '{label} must be an integer between {min} and {max}.',
@@ -12,7 +12,7 @@ export const enHealthCheckValidation = {
 export const ptHealthCheckValidation = {
   'healthCheckValidation.request': 'Revise a requisição HTTP da verificação de saúde.',
   'healthCheckValidation.requestFormat':
-    'Use um caminho HTTP iniciado por /, sem espaços, aspas ou quebras de linha, e um Host válido.',
+    'Use um caminho HTTP iniciado por /, sem espaços, aspas ou quebras de linha. Com HTTP/1.1, o cabeçalho Host é opcional e deve ser válido se preenchido.',
   'healthCheckValidation.contract': 'Contrato da verificação de saúde indisponível.',
   'healthCheckValidation.field': 'O campo de saúde {name} não está disponível. Reabra o painel.',
   'healthCheckValidation.integer': '{label} precisa ser um inteiro entre {min} e {max}.',

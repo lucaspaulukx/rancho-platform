@@ -311,7 +311,7 @@ export const zhHans = {
   'common.retry': '重试',
   'common.loading': '正在加载…',
   'language.label': '语言',
-  'language.preview': '预览 · 翻译尚未完成',
+  'language.preview': '语言预览',
   'runtime.disabledTitle': '控制台已禁用',
   'runtime.disabledDescription': '此控制台已在实例配置中禁用。',
   'runtime.classic': '打开经典版 Rancher',
@@ -671,7 +671,7 @@ export const zhHans = {
   'healthCheckEditor.number.unhealthyThreshold': '判定为不可用所需的失败次数',
   'healthCheckValidation.request': '请检查健康检查的 HTTP 请求。',
   'healthCheckValidation.requestFormat':
-    '请输入以 / 开头且不含空格、引号或换行符的 HTTP 路径，以及有效的 Host。',
+    '请输入以 / 开头且不含空格、引号或换行符的 HTTP 路径。使用 HTTP/1.1 时，可选填有效的 Host 请求头。',
   'healthCheckValidation.contract': '健康检查的接口规范不可用。',
   'healthCheckValidation.field': '健康检查字段「{name}」不可用。请重新打开面板。',
   'healthCheckValidation.integer': '{label}必须是介于 {min} 和 {max} 之间的整数。',

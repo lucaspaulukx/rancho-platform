@@ -144,7 +144,7 @@ export const ptGroups = {
   'groups.noUsers': 'Nenhum usuário encontrado.',
   'groups.preservedMember': 'O vínculo foi preservado. Você pode removê-lo deste grupo.',
   'groups.environmentHelp':
-    'Nenhum environment é concedido por padrão. Escolha o papel apenas nos ambientes necessários.',
+    'Por padrão, o grupo não concede acesso a nenhum ambiente. Escolha um papel apenas nos ambientes necessários.',
   'groups.rancherRules':
     'Os papéis seguem as regras do Rancher. Acesso direto ao environment continua sendo considerado pelo backend.',
   'groups.selectedMembers': 'Membros selecionados',

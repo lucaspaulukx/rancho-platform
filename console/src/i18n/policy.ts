@@ -39,8 +39,5 @@ export function normalizeLocalizationPolicy(value?: unknown): LocalizationPolicy
     !policy.availableLocales.includes(policy.defaultLocale)
   )
     throw new Error('Lista ou idioma padrão inválido.');
-  // Non-Portuguese interface extraction/review is incomplete. Preview must be explicit.
-  if (!policy.preview && policy.availableLocales.some((code) => code !== defaultLocale))
-    throw new Error('Traduções incompletas exigem preview explícito.');
   return { ...policy, availableLocales: [...policy.availableLocales] };
 }

@@ -37,7 +37,7 @@ async function main(){
   const scheduling=group.locator('details.workload-form-section').filter({has:page.getByText('Agendamento',{exact:true})});
   await scheduling.getByRole('button',{name:'Adicionar',exact:true}).click();await group.getByLabel('Labels: chave 1',{exact:true}).fill('rancher.console.ulimits-fixture');await group.getByLabel('Labels: valor 1',{exact:true}).fill(input.marker);
   await group.getByText('Recursos',{exact:true}).click();await group.getByRole('button',{name:'Adicionar limite de processo',exact:true}).click();
-  await group.getByLabel('Recurso do limite 1',{exact:true}).selectOption('nofile');await group.getByLabel('Limite inicial 1',{exact:true}).fill(String(soft));await group.getByLabel('Limite máximo 1',{exact:true}).fill(String(hard));
+  await group.getByLabel('Recurso do limite 1',{exact:true}).selectOption('nofile');await group.getByLabel('Limite flexível (soft) 1',{exact:true}).fill(String(soft));await group.getByLabel('Limite rígido (hard) 1',{exact:true}).fill(String(hard));
  }
  result.stage='primary';await configure(dialog.getByRole('group',{name:'Configuração do container *',exact:true}),1024,2048);
  result.stage='sidecar';await dialog.getByText('Sidecars',{exact:true}).click();await dialog.getByRole('button',{name:'Adicionar sidecar',exact:true}).click();

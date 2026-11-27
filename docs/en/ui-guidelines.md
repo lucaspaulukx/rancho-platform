@@ -35,13 +35,13 @@ Bound incoming frames and retained samples. Service metrics maintain independent
 
 ![English stack workspace showing environment selection, search, and expanded services](../images/guide-workloads-en-US.png)
 
-*Capture from the synthetic lab with the language preview enabled. The header shows `UI-OPS-LAB`. The expanded `documentation-demo` stack and its `web` service at scale 0 appear in the workspace.*
+*Capture from the synthetic lab with the shipped language selector. The header shows `UI-OPS-LAB`. The expanded `documentation-demo` stack and its `web` service at scale 0 appear in the workspace.*
 
 In an isolated environment with a test stack and a running container:
 
 1. Select the environment, open **Stacks**, expand a stack and search by service name. Open the container's **…** menu and choose its logs. Confirm that the log panel appears within the workspace and the environment and search stay in context.
 2. Close the panel with **Escape**. Verify that focus returns to the control that opened it. Use **Tab** to move through the environment selector, search, active view tab and menus. Move between view tabs with the horizontal arrow keys. At 320 px, confirm the page fits and the mobile sidebar can be dismissed with **Escape**.
-3. Switch between dark and light themes with the search populated. In a deployment with the [preview language policy](configuration.md#interface-language-policy), change the language while a draft is open. Confirm the draft and environment selection are preserved. In Persian, verify that the layout mirrors while terminal and Compose source stay left-to-right. Compare the layout at 320 px with the [Persian mobile capture](../images/guide-workloads-fa-IR-mobile.png).
+3. Switch between dark and light themes with the search populated. In a deployment with the [language policy](configuration.md#interface-language-policy), change the language while a draft is open. Confirm the draft and environment selection are preserved. In Persian, verify that the layout mirrors while terminal and Compose source stay left-to-right. Compare the layout at 320 px with the [Persian mobile capture](../images/guide-workloads-fa-IR-mobile.png).
 4. With an account that only has read access, verify the available actions. Use a disposable writer account to exercise save and cancellation in a draft. Check that the backend denies a write by the reader even if the client tries to issue it.
 
 Record the image revision, locale, viewport and theme beside any screenshot from the exercise. See the [testing guide](testing.md) for the automated and native checks.

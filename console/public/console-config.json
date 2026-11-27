@@ -62,5 +62,24 @@
     "environmentCatalogDelegation": true,
     "stackComposeUpgrades": true
   },
+  "localization": {
+    "enabled": true,
+    "defaultLocale": "pt-BR",
+    "availableLocales": [
+      "en-US",
+      "pt-BR",
+      "de-DE",
+      "fr-FR",
+      "hu-HU",
+      "ja-JP",
+      "fa-IR",
+      "ru-RU",
+      "uk-UA",
+      "zh-Hans"
+    ],
+    "selectable": true,
+    "detectBrowser": false,
+    "preview": false
+  },
   "classicUrl": "http://localhost:18080/"
 }

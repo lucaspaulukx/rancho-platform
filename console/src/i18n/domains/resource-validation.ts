@@ -28,7 +28,7 @@ export const ptResourceValidation = {
   'resourceValidation.limitCount': 'Configure até 32 limites de processo.',
   'resourceValidation.limitFormat': 'A lista de limites contém um formato incompatível.',
   'resourceValidation.limitNames': 'Escolha nomes de limites conhecidos e sem duplicatas.',
-  'resourceValidation.limitOrder': 'O limite inicial não pode exceder o máximo.',
+  'resourceValidation.limitOrder': 'O limite flexível não pode exceder o limite rígido.',
   'resourceValidation.limitContract':
     'O contrato atual não permite configurar limites de processo.',
 } as const;

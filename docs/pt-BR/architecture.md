@@ -50,7 +50,7 @@ A primeira retorna a configuração do frontend. A segunda chega ao backend e re
 
 Páginas são renderizadas no shell comum. Ações contextuais abrem drawers compartilhados, evitando trocar de página para operar a mesma stack. Parâmetros da URL preservam environment, visão e filtros. Flag de UI controla apresentação, nunca acesso ao backend.
 
-Para um exemplo concreto, veja a [captura de Stacks em português](../images/guide-workloads-pt-BR.png) do laboratório sintético com a prévia de idiomas habilitada. O cabeçalho identifica `UI-OPS-LAB`, a stack `documentation-demo` contém o serviço `web` e os menus ficam ao lado dos recursos. Ao reproduzir a tela com seu ambiente de teste, mantenha a rota e o contexto do ambiente ao abrir uma ação. A ação continua sujeita ao schema e à autorização atuais do backend. O [ensaio da tela de workloads](ui-guidelines.md#ensaie-uma-mudança-na-tela-de-workloads) descreve o que verificar no foco, no contexto e na autorização.
+Para um exemplo concreto, veja a [captura de Stacks em português](../images/guide-workloads-pt-BR.png) do laboratório sintético com o seletor distribuído. O cabeçalho identifica `UI-OPS-LAB`, a stack `documentation-demo` contém o serviço `web` e os menus ficam ao lado dos recursos. Ao reproduzir a tela com seu ambiente de teste, mantenha a rota e o contexto do ambiente ao abrir uma ação. A ação continua sujeita ao schema e à autorização atuais do backend. O [ensaio da tela de workloads](ui-guidelines.md#ensaie-uma-mudança-na-tela-de-workloads) descreve o que verificar no foco, no contexto e na autorização.
 
 ## Limite da localização
 

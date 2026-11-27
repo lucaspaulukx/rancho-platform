@@ -50,7 +50,7 @@ The first returns the frontend configuration. The second reaches the backend and
 
 Pages render inside the shared shell. Contextual actions open shared drawers instead of moving users between separate pages for the same stack. URL parameters retain environment, view and filters. A UI flag controls presentation, never backend access.
 
-For a concrete example, see the [English Stacks capture](../images/guide-workloads-en-US.png) from the synthetic lab with the language preview enabled. The header identifies `UI-OPS-LAB`, the `documentation-demo` stack contains the `web` service, and the action menus stay beside the resources. When reproducing this view with your own fixture, use the workspace route and environment context while opening the resource action. The action still depends on the backend's current schema and authorization. The [workspace exercise](ui-guidelines.md#rehearse-a-workspace-change) gives the expected outcomes for focus, context and authorization.
+For a concrete example, see the [English Stacks capture](../images/guide-workloads-en-US.png) from the synthetic lab using the shipped language selector. The header identifies `UI-OPS-LAB`, the `documentation-demo` stack contains the `web` service, and the action menus stay beside the resources. When reproducing this view with your own fixture, use the workspace route and environment context while opening the resource action. The action still depends on the backend's current schema and authorization. The [workspace exercise](ui-guidelines.md#rehearse-a-workspace-change) gives the expected outcomes for focus, context and authorization.
 
 ## Localization boundary
 

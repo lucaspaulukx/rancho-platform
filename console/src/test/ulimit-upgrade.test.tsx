@@ -173,10 +173,10 @@ describe('Contextual service process-limit upgrade', () => {
         </button>
       </>,
     );
-    expect(screen.queryByLabelText('Limite inicial 1')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Limite flexível (soft) 1')).not.toBeInTheDocument();
     await user.click(screen.getByLabelText('Editar limites de processo nesta atualização'));
-    await user.clear(screen.getByLabelText('Limite máximo 1'));
-    await user.type(screen.getByLabelText('Limite máximo 1'), '4096');
+    await user.clear(screen.getByLabelText('Limite rígido (hard) 1'));
+    await user.type(screen.getByLabelText('Limite rígido (hard) 1'), '4096');
     await user.click(screen.getByRole('button', { name: 'Revisar limites' }));
     expect(submit).not.toHaveBeenCalled();
     await user.click(await screen.findByRole('button', { name: /^Confirmar$/ }));

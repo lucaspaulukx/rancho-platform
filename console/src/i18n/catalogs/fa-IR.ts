@@ -24,7 +24,7 @@ export const faIR = {
   'details.field.orchestration': 'هماهنگ‌کننده',
   'details.field.created': 'زمان ایجاد',
   'details.field.serverAddress': 'نشانی رجیستری',
-  'details.field.CN': 'نام مشترک',
+  'details.field.CN': 'نام رایج',
   'details.field.expiresAt': 'زمان انقضا',
   'details.field.issuedAt': 'زمان صدور',
   'details.field.certFingerprint': 'اثر انگشت',
@@ -84,7 +84,7 @@ export const faIR = {
   'resourcePanel.bindingsDisabled': 'ویرایش پورت‌ها و حجم‌ها غیرفعال است.',
   'resourcePanel.healthCheckDisabled': 'ویرایش بررسی سلامت غیرفعال است.',
   'resourcePanel.sidecarsDisabled': 'ویرایش کانتینرهای جانبی غیرفعال است.',
-  'resourcePanel.schedulingDisabled': 'ویرایش قواعد وابستگی غیرفعال است.',
+  'resourcePanel.schedulingDisabled': 'ویرایش قواعد هم‌مکانی غیرفعال است.',
   'resourcePanel.memoryDisabled': 'ارتقای تنظیمات حافظه غیرفعال است.',
   'resourcePanel.cpuDisabled': 'ارتقای تنظیمات CPU و ورودی/خروجی غیرفعال است.',
   'resourcePanel.securityDisabled': 'ارتقای تنظیمات امنیتی غیرفعال است.',
@@ -154,7 +154,7 @@ export const faIR = {
   'operations.clearSelection': 'پاک کردن انتخاب',
   'operations.stackName': 'پشتهٔ {name}',
   'operations.collapseStack': 'جمع کردن پشتهٔ {name}',
-  'operations.expandStack': 'باز کردن پشتهٔ {name}',
+  'operations.expandStack': 'نمایش زیرمجموعه‌های پشتهٔ {name}',
   'operations.serviceCount': { other: '{count} سرویس' },
   'operations.system': ' · زیرساخت',
   'operations.emptyStack': 'هیچ سرویس یا کانتینری در این پشته با فیلترهای فعلی مطابقت ندارد.',
@@ -311,7 +311,7 @@ export const faIR = {
   'auth.pendingDescription':
     'مدیر باید حساب شما را به گروهی اضافه کند که به محیط‌ها دسترسی دارد. هیچ محیطی به‌طور خودکار ایجاد نمی‌شود.',
   'auth.contactAdmin': 'با مدیر خود تماس بگیرید',
-  'auth.accountHint': 'نام حساب خود را اعلام کنید: {account}.',
+  'auth.accountHint': 'حساب خود را اعلام کنید: {account}.',
   'auth.groupAccess': 'از طریق گروه خود دسترسی بگیرید',
   'auth.groupAccessDescription': 'مجوزها در Rancher تعریف و مدیریت می‌شوند.',
   'auth.returnConsole': 'به کنسول خود برگردید',
@@ -332,7 +332,7 @@ export const faIR = {
   'common.retry': 'تلاش دوباره',
   'common.loading': 'در حال بارگیری…',
   'language.label': 'زبان',
-  'language.preview': 'پیش‌نمایش · ترجمه‌ها کامل نیستند',
+  'language.preview': 'پیش‌نمایش زبان',
   'runtime.disabledTitle': 'کنسول غیرفعال است',
   'runtime.disabledDescription': 'این کنسول در تنظیمات نمونه غیرفعال شده است.',
   'runtime.classic': 'باز کردن Rancher کلاسیک',
@@ -448,7 +448,7 @@ export const faIR = {
   'shell.environment.authorized': 'محیطی را انتخاب کنید که مجوز دسترسی به آن دارید.',
   'resourceMetrics.disabled': 'معیارها غیرفعال‌اند',
   'resourceMetrics.enable': 'ماژول معیارها را در تنظیمات کنسول فعال کنید.',
-  'resourceMetrics.paused': 'متوقف‌شده',
+  'resourceMetrics.paused': 'موقتاً متوقف شده',
   'resourceMetrics.live': 'زنده',
   'resourceMetrics.stale': 'نمونهٔ جدیدی وجود ندارد',
   'resourceMetrics.closed': 'اتصال بسته شد',
@@ -716,7 +716,7 @@ export const faIR = {
   'healthCheckEditor.number.unhealthyThreshold': 'تعداد شکست‌ها برای تشخیص وضعیت خارج از دسترس',
   'healthCheckValidation.request': 'درخواست HTTP بررسی سلامت را بازبینی کنید.',
   'healthCheckValidation.requestFormat':
-    'یک مسیر HTTP وارد کنید که با / شروع شود و فاصله، علامت نقل‌قول یا شکست خط نداشته باشد. از Host معتبر استفاده کنید.',
+    'مسیر HTTP باید با / شروع شود و فاصله، علامت نقل‌قول یا شکست خط نداشته باشد. در HTTP/1.1، سرآیند Host اختیاری است و در صورت درج باید معتبر باشد.',
   'healthCheckValidation.contract': 'قرارداد بررسی سلامت در دسترس نیست.',
   'healthCheckValidation.field':
     'فیلد «{name}» در بررسی سلامت در دسترس نیست. پنل را دوباره باز کنید.',
@@ -846,7 +846,7 @@ export const faIR = {
   'serviceUpgradeForm.batchNotice':
     'در هر دسته حداکثر {batch} کانتینر ارتقا می‌یابد و فاصلهٔ بین دسته‌ها {interval} ms است. درگاه‌ها، متغیرها، ولوم‌ها و کانتینرهای جانبی تنظیمات فعلی را حفظ می‌کنند، مگر مواردی که در بالا به‌صراحت ویرایش شده‌اند. دسترس‌پذیری به ظرفیت و سلامت برنامه بستگی دارد.',
   'serviceUpgradeForm.follow':
-    'پس از ارتقا، وضعیت را در اینجا پیگیری کنید. وقتی Rancher عملیات مربوط را در دسترس قرار دهد، «تکمیل ارتقا» و «بازگردانی» نمایش داده می‌شوند.',
+    'پس از ارتقا، وضعیت را در اینجا پیگیری کنید. وقتی Rancher عملیات مربوط را در دسترس قرار دهد، «تکمیل ارتقا» و «بازگردانی ارتقا» نمایش داده می‌شوند.',
   'serviceUpgradeForm.impact':
     'سرویس {service}. درگاه‌های منتشرشده ممکن است دسترسی را تغییر دهند. تغییر اتصال‌های ذخیره‌سازی ممکن است داده‌های موجود را از دسترس خارج کند. ویرایش یا حذف کانتینرهای جانبی باعث جایگزینی کانتینرهای کمکی می‌شود و ممکن است بر داده‌ها یا شبکه اثر بگذارد. در صورت خرابی نقطهٔ پایانی، بررسی سلامت ممکن است کانتینرها را دوباره ایجاد کند یا ارتقا را متوقف کند. Rancher کانتینرها را بر اساس راهبرد انتخاب‌شده جایگزین می‌کند. پیش از تأیید، فیلدها را بررسی کنید.',
   'serviceUpgradeForm.image': 'ایمیج جدید',
@@ -979,7 +979,7 @@ export const faIR = {
   'stackComposeUpgradePanel.close': 'بستن',
   'stackComposeUpgradePanel.review': 'بازبینی ارتقا',
   'stackComposeUpgradePanel.warning':
-    'ارتقای Compose ممکن است سرویس‌ها را راه‌اندازی کند و کانتینرها را دوباره ایجاد کند. Rancher مقیاس سرویس‌های موجود را حفظ می‌کند. برای تغییر آن از «تغییر مقیاس سرویس» استفاده کنید. سرویس‌های جدید ممکن است حتی با وجود scale: 0 در فایل، با مقیاس 1 راه‌اندازی شوند. خروجی، پشتیبان کامل محیط نیست. پیش از ادامه، مقیاس و فایل‌ها را بررسی کنید.',
+    'ارتقای Compose ممکن است سرویس‌ها را راه‌اندازی کند و کانتینرها را دوباره ایجاد کند. Rancher تعداد نمونه‌های سرویس‌های موجود را حفظ می‌کند. برای تغییر آن از «تغییر تعداد نمونه‌های سرویس» استفاده کنید. سرویس‌های جدید ممکن است حتی با وجود scale: 0 در فایل، با یک نمونه راه‌اندازی شوند. خروجی، پشتیبان کامل محیط نیست. پیش از ادامه، تعداد نمونه‌ها و فایل‌ها را بررسی کنید.',
   'stackComposeUpgradePanel.title': 'ارتقای Compose · {name}',
   'stackComposeUpgradePanel.description': 'محیط: {name}. فایل‌ها از پیکربندی فعلی استخراج شده‌اند.',
   'stackComposeUpgradePanel.saved':
@@ -1507,7 +1507,7 @@ export const faIR = {
   'groups.environmentHelp':
     'به‌طور پیش‌فرض دسترسی به هیچ محیطی اعطا نمی‌شود. فقط برای محیط‌های موردنیاز نقش انتخاب کنید.',
   'groups.rancherRules':
-    'نقش‌ها از قواعد Rancher پیروی می‌کنند. بخش پشتیبان دسترسی مستقیم به محیط را نیز در نظر می‌گیرد.',
+    'نقش‌ها از قواعد Rancher پیروی می‌کنند. بک‌اند Rancher دسترسی مستقیم به محیط را نیز در نظر می‌گیرد.',
   'groups.selectedMembers': 'اعضای انتخاب‌شده',
   'groups.accessEnvironments': 'محیط‌های دارای دسترسی',
   'groups.noEnvironmentAccess': 'این گروه دسترسی به هیچ محیطی را اعطا نمی‌کند.',
@@ -1545,7 +1545,7 @@ export const faIR = {
   'groups.memberCount': { other: '{count} کاربر' },
   'groups.deleteTitle': '{name} حذف شود؟',
   'groups.groupFallback': 'گروه',
-  'accessDiagnostics.description': 'مجوزها و نقشی که بخش پشتیبان Rancher محاسبه کرده است.',
+  'accessDiagnostics.description': 'مجوزها و نقشی که بک‌اند Rancher محاسبه کرده است.',
   'accessDiagnostics.environment': 'محیط',
   'accessDiagnostics.noEnvironment': 'بدون محیط',
   'accessDiagnostics.refresh': 'تازه‌سازی دسترسی مؤثر',
@@ -1621,7 +1621,7 @@ export const faIR = {
   'users.administrator': 'مدیر',
   'users.user': 'کاربر',
   'users.name': 'نام',
-  'users.notProvided': 'وارد نشده',
+  'users.notProvided': 'ارائه نشده',
   'users.localGroups': 'گروه‌های محلی',
   'users.managementDisabled': 'مدیریت غیرفعال است',
   'users.adminNotice':
@@ -1955,7 +1955,7 @@ export const faIR = {
   'hostsPage.memory': 'حافظهٔ کل',
   'hostsPage.system': 'سامانه',
   'hostsPage.docker': 'Docker',
-  'hostsPage.hostFailure': 'Rancher خرابی این میزبان را گزارش کرد.',
+  'hostsPage.hostFailure': 'Rancher وقوع خطایی را روی این میزبان گزارش کرد.',
   'hostsPage.viewContainers': 'مشاهدهٔ کانتینرها',
   'hostsPage.detailsActions': 'جزئیات و عملیات',
   'hostsPage.containersTitle': 'کانتینرهای این میزبان',
@@ -2005,7 +2005,7 @@ export const faIR = {
   'engineMonitoring.address': 'نشانی گزارش‌شده',
   'engineMonitoring.port': 'درگاه HTTP',
   'engineMonitoring.clustered': 'وضعیت خوشه‌بندی گزارش‌شده',
-  'engineMonitoring.notProvided': 'وارد نشده',
+  'engineMonitoring.notProvided': 'ارائه نشده',
   'engineMonitoring.yes': 'بله',
   'engineMonitoring.no': 'خیر',
   'engineMonitoring.heartbeat': 'آخرین ضربان',
@@ -2062,7 +2062,7 @@ export const faIR = {
   'settings.restore': 'بازگردانی مقدار پیش‌فرض',
   'settings.hide': 'پنهان کردن مقادیر',
   'settings.show': 'نمایش مقادیر',
-  'settings.unknown': 'وارد نشده',
+  'settings.unknown': 'ارائه نشده',
   'settings.setting': 'تنظیم',
   'settings.refresh': 'تازه‌سازی',
   'settings.details': 'جزئیات',
@@ -2450,7 +2450,7 @@ export const faIR = {
   'balancerRulesPanel.validation.advancedTcp':
     'برای این قاعدهٔ پیشرفتهٔ TCP از ویرایشگر بومی استفاده کنید.',
   'balancerRulesPanel.validation.listener':
-    'شنونده مبهم است یا اتصالی ندارد. از ویرایشگر بومی استفاده کنید.',
+    'درگاه شنود مبهم است یا نگاشت درگاه ندارد. از ویرایشگر بومی استفاده کنید.',
   'balancerRulesPanel.validation.unmatchedPorts':
     'برخی درگاه‌ها قاعدهٔ منطبق ندارند. از ویرایشگر بومی استفاده کنید.',
   'balancerRulesPanel.validation.incompleteContract':
@@ -2561,7 +2561,7 @@ export const faIR = {
   'machineDrivers.deactivate': 'غیرفعال‌سازی',
   'machineDrivers.refresh': 'تازه‌سازی',
   'machineDrivers.reactivate': 'فعال‌سازی دوباره',
-  'machineDrivers.builtin': 'داخلی',
+  'machineDrivers.builtin': 'تعبیه‌شده',
   'machineDrivers.catalog': 'کاتالوگ',
   'machineDrivers.cancel': 'لغو',
   'machineDrivers.remove': 'حذف',

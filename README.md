@@ -20,7 +20,7 @@
 
 ![Rancho Console in English showing environments, stacks and service actions](docs/images/guide-workloads-en-US.png)
 
-*The English console shows the synthetic `UI-OPS-LAB` environment with the language preview enabled. The `documentation-demo` stack is expanded and its `web` service is at scale 0. [See the separate migration rehearsal](docs/en/migration-evidence.md).*
+*The English console shows the synthetic `UI-OPS-LAB` environment using the shipped language selector. The `documentation-demo` stack is expanded and its `web` service is at scale 0. [See the separate migration rehearsal](docs/en/migration-evidence.md).*
 
 ## What you can do
 
@@ -30,21 +30,19 @@
 
 ## Install with Docker Compose
 
-> [!WARNING]
-> The published v0.1.0 is a preview. Stable status was withdrawn while language completion, visual acceptance and the remaining roadmap work are completed. Follow the [acceptance roadmap](docs/en/roadmap.md).
+Choose a [published release](https://github.com/lucaspaulukx/rancho-platform/releases) that lists the registry image digests. This quick start uses Linux amd64, one Rancho server, MariaDB 10.11, Docker Compose v2 and Python 3.10+ for administrator setup. The [v0.1.0 preview](https://github.com/lucaspaulukx/rancho-platform-archive/releases/tag/v0.1.0) remains available in the archive.
 
-The [archived v0.1.0 preview](https://github.com/lucaspaulukx/rancho-platform-archive/releases/tag/v0.1.0) includes public images for Linux amd64. This quick start uses one Rancho server, MariaDB 10.11 and Docker Compose v2. Python 3.10+ runs the first administrator setup.
-
-1. Check out the release.
+1. Set `RANCHO_TAG` to the published tag you chose and check out that tag.
 
    ```sh
-   git clone --branch v0.1.0 --depth 1 https://github.com/lucaspaulukx/rancho-platform-archive.git rancho-platform
+   git clone --branch "$RANCHO_TAG" --depth 1 https://github.com/lucaspaulukx/rancho-platform.git rancho-platform
    cd rancho-platform
    ```
 
-2. In the repository root, create a private `.env` file with `RANCHO_DB_PASSWORD` set to a strong, unique password. Then pull and start the stack.
+2. In the repository root, create a private `.env` file. Set `RANCHO_VERSION` to the selected version without its leading `v` and set `RANCHO_DB_PASSWORD` to a strong, unique password. Check the resolved images before pulling and starting the stack.
 
    ```sh
+   docker compose -f compose.modern.yaml -f compose.registry.yaml config --images
    docker compose -f compose.modern.yaml -f compose.registry.yaml pull
    docker compose -f compose.modern.yaml -f compose.registry.yaml up -d --wait --no-build
    ```

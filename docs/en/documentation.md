@@ -32,7 +32,7 @@ Replace the example source with the affected canonical paths; `--review` accepts
 
 ## Reviewing interface translations
 
-`npm run check:ui-literals` checks direct JSX text and selected user-facing attributes for strings outside the catalogs. Product names, protocol names and technical units have scoped exceptions. Source CI and the image build run this check. Review text returned by helpers, the backend and external providers separately.
+`npm run check:ui-literals` checks JSX text, selected interface properties and direct feedback calls for strings outside the catalogs. Product names, protocol names and technical units have scoped exceptions. Source CI and the image build run this check. Review text returned by helpers, the backend and external providers separately.
 
 The preview catalogs in `console/src/i18n/catalogs/` track their English source by message domain in `console/src/i18n/preview-sources.json`. Run `npm run check:locales` from `console/`. A wording or placeholder change in a translated domain requires reviewing every affected locale. The gate also runs in CI and the image build.
 

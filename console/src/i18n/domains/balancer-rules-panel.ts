@@ -53,7 +53,7 @@ export const ptBalancerRulesPanel = {
     'Formato de portas não suportado. Use a edição nativa.',
   'balancerRulesPanel.validation.invalidBinding': 'Binding de porta inválido.',
   'balancerRulesPanel.validation.nativeBinding':
-    'Este binding exige a edição nativa. Nenhuma porta será convertida.',
+    'Este vínculo exige o editor nativo. Os vínculos de portas serão preservados.',
   'balancerRulesPanel.validation.port': 'Informe portas inteiras entre 1 e 65535.',
   'balancerRulesPanel.validation.native': 'Este balanceador exige a edição nativa.',
   'balancerRulesPanel.validation.advanced':

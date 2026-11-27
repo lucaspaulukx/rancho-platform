@@ -175,7 +175,7 @@ export const ptOperations = {
     one: '{count} recurso selecionado · limite 100',
     other: '{count} recursos selecionados · limite 100',
   },
-  'operations.selectedAction': '{action} selecionados',
+  'operations.selectedAction': 'Ação selecionada: {action}',
   'operations.noCommonAction': 'Os recursos selecionados não têm uma ação em comum disponível.',
   'operations.clearSelection': 'Limpar seleção',
   'operations.stackName': 'Stack {name}',

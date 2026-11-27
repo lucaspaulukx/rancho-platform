@@ -141,7 +141,7 @@ describe('Contas locais: fronteiras de privilégio e credencial', () => {
         'admin',
         [account],
       ),
-    ).toThrow('outro administrador');
+    ).toThrow('outra conta de administrador');
   });
   it('payload de perfil usa apenas campos permitidos e rejeita kind externo e limites', () => {
     expect(accountProfile(accountSchema, ' Name ', 'description', 'user', true)).toEqual({
@@ -161,7 +161,7 @@ describe('Contas locais: fronteiras de privilégio e credencial', () => {
   it('protege a própria administração, último admin e exige inativação antes de excluir', () => {
     const admin = { ...account, id: '1a1', kind: 'admin' };
     expect(() => validateAccountChange(admin, admin, '1a1', 'profile', 'user', [admin])).toThrow(
-      'outro administrador',
+      'outra conta de administrador',
     );
     expect(() =>
       validateAccountChange(admin, admin, '1a2', 'deactivate', 'admin', [admin]),
@@ -304,7 +304,7 @@ describe('Contas locais: fronteiras de privilégio e credencial', () => {
     await user.type(screen.getByLabelText('Confirmar senha local'), 'synthetic-private');
     await user.click(screen.getByRole('button', { name: 'Revisar alterações' }));
     await user.click(screen.getByRole('button', { name: 'Confirmar' }));
-    expect(await screen.findByText(/não possui uma única credencial local ativa/)).toBeVisible();
+    expect(await screen.findByText(/tem zero ou mais de uma credencial local ativa/)).toBeVisible();
     expect(vi.mocked(api).mock.calls.some(([p, body]) => p.startsWith('passwords') && !!body)).toBe(
       false,
     );

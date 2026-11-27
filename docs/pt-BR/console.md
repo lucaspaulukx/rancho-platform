@@ -49,4 +49,4 @@ Em um environment com um host registrado, abra **Containers**, selecione um cont
 
 A captura mostra a saída real de um container descartável em um host Docker 29 de teste. O workload emitia uma linha de teste a cada três segundos.
 
-Execute `npm run check:locales` e `npm run check:ui-literals` após alterar um rótulo visível. O primeiro verifica os catálogos de mensagens registradas. O segundo verifica texto direto no JSX e atributos selecionados. Consulte as [boas práticas de frontend](ui-guidelines.md) para verificar teclado, temas e layout.
+Execute `npm run check:locales` e `npm run check:ui-literals` após alterar um rótulo visível. O primeiro verifica os catálogos de mensagens registradas. O segundo verifica textos em JSX, propriedades da interface e chamadas de feedback. Consulte as [boas práticas de frontend](ui-guidelines.md) para verificar teclado, temas e layout.

@@ -15,7 +15,7 @@ async function change(reset=false){
  else{
   await page.getByRole('button',{name:'Adicionar limite de processo',exact:true}).click();
   await page.getByLabel('Recurso do limite 1',{exact:true}).selectOption('nofile');
-  await page.getByLabel('Limite inicial 1',{exact:true}).fill('1024');await page.getByLabel('Limite máximo 1',{exact:true}).fill('2048');
+  await page.getByLabel('Limite flexível (soft) 1',{exact:true}).fill('1024');await page.getByLabel('Limite rígido (hard) 1',{exact:true}).fill('2048');
  }
  const before=result.upgradeRequests;
  await page.getByRole('button',{name:'Confirmar operação',exact:true}).click();
