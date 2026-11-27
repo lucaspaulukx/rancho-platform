@@ -103,5 +103,5 @@ export const ptProcesses = {
   'processes.detailLabel': 'Detalhes do processo {id}',
   'processes.page': 'Página {page}',
   'processes.replayDescription':
-    'Processo {name} ({id}) sobre {type} {resource}. O engine pode repetir efeitos no recurso. A operação não pode ser desfeita pela console.',
+    'Processo {name} ({id}) sobre {type} {resource}. O engine pode repetir efeitos no recurso. A operação não pode ser desfeita pelo console.',
 } as const;

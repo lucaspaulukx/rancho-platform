@@ -42,8 +42,8 @@ let browser,
   for (const route of ['/stacks?env=1a12', '/audit?env=1a12']) {
     await p.goto('http://localhost:18090/console' + route);
     await p.getByLabel('Menu do usuário', { exact: true }).click();
-    await p.getByRole('button', { name: 'Sobre esta console', exact: true }).click();
-    await p.getByRole('dialog', { name: 'Sobre esta console', exact: true }).waitFor();
+    await p.getByRole('button', { name: 'Sobre este console', exact: true }).click();
+    await p.getByRole('dialog', { name: 'Sobre este console', exact: true }).waitFor();
     await p.getByRole('button', { name: 'Fechar diálogo', exact: true }).click();
   }
   for (const theme of ['dark', 'light'])
@@ -56,9 +56,9 @@ let browser,
         });
         if (await toggle.count()) await toggle.click();
         const menu = p.getByLabel('Menu do usuário', { exact: true });
-        if (!(await p.getByRole('button', { name: 'Sobre esta console', exact: true }).isVisible()))
+        if (!(await p.getByRole('button', { name: 'Sobre este console', exact: true }).isVisible()))
           await menu.click();
-        await p.getByRole('button', { name: 'Sobre esta console', exact: true }).click();
+        await p.getByRole('button', { name: 'Sobre este console', exact: true }).click();
         await p.getByRole('tab', { name: tab, exact: true }).click();
         await p.screenshot({
           path: path.join(root, 'evidence/e2e-isolated', `about-${tab}-${theme}-${width}.png`),
@@ -92,7 +92,7 @@ let browser,
   enabled = false;
   await p.reload();
   await p.getByLabel('Menu do usuário', { exact: true }).click();
-  assert.equal(await p.getByRole('button', { name: 'Sobre esta console', exact: true }).count(), 0);
+  assert.equal(await p.getByRole('button', { name: 'Sobre este console', exact: true }).count(), 0);
   console.log('PASS: about flag removes shared entry point');
   await c.close();
 })()

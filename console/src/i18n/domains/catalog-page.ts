@@ -183,7 +183,7 @@ export const ptCatalogPage = {
   'catalogPage.title': 'Catálogo',
   'catalogPage.close': 'Fechar',
   'catalogPage.cattleInfo':
-    'O lançamento de templates nesta console está disponível para environments Cattle. Você pode consultar as versões e seus arquivos.',
+    'O lançamento de templates neste console está disponível para environments Cattle. Você pode consultar as versões e seus arquivos.',
   'catalogPage.launchInfo':
     'Você pode consultar os arquivos. O lançamento não está disponível para sua conta ou para este tipo de environment.',
   'catalogPage.impactWarning':

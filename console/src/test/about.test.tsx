@@ -35,7 +35,7 @@ describe('Sobre e capacidades', () => {
     render(<About open onClose={vi.fn()} />);
     expect(screen.getByRole('img', { name: 'Rancho Platform' })).toBeInTheDocument();
     expect(screen.getByText('Rancher 1.6.30')).toBeInTheDocument();
-    expect(screen.getByText('Base do laboratório')).toBeInTheDocument();
+    expect(screen.getByText('Versão de origem')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Abrir Rancher clássico' })).toHaveAttribute(
       'href',
       'http://localhost:18080/',

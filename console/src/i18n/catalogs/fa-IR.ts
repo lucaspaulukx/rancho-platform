@@ -195,9 +195,9 @@ export const faIR = {
   'operations.action.remove': 'حذف',
   'operations.action.purge': 'حذف دائمی',
   'operations.action.setservicelinks': 'مدیریت پیوندهای سرویس',
-  'operations.stackMetric': 'پشته',
-  'operations.serviceMetric': 'سرویس',
-  'operations.containerMetric': 'کانتینر',
+  'operations.stackMetric': { other: '{count} پشته' },
+  'operations.serviceMetric': { other: '{count} سرویس' },
+  'operations.containerMetric': { other: '{count} کانتینر' },
   'operations.totals': 'مجموع منابع محیط · به‌روزرسانی هر ۱۵ ثانیه',
   'operations.visibleStacks': { other: '{count} پشتهٔ قابل مشاهده' },
   'operations.visibleServices': { other: '{count} سرویس قابل مشاهده' },
@@ -1669,7 +1669,7 @@ export const faIR = {
   'localAccountPanel.newPassword': 'گذرواژهٔ محلی جدید',
   'localAccountPanel.confirmPassword': 'تأیید گذرواژهٔ محلی',
   'localAccountPanel.passwordNotice':
-    'این تغییر فقط بر اطلاعات ورود محلی اثر می‌گذارد. تغییر گذرواژه نشست‌های JWT صادرشده را لغو نمی‌کند. برای جلوگیری از استفادهٔ حساب، آن را غیرفعال کنید. گذرواژه‌های Keycloak را ارائه‌دهنده مدیریت می‌کند.',
+    'این تغییر فقط بر اطلاعات ورود محلی اثر می‌گذارد. تغییر گذرواژه نشست‌های JWT صادرشده را لغو نمی‌کند. برای جلوگیری از استفادهٔ حساب، آن را غیرفعال کنید. اطلاعات ورود فدرال را ارائه‌دهندهٔ هویت مدیریت می‌کند.',
   'localAccountPanel.deactivateNotice':
     'حساب دیگر نمی‌تواند احراز هویت کند و بررسی بعدی نشست آن رد می‌شود. عضویت در گروه‌ها و دسترسی‌های فعلی حفظ می‌شوند.',
   'localAccountPanel.removeNotice':
@@ -2420,7 +2420,7 @@ export const faIR = {
   'balancerRulesPanel.remove': 'حذف قاعدهٔ {index}',
   'balancerRulesPanel.protocol': 'پروتکل {index}',
   'balancerRulesPanel.access': 'دسترسی {index}',
-  'balancerRulesPanel.sourcePort': 'درگاه مبدأ {index}',
+  'balancerRulesPanel.sourcePort': 'درگاه شنود {index}',
   'balancerRulesPanel.targetPort': 'درگاه مقصد {index}',
   'balancerRulesPanel.target': 'سرویس مقصد {index}',
   'balancerRulesPanel.hostname': 'نام میزبان {index}',
@@ -2757,11 +2757,11 @@ export const faIR = {
   'aboutPage.capabilities': 'قابلیت‌ها',
   'aboutPage.consoleInfo': 'اطلاعات کنسول',
   'aboutPage.modernConsole': 'کنسول جدید',
-  'aboutPage.labBase': 'نسخهٔ پایهٔ آزمایشگاه',
+  'aboutPage.labBase': 'نسخهٔ پایهٔ بالادست',
   'aboutPage.operations':
     'پشته‌ها، سرویس‌ها و کانتینرها را با مدیریت متمرکز دسترسی و احراز هویت OIDC مدیریت کنید. Rancher هویت محصول و قواعد مجوزدهی سرور خود را حفظ می‌کند.',
   'aboutPage.migration':
-    'مهاجرت در جریان است. ماژول‌های در دسترس به پرچم‌های قابلیت و مجوزهای حساب شما بستگی دارند. قابلیت‌هایی که هنوز در حال اعتبارسنجی هستند غیرفعال می‌مانند.',
+    'ماژول‌های در دسترس به پرچم‌های قابلیت و مجوزهای حساب شما بستگی دارند. قابلیت‌هایی که هنوز در حال اعتبارسنجی هستند غیرفعال می‌مانند.',
   'aboutPage.attribution':
     'این کنسول یک سفارشی‌سازی مستقل است. علائم تجاری محصولات و سازمان‌های مربوط را مشخص می‌کنند و به‌معنای گواهی یا تأیید رسمی Rancher نیستند.',
   'aboutPage.classic': 'باز کردن Rancher کلاسیک',

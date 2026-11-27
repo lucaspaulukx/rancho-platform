@@ -125,7 +125,7 @@ export const ptResourcesPage = {
   'resourcesPage.certificateUnavailable':
     'O certificado atual não está disponível. Recarregue o recurso antes de editar.',
   'resourcesPage.environmentHint':
-    'Alterar o environment atualiza os recursos apresentados nas telas da console.',
+    'Alterar o environment atualiza os recursos apresentados nas telas do console.',
   'resourcesPage.emptyDescription':
     'Os dados aparecerão aqui quando houver recursos disponíveis neste contexto.',
   'resourcesPage.unavailableDescription':
@@ -173,7 +173,7 @@ export const ptResourcesPage = {
   'resourcesPage.refreshData': 'Atualizar dados',
   'resourcesPage.loadMore': 'Carregar mais',
   'resourcesPage.admin': 'Administrador',
-  'resourcesPage.console': 'Sua console',
+  'resourcesPage.console': 'Seu console',
   'resourcesPage.overview': 'VISÃO GERAL',
   'resourcesPage.commonName': 'Nome comum',
   'resourcesPage.containers': 'Containers',

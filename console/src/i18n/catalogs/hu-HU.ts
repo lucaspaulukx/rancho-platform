@@ -90,11 +90,11 @@ export const huHU = {
   'aboutPage.capabilities': 'Funkciók',
   'aboutPage.consoleInfo': 'A konzol adatai',
   'aboutPage.modernConsole': 'Modern konzol',
-  'aboutPage.labBase': 'Laboralap',
+  'aboutPage.labBase': 'Upstream alapverzió',
   'aboutPage.operations':
     'Kezelje a stackeket, szolgáltatásokat és konténereket központosított hozzáféréssel és OIDC-hitelesítéssel. A Rancher megőrzi saját identitását és kiszolgálóoldali engedélyezési szabályait.',
   'aboutPage.migration':
-    'Az átállás folyamatban van. Az elérhető modulok a funkciókapcsolóktól és a fiókja jogosultságaitól függenek. Az ellenőrzés alatt álló funkciók kikapcsolva maradnak.',
+    'Az elérhető modulok a funkciókapcsolóktól és a fiókja jogosultságaitól függenek. Az ellenőrzés alatt álló funkciók kikapcsolva maradnak.',
   'aboutPage.attribution':
     'Ez a konzol független testreszabás. A védjegyek a megfelelő termékeket és szervezeteket azonosítják, és nem jelentenek hivatalos Rancher-tanúsítást vagy jóváhagyást.',
   'aboutPage.classic': 'Klasszikus Rancher megnyitása',
@@ -285,7 +285,7 @@ export const huHU = {
   'networkPoliciesPage.view': 'Hálózati szabályzatok megtekintése',
   'networkPoliciesPage.close': 'Bezárás',
   'networkPoliciesPage.managerWarning':
-    'A network-policy-manager inaktív vagy nem működik megfelelően. A szabályok megtekinthetők. Módosítani az infrastruktúra ellenőrzése után lehet.',
+    'A network-policy-manager inaktív vagy nem működik megfelelően. A szabályok megtekinthetők. A módosítás akkor válik elérhetővé, ha a szabályzatkezelő aktív és megfelelően működik.',
   'networkPoliciesPage.advancedNotice':
     'Ez a hálózat speciális vagy fel nem ismert szabályokat tartalmaz. Az egyszerűsített szerkesztő nem cseréli le őket.',
   'networkPoliciesPage.allowOption': 'Engedélyezés',
@@ -352,7 +352,7 @@ export const huHU = {
   'balancerRulesPanel.remove': 'A(z) {index}. szabály eltávolítása',
   'balancerRulesPanel.protocol': '{index}. protokoll',
   'balancerRulesPanel.access': '{index}. hozzáférés',
-  'balancerRulesPanel.sourcePort': '{index}. forrásport',
+  'balancerRulesPanel.sourcePort': '{index}. figyelőport',
   'balancerRulesPanel.targetPort': '{index}. célport',
   'balancerRulesPanel.target': '{index}. célszolgáltatás',
   'balancerRulesPanel.hostname': '{index}. gazdagépnév',
@@ -1188,7 +1188,7 @@ export const huHU = {
   'localAccountPanel.newPassword': 'Új helyi jelszó',
   'localAccountPanel.confirmPassword': 'Helyi jelszó megerősítése',
   'localAccountPanel.passwordNotice':
-    'A módosítás csak a helyi hitelesítő adatokat érinti. A jelszó módosítása nem vonja vissza a korábban kiadott JWT-munkameneteket. A használat letiltásához deaktiválja a fiókot. A Keycloak-jelszavakat az identitásszolgáltató kezeli.',
+    'A módosítás csak a helyi hitelesítő adatokat érinti. A jelszó módosítása nem vonja vissza a korábban kiadott JWT-munkameneteket. A használat letiltásához deaktiválja a fiókot. A föderált bejelentkezés hitelesítő adatait az identitásszolgáltató kezeli.',
   'localAccountPanel.deactivateNotice':
     'A fiók többé nem hitelesíthető, és a következő munkamenet-ellenőrzését a rendszer elutasítja. A meglévő csoporttagságok és hozzáférések megmaradnak.',
   'localAccountPanel.removeNotice':
@@ -1359,7 +1359,7 @@ export const huHU = {
   'groups.rancherRules':
     'A szerepkörök a Rancher szabályait követik. A kiszolgáló továbbra is figyelembe veszi a környezethez adott közvetlen hozzáférést.',
   'groups.selectedMembers': 'Kiválasztott tagok',
-  'groups.accessEnvironments': 'Elérhető környezetek',
+  'groups.accessEnvironments': 'Környezetek hozzáféréssel',
   'groups.noEnvironmentAccess': 'Ez a csoport egyik környezethez sem ad hozzáférést.',
   'groups.removalWarning':
     'A tagok eltávolítása a következő kérésektől megvonja a csoporton keresztül kapott hozzáférést, a meglévő munkamenetekben is.',
@@ -1523,7 +1523,7 @@ export const huHU = {
   'resourcesPage.admin': 'Rendszergazda',
   'resourcesPage.console': 'Az Ön konzolja',
   'resourcesPage.overview': 'ÁTTEKINTÉS',
-  'resourcesPage.commonName': 'Köznév (CN)',
+  'resourcesPage.commonName': 'Közös név (CN)',
   'resourcesPage.containers': 'Konténerek',
   'resourcesPage.profile': 'Saját szerepkör',
   'resourcesPage.instance': 'Példány',
@@ -1663,7 +1663,7 @@ export const huHU = {
   'schemaForm.label.issuedAt': 'Kibocsátás ideje',
   'schemaForm.label.issuer': 'Kibocsátó',
   'schemaForm.label.certFingerprint': 'Ujjlenyomat',
-  'schemaForm.label.CN': 'Köznév (CN)',
+  'schemaForm.label.CN': 'Közös név (CN)',
   'schemaForm.label.sizeMb': 'Igényelt kapacitás (MiB)',
   'schemaForm.label.driverOpts': 'Illesztőprogram beállításai',
   'schemaForm.label.storageDriverId': 'Tároló-illesztőprogram',
@@ -1768,7 +1768,7 @@ export const huHU = {
   'workloadsPage.state': 'Állapot',
   'workloadsPage.stack': 'Stack',
   'workloadsPage.noStack': 'Nincs stack',
-  'workloadsPage.image': 'Rendszerkép',
+  'workloadsPage.image': 'Konténerkép',
   'workloadsPage.scale': 'Konténerek / példányszám',
   'workloadsPage.host': 'Gazdagép',
   'workloadsPage.details': 'Részletek',
@@ -2000,7 +2000,7 @@ export const huHU = {
   'serviceUpgradeForm.validation.conflict':
     'Egy másik kliens módosította a konfigurációt. Nyissa meg újra a frissítést.',
   'serviceUpgradeForm.validation.noChange':
-    'Frissítés előtt módosítsa a lemezképet vagy a konfigurációt.',
+    'Frissítés előtt módosítsa a konténerképet vagy a konfigurációt.',
   'serviceUpgradeForm.validation.contract': 'A frissítési szerződés nem érhető el.',
   'serviceUpgradeForm.validation.sidecarContract': 'A sidecar-szerződés nem érhető el.',
   'serviceUpgradeForm.validation.image': 'Adjon meg érvényes konténerképet szóközök nélkül.',
@@ -2215,7 +2215,7 @@ export const huHU = {
   'schedulingEditor.kind.container_label': 'Konténercímke',
   'schedulingEditor.kind.container': 'Konténer neve',
   'schedulingEditor.mode.required': 'Egyezés kötelező',
-  'schedulingEditor.mode.exclude': 'Egyezés kizárva',
+  'schedulingEditor.mode.exclude': 'Nem egyezhet',
   'schedulingEditor.mode.prefer': 'Egyezés előnyben',
   'schedulingEditor.mode.avoid': 'Egyezés lehetőleg kerülendő',
   'schedulingEditor.key': 'Címkekulcs',
@@ -2240,7 +2240,7 @@ export const huHU = {
   'healthCheckEditor.path': 'Az ellenőrzés HTTP-útvonala',
   'healthCheckEditor.pathHint':
     'Példa: /health. Olyan végpontot válasszon, amely nem végez írási műveletet.',
-  'healthCheckEditor.host': 'HTTP-gazdagép (nem kötelező)',
+  'healthCheckEditor.host': 'HTTP Host fejléc (nem kötelező)',
   'healthCheckEditor.advanced': 'Időzítés és helyreállítási szabályzat',
   'healthCheckEditor.strategy': 'Művelet elérhetetlenség esetén',
   'healthCheckEditor.strategy.none': 'Csak jelentés',
@@ -2306,7 +2306,7 @@ export const huHU = {
     'A pontosan ábrázolható egész CPU-indexekből növekvő tartományokat adjon meg.',
   'workloadControls.cpuReview': 'Ellenőrizze a következő mezőt: {label}. {hint}',
 
-  'requestError.scopeChanged': 'A környezet megváltozott. A folytatáshoz nyissa meg újra a panelt.',
+  'requestError.scopeChanged': 'A kontextus megváltozott. A folytatáshoz nyissa meg újra a panelt.',
   'requestError.resourceOutOfScope': 'Az erőforrás nem érhető el ebben a környezetben.',
   'requestError.unsafeUrl': 'A kiszolgáló nem engedélyezett API-címet adott vissza.',
   'requestError.paginationCycle': 'Az API lapozási ciklust adott vissza.',
@@ -2655,9 +2655,9 @@ export const huHU = {
   'operations.action.purge': 'Végleges törlés',
   'operations.action.setservicelinks': 'Szolgáltatáskapcsolatok kezelése',
 
-  'operations.stackMetric': 'stack',
-  'operations.serviceMetric': 'szolgáltatás',
-  'operations.containerMetric': 'konténer',
+  'operations.stackMetric': { other: '{count} stack' },
+  'operations.serviceMetric': { other: '{count} szolgáltatás' },
+  'operations.containerMetric': { other: '{count} konténer' },
   'operations.totals': 'Környezeti összesítés · frissítés 15 másodpercenként',
   'operations.visibleStacks': { other: '{count} látható stack' },
   'operations.visibleServices': { other: '{count} látható szolgáltatás' },
@@ -2710,7 +2710,7 @@ export const huHU = {
   'topology.nodeMoved': 'A kijelölt csomópont elmozdult. Pozíció: x {x}, y {y}.',
   'topology.link': 'Kapcsolat innen: {source}, ide: {target}',
   'operations.search': 'Keresés a műveletekben',
-  'operations.searchPlaceholder': 'Stack, szolgáltatás, konténer, lemezkép vagy azonosító…',
+  'operations.searchPlaceholder': 'Stack, szolgáltatás, konténer, konténerkép vagy azonosító…',
   'operations.state': 'Állapot',
   'operations.allStates': 'Minden állapot',
   'operations.includeSystem': 'Infrastruktúra megjelenítése',
@@ -2847,8 +2847,8 @@ export const huHU = {
   'shell.nav.hosts.description': 'A környezetek kapacitása és infrastruktúrája.',
   'shell.nav.volumes.title': 'Kötetek',
   'shell.nav.volumes.description': 'Tárolás és erőforrás-hozzárendelések.',
-  'shell.nav.registries.title': 'Képtárak',
-  'shell.nav.registries.description': 'Lemezképforrások és hitelesítő adatok.',
+  'shell.nav.registries.title': 'Konténerkép-tárolók',
+  'shell.nav.registries.description': 'Konténerképek forrásai és hitelesítő adatai.',
   'shell.nav.secrets.title': 'Titkok',
   'shell.nav.secrets.description': 'Titkok metaadatai és konfigurációja.',
   'shell.nav.certificates.title': 'Tanúsítványok',

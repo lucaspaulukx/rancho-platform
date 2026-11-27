@@ -17,9 +17,10 @@ O pacote contém fontes de aplicação/extensões, patches pinados, testes, temp
 
 As versões de runtime publicadas usam o pacote GHCR `ghcr.io/lucaspaulukx/rancho-platform`, com tags como `backend-0.1.0`, `console-0.1.0` e `database-0.1.0`. Use uma versão somente depois que sua release listar os digests aceitos do registry. Pré-releases somente de código fonte não significam que essas imagens estejam disponíveis.
 
-Faça checkout da release correspondente, crie um `.env` privado com uma senha forte em `RANCHO_DB_PASSWORD` e mantenha esse arquivo fora do Git. O overlay do registry dispensa builds locais:
+Faça checkout da release correspondente e crie um `.env` privado com uma senha forte em `RANCHO_DB_PASSWORD` e a versão publicada em `RANCHO_VERSION`, sem o `v` inicial. Mantenha o arquivo fora do Git. Confira os nomes das imagens resolvidas antes de baixá-las. As três imagens devem vir do registry informado e coincidir com a versão ou os digests listados na release. O overlay do registry usa imagens prontas.
 
 ```sh
+docker compose -f compose.modern.yaml -f compose.registry.yaml config --images
 docker compose -f compose.modern.yaml -f compose.registry.yaml pull
 docker compose -f compose.modern.yaml -f compose.registry.yaml up -d --wait
 python scripts/bootstrap_admin.py --origin http://localhost:18090 --username admin
@@ -27,7 +28,7 @@ python scripts/bootstrap_admin.py --origin http://localhost:18090 --username adm
 
 O inicializador pede a senha do administrador sem exibi-la. Só aceita endereços loopback, ignora proxies HTTP, recusa redirecionamentos e se recusa a sobrescrever um provedor de autenticação já configurado. Execute-o somente em uma instalação nova. Para um banco restaurado, use o administrador existente e o [procedimento de migração](migration.md). Abra `http://localhost:18090/console/` depois da configuração.
 
-Defina `RANCHO_VERSION` para selecionar outra versão publicada. Para instalações imutáveis, defina `RANCHO_BACKEND_IMAGE`, `RANCHO_CONSOLE_IMAGE` e `RANCHO_DATABASE_IMAGE` com as referências por digest registradas na release; elas têm prioridade sobre as tags de versão. Na migração no primeiro boot, selecione também a imagem publicada `restore-VERSAO` por `RANCHO_MIGRATION_RESTORE_IMAGE` e use o overlay de migração conforme documentado.
+Altere `RANCHO_VERSION` ao adotar outra release publicada. Para instalações imutáveis, defina `RANCHO_BACKEND_IMAGE`, `RANCHO_CONSOLE_IMAGE` e `RANCHO_DATABASE_IMAGE` com as referências por digest registradas na release; elas têm prioridade sobre as tags de versão. Na migração no primeiro boot, selecione também a imagem publicada `restore-VERSAO` por `RANCHO_MIGRATION_RESTORE_IMAGE` e use o overlay de migração conforme documentado.
 
 ### Publicar imagens aceitas no registry
 

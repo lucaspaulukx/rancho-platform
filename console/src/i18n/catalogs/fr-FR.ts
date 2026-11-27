@@ -92,11 +92,11 @@ export const frFR = {
   'aboutPage.capabilities': 'Fonctionnalités',
   'aboutPage.consoleInfo': 'Informations sur la console',
   'aboutPage.modernConsole': 'Console moderne',
-  'aboutPage.labBase': 'Base du laboratoire',
+  'aboutPage.labBase': 'Version amont',
   'aboutPage.operations':
     'Gérez les stacks, services et conteneurs avec un accès centralisé et l’authentification OIDC. Rancher conserve son identité et ses règles d’autorisation côté serveur.',
   'aboutPage.migration':
-    'La migration est en cours. Les modules disponibles dépendent des options activées et des autorisations de votre compte. Les fonctionnalités en cours de validation restent désactivées.',
+    'Les modules disponibles dépendent des options activées et des autorisations de votre compte. Les fonctionnalités en cours de validation restent désactivées.',
   'aboutPage.attribution':
     'Cette console est une personnalisation indépendante. Les marques identifient leurs produits et organisations respectifs et n’impliquent aucune certification ni approbation officielle de Rancher.',
   'aboutPage.classic': 'Ouvrir Rancher classique',
@@ -356,7 +356,7 @@ export const frFR = {
   'balancerRulesPanel.remove': 'Retirer la règle {index}',
   'balancerRulesPanel.protocol': 'Protocole {index}',
   'balancerRulesPanel.access': 'Accès {index}',
-  'balancerRulesPanel.sourcePort': 'Port source {index}',
+  'balancerRulesPanel.sourcePort': 'Port d’écoute {index}',
   'balancerRulesPanel.targetPort': 'Port cible {index}',
   'balancerRulesPanel.target': 'Service cible {index}',
   'balancerRulesPanel.hostname': 'Nom d’hôte {index}',
@@ -1195,7 +1195,7 @@ export const frFR = {
   'localAccountPanel.newPassword': 'Nouveau mot de passe local',
   'localAccountPanel.confirmPassword': 'Confirmer le mot de passe local',
   'localAccountPanel.passwordNotice':
-    'Cette modification concerne uniquement les identifiants locaux. La modification du mot de passe ne révoque pas les sessions JWT déjà émises. Désactivez le compte pour bloquer son utilisation. Les mots de passe Keycloak sont gérés par le fournisseur.',
+    'Cette modification concerne uniquement les identifiants locaux. La modification du mot de passe ne révoque pas les sessions JWT déjà émises. Désactivez le compte pour bloquer son utilisation. Le fournisseur d’identité gère les identifiants de connexion fédérée.',
   'localAccountPanel.deactivateNotice':
     'Le compte ne pourra plus s’authentifier et sa prochaine vérification de session sera rejetée. Les groupes et accès existants seront conservés.',
   'localAccountPanel.removeNotice':
@@ -2699,9 +2699,9 @@ export const frFR = {
   'operations.action.purge': 'Supprimer définitivement',
   'operations.action.setservicelinks': 'Gérer les liens entre services',
 
-  'operations.stackMetric': 'stacks',
-  'operations.serviceMetric': 'services',
-  'operations.containerMetric': 'conteneurs',
+  'operations.stackMetric': { one: '{count} stack', other: '{count} stacks' },
+  'operations.serviceMetric': { one: '{count} service', other: '{count} services' },
+  'operations.containerMetric': { one: '{count} conteneur', other: '{count} conteneurs' },
   'operations.totals': 'Totaux de l’environnement · actualisés toutes les 15 s',
   'operations.visibleStacks': { one: '{count} stack visible', other: '{count} stacks visibles' },
   'operations.visibleServices': {
@@ -2840,7 +2840,7 @@ export const frFR = {
   'auth.password': 'Mot de passe',
   'auth.localLogin': 'Se connecter avec un compte local',
   'auth.localRejected': 'Impossible de se connecter. Vérifiez vos identifiants et réessayez.',
-  'auth.pendingStill': 'Votre demande d’accès est toujours en attente d’approbation.',
+  'auth.pendingStill': 'Votre accès est toujours en attente d’approbation.',
   'auth.accessCheckFailed': 'Impossible de vérifier l’accès. Réessayez.',
   'auth.accessTitle': 'Votre accès',
   'auth.accessDescription':

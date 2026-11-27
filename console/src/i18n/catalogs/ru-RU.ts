@@ -218,7 +218,7 @@ export const ruRU = {
   'workloadStreams.selectionHint':
     'Отображается только выбранный контейнер. При переключении на другой контейнер предыдущее соединение закрывается.',
 
-  'resourceStream.scope': 'Ресурс не относится к выбранному окружению.',
+  'resourceStream.scope': 'Ресурс не относится к выбранной среде.',
   'resourceStream.invalidFrame': 'Получено недопустимое сообщение соединения.',
   'resourceStream.failed': 'Не удалось подключиться. Закройте эту панель и попробуйте снова.',
   'resourceStream.revoked':
@@ -250,10 +250,25 @@ export const ruRU = {
     'В буфере хранится до 2 000 последних строк общим объёмом не более 512 КБ. Поиск и скачивание охватывают только содержимое, полученное в этой панели.',
   'resourceStream.logLabel': 'Журналы контейнера',
 
-  'operations.stackMetric': 'стеки',
-  'operations.serviceMetric': 'сервисы',
-  'operations.containerMetric': 'контейнеры',
-  'operations.totals': 'Итоги по окружению · обновление каждые 15 с',
+  'operations.stackMetric': {
+    one: '{count} стек',
+    few: '{count} стека',
+    many: '{count} стеков',
+    other: '{count} стека',
+  },
+  'operations.serviceMetric': {
+    one: '{count} сервис',
+    few: '{count} сервиса',
+    many: '{count} сервисов',
+    other: '{count} сервиса',
+  },
+  'operations.containerMetric': {
+    one: '{count} контейнер',
+    few: '{count} контейнера',
+    many: '{count} контейнеров',
+    other: '{count} контейнера',
+  },
+  'operations.totals': 'Итоги по среде · обновление каждые 15 с',
   'operations.visibleStacks': {
     one: '{count} видимый стек',
     few: '{count} видимых стека',
@@ -303,7 +318,7 @@ export const ruRU = {
   'operations.includeSystem': 'Показывать инфраструктуру',
   'operations.empty': 'Нет ресурсов, соответствующих этим фильтрам',
   'operations.emptyHint':
-    'Проверьте поиск, состояние или настройку инфраструктуры. Отображаются только ресурсы выбранного окружения.',
+    'Проверьте поиск, состояние или настройку инфраструктуры. Отображаются только ресурсы выбранной среды.',
   'operations.selectEnvironment': 'Выберите среду',
   'operations.selectEnvironmentHint':
     'Выберите в верхней панели среду, к которой у вас есть доступ, чтобы управлять её ресурсами.',
@@ -1031,8 +1046,8 @@ export const ruRU = {
   'serviceUpgradeForm.configuration': 'Обновление конфигурации',
   'serviceUpgradeForm.imageUpgrade': 'Обновление образа',
   'serviceUpgradeForm.currentImage': 'Текущий образ:',
-  'serviceUpgradeForm.capAdd': 'Добавленные возможности',
-  'serviceUpgradeForm.capDrop': 'Удалённые возможности',
+  'serviceUpgradeForm.capAdd': 'Добавляемые права Linux',
+  'serviceUpgradeForm.capDrop': 'Удаляемые права Linux',
   'serviceUpgradeForm.startFirst': 'Запускать новые контейнеры перед остановкой текущих',
   'serviceUpgradeForm.confirm': 'Обновить конфигурацию сервиса?',
   'sidecarValidation.depth':
@@ -1359,8 +1374,8 @@ export const ruRU = {
   'schemaForm.label.volumeDriver': 'Драйвер тома',
   'schemaForm.label.storageOpt': 'Параметры хранилища',
   'schemaForm.label.readOnly': 'Файловая система только для чтения',
-  'schemaForm.label.capAdd': 'Добавленные возможности',
-  'schemaForm.label.capDrop': 'Удалённые возможности',
+  'schemaForm.label.capAdd': 'Добавляемые права Linux',
+  'schemaForm.label.capDrop': 'Удаляемые права Linux',
   'schemaForm.label.securityOpt': 'Параметры безопасности',
   'schemaForm.label.devices': 'Устройства',
   'schemaForm.mapKey': '{name}: ключ {index}',
@@ -1797,7 +1812,7 @@ export const ruRU = {
   'localAccountPanel.newPassword': 'Новый локальный пароль',
   'localAccountPanel.confirmPassword': 'Подтвердите локальный пароль',
   'localAccountPanel.passwordNotice':
-    'Изменение затрагивает только локальные учётные данные. Смена пароля не отзывает ранее выданные сеансы JWT. Чтобы заблокировать использование учётной записи, деактивируйте её. Паролями Keycloak управляет поставщик удостоверений.',
+    'Изменение затрагивает только локальные учётные данные. Смена пароля не отзывает ранее выданные сеансы JWT. Чтобы заблокировать использование учётной записи, деактивируйте её. Учётными данными для федеративного входа управляет поставщик удостоверений.',
   'localAccountPanel.deactivateNotice':
     'Учётная запись больше не сможет пройти аутентификацию. Следующая проверка её сеанса завершится отказом. Текущие группы и разрешения сохранятся.',
   'localAccountPanel.removeNotice':
@@ -2564,7 +2579,7 @@ export const ruRU = {
   'balancerRulesPanel.remove': 'Удалить правило {index}',
   'balancerRulesPanel.protocol': 'Протокол {index}',
   'balancerRulesPanel.access': 'Доступ {index}',
-  'balancerRulesPanel.sourcePort': 'Исходный порт {index}',
+  'balancerRulesPanel.sourcePort': 'Входной порт {index}',
   'balancerRulesPanel.targetPort': 'Целевой порт {index}',
   'balancerRulesPanel.target': 'Целевой сервис {index}',
   'balancerRulesPanel.hostname': 'Имя хоста {index}',
@@ -2913,11 +2928,11 @@ export const ruRU = {
   'aboutPage.capabilities': 'Возможности',
   'aboutPage.consoleInfo': 'Сведения о консоли',
   'aboutPage.modernConsole': 'Современная консоль',
-  'aboutPage.labBase': 'Лабораторная база',
+  'aboutPage.labBase': 'Версия исходного проекта',
   'aboutPage.operations':
     'Управляйте стеками, сервисами и контейнерами с централизованным доступом и аутентификацией OIDC. Rancher сохраняет собственную идентичность и правила авторизации на сервере.',
   'aboutPage.migration':
-    'Миграция продолжается. Доступные модули зависят от флагов функций и разрешений вашей учётной записи. Функции, которые ещё проверяются, отключены.',
+    'Доступные модули зависят от флагов функций и разрешений вашей учётной записи. Функции, которые ещё проверяются, отключены.',
   'aboutPage.attribution':
     'Эта консоль представляет собой независимую разработку. Товарные знаки обозначают соответствующие продукты и организации и не подразумевают официальной сертификации или одобрения Rancher.',
   'aboutPage.classic': 'Открыть классический Rancher',

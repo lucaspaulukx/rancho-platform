@@ -41,4 +41,12 @@ Use a disposable environment with one stack named `documentation-demo` and a ser
 3. Refresh the page. Verify that the URL still identifies the selected environment and the saved filters still apply where the view stores them.
 4. To test real logs or the terminal, use a separate lab with a registered Docker host and a running container. The [testing guide](../docs/en/testing.md) describes the native workload checks.
 
+### Inspect live container logs
+
+In an environment with a registered host, open **Containers**, select a running container and choose **View logs** from its actions. Enter a fragment from your workload's output in **Filter logs**. The drawer keeps the container and environment in context. **Download** saves the portion retained in the browser buffer. Press Escape to close the drawer and return focus to the log action.
+
+![Rancho console showing a connected container log panel with filtered lines](../docs/images/guide-logs-en-US.png)
+
+The capture shows real output from a disposable container on a Docker 29 test host. The workload emitted a new test line every three seconds.
+
 Run `npm run check:locales` and `npm run check:ui-literals` after changing a visible label. The first checks the registered message catalogs. The second checks direct JSX text and selected attributes. Consult the [UI guide](../docs/en/ui-guidelines.md) for keyboard, theme and layout checks.
