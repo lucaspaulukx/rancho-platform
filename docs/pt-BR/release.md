@@ -152,6 +152,8 @@ Projeções CycloneDX públicas permitem identidades/versões/hashes/licenças e
 
 A imagem moderna do backend inclui a licença do Cattle em `/usr/share/doc/rancho-cattle` e os avisos do proxy WebSocket e de suas dependências empacotadas em `/usr/share/doc/community-websocket-proxy`. Confira esses diretórios na imagem final durante a revisão de dependências.
 
+O backend moderno copia utilitários herdados pelo nome exato do arquivo e exclui o driver legado do Packet. No perfil suportado, hosts Docker existentes são registrados manualmente. Quem habilita provisionamento externo fornece e revisa separadamente o binário do provedor escolhido.
+
 O build da console inclui em `dist/licenses/npm` os textos de licença das dependências de produção instaladas. O arquivo publicado em `/console/licenses/npm/index.json` lista as versões, as declarações de licença e os avisos. Quando o pacote publicado omite o texto da licença, o build exige um aviso revisado para aquela versão.
 
 O Console preserva o aviso do pacote e inclui o copyright e a licença completos do NGINX 1.30.7, vindos do [arquivo fonte assinado do NGINX](https://nginx.org/download/nginx-1.30.7.tar.gz), em `/usr/share/licenses/nginx/`. A imagem do importador inclui a licença do [arquivo fonte do OpenSSL 4.0.3](https://github.com/openssl/openssl/releases/tag/openssl-4.0.3) em `/usr/share/licenses/rancho-restore/`. Os dois builds conferem os hashes dos avisos e as versões de runtime do NGINX e do OpenSSL.
