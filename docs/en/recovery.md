@@ -104,4 +104,8 @@ With the isolated copy running, select the recovered environment and expand each
 
 ## Rollback and limits
 
+### Restore the matching Console configuration
+
+Restore the previous Console image together with its saved configuration. The 0.1.0 Console requires `localization.preview: true` when its `availableLocales` includes languages other than `pt-BR`. The 0.1.1 default enables all ten languages with preview disabled. For a single configuration shared by both versions during a rehearsal, use an explicit `preview: true` in the existing `localization` block. Keep the production file and the rehearsal copy separate. After switching images, open a fresh browser tab and confirm sign-in and environment selection. Keep the asset retention volume so tabs opened before the switch can still load the files they need.
+
 Recover database, Rancher cryptographic state, IdP and image/configuration as a matching set. Stop the replacement engine before restoring the previous set. Do not run old and new engines against shared storage or assume disabling a schema flag reverses DDL. Preserve sanitized error/cleanup/restart results and treat failed recovery as a failed gate. See [migration](migration.md), [access migration](access-migration.md) and [roadmap](roadmap.md).

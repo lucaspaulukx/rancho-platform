@@ -104,4 +104,8 @@ Com a cópia isolada em execução, selecione o environment restaurado e expanda
 
 ## Rollback e limites
 
+### Restaure a configuração correspondente do console
+
+Restaure a imagem anterior do console junto com a configuração que você salvou para ela. O console 0.1.0 exige `localization.preview: true` quando `availableLocales` inclui idiomas além de `pt-BR`. A configuração padrão da 0.1.1 oferece os dez idiomas com a prévia desativada. Para compartilhar uma configuração entre as duas versões durante um ensaio, defina `preview: true` no bloco `localization` existente. Mantenha a cópia do ensaio separada do arquivo de produção. Após trocar a imagem, abra uma nova aba e confirme o login e a seleção de ambiente. Preserve o volume de retenção de arquivos para que abas abertas antes da troca ainda consigam carregá-los.
+
 Recupere banco, estado criptográfico Rancher, IdP e imagem/configuração correspondentes. Pare o engine novo antes de restaurar o conjunto anterior. Não execute engines antigo/novo sobre storage compartilhado nem suponha que desligar schema desfaz DDL. Preserve resultados sanitizados de erro/cleanup/retomada e trate recuperação falha como gate reprovado. Veja [migração](migration.md), [migração de acesso](access-migration.md) e [roadmap](roadmap.md).
