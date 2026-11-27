@@ -7,7 +7,9 @@
 
 ## Scope and acceptance
 
-The published v0.1.0 has been reclassified as a prerelease. The first stable release targets one active Rancho server with the documented MariaDB installation. Automatic failover and database high availability remain roadmap work for a later release. The first stable release still requires final visual and runtime acceptance of language policy, successful tests for the supported deployment, verified release artifacts and anonymous access to the tested GHCR images. Passing an image scan or migration rehearsal completes only that check.
+[Rancho Platform v0.1.1](https://github.com/lucaspaulukx/rancho-platform/releases/tag/v0.1.1) is the first stable release. The validated profile uses Linux amd64, one active Rancho server, MariaDB 10.11 and manually registered Docker 29 Cattle hosts. All 13 public GHCR images passed anonymous pulls by tag and digest, and the Compose stack started from those digests. Automatic failover and database high availability remain roadmap work for a later release.
+
+The published artifacts passed first-start migration, database and browser rollback, backend recovery, 1,365 Chromium checks, 24 axe scans and 58 gateway checks. The Trivy scan reported zero high or critical findings and zero detected secrets. [Release validation report](https://github.com/lucaspaulukx/rancho-platform/releases/download/v0.1.1/rancho-release-validation.json)
 
 The target is Rancher1.6 Docker/Cattle operated through a shared contextual console, optional local groups/OIDC and a recoverable migration path. The project is under development, not production-certified. A feature implemented in tested slices is not an accepted entire phase. Unit-test counts do not measure parity.
 

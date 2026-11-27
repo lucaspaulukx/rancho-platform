@@ -7,7 +7,9 @@
 
 ## Escopo e aceite
 
-A v0.1.0 publicada foi reclassificada como pré-release. A primeira versão estável tem como alvo um servidor Rancho ativo com a instalação documentada do MariaDB. Failover automático e alta disponibilidade do banco continuam no roadmap para uma versão futura. A primeira estável ainda exige aceite visual e de runtime da política de idiomas, testes aprovados para a implantação suportada, artefatos de release verificados e acesso anônimo às imagens testadas no GHCR. Uma varredura de imagens ou um ensaio de migração aprovado conclui apenas aquela verificação.
+[Rancho Platform v0.1.1](https://github.com/lucaspaulukx/rancho-platform/releases/tag/v0.1.1) é a primeira versão estável. O perfil validado usa Linux amd64, um servidor Rancho ativo, MariaDB 10.11 e hosts Cattle Docker 29 registrados manualmente. As 13 imagens públicas do GHCR passaram pelo pull anônimo por tag e por digest, e a aplicação subiu via Compose com esses digests. Failover automático e alta disponibilidade do banco continuam no roadmap para uma versão futura.
+
+Os artefatos publicados passaram na migração inicial, nos rollbacks do banco e do navegador, na recuperação do backend, em 1.365 verificações do Chromium, 24 análises do axe e 58 testes do gateway. O Trivy reportou zero achados altos ou críticos e zero segredos detectados. [Relatório de validação da release](https://github.com/lucaspaulukx/rancho-platform/releases/download/v0.1.1/rancho-release-validation.json)
 
 O alvo é Rancher1.6 Docker/Cattle operado por console contextual comum, grupos locais/OIDC opcionais e migração recuperável. O projeto está em desenvolvimento, sem certificação produtiva. Função implementada em recortes testados não encerra fase inteira. Contagem de testes não mede paridade.
 
