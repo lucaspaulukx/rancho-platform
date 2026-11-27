@@ -193,6 +193,77 @@ describe('Configuração e escopo da console', () => {
       client.clear();
     }
   });
+  it.each([
+    {
+      field: 'theme',
+      invalid: { customTheme: { dark: { 'private-diagnostic-key': '#ffffff' } } },
+      detail: 'The request could not be completed.',
+      retry: 'Try again',
+      validLocale: true,
+    },
+    {
+      field: 'module',
+      invalid: { modules: { ...configuration.modules, 'private-diagnostic-key': true } },
+      detail: 'The request could not be completed.',
+      retry: 'Try again',
+      validLocale: true,
+    },
+    {
+      field: 'locale',
+      invalid: { localization: { defaultLocale: 'private-diagnostic-key' } },
+      detail: 'Não foi possível concluir a solicitação.',
+      retry: 'Tentar novamente',
+      validLocale: false,
+    },
+  ])(
+    'uses safe startup text and blocks the session for invalid $field configuration',
+    async ({ invalid, detail, retry, validLocale }) => {
+      const localization = {
+        enabled: true,
+        defaultLocale: 'en-US',
+        availableLocales: ['en-US'],
+        preview: true,
+      };
+      let repaired = false;
+      const fetcher = vi.fn(async (url: string) => {
+        if (url === '/console/console-config.json')
+          return Response.json({
+            ...configuration,
+            localization,
+            ...(repaired ? {} : invalid),
+          });
+        if (url === '/oidc/config')
+          return Response.json({ version: 1, effective: {}, available: {} });
+        if (url === '/v2-beta/token') return Response.json({ data: [{}] });
+        throw new Error('Unexpected fetch URL');
+      });
+      vi.stubGlobal('fetch', fetcher);
+      const client = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } });
+      const view = render(
+        <QueryClientProvider client={client}>
+          <MemoryRouter>
+            <AppProvider>Console ready</AppProvider>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      );
+      try {
+        await screen.findByText(detail);
+        expect(screen.getByRole('button', { name: retry })).toBeVisible();
+        expect(document.documentElement.lang).toBe(validLocale ? 'en-US' : 'pt-BR');
+        expect(view.container).not.toHaveTextContent('private-diagnostic-key');
+        expect(screen.queryByText('Console ready')).not.toBeInTheDocument();
+        expect(fetcher.mock.calls.map(([url]) => url)).not.toContain('/v2-beta/token');
+
+        repaired = true;
+        await userEvent.click(screen.getByRole('button', { name: retry }));
+        await screen.findByText('Console ready');
+        expect(fetcher.mock.calls.map(([url]) => url)).toContain('/v2-beta/token');
+      } finally {
+        view.unmount();
+        client.clear();
+      }
+    },
+  );
   it('usa self autenticado pelo backend mesmo com accountId nulo no token GET', async () => {
     const { fetcher, client, view } = setup(true, false, false, {
       groups: true,

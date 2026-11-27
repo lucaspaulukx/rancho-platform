@@ -62,6 +62,22 @@ describe('Configuração pública e temas', () => {
       fetcher.mockRestore();
     }
   });
+  it('preserves cancellation even when frontend configuration is invalid', async () => {
+    const controller = new AbortController();
+    const reason = new DOMException('Test cancellation', 'AbortError');
+    const fetcher = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(Response.json({ ...config, themeDefault: 'invalid' }))
+      .mockImplementationOnce(async () => {
+        controller.abort(reason);
+        throw reason;
+      });
+    try {
+      await expect(loadConfig(controller.signal)).rejects.toBe(reason);
+    } finally {
+      fetcher.mockRestore();
+    }
+  });
   it('rejeita tema com texto ilegível', () =>
     expect(() =>
       validateConfig({ ...config, customTheme: { light: { text: '#ffffff' } } }),
