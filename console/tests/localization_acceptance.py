@@ -47,7 +47,7 @@ def config_digest():
         return hashlib.sha256(content).hexdigest()
 
 
-def main(*, accessibility=False, release_images=None):
+def main(*, accessibility=False, full_visual=False, release_images=None):
     if REPORT.exists():
         archive = ROOT / 'migration-runs'
         archive.mkdir(exist_ok=True)
@@ -74,7 +74,7 @@ def main(*, accessibility=False, release_images=None):
         assert browser.is_file() and (runtime / 'bin/node.exe').is_file()
         payload = {
             'runtimeModules': str(runtime / 'node_modules'), 'browserExecutable': str(browser),
-            'accessibility': accessibility,
+            'accessibility': accessibility, 'fullVisual': full_visual,
             'cookies': [{'name': cookie.name, 'value': cookie.value} for cookie in admin.cookies
                         if cookie.name in ('token', 'CSRF')],
         }
@@ -84,9 +84,9 @@ def main(*, accessibility=False, release_images=None):
         child = subprocess.run(
             [str(runtime / 'bin/node.exe'), str(ROOT / 'console/tests/e2e/localization.cjs')],
             input=json.dumps(payload), text=True, encoding='utf-8', capture_output=True,
-            timeout=105, env=dict(os.environ, DEBUG='', NODE_DEBUG=''),
+            timeout=245 if full_visual else 105, env=dict(os.environ, DEBUG='', NODE_DEBUG=''),
         )
-        assert len(child.stdout) < 65536
+        assert len(child.stdout) < (131072 if full_visual else 65536)
         measured = json.loads(child.stdout)
         allowed = {
             'status', 'checks', 'browserClosed', 'pageErrors', 'blockedRequests',
@@ -143,9 +143,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--accessibility', action='store_true',
                         help='Also scan six routes with axe at desktop and mobile widths in both themes.')
+    parser.add_argument('--full-visual', action='store_true',
+                        help='Check all navigation routes in ten locales, both themes and three viewport widths.')
     parser.add_argument('--release-images', nargs=2, metavar=('BACKEND_ID', 'CONSOLE_ID'),
                         help='Require immutable image IDs of the running lab before and after the test.')
     args = parser.parse_args()
     if args.release_images and not all(re.fullmatch(r'sha256:[a-f0-9]{64}', image) for image in args.release_images):
         parser.error('--release-images requires two immutable sha256 image IDs')
-    raise SystemExit(main(accessibility=args.accessibility, release_images=args.release_images))
+    raise SystemExit(main(accessibility=args.accessibility, full_visual=args.full_visual, release_images=args.release_images))

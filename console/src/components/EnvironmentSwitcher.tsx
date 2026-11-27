@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Check, ChevronDown, Layers3, Search } from 'lucide-react';
 import type { Project } from '../api';
 import { useI18n } from '../i18n/provider';
+import { resourceStateLabel } from '../i18n/resource-state';
 
 const searchable = (value: string, locale: string) =>
   value
@@ -208,7 +209,7 @@ export function EnvironmentSwitcher({
                       ? t('shell.environment.active')
                       : project.state === 'inactive'
                         ? t('shell.environment.inactive')
-                        : project.state}
+                        : resourceStateLabel(t, project.state)}
                   </small>
                 </span>
                 {project.id === currentId && (

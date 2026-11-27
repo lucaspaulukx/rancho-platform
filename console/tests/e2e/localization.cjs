@@ -13,7 +13,7 @@ const accessibilityRoutes = ['groups', 'users', 'api-keys', 'settings', 'audit',
 let axe;
 let browser;
 const contexts = new Set();
-const budget = setTimeout(() => { result.timedOut = true; void browser?.close(); }, 90_000);
+const budget = setTimeout(() => { result.timedOut = true; void browser?.close(); }, input.fullVisual ? 230_000 : 90_000);
 function check(name, condition = true) { assert(condition); result.checks.push(name); }
 async function closeContext(value) {
   if (!contexts.has(value)) return;
@@ -327,13 +327,13 @@ async function main() {
   const serviceUrl = workspace.url();
   assert.equal(new URL(serviceUrl).searchParams.get('view'), 'services');
   for (const [locale, services, view, countLabel] of [
-    ['de-DE', 'Dienste', 'Vorgangsansicht', 'Sichtbare Dienste · {count}'],
-    ['fr-FR', 'Services', 'Vue des opérations', 'Services visibles · {count}'],
+    ['de-DE', 'Dienste', 'Vorgangsansicht', '{count} sichtbare Dienste'],
+    ['fr-FR', 'Services', 'Vue des opérations', '{count} service visible'],
     ['hu-HU', 'Szolgáltatások', 'Műveleti nézet', '{count} látható szolgáltatás'],
     ['ja-JP', 'サービス', '操作ビュー', '表示中のサービス：{count} 件'],
     ['fa-IR', 'سرویس‌ها', 'نمای عملیات', '{count} سرویس قابل مشاهده'],
-    ['ru-RU', 'Сервисы', 'Представление операций', 'Видимые сервисы · {count}'],
-    ['uk-UA', 'Сервіси', 'Подання операцій', 'Видимі сервіси · {count}'],
+    ['ru-RU', 'Сервисы', 'Представление операций', '{count} видимых сервисов'],
+    ['uk-UA', 'Сервіси', 'Подання операцій', '{count} видимих сервісів'],
     ['zh-Hans', '服务', '运维视图', '显示 {count} 个服务'],
   ]) {
     await workspace.locator('.language-selector select').selectOption(locale);
@@ -418,29 +418,33 @@ async function main() {
   ]) {
     const routeName = route || 'overview';
     await workspace.goto(origin + '/console/' + route + '?env=1a12');
-    for (const [locale, direction, heading] of [['en-US', 'ltr', title], ['fa-IR', 'rtl', persianTitle]]) {
+    for (const [locale, direction, heading] of [
+      ['en-US', 'ltr', title], ['fa-IR', 'rtl', persianTitle],
+      ...['pt-BR', 'de-DE', 'fr-FR', 'hu-HU', 'ja-JP', 'ru-RU', 'uk-UA', 'zh-Hans']
+        .map((code) => [code, 'ltr', undefined]),
+    ]) {
       result.stage = 'navigation-' + routeName + '-' + locale;
-      await workspace.locator('.language-selector select').selectOption(locale);
+      const selector = workspace.locator('.language-selector select');
+      await selector.selectOption(locale);
       await workspace.locator(`html[lang="${locale}"][dir="${direction}"]`).waitFor();
-      await workspace.locator('main').getByRole('heading', { level: 1, name: heading, exact: true }).waitFor();
-      check(routeName + ' keeps scope in ' + locale,
-        new URL(workspace.url()).searchParams.get('env') === '1a12');
-      for (const width of [320, 390]) {
-        await workspace.setViewportSize({ width, height: 844 });
-        result.stage = 'navigation-layout-' + routeName + '-' + locale + '-' + width;
-        await workspace.locator('main .loading:visible').waitFor({ state: 'hidden' });
-        assert(await routeFitsViewport(workspace));
-        check(routeName + ' fits the viewport in ' + locale + ' at ' + width + ' px');
+      await workspace.locator('main').getByRole('heading',
+        heading ? { level: 1, name: heading, exact: true } : { level: 1 }).waitFor();
+      const widths = input.fullVisual ? [320, 390, 1440] : heading ? [320, 390] : [320];
+      const themes = input.fullVisual ? ['dark', 'light'] : [null];
+      for (const theme of themes) {
+        if (theme) {
+          await workspace.emulateMedia({ colorScheme: theme });
+          await workspace.waitForFunction((expected) => document.documentElement.dataset.theme === expected, theme);
+        }
+        for (const width of widths) {
+          await workspace.setViewportSize({ width, height: width > 400 ? 1000 : 844 });
+          result.stage = [routeName, locale, theme, width].filter(Boolean).join('-');
+          await workspace.locator('main .loading:visible').waitFor({ state: 'hidden' });
+          check(result.stage + ' fits and retains scope',
+            await routeFitsViewport(workspace) && await insideViewport(selector) &&
+            new URL(workspace.url()).searchParams.get('env') === '1a12');
+        }
       }
-    }
-    await workspace.setViewportSize({ width: 320, height: 844 });
-    for (const locale of ['pt-BR', 'de-DE', 'fr-FR', 'hu-HU', 'ja-JP', 'ru-RU', 'uk-UA', 'zh-Hans']) {
-      result.stage = 'navigation-layout-' + routeName + '-' + locale + '-320';
-      await workspace.locator('.language-selector select').selectOption(locale);
-      await workspace.locator(`html[lang="${locale}"][dir="ltr"]`).waitFor();
-      check(routeName + ' fits the viewport in ' + locale + ' at 320 px',
-        await routeFitsViewport(workspace) &&
-        new URL(workspace.url()).searchParams.get('env') === '1a12');
     }
     await workspace.locator('.language-selector select').selectOption('en-US');
     await workspace.locator('html[lang="en-US"]').waitFor();

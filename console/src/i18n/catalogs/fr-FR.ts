@@ -2497,6 +2497,8 @@ export const frFR = {
   'details.copyFailed':
     'Impossible de copier la configuration. Sélectionnez le texte pour le copier manuellement.',
   'details.sanitized': 'Configuration expurgée',
+  'details.redacted': '[masqué]',
+  'details.depthLimit': '[profondeur maximale atteinte]',
   'details.certificate.unknown': 'Date d’expiration indisponible',
   'details.certificate.expired': 'Expiré',
   'details.certificate.valid': 'Valide',

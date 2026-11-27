@@ -2534,6 +2534,8 @@ export const deDE = {
   'details.copyFailed':
     'Kopieren fehlgeschlagen. Wählen Sie den Text aus, um ihn manuell zu kopieren.',
   'details.sanitized': 'Bereinigte Konfiguration',
+  'details.redacted': '[ausgeblendet]',
+  'details.depthLimit': '[maximale Tiefe erreicht]',
   'details.certificate.unknown': 'Ablaufdatum nicht verfügbar',
   'details.certificate.expired': 'Abgelaufen',
   'details.certificate.valid': 'Gültig',

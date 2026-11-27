@@ -649,6 +649,8 @@ export const ruRU = {
   'details.copied': 'Конфигурация скопирована.',
   'details.copyFailed': 'Не удалось скопировать. Выделите текст, чтобы скопировать его вручную.',
   'details.sanitized': 'Конфигурация со скрытыми данными',
+  'details.redacted': '[скрыто]',
+  'details.depthLimit': '[достигнут предел вложенности]',
   'details.certificate.unknown': 'Срок действия неизвестен',
   'details.certificate.expired': 'Срок действия истёк',
   'details.certificate.valid': 'Действителен',

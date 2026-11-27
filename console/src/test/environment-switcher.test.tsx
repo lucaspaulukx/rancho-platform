@@ -66,6 +66,26 @@ describe('Seletor compartilhado de environment', () => {
     expect(select).not.toHaveBeenCalled();
     expect(screen.queryByRole('link', { name: /Gerenciar/ })).not.toBeInTheDocument();
   });
+  it('traduz estados conhecidos e preserva os valores de estados desconhecidos', async () => {
+    render(
+      <MemoryRouter>
+        <EnvironmentSwitcher
+          projects={[
+            ...projects,
+            { id: '1a3', name: 'Ambiente novo', state: 'activating' },
+            { id: '1a4', name: 'Ambiente externo', state: 'native-state' },
+          ]}
+          currentId="1a1"
+          onSelect={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Environment: Produção' }));
+    expect(screen.getByRole('option', { name: /Ambiente novo/ })).toHaveTextContent('Ativando');
+    expect(screen.getByRole('option', { name: /Ambiente externo/ })).toHaveTextContent(
+      'native-state',
+    );
+  });
   it('mantém o seletor desabilitado quando a conta não tem environments', () => {
     render(
       <MemoryRouter>

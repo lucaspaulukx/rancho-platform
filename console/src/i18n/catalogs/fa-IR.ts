@@ -39,6 +39,8 @@ export const faIR = {
   'details.copied': 'پیکربندی کپی شد.',
   'details.copyFailed': 'کپی انجام نشد. متن را انتخاب کنید و دستی کپی کنید.',
   'details.sanitized': 'پیکربندی با اطلاعات حساس پنهان‌شده',
+  'details.redacted': '[پنهان‌شده]',
+  'details.depthLimit': '[حداکثر عمق مجاز]',
   'details.certificate.unknown': 'زمان انقضا در دسترس نیست',
   'details.certificate.expired': 'منقضی‌شده',
   'details.certificate.valid': 'معتبر',

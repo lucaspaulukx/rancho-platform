@@ -648,6 +648,8 @@ export const ukUA = {
   'details.copied': 'Конфігурацію скопійовано.',
   'details.copyFailed': 'Не вдалося скопіювати. Виділіть текст, щоб скопіювати його вручну.',
   'details.sanitized': 'Конфігурація з прихованими даними',
+  'details.redacted': '[приховано]',
+  'details.depthLimit': '[досягнуто межі вкладеності]',
   'details.certificate.unknown': 'Термін дії невідомий',
   'details.certificate.expired': 'Термін дії минув',
   'details.certificate.valid': 'Дійсний',

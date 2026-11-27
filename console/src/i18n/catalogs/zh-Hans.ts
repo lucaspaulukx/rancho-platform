@@ -39,6 +39,8 @@ export const zhHans = {
   'details.copied': '配置已复制。',
   'details.copyFailed': '无法复制。请选择文本并手动复制。',
   'details.sanitized': '已隐藏敏感信息的配置',
+  'details.redacted': '[已隐藏]',
+  'details.depthLimit': '[已达到深度上限]',
   'details.certificate.unknown': '无法获取到期时间',
   'details.certificate.expired': '已过期',
   'details.certificate.valid': '有效',

@@ -2470,6 +2470,8 @@ export const huHU = {
   'details.copied': 'A konfiguráció a vágólapra került.',
   'details.copyFailed': 'Nem sikerült másolni. Jelölje ki a szöveget a kézi másoláshoz.',
   'details.sanitized': 'Szűrt konfiguráció',
+  'details.redacted': '[elrejtve]',
+  'details.depthLimit': '[mélységi korlát elérve]',
   'details.certificate.unknown': 'A lejárati dátum nem érhető el',
   'details.certificate.expired': 'Lejárt',
   'details.certificate.valid': 'Érvényes',

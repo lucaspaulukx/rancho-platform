@@ -40,6 +40,8 @@ export const jaJP = {
   'details.copied': '設定をコピーしました。',
   'details.copyFailed': 'コピーできませんでした。テキストを選択して手動でコピーしてください。',
   'details.sanitized': '機密情報を除いた設定',
+  'details.redacted': '[非表示]',
+  'details.depthLimit': '[階層の上限に到達]',
   'details.certificate.unknown': '有効期限不明',
   'details.certificate.expired': '期限切れ',
   'details.certificate.valid': '有効',

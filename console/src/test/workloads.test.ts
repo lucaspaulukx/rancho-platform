@@ -32,6 +32,19 @@ describe('Vínculos operacionais dentro de um environment', () => {
       },
     });
   });
+  it('aplica rótulos localizados à configuração sem expor os valores', () => {
+    const labels = { redacted: '[redacted]', depthLimit: '[depth limit reached]' };
+    let nested: unknown = 'hidden by depth';
+    for (let level = 0; level < 10; level++) nested = [nested];
+
+    const result = JSON.stringify(
+      safeConfiguration({ API_TOKEN: 'fixture secret', nested }, labels),
+    );
+    expect(result).toContain(labels.redacted);
+    expect(result).toContain(labels.depthLimit);
+    expect(result).not.toContain('fixture secret');
+    expect(result).not.toContain('hidden by depth');
+  });
   const stacks = [resource('s1'), resource('s2')];
   const services = [resource('web', { stackId: 's1' }), resource('db', { stackId: 's2' })];
   const containers = [
